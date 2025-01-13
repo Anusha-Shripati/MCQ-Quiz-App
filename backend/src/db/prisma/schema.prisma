@@ -1,0 +1,67 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model User {
+    id                 String            @id @default(uuid())
+    email              String            @unique
+    password           String
+    role               Role
+    permissions        Json? // Flexible permissions storage
+    profile            Profile?
+    candidateDetails   CandidateDetails? @relation("UserToCandidateDetails") // Define the relation name, without fields and references
+    candidateDetailsId String?           @unique
+    createdAt          DateTime          @default(now())
+    updatedAt          DateTime          @updatedAt
+    isActive           Boolean           @default(true)
+}
+
+model Profile {
+    id            String  @id @default(uuid())
+    firstName     String
+    lastName      String
+    contactNumber String?
+    street        String?
+    city          String?
+    state         String?
+    zipCode       String?
+    country       String?
+    user          User    @relation(fields: [userId], references: [id])
+    userId        String  @unique
+}
+
+model CandidateDetails {
+    id           String        @id @default(uuid())
+    languages    String[]
+    frameworks   String[]
+    examAttempts ExamAttempt[]
+    user         User          @relation("UserToCandidateDetails", fields: [userId], references: [id]) // Define fields and references here
+    userId       String        @unique
+}
+
+model ExamAttempt {
+    id                 String           @id @default(uuid())
+    examId             String
+    score              Float?
+    status             ExamStatus
+    candidateDetails   CandidateDetails @relation(fields: [candidateDetailsId], references: [id])
+    candidateDetailsId String
+    createdAt          DateTime         @default(now())
+}
+
+enum Role {
+    Super_Admin
+    Editor
+    Candidate
+}
+
+enum ExamStatus {
+    passed
+    failed
+    in_progress
+}

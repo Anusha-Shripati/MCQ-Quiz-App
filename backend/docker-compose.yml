@@ -1,0 +1,66 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: bitnami/postgresql:15
+    container_name: postgres-container
+    environment:
+      POSTGRESQL_USERNAME: postgres
+      POSTGRESQL_PASSWORD: root
+      POSTGRESQL_DATABASE: app_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/bitnami/postgresql
+    networks:
+      - app-network
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:alpine
+    container_name: redis-container
+    ports:
+      - "6379:6379"
+    networks:
+      - app-network
+    restart: always
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nodejs-app
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgres://postgres:root@postgres-container:5432/app_db
+      REDIS_URL: redis://redis-container:6379
+    ports:
+      - "3001:3001"
+      - "5555:5555"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - app-network
+    restart: always
+    command: >
+      sh -c "npm start"
+
+volumes:
+  postgres-data:
+
+networks:
+  app-network:
+    driver: bridge

@@ -7,13 +7,13 @@
     "backend"
   ],
   "scripts": {
-    "dev": "concurrently -k -n frontend,backend \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev": "concurrently -k -n backend,frontend \"npm run dev:backend\" \"npm run dev:frontend\"",
     "dev:frontend": "wait-on http://localhost:$npm_package_config_backend_port/healthcheck && cd frontend && npm run dev",
     "dev:backend": "cd backend && cross-env BACKEND_PORT=$npm_package_config_backend_port npm run dev",
     "build": "concurrently -n frontend,backend \"npm run build:frontend\" \"npm run build:backend\"",
     "build:frontend": "cd frontend && npm run build",
     "build:backend": "cd backend && tsc",
-    "start": "concurrently -k -n frontend,backend \"npm run start:backend\" \"npm run start:frontend\"",
+    "start": "concurrently -k -n backend,frontend \"npm run start:backend\" \"npm run start:frontend\"",
     "start:frontend": "wait-on http://localhost:$npm_package_config_backend_port/healthcheck && cd frontend && npm run start",
     "start:backend": "cd backend && cross-env BACKEND_PORT=$npm_package_config_backend_port npm run start",
     "lint": "concurrently -n frontend,backend \"npm run lint:frontend\" \"npm run lint:backend\"",
@@ -28,14 +28,23 @@
     "docker:db": "cd backend && docker-compose up -d postgres",
     "docker:redis": "cd backend && docker-compose up -d redis",
     "docker:logs": "cd backend && docker-compose logs -f",
-    "docker:ps": "cd backend && docker-compose ps"
+    "docker:ps": "cd backend && docker-compose ps",
+    "seed:db": "cd backend && npm run seed:db"
   },
   "config": {
     "backend_port": "3001"
   },
   "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/jsonwebtoken": "^9.0.7",
+    "@types/node": "^22.10.5",
     "concurrently": "^8.2.2",
     "cross-env": "^7.0.3",
     "wait-on": "^7.2.0"
+  },
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2"
   }
 }

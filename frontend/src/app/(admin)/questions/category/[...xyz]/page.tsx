@@ -229,35 +229,6 @@ const CategoryPage = () => {
     setFilteredQuestions(filtered);
   }, [difficulty, searchQuery]);
 
-
-
-  // const handleFilterChange = (difficulty: string) => {
-  //   let updatedDifficulties: string[];
-
-  //   if (difficulty === "select all") {
-  //     updatedDifficulties =
-  //       selectedDifficulties.length === 3 ? [] : ["easy", "medium", "hard"];
-  //   } else {
-  //     updatedDifficulties = selectedDifficulties.includes(difficulty)
-  //       ? selectedDifficulties.filter((d) => d !== difficulty)
-  //       : [...selectedDifficulties, difficulty];
-  //   }
-
-  //   setSelectedDifficulties(updatedDifficulties);
-
-  //   const newFilteredQuestions = updatedDifficulties.length
-  //     ? questionsData.filter((question) =>
-  //       updatedDifficulties.includes(question.difficulty)
-  //     )
-  //     : questionsData;
-
-  //     console.log("newFilteredQuestions>>>>>>>>>>", newFilteredQuestions);
-
-
-  //   setFilteredQuestions(newFilteredQuestions);
-  //   setCurrentPage(1); // Reset to first page when filters change
-  // };
-
   const indexOfLastQuestion = currentPage * questionsPerPage;
   const indexOfFirstQuestion = indexOfLastQuestion - questionsPerPage;
   const currentQuestions = filteredQuestions.slice(

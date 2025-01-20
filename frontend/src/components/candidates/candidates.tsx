@@ -15,7 +15,7 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { Edit, MoreHorizontal, Trash, UserSearch } from "lucide-react";
+import { Copy, Edit, MoreHorizontal, MoreVertical, Share, Share2, Trash, UserSearch } from "lucide-react";
 import { candidates } from "@/shared/constants/data";
 import { useEffect, useState } from "react";
 import Pagination from "@/components/candidates/pagination";
@@ -26,6 +26,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Share2Icon } from "@radix-ui/react-icons";
+import { FaShare } from "react-icons/fa";
 
 interface Candidate {
   date: string;
@@ -189,7 +191,8 @@ export default function CandidatesTable({
                 <TableHead className="p-3 text-left">Duration</TableHead>
                 <TableHead className="p-3 text-left">Status</TableHead>
                 <TableHead className="p-3 text-left">Score</TableHead>
-                <TableHead className="p-3 text-left">Actions</TableHead>
+                <TableHead className="p-3 text-left"></TableHead>
+                
               </TableRow>
             </TableHeader>
 
@@ -198,7 +201,7 @@ export default function CandidatesTable({
                 currentItems.map((candidate, index) => (
                   <TableRow
                     key={index}
-                    className="hover:bg-gray-50 hover:text-gray-900 transition-colors duration-200"
+                    className="hover:bg-gray-400 hover:text-gray-900 transition-colors duration-200"
                   >
                     <TableCell className="p-3">{candidate.date}</TableCell>
                     <TableCell className="p-3">{candidate.name}</TableCell>
@@ -209,16 +212,44 @@ export default function CandidatesTable({
                     <TableCell className="p-3">{candidate.description}</TableCell>
                     <TableCell className="p-3">{candidate.duration}</TableCell>
                     <TableCell className="p-3">{candidate.status}</TableCell>
-                    <TableCell className="p-3">{candidate.score}</TableCell>
-                    <TableCell className="p-3">
+                    <TableCell className="p-1">{candidate.score} </TableCell>
+                  
+                    <TableCell className="p-3 flex items-center">
+                    
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            className="h-8 w-8 p-0 text-gray-600 hover:bg-gray-300 hover:text-gray-900 rounded-full"
+                          >
+                            <span className="sr-only">Open menu</span>
+                            <Share2 className="h-4 dark:text-white"/>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem
+                            onClick={() => openDialog(candidate)}
+                            className="hover:bg-gray-200 hover:text-gray-900"
+                          >
+                            <Copy /> Copy test link
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => openEditDialog(candidate)}
+                            className="hover:bg-gray-200 hover:text-gray-900"
+                          >
+                            <FaShare /> Share via email
+                          </DropdownMenuItem>
+                        
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button
                             variant="ghost"
-                            className="h-8 w-8 p-0 text-gray-600 hover:bg-gray-200 hover:text-gray-900 rounded-full"
+                            className="h-8 w-8 p-0 text-gray-600 hover:bg-gray-300 hover:text-gray-900 rounded-full"
                           >
                             <span className="sr-only">Open menu</span>
-                            <MoreHorizontal />
+                            <MoreVertical className="dark:text-white"/>
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
@@ -267,176 +298,98 @@ export default function CandidatesTable({
 
       {/* Dialog */}
       <Dialog
-        open={isDialogOpen}
-        onOpenChange={(open) => !open && closeDialog()}
+  open={isDialogOpen}
+  onOpenChange={(open) => !open && closeDialog()}
+>
+  <DialogContent className="max-w-2xl p-6 bg-gray-50 dark:bg-gray-900 rounded-lg shadow-lg">
+    <DialogHeader>
+      <DialogTitle className="text-2xl font-bold text-gray-900 dark:text-white">
+        {isEditMode ? "Edit Candidate" : `${selectedCandidate?.name}'s Details`}
+      </DialogTitle>
+    </DialogHeader>
+    {isEditMode ? (
+      <form
+        onSubmit={handleEditSubmit}
+        className="space-y-6"
       >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              {isEditMode ? "Edit Candidate" : `${selectedCandidate?.name}'s Details`}
-            </DialogTitle>
-          </DialogHeader>
-          {/* Dialog content */}
-          {/* Dialog Modal */}
-          <Dialog
-            open={isDialogOpen}
-            onOpenChange={(open) => {
-              if (!open) {
-                setIsDialogOpen(false);
-              }
-            }}
+        <div className="grid grid-cols-2 gap-6">
+          {/* Input fields */}
+          {[
+            { label: "Name", name: "name", type: "text" },
+            { label: "Email", name: "email", type: "email" },
+            { label: "Phone", name: "phone", type: "text" },
+            { label: "Test", name: "test", type: "text" },
+            { label: "Experience", name: "experience", type: "text" },
+            { label: "Description", name: "description", type: "text" },
+            { label: "Duration", name: "duration", type: "text" },
+            { label: "Status", name: "status", type: "text" },
+            { label: "Score", name: "score", type: "text" },
+          ].map((field) => (
+            <div key={field.name}>
+              <label
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                htmlFor={field.name}
+              >
+                {field.label}:
+              </label>
+              <input
+                id={field.name}
+                name={field.name}
+                type={field.type}
+                value={editingCandidate?.[field.name] || ""}
+                onChange={handleInputChange}
+                className="mt-1 w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-800 dark:text-white dark:border-gray-700"
+              />
+            </div>
+          ))}
+        </div>
+        {/* Buttons */}
+        <div className="flex justify-end gap-4">
+          <Button
+            type="button"
+            variant="outline"
+            className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+            onClick={closeDialog}
           >
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>
-                  {isEditMode ? 'Edit Candidate' : `${selectedCandidate?.name}'s Details`}
-                </DialogTitle>
-              </DialogHeader>
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            variant="default"
+            className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+          >
+            Save Changes
+          </Button>
+        </div>
+      </form>
+    ) : (
+      <div className="space-y-4 bg-white dark:bg-gray-800 rounded-lg p-6 shadow">
+        {/* Candidate Details */}
+        {[
+          { label: "Name", value: selectedCandidate?.name },
+          { label: "Email", value: selectedCandidate?.email },
+          { label: "Date", value: selectedCandidate?.date },
+          { label: "Phone", value: selectedCandidate?.phone },
+          { label: "Test", value: selectedCandidate?.test },
+          { label: "Experience", value: selectedCandidate?.experience },
+          { label: "Description", value: selectedCandidate?.description },
+          { label: "Duration", value: selectedCandidate?.duration },
+          { label: "Status", value: selectedCandidate?.status },
+          { label: "Score", value: selectedCandidate?.score },
+        ].map((item) => (
+          <p
+            key={item.label}
+            className="text-gray-800 dark:text-gray-300 text-sm flex justify-between border-b pb-2"
+          >
+            <span className="font-medium">{item.label}:</span>
+            <span>{item.value || "N/A"}</span>
+          </p>
+        ))}
+      </div>
+    )}
+  </DialogContent>
+</Dialog>
 
-              {isEditMode ? (
-                <form onSubmit={handleEditSubmit} className="space-y-4">
-                  <div className="space-y-4">
-                    <div>
-                      <label className="text-sm font-medium">Name:</label>
-                      <input
-                        type="text"
-                        name="name"
-                        value={editingCandidate?.name || ''}
-                        onChange={handleInputChange}
-                        className="w-full border rounded-md p-2"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium">Email:</label>
-                      <input
-                        type="email"
-                        name="email"
-                        value={editingCandidate?.email || ''}
-                        onChange={handleInputChange}
-                        className="w-full border rounded-md p-2"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium">Phone:</label>
-                      <input
-                        type="phone"
-                        name="phone"
-                        value={editingCandidate?.phone || ''}
-                        onChange={handleInputChange}
-                        className="w-full border rounded-md p-2"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium">Test:</label>
-                      <input
-                        type="test"
-                        name="test"
-                        value={editingCandidate?.test || ''}
-                        onChange={handleInputChange}
-                        className="w-full border rounded-md p-2"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium">Experience:</label>
-                      <input
-                        type="experience"
-                        name="experience"
-                        value={editingCandidate?.experience || ''}
-                        onChange={handleInputChange}
-                        className="w-full border rounded-md p-2"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium">Description:</label>
-                      <input
-                        type="description"
-                        name="description"
-                        value={editingCandidate?.description || ''}
-                        onChange={handleInputChange}
-                        className="w-full border rounded-md p-2"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium">Duration:</label>
-                      <input
-                        type="duration"
-                        name="duration"
-                        value={editingCandidate?.duration || ''}
-                        onChange={handleInputChange}
-                        className="w-full border rounded-md p-2"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium">Status:</label>
-                      <input
-                        type="status"
-                        name="status"
-                        value={editingCandidate?.status || ''}
-                        onChange={handleInputChange}
-                        className="w-full border rounded-md p-2"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium">Score:</label>
-                      <input
-                        type="score"
-                        name="score"
-                        value={editingCandidate?.score || ''}
-                        onChange={handleInputChange}
-                        className="w-full border rounded-md p-2"
-                      />
-                    </div>
-                    {/* Add more input fields as needed */}
-                  </div>
-                  <div className="flex justify-end gap-2">
-                    <Button type="button" variant="outline" onClick={closeDialog}>
-                      Cancel
-                    </Button>
-                    <Button type="submit" variant="default">
-                      Save Changes
-                    </Button>
-                  </div>
-                </form>
-              ) : (
-                <div className="space-y-6 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md">
-                  <p className="text-lg font-semibold text-gray-900 dark:text-white">
-                    <span className="font-bold">Name:</span> {selectedCandidate?.name}
-                  </p>
-                  <p className="text-lg font-semibold text-gray-900 dark:text-white">
-                    <span className="font-bold">Email:</span> {selectedCandidate?.email}
-                  </p>
-                  <p className="text-lg font-semibold text-gray-900 dark:text-white">
-                    <span className="font-bold">Date:</span> {selectedCandidate?.date}
-                  </p>
-                  <p className="text-lg font-semibold text-gray-900 dark:text-white">
-                    <span className="font-bold">Phone:</span> {selectedCandidate?.phone}
-                  </p>
-                  <p className="text-lg font-semibold text-gray-900 dark:text-white">
-                    <span className="font-bold">Test:</span> {selectedCandidate?.test}
-                  </p>
-                  <p className="text-lg font-semibold text-gray-900 dark:text-white">
-                    <span className="font-bold">Experience:</span> {selectedCandidate?.experience}
-                  </p>
-                  <p className="text-lg font-semibold text-gray-900 dark:text-white">
-                    <span className="font-bold">Description:</span> {selectedCandidate?.description}
-                  </p>
-                  <p className="text-lg font-semibold text-gray-900 dark:text-white">
-                    <span className="font-bold">Duration:</span> {selectedCandidate?.duration}
-                  </p>
-                  <p className="text-lg font-semibold text-gray-900 dark:text-white">
-                    <span className="font-bold">Status:</span> {selectedCandidate?.status}
-                  </p>
-                  <p className="text-lg font-semibold text-gray-900 dark:text-white">
-                    <span className="font-bold">Score:</span> {selectedCandidate?.score}
-                  </p>
-                </div>
-
-              )}
-            </DialogContent>
-          </Dialog>
-
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

@@ -172,7 +172,7 @@ export default function CreateAssessment() {
         </div>
         
         <div className="relative flex justify-center items-center mb-8">
-          <div className="absolute left-0 right-0 h-0.5 bg-gray-200 dark:bg-gray-700" />
+          {/* <div className="absolute left-0 right-0 h-0.5 bg-gray-200 dark:bg-gray-700" /> */}
           <div className="relative flex justify-between w-full max-w-xs">
             <div className="flex flex-col items-center">
               <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 
@@ -180,6 +180,7 @@ export default function CreateAssessment() {
                 1
               </div>
               <span className="mt-2 text-sm">Basic Info</span>
+            <div className="absolute left-[10%] top-[58%] right-[9%] h-0.5 bg-gray-200 dark:bg-gray-700" />
             </div>
             <div className="flex flex-col items-center ">
               <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 

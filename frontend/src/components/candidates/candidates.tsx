@@ -201,7 +201,7 @@ export default function CandidatesTable({
                 currentItems.map((candidate, index) => (
                   <TableRow
                     key={index}
-                    className="hover:bg-gray-400 hover:text-gray-900 transition-colors duration-200"
+                    className="hover:bg-gray-100 dark:hover:bg-gray-400 hover:text-gray-900 transition-colors duration-200"
                   >
                     <TableCell className="p-3">{candidate.date}</TableCell>
                     <TableCell className="p-3">{candidate.name}</TableCell>

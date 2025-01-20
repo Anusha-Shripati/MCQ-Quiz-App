@@ -3,11 +3,12 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import { useParams } from "next/navigation";
-import { useState } from "react";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import { useTheme } from "next-themes";
 import { ArrowLeft } from "lucide-react";
+import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
 
 const questionsData = [
   {
@@ -20,7 +21,7 @@ const questionsData = [
       "To manage component state",
     ],
     correctAnswer: "To update only the parts of the DOM that have changed",
-    difficulty: "Easy",
+    difficulty: "easy",
   },
   {
     id: 2,
@@ -32,7 +33,7 @@ const questionsData = [
       "require('React');",
     ],
     correctAnswer: "import React from 'react';",
-    difficulty: "Easy",
+    difficulty: "easy",
   },
   {
     id: 3,
@@ -44,21 +45,21 @@ const questionsData = [
       "By using a Redux store",
     ],
     correctAnswer: "By using React.createContext()",
-    difficulty: "Easy",
+    difficulty: "easy",
   },
   {
     id: 4,
     question: "Which hook is used for side effects in functional components?",
     options: ["useState", "useEffect", "useContext", "useReducer"],
     correctAnswer: "useEffect",
-    difficulty: "Easy",
+    difficulty: "easy",
   },
   {
     id: 5,
     question: "What is the default port number for a React development server?",
     options: ["3000", "8000", "8080", "5000"],
     correctAnswer: "3000",
-    difficulty: "Easy",
+    difficulty: "easy",
   },
   {
     id: 6,
@@ -70,7 +71,7 @@ const questionsData = [
       "componentWillUnmount",
     ],
     correctAnswer: "componentWillReceiveProps",
-    difficulty: "Medium",
+    difficulty: "medium",
   },
   {
     id: 7,
@@ -82,7 +83,7 @@ const questionsData = [
       "A component that is connected to a Redux store",
     ],
     correctAnswer: "A component whose form data is controlled by React state",
-    difficulty: "Medium",
+    difficulty: "medium",
   },
   {
     id: 8,
@@ -94,7 +95,7 @@ const questionsData = [
       "Avoid using keys in lists",
     ],
     correctAnswer: "Use memoization techniques like React.memo",
-    difficulty: "Medium",
+    difficulty: "medium",
   },
   {
     id: 9,
@@ -106,7 +107,7 @@ const questionsData = [
       "State is used in class components only, props are used in functional components",
     ],
     correctAnswer: "State is used to manage data inside a component, props are used to pass data to other components",
-    difficulty: "Easy",
+    difficulty: "easy",
   },
   {
     id: 10,
@@ -118,7 +119,7 @@ const questionsData = [
       "To create context in React",
     ],
     correctAnswer: "To group multiple children elements without adding an extra node to the DOM",
-    difficulty: "Easy",
+    difficulty: "easy",
   },
   {
     id: 11,
@@ -130,7 +131,7 @@ const questionsData = [
       "It improves the visual appearance of the list",
     ],
     correctAnswer: "It helps React identify which items have changed, are added, or removed",
-    difficulty: "Easy",
+    difficulty: "easy",
   },
   {
     id: 12,
@@ -142,14 +143,14 @@ const questionsData = [
       "To enforce specific coding standards",
     ],
     correctAnswer: "To enable additional checks and warnings for components",
-    difficulty: "Medium",
+    difficulty: "medium",
   },
   {
     id: 13,
     question: "Which hook is used to access the DOM in functional components?",
     options: ["useState", "useEffect", "useRef", "useContext"],
     correctAnswer: "useRef",
-    difficulty: "Medium",
+    difficulty: "medium",
   },
   {
     id: 14,
@@ -161,7 +162,7 @@ const questionsData = [
       "To define reusable UI components",
     ],
     correctAnswer: "To avoid unnecessary renders by doing a shallow comparison of props and state",
-    difficulty: "Hard",
+    difficulty: "hard",
   },
   {
     id: 15,
@@ -173,44 +174,89 @@ const questionsData = [
       "Converting state into props",
     ],
     correctAnswer: "Moving the state from a child component to a parent component to make it shared",
-    difficulty: "Medium",
+    difficulty: "medium",
   },
 ];
 
 const CategoryPage = () => {
   const { xyz } = useParams();
+  const searchParams = useSearchParams();
+
   const { theme,
     //  setTheme 
-    } = useTheme();
-  const [selectedDifficulties, setSelectedDifficulties] = useState<string[]>([]);
+  } = useTheme();
+  const difficulty = searchParams.get("difficulty");
+  const [selectedDifficulties, setSelectedDifficulties] = useState<string[]>(difficulty ? difficulty.split(",") : ["easy", "medium", "hard"]
+  );
   const [filteredQuestions, setFilteredQuestions] = useState(questionsData);
+  const [searchQuery, setSearchQuery] = useState("")
 
   const [currentPage, setCurrentPage] = useState(1);
   const questionsPerPage = 5;
 
-  const handleFilterChange = (difficulty: string) => {
-    let updatedDifficulties: string[];
+  const router = useRouter();
 
-    if (difficulty === "Select All") {
-      updatedDifficulties =
-        selectedDifficulties.length === 3 ? [] : ["Easy", "Medium", "Hard"];
+
+  console.log("difficulty>>>>>>>>>>>>>>>>", difficulty);
+
+  useEffect(() => {
+    if (selectedDifficulties.length === 0 || selectedDifficulties.length === 3) {
+      setFilteredQuestions(questionsData); // Show all questions
     } else {
-      updatedDifficulties = selectedDifficulties.includes(difficulty)
-        ? selectedDifficulties.filter((d) => d !== difficulty)
-        : [...selectedDifficulties, difficulty];
+      const filtered = questionsData.filter((question) =>
+        selectedDifficulties.includes(question.difficulty)
+      );
+      setFilteredQuestions(filtered);
+    }
+  }, [selectedDifficulties]);
+
+  useEffect(() => {
+    let filtered = questionsData;
+
+    if (difficulty) {
+      const difficulties = difficulty.split(",").map((d) => d.toLowerCase());
+      filtered = filtered.filter((question) =>
+        difficulties.includes(question.difficulty)
+      );
     }
 
-    setSelectedDifficulties(updatedDifficulties);
+    if (searchQuery) {
+      filtered = filtered.filter((question) =>
+        question.question.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
 
-    const newFilteredQuestions = updatedDifficulties.length
-      ? questionsData.filter((question) =>
-        updatedDifficulties.includes(question.difficulty)
-      )
-      : questionsData;
+    setFilteredQuestions(filtered);
+  }, [difficulty, searchQuery]);
 
-    setFilteredQuestions(newFilteredQuestions);
-    setCurrentPage(1); // Reset to first page when filters change
-  };
+
+
+  // const handleFilterChange = (difficulty: string) => {
+  //   let updatedDifficulties: string[];
+
+  //   if (difficulty === "select all") {
+  //     updatedDifficulties =
+  //       selectedDifficulties.length === 3 ? [] : ["easy", "medium", "hard"];
+  //   } else {
+  //     updatedDifficulties = selectedDifficulties.includes(difficulty)
+  //       ? selectedDifficulties.filter((d) => d !== difficulty)
+  //       : [...selectedDifficulties, difficulty];
+  //   }
+
+  //   setSelectedDifficulties(updatedDifficulties);
+
+  //   const newFilteredQuestions = updatedDifficulties.length
+  //     ? questionsData.filter((question) =>
+  //       updatedDifficulties.includes(question.difficulty)
+  //     )
+  //     : questionsData;
+
+  //     console.log("newFilteredQuestions>>>>>>>>>>", newFilteredQuestions);
+
+
+  //   setFilteredQuestions(newFilteredQuestions);
+  //   setCurrentPage(1); // Reset to first page when filters change
+  // };
 
   const indexOfLastQuestion = currentPage * questionsPerPage;
   const indexOfFirstQuestion = indexOfLastQuestion - questionsPerPage;
@@ -232,46 +278,72 @@ const CategoryPage = () => {
             onClick={() => window.history.back()}
             className={`${theme === "dark" ? "text-blue-400 hover:text-blue-600" : "text-blue-600 hover:text-blue-800"}`}
           >
-            <ArrowLeft className="h-4 w-4"/>
+            <ArrowLeft className="h-4 w-4" />
           </Button>
           <div
             className={`text-2xl font-bold ${theme === "dark" ? "text-white" : "text-gray-900"} ml-4`}
           >
-             {xyz}
+            {xyz}
           </div>
 
         </div>
 
         <div className="flex flex-col mb-6 sm:flex-row items-start sm:items-center justify-between sm:space-x-6 space-y-4 sm:space-y-0">
           <h2 className="text-xl font-semibold">{`Questions List (${filteredQuestions.length})`}</h2>
-
-          <div className="flex items-center space-x-4">
-            {["Select All", "Easy", "Medium", "Hard"].map((difficulty) => (
-              <div
-                key={difficulty}
-                className={`flex items-center space-x-2 ${theme === "dark" ? "text-gray-200" : "text-gray-800"
-                  }`}
-              >
-                <Checkbox
-                  checked={
-                    difficulty === "Select All"
-                      ? selectedDifficulties.length === 3
-                      : selectedDifficulties.includes(difficulty)
+          <div className="flex items-center justify-center gap-2">
+          <Input
+            type="text"
+            placeholder="Search questions..."
+            className="w-[300px] py-5"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              className={`px-4 py-2 rounded-md border cursor-pointer ${theme === "dark" ? "bg-gray-700 text-gray-200 border-gray-600" : "bg-gray-200 text-gray-800 border-gray-300"
+                }`}
+            >
+              Select Difficulty
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              className={`${theme === "dark" ? "bg-gray-700 text-gray-200" : "bg-white text-gray-800"
+                }`}
+            >
+              <DropdownMenuCheckboxItem
+                checked={selectedDifficulties.length === 3}
+                onCheckedChange={() => {
+                  const allDifficulties = ["easy", "medium", "hard"];
+                  if (selectedDifficulties.length === 3) {
+                    setSelectedDifficulties([]);
+                    router.push(""); // Clear query params
+                  } else {
+                    setSelectedDifficulties(allDifficulties);
+                    router.push(`?difficulty=${allDifficulties.join(",")}`);
                   }
-                  onCheckedChange={() => handleFilterChange(difficulty)}
-                  className={`${theme === "dark"
-                    ? "bg-gray-700 border-gray-600 text-gray-200"
-                    : "bg-gray-200 border-gray-300 text-gray-800"
-                    }`}
-                />
-                <span
-                  className={`${theme === "dark" ? "hover:text-gray-400" : "hover:text-gray-600"
-                    }`}
+                }}
+              >
+                Select All
+              </DropdownMenuCheckboxItem>
+              {["easy", "medium", "hard"].map((difficulty) => (
+                <DropdownMenuCheckboxItem
+                  key={difficulty}
+                  checked={selectedDifficulties.includes(difficulty)}
+                  onCheckedChange={() => {
+                    const updatedSelections = selectedDifficulties.includes(difficulty)
+                      ? selectedDifficulties.filter((item) => item !== difficulty)
+                      : [...selectedDifficulties, difficulty];
+                    setSelectedDifficulties(updatedSelections);
+                    const queryParam = updatedSelections.length
+                      ? `?difficulty=${updatedSelections.join(",")}`
+                      : "";
+                    router.push(queryParam);
+                  }}
                 >
-                  {difficulty}
-                </span>
-              </div>
-            ))}
+                  {difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}
+                </DropdownMenuCheckboxItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
           </div>
 
         </div>
@@ -324,7 +396,7 @@ const CategoryPage = () => {
           />
         </div>
 
-    
+
       </div>
     </div>
   );

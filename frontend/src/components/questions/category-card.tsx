@@ -4,6 +4,7 @@ import CategoryMenu from "./category-menu";
 import { useRouter } from 'next/navigation';
 import { Plus } from "lucide-react";
 import { Button } from "../ui/button";
+import Link from "next/link";
 
 export const CategoryCard = ({ category }: { category: QuestionCategory }) => {
   const router = useRouter();
@@ -17,10 +18,10 @@ export const CategoryCard = ({ category }: { category: QuestionCategory }) => {
     router.push(`/questions/category/${category.name}?difficulty=${difficulty}`);
   };
 
-  const handleAddQuestions = (event: React.MouseEvent) => {
-    event.stopPropagation(); // Prevent card click from firing
-    console.log("Add Questions");
-  };
+  // const handleAddQuestions = (event: React.MouseEvent) => {
+  //   event.stopPropagation(); // Prevent card click from firing
+  //   console.log("Add Questions");
+  // };
 
   return (
     <Card className="shadow-md hover:shadow-lg transition-all duration-200 " >
@@ -29,6 +30,7 @@ export const CategoryCard = ({ category }: { category: QuestionCategory }) => {
           {category.name}
         </CardTitle>
         <div className="flex items-center justify-center ">
+        <Link href={`/questions/create-question`}  >
         <Button
           variant="outline"
           size="sm"
@@ -37,6 +39,7 @@ export const CategoryCard = ({ category }: { category: QuestionCategory }) => {
         >
           <Plus className="h-4 w-4"/> Add
         </Button>
+        </Link>
         <CategoryMenu category={category} handleNavigate={handleNavigate}/>
         </div>
       </CardHeader>

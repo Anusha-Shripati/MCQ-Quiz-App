@@ -9,6 +9,7 @@ import { useTheme } from "next-themes";
 import { ArrowLeft } from "lucide-react";
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import Link from "next/link";
 
 const questionsData = [
   {
@@ -247,12 +248,11 @@ const CategoryPage = () => {
           <Button
             variant="ghost"
             onClick={() => window.history.back()}
-            className={`${theme === "dark" ? "text-blue-400 hover:text-blue-600" : "text-blue-600 hover:text-blue-800"}`}
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div
-            className={`text-2xl font-bold ${theme === "dark" ? "text-white" : "text-gray-900"} ml-4`}
+            className={`text-2xl font-bold ${theme === "dark" ? "text-white" : "text-gray-900"} `}
           >
             {xyz}
           </div>
@@ -262,59 +262,62 @@ const CategoryPage = () => {
         <div className="flex flex-col mb-6 sm:flex-row items-start sm:items-center justify-between sm:space-x-6 space-y-4 sm:space-y-0">
           <h2 className="text-xl font-semibold">{`Questions List (${filteredQuestions.length})`}</h2>
           <div className="flex items-center justify-center gap-2">
-          <Input
-            type="text"
-            placeholder="Search questions..."
-            className="w-[300px] py-5"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-          <DropdownMenu>
-            <DropdownMenuTrigger
-              className={`px-4 py-2 rounded-md border cursor-pointer ${theme === "dark" ? "bg-gray-700 text-gray-200 border-gray-600" : "bg-gray-200 text-gray-800 border-gray-300"
-                }`}
-            >
-              Select Difficulty
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              className={`${theme === "dark" ? "bg-gray-700 text-gray-200" : "bg-white text-gray-800"
-                }`}
-            >
-              <DropdownMenuCheckboxItem
-                checked={selectedDifficulties.length === 3}
-                onCheckedChange={() => {
-                  const allDifficulties = ["easy", "medium", "hard"];
-                  if (selectedDifficulties.length === 3) {
-                    setSelectedDifficulties([]);
-                    router.push(""); // Clear query params
-                  } else {
-                    setSelectedDifficulties(allDifficulties);
-                    router.push(`?difficulty=${allDifficulties.join(",")}`);
-                  }
-                }}
+            <Input
+              type="text"
+              placeholder="Search questions..."
+              className="w-[300px] py-5"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                className={`px-4 py-2 rounded-md border cursor-pointer ${theme === "dark" ? "bg-gray-700 text-gray-200 border-gray-600" : "bg-gray-200 text-gray-800 border-gray-300"
+                  }`}
               >
-                Select All
-              </DropdownMenuCheckboxItem>
-              {["easy", "medium", "hard"].map((difficulty) => (
+                Select Difficulty
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                className={`${theme === "dark" ? "bg-gray-700 text-gray-200" : "bg-white text-gray-800"
+                  }`}
+              >
                 <DropdownMenuCheckboxItem
-                  key={difficulty}
-                  checked={selectedDifficulties.includes(difficulty)}
+                  checked={selectedDifficulties.length === 3}
                   onCheckedChange={() => {
-                    const updatedSelections = selectedDifficulties.includes(difficulty)
-                      ? selectedDifficulties.filter((item) => item !== difficulty)
-                      : [...selectedDifficulties, difficulty];
-                    setSelectedDifficulties(updatedSelections);
-                    const queryParam = updatedSelections.length
-                      ? `?difficulty=${updatedSelections.join(",")}`
-                      : "";
-                    router.push(queryParam);
+                    const allDifficulties = ["easy", "medium", "hard"];
+                    if (selectedDifficulties.length === 3) {
+                      setSelectedDifficulties([]);
+                      router.push(""); // Clear query params
+                    } else {
+                      setSelectedDifficulties(allDifficulties);
+                      router.push(`?difficulty=${allDifficulties.join(",")}`);
+                    }
                   }}
                 >
-                  {difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}
+                  Select All
                 </DropdownMenuCheckboxItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
+                {["easy", "medium", "hard"].map((difficulty) => (
+                  <DropdownMenuCheckboxItem
+                    key={difficulty}
+                    checked={selectedDifficulties.includes(difficulty)}
+                    onCheckedChange={() => {
+                      const updatedSelections = selectedDifficulties.includes(difficulty)
+                        ? selectedDifficulties.filter((item) => item !== difficulty)
+                        : [...selectedDifficulties, difficulty];
+                      setSelectedDifficulties(updatedSelections);
+                      const queryParam = updatedSelections.length
+                        ? `?difficulty=${updatedSelections.join(",")}`
+                        : "";
+                      router.push(queryParam);
+                    }}
+                  >
+                    {difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <Link href={`/questions/create-question`} className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900">
+              Create Questions
+            </Link>
           </div>
 
         </div>

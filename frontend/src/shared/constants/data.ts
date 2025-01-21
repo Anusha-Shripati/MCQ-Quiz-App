@@ -490,3 +490,47 @@ export const AVAILABLE_CATEGORIES = ["MongoDB", "Express.Js", "React.Js", "Node.
   "Metabase",
   "Looker",
 ];
+
+
+export const CREATE_QUESTIONS_STATIC_LIST = [
+        {
+            id: 1,
+            type: 'multiple-choice',
+            difficulty: 'easy',
+            question: 'What is the primary purpose of the virtual DOM in React?',
+            options: ['To store all components', 'To store all components', 'To store all components', 'To store all components'],
+            correctOptions: [], // Initially no correct options selected
+        },
+        {
+            id: 2,
+            type: 'multiple-choice',
+            difficulty: 'easy',
+            question: 'What is the correct syntax to import React in a JavaScript file?',
+            options: ['import React from react?', 'import i React from react?', 'include React from react?', 'requireReact.js'],
+            correctOptions: [], // Initially no correct options selected
+        },
+        {
+            id: 3,
+            type: 'fill-in-the-blanks',
+            difficulty: 'easy',
+            question: 'How do you create context in React?',
+            answer: 'by using React.createContext.',
+        },
+        {
+            id: 4,
+            type: 'code-snippet',
+            difficulty: 'medium',
+            question: 'Find the issue in it',
+            code: `import React from 'react';
+function App() {
+  const name = ['a', 'b', 'c'];
+  int i, new 'name' = ['i', 'b', 'c'];
+  int j, new 'name' = ['j', 'c'];
+  return i;
+  const instance = items.map(item, indent) + ui;
+  apply(map(items.map(i+0)));
+  return end-list(instance.class);
+}
+export default App;`,
+        },
+    ]

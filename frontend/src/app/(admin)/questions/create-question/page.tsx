@@ -44,7 +44,7 @@ const CreateQuestion: React.FC = () => {
 
         // Reset answer/options based on the new type
         if (value === 'multiple-choice' || value === 'radio-select') {
-            updatedQuestions[index].options = ['', '', '', '']; // Default 4 options
+            updatedQuestions[index].options = ['', '', '', '', '', '']; // 4 compulsory + 2 optional
             updatedQuestions[index].correctOptions = []; // Reset correct options
             delete updatedQuestions[index].answer; // Remove answer field if it exists
             delete updatedQuestions[index].code; // Remove code field if it exists
@@ -88,7 +88,7 @@ const CreateQuestion: React.FC = () => {
             type: 'multiple-choice', // Default type
             difficulty: 'easy', // Default difficulty
             question: '', // Empty question
-            options: ['', '', '', ''], // Default 4 options
+            options: ['', '', '', '', '', ''],  // Default 4 options
             correctOptions: [], // No correct options initially
         };
 

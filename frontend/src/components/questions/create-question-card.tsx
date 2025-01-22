@@ -37,8 +37,40 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
   setQuestions,
 }) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+  // Ensure 6 options for multiple-choice and radio-select
+  const ensureSixOptions = (options: string[] | undefined) => {
+    if (!options) return Array(6).fill('');
+    while (options.length < 6) {
+      options.push('');
+    }
+    return options.slice(0, 6); // Ensure only 6 options
+  };
+
+  // Add an optional option
+  const addOptionalOption = () => {
+    const updatedQuestions = [...questions];
+    const options = updatedQuestions[index].options || [];
+    if (options.length < 6) {
+      options.push('');
+      updatedQuestions[index].options = options;
+      setQuestions(updatedQuestions);
+    }
+  };
+
+  // Remove an optional option
+  const removeOptionalOption = () => {
+    const updatedQuestions = [...questions];
+    const options = updatedQuestions[index].options || [];
+    if (options.length > 4) {
+      options.pop();
+      updatedQuestions[index].options = options;
+      setQuestions(updatedQuestions);
+    }
+  };
+
   return (
-    <Card className={`mb-6 ${selectedQuestion === index ? '' : 'hidden'}`}>
+    <Card className={`mb-6 h-[600px] flex flex-col ${selectedQuestion === index ? '' : 'hidden'}`}>
       <CardHeader>
         <CardTitle className="text-xl font-bold text-gray-900 dark:text-white">
           Question {question.id}
@@ -95,7 +127,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
         {/* Dynamic answer section based on question type */}
         {(question.type === 'multiple-choice' || question.type === 'radio-select') && (
           <div className="space-y-2">
-            {question.options?.map((option, i) => (
+            {ensureSixOptions(question.options).map((option, i) => (
               <div key={i} className="flex items-center gap-2">
                 {question.type === 'radio-select' ? (
                   <input
@@ -119,33 +151,30 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
                     updatedQuestions[index].options![i] = e.target.value;
                     setQuestions(updatedQuestions);
                   }}
+                  className={i >= 4 ? 'border-dashed border-gray-400' : ''}
                 />
               </div>
             ))}
 
-            <Button
-              // variant="destructive"
-              className='mr-2 w-4 bg-red-500 rounded-[50%]'
-              onClick={() => {
-                const updatedQuestions = [...questions];
-                updatedQuestions[index].options?.pop();
-                setQuestions(updatedQuestions);
-              }}
-            >
-              <Minus />
-            </Button>
-            <Button
-              variant="outline"
-              className='w-4 rounded-[50%]'
-              onClick={() => {
-                const updatedQuestions = [...questions];
-                updatedQuestions[index].options?.push('');
-                setQuestions(updatedQuestions);
-              }}
-            >
-              <Plus />
-            </Button>
-
+            {/* Buttons to add/remove optional options */}
+            {/* <div className="flex gap-2 mt-2">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={removeOptionalOption}
+                disabled={(question.options?.length || 0) <= 4}
+              >
+                <Minus className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={addOptionalOption}
+                disabled={(question.options?.length || 0) >= 6}
+              >
+                <Plus className="h-4 w-4" />
+              </Button>
+            </div> */}
           </div>
         )}
 
@@ -175,7 +204,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
           />
         )}
       </CardContent>
-      <CardFooter>
+      <CardFooter className="mt-auto">
         <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
           <DialogTrigger asChild>
             <Button variant="destructive">Delete Question</Button>

@@ -1,10 +1,11 @@
 "use client";
 
-import React, { Suspense, useMemo } from "react";
-import { Button } from "@/components/ui/button";
+import React, { Suspense, useMemo, useState } from "react";
+// import { Button } from "@/components/ui/button";
 import { FiCopy, FiMail } from "react-icons/fi";
 import toast from "react-hot-toast";
 import dynamic from "next/dynamic";
+import CreateCandidateDialog from "@/components/candidates/create-candidate-dialog";
 const FiltersCandidates = dynamic(() => import("@/components/candidates/candidates-filters"), {
   suspense: true,
 });
@@ -28,11 +29,11 @@ interface ExpandableRow {
   render: (row: any) => React.ReactNode; // Function to render the expandable content
 }
 
-interface Column {
-  key: string; // Unique key for the column
-  header: string; // Display name for the column header
-  render?: (row: any) => JSX.Element; // Optional function to render custom content for the column
-}
+// interface Column {
+//   key: string; // Unique key for the column
+//   header: string; // Display name for the column header
+//   render?: (row: any) => JSX.Element; // Optional function to render custom content for the column
+// }
 
 interface Candidates {
   id: number;
@@ -48,6 +49,8 @@ interface Candidates {
 }
 
 export default function Candidates() {
+
+  const [ openCreateCandidate, setOpenCreateCandidate ] = useState(false);
 
   // Sample candidate data
 
@@ -147,34 +150,60 @@ export default function Candidates() {
 
   const expandableRow: ExpandableRow = {
     render: (row) => (
-      <div className="space-y-2">
-        <p>
-          <strong>Total Percentage:</strong> {row.details.totalPercentage}
-        </p>
-        <div className="flex gap-4">
-          <p>
-            <strong>MongoDB:</strong> {row.details.mongodb}
-          </p>
-          <p>
-            <strong>Express Js:</strong> {row.details.expressJs}
-          </p>
-          <p>
-            <strong>React Js:</strong> {row.details.reactJs}
-          </p>
-          <p>
-            <strong>Node Js:</strong> {row.details.nodeJs}
-          </p>
+      <div className="border border-gray-200 rounded-lg p-4 space-y-6">
+      {/* Row Layout */}
+      <div className="flex items-center justify-between">
+        {/* Result Section */}
+        <div>
+          <p className="text-sm text-gray-500 dark:text-gray-300">Result</p>
+          <div className="flex items-center gap-2">
+            <p className="text-lg font-semibold text-blue-500">70%</p>
+            <a href="#" className="text-sm text-blue-500 hover:underline">View Answer</a>
+          </div>
         </div>
-        <p>
-          <strong>Created By:</strong> {row.details.createdBy}
-        </p>
-        <p>
-          <strong>Created On:</strong> {row.details.createdOn}
-        </p>
+    
+        {/* Test Time Section */}
+        <div>
+          <p className="text-sm text-gray-500 dark:text-gray-300">Test Time</p>
+          <p className="text-lg font-medium text-gray-700 dark:text-gray-300">18-Nov-2024 03:00PM–6:00PM</p>
+        </div>
+    
+        {/* Created Section */}
+        <div>
+          <p className="text-sm text-gray-500 dark:text-gray-300">Created</p>
+          <p className="text-lg font-medium text-gray-700 dark:text-gray-300">Mihirbhai</p>
+          <p className="text-sm text-gray-500 dark:text-gray-300">17-Nov-2024 03:00PM</p>
+        </div>
       </div>
+    
+      {/* Detailed Table */}
+      <div>
+        <table className="table-auto border-collapse border border-gray-300 w-full">
+          <thead className="dark:text-gray-800">
+            <tr className="dark:bg-gray-500 dark:text-white">
+              <th className="border border-gray-300 px-4 py-2 text-left">Total Percentage</th>
+              <th className="border border-gray-300 px-4 py-2 text-left">MongoDB</th>
+              <th className="border border-gray-300 px-4 py-2 text-left">Express Js</th>
+              <th className="border border-gray-300 px-4 py-2 text-left">React Js</th>
+              <th className="border border-gray-300 px-4 py-2 text-left">Node Js</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td className="border border-gray-300 px-4 py-2">{row.details.totalPercentage}</td>
+              <td className="border border-gray-300 px-4 py-2">{row.details.mongodb}</td>
+              <td className="border border-gray-300 px-4 py-2">{row.details.expressJs}</td>
+              <td className="border border-gray-300 px-4 py-2">{row.details.reactJs}</td>
+              <td className="border border-gray-300 px-4 py-2">{row.details.nodeJs}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+
     ),
   };
-
 
   return (
     // Main container
@@ -184,12 +213,10 @@ export default function Candidates() {
         <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 ">
           All Candidates &amp; Results
         </h1>
-        <Button
-          className="bg-blue-600 text-white font-medium px-6 py-2 rounded-lg shadow-md hover:bg-blue-700 hover:shadow-lg focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800 transition-all duration-200 ease-in-out"
-          aria-label="Add a new candidate"
-        >
-          Create Candidate
-        </Button>
+        <CreateCandidateDialog
+        open={openCreateCandidate}
+        onOpenChange={setOpenCreateCandidate}
+      />
       </div>
 
 
@@ -208,6 +235,8 @@ export default function Candidates() {
           rowKey="id"
         />
       </Suspense>
+
+    
     </div>
   );
 }

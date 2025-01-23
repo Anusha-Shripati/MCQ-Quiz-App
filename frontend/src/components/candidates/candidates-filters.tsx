@@ -3,6 +3,7 @@ import { Input } from "../ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "../ui/select";
 import { Button } from "../ui/button";
 import DateRangePicker from "./date-range-picker";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 interface CandidateDetails {
   totalPercentage: string; // Total percentage scored
@@ -32,11 +33,30 @@ interface FiltersProps {
 }
 
 const Filters: React.FC<FiltersProps> = memo(({ candidates = [] }) => {
+
   const [activeFilter, setActiveFilter] = useState<string>("");
+  const [candidateSearch, setCandidateSearch] = useState<string>("");
+  const [emailFilter, setEmailFilter] = useState<string>("");
+  const [technologyFilter, setTechnologyFilter] = useState<string[]>([]);
+  const [experienceFilter, setExperienceFilter] = useState<[number | "", number | ""]>(["", ""]);
+  const [assessmentFilter, setAssessmentFilter] = useState<[number | "", number | ""]>(["", ""]);
+  const [dateRange, setDateRange] = useState<[string, string]>(["", ""]);
 
   const handleOpenFilter = (filterName: string): void => {
     setActiveFilter(activeFilter === filterName ? "" : filterName);
   };
+
+  const clearAllFilters = () => {
+    setCandidateSearch("");
+    setEmailFilter("");
+    setTechnologyFilter([]);
+    setExperienceFilter(["", ""]);
+    setAssessmentFilter(["", ""]);
+    setDateRange(["", ""]);
+    setActiveFilter("");
+  };
+
+
 
   const renderFilterOptions = (filter: string) => {
     switch (filter) {
@@ -193,14 +213,14 @@ const Filters: React.FC<FiltersProps> = memo(({ candidates = [] }) => {
 
       {/* Dynamic Filter Buttons */}
       <div className="flex flex-wrap gap-3">
-      <div className="flex items-center gap-4">
-        <span className="text-base font-medium text-gray-800 dark:text-gray-200">
-          Candidates{" "}
-          <span className="inline-flex items-center justify-center w-7 h-7 bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-100 rounded-full text-sm font-semibold shadow">
-            {candidates.length}
+        <div className="flex items-center gap-4 mr-4 ml-[-1rem]">
+          <span className="text-base flex font-medium text-gray-800 dark:text-gray-200">
+            <span className="font-bold text-xl">Candidates</span>{" "}
+            <span className="inline-flex items-center justify-center w-7 h-7 bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-100 rounded-full text-sm font-semibold shadow">
+              {candidates.length}
+            </span>
           </span>
-        </span>
-      </div>
+        </div>
         {["Candidates", "Email", "Technology", "Exp.", "Assessment", "Created"].map((filter) => (
           <div key={filter} className="relative">
             <Button
@@ -209,6 +229,10 @@ const Filters: React.FC<FiltersProps> = memo(({ candidates = [] }) => {
               className="text-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 ease-in-out shadow-sm hover:shadow-md"
             >
               {filter}
+              {activeFilter === filter.toLowerCase() ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+              <span className="absolute -top-2 -left-2 bg-blue-600 text-white text-xs font-semibold rounded-full px-2 py-1">
+                {0}
+              </span>
             </Button>
             {activeFilter === filter.toLowerCase() && (
               <div className="absolute top-full left-0 mt-2 w-64 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg z-10 p-4">
@@ -245,6 +269,13 @@ const Filters: React.FC<FiltersProps> = memo(({ candidates = [] }) => {
           </Button>
         ))}
         <DateRangePicker />
+        <Button
+          variant="destructive"
+          onClick={clearAllFilters}
+          className="text-sm text-gray-700 text-white dark:text-gray-300"
+        >
+          Clear All Filters
+        </Button>
       </div>
     </div>
   );

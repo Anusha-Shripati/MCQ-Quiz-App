@@ -2,7 +2,11 @@ import { Request, Response, NextFunction } from "express";
 import Joi from "joi";
 
 import { AppError } from "../common/errors/AppError";
-import { IValidatedSchema, IValidationSchema, TRequestPart } from "../common/types/types";
+import {
+  IValidatedSchema,
+  IValidationSchema,
+  TRequestPart,
+} from "../common/types/types";
 
 export const validateRequest = (schema: IValidationSchema) => {
   return (req: Request, res: Response, next: NextFunction) => {
@@ -10,13 +14,13 @@ export const validateRequest = (schema: IValidationSchema) => {
     const validatedData: IValidatedSchema = {
       body: {},
       params: {},
-      query: {}
+      query: {},
     };
 
     Object.entries(schema).forEach(([part, partSchema]) => {
       const data = req[part as TRequestPart];
       const { error, value } = partSchema.validate(data, {
-        abortEarly: false
+        abortEarly: false,
       });
 
       if (error) {

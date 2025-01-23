@@ -4,12 +4,13 @@ export const generateResponse = (
   res: Response,
   status: number,
   data: any,
+  success: boolean = true,
   message: string = "success"
 ) => {
   return res.status(status).json({
-    success: true,
+    success: success,
     status,
     message,
-    data
+    data,
   });
 };

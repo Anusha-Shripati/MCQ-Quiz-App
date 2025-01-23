@@ -6,11 +6,9 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "types": ["node"]
   },
-  "references": [
-    { "path": "./frontend" },
-    { "path": "./backend" }
-  ],
+  "references": [{ "path": "./frontend" }, { "path": "./backend" }],
   "exclude": ["node_modules"]
 }

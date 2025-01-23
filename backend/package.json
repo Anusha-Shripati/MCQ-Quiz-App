@@ -8,7 +8,8 @@
     "test": "jest",
     "prisma:generate": "prisma generate --schema=./src/db/prisma/schema.prisma",
     "prisma:migrate": "prisma migrate dev --schema=./src/db/prisma/schema.prisma",
-    "prisma:studio": "prisma studio --schema=./src/db/prisma/schema.prisma"
+    "prisma:studio": "prisma studio --schema=./src/db/prisma/schema.prisma",
+    "seed:db": "ts-node ./src/db/prisma/seeders/seed.db.ts"
   },
   "prisma": {
     "schema": "./src/db/prisma/schema.prisma"

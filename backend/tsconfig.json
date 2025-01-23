@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "types": ["./src/common/types/custom.d.ts", "jest"],
+    "types": ["./src/common/types/custom.d.ts", "jest", "node"],
     "target": "es2020",
     "module": "commonjs",
     "strict": true,

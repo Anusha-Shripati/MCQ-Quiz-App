@@ -221,8 +221,8 @@ const Filters: React.FC<FiltersProps> = memo(({ candidates = [] }) => {
             </span>
           </span>
         </div>
-        {["Candidates", "Email", "Technology", "Exp.", "Assessment", "Created"].map((filter) => (
-          <div key={filter} className="relative">
+        {["Candidates", "Email", "Technology", "Exp.", "Assessment", "Created"].map((filter, index) => (
+          <div key={filter} className="relative animate-in slide-in-from-left duration-300 delay-100" style={{ animationDelay: `${index * 100}ms` }}>
             <Button
               variant="ghost"
               onClick={() => handleOpenFilter(filter.toLowerCase())}

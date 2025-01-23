@@ -150,7 +150,7 @@ export default function Candidates() {
 
   const expandableRow: ExpandableRow = {
     render: (row) => (
-      <div className="border border-gray-200 rounded-lg p-4 space-y-6">
+      <div className="border border-gray-200 rounded-lg p-4 space-y-6 transition-all duration-300 ease-in-out transform origin-top animate-in fade-in zoom-in-95">
       {/* Row Layout */}
       <div className="flex items-center justify-between">
         {/* Result Section */}
@@ -231,8 +231,9 @@ export default function Candidates() {
           columns={columns}
           rows={candidates}
           expandableRow={expandableRow}
-          className="mb-6"
+          className="mb-6 animate-in fade-in duration-300"
           rowKey="id"
+        
         />
       </Suspense>
 

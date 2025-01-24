@@ -6,6 +6,7 @@ import { FiCopy, FiMail } from "react-icons/fi";
 import toast from "react-hot-toast";
 import dynamic from "next/dynamic";
 import CreateCandidateDialog from "@/components/candidates/create-candidate-dialog";
+import { candidatesList } from "@/shared/constants/data";
 const FiltersCandidates = dynamic(() => import("@/components/candidates/candidates-filters"), {
   suspense: true,
 });
@@ -17,25 +18,14 @@ const ReusableTable = dynamic(() => import("@/components/candidates/candidates-t
 // Define types for Candidate and CandidateDetails
 interface CandidateDetails {
   totalPercentage: string;
-  mongodb: string;
-  expressJs: string;
-  reactJs: string;
-  nodeJs: string;
+  categories: {
+    [key: string]: string;
+  };
   createdBy: string;
   createdOn: string;
 }
 
-interface ExpandableRow {
-  render: (row: any) => React.ReactNode; // Function to render the expandable content
-}
-
-// interface Column {
-//   key: string; // Unique key for the column
-//   header: string; // Display name for the column header
-//   render?: (row: any) => JSX.Element; // Optional function to render custom content for the column
-// }
-
-interface Candidates {
+interface Candidate {
   id: number;
   date: string;
   name: string;
@@ -45,58 +35,60 @@ interface Candidates {
   assessment: string;
   result: string;
   created: string;
+  testStartDate: string; // New field
+  testEndDate: string;   // New field
   details: CandidateDetails;
 }
+
+interface ExpandableRow {
+  render: (row: Candidate) => React.ReactNode; // Function to render the expandable content
+}
+
+// interface Column {
+//   key: string; // Unique key for the column
+//   header: string; // Display name for the column header
+//   render?: (row: any) => JSX.Element; // Optional function to render custom content for the column
+// }
+
 
 export default function Candidates() {
 
   const [ openCreateCandidate, setOpenCreateCandidate ] = useState(false);
 
+  const formatTestDate = (startDate: string, endDate: string): string => {
+    // Parse the start and end dates
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+  
+    // Format the date (e.g., "18-Nov-2024")
+    const formattedDate = start.toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  
+    // Format the start time (e.g., "03:00PM")
+    const startTime = start.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+  
+    // Format the end time (e.g., "06:00PM")
+    const endTime = end.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+  
+    // Combine into the desired format
+    return `${formattedDate} ${startTime}–${endTime}`;
+  };
+
   // Sample candidate data
 
   const candidates = useMemo(() =>
-    [
-      {
-        id: 1,
-        date: "18-19 Nov 2024",
-        name: "Lary Page",
-        email: "karan@mail...",
-        technology: "MERN",
-        experience: "3+",
-        assessment: "MERN 3 years exp.",
-        result: "Pass",
-        created: "Mihirbhai",
-        details: {
-          totalPercentage: "90%",
-          mongodb: "10%",
-          expressJs: "10%",
-          reactJs: "10%",
-          nodeJs: "10%",
-          createdBy: "Mihirbhai",
-          createdOn: "17-Nov-2024 03:00PM",
-        },
-      },
-      {
-        id: 2,
-        date: "18-19 Nov 2024",
-        name: "Karan Doshi",
-        email: "karan@mail...",
-        technology: "MERN",
-        experience: "3+",
-        assessment: "MERN 3 years exp.",
-        result: "Fail",
-        created: "Mihirbhai",
-        details: {
-          totalPercentage: "60%",
-          mongodb: "10%",
-          expressJs: "10%",
-          reactJs: "10%",
-          nodeJs: "10%",
-          createdBy: "Mihirbhai",
-          createdOn: "17-Nov-2024 03:00PM",
-        },
-      },
-    ]
+    candidatesList
     , [])
 
     const columns = useMemo(
@@ -148,63 +140,68 @@ export default function Candidates() {
       [] // Empty dependency array because the columns array is static
     );
 
-  const expandableRow: ExpandableRow = {
-    render: (row) => (
-      <div className="border border-gray-200 rounded-lg p-4 space-y-6 transition-all duration-300 ease-in-out transform origin-top animate-in fade-in zoom-in-95">
-      {/* Row Layout */}
-      <div className="flex items-center justify-between">
-        {/* Result Section */}
-        <div>
-          <p className="text-sm text-gray-500 dark:text-gray-300">Result</p>
-          <div className="flex items-center gap-2">
-            <p className="text-lg font-semibold text-blue-500">70%</p>
-            <a href="#" className="text-sm text-blue-500 hover:underline">View Answer</a>
+    const expandableRow: ExpandableRow = {
+      render: (row) => (
+        <div className="border border-gray-200 rounded-lg p-4 space-y-6 transition-all duration-300 ease-in-out transform origin-top animate-in fade-in zoom-in-95">
+          {/* Row Layout */}
+          <div className="flex items-center justify-between">
+            {/* Result Section */}
+            <div>
+              <p className="text-sm text-gray-500 dark:text-gray-300">Result</p>
+              <div className="flex items-center gap-2">
+                <p className="text-lg font-semibold text-blue-500">{row.details.totalPercentage}</p>
+                <a href="#" className="text-sm text-blue-500 hover:underline">
+                  View Answer
+                </a>
+              </div>
+            </div>
+    
+            {/* Test Time Section */}
+            <div>
+              <p className="text-sm text-gray-500 dark:text-gray-300">Test Time</p>
+              <p className="text-lg font-medium text-gray-700 dark:text-gray-300">
+              {formatTestDate(row.testStartDate, row.testEndDate)}
+              </p>
+            </div>
+    
+            {/* Created Section */}
+            <div>
+              <p className="text-sm text-gray-500 dark:text-gray-300">Created</p>
+              <p className="text-lg font-medium text-gray-700 dark:text-gray-300">{row.details.createdBy}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-300">{row.details.createdOn}</p>
+            </div>
+          </div>
+    
+          {/* Detailed Table */}
+          <div>
+            <table className="table-auto border-collapse border border-gray-300 w-full">
+              <thead className="dark:text-gray-800">
+                <tr className="dark:bg-gray-500 dark:text-white">
+                  <th className="border border-gray-300 px-4 py-2 text-left">Total Percentage</th>
+                  {/* Dynamically render category headers */}
+                  {Object.keys(row.details.categories).map((category) => (
+                    <th key={category} className="border border-gray-300 px-4 py-2 text-left">
+                      {category}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td className="border border-gray-300 px-4 py-2">{row.details.totalPercentage}</td>
+                  {/* Dynamically render category percentages */}
+                  {Object.values(row.details.categories).map((percentage, index) => (
+                    <td key={index} className="border border-gray-300 px-4 py-2">
+                      {percentage}
+                    </td>
+                  ))}
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
-    
-        {/* Test Time Section */}
-        <div>
-          <p className="text-sm text-gray-500 dark:text-gray-300">Test Time</p>
-          <p className="text-lg font-medium text-gray-700 dark:text-gray-300">18-Nov-2024 03:00PM–6:00PM</p>
-        </div>
-    
-        {/* Created Section */}
-        <div>
-          <p className="text-sm text-gray-500 dark:text-gray-300">Created</p>
-          <p className="text-lg font-medium text-gray-700 dark:text-gray-300">Mihirbhai</p>
-          <p className="text-sm text-gray-500 dark:text-gray-300">17-Nov-2024 03:00PM</p>
-        </div>
-      </div>
-    
-      {/* Detailed Table */}
-      <div>
-        <table className="table-auto border-collapse border border-gray-300 w-full">
-          <thead className="dark:text-gray-800">
-            <tr className="dark:bg-gray-500 dark:text-white">
-              <th className="border border-gray-300 px-4 py-2 text-left">Total Percentage</th>
-              <th className="border border-gray-300 px-4 py-2 text-left">MongoDB</th>
-              <th className="border border-gray-300 px-4 py-2 text-left">Express Js</th>
-              <th className="border border-gray-300 px-4 py-2 text-left">React Js</th>
-              <th className="border border-gray-300 px-4 py-2 text-left">Node Js</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td className="border border-gray-300 px-4 py-2">{row.details.totalPercentage}</td>
-              <td className="border border-gray-300 px-4 py-2">{row.details.mongodb}</td>
-              <td className="border border-gray-300 px-4 py-2">{row.details.expressJs}</td>
-              <td className="border border-gray-300 px-4 py-2">{row.details.reactJs}</td>
-              <td className="border border-gray-300 px-4 py-2">{row.details.nodeJs}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-    
-
-    ),
-  };
-
+      ),
+    };
   return (
     // Main container
     <div className="p-4 sm:p-6 dark:bg-gray-900 min-h-screen">

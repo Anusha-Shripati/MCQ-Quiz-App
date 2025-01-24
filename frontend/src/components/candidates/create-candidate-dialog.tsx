@@ -37,8 +37,8 @@ export default function CreateCandidateDialog({ open, onOpenChange }: CreateCand
                 {/* Animation Wrapper */}
                 <div className="animate-in fade-in zoom-in-95 duration-300">
                     <DialogHeader>
-                        <DialogTitle className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-                            Create Candidates & Test
+                        <DialogTitle className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
+                            Create Candidate & Test
                         </DialogTitle>
                     </DialogHeader>
 

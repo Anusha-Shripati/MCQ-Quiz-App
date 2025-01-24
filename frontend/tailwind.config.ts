@@ -69,7 +69,8 @@ export default {
         "fade-in": "fadeIn 0.3s ease-out",
         "zoom-in-95": "zoomIn95 0.3s ease-out",
         "slide-in-from-left": "slideInFromLeft 0.3s ease-out", // Slide-in from left
-        bounce: "bounce 0.5s", // Bounce effect
+        "slide-in-from-top-2": "slideInFromTop2 0.3s ease-out",
+        "bounce": "bounce 0.3s", // Bounce effect
       },
       keyframes: {
         fadeIn: {

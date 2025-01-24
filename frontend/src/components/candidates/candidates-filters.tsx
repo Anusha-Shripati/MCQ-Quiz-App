@@ -230,12 +230,12 @@ const Filters: React.FC<FiltersProps> = memo(({ candidates = [] }) => {
             >
               {filter}
               {activeFilter === filter.toLowerCase() ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-              <span className="absolute -top-2 -left-2 bg-blue-600 text-white text-xs font-semibold rounded-full px-2 py-1">
+              <span className="absolute -top-2 -left-2 bg-pink-600 text-white text-xs font-semibold rounded-full px-2 py-1">
                 {0}
               </span>
             </Button>
             {activeFilter === filter.toLowerCase() && (
-              <div className="absolute top-full left-0 mt-2 w-64 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg z-10 p-4">
+              <div className="absolute top-full left-0 mt-2 w-64 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg z-10 p-4 animate-in fade-in slide-in-from-top-2 duration-600">
                 {renderFilterOptions(activeFilter)}
                 <div className="flex justify-end mt-4 gap-2">
                   <Button variant="ghost" onClick={() => setActiveFilter("")}>

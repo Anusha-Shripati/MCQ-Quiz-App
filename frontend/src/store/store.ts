@@ -1,9 +1,11 @@
 import { configureStore } from "@reduxjs/toolkit";
-import assessmentReducer from "./assessmentSlice";
+import assessmentReducer from "./features/assessmentSlice";
+import candidatesReducer from "./features/candidatesSlice"
 
 export const store = configureStore({
   reducer: {
     assessment: assessmentReducer,
+    candidates: candidatesReducer
   },
 });
 

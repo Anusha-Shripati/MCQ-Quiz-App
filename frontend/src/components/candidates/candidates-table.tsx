@@ -40,7 +40,7 @@ const ReusableTable: React.FC<TableProps> = ({
   };
 
   return (
-    <div className={`bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 sm:p-6 overflow-x-auto ${className}`}>
+    <div className={`bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 sm:p-6 overflow-x-auto ${className} h-[600px] overflow-y-scroll`}>
       <Table className="min-w-full">
         <TableHeader>
           <TableRow className="bg-gradient-to-r from-blue-50 to-blue-100 dark:from-gray-700 dark:to-gray-800">
@@ -87,7 +87,7 @@ const ReusableTable: React.FC<TableProps> = ({
                 )}
               </TableRow>
               {/* Render expandable content if expandableRow is provided and the row is expanded */}
-              {expandableRow && expandedRow === rowIndex && (
+              {expandableRow && expandedRow === rowIndex && ( 
                 <TableRow>
                   <TableCell colSpan={columns.length + (expandableRow ? 1 : 0)} className="bg-gray-50 dark:bg-gray-700 p-4">
                     {expandableRow.render(row)}

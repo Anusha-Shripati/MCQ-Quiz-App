@@ -7,6 +7,9 @@ import toast from "react-hot-toast";
 import dynamic from "next/dynamic";
 import CreateCandidateDialog from "@/components/candidates/create-candidate-dialog";
 import { candidatesList } from "@/shared/constants/data";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { PaginationControls } from "@/components/candidates/pagination-controls";
 const FiltersCandidates = dynamic(() => import("@/components/candidates/candidates-filters"), {
   suspense: true,
 });
@@ -53,34 +56,100 @@ interface ExpandableRow {
 
 export default function Candidates() {
 
-  const [ openCreateCandidate, setOpenCreateCandidate ] = useState(false);
+  const [openCreateCandidate, setOpenCreateCandidate] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+
+  const totalItems = candidatesList.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const currentPageStart = (currentPage - 1) * itemsPerPage + 1;
+  const currentPageEnd = Math.min(currentPage * itemsPerPage, totalItems);
+
+  // Get current page items
+  const currentItems = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return candidatesList.slice(startIndex, endIndex);
+  }, [currentPage, itemsPerPage]);
+
+  // Pagination controls
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(Math.max(1, Math.min(newPage, totalPages)));
+  };
+
+  const renderPageNumbers = () => {
+    const pages = [];
+    const maxVisiblePages = 7;
+    let startPage = Math.max(1, currentPage - 3);
+    let endPage = Math.min(totalPages, currentPage + 3);
+
+    if (totalPages > maxVisiblePages) {
+      if (currentPage <= 4) {
+        endPage = maxVisiblePages;
+      } else if (currentPage >= totalPages - 3) {
+        startPage = totalPages - maxVisiblePages + 1;
+      }
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(
+        <Button
+          key={i}
+          variant={i === currentPage ? "default" : "outline"}
+          onClick={() => handlePageChange(i)}
+          className="mx-1 min-w-[2rem]"
+        >
+          {i}
+        </Button>
+      );
+    }
+
+    if (totalPages > maxVisiblePages) {
+      if (startPage > 1) {
+        pages.unshift(
+          <span key="start-ellipsis" className="px-3 py-1">
+            ...
+          </span>
+        );
+      }
+      if (endPage < totalPages) {
+        pages.push(
+          <span key="end-ellipsis" className="px-3 py-1">
+            ...
+          </span>
+        );
+      }
+    }
+
+    return pages;
+  };
 
   const formatTestDate = (startDate: string, endDate: string): string => {
     // Parse the start and end dates
     const start = new Date(startDate);
     const end = new Date(endDate);
-  
+
     // Format the date (e.g., "18-Nov-2024")
     const formattedDate = start.toLocaleDateString("en-GB", {
       day: "2-digit",
       month: "short",
       year: "numeric",
     });
-  
+
     // Format the start time (e.g., "03:00PM")
     const startTime = start.toLocaleTimeString("en-US", {
       hour: "2-digit",
       minute: "2-digit",
       hour12: true,
     });
-  
+
     // Format the end time (e.g., "06:00PM")
     const endTime = end.toLocaleTimeString("en-US", {
       hour: "2-digit",
       minute: "2-digit",
       hour12: true,
     });
-  
+
     // Combine into the desired format
     return `${formattedDate} ${startTime}–${endTime}`;
   };
@@ -91,117 +160,117 @@ export default function Candidates() {
     candidatesList
     , [])
 
-    const columns = useMemo(
-      () => [
-        { key: "date", header: "Date" },
-        { key: "name", header: "Name" },
-        { key: "email", header: "Email" },
-        { key: "technology", header: "Technology" },
-        { key: "experience", header: "Exp." },
-        { key: "assessment", header: "Assessment" },
-        {
-          key: "result",
-          header: "Result",
-          render: (row) => (
-            <span className={`font-semibold ${row.result === "Pass" ? "text-green-600" : "text-red-600"}`}>
-              {row.result}
-            </span>
-          ),
-        },
-        { key: "created", header: "Created" },
-        {
-          key: "actions",
-          header: "Share",
-          render: () => (
-            <div className="flex items-center gap-2">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  navigator.clipboard.writeText("https://example.com/candidate-link");
-                  toast.success("Link copied to clipboard!");
-                }}
-                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all duration-200"
-              >
-                <FiCopy className="h-5 w-5 text-gray-700 dark:text-gray-300" />
-              </button>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  window.location.href = "mailto:candidate@example.com";
-                }}
-                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all duration-200"
-              >
-                <FiMail className="h-5 w-5 text-gray-700 dark:text-gray-300" />
-              </button>
-            </div>
-          ),
-        },
-      ],
-      [] // Empty dependency array because the columns array is static
-    );
+  const columns = useMemo(
+    () => [
+      { key: "date", header: "Date" },
+      { key: "name", header: "Name" },
+      { key: "email", header: "Email" },
+      { key: "technology", header: "Technology" },
+      { key: "experience", header: "Exp." },
+      { key: "assessment", header: "Assessment" },
+      {
+        key: "result",
+        header: "Result",
+        render: (row) => (
+          <span className={`font-semibold ${row.result === "Pass" ? "text-green-600" : "text-red-600"}`}>
+            {row.result}
+          </span>
+        ),
+      },
+      { key: "created", header: "Created" },
+      {
+        key: "actions",
+        header: "Share",
+        render: () => (
+          <div className="flex items-center gap-2">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                navigator.clipboard.writeText("https://example.com/candidate-link");
+                toast.success("Link copied to clipboard!");
+              }}
+              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all duration-200"
+            >
+              <FiCopy className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                window.location.href = "mailto:candidate@example.com";
+              }}
+              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all duration-200"
+            >
+              <FiMail className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+            </button>
+          </div>
+        ),
+      },
+    ],
+    [] // Empty dependency array because the columns array is static
+  );
 
-    const expandableRow: ExpandableRow = {
-      render: (row) => (
-        <div className="border border-gray-200 rounded-lg p-4 space-y-6 transition-all duration-300 ease-in-out transform origin-top animate-in fade-in zoom-in-95">
-          {/* Row Layout */}
-          <div className="flex items-center justify-between">
-            {/* Result Section */}
-            <div>
-              <p className="text-sm text-gray-500 dark:text-gray-300">Result</p>
-              <div className="flex items-center gap-2">
-                <p className="text-lg font-semibold text-blue-500">{row.details.totalPercentage}</p>
-                <a href="#" className="text-sm text-blue-500 hover:underline">
-                  View Answer
-                </a>
-              </div>
-            </div>
-    
-            {/* Test Time Section */}
-            <div>
-              <p className="text-sm text-gray-500 dark:text-gray-300">Test Time</p>
-              <p className="text-lg font-medium text-gray-700 dark:text-gray-300">
-              {formatTestDate(row.testStartDate, row.testEndDate)}
-              </p>
-            </div>
-    
-            {/* Created Section */}
-            <div>
-              <p className="text-sm text-gray-500 dark:text-gray-300">Created</p>
-              <p className="text-lg font-medium text-gray-700 dark:text-gray-300">{row.details.createdBy}</p>
-              <p className="text-sm text-gray-500 dark:text-gray-300">{row.details.createdOn}</p>
+  const expandableRow: ExpandableRow = {
+    render: (row) => (
+      <div className="border border-gray-200 rounded-lg p-4 space-y-6 transition-all duration-300 ease-in-out transform origin-top animate-in fade-in zoom-in-95">
+        {/* Row Layout */}
+        <div className="flex items-center justify-between">
+          {/* Result Section */}
+          <div>
+            <p className="text-sm text-gray-500 dark:text-gray-300">Result</p>
+            <div className="flex items-center gap-2">
+              <p className="text-lg font-semibold text-blue-500">{row.details.totalPercentage}</p>
+              <a href="#" className="text-sm text-blue-500 hover:underline">
+                View Answer
+              </a>
             </div>
           </div>
-    
-          {/* Detailed Table */}
+
+          {/* Test Time Section */}
           <div>
-            <table className="table-auto border-collapse border border-gray-300 w-full">
-              <thead className="dark:text-gray-800">
-                <tr className="dark:bg-gray-500 dark:text-white">
-                  <th className="border border-gray-300 px-4 py-2 text-left">Total Percentage</th>
-                  {/* Dynamically render category headers */}
-                  {Object.keys(row.details.categories).map((category) => (
-                    <th key={category} className="border border-gray-300 px-4 py-2 text-left">
-                      {category}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td className="border border-gray-300 px-4 py-2">{row.details.totalPercentage}</td>
-                  {/* Dynamically render category percentages */}
-                  {Object.values(row.details.categories).map((percentage, index) => (
-                    <td key={index} className="border border-gray-300 px-4 py-2">
-                      {percentage}
-                    </td>
-                  ))}
-                </tr>
-              </tbody>
-            </table>
+            <p className="text-sm text-gray-500 dark:text-gray-300">Test Time</p>
+            <p className="text-lg font-medium text-gray-700 dark:text-gray-300">
+              {formatTestDate(row.testStartDate, row.testEndDate)}
+            </p>
+          </div>
+
+          {/* Created Section */}
+          <div>
+            <p className="text-sm text-gray-500 dark:text-gray-300">Created</p>
+            <p className="text-lg font-medium text-gray-700 dark:text-gray-300">{row.details.createdBy}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-300">{row.details.createdOn}</p>
           </div>
         </div>
-      ),
-    };
+
+        {/* Detailed Table */}
+        <div>
+          <table className="table-auto border-collapse border border-gray-300 w-full">
+            <thead className="dark:text-gray-800">
+              <tr className="dark:bg-gray-500 dark:text-white">
+                <th className="border border-gray-300 px-4 py-2 text-left">Total Percentage</th>
+                {/* Dynamically render category headers */}
+                {Object.keys(row.details.categories).map((category) => (
+                  <th key={category} className="border border-gray-300 px-4 py-2 text-left">
+                    {category}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td className="border border-gray-300 px-4 py-2">{row.details.totalPercentage}</td>
+                {/* Dynamically render category percentages */}
+                {Object.values(row.details.categories).map((percentage, index) => (
+                  <td key={index} className="border border-gray-300 px-4 py-2">
+                    {percentage}
+                  </td>
+                ))}
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    ),
+  };
   return (
     // Main container
     <div className="p-4 sm:p-6 dark:bg-gray-900 min-h-screen">
@@ -211,9 +280,38 @@ export default function Candidates() {
           All Candidates &amp; Results
         </h1>
         <CreateCandidateDialog
-        open={openCreateCandidate}
-        onOpenChange={setOpenCreateCandidate}
-      />
+          open={openCreateCandidate}
+          onOpenChange={setOpenCreateCandidate}
+        />
+      </div>
+
+      {/* Add results count */}
+      <div className="flex flex-col sm:flex-row justify-between items-center mb-4 px-4">
+        <div className="text-sm text-gray-600 dark:text-gray-400 mb-2 sm:mb-0">
+          Showing {currentPageStart}-{currentPageEnd} of {totalItems}
+        </div>
+
+        {/* Items per page selector */}
+        <div className="flex items-center space-x-2">
+          <span className="text-sm text-gray-600 dark:text-gray-400">Results per page</span>
+          <Select
+            value={itemsPerPage.toString()}
+            onValueChange={(value) => {
+              setItemsPerPage(Number(value));
+              setCurrentPage(1);
+            }}
+          >
+            <SelectTrigger className="w-[80px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="10">10</SelectItem>
+              <SelectItem value="25">25</SelectItem>
+              <SelectItem value="50">50</SelectItem>
+              <SelectItem value="100">100</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
 
@@ -226,15 +324,21 @@ export default function Candidates() {
       <Suspense fallback={<div>Loading table...</div>}>
         <ReusableTable
           columns={columns}
-          rows={candidates}
+          rows={currentItems}
           expandableRow={expandableRow}
           className="mb-6 animate-in fade-in duration-300"
           rowKey="id"
-        
+
         />
       </Suspense>
 
-    
+      <PaginationControls
+        currentPage={currentPage}
+        totalItems={candidatesList.length}
+        itemsPerPage={itemsPerPage}
+        onPageChange={setCurrentPage}
+      />
+
     </div>
   );
 }

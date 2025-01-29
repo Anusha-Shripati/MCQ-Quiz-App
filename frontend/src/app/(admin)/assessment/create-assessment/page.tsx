@@ -228,83 +228,100 @@ export default function CreateAssessment() {
   };
 
   // Dark mode styles for react-select
-const customStyles = {
-  control: (provided, state) => ({
-    ...provided,
-    backgroundColor: state.theme === 'dark' ? '#374151' : 'white', // Background color
-    borderColor: state.theme === 'dark' ? '#4B5563' : '#D1D5DB', // Border color
-    color: state.theme === 'dark' ? 'white' : 'black', // Text color
-    boxShadow: state.isFocused ? (state.theme === 'dark' ? '0 0 0 2px #1E40AF' : '0 0 0 2px #3B82F6') : 'none', // Focus shadow
-    '&:hover': {
-      borderColor: state.theme === 'dark' ? '#6B7280' : '#9CA3AF', // Hover border color
-    },
-  }),
-  menu: (provided) => ({
-    ...provided,
-    backgroundColor: '#1F2937', // Dropdown menu background
-    color: 'white', // Dropdown menu text color
-  }),
-  option: (provided, state) => ({
-    ...provided,
-    backgroundColor: state.isFocused ? '#374151' : '#1F2937', // Option background
-    color: 'white', // Option text color
-    '&:active': {
-      backgroundColor: '#4B5563', // Active option background
-    },
-  }),
-  multiValue: (provided) => ({
-    ...provided,
-    backgroundColor: '#3B82F6', // Selected tag background
-    color: 'white', // Selected tag text color
-  }),
-  multiValueLabel: (provided) => ({
-    ...provided,
-    color: 'white', // Selected tag label color
-  }),
-  multiValueRemove: (provided) => ({
-    ...provided,
-    color: 'white', // Selected tag remove icon color
-    '&:hover': {
-      backgroundColor: '#EF4444', // Hover background for remove icon
-      color: 'white', // Hover color for remove icon
-    },
-  }),
-  placeholder: (provided) => ({
-    ...provided,
-    color: '#9CA3AF', // Placeholder text color
-    
-  }),
-  singleValue: (provided) => ({
-    ...provided,
-    color: 'white', // Selected value text color
-  }),
-};
+  const customStyles = {
+    control: (provided, state) => ({
+      ...provided,
+      backgroundColor: state.theme === 'dark' ? '#374151' : 'white', // Background color
+      borderColor: state.theme === 'dark' ? '#4B5563' : '#D1D5DB', // Border color
+      color: state.theme === 'dark' ? 'white' : 'black', // Text color
+      boxShadow: state.isFocused ? (state.theme === 'dark' ? '0 0 0 2px #1E40AF' : '0 0 0 2px #3B82F6') : 'none', // Focus shadow
+      '&:hover': {
+        borderColor: state.theme === 'dark' ? '#6B7280' : '#9CA3AF', // Hover border color
+      },
+    }),
+    menu: (provided) => ({
+      ...provided,
+      backgroundColor: '#1F2937', // Dropdown menu background
+      color: 'white', // Dropdown menu text color
+    }),
+    option: (provided, state) => ({
+      ...provided,
+      backgroundColor: state.isFocused ? '#374151' : '#1F2937', // Option background
+      color: 'white', // Option text color
+      '&:active': {
+        backgroundColor: '#4B5563', // Active option background
+      },
+    }),
+    multiValue: (provided) => ({
+      ...provided,
+      backgroundColor: '#3B82F6', // Selected tag background
+      color: 'white', // Selected tag text color
+    }),
+    multiValueLabel: (provided) => ({
+      ...provided,
+      color: 'white', // Selected tag label color
+    }),
+    multiValueRemove: (provided) => ({
+      ...provided,
+      color: 'white', // Selected tag remove icon color
+      '&:hover': {
+        backgroundColor: '#EF4444', // Hover background for remove icon
+        color: 'white', // Hover color for remove icon
+      },
+    }),
+    placeholder: (provided) => ({
+      ...provided,
+      color: '#9CA3AF', // Placeholder text color
 
-const calculateDifficultyPercentage = (difficulty: 'easy' | 'medium' | 'hard') => {
-  const totalForDifficulty = formData.categories.reduce(
-    (sum, cat) => sum + cat.questions[difficulty], 0
-  );
-  return targetQuestions > 0 
-    ? Math.round((totalForDifficulty / targetQuestions) * 100)
-    : 0;
-};
+    }),
+    singleValue: (provided) => ({
+      ...provided,
+      color: 'white', // Selected value text color
+    }),
+  };
 
-// Add this new function to handle slider changes
-const handleDifficultySliderChange = (difficulty: 'easy' | 'medium' | 'hard', percentage: number) => {
-  // Calculate questions per category based on percentage
-  const questionsPerCategory = Math.floor((targetQuestions * percentage) / 100 / formData.categories.length);
-  
-  setFormData(prev => ({
-    ...prev,
-    categories: prev.categories.map(category => ({
-      ...category,
-      questions: {
-        ...category.questions,
-        [difficulty]: questionsPerCategory
-      }
-    }))
-  }));
-};
+  const calculateDifficultyPercentage = (difficulty: 'easy' | 'medium' | 'hard') => {
+    const totalForDifficulty = formData.categories.reduce(
+      (sum, cat) => sum + cat.questions[difficulty], 0
+    );
+    return targetQuestions > 0
+      ? Math.round((totalForDifficulty / targetQuestions) * 100)
+      : 0;
+  };
+
+  // Add this new function to handle slider changes
+  const handleDifficultySliderChange = (difficulty: 'easy' | 'medium' | 'hard', percentage: number) => {
+    // Calculate the total questions for the selected difficulty based on the percentage
+    const totalForDifficulty = Math.floor((targetQuestions * percentage) / 100);
+
+    // Calculate the current total questions for the other difficulties
+    const totalForOtherDifficulties = formData.categories.reduce((sum, cat) => {
+      return sum + (difficulty === 'easy' ? 0 : cat.questions.easy) +
+        (difficulty === 'medium' ? 0 : cat.questions.medium) +
+        (difficulty === 'hard' ? 0 : cat.questions.hard);
+    }, 0);
+
+    // Check if the new total exceeds the target questions
+    if (totalForDifficulty + totalForOtherDifficulties > targetQuestions) {
+      toast.error(`Total questions cannot exceed ${targetQuestions}`);
+      return;
+    }
+
+    // Calculate questions per category based on the percentage
+    const questionsPerCategory = Math.floor(totalForDifficulty / formData.categories.length);
+
+    // Update the form data
+    setFormData(prev => ({
+      ...prev,
+      categories: prev.categories.map(category => ({
+        ...category,
+        questions: {
+          ...category.questions,
+          [difficulty]: questionsPerCategory
+        }
+      }))
+    }));
+  };
 
   return (
     <div className="mx-auto py-8 px-6">
@@ -326,11 +343,11 @@ const handleDifficultySliderChange = (difficulty: 'easy' | 'medium' | 'hard', pe
         <div className="relative max-w-2xl mx-auto">
           {/* Progress Line */}
           <div className="absolute top-5 left-0 right-0 h-[2px] bg-gray-200" />
-          <div 
+          <div
             className="absolute top-5 left-0 h-[2px] bg-blue-600 transition-all duration-300"
-            style={{ 
+            style={{
               width: `${((step - 1) / 2) * 100}%`
-            }} 
+            }}
           />
 
           {/* Steps */}
@@ -341,12 +358,12 @@ const handleDifficultySliderChange = (difficulty: 'easy' | 'medium' | 'hard', pe
               { number: 3, label: "Summary" }
             ].map(({ number, label }) => (
               <div key={number} className="flex flex-col items-center">
-                <div 
+                <div
                   className={`
                     w-10 h-10 rounded-full flex items-center justify-center 
                     border-2 transition-all duration-200 z-10
-                    ${step > number 
-                      ? 'bg-blue-600 border-blue-600 text-white' 
+                    ${step > number
+                      ? 'bg-blue-600 border-blue-600 text-white'
                       : step === number
                         ? 'border-blue-600 bg-white text-blue-600'
                         : 'border-gray-200 bg-white text-gray-400'
@@ -358,7 +375,7 @@ const handleDifficultySliderChange = (difficulty: 'easy' | 'medium' | 'hard', pe
                   ) : (
                     <span className="text-sm font-medium">{number}</span>
                   )}
-              </div>
+                </div>
                 <span className={`
                   mt-2 text-sm font-medium
                   ${step >= number ? 'text-gray-900' : 'text-gray-400'}
@@ -413,21 +430,38 @@ const handleDifficultySliderChange = (difficulty: 'easy' | 'medium' | 'hard', pe
                   value: category,
                   label: category
                 }))}
-                className="react-select-container"
+                className="mb-4 dark:bg-gray-700 dark:text-white"
                 classNamePrefix="react-select"
                 placeholder="Search Technology"
-                styles={customStyles} 
-                theme={(theme) => ({
-                  ...theme,
-                  colors: {
-                    ...theme.colors,
-                    primary: '#3B82F6', // Primary color (e.g., focus border)
-                    neutral0: '#1F2937', // Background color
-                    neutral80: 'white', // Text color
-                    neutral20: '#4B5563', // Border color
-                    primary25: '#374151', // Option hover background
-                  },
-                })}
+                styles={{
+                  control: (base) => ({
+                    ...base,
+                    backgroundColor: 'var(--bg-color)', // Use a variable for background color
+                    borderColor: 'var(--border-color)', // Use a variable for border color
+                    color: 'var(--text-color)', // Use a variable for text color
+                  }),
+                  option: (base, state) => ({
+                    ...base,
+                    backgroundColor: state.isFocused ? 'var(--highlight-color)' : 'var(--bg-color)', // Background color on focus
+                    color: 'var(--text-color)', // Text color
+                  }),
+                  multiValue: (base) => ({
+                    ...base,
+                    backgroundColor: 'var(--highlight-color)', // Background for selected items
+                  }),
+                  multiValueLabel: (base) => ({
+                    ...base,
+                    color: 'var(--text-color)', // Text color for selected items
+                  }),
+                  multiValueRemove: (base) => ({
+                    ...base,
+                    color: 'var(--text-color)', // Text color for remove button
+                    ':hover': {
+                      backgroundColor: 'red', // Change this to your desired hover color
+                      color: 'white', // Change this to your desired hover text color
+                    },
+                  }),
+                }}
               />
             </div>
           </CardContent>
@@ -448,7 +482,7 @@ const handleDifficultySliderChange = (difficulty: 'easy' | 'medium' | 'hard', pe
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Total Questions Input */}
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-start gap-2">
               <h3 className="text-lg font-medium">Total Questions</h3>
               <Input
                 type="number"
@@ -465,10 +499,10 @@ const handleDifficultySliderChange = (difficulty: 'easy' | 'medium' | 'hard', pe
                 const totalForDifficulty = formData.categories.reduce(
                   (sum, cat) => sum + cat.questions[difficulty], 0
                 );
-                const percentage = targetQuestions > 0 
-                  ? Math.round((totalForDifficulty / targetQuestions) * 100) 
+                const percentage = targetQuestions > 0
+                  ? Math.round((totalForDifficulty / targetQuestions) * 100)
                   : 0;
-                
+
                 // Define colors for each difficulty
                 const colors = {
                   easy: 'bg-green-500',
@@ -479,7 +513,8 @@ const handleDifficultySliderChange = (difficulty: 'easy' | 'medium' | 'hard', pe
                 return (
                   <div key={difficulty} className="text-center">
                     <div className="mb-2 capitalize">{difficulty}</div>
-                    <div className="relative h-2 bg-gray-200 rounded-full cursor-pointer"
+                    <div
+                      className="relative h-2 bg-gray-200 rounded-full cursor-pointer"
                       onClick={(e) => {
                         const rect = e.currentTarget.getBoundingClientRect();
                         const x = e.clientX - rect.left;
@@ -487,11 +522,11 @@ const handleDifficultySliderChange = (difficulty: 'easy' | 'medium' | 'hard', pe
                         handleDifficultySliderChange(difficulty as 'easy' | 'medium' | 'hard', newPercentage);
                       }}
                     >
-                      <div 
+                      <div
                         className={`h-full ${colors[difficulty]} rounded-full transition-all duration-300`}
                         style={{ width: `${percentage}%` }}
                       />
-                      <div 
+                      <div
                         className="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-white border-2 border-blue-600 rounded-full cursor-grab"
                         style={{ left: `${percentage}%`, transform: `translate(-50%, -50%)` }}
                         onMouseDown={(e) => {
@@ -502,12 +537,12 @@ const handleDifficultySliderChange = (difficulty: 'easy' | 'medium' | 'hard', pe
                             const newPercentage = Math.max(0, Math.min(100, Math.round((x / rect.width) * 100)));
                             handleDifficultySliderChange(difficulty as 'easy' | 'medium' | 'hard', newPercentage);
                           };
-                          
+
                           const handleMouseUp = () => {
                             document.removeEventListener('mousemove', handleMouseMove);
                             document.removeEventListener('mouseup', handleMouseUp);
                           };
-                          
+
                           document.addEventListener('mousemove', handleMouseMove);
                           document.addEventListener('mouseup', handleMouseUp);
                         }}
@@ -522,16 +557,16 @@ const handleDifficultySliderChange = (difficulty: 'easy' | 'medium' | 'hard', pe
 
             {/* Technology Rows */}
             <div className="space-y-4">
-                  {formData.categories.map((category, index) => {
-                    const total = category.questions.easy +
-                      category.questions.medium +
-                      category.questions.hard;
+              {formData.categories.map((category, index) => {
+                const total = category.questions.easy +
+                  category.questions.medium +
+                  category.questions.hard;
 
-                    return (
+                return (
                   <div key={index} className="grid grid-cols-[2fr,1fr,1fr,1fr,auto] gap-4 items-center">
                     <div className="flex items-center gap-2">
                       <span className="font-medium">{category.name}</span>
-                      <span className="text-sm text-gray-500">({(100 / formData.categories.length).toFixed(0)}%)</span>
+                      {/* <span className="text-sm text-gray-500">({(100 / formData.categories.length).toFixed(0)}%)</span> */}
                     </div>
                     <div className="text-center">
                       <Input
@@ -552,9 +587,9 @@ const handleDifficultySliderChange = (difficulty: 'easy' | 'medium' | 'hard', pe
                       />
                     </div>
                     <div className="text-center">
-                            <Input
-                              type="number"
-                              min="0"
+                      <Input
+                        type="number"
+                        min="0"
                         value={category.questions.hard}
                         onChange={(e) => handleQuestionCountChange(index, 'hard', e.target.value)}
                         className="w-16 text-center mx-auto bg-gray-50"
@@ -562,8 +597,8 @@ const handleDifficultySliderChange = (difficulty: 'easy' | 'medium' | 'hard', pe
                     </div>
                     <div className="text-center font-medium">{total}</div>
                   </div>
-                    );
-                  })}
+                );
+              })}
 
               {/* Totals Row */}
               <div className="grid grid-cols-[2fr,1fr,1fr,1fr,auto] gap-4 items-center pt-4 border-t">
@@ -576,10 +611,10 @@ const handleDifficultySliderChange = (difficulty: 'easy' | 'medium' | 'hard', pe
                 </div>
                 <div className="text-center font-medium">
                   {formData.categories.reduce((sum, cat) => sum + cat.questions.hard, 0)}
-            </div>
+                </div>
                 <div className="text-center font-medium text-blue-600">
                   {calculateTotalSum()}
-              </div>
+                </div>
               </div>
             </div>
           </CardContent>
@@ -596,80 +631,80 @@ const handleDifficultySliderChange = (difficulty: 'easy' | 'medium' | 'hard', pe
         </Card>
       )}
       {step === 3 && (
-  <Card className="max-h-[80vh] overflow-y-auto">
-    <CardHeader className="p-4">
-      <CardTitle className="font-bold text-lg">Assessment Summary</CardTitle>
-      <CardDescription className="text-sm">Review and confirm your assessment details</CardDescription>
+        <Card className="max-h-[80vh] overflow-y-auto">
+          <CardHeader className="p-4">
+            <CardTitle className="font-bold text-lg">Assessment Summary</CardTitle>
+            <CardDescription className="text-sm">Review and confirm your assessment details</CardDescription>
           </CardHeader>
-    <CardContent className="space-y-4 p-4">
-      {/* Basic Info Section */}
+          <CardContent className="space-y-4 p-4">
+            {/* Basic Info Section */}
             <div className="space-y-2">
-        <div className="flex items-center justify-between pb-2 border-b border-gray-200">
-          <h3 className="text-base font-semibold text-gray-900">Basic Information</h3>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={() => setStep(1)}
-            className="text-blue-600 hover:text-blue-700 text-sm"
-          >
-            Edit
-          </Button>
-        </div>
-        <div className="grid gap-2">
-          <div>
-            <Label className="text-xs text-gray-500">Assessment Name</Label>
-            <p className="mt-1 text-sm font-medium text-gray-900">{formData.name}</p>
-          </div>
-          <div>
-            <Label className="text-xs text-gray-500">Selected Categories</Label>
-            <div className="mt-1 flex flex-wrap gap-1">
-              {formData.categories.map((category) => (
-                <div 
-                  key={category.name}
-                  className="px-2 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-medium"
+              <div className="flex items-center justify-between pb-2 border-b border-gray-200">
+                <h3 className="text-base font-semibold text-gray-900">Basic Information</h3>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setStep(1)}
+                  className="text-blue-600 hover:text-blue-700 text-sm"
                 >
-                  {category.name}
+                  Edit
+                </Button>
+              </div>
+              <div className="grid gap-2">
+                <div>
+                  <Label className="text-xs text-gray-500">Assessment Name</Label>
+                  <p className="mt-1 text-sm font-medium text-gray-900">{formData.name}</p>
                 </div>
-              ))}
-            </div>
-          </div>
-        </div>
+                <div>
+                  <Label className="text-xs text-gray-500">Selected Categories</Label>
+                  <div className="mt-1 flex flex-wrap gap-1">
+                    {formData.categories.map((category) => (
+                      <div
+                        key={category.name}
+                        className="px-2 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-medium"
+                      >
+                        {category.name}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
             </div>
 
-      {/* Questions Distribution Section */}
+            {/* Questions Distribution Section */}
             <div className="space-y-2">
-        <div className="flex items-center justify-between pb-2 border-b border-gray-200">
-          <h3 className="text-base font-semibold text-gray-900">Questions Distribution</h3>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={() => setStep(2)}
-            className="text-blue-600 hover:text-blue-700 text-sm"
-          >
-            Edit
-          </Button>
-        </div>
-        <div className="overflow-hidden rounded-lg border border-gray-200">
-          <Table className="text-sm">
+              <div className="flex items-center justify-between pb-2 border-b border-gray-200">
+                <h3 className="text-base font-semibold text-gray-900">Questions Distribution</h3>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setStep(2)}
+                  className="text-blue-600 hover:text-blue-700 text-sm"
+                >
+                  Edit
+                </Button>
+              </div>
+              <div className="overflow-hidden rounded-lg border border-gray-200">
+                <Table className="text-sm">
                   <TableHeader>
-              <TableRow className="bg-gray-50">
-                <TableHead className="w-[30%] p-2">Category</TableHead>
-                <TableHead className="text-center p-2">
-                  <div className="px-2 py-1 bg-green-100 text-green-700 rounded-full inline-block text-xs">
-                    Easy ({calculateDifficultyPercentage('easy')}%)
-                  </div>
-                </TableHead>
-                <TableHead className="text-center p-2">
-                  <div className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full inline-block text-xs">
-                    Medium ({calculateDifficultyPercentage('medium')}%)
-                  </div>
-                </TableHead>
-                <TableHead className="text-center p-2">
-                  <div className="px-2 py-1 bg-red-100 text-red-700 rounded-full inline-block text-xs">
-                    Hard ({calculateDifficultyPercentage('hard')}%)
-                  </div>
-                </TableHead>
-                <TableHead className="text-center p-2">Total</TableHead>
+                    <TableRow className="bg-gray-50">
+                      <TableHead className="w-[30%] p-2">Category</TableHead>
+                      <TableHead className="text-center p-2">
+                        <div className="px-2 py-1 bg-green-100 text-green-700 rounded-full inline-block text-xs">
+                          Easy ({calculateDifficultyPercentage('easy')}%)
+                        </div>
+                      </TableHead>
+                      <TableHead className="text-center p-2">
+                        <div className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full inline-block text-xs">
+                          Medium ({calculateDifficultyPercentage('medium')}%)
+                        </div>
+                      </TableHead>
+                      <TableHead className="text-center p-2">
+                        <div className="px-2 py-1 bg-red-100 text-red-700 rounded-full inline-block text-xs">
+                          Hard ({calculateDifficultyPercentage('hard')}%)
+                        </div>
+                      </TableHead>
+                      <TableHead className="text-center p-2">Total</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -679,57 +714,57 @@ const handleDifficultySliderChange = (difficulty: 'easy' | 'medium' | 'hard', pe
                         category.questions.hard;
 
                       return (
-                  <TableRow key={index} className="hover:bg-gray-50">
-                    <TableCell className="font-medium p-2">{category.name}</TableCell>
-                    <TableCell className="text-center p-2">{category.questions.easy}</TableCell>
-                    <TableCell className="text-center p-2">{category.questions.medium}</TableCell>
-                    <TableCell className="text-center p-2">{category.questions.hard}</TableCell>
-                    <TableCell className="text-center p-2 font-semibold">{total}</TableCell>
+                        <TableRow key={index} className="hover:bg-gray-50">
+                          <TableCell className="font-medium p-2">{category.name}</TableCell>
+                          <TableCell className="text-center p-2">{category.questions.easy}</TableCell>
+                          <TableCell className="text-center p-2">{category.questions.medium}</TableCell>
+                          <TableCell className="text-center p-2">{category.questions.hard}</TableCell>
+                          <TableCell className="text-center p-2 font-semibold">{total}</TableCell>
                         </TableRow>
                       );
                     })}
-              <TableRow className="bg-gray-50 font-medium">
-                <TableCell className="p-2">Total</TableCell>
-                <TableCell className="text-center p-2">
-                  {formData.categories.reduce((sum, cat) => sum + cat.questions.easy, 0)}
-                </TableCell>
-                <TableCell className="text-center p-2">
-                  {formData.categories.reduce((sum, cat) => sum + cat.questions.medium, 0)}
-                </TableCell>
-                <TableCell className="text-center p-2">
-                  {formData.categories.reduce((sum, cat) => sum + cat.questions.hard, 0)}
-                </TableCell>
-                <TableCell className="text-center p-2 text-blue-600">
-                  {calculateTotalSum()}
-                </TableCell>
-              </TableRow>
+                    <TableRow className="bg-gray-50 font-medium">
+                      <TableCell className="p-2">Total</TableCell>
+                      <TableCell className="text-center p-2">
+                        {formData.categories.reduce((sum, cat) => sum + cat.questions.easy, 0)}
+                      </TableCell>
+                      <TableCell className="text-center p-2">
+                        {formData.categories.reduce((sum, cat) => sum + cat.questions.medium, 0)}
+                      </TableCell>
+                      <TableCell className="text-center p-2">
+                        {formData.categories.reduce((sum, cat) => sum + cat.questions.hard, 0)}
+                      </TableCell>
+                      <TableCell className="text-center p-2 text-blue-600">
+                        {calculateTotalSum()}
+                      </TableCell>
+                    </TableRow>
                   </TableBody>
                 </Table>
               </div>
             </div>
 
-      {/* Target vs Selected Questions */}
-      <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-        <div className="space-y-1">
-          <p className="text-xs text-gray-500">Target Questions</p>
-          <p className="text-sm font-semibold text-gray-900">{targetQuestions}</p>
+            {/* Target vs Selected Questions */}
+            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <div className="space-y-1">
+                <p className="text-xs text-gray-500">Target Questions</p>
+                <p className="text-sm font-semibold text-gray-900">{targetQuestions}</p>
               </div>
-        <div className="space-y-1 text-right">
-          <p className="text-xs text-gray-500">Selected Questions</p>
-          <p className="text-sm font-semibold text-blue-600">{calculateTotalSum()}</p>
+              <div className="space-y-1 text-right">
+                <p className="text-xs text-gray-500">Selected Questions</p>
+                <p className="text-sm font-semibold text-blue-600">{calculateTotalSum()}</p>
               </div>
             </div>
           </CardContent>
-    <CardFooter className="flex justify-end gap-2 p-4">
-      <Button variant="outline" onClick={handlePreviousStep} className="text-sm">
+          <CardFooter className="flex justify-end gap-2 p-4">
+            <Button variant="outline" onClick={handlePreviousStep} className="text-sm">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back
             </Button>
-      <Button 
-        onClick={handleSubmit}
-        className="bg-blue-600 hover:bg-blue-700 text-white text-sm"
-      >
-        Create Assessment
+            <Button
+              onClick={handleSubmit}
+              className="bg-blue-600 hover:bg-blue-700 text-white text-sm"
+            >
+              Create Assessment
             </Button>
           </CardFooter>
         </Card>

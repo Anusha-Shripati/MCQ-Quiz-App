@@ -35,7 +35,7 @@ const initialState: AssessmentState = {
       title: "MERN 3 years",
       createdBy: "MihirBhai",
       createdDate: "20-Jan-2025",
-      totalQuestions: 0,
+      totalQuestions: 60,
       technologies: [
         { name: "MongoDB", percentage: 25, questions: { easy: 5, medium: 5, hard: 5 } },
         { name: "ExpressJS", percentage: 25, questions: { easy: 5, medium: 5, hard: 5 } },

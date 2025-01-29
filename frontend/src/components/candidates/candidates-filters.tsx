@@ -274,7 +274,7 @@ const Filters: React.FC<FiltersProps> = memo(({ candidates = [] }) => {
           onClick={clearAllFilters}
           className="text-sm text-gray-700 text-white dark:text-gray-300"
         >
-          Clear All Filters
+          Clear All
         </Button>
       </div>
     </div>
@@ -284,3 +284,6 @@ const Filters: React.FC<FiltersProps> = memo(({ candidates = [] }) => {
 // Optional: Add a custom comparison function
 Filters.displayName = "Filters"; // Add a display name for debugging
 export default Filters;
+
+
+

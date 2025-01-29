@@ -10,6 +10,7 @@ import { candidatesList } from "@/shared/constants/data";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PaginationControls } from "@/components/candidates/pagination-controls";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 const FiltersCandidates = dynamic(() => import("@/components/candidates/candidates-filters"), {
   suspense: true,
 });
@@ -124,35 +125,35 @@ export default function Candidates() {
     return pages;
   };
 
-  const formatTestDate = (startDate: string, endDate: string): string => {
-    // Parse the start and end dates
+  const formatTestDuration = (startDate: string, endDate: string): string => {
     const start = new Date(startDate);
     const end = new Date(endDate);
 
-    // Format the date (e.g., "18-Nov-2024")
-    const formattedDate = start.toLocaleDateString("en-GB", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
+    // Calculate the difference in hours
+    const duration = Math.abs(end.getTime() - start.getTime()) / (1000 * 60 * 60);
 
-    // Format the start time (e.g., "03:00PM")
+    return `${duration} hours`; // e.g., "3 hours"
+  };
+
+  const formatTestDateRange = (startDate: string, endDate: string): string => {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
     const startTime = start.toLocaleTimeString("en-US", {
       hour: "2-digit",
       minute: "2-digit",
       hour12: true,
     });
 
-    // Format the end time (e.g., "06:00PM")
     const endTime = end.toLocaleTimeString("en-US", {
       hour: "2-digit",
       minute: "2-digit",
       hour12: true,
     });
 
-    // Combine into the desired format
-    return `${formattedDate} ${startTime}–${endTime}`;
+    return `${startTime}–${endTime}`; // e.g., "09:00 AM–12:00 PM"
   };
+
 
   // Sample candidate data
 
@@ -228,9 +229,16 @@ export default function Candidates() {
           {/* Test Time Section */}
           <div>
             <p className="text-sm text-gray-500 dark:text-gray-300">Test Time</p>
-            <p className="text-lg font-medium text-gray-700 dark:text-gray-300">
-              {formatTestDate(row.testStartDate, row.testEndDate)}
-            </p>
+            <Tooltip>
+              <TooltipTrigger>
+                <p className="text-lg font-medium text-gray-700 dark:text-gray-300">
+                  {formatTestDuration(row.testStartDate, row.testEndDate)}
+                </p>
+              </TooltipTrigger>
+              <TooltipContent className="bg-gray-800 text-white p-2 rounded shadow-lg">
+                {formatTestDateRange(row.testStartDate, row.testEndDate)}
+              </TooltipContent>
+            </Tooltip>
           </div>
 
           {/* Created Section */}

@@ -25,7 +25,7 @@ interface CreateCandidateDialogProps {
 
 export default function CreateCandidateDialog({ open, onOpenChange }: CreateCandidateDialogProps) {
     const [startDate, setStartDate] = useState<Date | undefined>(undefined);
-    const [timeUnit, setTimeUnit] = useState<'days' | 'hours' | null>(null);
+    const [timeUnit, setTimeUnit] = useState<'days' | 'hours'>('days');
     const [timeValue, setTimeValue] = useState<number | ''>('');
     const [endDate, setEndDate] = useState<Date | undefined>(undefined);
     const [isCalendarOpen, setIsCalendarOpen] = useState(false);
@@ -251,7 +251,7 @@ export default function CreateCandidateDialog({ open, onOpenChange }: CreateCand
                                 <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
                                     <PopoverTrigger asChild>
                                         <div className="relative w-full">
-                                          
+
                                             <Input
                                                 type="text"
                                                 placeholder="Select a date"
@@ -295,26 +295,33 @@ export default function CreateCandidateDialog({ open, onOpenChange }: CreateCand
                                     Ends in
                                 </label>
                                 {/* Conditionally show input field */}
-                                {timeUnit && (
+                                {/* {timeUnit && ( */}
+                                <div className="flex items-center gap-4">
+                                    {/* Input Field */}
                                     <Input
                                         type="number"
                                         placeholder={`Enter ${timeUnit}`}
                                         value={timeValue}
                                         onChange={(e) => setTimeValue(e.target.valueAsNumber || '')}
                                         min="1"
-                                        className="mb-2"
+                                        className="flex-1 border border-gray-300 rounded-lg p-2"
                                     />
-                                )}
-                                <Select onValueChange={(value) => setTimeUnit(value as 'days' | 'hours')}>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Choose duration type" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="hours">Hours</SelectItem>
-                                        <SelectItem value="days">Days</SelectItem>
-                                    </SelectContent>
-                                </Select>
 
+                                    {/* Select Dropdown */}
+                                    <Select
+                                        value={timeUnit}
+                                        onValueChange={(value) => setTimeUnit(value as 'days' | 'hours')}
+                                    >
+                                        <SelectTrigger className="flex-1 border border-gray-300 rounded-lg p-2">
+                                            <SelectValue placeholder="Choose duration type" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {/* Uncomment hours if needed */}
+                                            {/* <SelectItem value="hours">Hours</SelectItem> */}
+                                            <SelectItem value="days">Days</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
                                 {errors.duration && <p className="text-red-500 text-sm mt-1">{errors.duration}</p>}
                             </div>
                         </div>

@@ -39,17 +39,17 @@ function AssessmentItem({
   handleEdit,
 }: AssessmentItemProps) {
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden transition-all duration-200 hover:shadow-md">
+    <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-200 hover:shadow-md">
       <div className="p-5 flex items-center justify-between">
         <div className="flex-1">
-          <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
-          <p className="text-sm text-gray-500 mt-1">
-            Created by <span className="text-gray-700 font-medium">{createdBy}</span> on {createdDate}
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{title}</h3>
+          <p className="text-sm text-gray-500 mt-1 dark:text-gray-400">
+            Created by <span className="text-gray-700 font-medium dark:text-gray-300">{createdBy}</span> on {createdDate}
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" className="hover:bg-gray-100" onClick={handleEdit}>
-            <Edit className="h-4 w-4 text-gray-600" />
+          <Button variant="ghost" size="icon" className="hover:bg-gray-100 dark:hover:bg-gray-700" onClick={handleEdit}>
+            <Edit className="h-4 w-4 text-gray-600 dark:text-gray-300" />
           </Button>
           <Button variant="ghost" size="icon" className="hover:bg-red-50 hover:text-red-600">
             <Trash2 className="h-4 w-4" />
@@ -58,22 +58,22 @@ function AssessmentItem({
             variant="ghost" 
             size="icon" 
             onClick={onToggle}
-            className="hover:bg-gray-100"
+            className="hover:bg-gray-100 dark:hover:bg-gray-700"
           >
             {isExpanded ? (
-              <ChevronUp className="h-4 w-4 text-gray-600" />
+              <ChevronUp className="h-4 w-4 text-gray-600 dark:text-gray-300" />
             ) : (
-              <ChevronDown className="h-4 w-4 text-gray-600" />
+              <ChevronDown className="h-4 w-4 text-gray-600 dark:text-gray-300" />
             )}
           </Button>
         </div>
       </div>
 
       {isExpanded && technologies && (
-        <div className="p-5 border-t border-gray-200 bg-gray-50">
+        <div className="p-5 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
           <div className="space-y-4">
-            <div className="grid grid-cols-5 gap-4 pb-2 border-b border-gray-200">
-              <div className="font-medium text-gray-700">Technology</div>
+            <div className="grid grid-cols-5 gap-4 pb-2 border-b border-gray-200 dark:border-gray-700">
+              <div className="font-medium text-gray-700 dark:text-gray-300">Technology</div>
               <div className="text-center font-medium text-gray-700 bg-green-100 rounded-full px-2 py-1">
                 Easy (50%)
               </div>
@@ -83,26 +83,26 @@ function AssessmentItem({
               <div className="text-center font-medium text-gray-700 bg-red-100 rounded-full px-2 py-1">
                 Hard (50%)
               </div>
-              <div className="font-medium text-gray-700 text-right">Total Questions</div>
+              <div className="font-medium text-gray-700 dark:text-gray-300 text-right">Total Questions</div>
             </div>
             {technologies.map((tech) => (
               <div key={tech.name} className="grid grid-cols-5 gap-4 py-2">
-                <div className="text-gray-900 font-medium">
+                <div className="text-gray-900 dark:text-gray-300 font-medium">
                   {tech.name} <span className="text-gray-500">({tech.percentage}%)</span>
                 </div>
-                <div className="text-center text-gray-800">{tech.questions.easy}</div>
-                <div className="text-center text-gray-800">{tech.questions.medium}</div>
-                <div className="text-center text-gray-800">{tech.questions.hard}</div>
-                <div className="text-center text-gray-800 font-semibold">
+                <div className="text-center text-gray-800 dark:text-gray-300">{tech.questions.easy}</div>
+                <div className="text-center text-gray-800 dark:text-gray-300">{tech.questions.medium}</div>
+                <div className="text-center text-gray-800 dark:text-gray-300">{tech.questions.hard}</div>
+                <div className="text-center text-gray-800 dark:text-gray-300 font-semibold">
                   {tech.questions.easy + tech.questions.medium + tech.questions.hard}
                 </div>
               </div>
             ))}
-            <div className="grid grid-cols-5 gap-4 pt-2 border-t border-gray-200">
-              <div className="font-semibold text-gray-900">Total</div>
-              <div className="text-center font-semibold text-gray-900">20</div>
-              <div className="text-center font-semibold text-gray-900">20</div>
-              <div className="text-center font-semibold text-gray-900">20</div>
+            <div className="grid grid-cols-5 gap-4 pt-2 border-t border-gray-200 dark:border-gray-700">
+              <div className="font-semibold text-gray-900 dark:text-gray-300">Total</div>
+              <div className="text-center font-semibold text-gray-900 dark:text-gray-300">20</div>
+              <div className="text-center font-semibold text-gray-900 dark:text-gray-300">20</div>
+              <div className="text-center font-semibold text-gray-900 dark:text-gray-300">20</div>
               <div className="text-center font-semibold text-blue-600">
                 {technologies.reduce((total, tech) => total + tech.questions.easy + tech.questions.medium + tech.questions.hard, 0)}
               </div>

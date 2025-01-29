@@ -1,18 +1,50 @@
+import * as React from "react";
+
 interface DifficultySliderProps {
   label: string;
   value: number;
+  onChange: (value: number) => void;
+  color?: "green" | "blue" | "red";
 }
 
-export function DifficultySlider({ label, value }: DifficultySliderProps) {
+export function DifficultySlider({ 
+  label, 
+  value, 
+  onChange,
+  color = "blue" 
+}: DifficultySliderProps) {
+  const colorStyles = {
+    green: "bg-green-500 dark:bg-green-600",
+    blue: "bg-blue-500 dark:bg-blue-600",
+    red: "bg-red-500 dark:bg-red-600"
+  };
+
   return (
-    <div className="flex flex-col">
-      <span className="text-sm text-gray-600 mb-1">{label}</span>
-      <div className="flex items-center gap-2">
-        <div className="h-1 flex-grow bg-gray-200 rounded-full relative">
-          <div className="absolute h-4 w-4 bg-blue-500 rounded-full top-1/2 left-1/2 transform -translate-y-1/2 -translate-x-1/2"></div>
-          <div className="absolute h-1 w-1/2 bg-blue-500 rounded-full left-0"></div>
-        </div>
-        <span className="text-xs text-gray-500">{value}%</span>
+    <div className="space-y-2">
+      <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
+        {label}
+      </div>
+      <div className="relative h-2 bg-gray-200 dark:bg-gray-700 rounded-full">
+        <div 
+          className={`absolute h-full rounded-full transition-all ${colorStyles[color]}`}
+          style={{ width: `${value}%` }}
+        />
+        <input
+          type="range"
+          min="0"
+          max="100"
+          value={value}
+          onChange={(e) => onChange(parseInt(e.target.value))}
+          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+          style={{ WebkitAppearance: "none" }}
+        />
+        <div 
+          className="absolute h-4 w-4 -top-1 rounded-full bg-white border-2 border-blue-500 dark:border-blue-400 transition-all hover:scale-110"
+          style={{ left: `${value}%`, transform: 'translateX(-50%)' }}
+        />
+      </div>
+      <div className="text-xs text-gray-500 dark:text-gray-400">
+        {value}%
       </div>
     </div>
   );

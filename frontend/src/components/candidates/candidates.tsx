@@ -192,7 +192,7 @@ export default function CandidatesTable({
                 <TableHead className="p-3 text-left">Status</TableHead>
                 <TableHead className="p-3 text-left">Score</TableHead>
                 <TableHead className="p-3 text-left"></TableHead>
-                
+
               </TableRow>
             </TableHeader>
 
@@ -213,17 +213,17 @@ export default function CandidatesTable({
                     <TableCell className="p-3">{candidate.duration}</TableCell>
                     <TableCell className="p-3">{candidate.status}</TableCell>
                     <TableCell className="p-1">{candidate.score} </TableCell>
-                  
+
                     <TableCell className="p-3 flex items-center">
-                    
-                    <DropdownMenu>
+
+                      <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button
                             variant="ghost"
                             className="h-8 w-8 p-0 text-gray-600 hover:bg-gray-300 hover:text-gray-900 rounded-full"
                           >
                             <span className="sr-only">Open menu</span>
-                            <Share2 className="h-4 dark:text-white"/>
+                            <Share2 className="h-4 dark:text-white" />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
@@ -239,7 +239,7 @@ export default function CandidatesTable({
                           >
                             <FaShare /> Share via email
                           </DropdownMenuItem>
-                        
+
                         </DropdownMenuContent>
                       </DropdownMenu>
                       <DropdownMenu>
@@ -249,7 +249,7 @@ export default function CandidatesTable({
                             className="h-8 w-8 p-0 text-gray-600 hover:bg-gray-300 hover:text-gray-900 rounded-full"
                           >
                             <span className="sr-only">Open menu</span>
-                            <MoreVertical className="dark:text-white"/>
+                            <MoreVertical className="dark:text-white" />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
@@ -298,97 +298,97 @@ export default function CandidatesTable({
 
       {/* Dialog */}
       <Dialog
-  open={isDialogOpen}
-  onOpenChange={(open) => !open && closeDialog()}
->
-  <DialogContent className="max-w-2xl p-6 bg-gray-50 dark:bg-gray-900 rounded-lg shadow-lg">
-    <DialogHeader>
-      <DialogTitle className="text-2xl font-bold text-gray-900 dark:text-white">
-        {isEditMode ? "Edit Candidate" : `${selectedCandidate?.name}'s Details`}
-      </DialogTitle>
-    </DialogHeader>
-    {isEditMode ? (
-      <form
-        onSubmit={handleEditSubmit}
-        className="space-y-6"
+        open={isDialogOpen}
+        onOpenChange={(open) => !open && closeDialog()}
       >
-        <div className="grid grid-cols-2 gap-6">
-          {/* Input fields */}
-          {[
-            { label: "Name", name: "name", type: "text" },
-            { label: "Email", name: "email", type: "email" },
-            { label: "Phone", name: "phone", type: "text" },
-            { label: "Test", name: "test", type: "text" },
-            { label: "Experience", name: "experience", type: "text" },
-            { label: "Description", name: "description", type: "text" },
-            { label: "Duration", name: "duration", type: "text" },
-            { label: "Status", name: "status", type: "text" },
-            { label: "Score", name: "score", type: "text" },
-          ].map((field) => (
-            <div key={field.name}>
-              <label
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                htmlFor={field.name}
-              >
-                {field.label}:
-              </label>
-              <input
-                id={field.name}
-                name={field.name}
-                type={field.type}
-                value={editingCandidate?.[field.name] || ""}
-                onChange={handleInputChange}
-                className="mt-1 w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-800 dark:text-white dark:border-gray-700"
-              />
+        <DialogContent className="max-w-2xl p-6 bg-gray-50 dark:bg-gray-900 rounded-lg shadow-lg">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold text-gray-900 dark:text-white">
+              {isEditMode ? "Edit Candidate" : `${selectedCandidate?.name}'s Details`}
+            </DialogTitle>
+          </DialogHeader>
+          {isEditMode ? (
+            <form
+              onSubmit={handleEditSubmit}
+              className="space-y-6"
+            >
+              <div className="grid grid-cols-2 gap-6">
+                {/* Input fields */}
+                {[
+                  { label: "Name", name: "name", type: "text" },
+                  { label: "Email", name: "email", type: "email" },
+                  { label: "Phone", name: "phone", type: "text" },
+                  { label: "Test", name: "test", type: "text" },
+                  { label: "Experience", name: "experience", type: "text" },
+                  { label: "Description", name: "description", type: "text" },
+                  { label: "Duration", name: "duration", type: "text" },
+                  { label: "Status", name: "status", type: "text" },
+                  { label: "Score", name: "score", type: "text" },
+                ].map((field) => (
+                  <div key={field.name}>
+                    <label
+                      className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                      htmlFor={field.name}
+                    >
+                      {field.label}:
+                    </label>
+                    <input
+                      id={field.name}
+                      name={field.name}
+                      type={field.type}
+                      value={editingCandidate?.[field.name] || ""}
+                      onChange={handleInputChange}
+                      className="mt-1 w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-800 dark:text-white dark:border-gray-700"
+                    />
+                  </div>
+                ))}
+              </div>
+              {/* Buttons */}
+              <div className="flex justify-end gap-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                  onClick={closeDialog}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  variant="default"
+                  className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                >
+                  Save Changes
+                </Button>
+              </div>
+            </form>
+          ) : (
+            <div className="space-y-4 bg-white dark:bg-gray-800 rounded-lg p-6 shadow">
+              {/* Candidate Details */}
+              {[
+                { label: "Name", value: selectedCandidate?.name },
+                { label: "Email", value: selectedCandidate?.email },
+                { label: "Date", value: selectedCandidate?.date },
+                { label: "Phone", value: selectedCandidate?.phone },
+                { label: "Test", value: selectedCandidate?.test },
+                { label: "Experience", value: selectedCandidate?.experience },
+                { label: "Description", value: selectedCandidate?.description },
+                { label: "Duration", value: selectedCandidate?.duration },
+                { label: "Status", value: selectedCandidate?.status },
+                { label: "Score", value: selectedCandidate?.score },
+              ].map((item) => (
+                <p
+                  key={item.label}
+                  className="text-gray-800 dark:text-gray-300 text-sm flex justify-between border-b pb-2"
+                >
+                  <span className="font-medium">{item.label}:</span>
+                  <span>{item.value || "N/A"}</span>
+                </p>
+              ))}
             </div>
-          ))}
-        </div>
-        {/* Buttons */}
-        <div className="flex justify-end gap-4">
-          <Button
-            type="button"
-            variant="outline"
-            className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
-            onClick={closeDialog}
-          >
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            variant="default"
-            className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
-          >
-            Save Changes
-          </Button>
-        </div>
-      </form>
-    ) : (
-      <div className="space-y-4 bg-white dark:bg-gray-800 rounded-lg p-6 shadow">
-        {/* Candidate Details */}
-        {[
-          { label: "Name", value: selectedCandidate?.name },
-          { label: "Email", value: selectedCandidate?.email },
-          { label: "Date", value: selectedCandidate?.date },
-          { label: "Phone", value: selectedCandidate?.phone },
-          { label: "Test", value: selectedCandidate?.test },
-          { label: "Experience", value: selectedCandidate?.experience },
-          { label: "Description", value: selectedCandidate?.description },
-          { label: "Duration", value: selectedCandidate?.duration },
-          { label: "Status", value: selectedCandidate?.status },
-          { label: "Score", value: selectedCandidate?.score },
-        ].map((item) => (
-          <p
-            key={item.label}
-            className="text-gray-800 dark:text-gray-300 text-sm flex justify-between border-b pb-2"
-          >
-            <span className="font-medium">{item.label}:</span>
-            <span>{item.value || "N/A"}</span>
-          </p>
-        ))}
-      </div>
-    )}
-  </DialogContent>
-</Dialog>
+          )}
+        </DialogContent>
+      </Dialog>
 
     </div>
   );

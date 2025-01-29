@@ -74,3 +74,10 @@
     @apply bg-background text-foreground;
   }
 }
+
+.dark {
+  --bg-color: #1f2937; /* Dark mode background */
+  --text-color: white; /* Dark mode text */
+  --border-color: #4b5563; /* Dark mode border */
+  --highlight-color: #374151; /* Dark mode highlight */
+}

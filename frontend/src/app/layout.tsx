@@ -2,6 +2,7 @@ import { ReactNode } from "react";
 import "./globals.css";
 import { ThemeProvider } from "@/components/common/theme-provider";
 import { nunito } from "@/lib/fonts";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 export default async function RootLayout({
   children,
@@ -17,7 +18,9 @@ export default async function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {children}
+          <TooltipProvider>
+            {children}
+          </TooltipProvider>
         </ThemeProvider>
       </body>
     </html>

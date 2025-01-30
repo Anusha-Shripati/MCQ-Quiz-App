@@ -29,7 +29,6 @@ export default function Sidebar() {
   };
 
   const handleLogout = () => {
-    console.log("Logging out...");
   };
 
   return (

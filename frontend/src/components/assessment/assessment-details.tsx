@@ -159,7 +159,6 @@ export default function AssessmentDetails() {
 
   if (editing) {
     const assessment = assessments.find(a => a.id === expandedId);
-    console.log("assessment>>>>>",assessment);
     
     return assessment ? (
       <AssessmentEdit

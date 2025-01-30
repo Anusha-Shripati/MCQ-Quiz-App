@@ -26,7 +26,6 @@ const CreateQuestion: React.FC = () => {
     const [selectedQuestion, setSelectedQuestion] = useState<number>(0);
 
     const handleSave = () => {
-        console.log('Questions saved:', questions);
         toast.success('Questions saved successfully!');
     };
 

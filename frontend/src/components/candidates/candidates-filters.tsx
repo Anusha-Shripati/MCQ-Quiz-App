@@ -243,7 +243,6 @@ const Filters: React.FC<FiltersProps> = memo(({ candidates = [] }) => {
                   </Button>
                   <Button
                     onClick={() => {
-                      console.log(`Applied filter: ${activeFilter}`);
                       setActiveFilter("");
                     }}
                   >

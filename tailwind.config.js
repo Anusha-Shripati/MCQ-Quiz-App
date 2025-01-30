@@ -9,6 +9,7 @@ module.exports = {
           DEFAULT: '#6B7280', // gray-500
           foreground: '#111827', // gray-900
         },
+        
       },
     },
   },

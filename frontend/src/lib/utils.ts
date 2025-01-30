@@ -11,7 +11,6 @@ export function getShadePerInterviewsCount(
   defaultColor: string = "gray",
   theme: string = "light" // Default to "light" theme
 ) {
-  console.log({ theme });
 
   if (count <= 0) {
     return `bg-${defaultColor}-${

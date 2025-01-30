@@ -18,7 +18,6 @@ const EditorPage: React.FC = () => {
   };
 
   const handleThemeChange = (value: string) => {
-    console.log("theme????????????",value);
     
     setTheme(value); 
   };
@@ -35,7 +34,6 @@ const EditorPage: React.FC = () => {
       body: JSON.stringify({ language, code }),
     });
     const result = await response.json();
-    console.log('Output:', result.output);
     if (result.success) {
         setOutput(result.output); 
       } else {
@@ -44,8 +42,6 @@ const EditorPage: React.FC = () => {
 
     setIsLoading(false); 
   };
-
-  console.log("language",language);
   
 
   return (

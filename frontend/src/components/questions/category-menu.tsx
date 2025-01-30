@@ -11,11 +11,9 @@ import { Button } from "../ui/button";
 
 const CategoryMenu = ({ category, handleNavigate }: { category: QuestionCategory, handleNavigate:()=>void }) => {
   const handleEditCategory = (categoryName: string) => {
-    console.log("Edit category", categoryName);
   };
 
   const handleDeleteCategory = (categoryName: string) => {
-    console.log("Delete category", categoryName);
   };
 
   return (

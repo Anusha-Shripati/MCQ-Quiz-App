@@ -91,7 +91,6 @@ export default function AssessmentHeader() {
               selected={new Date()}
               onSelect={(date: Date | undefined) => {
                 if (date) {
-                  console.log("Selected date:", date);
                   setViewMode("calendar");
                 }
               }}

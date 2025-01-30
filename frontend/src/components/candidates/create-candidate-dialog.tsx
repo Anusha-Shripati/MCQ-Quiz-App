@@ -274,7 +274,6 @@ export default function CreateCandidateDialog({ open, onOpenChange }: CreateCand
                                                 mode="single"
                                                 selected={startDate}
                                                 onSelect={(date) => {
-                                                    console.log("Selected date:", date);
                                                     if (date) {
                                                         setStartDate(date);
                                                         setIsCalendarOpen(false); // Close the popover after selection
@@ -330,7 +329,7 @@ export default function CreateCandidateDialog({ open, onOpenChange }: CreateCand
                     {/* Dialog Footer (Create and Cancel Buttons) */}
                     <DialogFooter className="mt-6">
                         <Button
-                            variant="outline"
+                            variant="destructive"
                             onClick={() => {
                                 onOpenChange(false);
                                 setErrors({
@@ -369,8 +368,6 @@ export default function CreateCandidateDialog({ open, onOpenChange }: CreateCand
                                     duration: `${timeValue} ${timeUnit}`
                                 };
 
-                                // Here you would typically make an API call
-                                console.log('Submitting:', candidateData);
                                 toast.success('Candidate created successfully!');
 
                                 // Reset form

@@ -19,6 +19,30 @@ interface Pagination {
   itemsPerPage: number;
 }
 
+interface CandidateDetails {
+  totalPercentage: string;
+  categories: {
+    [key: string]: string;
+  };
+  createdBy: string;
+  createdOn: string;
+}
+
+interface Candidate {
+  id: number;
+  testDate: string;
+  testStartTime: string;
+  testEndTime: string;
+  name: string;
+  email: string;
+  technology: string;
+  experience: string;
+  assessment: string;
+  result: string;
+  created: string;
+  details: CandidateDetails;
+}
+
 interface CandidatesState {
   candidates: Candidate[];
   filters: Filters;
@@ -28,36 +52,35 @@ interface CandidatesState {
   error: string | null;
 }
 
-interface Candidate {
-    id: number;
-    date: string;
-    name: string;
-    email: string;
-    technology: string;
-    experience: string;
-    assessment: string;
-    result: string;
-    created: string;
-    testStartDate: string; // New field
-    testEndDate: string;   // New field
-    details: CandidateDetails;
-  }
-
-interface CandidateDetails {
-    totalPercentage: string;
-    categories: {
-      [key: string]: string;
-    };
-    createdBy: string;
-    createdOn: string;
-  }
-
 // Initial state
 const initialState: CandidatesState = {
-  candidates: [],
+  candidates: [
+    {
+      id: 1,
+      testDate: "2023-01-15",
+      testStartTime: "2023-01-15T09:00:00",
+      testEndTime: "2023-01-15T10:00:00",
+      name: "John Doe",
+      email: "john@example.com",
+      technology: "React",
+      experience: "2 years",
+      assessment: "React Assessment",
+      result: "Pass",
+      created: "2023-01-01",
+      details: {
+        totalPercentage: "80%",
+        categories: {
+          React: "80%",
+          JavaScript: "75%",
+        },
+        createdBy: "Admin",
+        createdOn: "2023-01-01",
+      },
+    },
+  ],
   filters: {},
   sorting: {
-    field: "date",
+    field: "testDate",
     order: "asc",
   },
   pagination: {
@@ -103,6 +126,9 @@ const candidatesSlice = createSlice({
     setPagination: (state, action: PayloadAction<Pagination>) => {
       state.pagination = action.payload;
     },
+    createCandidate: (state, action: PayloadAction<Candidate>) => {
+      state.candidates.push(action.payload);
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -121,5 +147,5 @@ const candidatesSlice = createSlice({
   },
 });
 
-export const { setFilters, setSorting, setPagination } = candidatesSlice.actions;
+export const { setFilters, setSorting, setPagination, createCandidate } = candidatesSlice.actions;
 export default candidatesSlice.reducer;

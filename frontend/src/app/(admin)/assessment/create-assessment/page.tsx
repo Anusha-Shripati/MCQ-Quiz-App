@@ -25,6 +25,7 @@ interface Category {
 interface AssessmentForm {
   name: string;
   categories: Category[];
+  duration: number;
 }
 
 // Option type for react-select
@@ -45,13 +46,20 @@ export default function CreateAssessment() {
         name: "",
         questions: { easy: 0, medium: 0, hard: 0 }
       }
-    ]
+    ],
+    duration: 15
   });
 
   // Convert AVAILABLE_CATEGORIES to react-select options
   const categoryOptions: Option[] = AVAILABLE_CATEGORIES.map(category => ({
     value: category,
     label: category
+  }));
+
+  // Add this options array for the duration select
+  const durationOptions = [...Array(37).keys()].map(i => ({
+    value: 15 + i * 5,
+    label: `${15 + i * 5} minutes`
   }));
 
   const calculateTotalSum = () => {
@@ -201,6 +209,7 @@ export default function CreateAssessment() {
       title: formData.name,
       createdBy: "Current User", // Replace with actual user data
       totalQuestions: targetQuestions,
+      duration: formData.duration,
       technologies: formData.categories.map(cat => ({
         name: cat.name,
         percentage: Math.round((100 / formData.categories.length) * 10) / 10,
@@ -227,58 +236,6 @@ export default function CreateAssessment() {
     return categoryOptions.filter(option => !selectedCategories.includes(option.value));
   };
 
-  // Dark mode styles for react-select
-  const customStyles = {
-    control: (provided, state) => ({
-      ...provided,
-      backgroundColor: state.theme === 'dark' ? '#374151' : 'white', // Background color
-      borderColor: state.theme === 'dark' ? '#4B5563' : '#D1D5DB', // Border color
-      color: state.theme === 'dark' ? 'white' : 'black', // Text color
-      boxShadow: state.isFocused ? (state.theme === 'dark' ? '0 0 0 2px #1E40AF' : '0 0 0 2px #3B82F6') : 'none', // Focus shadow
-      '&:hover': {
-        borderColor: state.theme === 'dark' ? '#6B7280' : '#9CA3AF', // Hover border color
-      },
-    }),
-    menu: (provided) => ({
-      ...provided,
-      backgroundColor: '#1F2937', // Dropdown menu background
-      color: 'white', // Dropdown menu text color
-    }),
-    option: (provided, state) => ({
-      ...provided,
-      backgroundColor: state.isFocused ? '#374151' : '#1F2937', // Option background
-      color: 'white', // Option text color
-      '&:active': {
-        backgroundColor: '#4B5563', // Active option background
-      },
-    }),
-    multiValue: (provided) => ({
-      ...provided,
-      backgroundColor: '#3B82F6', // Selected tag background
-      color: 'white', // Selected tag text color
-    }),
-    multiValueLabel: (provided) => ({
-      ...provided,
-      color: 'white', // Selected tag label color
-    }),
-    multiValueRemove: (provided) => ({
-      ...provided,
-      color: 'white', // Selected tag remove icon color
-      '&:hover': {
-        backgroundColor: '#EF4444', // Hover background for remove icon
-        color: 'white', // Hover color for remove icon
-      },
-    }),
-    placeholder: (provided) => ({
-      ...provided,
-      color: '#9CA3AF', // Placeholder text color
-
-    }),
-    singleValue: (provided) => ({
-      ...provided,
-      color: 'white', // Selected value text color
-    }),
-  };
 
   const calculateDifficultyPercentage = (difficulty: 'easy' | 'medium' | 'hard') => {
     const totalForDifficulty = formData.categories.reduce(
@@ -323,6 +280,16 @@ export default function CreateAssessment() {
     }));
   };
 
+  // Add this handler for duration change
+  const handleDurationChange = (selectedOption: { value: number; label: string } | null) => {
+    if (selectedOption) {
+      setFormData(prev => ({
+        ...prev,
+        duration: selectedOption.value
+      }));
+    }
+  };
+
   return (
     <div className="mx-auto py-8 px-6">
       {/* Step indicators and header - same as original */}
@@ -361,7 +328,7 @@ export default function CreateAssessment() {
                 <div
                   className={`
                     w-10 h-10 rounded-full flex items-center justify-center 
-                    border-2 transition-all duration-200 z-10
+                    border-2 transition-all duration-200 z-10 dark:bg-blue-700 dark:border-blue-600
                     ${step > number
                       ? 'bg-blue-600 border-blue-600 text-white'
                       : step === number
@@ -373,7 +340,7 @@ export default function CreateAssessment() {
                   {step > number ? (
                     <Check className="w-5 h-5" />
                   ) : (
-                    <span className="text-sm font-medium">{number}</span>
+                    <span className="text-sm font-medium dark:text-white">{number}</span>
                   )}
                 </div>
                 <span className={`
@@ -389,76 +356,138 @@ export default function CreateAssessment() {
       </div>
 
       {step === 1 && (
-        <Card>
+        <Card className="bg-white dark:bg-gray-800">
           <CardHeader>
-            <CardTitle className="font-bold">Assessment Details</CardTitle>
-            <CardDescription>Enter the basic information about your assessment</CardDescription>
+            <CardTitle className="font-bold text-gray-900 dark:text-white">Assessment Details</CardTitle>
+            <CardDescription className="text-gray-500 dark:text-gray-400">Enter the basic information about your assessment</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="assessmentName" className="font-bold">Assessment Name</Label>
+              <Label htmlFor="assessmentName" className="font-bold text-gray-900 dark:text-white">Assessment Name</Label>
               <Input
                 id="assessmentName"
                 placeholder="Enter a descriptive name"
                 value={formData.name}
                 onChange={handleAssessmentNameChange}
-                className="dark:bg-gray-600"
+                className="bg-white text-gray-900 border-gray-200 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500
+                     dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
               />
             </div>
 
             <div className="space-y-3">
-              <Label className="font-bold">Select Technology</Label>
+              <Label className="font-bold text-gray-900 dark:text-white">Select Technology</Label>
               <Select
                 isMulti
                 value={formData.categories
                   .filter(cat => cat.name)
                   .map(cat => ({ value: cat.name, label: cat.name }))}
-                onChange={(newValue) => {
-                  const selectedCategories = newValue.map(option => ({
-                    name: option.value,
-                    questions: { easy: 0, medium: 0, hard: 0 }
-                  }));
-                  setFormData(prev => ({
-                    ...prev,
-                    categories: selectedCategories.length ? selectedCategories : [{
-                      name: "",
+                  onChange={(newValue: any) => {
+                    const selectedCategories = newValue?.map((option: { value: string; label: string }) => ({
+                      name: option.value,
                       questions: { easy: 0, medium: 0, hard: 0 }
-                    }]
-                  }));
-                }}
+                    })) || [];
+                    
+                    setFormData(prev => ({
+                      ...prev,
+                      categories: selectedCategories.length ? selectedCategories : [{
+                        name: "",
+                        questions: { easy: 0, medium: 0, hard: 0 }
+                      }]
+                    }));
+                  }}
                 options={AVAILABLE_CATEGORIES.map(category => ({
                   value: category,
                   label: category
                 }))}
-                className="mb-4 dark:bg-gray-700 dark:text-white"
+                className="mb-4"
                 classNamePrefix="react-select"
                 placeholder="Search Technology"
                 styles={{
                   control: (base) => ({
                     ...base,
-                    backgroundColor: 'var(--bg-color)', // Use a variable for background color
-                    borderColor: 'var(--border-color)', // Use a variable for border color
-                    color: 'var(--text-color)', // Use a variable for text color
+                    backgroundColor: 'var(--bg-color, white)',
+                    borderColor: 'var(--border-color, #e5e7eb)',
+                    color: 'var(--text-color, #111827)',
+                  }),
+                  menu: (base) => ({
+                    ...base,
+                    backgroundColor: 'var(--bg-color, white)',
+                  }),
+                  input: (base) => ({
+                    ...base,
+                    color: 'var(--text-color, #111827)',
+                  }),
+                  singleValue: (base) => ({
+                    ...base,
+                    color: 'var(--text-color, #111827)',
                   }),
                   option: (base, state) => ({
                     ...base,
-                    backgroundColor: state.isFocused ? 'var(--highlight-color)' : 'var(--bg-color)', // Background color on focus
-                    color: 'var(--text-color)', // Text color
+                    backgroundColor: state.isFocused ? 'var(--highlight-color, #f3f4f6)' : 'var(--bg-color, white)',
+                    color: 'var(--text-color, #111827)',
+                    '&:hover': {
+                      backgroundColor: 'var(--highlight-color, #f3f4f6)',
+                    },
                   }),
                   multiValue: (base) => ({
                     ...base,
-                    backgroundColor: 'var(--highlight-color)', // Background for selected items
+                    backgroundColor: 'var(--highlight-color, #f3f4f6)',
                   }),
                   multiValueLabel: (base) => ({
                     ...base,
-                    color: 'var(--text-color)', // Text color for selected items
+                    color: 'var(--text-color, #111827)',
                   }),
                   multiValueRemove: (base) => ({
                     ...base,
-                    color: 'var(--text-color)', // Text color for remove button
+                    color: 'var(--text-color, #111827)',
                     ':hover': {
-                      backgroundColor: 'red', // Change this to your desired hover color
-                      color: 'white', // Change this to your desired hover text color
+                      backgroundColor: '#ef4444',
+                      color: 'white',
+                    },
+                  }),
+                  placeholder: (base) => ({
+                    ...base,
+                    color: 'var(--placeholder-color, #6b7280)',
+                  }),
+                }}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="testDuration" className="font-bold text-gray-900 dark:text-white">Test Duration (in minutes)</Label>
+              <Select
+                id="testDuration"
+                options={durationOptions}
+                value={durationOptions.find(option => option.value === formData.duration)}
+                onChange={handleDurationChange}
+                className="mb-4"
+                classNamePrefix="react-select"
+                styles={{
+                  // Same styles as above Select component
+                  control: (base) => ({
+                    ...base,
+                    backgroundColor: 'var(--bg-color, white)',
+                    borderColor: 'var(--border-color, #e5e7eb)',
+                    color: 'var(--text-color, #111827)',
+                  }),
+                  menu: (base) => ({
+                    ...base,
+                    backgroundColor: 'var(--bg-color, white)',
+                  }),
+                  input: (base) => ({
+                    ...base,
+                    color: 'var(--text-color, #111827)',
+                  }),
+                  singleValue: (base) => ({
+                    ...base,
+                    color: 'var(--text-color, #111827)',
+                  }),
+                  option: (base, state) => ({
+                    ...base,
+                    backgroundColor: state.isFocused ? 'var(--highlight-color, #f3f4f6)' : 'var(--bg-color, white)',
+                    color: 'var(--text-color, #111827)',
+                    '&:hover': {
+                      backgroundColor: 'var(--highlight-color, #f3f4f6)',
                     },
                   }),
                 }}
@@ -466,7 +495,7 @@ export default function CreateAssessment() {
             </div>
           </CardContent>
           <CardFooter className="flex justify-end">
-            <Button onClick={handleNextStep}>
+            <Button onClick={handleNextStep} className="bg-blue-600 hover:bg-blue-700 text-white">
               Continue
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
@@ -475,26 +504,29 @@ export default function CreateAssessment() {
       )}
 
       {step === 2 && (
-        <Card>
+        <Card className="dark:bg-gray-800 dark:border-gray-700">
           <CardHeader>
-            <CardTitle className="font-bold">Question Distribution</CardTitle>
-            <CardDescription>Set the number of questions for each difficulty level</CardDescription>
+            <CardTitle className="font-bold dark:text-white">Question Distribution</CardTitle>
+            <CardDescription className="dark:text-gray-300">
+              Set the number of questions for each difficulty level
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Total Questions Input */}
-            <div className="flex items-center justify-start gap-2">
-              <h3 className="text-lg font-medium">Total Questions</h3>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+              <h3 className="text-lg font-medium dark:text-white">Total Questions</h3>
               <Input
                 type="number"
                 value={targetQuestions}
                 onChange={(e) => setTargetQuestions(parseInt(e.target.value))}
-                className="w-24 text-center"
+                className="w-24 text-center dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                min="0"
               />
             </div>
 
             {/* Difficulty Level Headers */}
             <div className="grid grid-cols-[2fr,1fr,1fr,1fr,auto] gap-4 items-center">
-              <div>Category</div>
+              <div className="dark:text-gray-300">Technology</div>
               {['easy', 'medium', 'hard'].map((difficulty) => {
                 const totalForDifficulty = formData.categories.reduce(
                   (sum, cat) => sum + cat.questions[difficulty], 0
@@ -503,18 +535,17 @@ export default function CreateAssessment() {
                   ? Math.round((totalForDifficulty / targetQuestions) * 100)
                   : 0;
 
-                // Define colors for each difficulty
                 const colors = {
-                  easy: 'bg-green-500',
-                  medium: 'bg-blue-500',
-                  hard: 'bg-red-500'
+                  easy: 'bg-green-500 dark:bg-green-600',
+                  medium: 'bg-blue-500 dark:bg-blue-600',
+                  hard: 'bg-red-500 dark:bg-red-600'
                 };
 
                 return (
                   <div key={difficulty} className="text-center">
-                    <div className="mb-2 capitalize">{difficulty}</div>
+                    <div className="mb-2 capitalize dark:text-gray-300">{difficulty}</div>
                     <div
-                      className="relative h-2 bg-gray-200 rounded-full cursor-pointer"
+                      className="relative h-2 bg-gray-200 dark:bg-gray-600 rounded-full cursor-pointer"
                       onClick={(e) => {
                         const rect = e.currentTarget.getBoundingClientRect();
                         const x = e.clientX - rect.left;
@@ -527,32 +558,15 @@ export default function CreateAssessment() {
                         style={{ width: `${percentage}%` }}
                       />
                       <div
-                        className="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-white border-2 border-blue-600 rounded-full cursor-grab"
+                        className="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-white dark:bg-gray-300 border-2 border-blue-600 dark:border-blue-500 rounded-full cursor-grab"
                         style={{ left: `${percentage}%`, transform: `translate(-50%, -50%)` }}
-                        onMouseDown={(e) => {
-                          const slider = e.currentTarget.parentElement;
-                          const handleMouseMove = (e: MouseEvent) => {
-                            const rect = slider!.getBoundingClientRect();
-                            const x = e.clientX - rect.left;
-                            const newPercentage = Math.max(0, Math.min(100, Math.round((x / rect.width) * 100)));
-                            handleDifficultySliderChange(difficulty as 'easy' | 'medium' | 'hard', newPercentage);
-                          };
-
-                          const handleMouseUp = () => {
-                            document.removeEventListener('mousemove', handleMouseMove);
-                            document.removeEventListener('mouseup', handleMouseUp);
-                          };
-
-                          document.addEventListener('mousemove', handleMouseMove);
-                          document.addEventListener('mouseup', handleMouseUp);
-                        }}
                       />
                     </div>
-                    <div className="mt-1 text-xs text-gray-500">{percentage}%</div>
+                    <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">{percentage}%</div>
                   </div>
                 );
               })}
-              <div className="text-center">Total</div>
+              <div className="text-center dark:text-gray-300">Total</div>
             </div>
 
             {/* Technology Rows */}
@@ -563,67 +577,60 @@ export default function CreateAssessment() {
                   category.questions.hard;
 
                 return (
-                  <div key={index} className="grid grid-cols-[2fr,1fr,1fr,1fr,auto] gap-4 items-center">
+                  <div
+                    key={index}
+                    className="grid grid-cols-[2fr,1fr,1fr,1fr,auto] gap-4 items-center"
+                  >
                     <div className="flex items-center gap-2">
-                      <span className="font-medium">{category.name}</span>
-                      {/* <span className="text-sm text-gray-500">({(100 / formData.categories.length).toFixed(0)}%)</span> */}
+                      <span className="font-medium dark:text-white">{category.name}</span>
                     </div>
-                    <div className="text-center">
-                      <Input
-                        type="number"
-                        min="0"
-                        value={category.questions.easy}
-                        onChange={(e) => handleQuestionCountChange(index, 'easy', e.target.value)}
-                        className="w-16 text-center mx-auto bg-gray-50"
-                      />
-                    </div>
-                    <div className="text-center">
-                      <Input
-                        type="number"
-                        min="0"
-                        value={category.questions.medium}
-                        onChange={(e) => handleQuestionCountChange(index, 'medium', e.target.value)}
-                        className="w-16 text-center mx-auto bg-gray-50"
-                      />
-                    </div>
-                    <div className="text-center">
-                      <Input
-                        type="number"
-                        min="0"
-                        value={category.questions.hard}
-                        onChange={(e) => handleQuestionCountChange(index, 'hard', e.target.value)}
-                        className="w-16 text-center mx-auto bg-gray-50"
-                      />
-                    </div>
-                    <div className="text-center font-medium">{total}</div>
+                    {['easy', 'medium', 'hard'].map((difficulty) => (
+                      <div key={difficulty} className="text-center">
+                        <Input
+                          type="number"
+                          min="0"
+                          value={category.questions[difficulty]}
+                          onChange={(e) => handleQuestionCountChange(index, difficulty as 'easy' | 'medium' | 'hard', e.target.value)}
+                          className="w-16 text-center mx-auto bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                        />
+                      </div>
+                    ))}
+                    <div className="text-center font-medium dark:text-white">{total}</div>
                   </div>
                 );
               })}
 
               {/* Totals Row */}
-              <div className="grid grid-cols-[2fr,1fr,1fr,1fr,auto] gap-4 items-center pt-4 border-t">
-                <div className="font-medium">Total</div>
-                <div className="text-center font-medium">
+              <div className="grid grid-cols-[2fr,1fr,1fr,1fr,auto] gap-4 items-center pt-4 border-t dark:border-gray-700">
+                <div className="font-medium dark:text-white">Total</div>
+                <div className="text-center font-medium dark:text-white">
                   {formData.categories.reduce((sum, cat) => sum + cat.questions.easy, 0)}
                 </div>
-                <div className="text-center font-medium">
+                <div className="text-center font-medium dark:text-white">
                   {formData.categories.reduce((sum, cat) => sum + cat.questions.medium, 0)}
                 </div>
-                <div className="text-center font-medium">
+                <div className="text-center font-medium dark:text-white">
                   {formData.categories.reduce((sum, cat) => sum + cat.questions.hard, 0)}
                 </div>
-                <div className="text-center font-medium text-blue-600">
+                <div className="text-center font-medium text-blue-600 dark:text-blue-400">
                   {calculateTotalSum()}
                 </div>
               </div>
             </div>
           </CardContent>
-          <CardFooter className="flex justify-end gap-4">
-            <Button variant="outline" onClick={handlePreviousStep}>
+          <CardFooter className="flex flex-col sm:flex-row justify-end gap-4">
+            <Button
+              variant="outline"
+              onClick={handlePreviousStep}
+              className="dark:border-gray-600 dark:text-white dark:hover:bg-gray-700"
+            >
               <ArrowLeft className="mr-2 h-4 w-4" />
               Previous
             </Button>
-            <Button onClick={handleNextStep}>
+            <Button
+              onClick={handleNextStep}
+              className="dark:bg-blue-600 dark:hover:bg-blue-700"
+            >
               Next
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
@@ -631,37 +638,39 @@ export default function CreateAssessment() {
         </Card>
       )}
       {step === 3 && (
-        <Card className="max-h-[80vh] overflow-y-auto">
+        <Card className="max-h-[80vh] overflow-y-auto dark:bg-gray-800 dark:border-gray-700">
           <CardHeader className="p-4">
-            <CardTitle className="font-bold text-lg">Assessment Summary</CardTitle>
-            <CardDescription className="text-sm">Review and confirm your assessment details</CardDescription>
+            <CardTitle className="font-bold text-lg dark:text-white">Assessment Summary</CardTitle>
+            <CardDescription className="text-sm dark:text-gray-300">
+              Review and confirm your assessment details
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4 p-4">
             {/* Basic Info Section */}
             <div className="space-y-2">
-              <div className="flex items-center justify-between pb-2 border-b border-gray-200">
-                <h3 className="text-base font-semibold text-gray-900">Basic Information</h3>
+              <div className="flex items-center justify-between pb-2 border-b border-gray-200 dark:border-gray-600">
+                <h3 className="text-base font-semibold text-gray-900 dark:text-white">Basic Information</h3>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => setStep(1)}
-                  className="text-blue-600 hover:text-blue-700 text-sm"
+                  className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 text-sm"
                 >
                   Edit
                 </Button>
               </div>
               <div className="grid gap-2">
                 <div>
-                  <Label className="text-xs text-gray-500">Assessment Name</Label>
-                  <p className="mt-1 text-sm font-medium text-gray-900">{formData.name}</p>
+                  <Label className="text-xs text-gray-500 dark:text-gray-400">Assessment Name</Label>
+                  <p className="mt-1 text-sm font-medium text-gray-900 dark:text-white">{formData.name}</p>
                 </div>
                 <div>
-                  <Label className="text-xs text-gray-500">Selected Categories</Label>
+                  <Label className="text-xs text-gray-500 dark:text-gray-400">Selected Technologies</Label>
                   <div className="mt-1 flex flex-wrap gap-1">
                     {formData.categories.map((category) => (
                       <div
                         key={category.name}
-                        className="px-2 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-medium"
+                        className="px-2 py-1 bg-blue-50 dark:bg-blue-900 text-blue-700 dark:text-blue-200 rounded-full text-xs font-medium"
                       >
                         {category.name}
                       </div>
@@ -673,38 +682,38 @@ export default function CreateAssessment() {
 
             {/* Questions Distribution Section */}
             <div className="space-y-2">
-              <div className="flex items-center justify-between pb-2 border-b border-gray-200">
-                <h3 className="text-base font-semibold text-gray-900">Questions Distribution</h3>
+              <div className="flex items-center justify-between pb-2 border-b border-gray-200 dark:border-gray-600">
+                <h3 className="text-base font-semibold text-gray-900 dark:text-white">Questions Distribution</h3>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => setStep(2)}
-                  className="text-blue-600 hover:text-blue-700 text-sm"
+                  className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 text-sm"
                 >
                   Edit
                 </Button>
               </div>
-              <div className="overflow-hidden rounded-lg border border-gray-200">
+              <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-600">
                 <Table className="text-sm">
                   <TableHeader>
-                    <TableRow className="bg-gray-50">
-                      <TableHead className="w-[30%] p-2">Category</TableHead>
+                    <TableRow className="bg-gray-50 dark:bg-gray-700">
+                      <TableHead className="w-[30%] p-2 dark:text-white">Technology</TableHead>
                       <TableHead className="text-center p-2">
-                        <div className="px-2 py-1 bg-green-100 text-green-700 rounded-full inline-block text-xs">
+                        <div className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-200 rounded-full inline-block text-xs">
                           Easy ({calculateDifficultyPercentage('easy')}%)
                         </div>
                       </TableHead>
                       <TableHead className="text-center p-2">
-                        <div className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full inline-block text-xs">
+                        <div className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200 rounded-full inline-block text-xs">
                           Medium ({calculateDifficultyPercentage('medium')}%)
                         </div>
                       </TableHead>
                       <TableHead className="text-center p-2">
-                        <div className="px-2 py-1 bg-red-100 text-red-700 rounded-full inline-block text-xs">
+                        <div className="px-2 py-1 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200 rounded-full inline-block text-xs">
                           Hard ({calculateDifficultyPercentage('hard')}%)
                         </div>
                       </TableHead>
-                      <TableHead className="text-center p-2">Total</TableHead>
+                      <TableHead className="text-center p-2 dark:text-white">Total</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -714,27 +723,30 @@ export default function CreateAssessment() {
                         category.questions.hard;
 
                       return (
-                        <TableRow key={index} className="hover:bg-gray-50">
-                          <TableCell className="font-medium p-2">{category.name}</TableCell>
-                          <TableCell className="text-center p-2">{category.questions.easy}</TableCell>
-                          <TableCell className="text-center p-2">{category.questions.medium}</TableCell>
-                          <TableCell className="text-center p-2">{category.questions.hard}</TableCell>
-                          <TableCell className="text-center p-2 font-semibold">{total}</TableCell>
+                        <TableRow
+                          key={index}
+                          className="hover:bg-gray-50 dark:hover:bg-gray-600"
+                        >
+                          <TableCell className="font-medium p-2 dark:text-white">{category.name}</TableCell>
+                          <TableCell className="text-center p-2 dark:text-gray-300">{category.questions.easy}</TableCell>
+                          <TableCell className="text-center p-2 dark:text-gray-300">{category.questions.medium}</TableCell>
+                          <TableCell className="text-center p-2 dark:text-gray-300">{category.questions.hard}</TableCell>
+                          <TableCell className="text-center p-2 font-semibold dark:text-white">{total}</TableCell>
                         </TableRow>
                       );
                     })}
-                    <TableRow className="bg-gray-50 font-medium">
-                      <TableCell className="p-2">Total</TableCell>
-                      <TableCell className="text-center p-2">
+                    <TableRow className="bg-gray-50 dark:bg-gray-700 font-medium">
+                      <TableCell className="p-2 dark:text-white">Total</TableCell>
+                      <TableCell className="text-center p-2 dark:text-gray-300">
                         {formData.categories.reduce((sum, cat) => sum + cat.questions.easy, 0)}
                       </TableCell>
-                      <TableCell className="text-center p-2">
+                      <TableCell className="text-center p-2 dark:text-gray-300">
                         {formData.categories.reduce((sum, cat) => sum + cat.questions.medium, 0)}
                       </TableCell>
-                      <TableCell className="text-center p-2">
+                      <TableCell className="text-center p-2 dark:text-gray-300">
                         {formData.categories.reduce((sum, cat) => sum + cat.questions.hard, 0)}
                       </TableCell>
-                      <TableCell className="text-center p-2 text-blue-600">
+                      <TableCell className="text-center p-2 text-blue-600 dark:text-blue-400">
                         {calculateTotalSum()}
                       </TableCell>
                     </TableRow>
@@ -744,25 +756,29 @@ export default function CreateAssessment() {
             </div>
 
             {/* Target vs Selected Questions */}
-            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-              <div className="space-y-1">
-                <p className="text-xs text-gray-500">Target Questions</p>
-                <p className="text-sm font-semibold text-gray-900">{targetQuestions}</p>
+            <div className="flex flex-col sm:flex-row items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+              <div className="space-y-1 mb-2 sm:mb-0">
+                <p className="text-xs text-gray-500 dark:text-gray-400">Target Questions</p>
+                <p className="text-sm font-semibold text-gray-900 dark:text-white">{targetQuestions}</p>
               </div>
-              <div className="space-y-1 text-right">
-                <p className="text-xs text-gray-500">Selected Questions</p>
-                <p className="text-sm font-semibold text-blue-600">{calculateTotalSum()}</p>
+              <div className="space-y-1">
+                <p className="text-xs text-gray-500 dark:text-gray-400">Selected Questions</p>
+                <p className="text-sm font-semibold text-blue-600 dark:text-blue-400">{calculateTotalSum()}</p>
               </div>
             </div>
           </CardContent>
-          <CardFooter className="flex justify-end gap-2 p-4">
-            <Button variant="outline" onClick={handlePreviousStep} className="text-sm">
+          <CardFooter className="flex flex-col sm:flex-row justify-end gap-2 p-4">
+            <Button
+              variant="outline"
+              onClick={handlePreviousStep}
+              className="text-sm dark:border-gray-600 dark:text-white dark:hover:bg-gray-700"
+            >
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back
             </Button>
             <Button
               onClick={handleSubmit}
-              className="bg-blue-600 hover:bg-blue-700 text-white text-sm"
+              className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-white text-sm"
             >
               Create Assessment
             </Button>

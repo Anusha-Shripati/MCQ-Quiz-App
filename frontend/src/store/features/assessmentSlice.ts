@@ -18,6 +18,7 @@ export interface Assessment {
   createdBy: string;
   createdDate: string;
   totalQuestions: number;
+  duration: number;
   technologies: Technology[];
 }
 
@@ -36,6 +37,7 @@ const initialState: AssessmentState = {
       createdBy: "MihirBhai",
       createdDate: "20-Jan-2025",
       totalQuestions: 60,
+      duration: 60,
       technologies: [
         { name: "MongoDB", percentage: 25, questions: { easy: 5, medium: 5, hard: 5 } },
         { name: "ExpressJS", percentage: 25, questions: { easy: 5, medium: 5, hard: 5 } },

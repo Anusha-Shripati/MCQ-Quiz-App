@@ -32,6 +32,7 @@ interface CandidateDetails {
 interface Candidate {
   id: number;
   date: string;
+  testDate: string;
   name: string;
   email: string;
   technology: string;
@@ -39,8 +40,8 @@ interface Candidate {
   assessment: string;
   result: string;
   created: string;
-  testStartDate: string; // New field
-  testEndDate: string;   // New field
+  testStartTime: string;
+  testEndTime: string;
   details: CandidateDetails;
 }
 
@@ -163,7 +164,7 @@ export default function Candidates() {
 
   const columns = useMemo(
     () => [
-      { key: "date", header: "Date" },
+      { key: "testDate", header: "Test Date" },
       { key: "name", header: "Name" },
       { key: "email", header: "Email" },
       { key: "technology", header: "Technology" },
@@ -232,11 +233,11 @@ export default function Candidates() {
             <Tooltip>
               <TooltipTrigger>
                 <p className="text-lg font-medium text-gray-700 dark:text-gray-300">
-                  {formatTestDuration(row.testStartDate, row.testEndDate)}
+                  {formatTestDuration(row.testStartTime, row.testEndTime)}
                 </p>
               </TooltipTrigger>
               <TooltipContent className="bg-gray-800 text-white p-2 rounded shadow-lg">
-                {formatTestDateRange(row.testStartDate, row.testEndDate)}
+                {formatTestDateRange(row.testStartTime, row.testEndTime)}
               </TooltipContent>
             </Tooltip>
           </div>

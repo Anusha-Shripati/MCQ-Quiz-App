@@ -24,7 +24,7 @@ const CreateCategory = ({setCategoriesArray}) => {
           className="w-[200px] border-gray-300"
         />
         <Button
-          className="bg-primary text-primary-foreground hover:bg-primary/90"
+          className="bg-blue-600 text-primary-foreground hover:bg-primary/90"
           onClick={handleAddCategory}
         >
           Create Category
@@ -39,7 +39,7 @@ const CreateCategory = ({setCategoriesArray}) => {
           <div className="space-y-4">
             <Input placeholder="Category Name" className="border-gray-300" onChange={(e) => setCategoryName(e.target.value)}/>
             <Button
-              className="bg-primary text-primary-foreground hover:bg-primary/90"
+              className="bg-blue-600 text-primary-foreground hover:bg-primary/90"
               onClick={() => {
                 handleCloseModal()
                 setCategoriesArray((prev: any) => [...prev, { name: categoryName, easy: 0, medium: 0, hard: 0 }])

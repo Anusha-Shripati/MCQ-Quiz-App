@@ -4,9 +4,9 @@ import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
 import Select from "react-select";
 import { AVAILABLE_CATEGORIES } from "@/shared/constants/data";
-import {
-  updateTechnologyQuestions,
-  removeTechnology,
+import { 
+  updateTechnologyQuestions, 
+  removeTechnology, 
   addTechnology,
   type Technology,
   updateAssessment,
@@ -132,11 +132,11 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
 
   const handleAddTechnology = () => {
     if (newTechName.trim()) {
-      dispatch(addTechnology({
+      dispatch(addTechnology({ 
         assessmentId: localAssessment.id,
         technology: {
-          name: newTechName.trim(),
-          percentage: 25
+        name: newTechName.trim(), 
+        percentage: 25 
         }
       }));
       setNewTechName("");
@@ -213,7 +213,7 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
 
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-800">
+    <div className="min-h-screen dark:bg-gray-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
           <div className="px-6 py-5 border-b border-gray-200 dark:border-gray-700">
@@ -227,14 +227,14 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
                 </p>
               </div>
               <div className="flex gap-3">
-                <Button
-                  variant="outline"
+                <Button 
+                  variant="destructive" 
                   onClick={onCancel}
-                  className="hover:bg-gray-50 dark:hover:bg-gray-700"
+                  className="hover:bg-red-600 dark:hover:bg-gray-700"
                 >
                   Cancel
                 </Button>
-                <Button
+                <Button 
                   onClick={handleSaveChanges}
                   className="bg-blue-600 hover:bg-blue-700 text-white"
                 >
@@ -302,15 +302,15 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
 
               <div className="flex flex-wrap gap-2">
                 {localTechnologies.map((tech) => (
-                  <div
-                    key={tech.name}
+                  <div 
+                    key={tech.name} 
                     className="flex items-center bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 
                                dark:hover:bg-gray-600 transition-colors rounded-full px-4 py-2"
                   >
                     <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                       {tech.name}
                     </span>
-                    <button
+                    <button 
                       onClick={() => handleRemoveTechnology(tech.name)}
                       className="ml-2 text-gray-400 hover:text-gray-600 dark:text-gray-500 
                                  dark:hover:text-gray-300"
@@ -320,11 +320,11 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
                   </div>
                 ))}
               </div>
-            </div>
+              </div>
 
-            {/* Questions Grid */}
-            <div className="mt-8">
-              {/* Headers */}
+              {/* Questions Grid */}
+              <div className="mt-8">
+                {/* Headers */}
               <div className="grid grid-cols-1 md:grid-cols-[2fr,1fr,1fr,1fr,1fr] gap-4 md:gap-6 mb-6">
                 <div className="text-sm font-medium text-gray-700 dark:text-gray-300">Technology</div>
                 {['easy', 'medium', 'hard'].map((difficulty) => {
@@ -391,61 +391,61 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
                   );
                 })}
                 <div className="text-sm font-medium text-gray-700 dark:text-gray-300 text-center">Total</div>
-              </div>
+                </div>
 
-              {/* Technology Rows */}
-              <div className="space-y-4">
+                {/* Technology Rows */}
+                <div className="space-y-4">
                 {localTechnologies.map((tech) => (
-                  <div
-                    key={tech.name}
-                    className="grid grid-cols-[2fr,1fr,1fr,1fr,1fr] gap-6 items-center py-3 border-b border-gray-100 last:border-0"
-                  >
+                    <div 
+                      key={tech.name} 
+                      className="grid grid-cols-[2fr,1fr,1fr,1fr,1fr] gap-6 items-center py-3 border-b border-gray-100 last:border-0"
+                    >
                     <div className="text-gray-900 dark:text-gray-300">
-                      {tech.name}
-                      <span className="ml-1 text-sm text-gray-500">({tech.percentage}%)</span>
-                    </div>
-                    <input
-                      type="number"
+                        {tech.name} 
+                        <span className="ml-1 text-sm text-gray-500">({tech.percentage}%)</span>
+                      </div>
+                      <input
+                        type="number"
                       min="0"
                       max={localAssessment.totalQuestions}
-                      value={tech.questions.easy}
-                      onChange={(e) => handleQuestionChange(tech.name, 'easy', parseInt(e.target.value))}
+                        value={tech.questions.easy}
+                        onChange={(e) => handleQuestionChange(tech.name, 'easy', parseInt(e.target.value))}
                       className="w-20 px-3 py-2 text-center rounded-md border border-gray-300 
                                  focus:ring-2 focus:ring-blue-500 focus:border-blue-500
                                  dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
-                    />
-                    <input
-                      type="number"
-                      value={tech.questions.medium}
-                      onChange={(e) => handleQuestionChange(tech.name, 'medium', parseInt(e.target.value))}
-                      className="w-20 px-3 py-2 text-center rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                    <input
-                      type="number"
-                      value={tech.questions.hard}
-                      onChange={(e) => handleQuestionChange(tech.name, 'hard', parseInt(e.target.value))}
-                      className="w-20 px-3 py-2 text-center rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
+                      />
+                      <input
+                        type="number"
+                        value={tech.questions.medium}
+                        onChange={(e) => handleQuestionChange(tech.name, 'medium', parseInt(e.target.value))}
+                        className="dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 w-20 px-3 py-2 text-center rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      />
+                      <input
+                        type="number"
+                        value={tech.questions.hard}
+                        onChange={(e) => handleQuestionChange(tech.name, 'hard', parseInt(e.target.value))}
+                        className="dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 w-20 px-3 py-2 text-center rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      />
                     <div className="text-center font-medium text-gray-900 dark:text-gray-300">
-                      {tech.questions.easy + tech.questions.medium + tech.questions.hard}
+                        {tech.questions.easy + tech.questions.medium + tech.questions.hard}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
 
-                {/* Totals Row */}
+                  {/* Totals Row */}
                 <div className="grid grid-cols-[2fr,1fr,1fr,1fr,1fr] gap-6 items-center pt-4 border-t border-gray-200 dark:border-gray-700">
                   <div className="font-medium text-gray-900 dark:text-gray-300">Total</div>
                   <div className="text-center font-medium text-gray-900 dark:text-gray-300">
                     {localTechnologies.reduce((sum, tech) => sum + tech.questions.easy, 0)}
-                  </div>
+                    </div>
                   <div className="text-center font-medium text-gray-900 dark:text-gray-300">
                     {localTechnologies.reduce((sum, tech) => sum + tech.questions.medium, 0)}
-                  </div>
+                    </div>
                   <div className="text-center font-medium text-gray-900 dark:text-gray-300">
                     {localTechnologies.reduce((sum, tech) => sum + tech.questions.hard, 0)}
-                  </div>
-                  <div className="text-center font-medium text-blue-600">
-                    {totalQuestions}
+                    </div>
+                    <div className="text-center font-medium text-blue-600">
+                      {totalQuestions}
                   </div>
                 </div>
               </div>

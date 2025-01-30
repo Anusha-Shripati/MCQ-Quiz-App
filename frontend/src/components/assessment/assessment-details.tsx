@@ -23,6 +23,7 @@ interface AssessmentItemProps {
   title: string;
   createdBy: string;
   createdDate: string;
+  duration: number;
   technologies?: Technology[];
   isExpanded: boolean;
   onToggle: () => void;
@@ -33,6 +34,7 @@ function AssessmentItem({
   title,
   createdBy,
   createdDate,
+  duration,
   technologies,
   isExpanded,
   onToggle,
@@ -45,6 +47,9 @@ function AssessmentItem({
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{title}</h3>
           <p className="text-sm text-gray-500 mt-1 dark:text-gray-400">
             Created by <span className="text-gray-700 font-medium dark:text-gray-300">{createdBy}</span> on {createdDate}
+          </p>
+          <p className="text-sm text-gray-500 mt-1 dark:text-gray-400">
+            Duration: <span className="font-medium dark:text-gray-300">{duration} minutes</span>
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -173,6 +178,7 @@ export default function AssessmentDetails() {
           title={assessment.title}
           createdBy={assessment.createdBy}
           createdDate={assessment.createdDate}
+          duration={assessment.duration}
           technologies={assessment.technologies}
           isExpanded={expandedId === assessment.id}
           onToggle={() => setExpandedId(expandedId === assessment.id ? "" : assessment.id)}

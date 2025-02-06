@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft } from "lucide-react";
+// import { ChevronLeft } from "lucide-react";
 import Select from "react-select";
 import { AVAILABLE_CATEGORIES } from "@/shared/constants/data";
 import { 
-  updateTechnologyQuestions, 
+  // updateTechnologyQuestions, 
   removeTechnology, 
   addTechnology,
   type Technology,
@@ -40,8 +40,8 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
   const dispatch = useDispatch();
   const [localAssessment, setLocalAssessment] = useState(assessment);
   const [localTechnologies, setLocalTechnologies] = useState(assessment.technologies);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  // const [isLoading, setIsLoading] = useState(false);
+  // const [error, setError] = useState<string | null>(null);
   const [newTechName, setNewTechName] = useState("");
 
   useEffect(() => {

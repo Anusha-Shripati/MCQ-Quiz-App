@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { LuLogOut } from "react-icons/lu";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation"; // Import usePathname
@@ -17,10 +16,21 @@ import {
 import { Button } from "@/components/ui/button";
 import UserAvatar from "@/components/common/user-avatar";
 import { ThemeToggle } from "@/components/common/theme-toggle";
+import { 
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { useAuth } from "@/context/AuthContext";
+import { LogOut } from "lucide-react";
+import { useRouter } from "next/navigation";
+
 
 export default function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const sidebarRef = useRef<HTMLDivElement | null>(null);
+  const { logout } = useAuth();
+  const router = useRouter();
 
   const pathname = usePathname();
 
@@ -29,8 +39,10 @@ export default function Sidebar() {
   };
 
   const handleLogout = () => {
+    logout();
+    router.push("/");
   };
-
+  
   return (
     <aside
       ref={sidebarRef}
@@ -89,12 +101,19 @@ export default function Sidebar() {
           <div className="flex items-center justify-between w-full">
             <UserAvatar isCollapsed={isCollapsed} />
             {!isCollapsed && (
-              <Button
-                onClick={handleLogout}
-                className="flex items-center justify-center p-2 text-white rounded-lg"
-              >
-                <LuLogOut size={24} />
-              </Button>
+               <Tooltip>
+               <TooltipTrigger asChild>
+                 <button
+                   onClick={handleLogout}
+                   className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                 >
+                   <LogOut className="h-5 w-5 text-gray-600 hover:text-gray-900" />
+                 </button>
+               </TooltipTrigger>
+               <TooltipContent>
+                 <p>Logout</p>
+               </TooltipContent>
+             </Tooltip>
             )}
           </div>
         </div>

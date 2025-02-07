@@ -1,7 +1,6 @@
 "use client";
 
 import React, { Suspense, useMemo, useState, useEffect } from "react";
-// import { Button } from "@/components/ui/button";
 import { FiCopy, FiMail } from "react-icons/fi";
 import toast from "react-hot-toast";
 import dynamic from "next/dynamic";
@@ -11,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { PaginationControls } from "@/components/candidates/pagination-controls";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useRouter, useSearchParams, usePathname } from "next/navigation"; 
+import type { CandidateDetails } from "@/types/candidate.types";
 const FiltersCandidates = dynamic(() => import("@/components/candidates/candidates-filters"), {
   suspense: true,
 });
@@ -20,19 +20,9 @@ const ReusableTable = dynamic(() => import("@/components/candidates/candidates-t
 
 
 // Define types for Candidate and CandidateDetails
-interface CandidateDetails {
-  totalPercentage: string;
-  categories: {
-    [key: string]: string;
-  };
-  createdBy: string;
-  createdOn: string;
-}
-
 interface Candidate {
   id: number;
   date: string;
-  testDate: string;
   name: string;
   email: string;
   technology: string;
@@ -54,9 +44,9 @@ export default function Candidates() {
   const [openCreateCandidate, setOpenCreateCandidate] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
-  const [filteredCandidates, setFilteredCandidates] = useState(candidatesList);
+  const [filteredCandidates, ] = useState(candidatesList);
 
-  const router = useRouter();
+  const router = useRouter(); 
   const pathname = usePathname();
   const searchParams = useSearchParams();
  
@@ -102,11 +92,6 @@ export default function Candidates() {
   };
 
 
-  // Sample candidate data
-
-  // const candidates = useMemo(() =>
-  //   candidatesList
-  //   , [])
 
   const columns = useMemo(
     () => [

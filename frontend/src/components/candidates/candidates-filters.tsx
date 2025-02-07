@@ -7,30 +7,13 @@ import { SearchFilter } from "./filters/search-filter";
 import { TechnologyFilter } from "./filters/technology-filter";
 import { FilterOptions } from "./filters/filter-options";
 import { AssessmentFilter } from "./filters/assessment-filter";
+import { assessmentOptions, technologyOptions } from "@/shared/constants/data";
 
-const technologyOptions: TechnologyOption[] = [
-  { value: 'react', label: 'React' },
-  { value: 'angular', label: 'Angular' },
-  { value: 'vue', label: 'Vue' },
-  { value: 'node', label: 'Node.js' },
-  { value: 'python', label: 'Python' },
-  { value: 'java', label: 'Java' },
-  { value: 'mongodb', label: 'MongoDB' },
-];
-
-const assessmentOptions: StatusOption[] = [
-  { value: 'completed', label: 'Completed' },
-  { value: 'pending', label: 'Pending' },
-  { value: 'not-started', label: 'Not Started' },
-  { value: 'expired', label: 'Expired' },
-  { value: 'in-progress', label: 'In Progress' },
-];
 
 const Filters = memo(({ candidates = [] }: FiltersProps) => {
   const [activeFilter, setActiveFilter] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [technologyFilter, setTechnologyFilter] = useState<TechnologyOption[]>([]);
-  const [experienceFilter, setExperienceFilter] = useState<[string, string]>(["", ""]);
   const [assessmentFilter, setAssessmentFilter] = useState<StatusOption[]>([]);
   const [dateRange, setDateRange] = useState<[string, string]>(["", ""]);
 
@@ -41,7 +24,6 @@ const Filters = memo(({ candidates = [] }: FiltersProps) => {
   const clearAllFilters = () => {
     setSearchQuery("");
     setTechnologyFilter([]);
-    setExperienceFilter(["", ""]);
     setAssessmentFilter([]);
     setDateRange(["", ""]);
     setActiveFilter("");
@@ -49,10 +31,7 @@ const Filters = memo(({ candidates = [] }: FiltersProps) => {
 
   return (
     <section className="w-full p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
-      {/* First Row - Title, Count, and Clear Button */}
-     
-
-      {/* Second Row - Filter Controls */}
+    
       <div className="flex flex-col md:flex-row md:items-center gap-2 flex-wrap mb-2">
         <SearchFilter searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
         
@@ -71,7 +50,6 @@ const Filters = memo(({ candidates = [] }: FiltersProps) => {
         <FilterOptions 
           activeFilter={activeFilter}
           handleOpenFilter={handleOpenFilter}
-          experienceFilter={experienceFilter}
           assessmentFilter={assessmentFilter}
           dateRange={dateRange}
           setAssessmentFilter={setAssessmentFilter}

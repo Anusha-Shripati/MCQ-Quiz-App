@@ -10,7 +10,7 @@ export interface CandidateDetails {
 
 export interface Candidate {
   id: number;
-  date: string;
+  testDate: string;
   name: string;
   email: string;
   technology: string;

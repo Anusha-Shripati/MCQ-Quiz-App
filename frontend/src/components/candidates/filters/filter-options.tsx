@@ -4,35 +4,23 @@ import { Input } from "@/components/ui/input";
 import DateRangePicker from "../date-range-picker";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
-import Select from "react-select";
 
 interface StatusOption {
   value: string;
   label: string;
 }
 
-const statusOptions: StatusOption[] = [
-  { value: 'completed', label: 'Completed' },
-  { value: 'pending', label: 'Pending' },
-  { value: 'not-started', label: 'Not Started' },
-];
-
 interface FilterOptionsProps {
   activeFilter: string;
   handleOpenFilter: (filter: string) => void;
-  experienceFilter: [string, string];
-  assessmentFilter: StatusOption[];
-  dateRange: [string, string];
-  setAssessmentFilter: (filter: StatusOption[]) => void;
+  assessmentFilter?: StatusOption[];
+  dateRange?: [string, string];
+  setAssessmentFilter?: (filter: StatusOption[]) => void;
 }
 
 export function FilterOptions({
   activeFilter,
-  handleOpenFilter,
-  experienceFilter,
-  assessmentFilter,
-  dateRange,
-  setAssessmentFilter
+  handleOpenFilter
 }: FilterOptionsProps) {
   const renderFilterContent = (filter: string) => {
     switch (filter) {
@@ -69,7 +57,7 @@ export function FilterOptions({
 
   return (
     <div className="flex gap-2 flex-wrap md:flex-nowrap shrink-0">
-      {["Experience", "Created"].map((filter) => (
+      {["Created"].map((filter) => (
         <div key={filter} className="relative">
           <Button
             variant="outline"

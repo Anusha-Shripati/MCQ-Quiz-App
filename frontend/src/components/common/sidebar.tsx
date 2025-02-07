@@ -103,12 +103,12 @@ export default function Sidebar() {
             {!isCollapsed && (
                <Tooltip>
                <TooltipTrigger asChild>
-                 <button
+                 <Button
                    onClick={handleLogout}
                    className="p-2 hover:bg-gray-100 rounded-full transition-colors"
                  >
                    <LogOut className="h-5 w-5 text-gray-600 hover:text-gray-900" />
-                 </button>
+                 </Button>
                </TooltipTrigger>
                <TooltipContent>
                  <p>Logout</p>

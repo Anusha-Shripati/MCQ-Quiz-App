@@ -1,6 +1,7 @@
 import { Input } from "../../ui/input";
 import { Search, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 interface SearchFilterProps {
   searchQuery: string;
@@ -25,12 +26,12 @@ export function SearchFilter({ searchQuery, setSearchQuery }: SearchFilterProps)
         )}
       />
       {searchQuery && (
-        <button
+        <Button
           onClick={() => setSearchQuery("")}
           className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
         >
           <X className="h-4 w-4" />
-        </button>
+        </Button>
       )}
     </div>
   );

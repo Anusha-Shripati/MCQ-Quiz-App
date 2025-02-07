@@ -3,6 +3,7 @@ import Link from "next/link";
 import React, { useState } from "react";
 // import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+import { Button } from "@/components/ui/button";
 
 export default function Home() {
   // const router = useRouter();
@@ -67,13 +68,13 @@ export default function Home() {
         />
       </div>
 
-      <button
+      <Button
         type="submit"
         disabled={loading}
         className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded disabled:bg-gray-400"
       >
         {loading ? "Logging in..." : "Login"}
-      </button>
+      </Button>
 
       <div className="mt-4 text-center">
         <Link href="/forgot-password" className="text-blue-500 hover:underline">

@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
+import { cn } from "@/lib/utils";
 
 export default function Error({
   error,
@@ -20,9 +21,9 @@ export default function Error({
       <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
         Something went wrong!
       </h2>
-      <Button
+      <Button 
+        variant="primary"
         onClick={reset}
-        className="bg-blue-600 text-white hover:bg-blue-700"
       >
         Try again
       </Button>

@@ -11,6 +11,7 @@ import { PaginationControls } from "@/components/candidates/pagination-controls"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useRouter, useSearchParams, usePathname } from "next/navigation"; 
 import type { CandidateDetails } from "@/types/candidate.types";
+import { Button } from "@/components/ui/button";
 const FiltersCandidates = dynamic(() => import("@/components/candidates/candidates-filters"), {
   suspense: true,
 });
@@ -116,7 +117,7 @@ export default function Candidates() {
         header: "Share",
         render: () => (
           <div className="flex items-center gap-2">
-            <button
+            <Button
               onClick={(e) => {
                 e.stopPropagation();
                 navigator.clipboard.writeText("https://example.com/candidate-link");
@@ -125,8 +126,8 @@ export default function Candidates() {
               className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all duration-200"
             >
               <FiCopy className="h-5 w-5 text-gray-700 dark:text-gray-300" />
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={(e) => {
                 e.stopPropagation();
                 window.location.href = "mailto:candidate@example.com";
@@ -134,7 +135,7 @@ export default function Candidates() {
               className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all duration-200"
             >
               <FiMail className="h-5 w-5 text-gray-700 dark:text-gray-300" />
-            </button>
+            </Button>
           </div>
         ),
       },

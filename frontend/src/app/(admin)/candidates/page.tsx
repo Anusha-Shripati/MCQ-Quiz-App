@@ -1,6 +1,6 @@
 "use client";
 
-import React, { Suspense, useMemo, useState } from "react";
+import React, { Suspense, useMemo, useState, useEffect } from "react";
 // import { Button } from "@/components/ui/button";
 import { FiCopy, FiMail } from "react-icons/fi";
 import toast from "react-hot-toast";
@@ -10,6 +10,7 @@ import { candidatesList } from "@/shared/constants/data";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PaginationControls } from "@/components/candidates/pagination-controls";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { useRouter, useSearchParams, usePathname } from "next/navigation"; 
 const FiltersCandidates = dynamic(() => import("@/components/candidates/candidates-filters"), {
   suspense: true,
 });
@@ -53,7 +54,12 @@ export default function Candidates() {
   const [openCreateCandidate, setOpenCreateCandidate] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [filteredCandidates, setFilteredCandidates] = useState(candidatesList);
 
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+ 
   const totalItems = candidatesList.length;
   const currentPageStart = (currentPage - 1) * itemsPerPage + 1;
   const currentPageEnd = Math.min(currentPage * itemsPerPage, totalItems);
@@ -98,9 +104,9 @@ export default function Candidates() {
 
   // Sample candidate data
 
-  const candidates = useMemo(() =>
-    candidatesList
-    , [])
+  // const candidates = useMemo(() =>
+  //   candidatesList
+  //   , [])
 
   const columns = useMemo(
     () => [
@@ -220,6 +226,26 @@ export default function Candidates() {
       </div>
     ),
   };
+
+  // Add this function to handle query param updates
+  const updateQueryParams = (params: { page?: string; perPage?: string }) => {
+    const newParams = new URLSearchParams(searchParams.toString());
+    
+    if (params.page) newParams.set('page', params.page);
+    if (params.perPage) newParams.set('perPage', params.perPage);
+    
+    router.replace(`${pathname}?${newParams.toString()}`);
+  };
+
+  // Initialize state from query params
+  useEffect(() => {
+    const pageParam = searchParams.get('page');
+    const perPageParam = searchParams.get('perPage');
+    
+    if (pageParam) setCurrentPage(Number(pageParam));
+    if (perPageParam) setItemsPerPage(Number(perPageParam));
+  }, [searchParams]);
+
   return (
     // Main container
     <div className="p-4 sm:p-6 dark:bg-gray-900 min-h-screen">
@@ -236,7 +262,7 @@ export default function Candidates() {
 
       {/* Filters */}
       <Suspense fallback={<div>Loading filters...</div>}>
-        <FiltersCandidates candidates={candidates} />
+        <FiltersCandidates candidates={filteredCandidates} />
       </Suspense>
 
       {/* Candidate info table */}
@@ -265,6 +291,7 @@ export default function Candidates() {
             onValueChange={(value) => {
               setItemsPerPage(Number(value));
               setCurrentPage(1);
+              updateQueryParams({ perPage: value, page: '1' });
             }}
           >
             <SelectTrigger className="w-[80px]">
@@ -284,7 +311,10 @@ export default function Candidates() {
         currentPage={currentPage}
         totalItems={candidatesList.length}
         itemsPerPage={itemsPerPage}
-        onPageChange={setCurrentPage}
+        onPageChange={(page) => {
+          setCurrentPage(page);
+          updateQueryParams({ page: page.toString() });
+        }}
       />
 
     </div>

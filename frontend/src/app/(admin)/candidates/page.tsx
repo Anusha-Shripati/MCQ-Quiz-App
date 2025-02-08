@@ -123,6 +123,7 @@ export default function Candidates() {
                 navigator.clipboard.writeText("https://example.com/candidate-link");
                 toast.success("Link copied to clipboard!");
               }}
+              variant="ghost"
               className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all duration-200"
             >
               <FiCopy className="h-5 w-5 text-gray-700 dark:text-gray-300" />
@@ -132,6 +133,7 @@ export default function Candidates() {
                 e.stopPropagation();
                 window.location.href = "mailto:candidate@example.com";
               }}
+              variant="ghost"
               className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all duration-200"
             >
               <FiMail className="h-5 w-5 text-gray-700 dark:text-gray-300" />

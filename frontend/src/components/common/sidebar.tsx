@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useRef } from "react";
-
 import Link from "next/link";
 import { usePathname } from "next/navigation"; // Import usePathname
 import {
@@ -21,15 +20,17 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useAuth } from "@/context/AuthContext";
 import { LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useAppDispatch } from "@/store/hooks";
+import { logout } from "@/store/features/authSlice";
 
 
 export default function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const sidebarRef = useRef<HTMLDivElement | null>(null);
-  const { logout } = useAuth();
+  // const { logout } = useAuth();
+  const dispatch = useAppDispatch();
   const router = useRouter();
 
   const pathname = usePathname();
@@ -39,7 +40,7 @@ export default function Sidebar() {
   };
 
   const handleLogout = () => {
-    logout();
+    dispatch(logout());
     router.push("/");
   };
   

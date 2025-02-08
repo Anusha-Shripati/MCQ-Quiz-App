@@ -1,30 +1,25 @@
 "use client"
 import Link from "next/link";
 import React, { useState } from "react";
-// import { useRouter } from "next/navigation";
-import { useAuth } from "@/context/AuthContext";
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { Button } from "@/components/ui/button";
+import { loginUser } from '@/store/features/authSlice';
 
 export default function Home() {
-  // const router = useRouter();
-  const { login } = useAuth();
+  const dispatch = useAppDispatch();
+  const { loading, error } = useAppSelector((state) => state.auth);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setError("");
-
     try {
-      await login(email, password);
-      // Login successful, AuthContext will handle the redirection
-    } catch (err: any) {
-      setError(err.message || "Login failed");
-    } finally {
-      setLoading(false);
+      await dispatch(loginUser({ email, password })).unwrap();
+      // Force full page reload to sync middleware
+      window.location.href = '/dashboard';
+    } catch (err) {
+      // Error handled by Redux
+      throw err;
     }
   };
 
@@ -34,7 +29,7 @@ export default function Home() {
     <div className="text-6xl font-bold text-white mb-8">MCQ APP</div>
 
     <form onSubmit={handleLogin} className="bg-white p-8 rounded-lg shadow-md w-96">
-      <h2 className="text-2xl font-bold mb-6 text-center">Admin Login</h2>
+      <h2 className="text-2xl font-bold mb-6 text-center dark:text-black">Admin Login</h2>
 
       {error && (
         <div className="mb-4 p-2 bg-red-100 text-red-700 rounded">{error}</div>

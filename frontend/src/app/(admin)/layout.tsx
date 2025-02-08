@@ -1,7 +1,7 @@
 "use client";
-import { ReactNode, useEffect } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/context/AuthContext";
+import { useAppSelector } from "@/store/hooks";
 import Sidebar from "@/components/common/sidebar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import ClientWrapper from "@/components/ClientWrapper";
@@ -12,15 +12,17 @@ export default function AdminLayout({
   children: ReactNode;
 }) {
   const router = useRouter();
-  const { user, loading } = useAuth();
+  const { user, loading } = useAppSelector((state) => state.auth);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     if (!loading && !user) {
       router.push("/");
     }
   }, [user, loading, router]);
 
-  if (loading) {
+  if (!mounted || loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />

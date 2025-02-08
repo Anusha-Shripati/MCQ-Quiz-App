@@ -10,12 +10,10 @@ export function middleware(request: NextRequest) {
                       request.nextUrl.pathname.startsWith("/questions") ||
                       request.nextUrl.pathname.startsWith("/assessment");
 
-  // Redirect to login if accessing protected route without token
   if (isAdminRoute && !token) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 
-  // Redirect to dashboard if accessing login page with valid token
   if (isAuthPage && token) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }

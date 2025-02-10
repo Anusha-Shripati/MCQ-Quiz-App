@@ -10,3 +10,17 @@ interface QuestionCategory {
   medium: number;
   hard: number;
 }
+
+export interface Question {
+  id: number;
+  question: string;
+  options: string[];
+  correctAnswer: string;
+  difficulty: string;
+}
+
+export interface PaginationProps {
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (pageNumber: number) => void;
+}

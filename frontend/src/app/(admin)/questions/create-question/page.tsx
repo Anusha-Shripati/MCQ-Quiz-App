@@ -9,16 +9,17 @@ import { useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 // Define the Question type
-interface Question {
-    id: number;
-    type: 'multiple-choice' | 'radio-select' | 'fill-in-the-blanks' | 'code-snippet';
-    difficulty: 'easy' | 'medium' | 'hard';
-    question: string;
-    options?: string[]; // For multiple-choice and radio-select
-    correctOptions?: number[]; // Indices of correct options
-    answer?: string; // For fill-in-the-blanks
-    code?: string; // For code-snippet
-}
+type Question = {
+  id: number;
+  type: "multiple-choice" | "radio-select" | "fill-in-the-blanks" | "code-snippet";
+  difficulty: string;
+  question: string;
+  options?: string[];
+  correctOptions?: string[];
+  answer?: string;
+  code?: string;
+};
+
 
 const CreateQuestion: React.FC = () => {
     const [questions, setQuestions] = useState<Question[]>(CREATE_QUESTIONS_STATIC_LIST);
@@ -166,61 +167,3 @@ const CreateQuestion: React.FC = () => {
 };
 
 export default CreateQuestion;
-
-
-
-
-
-// import React from 'react'
-
-// const CreateQuestion = () => {
-//   return (
-//     // Main container
-//     <div className=''>
-//       {/* Header */}
-//       <div className=''>
-//          <div>
-//             React.js
-//          </div>
-//          <div>
-//             <button>Save</button>
-//          </div>
-//       </div>
-
-//       {/* Remaining body */}
-//       <div className=''>
-//         {/* Sidebar for questions no. list */}
-//         <div className=''>
-
-//         </div>
-
-//         {/* Questions list with data for real questions which can be edited */}
-//         <div className=''>
-
-//             {/* Card for each question */}
-//             <div className=''>
-//                 {/* Question head */}
-//                 <div className=''>
-
-//                 </div>
-
-//                 {/* Question title */}
-//                 <div className=''>
-
-//                 </div>
-
-//                 {/* Options for answer or other answer types */}
-//                 <div className=''>
-
-//                 </div>
-//             </div>
-
-//         </div>
-
-//       </div>
-//     </div>
-//   )
-// }
-
-// export default CreateQuestion
-

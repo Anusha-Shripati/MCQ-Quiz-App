@@ -80,7 +80,7 @@ export default function Home() {
 
     <div className="mt-8 text-center">
       <p className="text-white">
-        Don't have an account?{" "}
+        Don&apos;t have an account?{" "}
         <Link href="/register" className="text-blue-300 hover:underline">
           Contact Admin
         </Link>

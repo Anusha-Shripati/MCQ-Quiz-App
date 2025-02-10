@@ -33,10 +33,11 @@ export const loginUser = createAsyncThunk(
       const data = await response.json();
       
       if (response.ok && data.data.token) {
-        localStorage.setItem("token", data.data.token);
-        localStorage.setItem("email", data.data.email);
-        localStorage.setItem("role", data.data.role);
-        document.cookie = `token=${data.data.token}; path=/; max-age=86400`;
+        // ✅ Store entire data.data object
+        localStorage.setItem("user", JSON.stringify(data.data));
+        
+        // ✅ Also store token in cookies for server-side access
+        document.cookie = `token=${data.data.token}; path=/;`;
         
         return data.data;
       }
@@ -53,19 +54,21 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     initializeAuth: (state) => {
-      const token = localStorage.getItem("token");
-      const email = localStorage.getItem("email");
-      const role = localStorage.getItem("role");
+      const storedUser = localStorage.getItem("user");
       
-      if (token && email && role) {
-        state.user = { email, role, token };
+      if (storedUser) {
+        try {
+          state.user = JSON.parse(storedUser);
+        } catch (error) {
+          console.error("Error parsing stored user:", error);
+          localStorage.removeItem("user"); // Remove invalid data
+          state.user = null;
+        }
       }
       state.initializing = false;
     },
     logout: (state) => {
-      localStorage.removeItem("token");
-      localStorage.removeItem("email");
-      localStorage.removeItem("role");
+      localStorage.removeItem("user"); // Remove entire user object
       document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
       state.user = null;
       state.loading = false;

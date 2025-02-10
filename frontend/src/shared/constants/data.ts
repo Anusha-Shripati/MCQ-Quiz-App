@@ -1,3 +1,5 @@
+import { StatusOption, TechnologyOption } from "@/types/candidate.types";
+
 export const data = [
   {
     date: "18-Nov-24",
@@ -932,8 +934,13 @@ export default App;`,
       
     ];
 
+    export const steps = [
+      { number: 1, label: "Basic Info" },
+      { number: 2, label: "Questions" },
+      { number: 3, label: "Summary" }
+    ];
 
-   export const technologyOptions: TechnologyOption[] = [
+   export const technologyOptions: TechnologyOption[] = [ 
       { value: 'react', label: 'React' },
       { value: 'angular', label: 'Angular' },
       { value: 'vue', label: 'Vue' },

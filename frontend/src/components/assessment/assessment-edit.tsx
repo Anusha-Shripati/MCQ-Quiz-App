@@ -7,12 +7,11 @@ import { AVAILABLE_CATEGORIES } from "@/shared/constants/data";
 import { 
   // updateTechnologyQuestions, 
   removeTechnology, 
-  addTechnology,
   type Technology,
   updateAssessment,
 } from "@/store/features/assessmentSlice";
 import { toast } from "react-hot-toast";
-
+import { Input } from "../ui/input";
 interface Option {
   value: string;
   label: string;
@@ -40,9 +39,8 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
   const dispatch = useDispatch();
   const [localAssessment, setLocalAssessment] = useState(assessment);
   const [localTechnologies, setLocalTechnologies] = useState(assessment.technologies);
-  // const [isLoading, setIsLoading] = useState(false);
-  // const [error, setError] = useState<string | null>(null);
-  const [newTechName, setNewTechName] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     setLocalAssessment(assessment);
@@ -130,18 +128,6 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
     dispatch(removeTechnology({ assessmentId: localAssessment.id, techName }));
   };
 
-  const handleAddTechnology = () => {
-    if (newTechName.trim()) {
-      dispatch(addTechnology({ 
-        assessmentId: localAssessment.id,
-        technology: {
-        name: newTechName.trim(), 
-        percentage: 25 
-        }
-      }));
-      setNewTechName("");
-    }
-  };
 
   const handleTotalQuestionsChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = parseInt(event.target.value);
@@ -244,7 +230,7 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
           <div className="px-6 py-5">
             <div className="flex items-center space-x-4">
               <label htmlFor="total-questions" className="font-medium text-gray-700 dark:text-gray-300">Total Questions</label>
-              <input
+              <Input
                 type="number"
                 id="total-questions"
                 value={localAssessment.totalQuestions}

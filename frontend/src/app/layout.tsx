@@ -22,6 +22,9 @@ function AuthInitializer({ children }: { children: ReactNode }) {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning={true}>
+      <head>
+        <link rel="icon" type="image/png" href="/favicon.ico" />
+      </head>
       <body className={`flex min-h-screen relative ${nunito.className}`}>
         <Provider store={store}>
           <AuthInitializer>

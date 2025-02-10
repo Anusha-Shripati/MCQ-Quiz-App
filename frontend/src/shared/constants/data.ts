@@ -931,3 +931,9 @@ export default App;`,
       },
       
     ];
+
+    export const steps = [
+      { number: 1, label: "Basic Info" },
+      { number: 2, label: "Questions" },
+      { number: 3, label: "Summary" }
+    ];

@@ -8,8 +8,9 @@ export const Pagination = ({ currentPage, totalPages, onPageChange }: Pagination
     <div className="flex space-x-2">
       <Button
         disabled={currentPage === 1}
+        variant="ghost"
         onClick={() => onPageChange(currentPage - 1)}
-        className={`px-3 py-1 border rounded-md ${currentPage === 1 ? "text-gray-400 cursor-not-allowed" : "text-blue-600"}`}
+        className={`px-3 py-1 border rounded-md ${currentPage === 1 ? "text-gray-400 cursor-not-allowed" : "text-blue-600"} dark:bg-white`}
       >
         Prev
       </Button>
@@ -26,10 +27,11 @@ export const Pagination = ({ currentPage, totalPages, onPageChange }: Pagination
       ))}
       <Button
         disabled={currentPage === totalPages}
+        variant="ghost"
         onClick={() => onPageChange(currentPage + 1)}
         className={`px-3 py-1 border rounded-md ${
           currentPage === totalPages ? "text-gray-400 cursor-not-allowed" : "text-blue-600"
-        }`}
+        } dark:bg-white`}
       >
         Next
       </Button>

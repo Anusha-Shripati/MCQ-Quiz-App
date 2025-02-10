@@ -20,6 +20,7 @@ interface Technology {
 }
 
 interface AssessmentItemProps {
+  key:string,
   title: string;
   createdBy: string;
   createdDate: string;
@@ -28,9 +29,11 @@ interface AssessmentItemProps {
   isExpanded: boolean;
   onToggle: () => void;
   handleEdit: () => void;
+  handleDelete: (id:string) => void
 }
 
 function AssessmentItem({
+  key,
   title,
   createdBy,
   createdDate,
@@ -39,6 +42,7 @@ function AssessmentItem({
   isExpanded,
   onToggle,
   handleEdit,
+  handleDelete
 }: AssessmentItemProps) {
   return (
     <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-200 hover:shadow-md">
@@ -56,7 +60,7 @@ function AssessmentItem({
           <Button variant="ghost" size="icon" className="hover:bg-gray-100 dark:hover:bg-gray-700" onClick={handleEdit}>
             <Edit className="h-4 w-4 text-gray-600 dark:text-gray-300" />
           </Button>
-          <Button variant="ghost" size="icon" className="hover:bg-red-50 hover:text-red-600">
+          <Button variant="ghost" size="icon" className="hover:bg-red-50 hover:text-red-600" onClick={()=>handleDelete(key)}>
             <Trash2 className="h-4 w-4" />
           </Button>
           <Button 
@@ -168,6 +172,7 @@ export default function AssessmentDetails() {
       />
     ) : null;
   }
+  
 
   return (
     <div className="space-y-4">
@@ -182,6 +187,7 @@ export default function AssessmentDetails() {
           isExpanded={expandedId === assessment.id}
           onToggle={() => setExpandedId(expandedId === assessment.id ? "" : assessment.id)}
           handleEdit={() => handleEdit(assessment.id)}
+          handleDelete={handleDelete}
         />
       ))}
     </div>

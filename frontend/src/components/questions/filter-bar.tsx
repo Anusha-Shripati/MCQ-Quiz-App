@@ -28,7 +28,7 @@ export const FilterBar = ({
         <Input
           type="text"
           placeholder="Search questions..."
-          className="w-[300px] py-5"
+          className="w-[300px] py-5 dark:border-gray-400"
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
         />

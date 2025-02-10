@@ -11,6 +11,9 @@ export default async function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning={true}>
+      <head>
+        <link rel="icon" type="image/png" href="/favicon.ico" />
+      </head>
       <body className={`flex min-h-screen relative ${nunito.className}`}>
         <ThemeProvider
           attribute="class"

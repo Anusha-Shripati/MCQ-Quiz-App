@@ -33,10 +33,10 @@ export const loginUser = createAsyncThunk(
       const data = await response.json();
       
       if (response.ok && data.data.token) {
-        // ✅ Store entire data.data object
+        //  Store entire data.data object
         localStorage.setItem("user", JSON.stringify(data.data));
         
-        // ✅ Also store token in cookies for server-side access
+        // Also store token in cookies for server-side access
         document.cookie = `token=${data.data.token}; path=/;`;
         
         return data.data;

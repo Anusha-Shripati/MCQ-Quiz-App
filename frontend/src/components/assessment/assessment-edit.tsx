@@ -1,13 +1,10 @@
 import { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft } from "lucide-react";
 import Select from "react-select";
 import { AVAILABLE_CATEGORIES } from "@/shared/constants/data";
 import { 
-  updateTechnologyQuestions, 
   removeTechnology, 
-  addTechnology,
   type Technology,
   updateAssessment,
 } from "@/store/features/assessmentSlice";
@@ -42,7 +39,6 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
   const [localTechnologies, setLocalTechnologies] = useState(assessment.technologies);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [newTechName, setNewTechName] = useState("");
 
   useEffect(() => {
     setLocalAssessment(assessment);
@@ -130,18 +126,6 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
     dispatch(removeTechnology({ assessmentId: localAssessment.id, techName }));
   };
 
-  const handleAddTechnology = () => {
-    if (newTechName.trim()) {
-      dispatch(addTechnology({ 
-        assessmentId: localAssessment.id,
-        technology: {
-        name: newTechName.trim(), 
-        percentage: 25 
-        }
-      }));
-      setNewTechName("");
-    }
-  };
 
   const handleTotalQuestionsChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = parseInt(event.target.value);

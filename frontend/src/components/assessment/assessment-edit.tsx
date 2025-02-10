@@ -9,7 +9,7 @@ import {
   updateAssessment,
 } from "@/store/features/assessmentSlice";
 import { toast } from "react-hot-toast";
-
+import { Input } from "../ui/input";
 interface Option {
   value: string;
   label: string;
@@ -228,7 +228,7 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
           <div className="px-6 py-5">
             <div className="flex items-center space-x-4">
               <label htmlFor="total-questions" className="font-medium text-gray-700 dark:text-gray-300">Total Questions</label>
-              <input
+              <Input
                 type="number"
                 id="total-questions"
                 value={localAssessment.totalQuestions}

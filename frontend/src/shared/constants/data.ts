@@ -1,3 +1,5 @@
+import { StatusOption, TechnologyOption } from "@/types/candidate.types";
+
 export const data = [
   {
     date: "18-Nov-24",
@@ -937,3 +939,22 @@ export default App;`,
       { number: 2, label: "Questions" },
       { number: 3, label: "Summary" }
     ];
+
+   export const technologyOptions: TechnologyOption[] = [ 
+      { value: 'react', label: 'React' },
+      { value: 'angular', label: 'Angular' },
+      { value: 'vue', label: 'Vue' },
+      { value: 'node', label: 'Node.js' },
+      { value: 'python', label: 'Python' },
+      { value: 'java', label: 'Java' },
+      { value: 'mongodb', label: 'MongoDB' },
+    ];
+    
+   export const assessmentOptions: StatusOption[] = [
+      { value: 'completed', label: 'Completed' },
+      { value: 'pending', label: 'Pending' },
+      { value: 'not-started', label: 'Not Started' },
+      { value: 'expired', label: 'Expired' },
+      { value: 'in-progress', label: 'In Progress' },
+    ];
+    

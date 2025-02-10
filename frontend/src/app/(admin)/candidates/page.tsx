@@ -1,16 +1,17 @@
 "use client";
 
-import React, { Suspense, useMemo, useState } from "react";
-// import { Button } from "@/components/ui/button";
+import React, { Suspense, useMemo, useState, useEffect } from "react";
 import { FiCopy, FiMail } from "react-icons/fi";
 import toast from "react-hot-toast";
 import dynamic from "next/dynamic";
 import CreateCandidateDialog from "@/components/candidates/create-candidate-dialog";
 import { candidatesList } from "@/shared/constants/data";
-import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PaginationControls } from "@/components/candidates/pagination-controls";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { useRouter, useSearchParams, usePathname } from "next/navigation"; 
+import type { CandidateDetails } from "@/types/candidate.types";
+import { Button } from "@/components/ui/button";
 const FiltersCandidates = dynamic(() => import("@/components/candidates/candidates-filters"), {
   suspense: true,
 });
@@ -20,19 +21,9 @@ const ReusableTable = dynamic(() => import("@/components/candidates/candidates-t
 
 
 // Define types for Candidate and CandidateDetails
-interface CandidateDetails {
-  totalPercentage: string;
-  categories: {
-    [key: string]: string;
-  };
-  createdBy: string;
-  createdOn: string;
-}
-
 interface Candidate {
   id: number;
   date: string;
-  testDate: string;
   name: string;
   email: string;
   technology: string;
@@ -49,21 +40,18 @@ interface ExpandableRow {
   render: (row: Candidate) => React.ReactNode; // Function to render the expandable content
 }
 
-// interface Column {
-//   key: string; // Unique key for the column
-//   header: string; // Display name for the column header
-//   render?: (row: any) => JSX.Element; // Optional function to render custom content for the column
-// }
-
-
 export default function Candidates() {
 
   const [openCreateCandidate, setOpenCreateCandidate] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [filteredCandidates, ] = useState(candidatesList);
 
+  const router = useRouter(); 
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+ 
   const totalItems = candidatesList.length;
-  const totalPages = Math.ceil(totalItems / itemsPerPage);
   const currentPageStart = (currentPage - 1) * itemsPerPage + 1;
   const currentPageEnd = Math.min(currentPage * itemsPerPage, totalItems);
 
@@ -74,57 +62,6 @@ export default function Candidates() {
     return candidatesList.slice(startIndex, endIndex);
   }, [currentPage, itemsPerPage]);
 
-  // Pagination controls
-  const handlePageChange = (newPage: number) => {
-    setCurrentPage(Math.max(1, Math.min(newPage, totalPages)));
-  };
-
-  const renderPageNumbers = () => {
-    const pages = [];
-    const maxVisiblePages = 7;
-    let startPage = Math.max(1, currentPage - 3);
-    let endPage = Math.min(totalPages, currentPage + 3);
-
-    if (totalPages > maxVisiblePages) {
-      if (currentPage <= 4) {
-        endPage = maxVisiblePages;
-      } else if (currentPage >= totalPages - 3) {
-        startPage = totalPages - maxVisiblePages + 1;
-      }
-    }
-
-    for (let i = startPage; i <= endPage; i++) {
-      pages.push(
-        <Button
-          key={i}
-          variant={i === currentPage ? "default" : "outline"}
-          onClick={() => handlePageChange(i)}
-          className="mx-1 min-w-[2rem]"
-        >
-          {i}
-        </Button>
-      );
-    }
-
-    if (totalPages > maxVisiblePages) {
-      if (startPage > 1) {
-        pages.unshift(
-          <span key="start-ellipsis" className="px-3 py-1">
-            ...
-          </span>
-        );
-      }
-      if (endPage < totalPages) {
-        pages.push(
-          <span key="end-ellipsis" className="px-3 py-1">
-            ...
-          </span>
-        );
-      }
-    }
-
-    return pages;
-  };
 
   const formatTestDuration = (startDate: string, endDate: string): string => {
     const start = new Date(startDate);
@@ -156,11 +93,6 @@ export default function Candidates() {
   };
 
 
-  // Sample candidate data
-
-  const candidates = useMemo(() =>
-    candidatesList
-    , [])
 
   const columns = useMemo(
     () => [
@@ -185,25 +117,27 @@ export default function Candidates() {
         header: "Share",
         render: () => (
           <div className="flex items-center gap-2">
-            <button
+            <Button
               onClick={(e) => {
                 e.stopPropagation();
                 navigator.clipboard.writeText("https://example.com/candidate-link");
                 toast.success("Link copied to clipboard!");
               }}
+              variant="ghost"
               className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all duration-200"
             >
               <FiCopy className="h-5 w-5 text-gray-700 dark:text-gray-300" />
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={(e) => {
                 e.stopPropagation();
                 window.location.href = "mailto:candidate@example.com";
               }}
+              variant="ghost"
               className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all duration-200"
             >
               <FiMail className="h-5 w-5 text-gray-700 dark:text-gray-300" />
-            </button>
+            </Button>
           </div>
         ),
       },
@@ -280,6 +214,26 @@ export default function Candidates() {
       </div>
     ),
   };
+
+  // Add this function to handle query param updates
+  const updateQueryParams = (params: { page?: string; perPage?: string }) => {
+    const newParams = new URLSearchParams(searchParams.toString());
+    
+    if (params.page) newParams.set('page', params.page);
+    if (params.perPage) newParams.set('perPage', params.perPage);
+    
+    router.replace(`${pathname}?${newParams.toString()}`);
+  };
+
+  // Initialize state from query params
+  useEffect(() => {
+    const pageParam = searchParams.get('page');
+    const perPageParam = searchParams.get('perPage');
+    
+    if (pageParam) setCurrentPage(Number(pageParam));
+    if (perPageParam) setItemsPerPage(Number(perPageParam));
+  }, [searchParams]);
+
   return (
     // Main container
     <div className="p-4 sm:p-6 dark:bg-gray-900 min-h-screen">
@@ -293,6 +247,23 @@ export default function Candidates() {
           onOpenChange={setOpenCreateCandidate}
         />
       </div>
+
+      {/* Filters */}
+      <Suspense fallback={<div>Loading filters...</div>}>
+        <FiltersCandidates candidates={filteredCandidates} />
+      </Suspense>
+
+      {/* Candidate info table */}
+      <Suspense fallback={<div>Loading table...</div>}>
+        <ReusableTable
+          columns={columns}
+          rows={currentItems}
+          expandableRow={expandableRow}
+          className="mb-6 animate-in fade-in duration-300"
+          rowKey="id"
+
+        />
+      </Suspense>
 
       {/* Add results count */}
       <div className="flex flex-col sm:flex-row justify-between items-center mb-4 px-4">
@@ -308,6 +279,7 @@ export default function Candidates() {
             onValueChange={(value) => {
               setItemsPerPage(Number(value));
               setCurrentPage(1);
+              updateQueryParams({ perPage: value, page: '1' });
             }}
           >
             <SelectTrigger className="w-[80px]">
@@ -323,29 +295,14 @@ export default function Candidates() {
         </div>
       </div>
 
-
-      {/* Filters */}
-      <Suspense fallback={<div>Loading filters...</div>}>
-        <FiltersCandidates candidates={candidates} />
-      </Suspense>
-
-      {/* Candidate info table */}
-      <Suspense fallback={<div>Loading table...</div>}>
-        <ReusableTable
-          columns={columns}
-          rows={currentItems}
-          expandableRow={expandableRow}
-          className="mb-6 animate-in fade-in duration-300"
-          rowKey="id"
-
-        />
-      </Suspense>
-
       <PaginationControls
         currentPage={currentPage}
         totalItems={candidatesList.length}
         itemsPerPage={itemsPerPage}
-        onPageChange={setCurrentPage}
+        onPageChange={(page) => {
+          setCurrentPage(page);
+          updateQueryParams({ page: page.toString() });
+        }}
       />
 
     </div>

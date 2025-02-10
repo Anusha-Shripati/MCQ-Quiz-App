@@ -156,25 +156,6 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
               </div>
             ))}
 
-            {/* Buttons to add/remove optional options */}
-            {/* <div className="flex gap-2 mt-2">
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={removeOptionalOption}
-                disabled={(question.options?.length || 0) <= 4}
-              >
-                <Minus className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={addOptionalOption}
-                disabled={(question.options?.length || 0) >= 6}
-              >
-                <Plus className="h-4 w-4" />
-              </Button>
-            </div> */}
           </div>
         )}
 

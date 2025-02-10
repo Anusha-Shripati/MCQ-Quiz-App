@@ -81,3 +81,32 @@
   --border-color: #4b5563; /* Dark mode border */
   --highlight-color: #374151; /* Dark mode highlight */
 }
+
+
+.react-select-container .react-select__control--is-focused {
+  @apply ring-2 ring-ring ring-offset-2 ring-offset-background;
+}
+
+.react-select-container .react-select__menu {
+  @apply bg-popover border border-border;
+}
+
+.react-select-container .react-select__value-container {
+  @apply gap-1.5;
+}
+
+.react-select-container .react-select__input-container {
+  @apply text-foreground;
+}
+
+.react-select-container .react-select__multi-value {
+  @apply bg-accent text-accent-foreground;
+}
+
+.react-select-container .react-select__multi-value__label {
+  @apply text-accent-foreground px-1.5 py-0.5;
+}
+
+.react-select-container .react-select__multi-value__remove {
+  @apply hover:bg-destructive hover:text-destructive-foreground rounded-sm;
+}

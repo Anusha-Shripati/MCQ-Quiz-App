@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';  // Assuming you have the Input c
 import { format } from 'date-fns'; // For formatting date
 import { CalendarIcon } from 'lucide-react';
 import { Calendar } from '../ui/calendar';
+import { Button } from '../ui/button';
 
 // Define the DatePicker component
 const DatePicker: React.FC = () => {
@@ -45,12 +46,12 @@ const DatePicker: React.FC = () => {
         {/* Popover with Calendar */}
         <Popover>
           <PopoverTrigger asChild>
-            <button
+            <Button
               className="inline-flex items-center justify-center p-2 text-sm font-medium rounded-md border bg-white hover:bg-gray-100"
               aria-label="Pick a date"
             >
               <CalendarIcon className="w-5 h-5" />
-            </button>
+            </Button>
           </PopoverTrigger>
           <PopoverContent
             align="start"

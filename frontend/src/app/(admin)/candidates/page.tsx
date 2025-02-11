@@ -10,35 +10,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { PaginationControls } from "@/components/candidates/pagination-controls";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useRouter, useSearchParams, usePathname } from "next/navigation"; 
-import type { CandidateDetails } from "@/types/candidate.types";
+import type { Candidate } from "@/types/candidate.types";
 import { Button } from "@/components/ui/button";
+import type { TableProps, Column, ExpandableRow } from "@/components/candidates/candidates-table";
+// import { Candidate } from "@/types/candidate.types";
 const FiltersCandidates = dynamic(() => import("@/components/candidates/candidates-filters"), {
   suspense: true,
 });
-const ReusableTable = dynamic(() => import("@/components/candidates/candidates-table"), {
-  suspense: true,
-});
+const ReusableTable = dynamic(() => 
+  import("@/components/candidates/candidates-table").then(mod => 
+    mod.default as React.FC<TableProps<Candidate>>
+  )
+);
 
-
-// Define types for Candidate and CandidateDetails
-interface Candidate {
-  id: number;
-  date: string;
-  name: string;
-  email: string;
-  technology: string;
-  experience: string;
-  assessment: string;
-  result: string;
-  created: string;
-  testStartTime: string;
-  testEndTime: string;
-  details: CandidateDetails;
-}
-
-interface ExpandableRow {
-  render: (row: Candidate) => React.ReactNode; // Function to render the expandable content
-}
 
 export default function Candidates() {
 
@@ -94,7 +78,7 @@ export default function Candidates() {
 
 
 
-  const columns = useMemo(
+  const columns = useMemo<Array<Column<Candidate>>>(
     () => [
       { key: "testDate", header: "Test Date" },
       { key: "name", header: "Name" },
@@ -105,7 +89,7 @@ export default function Candidates() {
       {
         key: "result",
         header: "Result",
-        render: (row) => (
+        render: (row:Candidate) => (
           <span className={`font-semibold ${row.result === "Pass" ? "text-green-600" : "text-red-600"}`}>
             {row.result}
           </span>
@@ -142,11 +126,11 @@ export default function Candidates() {
         ),
       },
     ],
-    [] // Empty dependency array because the columns array is static
+    []
   );
 
-  const expandableRow: ExpandableRow = {
-    render: (row) => (
+  const expandableRow: ExpandableRow<Candidate> = {
+    render: (row: Candidate) => (
       <div className="border border-gray-200 rounded-lg p-4 space-y-6 transition-all duration-300 ease-in-out transform origin-top animate-in fade-in zoom-in-95">
         {/* Row Layout */}
         <div className="flex items-center justify-between">
@@ -154,7 +138,7 @@ export default function Candidates() {
           <div>
             <p className="text-sm text-gray-500 dark:text-gray-300">Result</p>
             <div className="flex items-center gap-2">
-              <p className="text-lg font-semibold text-blue-500">{row.details.totalPercentage}</p>
+              <p className="text-lg font-semibold text-blue-500">{row?.details?.totalPercentage}</p>
               <a href="#" className="text-sm text-blue-500 hover:underline">
                 View Answer
               </a>
@@ -167,11 +151,11 @@ export default function Candidates() {
             <Tooltip>
               <TooltipTrigger>
                 <p className="text-lg font-medium text-gray-700 dark:text-gray-300">
-                  {formatTestDuration(row.testStartTime, row.testEndTime)}
+                  {formatTestDuration(row?.testStartTime, row?.testEndTime)}
                 </p>
               </TooltipTrigger>
               <TooltipContent className="bg-gray-800 text-white p-2 rounded shadow-lg">
-                {formatTestDateRange(row.testStartTime, row.testEndTime)}
+                {formatTestDateRange(row?.testStartTime, row?.testEndTime)}
               </TooltipContent>
             </Tooltip>
           </div>
@@ -179,8 +163,8 @@ export default function Candidates() {
           {/* Created Section */}
           <div>
             <p className="text-sm text-gray-500 dark:text-gray-300">Created</p>
-            <p className="text-lg font-medium text-gray-700 dark:text-gray-300">{row.details.createdBy}</p>
-            <p className="text-sm text-gray-500 dark:text-gray-300">{row.details.createdOn}</p>
+            <p className="text-lg font-medium text-gray-700 dark:text-gray-300">{row?.details?.createdBy}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-300">{row?.details?.createdOn}</p>
           </div>
         </div>
 
@@ -191,7 +175,7 @@ export default function Candidates() {
               <tr className="dark:bg-gray-500 dark:text-white">
                 <th className="border border-gray-300 px-4 py-2 text-left">Total Percentage</th>
                 {/* Dynamically render category headers */}
-                {Object.keys(row.details.categories).map((category) => (
+                {Object.keys(row?.details?.categories ?? {}).map((category) => (
                   <th key={category} className="border border-gray-300 px-4 py-2 text-left">
                     {category}
                   </th>
@@ -200,11 +184,11 @@ export default function Candidates() {
             </thead>
             <tbody>
               <tr>
-                <td className="border border-gray-300 px-4 py-2">{row.details.totalPercentage}</td>
+                <td className="border border-gray-300 px-4 py-2">{row?.details?.totalPercentage}</td>
                 {/* Dynamically render category percentages */}
-                {Object.values(row.details.categories).map((percentage, index) => (
+                {Object.values(row?.details?.categories ?? {}).map((percentage, index) => (
                   <td key={index} className="border border-gray-300 px-4 py-2">
-                    {percentage}
+                    {percentage as string}
                   </td>
                 ))}
               </tr>

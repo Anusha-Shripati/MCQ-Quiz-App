@@ -1,4 +1,5 @@
 import { StatusOption, TechnologyOption } from "@/types/candidate.types";
+import { Question } from "../types/app";
 
 export const data = [
   {
@@ -313,35 +314,35 @@ export const AVAILABLE_CATEGORIES = ["MongoDB", "Express.Js", "React.Js", "Node.
 ];
 
 
-export const CREATE_QUESTIONS_STATIC_LIST = [
+export const CREATE_QUESTIONS_STATIC_LIST: Question[] = [
   {
     id: 1,
     type: "multiple-choice",
-    difficulty: 'easy',
-    question: 'What is the primary purpose of the virtual DOM in React?',
-    options: ['To store all components', 'To store all components', 'To store all components', 'To store all components'],
-    correctOptions: [], // Initially no correct options selected
+    difficulty: "easy",
+    question: "What is the primary purpose of the virtual DOM in React?",
+    options: ["To store all components", "To directly manipulate the real DOM", "To update only the parts of the DOM that have changed", "To manage component state"],
+    correctOptions: []
   },
   {
     id: 2,
     type: "multiple-choice",
-    difficulty: 'easy',
-    question: 'What is the correct syntax to import React in a JavaScript file?',
-    options: ['import React from react?', 'import i React from react?', 'include React from react?', 'requireReact.js'],
-    correctOptions: [], // Initially no correct options selected
+    difficulty: "easy",
+    question: "What is the correct syntax to import React in a JavaScript file?",
+    options: ["import React from 'react?'", "import i React from react?", "include React from react?", "requireReact.js"],
+    correctOptions: []
   },
   {
     id: 3,
     type: "fill-in-the-blanks",
-    difficulty: 'easy',
-    question: 'How do you create context in React?',
-    answer: 'by using React.createContext.',
+    difficulty: "easy",
+    question: "How do you create context in React?",
+    answer: "by using React.createContext.",
   },
   {
     id: 4,
     type: "code-snippet",
-    difficulty: 'medium',
-    question: 'Find the issue in it',
+    difficulty: "medium",
+    question: "Find the issue in it",
     code: `import React from 'react';
 function App() {
   const name = ['a', 'b', 'c'];
@@ -958,20 +959,22 @@ export const assessmentOptions: StatusOption[] = [
   { value: 'in-progress', label: 'In Progress' },
 ];
 
-export const questionsDataStatic = [
+export const questionsDataStatic: Question[] = [
   {
+    type: "multiple-choice",
     id: 1,
-    question: "What is the primary purpose of the virtual DOM in React?",
+    question: "What is React?",
     options: [
-      "To store all components",
-      "To directly manipulate the real DOM",
-      "To update only the parts of the DOM that have changed",
-      "To manage component state",
+      "A JavaScript library for building user interfaces",
+      "A programming language",
+      "A backend framework",
+      "A database management system",
     ],
-    correctAnswer: "To update only the parts of the DOM that have changed",
+    correctOptions: ["A JavaScript library for building user interfaces"],
     difficulty: "easy",
   },
   {
+    type: "multiple-choice",
     id: 2,
     question: "What is the correct syntax to import React in a JavaScript file?",
     options: [
@@ -980,36 +983,43 @@ export const questionsDataStatic = [
       "include React from 'react';",
       "require('React');",
     ],
-    correctAnswer: "import React from 'react';",
+    correctOptions: ["import React from 'react';"],
     difficulty: "easy",
   },
   {
+    type: "fill-in-the-blanks",
     id: 3,
     question: "How do you create context in React?",
-    options: [
-      "By using React.createContext()",
-      "By using React.useContext()",
-      "By passing props to child components",
-      "By using a Redux store",
-    ],
-    correctAnswer: "By using React.createContext()",
+    answer: "by using React.createContext.",
     difficulty: "easy",
   },
   {
+    type: "code-snippet",
     id: 4,
-    question: "Which hook is used for side effects in functional components?",
-    options: ["useState", "useEffect", "useContext", "useReducer"],
-    correctAnswer: "useEffect",
-    difficulty: "easy",
+    question: "Find the issue in it",
+    code: `import React from 'react';
+function App() {
+  const name = ['a', 'b', 'c'];
+  int i, new 'name' = ['i', 'b', 'c'];
+  int j, new 'name' = ['j', 'c'];
+  return i;
+  const instance = items.map(item, indent) + ui;
+  apply(map(items.map(i+0)));
+  return end-list(instance.class);
+}
+export default App;`,
+    difficulty: "medium",
   },
   {
+    type: "multiple-choice",
     id: 5,
     question: "What is the default port number for a React development server?",
     options: ["3000", "8000", "8080", "5000"],
-    correctAnswer: "3000",
+    correctOptions: ["3000"],
     difficulty: "easy",
   },
   {
+    type: "multiple-choice",
     id: 6,
     question: "Which lifecycle method is deprecated in React?",
     options: [
@@ -1018,10 +1028,11 @@ export const questionsDataStatic = [
       "componentDidUpdate",
       "componentWillUnmount",
     ],
-    correctAnswer: "componentWillReceiveProps",
+    correctOptions: ["componentWillReceiveProps"],
     difficulty: "medium",
   },
   {
+    type: "multiple-choice",
     id: 7,
     question: "What is a controlled component in React?",
     options: [
@@ -1030,10 +1041,11 @@ export const questionsDataStatic = [
       "A component whose form data is controlled by React state",
       "A component that is connected to a Redux store",
     ],
-    correctAnswer: "A component whose form data is controlled by React state",
+    correctOptions: ["A component whose form data is controlled by React state"],
     difficulty: "medium",
   },
   {
+    type: "multiple-choice",
     id: 8,
     question: "How can you improve the performance of a React application?",
     options: [
@@ -1042,10 +1054,11 @@ export const questionsDataStatic = [
       "Use only class components",
       "Avoid using keys in lists",
     ],
-    correctAnswer: "Use memoization techniques like React.memo",
+    correctOptions: ["Use memoization techniques like React.memo"],
     difficulty: "medium",
   },
   {
+    type: "multiple-choice",
     id: 9,
     question: "What is the difference between state and props in React?",
     options: [
@@ -1054,10 +1067,11 @@ export const questionsDataStatic = [
       "Both are immutable and cannot be modified",
       "State is used in class components only, props are used in functional components",
     ],
-    correctAnswer: "State is used to manage data inside a component, props are used to pass data to other components",
+    correctOptions: ["State is used to manage data inside a component, props are used to pass data to other components"],
     difficulty: "easy",
   },
   {
+    type: "multiple-choice",
     id: 10,
     question: "What is the purpose of the React.Fragment component?",
     options: [
@@ -1066,10 +1080,11 @@ export const questionsDataStatic = [
       "To manage state for components",
       "To create context in React",
     ],
-    correctAnswer: "To group multiple children elements without adding an extra node to the DOM",
+    correctOptions: ["To group multiple children elements without adding an extra node to the DOM"],
     difficulty: "easy",
   },
   {
+    type: "multiple-choice",
     id: 11,
     question: "How does React's key prop help with rendering lists?",
     options: [
@@ -1078,10 +1093,11 @@ export const questionsDataStatic = [
       "It makes the list immutable",
       "It improves the visual appearance of the list",
     ],
-    correctAnswer: "It helps React identify which items have changed, are added, or removed",
+    correctOptions: ["It helps React identify which items have changed, are added, or removed"],
     difficulty: "easy",
   },
   {
+    type: "multiple-choice",
     id: 12,
     question: "What is React.StrictMode used for?",
     options: [
@@ -1090,17 +1106,19 @@ export const questionsDataStatic = [
       "To create strict component hierarchies",
       "To enforce specific coding standards",
     ],
-    correctAnswer: "To enable additional checks and warnings for components",
+    correctOptions: ["To enable additional checks and warnings for components"],
     difficulty: "medium",
   },
   {
+    type: "multiple-choice",
     id: 13,
     question: "Which hook is used to access the DOM in functional components?",
     options: ["useState", "useEffect", "useRef", "useContext"],
-    correctAnswer: "useRef",
+    correctOptions: ["useRef"],
     difficulty: "medium",
   },
   {
+    type: "multiple-choice",
     id: 14,
     question: "What is the purpose of the React.PureComponent?",
     options: [
@@ -1109,10 +1127,11 @@ export const questionsDataStatic = [
       "To create complex components",
       "To define reusable UI components",
     ],
-    correctAnswer: "To avoid unnecessary renders by doing a shallow comparison of props and state",
+    correctOptions: ["To avoid unnecessary renders by doing a shallow comparison of props and state"],
     difficulty: "hard",
   },
   {
+    type: "multiple-choice",
     id: 15,
     question: "What does lifting state up in React mean?",
     options: [
@@ -1121,7 +1140,13 @@ export const questionsDataStatic = [
       "Sharing state between sibling components directly",
       "Converting state into props",
     ],
-    correctAnswer: "Moving the state from a child component to a parent component to make it shared",
+    correctOptions: ["Moving the state from a child component to a parent component to make it shared"],
     difficulty: "medium",
   },
 ];
+
+interface Exam {
+  date: string;
+  task: string;
+  candidate: string;
+}

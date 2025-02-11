@@ -30,21 +30,23 @@ export const loginUser = createAsyncThunk(
         body: JSON.stringify({ email, password }),
       });
 
-      const data = await response.json();
+      const data: { data: User; message?: string } = await response.json();
       
       if (response.ok && data.data.token) {
-        //  Store entire data.data object
+        // Store entire data.data object
         localStorage.setItem("user", JSON.stringify(data.data));
         
-        // Also store token in cookies for server-side access
         document.cookie = `token=${data.data.token}; path=/;`;
         
         return data.data;
       }
       
       return rejectWithValue(data.message || "Login failed");
-    } catch (error: any) {
-      return rejectWithValue(error.message || "Login failed");
+    } catch (error) {
+      if (error instanceof Error) {
+        return rejectWithValue(error.message);
+      }
+      return rejectWithValue("An unexpected error occurred");
     }
   }
 );
@@ -92,4 +94,4 @@ const authSlice = createSlice({
 });
 
 export const { initializeAuth, logout } = authSlice.actions;
-export default authSlice.reducer; 
+export default authSlice.reducer;

@@ -17,11 +17,11 @@ export const QuestionCard = ({ question }: QuestionCardProps) => {
         {question.id}. {question.question}
       </div>
       <ul className="space-y-2">
-        {question.options.map((option, index) => (
+        {question.options?.map((option, index) => (
           <li
             key={index}
             className={`p-2 rounded-md text-sm md:text-base ${
-              option === question.correctAnswer
+              option === question?.correctAnswer
                 ? theme === "dark"
                   ? "bg-green-800 text-green-100"
                   : "bg-green-100 text-green-800"

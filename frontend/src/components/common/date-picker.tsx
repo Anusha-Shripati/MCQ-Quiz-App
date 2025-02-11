@@ -24,9 +24,13 @@ const DatePicker: React.FC = () => {
   };
 
   // Handle date selection from calendar
-  const handleDateSelect = (date: Date) => {
-    setStartDate(date);
-    setInputDate(format(date, 'yyyy-MM-dd'));  // Format and update input with selected date
+  const handleDateSelect = (date: Date | undefined) => {
+    setStartDate(date || null);
+    if (date) {
+      setInputDate(format(date, 'yyyy-MM-dd'));
+    } else {
+      setInputDate(''); // Clear input when date is undefined
+    }
   };
 
   return (
@@ -59,7 +63,7 @@ const DatePicker: React.FC = () => {
             className="p-2 w-auto rounded-md border bg-white shadow-lg"
           >
             <Calendar
-              selected={startDate}  // Bind Shadcn Calendar to startDate state
+              selected={startDate || undefined}  // Bind Shadcn Calendar to startDate state
               onSelect={handleDateSelect}  // Handle date selection
               className="rounded-md border"
             />

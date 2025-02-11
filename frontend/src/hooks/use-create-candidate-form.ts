@@ -72,13 +72,6 @@ export const useCreateCandidateForm = ({ onOpenChange }: UseCreateCandidateFormP
       return;
     }
 
-    const candidateData = {
-      ...formData,
-      startDate,
-      endDate,
-      duration: `${timeValue} ${timeUnit}`
-    };
-
     toast.success('Candidate created successfully!');
     resetForm();
     onOpenChange(false);

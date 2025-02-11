@@ -13,10 +13,14 @@ interface QuestionCategory {
 
 export interface Question {
   id: number;
+  type: "multiple-choice" | "radio-select" | "fill-in-the-blanks" | "code-snippet";
   question: string;
-  options: string[];
-  correctAnswer: string;
-  difficulty: string;
+  options?: string[];
+  correctOptions?: (string | number)[];
+  correctAnswer?: string; 
+  difficulty: "easy" | "medium" | "hard";
+  answer?: string;
+  code?: string;
 }
 
 export interface PaginationProps {

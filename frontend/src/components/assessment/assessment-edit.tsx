@@ -30,6 +30,7 @@ interface AssessmentEditProps {
     createdDate: string;
     technologies: Technology[];
     totalQuestions: number;
+    duration: number;
   };
   onSave: () => void;
   onCancel: () => void;
@@ -39,8 +40,8 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
   const dispatch = useDispatch();
   const [localAssessment, setLocalAssessment] = useState(assessment);
   const [localTechnologies, setLocalTechnologies] = useState(assessment.technologies);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [, setIsLoading] = useState(false);
+  const [, setError] = useState<string | null>(null);
 
   useEffect(() => {
     setLocalAssessment(assessment);
@@ -178,7 +179,8 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
 
       dispatch(updateAssessment({
         ...localAssessment,
-        technologies: localTechnologies
+        technologies: localTechnologies,
+        duration: localAssessment.duration
       }));
 
       onSave();
@@ -355,7 +357,7 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
                         }}
                       >
                         <div
-                          className={`h-full ${colors[difficulty]} rounded-full transition-all duration-300`}
+                          className={`h-full ${colors[difficulty as keyof typeof colors]} rounded-full transition-all duration-300`}
                           style={{ width: `${percentage}%` }}
                         />
                         <div

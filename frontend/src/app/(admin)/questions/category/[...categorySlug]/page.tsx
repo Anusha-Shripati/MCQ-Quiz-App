@@ -11,7 +11,7 @@ import { QuestionCard } from "@/components/questions/questions-card";
 import { Pagination } from "@/components/questions/pagination-for-category";
 
 const CategoryPage = () => {
-  const { cateGory } = useParams();
+  const { categorySlug } = useParams();
   const searchParams = useSearchParams();
   const { theme } = useTheme();
   const router = useRouter();
@@ -66,7 +66,7 @@ const CategoryPage = () => {
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div className={`text-2xl font-bold ${theme === "dark" ? "text-white" : "text-gray-900"}`}>
-            {cateGory}
+            {categorySlug}
           </div>
         </div>
 

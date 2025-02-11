@@ -8,12 +8,15 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Edit, Trash, MoreVertical, Eye } from "lucide-react";
 import { Button } from "../ui/button";
+import { QuestionCategory } from "@/shared/types/app";
 
 const CategoryMenu = ({ category, handleNavigate }: { category: QuestionCategory, handleNavigate:()=>void }) => {
   const handleEditCategory = (categoryName: string) => {
+    console.log(categoryName)
   };
 
   const handleDeleteCategory = (categoryName: string) => {
+    console.log(categoryName)
   };
 
   return (

@@ -2,7 +2,6 @@
 
 import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { cn } from "@/lib/utils";
 
 export default function Error({
   error,
@@ -22,7 +21,7 @@ export default function Error({
         Something went wrong!
       </h2>
       <Button 
-        variant="primary"
+        variant="ghost"
         onClick={reset}
       >
         Try again

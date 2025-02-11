@@ -8,17 +8,8 @@ import EmptyState from '@/components/common/EmptyCreateQuestionState';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
-// Define the Question type
-interface Question {
-    id: number;
-    type: 'multiple-choice' | 'radio-select' | 'fill-in-the-blanks' | 'code-snippet';
-    difficulty: 'easy' | 'medium' | 'hard';
-    question: string;
-    options?: string[]; // For multiple-choice and radio-select
-    correctOptions?: number[]; // Indices of correct options
-    answer?: string; // For fill-in-the-blanks
-    code?: string; // For code-snippet
-}
+import { Question } from "@/shared/types/app";
+
 
 const CreateQuestion: React.FC = () => {
     const [questions, setQuestions] = useState<Question[]>(CREATE_QUESTIONS_STATIC_LIST);
@@ -66,15 +57,19 @@ const CreateQuestion: React.FC = () => {
         const updatedQuestions = [...questions];
         const question = updatedQuestions[index];
 
+        // Replace optional chaining with type assertion
+        if (!question.correctOptions) {
+            question.correctOptions = [];
+        }
+
         if (question.type === 'radio-select') {
-            // For radio-select, only one correct option is allowed
             question.correctOptions = [optionIndex];
         } else if (question.type === 'multiple-choice') {
-            // For multiple-choice, toggle the correct option
-            if (question.correctOptions?.includes(optionIndex)) {
-                question.correctOptions = question.correctOptions.filter((i) => i !== optionIndex);
+            const currentOptions = question.correctOptions;
+            if (currentOptions.includes(optionIndex as number)) {
+                question.correctOptions = (currentOptions as number[]).filter((i: number) => i !== optionIndex);
             } else {
-                question.correctOptions = [...(question.correctOptions || []), optionIndex];
+                question.correctOptions = [...currentOptions, optionIndex];
             }
         }
 
@@ -83,16 +78,15 @@ const CreateQuestion: React.FC = () => {
 
     const handleAddQuestion = () => {
         const newQuestion: Question = {
-            id: questions.length + 1, // Auto-increment ID
-            type: 'multiple-choice', // Default type
-            difficulty: 'easy', // Default difficulty
-            question: '', // Empty question
-            options: ['', '', '', '', '', ''],  // Default 4 options
-            correctOptions: [], // No correct options initially
+            id: questions.length + 1,
+            type: 'multiple-choice',
+            difficulty: 'easy',
+            question: '',
+            options: ['', '', '', '', '', ''],
+            correctOptions: [],
         };
-
         setQuestions([...questions, newQuestion]);
-        setSelectedQuestion(questions.length); // Select the newly added question
+        setSelectedQuestion(questions.length);
     };
 
     return (
@@ -100,9 +94,9 @@ const CreateQuestion: React.FC = () => {
         <div className="min-h-screen bg-gray-100 p-6 dark:bg-gray-900">
             {/* Header */}
             <div className="flex justify-start items-center mb-6">
-            <Button variant="ghost" size="icon"  onClick={() => router.back()}>
-              <ArrowLeft className="h-5 w-5" />
-            </Button> <div className="text-2xl font-bold text-gray-900 dark:text-white">React.js</div>
+                <Button variant="ghost" size="icon" onClick={() => router.back()}>
+                    <ArrowLeft className="h-5 w-5" />
+                </Button> <div className="text-2xl font-bold text-gray-900 dark:text-white">React.js</div>
                 {/* <Button onClick={handleSave}>Save</Button> */}
             </div>
 
@@ -132,7 +126,7 @@ const CreateQuestion: React.FC = () => {
                                         type: 'multiple-choice',
                                         difficulty: 'easy',
                                         question: '',
-                                        options: ['', '', '', ''],
+                                        options: ['', '', '', '', '', ''],
                                         correctOptions: [],
                                     };
                                     setQuestions([newQuestion]);
@@ -156,7 +150,6 @@ const CreateQuestion: React.FC = () => {
                     </div>
                     {/* Add Question Button */}
                     {questions.length !== 0 && <div className="mt-6 flex justify-end gap-4">
-                        
                         <Button onClick={handleSave}>Save</Button>
                     </div>}
                 </div>
@@ -166,61 +159,3 @@ const CreateQuestion: React.FC = () => {
 };
 
 export default CreateQuestion;
-
-
-
-
-
-// import React from 'react'
-
-// const CreateQuestion = () => {
-//   return (
-//     // Main container
-//     <div className=''>
-//       {/* Header */}
-//       <div className=''>
-//          <div>
-//             React.js
-//          </div>
-//          <div>
-//             <button>Save</button>
-//          </div>
-//       </div>
-
-//       {/* Remaining body */}
-//       <div className=''>
-//         {/* Sidebar for questions no. list */}
-//         <div className=''>
-
-//         </div>
-
-//         {/* Questions list with data for real questions which can be edited */}
-//         <div className=''>
-
-//             {/* Card for each question */}
-//             <div className=''>
-//                 {/* Question head */}
-//                 <div className=''>
-
-//                 </div>
-
-//                 {/* Question title */}
-//                 <div className=''>
-
-//                 </div>
-
-//                 {/* Options for answer or other answer types */}
-//                 <div className=''>
-
-//                 </div>
-//             </div>
-
-//         </div>
-
-//       </div>
-//     </div>
-//   )
-// }
-
-// export default CreateQuestion
-

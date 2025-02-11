@@ -3,8 +3,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
-import { Question } from './types'; // Import the Question type
-import { Minus, Plus } from 'lucide-react';
 import {
   Dialog,
   DialogTrigger,
@@ -14,6 +12,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog';
+import { Question } from '@/shared/types/app';
 
 interface QuestionCardProps {
   question: Question;
@@ -45,28 +44,6 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
       options.push('');
     }
     return options.slice(0, 6); // Ensure only 6 options
-  };
-
-  // Add an optional option
-  const addOptionalOption = () => {
-    const updatedQuestions = [...questions];
-    const options = updatedQuestions[index].options || [];
-    if (options.length < 6) {
-      options.push('');
-      updatedQuestions[index].options = options;
-      setQuestions(updatedQuestions);
-    }
-  };
-
-  // Remove an optional option
-  const removeOptionalOption = () => {
-    const updatedQuestions = [...questions];
-    const options = updatedQuestions[index].options || [];
-    if (options.length > 4) {
-      options.pop();
-      updatedQuestions[index].options = options;
-      setQuestions(updatedQuestions);
-    }
   };
 
   return (

@@ -88,7 +88,10 @@ export async function POST(req: Request) {
   } catch (error) {
     console.error("Error in /api/code-execution:", error);
     return NextResponse.json(
-      { success: false, message: error.message },
+      { 
+        success: false, 
+        message: error instanceof Error ? error.message : 'Unknown error occurred' 
+      },
       { status: 500 }
     );
   }

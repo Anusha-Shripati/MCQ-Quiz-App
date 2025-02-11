@@ -52,7 +52,7 @@ const DateRangePicker: React.FC = () => {
             selected={endDate}
             onSelect={(date) => setEndDate(date || undefined)}
             initialFocus
-            disabled={{ before: startDate }}
+            disabled={startDate ? { before: startDate } : undefined}
             className="text-xs" // Smaller calendar text
           />
         </PopoverContent>

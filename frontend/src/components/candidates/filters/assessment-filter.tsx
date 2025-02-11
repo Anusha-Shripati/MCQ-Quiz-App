@@ -68,7 +68,6 @@ export function AssessmentFilter({ value, onChange, options, className }: Assess
             borderRadius: 'calc(var(--radius) - 4px)',
             cursor: 'pointer',
             fontSize: '14px',
-            color: 'hsl(var(--foreground))',
             background: state.isFocused 
               ? 'hsl(var(--accent))' 
               : state.isSelected

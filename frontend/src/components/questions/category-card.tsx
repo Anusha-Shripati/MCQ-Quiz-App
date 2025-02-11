@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Plus } from "lucide-react";
 import { Button } from "../ui/button";
 import Link from "next/link";
+import { QuestionCategory } from "@/shared/types/app";
 
 export const CategoryCard = ({ category }: { category: QuestionCategory }) => {
   const router = useRouter();

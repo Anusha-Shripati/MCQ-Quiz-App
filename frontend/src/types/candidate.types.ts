@@ -1,9 +1,6 @@
 export interface CandidateDetails {
   totalPercentage: string;
-  mongodb: string;
-  expressJs: string;
-  reactJs: string;
-  nodeJs: string;
+  categories: Record<string, string>;
   createdBy: string;
   createdOn: string;
 }
@@ -11,6 +8,8 @@ export interface CandidateDetails {
 export interface Candidate {
   id: number;
   testDate: string;
+  testStartTime: string;
+  testEndTime: string;
   name: string;
   email: string;
   technology: string;
@@ -18,7 +17,7 @@ export interface Candidate {
   assessment: string;
   result: string;
   created: string;
-  details: CandidateDetails;
+  details?: CandidateDetails;
 }
 
 export interface FiltersProps {

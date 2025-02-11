@@ -28,7 +28,6 @@ async function main() {
     },
   });
 
-  console.log("Super Admin user created:", user);
 }
 
 main()

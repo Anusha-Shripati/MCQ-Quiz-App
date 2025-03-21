@@ -24,6 +24,7 @@ import { LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAppDispatch } from "@/store/hooks";
 import { logout } from "@/store/features/authSlice";
+import { FaUserAlt } from "react-icons/fa";
 
 
 export default function Sidebar() {
@@ -95,6 +96,13 @@ export default function Sidebar() {
               label="Profile"
               isCollapsed={isCollapsed}
               isActive={pathname === "/profile"}
+            />
+            <NavItem
+              href="/users"
+              icon={<FaUserAlt size={30} />}
+              label="Users"
+              isCollapsed={isCollapsed}
+              isActive={pathname === "/users"}
             />
             <ThemeToggle />
           </nav>

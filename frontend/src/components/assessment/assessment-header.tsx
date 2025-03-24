@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -17,33 +17,47 @@ import {
   PopoverTrigger,
 } from "@radix-ui/react-popover";
 import { Calendar } from "@/components/ui/calendar";
+import { Controller, useForm } from "react-hook-form";
 
 export default function AssessmentHeader() {
-  const [selectedAssessment, setSelectedAssessment] = useState("all");
-  const [selectedCreated, setSelectedCreated] = useState("all");
-  const [viewMode, setViewMode] = useState<"today" | "week" | "calendar">(
-    "today"
-  );
+
+  const defaultValues={ assessment: 'all', createdBy: "all", date: new Date(), view: 'today' } 
+
+  const { control,register, setValue, watch} = useForm({ defaultValues })
+  const allFields = watch();
+
+  const handleViewChange = (view:string) => setValue("view", view);
+  const isFirstRender = useRef(true);
+
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+  }, [allFields]);
 
   return (
     <div className="flex flex-col md:flex-row items-center gap-6">
       {/* Select Dropdowns */}
       <div className="flex flex-wrap items-center gap-3">
-        <Select
-          value={selectedAssessment}
-          onValueChange={setSelectedAssessment}
-        >
-          <SelectTrigger className="w-[200px] bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-300">
-            <SelectValue placeholder="Assessment" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Assessment</SelectItem>
-            <SelectItem value="mern">MERN</SelectItem>
-            <SelectItem value="mean">MEAN</SelectItem>
-          </SelectContent>
-        </Select>
+        <Controller
+          name="assessment"
+          control={control}
+          render={({ field }) => (
+            <Select onValueChange={field.onChange} value={field.value}>
+              <SelectTrigger className="w-[200px] bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-300">
+                <SelectValue placeholder="Assessment" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Assessment</SelectItem>
+                <SelectItem value="mern">MERN</SelectItem>
+                <SelectItem value="mean">MEAN</SelectItem>
+              </SelectContent>
+            </Select>
+          )}
+        />
 
-        <Select value={selectedCreated} onValueChange={setSelectedCreated}>
+        <Select {...register('createdBy')} onValueChange={(value) => setValue('createdBy', value)} >
           <SelectTrigger className="w-[200px] bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-300">
             <SelectValue placeholder="Created" />
           </SelectTrigger>
@@ -60,34 +74,31 @@ export default function AssessmentHeader() {
         {/* View Mode Buttons */}
         <div className="flex bg-white dark:bg-gray-800 rounded-lg p-1 shadow-sm border border-gray-200 dark:border-gray-600">
           <Button
-            variant={viewMode === "today" ? "secondary" : "ghost"}
+            variant={allFields.view === "today" ? "secondary" : "ghost"}
             size="sm"
-            className={`${
-              viewMode === "today" ? "bg-gray-100 dark:bg-gray-700" : ""
-            } text-gray-900 dark:text-gray-300`}
-            onClick={() => setViewMode("today")}
+            className={`${allFields.view === "today" ? "bg-gray-100 dark:bg-gray-700" : ""
+              } text-gray-900 dark:text-gray-300`}
+              onClick={() => handleViewChange("today")}
           >
             Today
           </Button>
           <Button
-            variant={viewMode === "week" ? "secondary" : "ghost"}
+            variant={allFields.view === "week" ? "secondary" : "ghost"}
             size="sm"
-            className={`${
-              viewMode === "week" ? "bg-gray-100 dark:bg-gray-700" : ""
-            } text-gray-900 dark:text-gray-300`}
-            onClick={() => setViewMode("week")}
+            className={`${allFields.view === "week" ? "bg-gray-100 dark:bg-gray-700" : ""
+              } text-gray-900 dark:text-gray-300`}
+              onClick={() => handleViewChange("week")}
           >
             Week
           </Button>
           <Popover>
             <PopoverTrigger asChild>
               <Button
-                variant={viewMode === "calendar" ? "secondary" : "ghost"}
+                variant={allFields.view === "calendar" ? "secondary" : "ghost"}
                 size="sm"
-                className={`${
-                  viewMode === "calendar" ? "bg-gray-100 dark:bg-gray-700" : ""
-                } text-gray-900 dark:text-gray-300`}
-                onClick={() => setViewMode("calendar")}
+                className={`${allFields.view === "calendar" ? "bg-gray-100 dark:bg-gray-700" : ""
+                  } text-gray-900 dark:text-gray-300`}
+                  onClick={() => handleViewChange("calendar")}
               >
                 <CalendarIcon className="h-4 w-4 mr-2" />
                 Pick Date
@@ -97,10 +108,11 @@ export default function AssessmentHeader() {
               <Calendar
                 className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-300"
                 mode="single"
-                selected={new Date()}
+                selected={allFields.date}
                 onSelect={(date: Date | undefined) => {
                   if (date) {
-                    setViewMode("calendar");
+                    handleViewChange("calendar")
+                    setValue('date', date)
                   }
                 }}
                 initialFocus

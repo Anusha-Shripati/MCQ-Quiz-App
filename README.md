@@ -45,7 +45,7 @@ mcq-quiz-new/
 
 Start the required services using Docker:
 
-- To start both PostgreSQL and Redis:
+- To start all things backend, PostgreSQL and Redis:
 
   ```bash
   npm run docker:up

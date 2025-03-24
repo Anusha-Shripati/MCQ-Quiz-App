@@ -40,9 +40,9 @@ const initialState: AssessmentState = {
       duration: 60,
       technologies: [
         { name: "MongoDB", percentage: 25, questions: { easy: 5, medium: 5, hard: 5 } },
-        { name: "ExpressJS", percentage: 25, questions: { easy: 5, medium: 5, hard: 5 } },
-        { name: "ReactJS", percentage: 25, questions: { easy: 5, medium: 5, hard: 5 } },
-        { name: "NodeJS", percentage: 25, questions: { easy: 5, medium: 5, hard: 5 } },
+        { name: "ExpressJs", percentage: 25, questions: { easy: 5, medium: 5, hard: 5 } },
+        { name: "ReactJs", percentage: 25, questions: { easy: 5, medium: 5, hard: 5 } },
+        { name: "NodeJs", percentage: 25, questions: { easy: 5, medium: 5, hard: 5 } },
       ],
     },
     // ... other initial assessments

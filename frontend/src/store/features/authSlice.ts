@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
 interface User {
   email: string;
@@ -21,26 +21,37 @@ const initialState: AuthState = {
 };
 
 export const loginUser = createAsyncThunk(
-  'auth/login',
-  async ({ email, password }: { email: string; password: string }, { rejectWithValue }) => {
+  "auth/login",
+  async (
+    { email, password }: { email: string; password: string },
+    { rejectWithValue }
+  ) => {
     try {
-      const response = await fetch("http://localhost:3005/api/v1/user/login", {
+      const response = await fetch("http://localhost:3001/api/v1/user/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
+      // .then((data)=>data.json()
+      // );
+
+      // console.log(await response.json(), "response");
 
       const data: { data: User; message?: string } = await response.json();
-      
+      // const data = response.data;
+
       if (response.ok && data.data.token) {
+        console.log(data.data, "data");
         // Store entire data.data object
         localStorage.setItem("user", JSON.stringify(data.data));
-        
+
         document.cookie = `token=${data.data.token}; path=/;`;
         
+        console.log(document.cookie, "cookie");
+
         return data.data;
       }
-      
+
       return rejectWithValue(data.message || "Login failed");
     } catch (error) {
       if (error instanceof Error) {
@@ -52,12 +63,11 @@ export const loginUser = createAsyncThunk(
 );
 
 const authSlice = createSlice({
-  name: 'auth',
+  name: "auth",
   initialState,
   reducers: {
     initializeAuth: (state) => {
       const storedUser = localStorage.getItem("user");
-      
       if (storedUser) {
         try {
           state.user = JSON.parse(storedUser);
@@ -74,7 +84,7 @@ const authSlice = createSlice({
       document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
       state.user = null;
       state.loading = false;
-    }
+    },
   },
   extraReducers: (builder) => {
     builder

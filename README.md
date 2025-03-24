@@ -169,3 +169,13 @@ REFRESH_EXPIRES="7d"
 - The backend runs on port 3001 by default (configurable in package.json config)
 - The frontend waits for the backend's healthcheck before starting
 - All processes are killed together when stopping the application (Ctrl+C)
+
+## FrontEnd -> NextJs
+
+- Charts -> Recharts
+- UI Components -> ShadCn + Tailwind
+- API calls -> React Query
+- State Management -> Zustand
+- Routing -> NextJs built-in routing
+- Authentication -> JWT (JSON Web Tokens)
+- Form Handling -> React Hook Form

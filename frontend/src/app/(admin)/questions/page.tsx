@@ -1,11 +1,11 @@
-"use client"
+"use client";
 import { CategoryCard } from "@/components/questions/category-card";
 import CreateCategory from "@/components/questions/create-category";
 import { categories } from "@/shared/constants/data";
 import { useState } from "react";
 
 export default function QuestionsPage() {
-  const [ categoriesArray, setCategoriesArray ] = useState(categories);
+  const [categoriesArray, setCategoriesArray] = useState(categories);
   return (
     <div className="p-6">
       {/* Page Header */}
@@ -13,7 +13,7 @@ export default function QuestionsPage() {
         <h1 className="text-3xl font-bold text-secondary-foreground">
           Questions
         </h1>
-        <CreateCategory setCategoriesArray={setCategoriesArray}/>
+        <CreateCategory setCategoriesArray={setCategoriesArray} />
       </div>
 
       {/* Categories Grid */}

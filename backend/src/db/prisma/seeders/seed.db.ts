@@ -1,11 +1,12 @@
 import { PrismaClient, Role } from "@prisma/client";
 import bcrypt from "bcryptjs";
-
+import dotenv from "dotenv";
 const prisma = new PrismaClient();
 
+dotenv.config()
 async function main() {
   // Hash the password for the Super Admin user
-  const hashedPassword = await bcrypt.hash("superadminpassword", 10);
+  const hashedPassword = await bcrypt.hash(process.env.SUPER_ADMIN_PASSWORD || 'superadminpassword', 10);
 
   // Create the Super Admin user
   const user = await prisma.user.create({

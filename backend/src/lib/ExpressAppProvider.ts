@@ -20,7 +20,7 @@ class ExpressAppProvider {
 
   constructor() {
     this.app = express();
-    this.port = process.env.BACKEND_PORT || 3005;
+    this.port = process.env.BACKEND_PORT || 3001;
     this.initializeMiddlewares();
     this.initializeRoutes();
     this.initializeErrorHandling();

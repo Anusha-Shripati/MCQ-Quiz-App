@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { ChevronDown, ChevronUp, Edit, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AssessmentEdit from "./assessment-edit";
 import { useDispatch, useSelector } from "react-redux";
-import { setCurrentAssessment, deleteAssessment } from "../../store/features/assessmentSlice";
+import { setCurrentAssessment, deleteAssessment, clearCurrentAssessment } from "../../store/features/assessmentSlice";
 import { RootState } from "../../store/store";
 import { toast } from "react-hot-toast";
 
@@ -20,7 +20,8 @@ interface Technology {
 }
 
 interface AssessmentItemProps {
-  key:string,
+  key: string,
+  id: string,
   title: string;
   createdBy: string;
   createdDate: string;
@@ -29,11 +30,11 @@ interface AssessmentItemProps {
   isExpanded: boolean;
   onToggle: () => void;
   handleEdit: () => void;
-  handleDelete: (id:string) => void
+  handleDelete: (id: string) => void
 }
 
 function AssessmentItem({
-  key,
+  id,
   title,
   createdBy,
   createdDate,
@@ -44,6 +45,16 @@ function AssessmentItem({
   handleEdit,
   handleDelete
 }: AssessmentItemProps) {
+
+  const initial = { easy: 0, medium: 0, hard: 0 }
+  const totalQuestions = technologies?.reduce(
+    (total, tech) => ({
+      easy: total.easy + tech.questions.easy,
+      medium: total.medium + tech.questions.medium,
+      hard: total.hard + tech.questions.hard,
+    }),
+    initial
+  ) || initial;
   return (
     <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-200 hover:shadow-md">
       <div className="p-5 flex items-center justify-between">
@@ -60,12 +71,12 @@ function AssessmentItem({
           <Button variant="ghost" size="icon" className="hover:bg-gray-100 dark:hover:bg-gray-700" onClick={handleEdit}>
             <Edit className="h-4 w-4 text-gray-600 dark:text-gray-300" />
           </Button>
-          <Button variant="ghost" size="icon" className="hover:bg-red-50 hover:text-red-600" onClick={()=>handleDelete(key)}>
+          <Button variant="ghost" size="icon" className="hover:bg-red-50 hover:text-red-600" onClick={() => handleDelete(id)}>
             <Trash2 className="h-4 w-4" />
           </Button>
-          <Button 
-            variant="ghost" 
-            size="icon" 
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={onToggle}
             className="hover:bg-gray-100 dark:hover:bg-gray-700"
           >
@@ -109,11 +120,11 @@ function AssessmentItem({
             ))}
             <div className="grid grid-cols-5 gap-4 pt-2 border-t border-gray-200 dark:border-gray-700">
               <div className="font-semibold text-gray-900 dark:text-gray-300">Total</div>
-              <div className="text-center font-semibold text-gray-900 dark:text-gray-300">20</div>
-              <div className="text-center font-semibold text-gray-900 dark:text-gray-300">20</div>
-              <div className="text-center font-semibold text-gray-900 dark:text-gray-300">20</div>
+              <div className="text-center font-semibold text-gray-900 dark:text-gray-300">{totalQuestions?.easy}</div>
+              <div className="text-center font-semibold text-gray-900 dark:text-gray-300">{totalQuestions?.medium}</div>
+              <div className="text-center font-semibold text-gray-900 dark:text-gray-300">{totalQuestions?.hard}</div>
               <div className="text-center font-semibold text-blue-600">
-                {technologies.reduce((total, tech) => total + tech.questions.easy + tech.questions.medium + tech.questions.hard, 0)}
+                {totalQuestions?.easy + totalQuestions?.medium + totalQuestions?.hard}
               </div>
             </div>
           </div>
@@ -124,7 +135,7 @@ function AssessmentItem({
 }
 
 export default function AssessmentDetails() {
-  const { assessments, isLoading, error } = useSelector((state: RootState) => state.assessment);
+  const { assessments, isLoading, error, currentAssessment } = useSelector((state: RootState) => state.assessment);
   const dispatch = useDispatch();
   const [expandedId, setExpandedId] = useState<string>("mern");
   const [editing, setEditing] = useState<boolean>(false);
@@ -136,18 +147,21 @@ export default function AssessmentDetails() {
 
   const handleSave = () => {
     setEditing(false);
+    dispatch(clearCurrentAssessment());
   };
 
   const handleCancel = () => {
     setEditing(false);
+    dispatch(clearCurrentAssessment());
+
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = useCallback((id: string) => {
     if (window.confirm("Are you sure you want to delete this assessment?")) {
       dispatch(deleteAssessment(id));
       toast.success("Assessment deleted successfully");
     }
-  };
+  }, [dispatch]);
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -162,23 +176,23 @@ export default function AssessmentDetails() {
   }
 
   if (editing) {
-    const assessment = assessments.find(a => a.id === expandedId);
-    
-    return assessment ? (
+
+    return currentAssessment ? (
       <AssessmentEdit
-        assessment={assessment}
+        assessment={currentAssessment}
         onSave={handleSave}
         onCancel={handleCancel}
       />
     ) : null;
   }
-  
+
 
   return (
     <div className="space-y-4">
       {assessments.map((assessment) => (
         <AssessmentItem
           key={assessment.id}
+          id={assessment.id}
           title={assessment.title}
           createdBy={assessment.createdBy}
           createdDate={assessment.createdDate}

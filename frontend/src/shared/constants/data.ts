@@ -206,7 +206,7 @@ export const technologies = [
   },
 ];
 
-export const AVAILABLE_CATEGORIES = ["MongoDB", "Express.Js", "React.Js", "Node.Js", "Angular.Js",
+export const AVAILABLE_CATEGORIES = ["MongoDB", "ExpressJs", "ReactJs", "NodeJs", "AngularJs",
   "Vue.Js",
   "JavaScript",
   "TypeScript",

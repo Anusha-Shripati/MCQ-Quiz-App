@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useDispatch } from "react-redux";
 import { Button } from "@/components/ui/button";
 // import { ChevronLeft } from "lucide-react";
@@ -43,10 +43,29 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
   const [, setIsLoading] = useState(false);
   const [, setError] = useState<string | null>(null);
 
+  const errorTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+
+
+  const showError = (message: string) => {
+    if (errorTimeoutRef.current) return;
+
+    toast.error(message);
+
+    errorTimeoutRef.current = setTimeout(() => {
+      errorTimeoutRef.current = null;
+    }, 1000);
+  };
+
   useEffect(() => {
     setLocalAssessment(assessment);
     setLocalTechnologies(assessment.technologies);
   }, [assessment]);
+  const colors = {
+    easy: 'bg-green-500',
+    medium: 'bg-blue-500',
+    hard: 'bg-red-500'
+  };
 
   const handleQuestionChange = (
     techName: string,
@@ -74,7 +93,9 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
 
       // Check if new total would exceed the limit
       if (newTotalForTech + otherTechsTotal > localAssessment.totalQuestions) {
-        toast.error(`Total questions cannot exceed ${localAssessment.totalQuestions}`);
+        showError(`Total questions cannot exceed ${localAssessment.totalQuestions}`);
+
+        // toast.error(`Total questions cannot exceed ${localAssessment.totalQuestions}`);
         return tech;
       }
 
@@ -99,7 +120,9 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
     );
 
     if (newQuestionsForDifficulty + otherDifficultiesTotal > totalQuestionsTarget) {
-      toast.error(`Total questions cannot exceed ${totalQuestionsTarget}`);
+
+      showError(`Total questions cannot exceed ${totalQuestionsTarget}`);
+      // toast.error(`Total questions cannot exceed ${totalQuestionsTarget}`);
       return;
     }
 
@@ -129,28 +152,29 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
     dispatch(removeTechnology({ assessmentId: localAssessment.id, techName }));
   };
 
-
   const handleTotalQuestionsChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = parseInt(event.target.value);
+    let newValue = parseInt(event.target.value);
 
     if (isNaN(newValue) || newValue < 0) {
-      toast.error("Please enter a valid number");
-      return;
+      // toast.error("Please enter a valid number");
+      newValue=0;
+      // return;
     }
 
-    // Calculate current total of all questions
-    const currentTotal = localTechnologies.reduce((sum, tech) =>
-      sum + tech.questions.easy + tech.questions.medium + tech.questions.hard,
-      0
-    );
+    // // Calculate current total of all questions
+    // const currentTotal = localTechnologies.reduce((sum, tech) =>
+    //   sum + tech.questions.easy + tech.questions.medium + tech.questions.hard,
+    //   0
+    // );
 
-    // Allow increasing the total questions, but validate when decreasing
-    if (newValue < currentTotal) {
-      toast.error(`Cannot set total questions below current sum (${currentTotal})`);
-      return;
-    }
+    // // Allow increasing the total questions, but validate when decreasing
+    // if (newValue < currentTotal) {
+      // showError(`Cannot set total questions below current sum (${currentTotal})`)
+      // toast.error(`Cannot set total questions below current sum (${currentTotal})`);
+      // return;
+    // }
 
-    setLocalAssessment(prev => ({ ...prev, totalQuestions: newValue }));
+    setLocalAssessment(prev => ({ ...prev, totalQuestions: newValue || 0 }));
   };
 
   const validateQuestionTotals = () => {
@@ -196,6 +220,39 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
     (sum, tech) => sum + tech.questions.easy + tech.questions.medium + tech.questions.hard,
     0
   );
+
+  const sliderClick = (e: React.MouseEvent<HTMLDivElement>, difficulty: string) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const newPercentage = Math.round((x / rect.width) * 100);
+    handleDifficultySliderChange(
+      difficulty as keyof Technology['questions'],
+      newPercentage
+    );
+  }
+  const slideChange = (e: React.MouseEvent<HTMLDivElement>, difficulty: string) => {
+    const slider = e.currentTarget.parentElement;
+
+    if (!slider) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const rect = slider!.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const newPercentage = Math.max(0, Math.min(100, Math.round((x / rect.width) * 100)));
+      handleDifficultySliderChange(
+        difficulty as keyof Technology['questions'],
+        newPercentage
+      );
+    };
+
+    const handleMouseUp = () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  }
 
   return (
     <div className="min-h-screen dark:bg-gray-800">
@@ -314,7 +371,6 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
                       className="ml-2 text-gray-400 hover:text-gray-600 dark:text-gray-500 
                                  dark:hover:text-gray-300"
                     >
-                      ×
                     </Button>
                   </div>
                 ))}
@@ -335,57 +391,24 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
                     ? Math.round((totalForDifficulty / localAssessment.totalQuestions) * 100)
                     : 0;
 
-                  const colors = {
-                    easy: 'bg-green-500',
-                    medium: 'bg-blue-500',
-                    hard: 'bg-red-500'
-                  };
-
                   return (
                     <div key={difficulty} className="text-center">
                       <div className="mb-2 capitalize">{difficulty}</div>
                       <div
                         className="relative h-2 bg-gray-200 rounded-full cursor-pointer"
-                        onClick={(e) => {
-                          const rect = e.currentTarget.getBoundingClientRect();
-                          const x = e.clientX - rect.left;
-                          const newPercentage = Math.round((x / rect.width) * 100);
-                          handleDifficultySliderChange(
-                            difficulty as keyof Technology['questions'],
-                            newPercentage
-                          );
-                        }}
+                        onClick={(e) => sliderClick(e, difficulty)}
                       >
                         <div
                           className={`h-full ${colors[difficulty as keyof typeof colors]} rounded-full transition-all duration-300`}
-                          style={{ width: `${percentage}%` }}
+                          style={{ width: `${percentage >100 ? 0 : percentage }%` }}
                         />
                         <div
                           className="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-white border-2 border-blue-600 rounded-full cursor-grab"
-                          style={{ left: `${percentage}%`, transform: `translate(-50%, -50%)` }}
-                          onMouseDown={(e) => {
-                            const slider = e.currentTarget.parentElement;
-                            const handleMouseMove = (e: MouseEvent) => {
-                              const rect = slider!.getBoundingClientRect();
-                              const x = e.clientX - rect.left;
-                              const newPercentage = Math.max(0, Math.min(100, Math.round((x / rect.width) * 100)));
-                              handleDifficultySliderChange(
-                                difficulty as keyof Technology['questions'],
-                                newPercentage
-                              );
-                            };
-
-                            const handleMouseUp = () => {
-                              document.removeEventListener('mousemove', handleMouseMove);
-                              document.removeEventListener('mouseup', handleMouseUp);
-                            };
-
-                            document.addEventListener('mousemove', handleMouseMove);
-                            document.addEventListener('mouseup', handleMouseUp);
-                          }}
+                          style={{ left: `${percentage >100 ? 0 : percentage}%`, transform: `translate(-50%, -50%)` }}
+                          onMouseDown={(e) => slideChange(e, difficulty)}
                         />
                       </div>
-                      <div className="mt-1 text-xs text-gray-500">{percentage}%</div>
+                      <div className="mt-1 text-xs text-gray-500">{percentage >100 ? 0 : percentage}%</div>
                     </div>
                   );
                 })}

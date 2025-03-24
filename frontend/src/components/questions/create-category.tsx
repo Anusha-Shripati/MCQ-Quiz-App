@@ -18,7 +18,9 @@ interface CreateCategoryProps {
   setCategoriesArray: React.Dispatch<React.SetStateAction<Category[]>>;
 }
 
-const CreateCategory: React.FC<CreateCategoryProps> = ({ setCategoriesArray }) => {
+const CreateCategory: React.FC<CreateCategoryProps> = ({
+  setCategoriesArray,
+}) => {
   const [open, setOpen] = useState(false);
   const [categoryName, setCategoryName] = useState("");
 

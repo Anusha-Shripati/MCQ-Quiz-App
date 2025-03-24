@@ -22,6 +22,8 @@ export class UserController {
     try {
       const { email, password } = req.body;
 
+      
+
       // Step 1: Find the user by email
       const user = await userService.findUserByEmail(email);
       if (!user) {
@@ -108,6 +110,22 @@ export class UserController {
         "Users fetched successfully!"
       );
     } catch (error) {
+      next(error);
+    }
+  };
+
+  getUserById = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const userId = req.params.userId;
+      
+      const user = await userService.findUserById(userId);
+      if (!user) {
+        generateResponse(res, 404, {}, false, "User not found");
+        return;
+      }
+      generateResponse(res, 200, user, true, "User found");
+    } catch (error) {
+      console.log(error);
       next(error);
     }
   };

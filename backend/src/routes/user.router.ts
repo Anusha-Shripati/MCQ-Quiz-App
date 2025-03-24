@@ -30,4 +30,10 @@ userRouter.get(
   asyncHandler(userController.list)
 );
 
+userRouter.get(
+  "/:userId",
+  // authenticateAndAuthorize(["Super_Admin", "Editor"]),
+  asyncHandler(userController.getUserById)
+);
+
 export default userRouter;

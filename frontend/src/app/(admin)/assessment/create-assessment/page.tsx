@@ -37,16 +37,16 @@ export default function CreateAssessment() {
     categories: [
       {
         name: "",
-        questions: { easy: 0, medium: 0, hard: 0 }
-      }
+        questions: { easy: 0, medium: 0, hard: 0 },
+      },
     ],
-    duration: 15
+    duration: 15,
   });
 
   // Add this options array for the duration select
-  const durationOptions = Array.from(Array(37).keys()).map(i => ({
+  const durationOptions = Array.from(Array(37).keys()).map((i) => ({
     value: 15 + i * 5,
-    label: `${15 + i * 5} minutes`
+    label: `${15 + i * 5} minutes`,
   }));
 
   const calculateTotalSum = () => {
@@ -68,24 +68,29 @@ export default function CreateAssessment() {
     const numValue = parseInt(value);
 
     const totalSum = calculateTotalSum();
-    const remainingQuestions = targetQuestions - totalSum + formData.categories[index].questions[difficulty];
+    const remainingQuestions =
+      targetQuestions -
+      totalSum +
+      formData.categories[index].questions[difficulty];
 
     if (numValue > remainingQuestions) {
       toast.error(`You can only allocate ${remainingQuestions} questions.`);
       return;
     }
 
-    setFormData(prev => {
+    setFormData((prev) => {
       const updatedCategories = [...prev.categories];
       updatedCategories[index].questions[difficulty] = numValue;
       return { ...prev, categories: updatedCategories };
     });
   };
 
-  const handleAssessmentNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData(prev => ({
+  const handleAssessmentNameChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setFormData((prev) => ({
       ...prev,
-      name: e.target.value
+      name: e.target.value,
     }));
   };
 
@@ -94,24 +99,28 @@ export default function CreateAssessment() {
       toast.error("Assessment name is required");
       return;
     }
-    if (step === 1 && (formData.categories.length <= 1 && formData.categories[0].name === "")) {
+    if (
+      step === 1 &&
+      formData.categories.length <= 1 &&
+      formData.categories[0].name === ""
+    ) {
       toast.error("At least add one category.");
       return;
     }
     if (step === 2) {
-      const isValid = formData.categories.every(cat =>
-        Object.values(cat.questions).some(count => count > 0)
+      const isValid = formData.categories.every((cat) =>
+        Object.values(cat.questions).some((count) => count > 0)
       );
       if (!isValid) {
         toast.error("Each category must have at least one question");
         return;
       }
     }
-    setStep(prev => prev + 1);
+    setStep((prev) => prev + 1);
   };
 
   const handlePreviousStep = () => {
-    setStep(prev => prev - 1);
+    setStep((prev) => prev - 1);
   };
 
   const handleSubmit = () => {
@@ -137,11 +146,11 @@ export default function CreateAssessment() {
       createdBy: "Current User", // Replace with actual user data
       totalQuestions: targetQuestions,
       duration: formData.duration,
-      technologies: formData.categories.map(cat => ({
+      technologies: formData.categories.map((cat) => ({
         name: cat.name,
         percentage: Math.round((100 / formData.categories.length) * 10) / 10,
-        questions: cat.questions
-      }))
+        questions: cat.questions,
+      })),
     };
 
     try {
@@ -154,9 +163,12 @@ export default function CreateAssessment() {
     }
   };
 
-  const calculateDifficultyPercentage = (difficulty: 'easy' | 'medium' | 'hard') => {
+  const calculateDifficultyPercentage = (
+    difficulty: "easy" | "medium" | "hard"
+  ) => {
     const totalForDifficulty = formData.categories.reduce(
-      (sum, cat) => sum + cat.questions[difficulty], 0
+      (sum, cat) => sum + cat.questions[difficulty],
+      0
     );
     return targetQuestions > 0
       ? Math.round((totalForDifficulty / targetQuestions) * 100)
@@ -164,15 +176,21 @@ export default function CreateAssessment() {
   };
 
   // Add this new function to handle slider changes
-  const handleDifficultySliderChange = (difficulty: 'easy' | 'medium' | 'hard', percentage: number) => {
+  const handleDifficultySliderChange = (
+    difficulty: "easy" | "medium" | "hard",
+    percentage: number
+  ) => {
     // Calculate the total questions for the selected difficulty based on the percentage
     const totalForDifficulty = Math.floor((targetQuestions * percentage) / 100);
 
     // Calculate the current total questions for the other difficulties
     const totalForOtherDifficulties = formData.categories.reduce((sum, cat) => {
-      return sum + (difficulty === 'easy' ? 0 : cat.questions.easy) +
-        (difficulty === 'medium' ? 0 : cat.questions.medium) +
-        (difficulty === 'hard' ? 0 : cat.questions.hard);
+      return (
+        sum +
+        (difficulty === "easy" ? 0 : cat.questions.easy) +
+        (difficulty === "medium" ? 0 : cat.questions.medium) +
+        (difficulty === "hard" ? 0 : cat.questions.hard)
+      );
     }, 0);
 
     // Check if the new total exceeds the target questions
@@ -182,27 +200,31 @@ export default function CreateAssessment() {
     }
 
     // Calculate questions per category based on the percentage
-    const questionsPerCategory = Math.floor(totalForDifficulty / formData.categories.length);
+    const questionsPerCategory = Math.floor(
+      totalForDifficulty / formData.categories.length
+    );
 
     // Update the form data
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      categories: prev.categories.map(category => ({
+      categories: prev.categories.map((category) => ({
         ...category,
         questions: {
           ...category.questions,
-          [difficulty]: questionsPerCategory
-        }
-      }))
+          [difficulty]: questionsPerCategory,
+        },
+      })),
     }));
   };
 
   // Add this handler for duration change
-  const handleDurationChange = (selectedOption: { value: number; label: string } | null) => {
+  const handleDurationChange = (
+    selectedOption: { value: number; label: string } | null
+  ) => {
     if (selectedOption) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        duration: selectedOption.value
+        duration: selectedOption.value,
       }));
     }
   };
@@ -217,7 +239,11 @@ export default function CreateAssessment() {
               <ArrowLeft className="h-5 w-5" />
             </Button>
           ) : (
-            <Button variant="ghost" size="icon" onClick={() => window.history.back()}>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => window.history.back()}
+            >
               <ArrowLeft className="h-5 w-5" />
             </Button>
           )}
@@ -230,14 +256,13 @@ export default function CreateAssessment() {
           <div
             className="absolute top-5 left-0 h-[2px] bg-blue-600 transition-all duration-300"
             style={{
-              width: `${((step - 1) / 2) * 100}%`
+              width: `${((step - 1) / 2) * 100}%`,
             }}
           />
 
           {/* Steps */}
 
           <StepsStepperNumber steps={steps} currentStep={step} />
-
         </div>
       </div>
 
@@ -274,7 +299,6 @@ export default function CreateAssessment() {
           calculateTotalSum={calculateTotalSum}
           handlePreviousStep={handlePreviousStep}
         />
-
       )}
     </div>
   );

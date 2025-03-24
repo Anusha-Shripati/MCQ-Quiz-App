@@ -98,8 +98,8 @@ export const categories = [
   { name: "Vue.js", easy: 20, medium: 30, hard: 50 },
   { name: "Laravel", easy: 20, medium: 30, hard: 50 },
   { name: "PHP", easy: 20, medium: 30, hard: 50 },
+  { name: "Java", easy: 20, medium: 10, hard: 40 },
 ];
-
 
 export const technologies = [
   {
@@ -313,23 +313,33 @@ export const AVAILABLE_CATEGORIES = ["MongoDB", "ExpressJs", "ReactJs", "NodeJs"
   "Looker",
 ];
 
-
 export const CREATE_QUESTIONS_STATIC_LIST: Question[] = [
   {
     id: 1,
     type: "multiple-choice",
     difficulty: "easy",
     question: "What is the primary purpose of the virtual DOM in React?",
-    options: ["To store all components", "To directly manipulate the real DOM", "To update only the parts of the DOM that have changed", "To manage component state"],
-    correctOptions: []
+    options: [
+      "To store all components",
+      "To directly manipulate the real DOM",
+      "To update only the parts of the DOM that have changed",
+      "To manage component state",
+    ],
+    correctOptions: [],
   },
   {
     id: 2,
     type: "multiple-choice",
     difficulty: "easy",
-    question: "What is the correct syntax to import React in a JavaScript file?",
-    options: ["import React from 'react?'", "import i React from react?", "include React from react?", "requireReact.js"],
-    correctOptions: []
+    question:
+      "What is the correct syntax to import React in a JavaScript file?",
+    options: [
+      "import React from 'react?'",
+      "import i React from react?",
+      "include React from react?",
+      "requireReact.js",
+    ],
+    correctOptions: [],
   },
   {
     id: 3,
@@ -355,7 +365,7 @@ function App() {
 }
 export default App;`,
   },
-]
+];
 
 interface CandidateDetails {
   totalPercentage: string;
@@ -932,31 +942,30 @@ export const candidatesList: Candidate[] = [
       createdOn: "9-Dec-2024 09:00AM",
     },
   },
-
 ];
 
 export const steps = [
   { number: 1, label: "Basic Info" },
   { number: 2, label: "Questions" },
-  { number: 3, label: "Summary" }
+  { number: 3, label: "Summary" },
 ];
 
 export const technologyOptions: TechnologyOption[] = [
-  { value: 'react', label: 'React' },
-  { value: 'angular', label: 'Angular' },
-  { value: 'vue', label: 'Vue' },
-  { value: 'node', label: 'Node.js' },
-  { value: 'python', label: 'Python' },
-  { value: 'java', label: 'Java' },
-  { value: 'mongodb', label: 'MongoDB' },
+  { value: "react", label: "React" },
+  { value: "angular", label: "Angular" },
+  { value: "vue", label: "Vue" },
+  { value: "node", label: "Node.js" },
+  { value: "python", label: "Python" },
+  { value: "java", label: "Java" },
+  { value: "mongodb", label: "MongoDB" },
 ];
 
 export const assessmentOptions: StatusOption[] = [
-  { value: 'completed', label: 'Completed' },
-  { value: 'pending', label: 'Pending' },
-  { value: 'not-started', label: 'Not Started' },
-  { value: 'expired', label: 'Expired' },
-  { value: 'in-progress', label: 'In Progress' },
+  { value: "completed", label: "Completed" },
+  { value: "pending", label: "Pending" },
+  { value: "not-started", label: "Not Started" },
+  { value: "expired", label: "Expired" },
+  { value: "in-progress", label: "In Progress" },
 ];
 
 export const questionsDataStatic: Question[] = [
@@ -976,7 +985,8 @@ export const questionsDataStatic: Question[] = [
   {
     type: "multiple-choice",
     id: 2,
-    question: "What is the correct syntax to import React in a JavaScript file?",
+    question:
+      "What is the correct syntax to import React in a JavaScript file?",
     options: [
       "import React from 'react';",
       "import { React } from 'react';",
@@ -1041,7 +1051,9 @@ export default App;`,
       "A component whose form data is controlled by React state",
       "A component that is connected to a Redux store",
     ],
-    correctOptions: ["A component whose form data is controlled by React state"],
+    correctOptions: [
+      "A component whose form data is controlled by React state",
+    ],
     difficulty: "medium",
   },
   {
@@ -1067,7 +1079,9 @@ export default App;`,
       "Both are immutable and cannot be modified",
       "State is used in class components only, props are used in functional components",
     ],
-    correctOptions: ["State is used to manage data inside a component, props are used to pass data to other components"],
+    correctOptions: [
+      "State is used to manage data inside a component, props are used to pass data to other components",
+    ],
     difficulty: "easy",
   },
   {
@@ -1080,7 +1094,9 @@ export default App;`,
       "To manage state for components",
       "To create context in React",
     ],
-    correctOptions: ["To group multiple children elements without adding an extra node to the DOM"],
+    correctOptions: [
+      "To group multiple children elements without adding an extra node to the DOM",
+    ],
     difficulty: "easy",
   },
   {
@@ -1093,7 +1109,9 @@ export default App;`,
       "It makes the list immutable",
       "It improves the visual appearance of the list",
     ],
-    correctOptions: ["It helps React identify which items have changed, are added, or removed"],
+    correctOptions: [
+      "It helps React identify which items have changed, are added, or removed",
+    ],
     difficulty: "easy",
   },
   {
@@ -1127,7 +1145,9 @@ export default App;`,
       "To create complex components",
       "To define reusable UI components",
     ],
-    correctOptions: ["To avoid unnecessary renders by doing a shallow comparison of props and state"],
+    correctOptions: [
+      "To avoid unnecessary renders by doing a shallow comparison of props and state",
+    ],
     difficulty: "hard",
   },
   {
@@ -1140,7 +1160,9 @@ export default App;`,
       "Sharing state between sibling components directly",
       "Converting state into props",
     ],
-    correctOptions: ["Moving the state from a child component to a parent component to make it shared"],
+    correctOptions: [
+      "Moving the state from a child component to a parent component to make it shared",
+    ],
     difficulty: "medium",
   },
 ];

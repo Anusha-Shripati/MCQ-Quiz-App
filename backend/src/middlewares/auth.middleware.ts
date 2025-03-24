@@ -17,7 +17,10 @@ export const authenticateAndAuthorize =
     const token = authHeader.split(" ")[1] || "";
     try {
       // Decode and verify the token
-      const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as {
+      const decoded = jwt.verify(
+        token,
+        process.env.ACCESS_SECRET as string
+      ) as {
         id: string;
         email: string;
         role: string;
@@ -56,8 +59,8 @@ export const createToken = (id: string, email: string, role = "user") => {
     token: "",
   };
 
-  const token = jwt.sign(payload, process.env.JWT_SECRET as string, {
-    expiresIn: process.env.EXPIRE_JWT_SECRET || "30d",
+  const token = jwt.sign(payload, process.env.ACCESS_SECRET as string, {
+    expiresIn: process.env.ACCESS_EXPIRES || "30d",
   });
 
   return token;

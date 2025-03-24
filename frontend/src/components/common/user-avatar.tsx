@@ -19,7 +19,7 @@ const UserAvatar = ({
       {!isCollapsed && (
         <div>
           <p className="font-semibold">John Doe</p>
-          <p className="text-sm text-gray-500">Developer</p>
+          <p className="text-sm text-gray-500">Admin</p>
         </div>
       )}
     </div>

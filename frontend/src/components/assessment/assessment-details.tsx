@@ -1,14 +1,15 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useMemo, useState } from "react";
 import { ChevronDown, ChevronUp, Edit, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AssessmentEdit from "./assessment-edit";
-import { useDispatch, useSelector } from "react-redux";
-import { setCurrentAssessment, deleteAssessment, clearCurrentAssessment } from "../../store/features/assessmentSlice";
-import { RootState } from "../../store/store";
+// import { useDispatch, useSelector } from "react-redux";
+// import { setCurrentAssessment, deleteAssessment, clearCurrentAssessment } from "../../toolkit-store/features/assessmentSlice";
+// import { RootState } from "../../toolkit-store/store";
 import { toast } from "react-hot-toast";
-
+import { useAssessmentStore } from "@/store/assessmentStore";
+import useSWR from "swr";
 interface Technology {
   name: string;
   percentage: number;
@@ -135,33 +136,41 @@ function AssessmentItem({
 }
 
 export default function AssessmentDetails() {
-  const { assessments, isLoading, error, currentAssessment } = useSelector((state: RootState) => state.assessment);
-  const dispatch = useDispatch();
+  // const { assessments, isLoading, error, currentAssessment } = useSelector((state: RootState) => state.assessment);
   const [expandedId, setExpandedId] = useState<string>("mern");
   const [editing, setEditing] = useState<boolean>(false);
 
+  const { setCurrentAssessment, clearCurrentAssessment, deleteAssessment, currentAssessment, fetchAssessments, filters } = useAssessmentStore()
+  const key = useMemo(()=>{
+    return `/api/assessments?createdBy=${filters.createdBy}&assessment=${filters.assessment}&date=${filters.assessment}&view=${filters.view}`
+  },[filters])
+
+  
+  const { data: assessments, isLoading, error } = useSWR(
+    key, 
+    fetchAssessments);
+  
   const handleEdit = (id: string) => {
-    dispatch(setCurrentAssessment(id));
+    setCurrentAssessment(id);
     setEditing(true);
   };
 
   const handleSave = () => {
     setEditing(false);
-    dispatch(clearCurrentAssessment());
+    clearCurrentAssessment();
   };
 
   const handleCancel = () => {
-    setEditing(false);
-    dispatch(clearCurrentAssessment());
+    clearCurrentAssessment();
 
   };
 
-  const handleDelete = useCallback((id: string) => {
+  const handleDelete = (id: string) => {
     if (window.confirm("Are you sure you want to delete this assessment?")) {
-      dispatch(deleteAssessment(id));
+      deleteAssessment(id);
       toast.success("Assessment deleted successfully");
     }
-  }, [dispatch]);
+  };
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -171,7 +180,7 @@ export default function AssessmentDetails() {
     return <div>Error: {error}</div>;
   }
 
-  if (assessments.length === 0) {
+  if (assessments && assessments.length === 0) {
     return <div>No assessments found</div>;
   }
 
@@ -189,7 +198,7 @@ export default function AssessmentDetails() {
 
   return (
     <div className="space-y-4">
-      {assessments.map((assessment) => (
+      {assessments && assessments.map((assessment) => (
         <AssessmentItem
           key={assessment.id}
           id={assessment.id}

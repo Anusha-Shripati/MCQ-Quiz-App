@@ -1,17 +1,18 @@
 import { useState, useEffect, useRef } from "react";
-import { useDispatch } from "react-redux";
+// import { useDispatch } from "react-redux";
 import { Button } from "@/components/ui/button";
 // import { ChevronLeft } from "lucide-react";
 import Select from "react-select";
 import { AVAILABLE_CATEGORIES } from "@/shared/constants/data";
-import {
-  // updateTechnologyQuestions, 
-  removeTechnology,
-  type Technology,
-  updateAssessment,
-} from "@/store/features/assessmentSlice";
+// import {
+//   updateTechnologyQuestions, 
+//   removeTechnology,
+//   type Technology,
+//   updateAssessment,
+// } from "@/toolkit-store/features/assessmentSlice";
 import { toast } from "react-hot-toast";
 import { Input } from "../ui/input";
+import { useAssessmentStore, Technology } from "@/store/assessmentStore";
 interface Option {
   value: string;
   label: string;
@@ -37,14 +38,13 @@ interface AssessmentEditProps {
 }
 
 export default function AssessmentEdit({ assessment, onSave, onCancel }: AssessmentEditProps) {
-  const dispatch = useDispatch();
   const [localAssessment, setLocalAssessment] = useState(assessment);
   const [localTechnologies, setLocalTechnologies] = useState(assessment.technologies);
   const [, setIsLoading] = useState(false);
   const [, setError] = useState<string | null>(null);
 
   const errorTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
+const {removeTechnology,updateAssessment} = useAssessmentStore()
 
 
   const showError = (message: string) => {
@@ -149,7 +149,7 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
   };
 
   const handleRemoveTechnology = (techName: string) => {
-    dispatch(removeTechnology({ assessmentId: localAssessment.id, techName }));
+    removeTechnology({ assessmentId: localAssessment.id, techName });
   };
 
   const handleTotalQuestionsChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -187,6 +187,10 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
       toast.error(`Total questions (${totalQuestions}) exceed the limit (${localAssessment.totalQuestions})`);
       return false;
     }
+    if (totalQuestions != localAssessment.totalQuestions) {
+      toast.error(`Total questions (${totalQuestions}) is not equal to (${localAssessment.totalQuestions})`);
+      return false;
+    }
 
     return true;
   };
@@ -201,11 +205,11 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
         return;
       }
 
-      dispatch(updateAssessment({
+      updateAssessment({
         ...localAssessment,
         technologies: localTechnologies,
         duration: localAssessment.duration
-      }));
+      });
 
       onSave();
     } catch (err) {

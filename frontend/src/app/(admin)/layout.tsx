@@ -1,10 +1,12 @@
 "use client";
 import { ReactNode, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAppSelector } from "@/store/hooks";
+// import { useAppSelector } from "@/toolkit-store/hooks";
 import Sidebar from "@/components/common/sidebar";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import ClientWrapper from "@/components/ClientWrapper";
+// import ClientWrapper from "@/components/ClientWrapper";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { useAuthStore } from "@/store/authStore";
 
 export default function AdminLayout({
   children,
@@ -12,7 +14,9 @@ export default function AdminLayout({
   children: ReactNode;
 }) {
   const router = useRouter();
-  const { user, loading } = useAppSelector((state) => state.auth);
+  // const { user, loading } = useAppSelector((state) => state.auth);
+  const { user, loading } = useAuthStore();
+  
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -24,9 +28,7 @@ export default function AdminLayout({
 
   if (!mounted || loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen w-full">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />
-      </div>
+      <LoadingSpinner/>
     );
   }
 
@@ -38,11 +40,11 @@ export default function AdminLayout({
     <>
       <Sidebar />
       <div className="flex-1 bg-secondary border h-screen overflow-y-scroll flex justify-center">
-        <ClientWrapper>
+        {/* <ClientWrapper> */}
           <ScrollArea className="px-6 w-full xl:max-w-[1600px]">
             {children}
           </ScrollArea>
-        </ClientWrapper>
+        {/* </ClientWrapper> */}
       </div>
     </>
   );

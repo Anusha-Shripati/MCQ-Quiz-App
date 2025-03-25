@@ -4,13 +4,14 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { AVAILABLE_CATEGORIES, steps } from "@/shared/constants/data";
 import toast from "react-hot-toast";
-import { useDispatch } from "react-redux";
+// import { useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
-import { createAssessment } from "@/store/features/assessmentSlice";
+// import { createAssessment } from "@/toolkit-store/features/assessmentSlice";
 import Step1 from "./Step1";
 import Step2 from "./Step2";
 import Step3 from "./Step3";
 import StepsStepperNumber from "./StepsStepperNumber";
+import {  useAssessmentStore } from "@/store/assessmentStore";
 
 interface Category {
   name: string;
@@ -28,7 +29,7 @@ interface AssessmentForm {
 }
 
 export default function CreateAssessment() {
-  const dispatch = useDispatch();
+  const {createAssessment} = useAssessmentStore();
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [targetQuestions, setTargetQuestions] = useState(0);
@@ -154,7 +155,7 @@ export default function CreateAssessment() {
     };
 
     try {
-      dispatch(createAssessment(newAssessment));
+      createAssessment(newAssessment);
       toast.success("Assessment created successfully");
       router.push("/assessment");
     } catch (error) {

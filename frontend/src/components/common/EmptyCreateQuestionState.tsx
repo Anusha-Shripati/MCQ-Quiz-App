@@ -1,6 +1,6 @@
 import React from 'react';
 import { FileText } from 'lucide-react'; // Example icon
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/form/button';
 
 interface EmptyStateProps {
   title: string;

@@ -1,7 +1,7 @@
 // components/pagination/PaginationControls.tsx
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/form/button";
 
 interface PaginationControlsProps {
   currentPage: number;

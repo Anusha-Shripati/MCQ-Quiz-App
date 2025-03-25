@@ -6,12 +6,12 @@ import toast from "react-hot-toast";
 import dynamic from "next/dynamic";
 import CreateCandidateDialog from "@/components/candidates/create-candidate-dialog";
 import { candidatesList } from "@/shared/constants/data";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/form/select";
 import { PaginationControls } from "@/components/candidates/pagination-controls";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useRouter, useSearchParams, usePathname } from "next/navigation"; 
 import type { Candidate } from "@/types/candidate.types";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/form/button";
 import type { TableProps, Column, ExpandableRow } from "@/components/candidates/candidates-table";
 // import { Candidate } from "@/types/candidate.types";
 const FiltersCandidates = dynamic(() => import("@/components/candidates/candidates-filters"), {

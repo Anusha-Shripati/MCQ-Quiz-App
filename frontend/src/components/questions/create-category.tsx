@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/form/input";
+import { Button } from "@/components/ui/form/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 
 // Define Category type

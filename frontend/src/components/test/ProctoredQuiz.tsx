@@ -2,8 +2,8 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/form/input";
+import { Button } from "@/components/ui/form/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import html2canvas from 'html2canvas';
 

@@ -1,7 +1,7 @@
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@radix-ui/react-popover";
 import { CalendarIcon } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { Input } from "@/components/ui/form/input";
 import { formatDate } from "@/lib/utils";
 
 interface DatePickerInputProps {

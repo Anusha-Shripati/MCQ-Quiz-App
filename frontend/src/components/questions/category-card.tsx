@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import CategoryMenu from "./category-menu";
 import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
-import { Button } from "../ui/button";
+import { Button } from "../ui/form/button";
 import Link from "next/link";
 import { QuestionCategory } from "@/shared/types/app";
 

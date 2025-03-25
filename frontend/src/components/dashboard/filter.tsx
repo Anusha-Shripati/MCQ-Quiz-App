@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 
-import { Select, SelectContent, SelectTrigger, SelectItem } from "../ui/select";
+import { Select, SelectContent, SelectTrigger, SelectItem } from "../ui/form/select";
 
 interface LanguageScoreSelect {
   languages: string[];

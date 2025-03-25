@@ -1,5 +1,5 @@
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/form/select";
+import { Input } from "@/components/ui/form/input";
 
 interface DurationInputProps {
   label: string;

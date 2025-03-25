@@ -1,5 +1,5 @@
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/form/button";
 import { Card } from "@/components/ui/card";
 import { Question } from "@/shared/types/app";
 import { useTheme } from "next-themes";

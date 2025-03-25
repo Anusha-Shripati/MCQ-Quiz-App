@@ -1,15 +1,16 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { ChevronDown, ChevronUp, Edit, Trash2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/form/button";
 import AssessmentEdit from "./assessment-edit";
 // import { useDispatch, useSelector } from "react-redux";
 // import { setCurrentAssessment, deleteAssessment, clearCurrentAssessment } from "../../toolkit-store/features/assessmentSlice";
 // import { RootState } from "../../toolkit-store/store";
 import { toast } from "react-hot-toast";
 import { useAssessmentStore } from "@/store/assessmentStore";
-import useSWR from "swr";
+import { LoadingSpinner } from "../ui/loading-spinner";
+import Error from "@/app/error";
 interface Technology {
   name: string;
   percentage: number;
@@ -56,6 +57,13 @@ function AssessmentItem({
     }),
     initial
   ) || initial;
+
+
+  const total = (totalQuestions?.easy || 0) + (totalQuestions?.medium || 0) + (totalQuestions?.hard || 0)
+  const getPercentage = (count: number) => {
+    if (!total) return '0.00%'
+    return `${Math.round((count / total) * 100)}%`
+  }
   return (
     <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-200 hover:shadow-md">
       <div className="p-5 flex items-center justify-between">
@@ -96,13 +104,13 @@ function AssessmentItem({
             <div className="grid grid-cols-5 gap-4 pb-2 border-b border-gray-200 dark:border-gray-700">
               <div className="font-medium text-gray-700 dark:text-gray-300">Technology</div>
               <div className="text-center font-medium text-gray-700 bg-green-100 rounded-full px-2 py-1">
-                Easy (50%)
+                Easy ({getPercentage(totalQuestions.easy)})
               </div>
               <div className="text-center font-medium text-gray-700 bg-blue-100 rounded-full px-2 py-1">
-                Medium (50%)
+                Medium ({getPercentage(totalQuestions.medium)})
               </div>
               <div className="text-center font-medium text-gray-700 bg-red-100 rounded-full px-2 py-1">
-                Hard (50%)
+                Hard ({getPercentage(totalQuestions.hard)})
               </div>
               <div className="font-medium text-gray-700 dark:text-gray-300 text-right">Total Questions</div>
             </div>
@@ -125,7 +133,7 @@ function AssessmentItem({
               <div className="text-center font-semibold text-gray-900 dark:text-gray-300">{totalQuestions?.medium}</div>
               <div className="text-center font-semibold text-gray-900 dark:text-gray-300">{totalQuestions?.hard}</div>
               <div className="text-center font-semibold text-blue-600">
-                {totalQuestions?.easy + totalQuestions?.medium + totalQuestions?.hard}
+                {total}
               </div>
             </div>
           </div>
@@ -136,20 +144,11 @@ function AssessmentItem({
 }
 
 export default function AssessmentDetails() {
-  // const { assessments, isLoading, error, currentAssessment } = useSelector((state: RootState) => state.assessment);
   const [expandedId, setExpandedId] = useState<string>("mern");
   const [editing, setEditing] = useState<boolean>(false);
 
-  const { setCurrentAssessment, clearCurrentAssessment, deleteAssessment, currentAssessment, fetchAssessments, filters } = useAssessmentStore()
-  const key = useMemo(()=>{
-    return `/api/assessments?createdBy=${filters.createdBy}&assessment=${filters.assessment}&date=${filters.assessment}&view=${filters.view}`
-  },[filters])
+  const { assessments, isLoading, error, setCurrentAssessment, clearCurrentAssessment, deleteAssessment, currentAssessment } = useAssessmentStore()
 
-  
-  const { data: assessments, isLoading, error } = useSWR(
-    key, 
-    fetchAssessments);
-  
   const handleEdit = (id: string) => {
     setCurrentAssessment(id);
     setEditing(true);
@@ -173,15 +172,17 @@ export default function AssessmentDetails() {
   };
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <LoadingSpinner className="h-full w-full flex-grow" />;
   }
 
   if (error) {
-    return <div>Error: {error}</div>;
+    return <Error error={error} reset={() => window.location.reload()} />
+    // <div className="flex-grow w-full h-full center " >Something went wrong</div>;
+    // return <div className="flex-grow w-full h-full center " >Error: {error}</div>;
   }
 
   if (assessments && assessments.length === 0) {
-    return <div>No assessments found</div>;
+    return <div className="flex-grow w-full h-full center">No assessments found</div>;
   }
 
   if (editing) {

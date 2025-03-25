@@ -1,10 +1,10 @@
 "use client"
-import { Input } from '@/components/ui/input';
+import { Input } from '@/components/ui/form/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/form/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/form/label';
+import { Checkbox } from '@/components/ui/form/checkbox';
 import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { FiEdit, FiTrash2 } from 'react-icons/fi';

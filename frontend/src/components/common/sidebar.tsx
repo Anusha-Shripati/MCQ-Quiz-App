@@ -12,7 +12,7 @@ import {
   FiUsers,
   FiSettings,
 } from "react-icons/fi";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/form/button";
 import UserAvatar from "@/components/common/user-avatar";
 import { ThemeToggle } from "@/components/common/theme-toggle";
 import { 

@@ -28,7 +28,7 @@ export default function AdminLayout({
 
   if (!mounted || loading) {
     return (
-      <LoadingSpinner/>
+      <LoadingSpinner className="min-h-screen w-full"/>
     );
   }
 

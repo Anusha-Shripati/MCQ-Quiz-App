@@ -17,8 +17,10 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useAppDispatch } from "@/store/hooks";
-import { loginUser } from "@/store/features/authSlice";
+// import { useAppDispatch } from "@/toolkit-store/hooks";
+// import { loginUser } from "@/toolkit-store/features/authSlice";
+import toast from "react-hot-toast";
+import { useAuthStore } from "@/store/authStore";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address."),
@@ -27,7 +29,7 @@ const loginSchema = z.object({
 
 export default function Home() {
   const router = useRouter();
-  const dispatch = useAppDispatch();
+  const { login } = useAuthStore();
 
   const {
     register,
@@ -38,14 +40,15 @@ export default function Home() {
   });
 
   const onSubmit = async (data: z.infer<typeof loginSchema>) => {
-    console.log("Form Data:", data);
     try {
+      await login({ email: data.email, password: data.password })
+      toast.success('Login successfully')
       router.push("/dashboard");
-      await dispatch(
-        loginUser({ email: data.email, password: data.password })
-      ).unwrap();
     } catch (err) {
-      throw err;
+      if (err instanceof Error)
+        toast.error(err.message)
+      else
+        toast.error('Something went wrong')
     }
     // toast({ title: "Success!", description: "Form submitted successfully." });
   };

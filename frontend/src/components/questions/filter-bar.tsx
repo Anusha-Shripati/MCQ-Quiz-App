@@ -10,7 +10,7 @@ interface FilterBarProps {
   selectedDifficulties: string[];
   onDifficultyChange: (difficulties: string[]) => void;
 }
-
+  
 export const FilterBar = ({
   totalQuestions,
   searchQuery,

@@ -6,11 +6,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Edit, Trash, MoreVertical, Eye } from "lucide-react";
+import { Edit, Trash, MoreVertical } from "lucide-react";
 import { Button } from "../ui/form/button";
 import { QuestionCategory } from "@/shared/types/app";
 
-const CategoryMenu = ({ category, handleNavigate }: { category: QuestionCategory, handleNavigate:()=>void }) => {
+const CategoryMenu = ({ category }: { category: QuestionCategory, handleNavigate:()=>void }) => {
   const handleEditCategory = (categoryName: string) => {
     console.log(categoryName)
   };
@@ -43,13 +43,13 @@ const CategoryMenu = ({ category, handleNavigate }: { category: QuestionCategory
           <Trash className="h-4 w-4 text-red-500" />
           <span className="text-gray-900 dark:text-gray-200">Delete</span>
         </DropdownMenuItem>
-        <DropdownMenuItem
+        {/* <DropdownMenuItem
           onClick={() => handleNavigate()}
           className="flex items-center space-x-2 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"
         >
           <Eye className="h-4 w-4 text-blue-500" />
           <span className="text-gray-900 dark:text-gray-200">View</span>
-        </DropdownMenuItem>
+        </DropdownMenuItem> */}
       </DropdownMenuContent>
     </DropdownMenu>
   );

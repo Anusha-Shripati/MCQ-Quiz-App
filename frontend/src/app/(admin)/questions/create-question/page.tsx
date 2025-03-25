@@ -1,6 +1,6 @@
 "use client"
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/form/button';
 import QuestionCard from '@/components/questions/create-question-card';
 import { CREATE_QUESTIONS_STATIC_LIST } from '@/shared/constants/data';
 import QuestionSidebar from '@/components/questions/create-question-sidebar';

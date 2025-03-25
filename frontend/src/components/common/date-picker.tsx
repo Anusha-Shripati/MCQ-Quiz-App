@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { Popover, PopoverTrigger, PopoverContent } from '@radix-ui/react-popover';
-import { Input } from '@/components/ui/input';  // Assuming you have the Input component from shadcn
+import { Input } from '@/components/ui/form/input';  // Assuming you have the Input component from shadcn
 import { format } from 'date-fns'; // For formatting date
 import { CalendarIcon } from 'lucide-react';
 import { Calendar } from '../ui/calendar';
-import { Button } from '../ui/button';
+import { Button } from '../ui/form/button';
 
 // Define the DatePicker component
 const DatePicker: React.FC = () => {

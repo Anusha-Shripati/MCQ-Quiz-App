@@ -1,18 +1,12 @@
 import { useState, useEffect, useRef } from "react";
-// import { useDispatch } from "react-redux";
-import { Button } from "@/components/ui/button";
-// import { ChevronLeft } from "lucide-react";
+import { Button } from "@/components/ui/form/button";
 import Select from "react-select";
 import { AVAILABLE_CATEGORIES } from "@/shared/constants/data";
-// import {
-//   updateTechnologyQuestions, 
-//   removeTechnology,
-//   type Technology,
-//   updateAssessment,
-// } from "@/toolkit-store/features/assessmentSlice";
 import { toast } from "react-hot-toast";
-import { Input } from "../ui/input";
+import { Input } from "../ui/form/input";
 import { useAssessmentStore, Technology } from "@/store/assessmentStore";
+import { Slider } from "../ui/form/slider";
+
 interface Option {
   value: string;
   label: string;
@@ -44,7 +38,7 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
   const [, setError] = useState<string | null>(null);
 
   const errorTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-const {removeTechnology,updateAssessment} = useAssessmentStore()
+  const { removeTechnology, updateAssessment } = useAssessmentStore()
 
 
   const showError = (message: string) => {
@@ -72,15 +66,15 @@ const {removeTechnology,updateAssessment} = useAssessmentStore()
     difficulty: keyof Technology["questions"],
     value: number
   ) => {
-    if (isNaN(value) || value < 0) {
-      toast.error("Please enter a valid number");
-      return;
-    }
+    // if (isNaN(value) || value < 0) {
+    //   toast.error("Please enter a valid number");
+    //   return;
+    // }
 
     const updatedTechnologies = localTechnologies.map(tech => {
       if (tech.name !== techName) return tech;
 
-      const newQuestions = { ...tech.questions, [difficulty]: value };
+      const newQuestions = { ...tech.questions, [difficulty]: value || 0 };
 
       // Calculate new total for this technology
       const newTotalForTech = Object.values(newQuestions).reduce((a, b) => a + b, 0);
@@ -92,8 +86,8 @@ const {removeTechnology,updateAssessment} = useAssessmentStore()
       }, 0);
 
       // Check if new total would exceed the limit
-      if (newTotalForTech + otherTechsTotal > localAssessment.totalQuestions) {
-        showError(`Total questions cannot exceed ${localAssessment.totalQuestions}`);
+      if (newTotalForTech + otherTechsTotal > localAssessment.totalQuestions ) {
+        showError(`Total questions cannot exceed ${localAssessment.totalQuestions || 0}`);
 
         // toast.error(`Total questions cannot exceed ${localAssessment.totalQuestions}`);
         return tech;
@@ -106,11 +100,11 @@ const {removeTechnology,updateAssessment} = useAssessmentStore()
   };
 
   const handleDifficultySliderChange = (
-    difficulty: keyof Technology["questions"],
-    percentage: number
+    percentage: number[],
+    difficulty: keyof Technology["questions"]
   ) => {
-    const totalQuestionsTarget = localAssessment.totalQuestions;
-    const newQuestionsForDifficulty = Math.floor((totalQuestionsTarget * percentage) / 100);
+    const totalQuestionsTarget = localAssessment.totalQuestions || 0;
+    const newQuestionsForDifficulty = Math.floor((totalQuestionsTarget * percentage[0]) / 100);
     const questionsPerTech = Math.floor(newQuestionsForDifficulty / localTechnologies.length);
 
     const otherDifficulties = ['easy', 'medium', 'hard'].filter(d => d !== difficulty);
@@ -121,7 +115,7 @@ const {removeTechnology,updateAssessment} = useAssessmentStore()
 
     if (newQuestionsForDifficulty + otherDifficultiesTotal > totalQuestionsTarget) {
 
-      showError(`Total questions cannot exceed ${totalQuestionsTarget}`);
+      showError(`Total questions cannot exceed ${totalQuestionsTarget }`);
       // toast.error(`Total questions cannot exceed ${totalQuestionsTarget}`);
       return;
     }
@@ -155,11 +149,11 @@ const {removeTechnology,updateAssessment} = useAssessmentStore()
   const handleTotalQuestionsChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     let newValue = parseInt(event.target.value);
 
-    if (isNaN(newValue) || newValue < 0) {
+    // if (isNaN(newValue) || newValue < 0) {
       // toast.error("Please enter a valid number");
-      newValue=0;
+      // newValue = 0;
       // return;
-    }
+    // }
 
     // // Calculate current total of all questions
     // const currentTotal = localTechnologies.reduce((sum, tech) =>
@@ -169,12 +163,12 @@ const {removeTechnology,updateAssessment} = useAssessmentStore()
 
     // // Allow increasing the total questions, but validate when decreasing
     // if (newValue < currentTotal) {
-      // showError(`Cannot set total questions below current sum (${currentTotal})`)
-      // toast.error(`Cannot set total questions below current sum (${currentTotal})`);
-      // return;
+    // showError(`Cannot set total questions below current sum (${currentTotal})`)
+    // toast.error(`Cannot set total questions below current sum (${currentTotal})`);
+    // return;
     // }
 
-    setLocalAssessment(prev => ({ ...prev, totalQuestions: newValue || 0 }));
+    setLocalAssessment(prev => ({ ...prev, totalQuestions: newValue }));
   };
 
   const validateQuestionTotals = () => {
@@ -184,11 +178,11 @@ const {removeTechnology,updateAssessment} = useAssessmentStore()
     );
 
     if (totalQuestions > localAssessment.totalQuestions) {
-      toast.error(`Total questions (${totalQuestions}) exceed the limit (${localAssessment.totalQuestions})`);
+      toast.error(`Total questions (${totalQuestions}) exceed the limit (${localAssessment.totalQuestions || 0})`);
       return false;
     }
     if (totalQuestions != localAssessment.totalQuestions) {
-      toast.error(`Total questions (${totalQuestions}) is not equal to (${localAssessment.totalQuestions})`);
+      toast.error(`Total questions (${totalQuestions}) is not equal to (${localAssessment.totalQuestions || 0})`);
       return false;
     }
 
@@ -225,38 +219,25 @@ const {removeTechnology,updateAssessment} = useAssessmentStore()
     0
   );
 
-  const sliderClick = (e: React.MouseEvent<HTMLDivElement>, difficulty: string) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const newPercentage = Math.round((x / rect.width) * 100);
-    handleDifficultySliderChange(
-      difficulty as keyof Technology['questions'],
-      newPercentage
-    );
-  }
-  const slideChange = (e: React.MouseEvent<HTMLDivElement>, difficulty: string) => {
-    const slider = e.currentTarget.parentElement;
+  // const sliderClick = (e: React.MouseEvent<HTMLDivElement>, difficulty: string) => {
+  //   const rect = e.currentTarget.getBoundingClientRect();
+  //   const x = e.clientX - rect.left;
+  //   const newPercentage = Math.round((x / rect.width) * 100);
+  //   handleDifficultySliderChange(
+  //     difficulty as keyof Technology['questions'],
+  //     newPercentage
+  //   );
+  // }
+  // const slideChange = (value:number[], difficulty: string) => {
+  //   const slider = value;
 
-    if (!slider) return;
+  //   if (!slider) return;
 
-    const handleMouseMove = (e: MouseEvent) => {
-      const rect = slider!.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const newPercentage = Math.max(0, Math.min(100, Math.round((x / rect.width) * 100)));
-      handleDifficultySliderChange(
-        difficulty as keyof Technology['questions'],
-        newPercentage
-      );
-    };
-
-    const handleMouseUp = () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-    };
-
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
-  }
+  //     handleDifficultySliderChange(
+  //       difficulty as keyof Technology['questions'],
+  //       newPercentage
+  //     );
+  // }
 
   return (
     <div className="min-h-screen dark:bg-gray-800">
@@ -392,13 +373,22 @@ const {removeTechnology,updateAssessment} = useAssessmentStore()
                     0
                   );
                   const percentage = localAssessment.totalQuestions > 0
-                    ? Math.round((totalForDifficulty / localAssessment.totalQuestions) * 100)
+                    ? Math.round((totalForDifficulty / localAssessment.totalQuestions ) * 100)
                     : 0;
 
                   return (
                     <div key={difficulty} className="text-center">
                       <div className="mb-2 capitalize">{difficulty}</div>
-                      <div
+                      <Slider
+                        className="relative flex items-center select-none touch-none w-[200px] h-5"
+                        max={100}
+                        step={1}
+                        onValueChange={(e:number[]) => handleDifficultySliderChange(e, difficulty as keyof typeof colors)}
+                        value={[percentage >100 ? 0 : percentage ]}
+                        color={colors[difficulty as keyof typeof colors]} 
+                      >
+                      </Slider>
+                        {/* <div
                         className="relative h-2 bg-gray-200 rounded-full cursor-pointer"
                         onClick={(e) => sliderClick(e, difficulty)}
                       >
@@ -411,8 +401,8 @@ const {removeTechnology,updateAssessment} = useAssessmentStore()
                           style={{ left: `${percentage >100 ? 0 : percentage}%`, transform: `translate(-50%, -50%)` }}
                           onMouseDown={(e) => slideChange(e, difficulty)}
                         />
-                      </div>
-                      <div className="mt-1 text-xs text-gray-500">{percentage >100 ? 0 : percentage}%</div>
+                      </div> */}
+                      <div className="mt-1 text-xs text-gray-500">{percentage > 100 ? 0 : percentage}%</div>
                     </div>
                   );
                 })}
@@ -433,7 +423,7 @@ const {removeTechnology,updateAssessment} = useAssessmentStore()
                     <input
                       type="number"
                       min="0"
-                      max={localAssessment.totalQuestions}
+                      max={localAssessment.totalQuestions || 0}
                       value={tech.questions.easy}
                       onChange={(e) => handleQuestionChange(tech.name, 'easy', parseInt(e.target.value))}
                       className="w-20 px-3 py-2 text-center rounded-md border border-gray-300 

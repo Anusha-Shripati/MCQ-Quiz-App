@@ -3,7 +3,7 @@ import AssessmentDetails from "@/components/assessment/assessment-details";
 
 export default function AssessmentPage() {
   return (
-    <div className="min-h-screen p-8 ">
+    <div className="min-h-screen p-8 flex flex-col">
       {/* Page Header */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-6">

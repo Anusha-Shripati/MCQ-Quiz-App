@@ -1,7 +1,7 @@
 // components/pagination/ResultsPerPage.tsx
 "use client";
 
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/form/select";
 
 interface ResultsPerPageProps {
   currentPageStart: number;

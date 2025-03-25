@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/form/button";
 import { PaginationProps } from "@/shared/types/app";
 
 export const Pagination = ({ currentPage, totalPages, onPageChange }: PaginationProps) => {

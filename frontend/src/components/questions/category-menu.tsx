@@ -7,7 +7,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Edit, Trash, MoreVertical, Eye } from "lucide-react";
-import { Button } from "../ui/button";
+import { Button } from "../ui/form/button";
 import { QuestionCategory } from "@/shared/types/app";
 
 const CategoryMenu = ({ category, handleNavigate }: { category: QuestionCategory, handleNavigate:()=>void }) => {

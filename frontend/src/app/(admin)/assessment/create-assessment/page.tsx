@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/form/button";
 import { ArrowLeft } from "lucide-react";
 import { AVAILABLE_CATEGORIES, steps } from "@/shared/constants/data";
 import toast from "react-hot-toast";

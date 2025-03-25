@@ -1,13 +1,13 @@
 'use client';
 
 import { useEffect } from 'react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/form/button';
 
 export default function Error({
   error,
   reset,
 }: {
-  error: Error & { digest?: string };
+  error: Error & { digest?: string } |any;
   reset: () => void;
 }) {
   useEffect(() => {
@@ -16,12 +16,12 @@ export default function Error({
   }, [error]);
 
   return (
-    <div className="flex h-screen flex-col items-center justify-center gap-4">
+    <div className="flex h-screen flex-col items-center justify-center gap-4 w-100">
       <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
         Something went wrong!
       </h2>
       <Button 
-        variant="ghost"
+        variant="default"
         onClick={reset}
       >
         Try again

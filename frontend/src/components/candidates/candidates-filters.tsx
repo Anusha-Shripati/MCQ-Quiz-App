@@ -1,6 +1,6 @@
 // Filters component (main file)
 import React, { useState, memo } from "react";
-import { Button } from "../ui/button";
+import { Button } from "../ui/form/button";
 import { cn } from "@/lib/utils";
 import { FiltersProps, TechnologyOption, StatusOption } from "@/types/candidate.types";
 import { SearchFilter } from "./filters/search-filter";

@@ -1,7 +1,7 @@
 import React from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/form/input";
+import { Button } from "@/components/ui/form/button";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 
 type Category = {

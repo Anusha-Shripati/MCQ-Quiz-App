@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/form/button';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
+import { Input } from '@/components/ui/form/input';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/form/select';
 import {
   Dialog,
   DialogTrigger,

@@ -4,8 +4,8 @@ import {
   import { 
     Table, TableHeader, TableRow, TableHead, TableBody, TableCell 
   } from "@/components/ui/table";
-  import { Button } from "@/components/ui/button";
-  import { Label } from "@/components/ui/label";
+  import { Button } from "@/components/ui/form/button";
+  import { Label } from "@/components/ui/form/label";
   import { ArrowLeft } from "lucide-react";
   
   // Define types for formData

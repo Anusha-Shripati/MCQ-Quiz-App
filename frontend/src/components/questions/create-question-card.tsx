@@ -1,8 +1,20 @@
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/form/button';
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
-import { Input } from '@/components/ui/form/input';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/form/select';
+import React, { useState } from "react";
+import { Button } from "@/components/ui/form/button";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/form/input";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/form/select";
 import {
   Dialog,
   DialogTrigger,
@@ -11,15 +23,15 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from '@/components/ui/dialog';
-import { Question } from '@/shared/types/app';
+} from "@/components/ui/dialog";
+import { Question } from "@/shared/types/app";
 
 interface QuestionCardProps {
   question: Question;
   index: number;
   selectedQuestion: number;
   questions: Question[];
-  handleQuestionTypeChange: (value: Question['type'], index: number) => void;
+  handleQuestionTypeChange: (value: Question["type"], index: number) => void;
   handleCorrectOptionChange: (optionIndex: number, index: number) => void;
   handleDeleteQuestion: (index: number) => void;
   setQuestions: React.Dispatch<React.SetStateAction<Question[]>>;
@@ -39,15 +51,17 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
 
   // Ensure 6 options for multiple-choice and radio-select
   const ensureSixOptions = (options: string[] | undefined) => {
-    if (!options) return Array(6).fill('');
-    while (options.length < 6) {
-      options.push('');
+    if (!options) return Array(5).fill("");
+    while (options.length < 5) {
+      options.push("");
     }
-    return options.slice(0, 6); // Ensure only 6 options
+    return options.slice(0, 5); // Ensure only 6 options
   };
 
   return (
-    <Card className={`mb-6 h-[600px] flex flex-col ${selectedQuestion === index ? '' : 'hidden'}`}>
+    <Card
+      className={` h-[570px] flex flex-col ${selectedQuestion === index ? "" : "hidden"}`}
+    >
       <CardHeader>
         <CardTitle className="text-xl font-bold text-gray-900 dark:text-white">
           Question {question.id}
@@ -58,7 +72,9 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
         <div className="flex gap-4 mb-4">
           <Select
             value={question.type}
-            onValueChange={(value: Question['type']) => handleQuestionTypeChange(value, index)}
+            onValueChange={(value: Question["type"]) =>
+              handleQuestionTypeChange(value, index)
+            }
           >
             <SelectTrigger className="w-1/2">
               <SelectValue placeholder="Question Type" />
@@ -66,13 +82,15 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
             <SelectContent>
               <SelectItem value="multiple-choice">Multiple Choice</SelectItem>
               <SelectItem value="radio-select">Radio Select</SelectItem>
-              <SelectItem value="fill-in-the-blanks">Fill in the Blanks</SelectItem>
+              <SelectItem value="fill-in-the-blanks">
+                Fill in the Blanks
+              </SelectItem>
               <SelectItem value="code-snippet">Code Snippet</SelectItem>
             </SelectContent>
           </Select>
           <Select
             value={question.difficulty}
-            onValueChange={(value: Question['difficulty']) => {
+            onValueChange={(value: Question["difficulty"]) => {
               const updatedQuestions = [...questions];
               updatedQuestions[index].difficulty = value;
               setQuestions(updatedQuestions);
@@ -102,11 +120,12 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
         />
 
         {/* Dynamic answer section based on question type */}
-        {(question.type === 'multiple-choice' || question.type === 'radio-select') && (
+        {(question.type === "multiple-choice" ||
+          question.type === "radio-select") && (
           <div className="space-y-2">
             {ensureSixOptions(question.options).map((option, i) => (
               <div key={i} className="flex items-center gap-2">
-                {question.type === 'radio-select' ? (
+                {question.type === "radio-select" ? (
                   <input
                     type="radio"
                     name={`radio-${question.id}`}
@@ -128,15 +147,14 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
                     updatedQuestions[index].options![i] = e.target.value;
                     setQuestions(updatedQuestions);
                   }}
-                  className={i >= 4 ? 'border-dashed border-gray-400' : ''}
+                  className={i >= 4 ? "border-dashed border-gray-400" : ""}
                 />
               </div>
             ))}
-
           </div>
         )}
 
-        {question.type === 'fill-in-the-blanks' && (
+        {question.type === "fill-in-the-blanks" && (
           <Input
             placeholder="Enter the correct answer"
             value={question.answer}
@@ -148,7 +166,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
           />
         )}
 
-        {question.type === 'code-snippet' && (
+        {question.type === "code-snippet" && (
           <textarea
             placeholder="Enter your code snippet"
             value={question.code}
@@ -171,11 +189,15 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
             <DialogHeader>
               <DialogTitle>Are you sure?</DialogTitle>
               <DialogDescription>
-                This action cannot be undone. This will permanently delete the question.
+                This action cannot be undone. This will permanently delete the
+                question.
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setIsDeleteModalOpen(false)}>
+              <Button
+                variant="outline"
+                onClick={() => setIsDeleteModalOpen(false)}
+              >
                 Cancel
               </Button>
               <Button

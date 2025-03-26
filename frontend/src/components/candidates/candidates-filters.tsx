@@ -1,58 +1,74 @@
 // Filters component (main file)
-import React, { useState, memo } from "react";
+"use client"
+import React, { useState, memo, useEffect } from "react";
 import { Button } from "../ui/form/button";
 import { cn } from "@/lib/utils";
-import { FiltersProps, TechnologyOption, StatusOption } from "@/types/candidate.types";
+import { AssessmentOption, CandidateFilter, FiltersProps, TechnologyOption } from "@/types/candidate.types";
 import { SearchFilter } from "./filters/search-filter";
 import { TechnologyFilter } from "./filters/technology-filter";
 import { FilterOptions } from "./filters/filter-options";
 import { AssessmentFilter } from "./filters/assessment-filter";
 import { assessmentOptions, technologyOptions } from "@/shared/constants/data";
+import { useForm } from "react-hook-form";
 
 
 const Filters = memo(({ candidates = [] }: FiltersProps) => {
   const [activeFilter, setActiveFilter] = useState("");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [technologyFilter, setTechnologyFilter] = useState<TechnologyOption[]>([]);
-  const [assessmentFilter, setAssessmentFilter] = useState<StatusOption[]>([]);
-  const [dateRange, setDateRange] = useState<[string, string]>(["", ""]);
 
   const handleOpenFilter = (filterName: string) => {
     setActiveFilter(activeFilter === filterName ? "" : filterName);
   };
-
+  const defaultValues: CandidateFilter = {
+    searchQuery: "",
+    technologyFilter: [],
+    assessmentFilter: [],
+    created: {
+      days: "",
+      range: undefined
+    },
+  }
+  const { setValue, watch, reset, register } = useForm<CandidateFilter>({ defaultValues })
+  const formData = watch()
   const clearAllFilters = () => {
-    setSearchQuery("");
-    setTechnologyFilter([]);
-    setAssessmentFilter([]);
-    setDateRange(["", ""]);
-    setActiveFilter("");
+    reset()
   };
+  const getData = () => {
+    console.log(formData);
+  }
+  useEffect(() => {
+    getData()
+  }, [formData.technologyFilter, formData.assessmentFilter, formData.created?.days, formData.created?.range])
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      getData()
+    }, 1000)
+    return () => clearTimeout(timer)
+  }, [formData.searchQuery])
 
   return (
-    <section className="w-full p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
-    
+    <section className="w-full">
+
       <div className="flex flex-col md:flex-row md:items-center gap-2 flex-wrap mb-2">
-        <SearchFilter searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
-        
-        <TechnologyFilter 
-          value={technologyFilter}
-          onChange={setTechnologyFilter}
+        <SearchFilter searchQuery={formData.searchQuery} setSearchQuery={(value) => setValue('searchQuery', value)} />
+
+        <TechnologyFilter
+          value={formData.technologyFilter}
+          onChange={(value: TechnologyOption[]) => setValue('technologyFilter', value)}
           options={technologyOptions}
         />
 
-        <AssessmentFilter 
-          value={assessmentFilter}
-          onChange={setAssessmentFilter}
+        <AssessmentFilter
+          value={formData.assessmentFilter}
+          onChange={(value: AssessmentOption[]) => setValue('assessmentFilter', value)}
           options={assessmentOptions}
         />
 
-        <FilterOptions 
+        <FilterOptions
+          formData={formData}
+          setValue={setValue}
+          register={register}
           activeFilter={activeFilter}
           handleOpenFilter={handleOpenFilter}
-          assessmentFilter={assessmentFilter}
-          dateRange={dateRange}
-          setAssessmentFilter={setAssessmentFilter}
         />
       </div>
       <div className="flex justify-between items-center gap-4 flex-wrap mt-2 ml-2">

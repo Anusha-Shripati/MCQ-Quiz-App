@@ -40,9 +40,9 @@ const ReusableTable= <T extends object> ({
   };
 
   return (
-    <div className={`bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 sm:p-6 overflow-x-auto ${className} h-[600px] overflow-y-scroll`}>
-      <Table className="min-w-full">
-        <TableHeader>
+    <div className={`overflow-x-auto ${className} h-[580px] overflow-y-scroll`}>
+      <Table className="min-w-full h-full">
+        <TableHeader className="sticky">
           <TableRow className="bg-gradient-to-r from-blue-50 to-blue-100 dark:from-gray-700 dark:to-gray-800">
             {columns.map((column) => (
               <TableHead

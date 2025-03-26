@@ -37,4 +37,25 @@ export interface StatusOption {
 export interface AssessmentOption {
   value: string;
   label: string;
-} 
+}
+
+
+export type DateRange = {
+  from: Date | undefined;
+  to?: Date | undefined; // Optional
+};
+export interface CandidateFilter {
+  searchQuery: string;
+  technologyFilter: TechnologyOption[];
+  assessmentFilter: AssessmentOption[];
+  created?: {
+    range: DateRange | undefined;
+    days:string
+  };
+  experience?:{
+    min:number |null,
+    max:number|null,
+    range:string
+  }
+
+}

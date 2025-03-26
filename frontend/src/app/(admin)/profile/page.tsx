@@ -5,86 +5,127 @@ import { Label } from "@/components/ui/form/label";
 import { Button } from "@/components/ui/form/button";
 import ProfilePictureUpload from "@/components/profile/ProfilePictureUpload";
 
+// Helper functions
+const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+const isValidPassword = (password: string) => password.length >= 8;
+
+// Reusable Input Field Component
+const ValidatedInput = ({
+  label,
+  type = "text",
+  value,
+  onChange,
+  error,
+}: {
+  label: string;
+  type?: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  error?: string;
+}) => (
+  <div>
+    <Label className="block text-gray-700 dark:text-gray-300 mb-2">{label}</Label>
+    <Input
+      type={type}
+      value={value}
+      onChange={onChange}
+      className="w-full dark:bg-gray-800 dark:text-white"
+    />
+    {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+  </div>
+);
+
 export default function Profile() {
+  // State for user info
   const [userName, setUserName] = useState("LogicRays");
   const [email, setEmail] = useState("hello@iclrays.com");
   const [isEditing, setIsEditing] = useState(false);
 
-  // Password fields
-  const [oldPassword, setOldPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [reNewPassword, setReNewPassword] = useState("");
+  // State for password fields
+  const [passwords, setPasswords] = useState({
+    oldPassword: "",
+    newPassword: "",
+    reNewPassword: "",
+  });
 
   // Validation states
-  const [userNameError, setUserNameError] = useState("");
-  const [emailError, setEmailError] = useState("");
-  const [oldPasswordError, setOldPasswordError] = useState("");
-  const [newPasswordError, setNewPasswordError] = useState("");
-  const [reNewPasswordError, setReNewPasswordError] = useState("");
+  const [errors, setErrors] = useState({
+    userName: "",
+    email: "",
+    oldPassword: "",
+    newPassword: "",
+    reNewPassword: "",
+  });
+
   const [isPasswordFormValid, setIsPasswordFormValid] = useState(false);
-  // Handle Save for User Info
-  const handleSave = () => {
-    // Validate User Name
+
+  // Handlers for user info validation
+  const validateUserInfo = () => {
+    const newErrors = { userName: "", email: "" };
+    let isValid = true;
+
     if (!userName.trim()) {
-      setUserNameError("User Name is required");
-      return;
-    } else {
-      setUserNameError("");
+      newErrors.userName = "User Name is required";
+      isValid = false;
     }
 
-    // Validate Email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      setEmailError("Invalid email format");
-      return;
-    } else {
-      setEmailError("");
+    if (!isValidEmail(email)) {
+      newErrors.email = "Invalid email format";
+      isValid = false;
     }
 
-    setIsEditing(false);
-    // Add logic to save the user info
+    setErrors((prev) => ({ ...prev, ...newErrors }));
+    return isValid;
   };
 
-  // Handle Save for Password Change
+  const handleSave = () => {
+    if (validateUserInfo()) {
+      setIsEditing(false);
+      // Add logic to save the user info
+    }
+  };
+
+  // Handlers for password validation
+  const validatePasswordForm = () => {
+    const newErrors = { oldPassword: "", newPassword: "", reNewPassword: "" };
+    let isValid = true;
+
+    if (!passwords.oldPassword.trim()) {
+      newErrors.oldPassword = "Old Password is required";
+      isValid = false;
+    }
+
+    if (!isValidPassword(passwords.newPassword)) {
+      newErrors.newPassword = "Password must be at least 8 characters";
+      isValid = false;
+    }
+
+    if (passwords.newPassword !== passwords.reNewPassword) {
+      newErrors.reNewPassword = "Passwords do not match";
+      isValid = false;
+    }
+
+    setErrors((prev) => ({ ...prev, ...newErrors }));
+    return isValid;
+  };
+
   const handlePasswordChange = (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Validate Old Password
-    if (!oldPassword.trim()) {
-      setOldPasswordError("Old Password is required");
-      return;
-    } else {
-      setOldPasswordError("");
+    if (validatePasswordForm()) {
+      console.log("Password changed successfully");
+      // Add logic to save the new password
     }
-
-    // Validate New Password
-    if (newPassword.length < 8) {
-      setNewPasswordError("Password must be at least 8 characters");
-      return;
-    } else {
-      setNewPasswordError("");
-    }
-
-    // Validate Re-New Password
-    if (newPassword !== reNewPassword) {
-      setReNewPasswordError("Passwords do not match");
-      return;
-    } else {
-      setReNewPasswordError("");
-    }
-
-    // Add logic to save the new password
-    console.log("Password changed successfully");
   };
 
-    useEffect(() => {
-      setIsPasswordFormValid(
-        oldPassword.trim().length > 0 &&
-        newPassword.trim().length >= 8 &&
-        reNewPassword.trim().length > 0 &&
-        newPassword === reNewPassword
-      );
-    }, [oldPassword, newPassword, reNewPassword]);
+  // Update password form validity
+  useEffect(() => {
+    setIsPasswordFormValid(
+      passwords.oldPassword.trim().length > 0 &&
+        isValidPassword(passwords.newPassword) &&
+        passwords.reNewPassword.trim().length > 0 &&
+        passwords.newPassword === passwords.reNewPassword
+    );
+  }, [passwords]);
 
   return (
     <div className="max-w-2xl mx-auto p-6 bg-white dark:bg-gray-700 m-4 rounded-lg shadow-sm">
@@ -95,8 +136,7 @@ export default function Profile() {
 
       {/* User Info Section */}
       <div className="space-y-4 mb-4 mt-4">
-         {/* Single Edit / Save Button */}
-         <div className="mb-1 flex justify-end">
+        <div className="mb-1 flex justify-end">
           <Button
             onClick={isEditing ? handleSave : () => setIsEditing(true)}
             className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-600"
@@ -108,14 +148,12 @@ export default function Profile() {
         <div className="pb-4 dark:border-gray-700">
           <Label className="text-gray-600 dark:text-gray-300">User Name</Label>
           {isEditing ? (
-            <>
-              <Input
-                value={userName}
-                onChange={(e) => setUserName(e.target.value)}
-                className="w-full mt-2 dark:bg-gray-800 dark:text-white"
-              />
-              {userNameError && <p className="text-red-500 text-sm mt-1">{userNameError}</p>}
-            </>
+            <ValidatedInput
+              label="User Name"
+              value={userName}
+              onChange={(e) => setUserName(e.target.value)}
+              error={errors.userName}
+            />
           ) : (
             <div className="font-medium mt-2 dark:text-white">{userName}</div>
           )}
@@ -124,63 +162,56 @@ export default function Profile() {
         <div className="pb-2 dark:border-gray-700">
           <Label className="text-gray-600 dark:text-gray-300">Email</Label>
           {isEditing ? (
-            <>
-              <Input
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full mt-2 dark:bg-gray-800 dark:text-white"
-              />
-              {emailError && <p className="text-red-500 text-sm mt-1">{emailError}</p>}
-            </>
+            <ValidatedInput
+              label="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              error={errors.email}
+            />
           ) : (
             <div className="font-medium mt-2 dark:text-white">{email}</div>
           )}
         </div>
       </div>
 
-      <hr className="mb-4"/>
+      <hr className="mb-4" />
+
       {/* Change Password Section */}
       <div>
         <h2 className="text-xl font-semibold mb-6 dark:text-white">Change Password</h2>
         <form className="space-y-4" onSubmit={handlePasswordChange}>
-          <div>
-            <Label className="block text-gray-700 dark:text-gray-300 mb-2">Old Password</Label>
-            <Input
-              type="password"
-              value={oldPassword}
-              onChange={(e) => setOldPassword(e.target.value)}
-              className="w-full dark:bg-gray-800 dark:text-white"
-            />
-            {oldPasswordError && <p className="text-red-500 text-sm mt-1">{oldPasswordError}</p>}
-          </div>
-
-          <div>
-            <Label className="block text-gray-700 dark:text-gray-300 mb-2">New Password</Label>
-            <Input
-              type="password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              className="w-full dark:bg-gray-800 dark:text-white"
-            />
-            {newPasswordError && <p className="text-red-500 text-sm mt-1">{newPasswordError}</p>}
-          </div>
-
-          <div>
-            <Label className="block text-gray-700 dark:text-gray-300 mb-2">Re-New Password</Label>
-            <Input
-              type="password"
-              value={reNewPassword}
-              onChange={(e) => setReNewPassword(e.target.value)}
-              className="w-full dark:bg-gray-800 dark:text-white"
-            />
-            {reNewPasswordError && <p className="text-red-500 text-sm mt-1">{reNewPasswordError}</p>}
-          </div>
-
+          <ValidatedInput
+            label="Old Password"
+            type="password"
+            value={passwords.oldPassword}
+            onChange={(e) =>
+              setPasswords((prev) => ({ ...prev, oldPassword: e.target.value }))
+            }
+            error={errors.oldPassword}
+          />
+          <ValidatedInput
+            label="New Password"
+            type="password"
+            value={passwords.newPassword}
+            onChange={(e) =>
+              setPasswords((prev) => ({ ...prev, newPassword: e.target.value }))
+            }
+            error={errors.newPassword}
+          />
+          <ValidatedInput
+            label="Re-New Password"
+            type="password"
+            value={passwords.reNewPassword}
+            onChange={(e) =>
+              setPasswords((prev) => ({ ...prev, reNewPassword: e.target.value }))
+            }
+            error={errors.reNewPassword}
+          />
           <div className="flex justify-end">
             <Button
               type="submit"
               className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800"
-              disabled={!isPasswordFormValid}  // Disable if validations fail
+              disabled={!isPasswordFormValid}
             >
               Save Changes
             </Button>

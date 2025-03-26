@@ -22,8 +22,6 @@ import {
 } from "@/components/ui/tooltip";
 import { LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
-// import { useAppDispatch } from "@/toolkit-store/hooks";
-// import { logout } from "@/toolkit-store/features/authSlice";
 import { FaUserAlt } from "react-icons/fa";
 import { useAuthStore } from "@/store/authStore";
 
@@ -31,7 +29,6 @@ import { useAuthStore } from "@/store/authStore";
 export default function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const sidebarRef = useRef<HTMLDivElement | null>(null);
-  // const { logout } = useAuth();
   const {logout} = useAuthStore();
   const router = useRouter();
 

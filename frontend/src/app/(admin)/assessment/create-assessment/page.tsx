@@ -4,51 +4,69 @@ import { Button } from "@/components/ui/form/button";
 import { ArrowLeft } from "lucide-react";
 import { AVAILABLE_CATEGORIES, steps } from "@/shared/constants/data";
 import toast from "react-hot-toast";
-// import { useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
-// import { createAssessment } from "@/toolkit-store/features/assessmentSlice";
 import Step1 from "./Step1";
 import Step2 from "./Step2";
 import Step3 from "./Step3";
 import StepsStepperNumber from "./StepsStepperNumber";
-import {  useAssessmentStore } from "@/store/assessmentStore";
+import { useAssessmentStore } from "@/store/assessmentStore";
+import { useForm } from "react-hook-form";
+import { AssessmentForm } from "@/types/assessment.types";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-interface Category {
-  name: string;
-  questions: {
-    easy: number;
-    medium: number;
-    hard: number;
-  };
-}
-
-interface AssessmentForm {
-  name: string;
-  categories: Category[];
-  duration: number;
-}
 
 export default function CreateAssessment() {
-  const {createAssessment} = useAssessmentStore();
+  const { createAssessment } = useAssessmentStore();
   const router = useRouter();
   const [step, setStep] = useState(1);
-  const [targetQuestions, setTargetQuestions] = useState(0);
-  const [formData, setFormData] = useState<AssessmentForm>({
-    name: "",
-    categories: [
-      {
-        name: "",
-        questions: { easy: 0, medium: 0, hard: 0 },
-      },
-    ],
-    duration: 15,
+
+
+  const technologySchema = z.object({
+    name: z.string().min(1, "Technology name is required"),
+  });
+  const validation = z.object({
+    name: z.string().nonempty("Name is required."),
+    duration: z.number().min(1, "Duration is required"),
+    categories:z.array(technologySchema).min(1,'At least one category is required')
   });
 
+  const { register, watch, setValue, formState: { errors }, trigger } = useForm<AssessmentForm>({
+    resolver: zodResolver(validation), defaultValues: {
+      name: "",
+      categories: [],
+      duration: 15,
+      targetQuestions:0
+    }
+  })
+  const formData = watch()
   // Add this options array for the duration select
   const durationOptions = Array.from(Array(37).keys()).map((i) => ({
     value: 15 + i * 5,
     label: `${15 + i * 5} minutes`,
   }));
+
+
+  const handleNextStep = async () => {
+    const valudate = await trigger()
+    if (step === 2) {
+
+      const isValid = formData.categories.every((cat) =>
+        Object.values(cat.questions).some((count) => count > 0)
+      );
+      if (!isValid) {
+        toast.error("Each category must have at least one question");
+        return;
+      }
+    }
+    if(valudate){
+      setStep((prev) => prev + 1);
+    }
+  };
+
+  const handlePreviousStep = () => {
+    setStep((prev) => prev - 1);
+  };
 
   const calculateTotalSum = () => {
     return formData.categories.reduce((sum, category) => {
@@ -61,91 +79,14 @@ export default function CreateAssessment() {
     }, 0);
   };
 
-  const handleQuestionCountChange = (
-    index: number,
-    difficulty: "easy" | "medium" | "hard",
-    value: string
-  ) => {
-    const numValue = parseInt(value);
-
-    const totalSum = calculateTotalSum();
-    const remainingQuestions =
-      targetQuestions -
-      totalSum +
-      formData.categories[index].questions[difficulty];
-
-    if (numValue > remainingQuestions) {
-      toast.error(`You can only allocate ${remainingQuestions} questions.`);
-      return;
-    }
-
-    setFormData((prev) => {
-      const updatedCategories = [...prev.categories];
-      updatedCategories[index].questions[difficulty] = numValue;
-      return { ...prev, categories: updatedCategories };
-    });
-  };
-
-  const handleAssessmentNameChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setFormData((prev) => ({
-      ...prev,
-      name: e.target.value,
-    }));
-  };
-
-  const handleNextStep = () => {
-    if (step === 1 && !formData.name.trim()) {
-      toast.error("Assessment name is required");
-      return;
-    }
-    if (
-      step === 1 &&
-      formData.categories.length <= 1 &&
-      formData.categories[0].name === ""
-    ) {
-      toast.error("At least add one category.");
-      return;
-    }
-    if (step === 2) {
-      const isValid = formData.categories.every((cat) =>
-        Object.values(cat.questions).some((count) => count > 0)
-      );
-      if (!isValid) {
-        toast.error("Each category must have at least one question");
-        return;
-      }
-    }
-    setStep((prev) => prev + 1);
-  };
-
-  const handlePreviousStep = () => {
-    setStep((prev) => prev - 1);
-  };
 
   const handleSubmit = () => {
-    // Validate the form data
-    if (!formData.name.trim()) {
-      toast.error("Assessment name is required");
-      return;
-    }
-
-    if (formData.categories.length === 0) {
-      toast.error("At least one category is required");
-      return;
-    }
-
-    if (calculateTotalSum() !== targetQuestions) {
-      toast.error("Total questions must match target questions");
-      return;
-    }
 
     // Create the assessment
     const newAssessment = {
       title: formData.name,
       createdBy: "Current User", // Replace with actual user data
-      totalQuestions: targetQuestions,
+      totalQuestions: formData.targetQuestions,
       duration: formData.duration,
       technologies: formData.categories.map((cat) => ({
         name: cat.name,
@@ -164,71 +105,11 @@ export default function CreateAssessment() {
     }
   };
 
-  const calculateDifficultyPercentage = (
-    difficulty: "easy" | "medium" | "hard"
-  ) => {
-    const totalForDifficulty = formData.categories.reduce(
-      (sum, cat) => sum + cat.questions[difficulty],
-      0
-    );
-    return targetQuestions > 0
-      ? Math.round((totalForDifficulty / targetQuestions) * 100)
-      : 0;
-  };
-
-  // Add this new function to handle slider changes
-  const handleDifficultySliderChange = (
-    difficulty: "easy" | "medium" | "hard",
-    percentage: number
-  ) => {
-    // Calculate the total questions for the selected difficulty based on the percentage
-    const totalForDifficulty = Math.floor((targetQuestions * percentage) / 100);
-
-    // Calculate the current total questions for the other difficulties
-    const totalForOtherDifficulties = formData.categories.reduce((sum, cat) => {
-      return (
-        sum +
-        (difficulty === "easy" ? 0 : cat.questions.easy) +
-        (difficulty === "medium" ? 0 : cat.questions.medium) +
-        (difficulty === "hard" ? 0 : cat.questions.hard)
-      );
-    }, 0);
-
-    // Check if the new total exceeds the target questions
-    if (totalForDifficulty + totalForOtherDifficulties > targetQuestions) {
-      toast.error(`Total questions cannot exceed ${targetQuestions}`);
-      return;
-    }
-
-    // Calculate questions per category based on the percentage
-    const questionsPerCategory = Math.floor(
-      totalForDifficulty / formData.categories.length
-    );
-
-    // Update the form data
-    setFormData((prev) => ({
-      ...prev,
-      categories: prev.categories.map((category) => ({
-        ...category,
-        questions: {
-          ...category.questions,
-          [difficulty]: questionsPerCategory,
-        },
-      })),
-    }));
-  };
+  // // Add this new function to handle slider changes
+  
 
   // Add this handler for duration change
-  const handleDurationChange = (
-    selectedOption: { value: number; label: string } | null
-  ) => {
-    if (selectedOption) {
-      setFormData((prev) => ({
-        ...prev,
-        duration: selectedOption.value,
-      }));
-    }
-  };
+
 
   return (
     <div className="mx-auto py-8 px-6">
@@ -272,22 +153,22 @@ export default function CreateAssessment() {
           formData={formData}
           AVAILABLE_CATEGORIES={AVAILABLE_CATEGORIES}
           durationOptions={durationOptions}
-          handleAssessmentNameChange={handleAssessmentNameChange}
-          handleDurationChange={handleDurationChange}
           handleNextStep={handleNextStep}
-          setFormData={setFormData}
+          register={register}
+          setValue={setValue}
+          errors={errors}
         />
       )}
       {step === 2 && (
         <Step2
-          targetQuestions={targetQuestions}
-          setTargetQuestions={setTargetQuestions}
           formData={formData}
-          handleDifficultySliderChange={handleDifficultySliderChange}
-          handleQuestionCountChange={handleQuestionCountChange}
-          calculateTotalSum={calculateTotalSum}
           handlePreviousStep={handlePreviousStep}
           handleNextStep={handleNextStep}
+          register={register}
+          setValue={setValue}
+          errors={errors}
+          calculateTotalSum={calculateTotalSum}
+
         />
       )}
       {step === 3 && (
@@ -295,8 +176,6 @@ export default function CreateAssessment() {
           formData={formData}
           setStep={setStep}
           handleSubmit={handleSubmit}
-          targetQuestions={targetQuestions}
-          calculateDifficultyPercentage={calculateDifficultyPercentage}
           calculateTotalSum={calculateTotalSum}
           handlePreviousStep={handlePreviousStep}
         />

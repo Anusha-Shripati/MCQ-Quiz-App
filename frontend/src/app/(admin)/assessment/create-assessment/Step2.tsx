@@ -1,38 +1,127 @@
-import React from "react";
+import React, { useRef } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/form/input";
 import { Button } from "@/components/ui/form/button";
 import { ArrowLeft, ArrowRight } from "lucide-react";
-
-type Category = {
-  name: string;
-  questions: {
-    easy: number;
-    medium: number;
-    hard: number;
-  };
-};
+import { UseFormRegister, UseFormSetValue } from "react-hook-form";
+import { AssessmentForm } from "@/types/assessment.types";
+import { Slider } from "@/components/ui/form/slider";
+import toast from "react-hot-toast";
 
 type Step2Props = {
-  formData: { categories: Category[] };
-  targetQuestions: number;
-  setTargetQuestions: (value: number) => void;
-  handleDifficultySliderChange: (difficulty: "easy" | "medium" | "hard", percentage: number) => void;
-  handleQuestionCountChange: (index: number, difficulty: "easy" | "medium" | "hard", value: string) => void;
-  calculateTotalSum: () => number;
+  formData: AssessmentForm;
   handlePreviousStep: () => void;
   handleNextStep: () => void;
+  errors: any
+  calculateTotalSum: () => number;
+
+  setValue: UseFormSetValue<AssessmentForm>
+  register:UseFormRegister<AssessmentForm>
+
+
 };
 
 const Step2: React.FC<Step2Props> = ({
   formData,
-  targetQuestions,
-  setTargetQuestions,
-  handleDifficultySliderChange,
-  handleQuestionCountChange,
   handlePreviousStep,
   handleNextStep,
+  register,
+  setValue,
+  calculateTotalSum
+
 }) => {
+  const colors = {
+    easy: "bg-green-500 dark:bg-green-600",
+    medium: "bg-blue-500 dark:bg-blue-600",
+    hard: "bg-red-500 dark:bg-red-600",
+  };
+
+  const errorTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const showError = (message: string) => {
+    if (errorTimeoutRef.current) return;
+
+    toast.error(message);
+
+    errorTimeoutRef.current = setTimeout(() => {
+      errorTimeoutRef.current = null;
+    }, 1000);
+  };
+  const gotoNext=()=>{
+    const total = calculateTotalSum();
+    if(total != formData.targetQuestions){
+      toast.error('Target questions must be eqla to total question')
+      return
+    }
+    handleNextStep()
+  }
+
+  const handleDifficultySliderChange = (
+    percentage: number[],
+    difficulty: "easy" | "medium" | "hard"
+  ) => {
+    // Calculate the total questions for the selected difficulty based on the percentage
+    const totalForDifficulty = Math.floor((formData.targetQuestions * percentage[0]) / 100);
+
+    // Calculate the current total questions for the other difficulties
+    const totalForOtherDifficulties = formData.categories.reduce((sum, cat) => {
+      return (
+        sum +
+        (difficulty === "easy" ? 0 : cat.questions.easy) +
+        (difficulty === "medium" ? 0 : cat.questions.medium) +
+        (difficulty === "hard" ? 0 : cat.questions.hard)
+      );
+    }, 0);
+
+    // Check if the new total exceeds the target questions
+    if (totalForDifficulty + totalForOtherDifficulties > formData.targetQuestions) {
+      showError(`Total questions cannot exceed ${formData.targetQuestions}`);
+      return;
+    }
+
+    // Calculate questions per category based on the percentage
+    const questionsPerCategory = Math.floor(
+      totalForDifficulty / formData.categories.length
+    );
+
+    // Update the form data
+    const updated = formData.categories.map((category) => ({
+      ...category,
+      questions: {
+        ...category.questions,
+        [difficulty]: questionsPerCategory,
+      },
+    }))
+    setValue('categories', updated)
+  };
+
+
+  const handleQuestionCountChange = (
+    index: number,
+    difficulty: "easy" | "medium" | "hard",
+    value: string
+  ) => {
+    const numValue = isNaN(parseInt(value))?0:parseInt(value);
+
+    const totalSum = calculateTotalSum();
+    const remainingQuestions =
+    formData.targetQuestions -
+      totalSum +
+      formData.categories[index].questions[difficulty];
+
+    if (numValue > remainingQuestions) {
+      showError(`You can only allocate ${remainingQuestions} questions.`);
+      return;
+    }
+
+    const updatedCategories = formData.categories;
+    updatedCategories[index].questions[difficulty] = numValue;
+
+    setValue('categories', updatedCategories)
+  };
+
+
+
   return (
     <Card className="dark:bg-gray-800 dark:border-gray-700">
       <CardHeader>
@@ -46,8 +135,7 @@ const Step2: React.FC<Step2Props> = ({
           <h3 className="text-lg font-medium dark:text-white">Total Questions</h3>
           <Input
             type="number"
-            value={targetQuestions}
-            onChange={(e) => setTargetQuestions(parseInt(e.target.value))}
+           {...register('targetQuestions')}
             className="w-24 text-center dark:bg-gray-700 dark:border-gray-600 dark:text-white"
             min="0"
           />
@@ -59,28 +147,19 @@ const Step2: React.FC<Step2Props> = ({
               (sum, cat) => sum + cat.questions[difficulty as "easy" | "medium" | "hard"],
               0
             );
-            const percentage = targetQuestions > 0 ? Math.round((totalForDifficulty / targetQuestions) * 100) : 0;
-            const colors = {
-              easy: "bg-green-500 dark:bg-green-600",
-              medium: "bg-blue-500 dark:bg-blue-600",
-              hard: "bg-red-500 dark:bg-red-600",
-            };
+            const percentage = formData.targetQuestions > 0 ? Math.round((totalForDifficulty / formData.targetQuestions) * 100) : 0;
+
 
             return (
               <div key={difficulty} className="text-center">
-                <div className="mb-2 capitalize dark:text-gray-300">{difficulty}</div>
-                <div
-                  className="relative h-2 bg-gray-200 dark:bg-gray-600 rounded-full cursor-pointer"
-                  onClick={(e) => {
-                    const rect = e.currentTarget.getBoundingClientRect();
-                    const x = e.clientX - rect.left;
-                    const newPercentage = Math.round((x / rect.width) * 100);
-                    handleDifficultySliderChange(difficulty as "easy" | "medium" | "hard", newPercentage);
-                  }}
-                >
-                  <div className={`h-full ${colors[difficulty as "easy" | "medium" | "hard"]} rounded-full transition-all duration-300`} style={{ width: `${percentage}%` }} />
-                  <div className="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-white dark:bg-gray-300 border-2 border-blue-600 dark:border-blue-500 rounded-full cursor-grab" style={{ left: `${percentage}%`, transform: `translate(-50%, -50%)` }} />
-                </div>
+                <Slider
+                  className="relative flex items-center select-none touch-none w-[200px] h-5"
+                  max={100}
+                  step={1}
+                  onValueChange={(e: number[]) => handleDifficultySliderChange(e, difficulty as keyof typeof colors)}
+                  value={[percentage > 100 ? 0 : percentage]}
+                  color={colors[difficulty as keyof typeof colors]}
+                />
                 <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">{percentage}%</div>
               </div>
             );
@@ -118,7 +197,7 @@ const Step2: React.FC<Step2Props> = ({
           <ArrowLeft className="mr-2 h-4 w-4" />
           Previous
         </Button>
-        <Button onClick={handleNextStep} className="dark:bg-blue-600 dark:hover:bg-blue-700">
+        <Button onClick={gotoNext} className="dark:bg-blue-600 dark:hover:bg-blue-700">
           Next
           <ArrowRight className="ml-2 h-4 w-4" />
         </Button>

@@ -7,43 +7,38 @@ import {
   import { Button } from "@/components/ui/form/button";
   import { Label } from "@/components/ui/form/label";
   import { ArrowLeft } from "lucide-react";
+import { AssessmentForm } from "@/types/assessment.types";
   
-  // Define types for formData
-  interface QuestionDistribution {
-    easy: number;
-    medium: number;
-    hard: number;
-  }
-  
-  interface Category {
-    name: string;
-    questions: QuestionDistribution;
-  }
-  
-  interface FormData {
-    name: string;
-    categories: Category[];
-  }
   
   interface Step3Props {
-    formData: FormData;
+    formData: AssessmentForm;
     setStep: (step: number) => void;
-    targetQuestions: number;
-    calculateDifficultyPercentage: (difficulty: "easy" | "medium" | "hard") => number;
-    calculateTotalSum: () => number;
     handlePreviousStep: () => void;
     handleSubmit: () => void;
+    calculateTotalSum: () => number;
+
   }
   
   const Step3: React.FC<Step3Props> = ({
     formData,
     setStep,
-    targetQuestions,
-    calculateDifficultyPercentage,
-    calculateTotalSum,
     handlePreviousStep,
     handleSubmit,
+    calculateTotalSum
   }) => {
+
+  const calculateDifficultyPercentage = (
+    difficulty: "easy" | "medium" | "hard"
+  ) => {
+    const totalForDifficulty = formData.categories.reduce(
+      (sum, cat) => sum + cat.questions[difficulty],
+      0
+    );
+    return formData.targetQuestions > 0
+      ? Math.round((totalForDifficulty / formData.targetQuestions) * 100)
+      : 0;
+  };
+
     return (
       <Card className="max-h-[80vh] overflow-y-auto dark:bg-gray-800 dark:border-gray-700">
         <CardHeader className="p-4">
@@ -120,7 +115,7 @@ import {
           <div className="flex flex-col sm:flex-row items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
             <div className="space-y-1 mb-2 sm:mb-0">
               <p className="text-xs text-gray-500 dark:text-gray-400">Target Questions</p>
-              <p className="text-sm font-semibold text-gray-900 dark:text-white">{targetQuestions}</p>
+              <p className="text-sm font-semibold text-gray-900 dark:text-white">{formData.targetQuestions}</p>
             </div>
             <div className="space-y-1">
               <p className="text-xs text-gray-500 dark:text-gray-400">Selected Questions</p>

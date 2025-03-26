@@ -34,13 +34,11 @@ interface AssessmentEditProps {
 export default function AssessmentEdit({ assessment, onSave, onCancel }: AssessmentEditProps) {
   const [localAssessment, setLocalAssessment] = useState(assessment);
   const [localTechnologies, setLocalTechnologies] = useState(assessment.technologies);
-  const [, setIsLoading] = useState(false);
-  const [, setError] = useState<string | null>(null);
 
-  const errorTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const { removeTechnology, updateAssessment } = useAssessmentStore()
 
 
+  const errorTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const showError = (message: string) => {
     if (errorTimeoutRef.current) return;
 
@@ -86,7 +84,7 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
       }, 0);
 
       // Check if new total would exceed the limit
-      if (newTotalForTech + otherTechsTotal > localAssessment.totalQuestions ) {
+      if (newTotalForTech + otherTechsTotal > localAssessment.totalQuestions) {
         showError(`Total questions cannot exceed ${localAssessment.totalQuestions || 0}`);
 
         // toast.error(`Total questions cannot exceed ${localAssessment.totalQuestions}`);
@@ -115,7 +113,7 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
 
     if (newQuestionsForDifficulty + otherDifficultiesTotal > totalQuestionsTarget) {
 
-      showError(`Total questions cannot exceed ${totalQuestionsTarget }`);
+      showError(`Total questions cannot exceed ${totalQuestionsTarget}`);
       // toast.error(`Total questions cannot exceed ${totalQuestionsTarget}`);
       return;
     }
@@ -149,25 +147,6 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
   const handleTotalQuestionsChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     let newValue = parseInt(event.target.value);
 
-    // if (isNaN(newValue) || newValue < 0) {
-      // toast.error("Please enter a valid number");
-      // newValue = 0;
-      // return;
-    // }
-
-    // // Calculate current total of all questions
-    // const currentTotal = localTechnologies.reduce((sum, tech) =>
-    //   sum + tech.questions.easy + tech.questions.medium + tech.questions.hard,
-    //   0
-    // );
-
-    // // Allow increasing the total questions, but validate when decreasing
-    // if (newValue < currentTotal) {
-    // showError(`Cannot set total questions below current sum (${currentTotal})`)
-    // toast.error(`Cannot set total questions below current sum (${currentTotal})`);
-    // return;
-    // }
-
     setLocalAssessment(prev => ({ ...prev, totalQuestions: newValue }));
   };
 
@@ -191,11 +170,9 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
 
   const handleSaveChanges = () => {
     try {
-      setIsLoading(true);
-      setError(null);
 
       if (!validateQuestionTotals()) {
-        setIsLoading(false);
+        toast.error('Failed to save changes');
         return;
       }
 
@@ -207,10 +184,8 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
 
       onSave();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
       toast.error('Failed to save changes');
     } finally {
-      setIsLoading(false);
     }
   };
 
@@ -219,25 +194,6 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
     0
   );
 
-  // const sliderClick = (e: React.MouseEvent<HTMLDivElement>, difficulty: string) => {
-  //   const rect = e.currentTarget.getBoundingClientRect();
-  //   const x = e.clientX - rect.left;
-  //   const newPercentage = Math.round((x / rect.width) * 100);
-  //   handleDifficultySliderChange(
-  //     difficulty as keyof Technology['questions'],
-  //     newPercentage
-  //   );
-  // }
-  // const slideChange = (value:number[], difficulty: string) => {
-  //   const slider = value;
-
-  //   if (!slider) return;
-
-  //     handleDifficultySliderChange(
-  //       difficulty as keyof Technology['questions'],
-  //       newPercentage
-  //     );
-  // }
 
   return (
     <div className="min-h-screen dark:bg-gray-800">
@@ -373,7 +329,7 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
                     0
                   );
                   const percentage = localAssessment.totalQuestions > 0
-                    ? Math.round((totalForDifficulty / localAssessment.totalQuestions ) * 100)
+                    ? Math.round((totalForDifficulty / localAssessment.totalQuestions) * 100)
                     : 0;
 
                   return (
@@ -383,12 +339,12 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
                         className="relative flex items-center select-none touch-none w-[200px] h-5"
                         max={100}
                         step={1}
-                        onValueChange={(e:number[]) => handleDifficultySliderChange(e, difficulty as keyof typeof colors)}
-                        value={[percentage >100 ? 0 : percentage ]}
-                        color={colors[difficulty as keyof typeof colors]} 
+                        onValueChange={(e: number[]) => handleDifficultySliderChange(e, difficulty as keyof typeof colors)}
+                        value={[percentage > 100 ? 0 : percentage]}
+                        color={colors[difficulty as keyof typeof colors]}
                       >
                       </Slider>
-                        {/* <div
+                      {/* <div
                         className="relative h-2 bg-gray-200 rounded-full cursor-pointer"
                         onClick={(e) => sliderClick(e, difficulty)}
                       >

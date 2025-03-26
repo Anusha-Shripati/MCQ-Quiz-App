@@ -7,7 +7,7 @@ interface DurationInputProps {
   timeValue: number | '';
   setTimeUnit: (unit: 'days' | 'hours') => void;
   setTimeValue: (value: number | '') => void;
-  error?: string;
+  error?: string | undefined;
 }
 
 export const DurationInput = ({

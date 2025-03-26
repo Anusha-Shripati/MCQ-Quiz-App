@@ -1,0 +1,54 @@
+import React, { useMemo } from 'react'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/form/select';
+import { TablePaginationProps } from '@/shared/types/app';
+import { PaginationControls } from './pagination-controls';
+
+function Pagination(props:React.PropsWithChildren<TablePaginationProps>) {
+    const handleChange=(e:string)=>{
+        if('onPerPageChange' in props){
+            props.onPerPageChange(e)
+        }
+    }
+    const handlePageChange=(e:number)=>{
+        if('onPageChange' in props){
+            props.onPageChange(e)
+        }
+    }
+    return (
+        <div className={props.className || ''}>
+            {props.children}
+            <div className="flex flex-col sm:flex-row justify-between items-center mb-4 px-4">
+                <div className="text-sm text-gray-600 dark:text-gray-400 mb-2 sm:mb-0">
+                    Showing {props.currentPageStart || 0}-{props.currentPageEnd || 0} of {props.totalItems || 0}
+                </div>
+
+                {/* Items per page selector */}
+                <div className="flex items-center space-x-2">
+                    <span className="text-sm text-gray-600 dark:text-gray-400">Results per page</span>
+                    <Select
+                        value={props.itemsPerPage?.toString() || '10'}
+                        onValueChange={handleChange}
+                    >
+                        <SelectTrigger className="w-[80px]">
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="10">10</SelectItem>
+                            <SelectItem value="25">25</SelectItem>
+                            <SelectItem value="50">50</SelectItem>
+                            <SelectItem value="100">100</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+            </div>
+            <PaginationControls
+                currentPage={props.currentPage || 0}
+                totalItems={props.totalItems || 0}
+                itemsPerPage={props.itemsPerPage || 10}
+                onPageChange={handlePageChange}
+            />
+        </div>
+    )
+}
+
+export default Pagination

@@ -1,26 +1,26 @@
+"use client"
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@radix-ui/react-popover";
 import { CalendarIcon } from "lucide-react";
 import { Input } from "@/components/ui/form/input";
 import { formatDate } from "@/lib/utils";
+import { useState } from "react";
 
 interface DatePickerInputProps {
   label: string;
   date?: Date;
   setDate: (date?: Date) => void;
-  isOpen: boolean;
-  setIsOpen: (open: boolean) => void;
-  error?: string;
+  error?: string | undefined;
 }
 
 export const DatePickerInput = ({
   label,
   date,
   setDate,
-  isOpen,
-  setIsOpen,
   error
-}: DatePickerInputProps) => (
+}: DatePickerInputProps) => {
+  const [isOpen,setIsOpen] = useState(false)
+  return (
   <div>
     <label className="block text-sm font-medium mb-1">{label}</label>
     <Popover open={isOpen} onOpenChange={setIsOpen}>
@@ -48,4 +48,4 @@ export const DatePickerInput = ({
     </Popover>
     {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
   </div>
-); 
+)}; 

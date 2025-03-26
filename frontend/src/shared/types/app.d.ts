@@ -28,3 +28,14 @@ export interface PaginationProps {
   totalPages: number;
   onPageChange: (pageNumber: number) => void;
 }
+
+export interface TablePaginationProps{
+  currentPageStart:number;
+  currentPageEnd:number;
+  totalItems:number;
+  currentPage: number;
+  itemsPerPage:number;
+  onPageChange: (e:number) => void;
+  onPerPageChange:(e:string) => void;
+  className:string;
+}

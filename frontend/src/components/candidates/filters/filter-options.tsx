@@ -6,44 +6,47 @@ import { cn } from "@/lib/utils";
 
 import * as  Popover from "@radix-ui/react-popover";
 import { UseFormRegister, UseFormSetValue } from "react-hook-form";
-import { useEffect } from "react";
-import { CandidateFilter, DateRange } from "@/types/candidate.types";
+import { useEffect, useState } from "react";
+import { CandidateFilter } from "@/types/candidate.types";
+import { DateRange } from "@/types/common.types";
 
 interface FilterOptionsProps {
   formData: CandidateFilter;
   setValue: UseFormSetValue<CandidateFilter>;
   register: UseFormRegister<CandidateFilter>;
-  activeFilter: string;
-  handleOpenFilter: (filter: string) => void;
 }
 
 export function FilterOptions({
   formData,
   setValue,
-  register, activeFilter,
-  handleOpenFilter,
+  register,
 
 }: FilterOptionsProps) {
-  useEffect(()=>{
-    setValue('experience.range','')
-  },[formData?.experience?.min || formData?.experience?.max])
+  useEffect(() => {
+    setValue('experience.range', '')
+  }, [formData?.experience?.min || formData?.experience?.max])
+  const [activeFilter, setActiveFilter] = useState("");
 
+
+  const handleOpenFilter = (filterName: string) => {
+    setActiveFilter(activeFilter === filterName ? "" : filterName);
+  };
   const renderFilterContent = (filter: string) => {
 
     const handleExpRange = (value: string) => {
-      setValue('experience.min',null)
-      setValue('experience.max',null)
+      setValue('experience.min', null)
+      setValue('experience.max', null)
       setValue('experience.range', value)
     }
     const handelDateButton = (value: string) => {
-      setValue('created.range',undefined)
+      setValue('created.range', undefined)
       setValue('created.days', value)
     }
-    const handleDateRange=(e:DateRange)=>{
-      setValue('created.days','');
-      setValue('created.range',e)
+    const handleDateRange = (e: DateRange) => {
+      setValue('created.days', '');
+      setValue('created.range', e)
     }
-   
+
     switch (filter) {
       case "experience":
         return (
@@ -64,10 +67,10 @@ export function FilterOptions({
       case "created":
         return (
           <div className="space-y-2">
-            <DateRangePicker onSelect={(e: any) => { handleDateRange(e) }} value={formData.created?.range} />
+            <DateRangePicker onSelect={(e: any) => { handleDateRange(e) }} selected={formData.created?.range} />
             <div className="flex gap-2 flex-wrap">
-              <Button variant={formData?.created?.days == 'Last 7 Days'?'default':"outline"} onClick={() => handelDateButton('Last 7 Days')} className="text-sm">Last 7 Days</Button>
-              <Button variant={formData?.created?.days == 'Last 30 Days'?'default':"outline"} onClick={() => handelDateButton('Last 30 Days')} className="text-sm">Last 30 Days</Button>
+              <Button variant={formData?.created?.days == 'Last 7 Days' ? 'default' : "outline"} onClick={() => handelDateButton('Last 7 Days')} className="text-sm">Last 7 Days</Button>
+              <Button variant={formData?.created?.days == 'Last 30 Days' ? 'default' : "outline"} onClick={() => handelDateButton('Last 30 Days')} className="text-sm">Last 30 Days</Button>
             </div>
           </div>
         );
@@ -75,14 +78,12 @@ export function FilterOptions({
         return null;
     }
   };
-  let open = false
-
   return (
-    <div className="flex gap-2 flex-wrap md:flex-nowrap shrink-0">
+    <div className="flex gap-2 flex-wrap md:flex-nowrap shrink-0 z-10">
       {["Created"].map((filter) => (
         <Popover.Root key={filter} onOpenChange={(e) => { handleOpenFilter(filter.toLowerCase()) }}>
           <Popover.Trigger asChild>
-            <div  className="relative">
+            <div className="relative">
               <Button
                 variant="outline"
                 className={cn(
@@ -105,12 +106,11 @@ export function FilterOptions({
           </Popover.Trigger>
           <Popover.Portal>
 
-            <Popover.Content>
+            <Popover.Content className="z-10">
               <div className={cn(
-                " mt-2 w-72 bg-white dark:bg-gray-900",
+                "mt-2 w-72 bg-white dark:bg-gray-900",
                 "border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg",
-                "z-50 p-4 transform origin-top",
-                "animate-in fade-in slide-in-from-top-2 duration-200"
+                "p-4 transform origin-top",
               )}>
                 {renderFilterContent(filter.toLowerCase())}
               </div>

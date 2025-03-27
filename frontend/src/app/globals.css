@@ -3,11 +3,11 @@
 @tailwind utilities;
 
 @layer base {
-  ::-webkit-scrollbar {
+  /* ::-webkit-scrollbar {
     display: none;
-  }
+  } */
   html {
-    scrollbar-width: none;
+    /* scrollbar-width: none; */
     -ms-overflow-style: none;
   }
   :root {

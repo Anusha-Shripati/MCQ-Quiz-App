@@ -1,3 +1,4 @@
+import { DateRange } from '@/types/common.types';
 import { create } from 'zustand'
 
 export interface Question {
@@ -23,7 +24,7 @@ export interface Assessment {
 export interface AssessmentFilters{
     assessment:string,
     createdBy:string,
-    date: Date, 
+    date: DateRange | undefined, 
     view: string 
 }
 interface AssessmentState {
@@ -68,7 +69,7 @@ export const useAssessmentStore = create<AssessmentState>((set, get) => ({
     filters:{
         assessment:"all",
         createdBy:"all",
-        date: new Date(), 
+        date: undefined, 
         view: 'today' 
     },
     currentAssessment: null,

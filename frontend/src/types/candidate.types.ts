@@ -1,3 +1,5 @@
+import { DateRange } from "./common.types";
+
 export interface CandidateDetails {
   totalPercentage: string;
   categories: Record<string, string>;
@@ -40,10 +42,6 @@ export interface AssessmentOption {
 }
 
 
-export type DateRange = {
-  from: Date | undefined;
-  to?: Date | undefined; // Optional
-};
 export interface CandidateFilter {
   searchQuery: string;
   technologyFilter: TechnologyOption[];

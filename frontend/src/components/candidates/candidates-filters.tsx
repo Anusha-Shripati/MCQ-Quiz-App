@@ -1,6 +1,6 @@
 // Filters component (main file)
 "use client"
-import React, { useState, memo, useEffect } from "react";
+import React, { memo, useEffect } from "react";
 import { Button } from "../ui/form/button";
 import { cn } from "@/lib/utils";
 import { AssessmentOption, CandidateFilter, FiltersProps, TechnologyOption } from "@/types/candidate.types";
@@ -10,14 +10,10 @@ import { FilterOptions } from "./filters/filter-options";
 import { AssessmentFilter } from "./filters/assessment-filter";
 import { assessmentOptions, technologyOptions } from "@/shared/constants/data";
 import { useForm } from "react-hook-form";
-
+import { ListFilterIcon } from "lucide-react";
 
 const Filters = memo(({ candidates = [] }: FiltersProps) => {
-  const [activeFilter, setActiveFilter] = useState("");
 
-  const handleOpenFilter = (filterName: string) => {
-    setActiveFilter(activeFilter === filterName ? "" : filterName);
-  };
   const defaultValues: CandidateFilter = {
     searchQuery: "",
     technologyFilter: [],
@@ -35,15 +31,8 @@ const Filters = memo(({ candidates = [] }: FiltersProps) => {
   const getData = () => {
     console.log(formData);
   }
-  useEffect(() => {
-    getData()
-  }, [formData.technologyFilter, formData.assessmentFilter, formData.created?.days, formData.created?.range])
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      getData()
-    }, 1000)
-    return () => clearTimeout(timer)
-  }, [formData.searchQuery])
+
+
 
   return (
     <section className="w-full">
@@ -53,7 +42,7 @@ const Filters = memo(({ candidates = [] }: FiltersProps) => {
 
         <TechnologyFilter
           value={formData.technologyFilter}
-          onChange={(value: TechnologyOption[]) => setValue('technologyFilter', value)}
+          onChange={(value: TechnologyOption[]) => {setValue('technologyFilter', value)}}
           options={technologyOptions}
         />
 
@@ -67,9 +56,10 @@ const Filters = memo(({ candidates = [] }: FiltersProps) => {
           formData={formData}
           setValue={setValue}
           register={register}
-          activeFilter={activeFilter}
-          handleOpenFilter={handleOpenFilter}
         />
+        <Button className="ml-2 cursor-pointer" onClick={getData}>
+          <ListFilterIcon size={30}/>
+        </Button>
       </div>
       <div className="flex justify-between items-center gap-4 flex-wrap mt-2 ml-2">
         <div className="flex items-center gap-2 min-w-fit shrink-0">

@@ -25,7 +25,7 @@ export interface TableProps<T> {
   rowKey: keyof T;
 }
 
-const ReusableTable= <T extends object> ({
+const ReusableTable = <T extends object>({
   columns,
   rows,
   expandableRow,
@@ -40,9 +40,9 @@ const ReusableTable= <T extends object> ({
   };
 
   return (
-    <div className={`overflow-x-auto ${className} h-[580px] overflow-y-scroll`}>
-      <Table className="min-w-full h-full">
-        <TableHeader className="sticky">
+    <div className={`overflow-x-auto ${className} h-[580px] overflow-y-auto`}>
+      <Table className="min-w-full">
+        <TableHeader className="sticky z-10">
           <TableRow className="bg-gradient-to-r from-blue-50 to-blue-100 dark:from-gray-700 dark:to-gray-800">
             {columns.map((column) => (
               <TableHead
@@ -55,7 +55,7 @@ const ReusableTable= <T extends object> ({
             {/* Add a column for the expand/collapse icon if expandableRow is provided */}
             {expandableRow && (
               <TableHead className="sticky top-0 bg-blue-50 dark:bg-gray-700 text-gray-900 dark:text-white font-bold py-3">
-               
+
               </TableHead>
             )}
           </TableRow>
@@ -66,20 +66,21 @@ const ReusableTable= <T extends object> ({
               <TableRow
                 onClick={() => {
                   onRowClick?.(row);
-                  toggleRow(rowIndex);
                 }}
                 className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200"
               >
                 {columns.map((column) => (
                   <TableCell key={column.key as string}>
-                    {column.render 
+                    {column.render
                       ? column.render(row)
                       : (row[column.key as keyof T] as React.ReactNode)}
                   </TableCell>
                 ))}
                 {/* Add the expand/collapse icon if expandableRow is provided */}
                 {expandableRow && (
-                  <TableCell>
+                  <TableCell onClick={() => {
+                    toggleRow(rowIndex);
+                  }}>
                     {expandedRow === rowIndex ? (
                       <ChevronUp className="h-4 w-4" />
                     ) : (
@@ -89,7 +90,7 @@ const ReusableTable= <T extends object> ({
                 )}
               </TableRow>
               {/* Render expandable content if expandableRow is provided and the row is expanded */}
-              {expandableRow && expandedRow === rowIndex && ( 
+              {expandableRow && expandedRow === rowIndex && (
                 <TableRow>
                   <TableCell colSpan={columns.length + (expandableRow ? 1 : 0)} className="bg-gray-50 dark:bg-gray-700 p-4">
                     {expandableRow.render(row)}

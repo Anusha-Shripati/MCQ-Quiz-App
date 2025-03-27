@@ -9,32 +9,38 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/form/select";
-import { PlusCircle, CalendarIcon } from "lucide-react";
+import { ListFilterIcon, PlusCircle } from "lucide-react";
 import Link from "next/link";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@radix-ui/react-popover";
-import { Calendar } from "@/components/ui/calendar";
 import { Controller, useForm } from "react-hook-form";
+import { DateRange } from "@/types/common.types";
+import { AssessmentFilters } from "@/store/assessmentStore";
+import DatePickerWithRange from "../ui/form/date-range-picker";
 
 export default function AssessmentHeader() {
 
-  const defaultValues={ assessment: 'all', createdBy: "all", date: new Date(), view: 'today' } 
+  const defaultValues = { assessment: 'all', createdBy: "all", date: undefined, view: 'today' }
 
-  const { control,register, setValue, watch} = useForm({ defaultValues })
+  const { control, register, setValue, watch } = useForm<AssessmentFilters>({ defaultValues })
   const allFields = watch();
 
-  const handleViewChange = (view:string) => setValue("view", view);
+  const handleViewChange = (view: string) => {
+    if (view != 'calander') {
+      setValue('date', undefined)
+    }
+    setValue("view", view)
+  };
   const isFirstRender = useRef(true);
 
-  useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      return;
-    }
-  }, [allFields]);
+  // useEffect(() => {
+  //   if (isFirstRender.current) {
+  //     isFirstRender.current = false;
+  //     return;
+  //   }
+  // }, [allFields]);
+
+  const getData = () => {
+    console.log(allFields);
+  }
 
   return (
     <div className="flex flex-col md:flex-row items-center gap-6">
@@ -78,7 +84,7 @@ export default function AssessmentHeader() {
             size="sm"
             className={`${allFields.view === "today" ? "bg-gray-100 dark:bg-gray-700" : ""
               } text-gray-900 dark:text-gray-300`}
-              onClick={() => handleViewChange("today")}
+            onClick={() => handleViewChange("today")}
           >
             Today
           </Button>
@@ -87,39 +93,20 @@ export default function AssessmentHeader() {
             size="sm"
             className={`${allFields.view === "week" ? "bg-gray-100 dark:bg-gray-700" : ""
               } text-gray-900 dark:text-gray-300`}
-              onClick={() => handleViewChange("week")}
+            onClick={() => handleViewChange("week")}
           >
             Week
           </Button>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant={allFields.view === "calendar" ? "secondary" : "ghost"}
-                size="sm"
-                className={`${allFields.view === "calendar" ? "bg-gray-100 dark:bg-gray-700" : ""
-                  } text-gray-900 dark:text-gray-300`}
-                  onClick={() => handleViewChange("calendar")}
-              >
-                <CalendarIcon className="h-4 w-4 mr-2" />
-                Pick Date
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="end">
-              <Calendar
-                className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-300"
-                mode="single"
-                selected={allFields.date}
-                onSelect={(date: Date | undefined) => {
-                  if (date) {
-                    handleViewChange("calendar")
-                    setValue('date', date)
-                  }
-                }}
-                initialFocus
-              />
-            </PopoverContent>
-          </Popover>
+          <DatePickerWithRange selected={allFields.date} onSelect={(date: DateRange | undefined) => {
+            if (date) {
+              handleViewChange("calendar")
+              setValue('date', date)
+            }
+          }} />
         </div>
+        <Button className="ml-2 cursor-pointer" onClick={getData}>
+          <ListFilterIcon size={30} />
+        </Button>
 
         {/* Create Assessment Button */}
         <Link href="/assessment/create-assessment">

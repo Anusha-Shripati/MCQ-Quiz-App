@@ -3,26 +3,26 @@
 import Pagination from '@/components/pagination'
 import { candidatesList } from '@/shared/constants/data';
 import { usePathname, useSearchParams } from 'next/navigation';
-import { useRouter } from 'next/navigation';
 import React, { useEffect, useMemo, useState } from 'react'
 
 import type { Candidate } from "@/types/candidate.types";
 import { Button } from "@/components/ui/form/button";
-import type { TableProps, Column, ExpandableRow } from "@/components/common/reusable-table";
-import dynamic from 'next/dynamic';
-import Loading from '@/app/loading';
+import type {  Column, ExpandableRow } from "@/components/common/reusable-table";
 import { FiCopy, FiMail } from "react-icons/fi";
 import toast from "react-hot-toast";
 
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-
+import DialogForm from '@/components/candidates/dialog-form';
+import { Edit } from 'lucide-react';
+import dayjs from 'dayjs'
+import ReusableTable from '@/components/common/reusable-table';
 function CandidateTable() {
 
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
     const searchParams = useSearchParams();
-
-    const router = useRouter();
+    const [selectedCandidate, setSelectedCandidate] = useState<null | Candidate>(null)
+    const [open, setOpen] = useState(false)
     const pathname = usePathname();
     const totalItems = candidatesList.length;
 
@@ -34,11 +34,11 @@ function CandidateTable() {
         if (perPageParam) setItemsPerPage(Number(perPageParam));
     }, [searchParams]);
 
-    const ReusableTable = dynamic(() =>
-        import("@/components/common/reusable-table").then(mod =>
-            mod.default as React.FC<TableProps<Candidate>>
-        ), { ssr: false, loading: () => <Loading /> }
-    );
+    // const ReusableTable = dynamic(() =>
+    //     import("@/components/common/reusable-table").then(mod =>
+    //         mod.default as React.FC<TableProps<Candidate>>
+    //     ), { ssr: false, loading: () => <Loading /> }
+    // );
     const handlePerPageChange = (value: string) => {
         setItemsPerPage(Number(value));
         setCurrentPage(1);
@@ -53,8 +53,7 @@ function CandidateTable() {
 
         if (params.page) newParams.set('page', params.page);
         if (params.perPage) newParams.set('perPage', params.perPage);
-
-        router.replace(`${pathname}?${newParams.toString()}`);
+        window.history.pushState(null, "", `${pathname}?${newParams.toString()}`);
     };
 
 
@@ -97,6 +96,15 @@ function CandidateTable() {
 
         return `${startTime}–${endTime}`; // e.g., "09:00 AM–12:00 PM"
     };
+    const handleEdit = (candidate: Candidate) => {  
+        const obj:any ={...candidate}
+        obj.startDate = new Date(candidate.testStartTime)
+        obj.endDate = new Date(candidate.testStartTime)
+        obj.timeUnit = 'days'
+        obj.timeValue = dayjs(candidate.testStartTime).diff(dayjs(candidate.testEndTime),'days')
+        setSelectedCandidate(obj);
+        setOpen(true)
+    }
 
     const columns = useMemo<Array<Column<Candidate>>>(
         () => [
@@ -119,7 +127,7 @@ function CandidateTable() {
             {
                 key: "actions",
                 header: "Share",
-                render: () => (
+                render: (candidate: Candidate) => (
                     <div className="flex items-center gap-2">
                         <Button
                             onClick={(e) => {
@@ -142,6 +150,14 @@ function CandidateTable() {
                         >
                             <FiMail className="h-5 w-5 text-gray-700 dark:text-gray-300" />
                         </Button>
+                        <Button
+                            onClick={() => handleEdit(candidate)}
+                            variant="ghost"
+                            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all duration-200"
+                        >
+                            <Edit className="h-4 w-4 text-gray-600 dark:text-gray-300" />
+                        </Button>
+
                     </div>
                 ),
             },
@@ -220,29 +236,31 @@ function CandidateTable() {
     };
 
     return (
-
-        <Pagination
-            className="flex-grow"
-            currentPageStart={currentPageStart}
-            currentPageEnd={currentPageEnd}
-            totalItems={totalItems}
-            itemsPerPage={itemsPerPage}
-            onPerPageChange={handlePerPageChange}
-            currentPage={currentPage}
-            onPageChange={handlePageChange}
-        >
-            {/* <Suspense fallback={<Loading />}> */}
-            <div className="min-h-[500px]">
-                <ReusableTable
-                    columns={columns}
-                    rows={currentItems}
-                    expandableRow={expandableRow}
-                    className="mb-6 animate-in fade-in duration-300"
-                    rowKey="id"
-                />
-            </div>
-            {/* </Suspense> */}
-        </Pagination>
+        <>
+            <Pagination
+                className="flex-grow"
+                currentPageStart={currentPageStart}
+                currentPageEnd={currentPageEnd}
+                totalItems={totalItems}
+                itemsPerPage={itemsPerPage}
+                onPerPageChange={handlePerPageChange}
+                currentPage={currentPage}
+                onPageChange={handlePageChange}
+            >
+                {/* <Suspense fallback={<Loading />}> */}
+                <div className="min-h-[500px]">
+                    <ReusableTable
+                        columns={columns}
+                        rows={currentItems}
+                        expandableRow={expandableRow}
+                        className="mb-6 animate-in fade-in duration-300"
+                        rowKey="id"
+                    />
+                </div>
+                {/* </Suspense> */}
+            </Pagination>
+           <DialogForm candidate={selectedCandidate} open={open} setOpen={setOpen} />
+        </>
     )
 }
 

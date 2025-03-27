@@ -961,11 +961,11 @@ export const technologyOptions: TechnologyOption[] = [
 ];
 
 export const assessmentOptions: StatusOption[] = [
-  { value: "completed", label: "Completed" },
-  { value: "pending", label: "Pending" },
-  { value: "not-started", label: "Not Started" },
-  { value: "expired", label: "Expired" },
-  { value: "in-progress", label: "In Progress" },
+  { value: "React Assessment", label: "React Assessment" },
+  { value: "MERN 3 years exp.", label: "MERN 3 years exp." },
+  { value: "Python 5 years exp.", label: "Not Started" },
+  { value: "Java 4 years exp.", label: "Java 4 years exp." },
+  { value: "MEAN 2 years exp.", label: "MEAN 2 years exp." },
 ];
 
 export const questionsDataStatic: Question[] = [

@@ -8,7 +8,7 @@ import { useTheme } from "next-themes";
 export default function Questions() {
   const chartRef = useRef<HTMLDivElement>(null);
   const { theme } = useTheme();
-
+  const totalCount = questionsData.reduce((sum, item) => sum + item.value, 0);
   useEffect(() => {
     if (chartRef.current) {
       const myChart = echarts.init(chartRef.current);
@@ -34,8 +34,16 @@ export default function Questions() {
             radius: ["50%", "80%"],
             avoidLabelOverlap: false,
             label: {
-              show: false,
+              show: true,
               position: "center",
+              fontSize: 20,
+              fontWeight: "bold",
+              color: theme === "light" ? "#333" : "#fff",
+              formatter: `{total|${totalCount}}\n{small|Total Questions}`,
+              rich: {
+                total: { fontSize: 24, fontWeight: "bold", color: "#333" },
+                small: { fontSize: 14, color: "#666" },
+              },
             },
             emphasis: {
               label: {
@@ -45,7 +53,7 @@ export default function Questions() {
               },
             },
             labelLine: {
-              show: false,
+              show: true,
             },
             data: questionsData,
           },

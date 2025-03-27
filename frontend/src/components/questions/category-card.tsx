@@ -8,11 +8,10 @@ import { Button } from "../ui/form/button";
 import { QuestionCategory } from "@/shared/types/app";
 
 export const CategoryCard = ({ category }: { category: QuestionCategory }) => {
-  console.log(category, "category");
   const router = useRouter();
 
   const handleNavigate = () => {
-    router.push(`/questions/category/${category.name}`); // Navigate to the desired route
+    router.push(`/questions/category/${category.name}`); 
   };
 
   const handleAddQuestion = () => {
@@ -23,16 +22,12 @@ export const CategoryCard = ({ category }: { category: QuestionCategory }) => {
     event: React.MouseEvent,
     difficulty: string
   ) => {
-    event.stopPropagation(); // Prevent card click from firing
+    event.stopPropagation(); 
     router.push(
       `/questions/category/${category.name}?difficulty=${difficulty}`
     );
   };
 
-  // const handleAddQuestions = (event: React.MouseEvent) => {
-  //   event.stopPropagation(); // Prevent card click from firing
-  //   console.log("Add Questions");
-  // };
 
   return (
     <Card className="shadow-md hover:shadow-lg transition-all duration-200">

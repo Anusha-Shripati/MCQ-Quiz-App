@@ -12,16 +12,16 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { format } from "date-fns"
-import { DateRange } from "@/types/candidate.types"
+import { DateRange } from "@/types/common.types"
 
 interface DateRangePickerProps {
-  value: DateRange | undefined,
+  selected: DateRange | undefined,
   className?: string; onSelect: (e: DateRange | undefined) => void;
 }
 
 export default function DatePickerWithRange({
   className,
-  value: date,
+  selected: date,
   onSelect
 }: DateRangePickerProps) {
 
@@ -31,11 +31,12 @@ export default function DatePickerWithRange({
         <PopoverTrigger asChild>
           <Button
             id="date"
-            variant={"outline"}
+            variant="ghost"
             className={cn(
               "w-full justify-start text-left font-normal",
               !date && "text-muted-foreground"
             )}
+            size='sm'
           >
             <CalendarIcon />
             {date?.from ? (

@@ -25,7 +25,7 @@ interface AssessmentEditProps {
     createdDate: string;
     technologies: Technology[];
     totalQuestions: number;
-    duration: number;
+    duration: string | number | null;
   };
   onSave: () => void;
   onCancel: () => void;

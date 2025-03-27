@@ -1,5 +1,8 @@
 "use client";
 import React, { useState } from "react";
+import { useForm, Controller } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/form/input";
 import {
   Table,
@@ -17,7 +20,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/form/label";
-import { Checkbox } from "@/components/ui/form/checkbox";
+import PermissionsTable from "@/components/users/permission-table";
 import toast from "react-hot-toast";
 import { FiEdit, FiTrash2 } from "react-icons/fi";
 import { Badge } from "@/components/ui/badge";
@@ -25,31 +28,40 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 const availableModules = ["assessment", "candidates", "questions"];
 
-type Permission = {
-  createEdit: boolean;
-  view: boolean;
-  delete: boolean;
-};
+const permissionSchema = z.object({
+  createEdit: z.boolean(),
+  view: z.boolean(),
+  delete: z.boolean(),
+});
 
-type User = {
-  name: string;
-  email: string;
-  password: string;
-  permissions: Record<string, Permission>;
-};
+const userSchema = z
+  .object({
+    name: z.string().min(1, "Name is required"),
+    email: z.string().email("Invalid email address"),
+    password: z.string().min(6, "Password must be at least 6 characters"),
+    confirmPassword: z.string().min(6, "Confirm Password must match Password"),
+    permissions: z.record(permissionSchema),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
+
+type UserFormValues = z.infer<typeof userSchema>;
 
 const defaultPermissions = availableModules.reduce(
   (acc, module) => {
     acc[module] = { createEdit: false, view: false, delete: false };
     return acc;
   },
-  {} as Record<string, Permission>
+  {} as Record<string, z.infer<typeof permissionSchema>>
 );
 
-const defaultUser: User = {
+const defaultUser: UserFormValues = {
   name: "",
   email: "",
   password: "",
+  confirmPassword: "",
   permissions: defaultPermissions,
 };
 
@@ -57,13 +69,14 @@ const UserTable: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUserIndex, setEditingUserIndex] = useState<number | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [users, setUsers] = useState<User[]>([
+  const [users, setUsers] = useState<UserFormValues[]>([
     {
       name: "Mihir T",
       email: "Mihir@logicrays.com",
       password: "LRSMihir",
+      confirmPassword: "LRSMihir",
       permissions: {
+        ...defaultPermissions,
         assessment: { createEdit: true, view: true, delete: false },
         candidates: { createEdit: true, view: false, delete: true },
       },
@@ -72,56 +85,63 @@ const UserTable: React.FC = () => {
       name: "HR",
       email: "HR@logicrays.com",
       password: "LRSHr",
+      confirmPassword: "LRSHr",
       permissions: {
+        ...defaultPermissions,
         assessment: { createEdit: true, view: true, delete: true },
         candidates: { createEdit: false, view: true, delete: true },
       },
     },
   ]);
-  const [newUser, setNewUser] = useState<User>(defaultUser);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setNewUser((prev) => ({ ...prev, [name]: value }));
+  const {
+    control,
+    handleSubmit,
+    reset,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm<UserFormValues>({
+    resolver: zodResolver(userSchema),
+    defaultValues: defaultUser,
+  });
+
+  const handleCheckboxChange = (
+    category: string,
+    type: keyof z.infer<typeof permissionSchema>,
+    value: boolean
+  ) => {
+    setValue(`permissions.${category}.${type}`, value, {
+      shouldValidate: true,
+    });
   };
 
-  const handleCheckboxChange = (category: string, type: keyof Permission) => {
-    setNewUser((prev) => ({
-      ...prev,
-      permissions: {
-        ...prev.permissions,
-        [category]: {
-          ...prev.permissions[category],
-          [type]: !prev.permissions[category][type],
-        },
-      },
-    }));
-  };
-
-  const validateUser = () => {
-    const { name, email } = newUser;
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return name.trim() && emailRegex.test(email);
-  };
-
-  const handleCreateOrUpdateUser = () => {
+  const handleCreateOrUpdateUser = (data: UserFormValues) => {
     if (editingUserIndex !== null) {
       const updatedUsers = [...users];
-      updatedUsers[editingUserIndex] = newUser;
+      updatedUsers[editingUserIndex] = data;
       setUsers(updatedUsers);
+      toast.success("User updated successfully");
     } else {
-      if (users.some((user) => user.email === newUser.email)) {
-        toast.error("User with this email already exists!");
-        return;
+      if (users.some((user) => user.email === data.email)) {
+        toast.error("Sorry! User with this email already exists!");
+      } else {
+        setUsers([...users, data]);
+        toast.success("User created successfully");
       }
-      setUsers([...users, newUser]);
     }
     closeModal();
   };
 
   const handleEditUser = (index: number) => {
-    setNewUser(users[index]);
+    reset(users[index]);
     setEditingUserIndex(index);
+    setIsModalOpen(true);
+  };
+
+  const handleCreateUser = () => {
+    reset(defaultUser);
+    setEditingUserIndex(null);
     setIsModalOpen(true);
   };
 
@@ -135,8 +155,7 @@ const UserTable: React.FC = () => {
   const closeModal = () => {
     setIsModalOpen(false);
     setEditingUserIndex(null);
-    setNewUser(defaultUser);
-    setConfirmPassword("");
+    reset(defaultUser);
   };
 
   const filteredUsers = users.filter((user) =>
@@ -148,7 +167,7 @@ const UserTable: React.FC = () => {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
           <CardTitle className="text-xl font-semibold">
-            All Users ({users.length})
+            All Users ({filteredUsers.length})
           </CardTitle>
           <div className="flex space-x-4 items-center">
             <Input
@@ -159,7 +178,7 @@ const UserTable: React.FC = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
               autoComplete="off"
             />
-            <Button onClick={() => setIsModalOpen(true)}>Create User</Button>
+            <Button onClick={handleCreateUser}>Create User</Button>
           </div>
         </CardHeader>
         <CardContent>
@@ -218,126 +237,126 @@ const UserTable: React.FC = () => {
       </Card>
 
       <Dialog open={isModalOpen} onOpenChange={(open) => !open && closeModal()}>
-        <DialogContent className="sm:max-w-md dark:bg-gray-800">
+        <DialogContent
+          className="sm:max-w-md dark:bg-gray-800"
+          aria-describedby="dialog-description"
+        >
           <DialogHeader>
             <DialogTitle>
               {editingUserIndex !== null ? "Edit" : "Create"} User
             </DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Name</Label>
-              <Input
-                id="name"
-                name="name"
-                value={newUser.name}
-                onChange={handleInputChange}
-                placeholder="User Name"
-                className="dark:bg-gray-700"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                value={newUser.email}
-                onChange={handleInputChange}
-                placeholder="Email"
-                className="dark:bg-gray-700"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                name="password"
-                type="password"
-                value={newUser.password}
-                onChange={handleInputChange}
-                placeholder="Password"
-                className="dark:bg-gray-700"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
-              <Input
-                id="confirmPassword"
-                name="confirmPassword"
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Confirm Password"
-                className="dark:bg-gray-700"
-              />
-              {confirmPassword && newUser.password !== confirmPassword && (
-                <p className="text-sm text-destructive">
-                  Passwords do not match!
-                </p>
-              )}
-            </div>
+          <form onSubmit={handleSubmit(handleCreateOrUpdateUser)}>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Name</Label>
+                <Controller
+                  name="name"
+                  control={control}
+                  render={({ field }) => (
+                    <Input
+                      {...field}
+                      id="name"
+                      placeholder="User Name"
+                      className="dark:bg-gray-700"
+                    />
+                  )}
+                />
+                {errors.name && (
+                  <p className="text-sm text-destructive">
+                    {errors.name.message}
+                  </p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Controller
+                  name="email"
+                  control={control}
+                  render={({ field }) => (
+                    <Input
+                      {...field}
+                      id="email"
+                      type="email"
+                      placeholder="Email"
+                      className="dark:bg-gray-700"
+                    />
+                  )}
+                />
+                {errors.email && (
+                  <p className="text-sm text-destructive">
+                    {errors.email.message}
+                  </p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Controller
+                  name="password"
+                  control={control}
+                  render={({ field }) => (
+                    <Input
+                      {...field}
+                      id="password"
+                      type="password"
+                      placeholder="Password"
+                      className="dark:bg-gray-700"
+                    />
+                  )}
+                />
+                {errors.password && (
+                  <p className="text-sm text-destructive">
+                    {errors.password.message}
+                  </p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                <Controller
+                  name="confirmPassword"
+                  control={control}
+                  render={({ field }) => (
+                    <Input
+                      {...field}
+                      id="confirmPassword"
+                      type="password"
+                      placeholder="Confirm Password"
+                      className="dark:bg-gray-700"
+                    />
+                  )}
+                />
+                {errors.confirmPassword && (
+                  <p className="text-sm text-destructive">
+                    {errors.confirmPassword.message}
+                  </p>
+                )}
+              </div>
 
-            <PermissionsTable
-              permissions={newUser.permissions}
-              onCheckboxChange={handleCheckboxChange}
-            />
-
-            <div className="flex justify-end space-x-2">
-              <Button variant="destructive" onClick={closeModal}>
-                Close
-              </Button>
-              <Button
-                onClick={handleCreateOrUpdateUser}
-                disabled={
-                  !validateUser() || newUser.password !== confirmPassword
+              <PermissionsTable
+                permissions={watch("permissions")}
+                onCheckboxChange={(category, type) =>
+                  handleCheckboxChange(
+                    category,
+                    type,
+                    !watch(`permissions.${category}.${type}`)
+                  )
                 }
-                className="bg-green-600"
-              >
-                Save & Update
-              </Button>
+              />
+
+              <div className="flex justify-end space-x-2">
+                <Button variant="destructive" onClick={closeModal}>
+                  Close
+                </Button>
+                <Button type="submit" className="bg-green-600">
+                  Save & Update
+                </Button>
+              </div>
             </div>
-          </div>
+          </form>
         </DialogContent>
       </Dialog>
     </div>
   );
 };
-
-const PermissionsTable: React.FC<{
-  permissions: Record<string, Permission>;
-  onCheckboxChange: (category: string, type: keyof Permission) => void;
-}> = ({ permissions, onCheckboxChange }) => (
-  <Table>
-    <TableHeader>
-      <TableRow>
-        <TableHead>Module</TableHead>
-        <TableHead className="text-center">Create/Edit</TableHead>
-        <TableHead className="text-center">View</TableHead>
-        <TableHead className="text-center">Delete</TableHead>
-      </TableRow>
-    </TableHeader>
-    <TableBody>
-      {availableModules.map((category) => (
-        <TableRow key={category}>
-          <TableCell>{category}</TableCell>
-          {["createEdit", "view", "delete"].map((type) => (
-            <TableCell key={type} className="text-center">
-              <Checkbox
-                checked={
-                  permissions[category]?.[type as keyof Permission] || false
-                }
-                onCheckedChange={() =>
-                  onCheckboxChange(category, type as keyof Permission)
-                }
-                className="dark:bg-gray-600"
-              />
-            </TableCell>
-          ))}
-        </TableRow>
-      ))}
-    </TableBody>
-  </Table>
-);
 
 export default UserTable;

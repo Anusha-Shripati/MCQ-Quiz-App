@@ -168,6 +168,7 @@ export default function Profile() {
               type="password"
               {...registerPassword("oldPassword")}
               className="w-full dark:bg-gray-800 dark:text-white"
+              disabled={!isEditing}
             />
             {passwordErrors.oldPassword && (
               <p className="text-red-500 text-sm mt-1">
@@ -184,6 +185,7 @@ export default function Profile() {
               type="password"
               {...registerPassword("newPassword")}
               className="w-full dark:bg-gray-800 dark:text-white"
+              disabled={!isEditing}
             />
             {passwordErrors.newPassword && (
               <p className="text-red-500 text-sm mt-1">
@@ -200,6 +202,7 @@ export default function Profile() {
               type="password"
               {...registerPassword("reNewPassword")}
               className="w-full dark:bg-gray-800 dark:text-white"
+              disabled={!isEditing}
             />
             {passwordErrors.reNewPassword && (
               <p className="text-red-500 text-sm mt-1">

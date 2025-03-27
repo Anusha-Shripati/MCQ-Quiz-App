@@ -1,9 +1,21 @@
 "use client";
 import React, { useState } from "react";
 import { Input } from "@/components/ui/form/input";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Button } from "@/components/ui/form/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Label } from "@/components/ui/form/label";
 import { Checkbox } from "@/components/ui/form/checkbox";
 import toast from "react-hot-toast";
@@ -26,10 +38,13 @@ type User = {
   permissions: Record<string, Permission>;
 };
 
-const defaultPermissions = availableModules.reduce((acc, module) => {
-  acc[module] = { createEdit: false, view: false, delete: false };
-  return acc;
-}, {} as Record<string, Permission>);
+const defaultPermissions = availableModules.reduce(
+  (acc, module) => {
+    acc[module] = { createEdit: false, view: false, delete: false };
+    return acc;
+  },
+  {} as Record<string, Permission>
+);
 
 const defaultUser: User = {
   name: "",
@@ -132,7 +147,9 @@ const UserTable: React.FC = () => {
     <div className="p-6 min-h-screen">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-          <CardTitle className="text-xl font-semibold">All Users ({users.length})</CardTitle>
+          <CardTitle className="text-xl font-semibold">
+            All Users ({users.length})
+          </CardTitle>
           <div className="flex space-x-4 items-center">
             <Input
               type="text"
@@ -177,7 +194,11 @@ const UserTable: React.FC = () => {
                   </TableCell>
                   <TableCell>
                     <div className="flex space-x-2">
-                      <Button variant="ghost" size="icon" onClick={() => handleEditUser(index)}>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleEditUser(index)}
+                      >
                         <FiEdit className="h-4 w-4" />
                       </Button>
                       <Button
@@ -199,7 +220,9 @@ const UserTable: React.FC = () => {
       <Dialog open={isModalOpen} onOpenChange={(open) => !open && closeModal()}>
         <DialogContent className="sm:max-w-md dark:bg-gray-800">
           <DialogHeader>
-            <DialogTitle>{editingUserIndex !== null ? "Edit" : "Create"} User</DialogTitle>
+            <DialogTitle>
+              {editingUserIndex !== null ? "Edit" : "Create"} User
+            </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
@@ -249,7 +272,9 @@ const UserTable: React.FC = () => {
                 className="dark:bg-gray-700"
               />
               {confirmPassword && newUser.password !== confirmPassword && (
-                <p className="text-sm text-destructive">Passwords do not match!</p>
+                <p className="text-sm text-destructive">
+                  Passwords do not match!
+                </p>
               )}
             </div>
 
@@ -264,7 +289,9 @@ const UserTable: React.FC = () => {
               </Button>
               <Button
                 onClick={handleCreateOrUpdateUser}
-                disabled={!validateUser() || newUser.password !== confirmPassword}
+                disabled={
+                  !validateUser() || newUser.password !== confirmPassword
+                }
                 className="bg-green-600"
               >
                 Save & Update
@@ -297,8 +324,12 @@ const PermissionsTable: React.FC<{
           {["createEdit", "view", "delete"].map((type) => (
             <TableCell key={type} className="text-center">
               <Checkbox
-                checked={permissions[category]?.[type as keyof Permission] || false}
-                onCheckedChange={() => onCheckboxChange(category, type as keyof Permission)}
+                checked={
+                  permissions[category]?.[type as keyof Permission] || false
+                }
+                onCheckedChange={() =>
+                  onCheckboxChange(category, type as keyof Permission)
+                }
                 className="dark:bg-gray-600"
               />
             </TableCell>

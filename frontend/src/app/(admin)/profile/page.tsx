@@ -33,6 +33,7 @@ export default function Profile() {
     register: registerUserInfo,
     handleSubmit: handleUserInfoSubmit,
     formState: { errors: userInfoErrors },
+    setValue,
   } = useForm({
     resolver: zodResolver(userInfoSchema),
     defaultValues: {
@@ -54,6 +55,21 @@ export default function Profile() {
       reNewPassword: "",
     },
   });
+
+  const handleCancelAndEdit = () => {
+    if (isEditing) {
+      console.log("Cancel");
+      setValue('userName', 'LogicRays', {
+        shouldValidate: true, // trigger validation
+        shouldTouch: true, // update touched fields form state
+        shouldDirty: true, // update dirty and dirty fields form state
+      });
+      setIsEditing(false);
+    } else {
+      console.log("Edit");
+      setIsEditing(true);
+    }
+  };
 
   // Handlers
   const onSaveUserInfo = (data: { userName: string; email: string }) => {
@@ -80,7 +96,8 @@ export default function Profile() {
       <div className="space-y-4 mb-4 mt-4">
         <div className="mb-1 flex justify-end">
           <Button
-            onClick={() => setIsEditing((prev) => !prev)}
+            // onClick={() => setIsEditing((prev) => !prev)}
+            onClick={handleCancelAndEdit}
             className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-600"
             variant="ghost"
           >

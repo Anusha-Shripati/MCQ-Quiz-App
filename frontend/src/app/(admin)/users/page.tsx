@@ -25,6 +25,7 @@ import toast from "react-hot-toast";
 import { FiEdit, FiTrash2 } from "react-icons/fi";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { FormField } from "@/components/common/form-field";
 
 const availableModules = ["assessment", "candidates", "questions"];
 
@@ -103,6 +104,7 @@ const UserTable: React.FC = () => {
     reset,
     setValue,
     watch,
+    register,
     formState: { errors },
   } = useForm<UserFormValues>({
     resolver: zodResolver(userSchema),
@@ -181,7 +183,7 @@ const UserTable: React.FC = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
               autoComplete="off"
             />
-            <Button onClick={handleCreateUser}>Create User</Button>
+            <Button onClick={handleCreateUser} className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm">Create User</Button>
           </div>
         </CardHeader>
         <CardContent>
@@ -252,89 +254,47 @@ const UserTable: React.FC = () => {
           <form onSubmit={handleSubmit(handleCreateOrUpdateUser)}>
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="name">Name</Label>
-                <Controller
-                  name="name"
-                  control={control}
-                  render={({ field }) => (
-                    <Input
-                      {...field}
-                      id="name"
-                      placeholder="User Name"
-                      className="dark:bg-gray-700"
-                    />
-                  )}
+                <FormField
+                  label="Name"
+                  {...register('name')}
+                  placeholder="User Name"
+                  className="dark:bg-gray-700"
+                  error={errors.name?.message}
                 />
-                {errors.name && (
-                  <p className="text-sm text-destructive">
-                    {errors.name.message}
-                  </p>
-                )}
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Controller
-                  name="email"
-                  control={control}
-                  render={({ field }) => (
-                    <Input
-                      {...field}
-                      id="email"
-                      type="email"
-                      placeholder="Email"
-                      className="dark:bg-gray-700"
-                    />
-                  )}
-                />
-                {errors.email && (
-                  <p className="text-sm text-destructive">
-                    {errors.email.message}
-                  </p>
-                )}
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <Controller
-                  name="password"
-                  control={control}
-                  render={({ field }) => (
-                    <Input
-                      {...field}
-                      id="password"
-                      type="password"
-                      placeholder="Password"
-                      className="dark:bg-gray-700"
-                    />
-                  )}
-                />
-                {errors.password && (
-                  <p className="text-sm text-destructive">
-                    {errors.password.message}
-                  </p>
-                )}
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirm Password</Label>
-                <Controller
-                  name="confirmPassword"
-                  control={control}
-                  render={({ field }) => (
-                    <Input
-                      {...field}
-                      id="confirmPassword"
-                      type="password"
-                      placeholder="Confirm Password"
-                      className="dark:bg-gray-700"
-                    />
-                  )}
-                />
-                {errors.confirmPassword && (
-                  <p className="text-sm text-destructive">
-                    {errors.confirmPassword.message}
-                  </p>
-                )}
               </div>
 
+              <div className="space-y-2">
+                <FormField
+                  label="Email"
+                  {...register('email')}
+                  placeholder="Email"
+                  className="dark:bg-gray-700"
+                  error={errors.email?.message}
+                />
+              </div>
+
+
+              <div className="space-y-2">
+                <FormField
+                  label="Password"
+                  {...register('password')}
+                  placeholder="Password"
+                  className="dark:bg-gray-700"
+                  type="password"
+                  error={errors.password?.message}
+                />
+              </div>
+              <div className="space-y-2">
+                <FormField
+                  label="Confirm Password"
+                  {...register('confirmPassword')}
+                  placeholder="Confirm Password"
+
+                  className="dark:bg-gray-700"
+                  type="password"
+                  error={errors.confirmPassword?.message}
+                />
+              </div>
               <PermissionsTable
                 permissions={watch("permissions")}
                 onCheckboxChange={(category, type) =>

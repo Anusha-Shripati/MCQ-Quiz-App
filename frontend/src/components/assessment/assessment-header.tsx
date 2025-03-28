@@ -1,27 +1,31 @@
 "use client";
 
-import { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/form/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/form/select";
 import { ListFilterIcon, PlusCircle } from "lucide-react";
 import Link from "next/link";
 import { Controller, useForm } from "react-hook-form";
 import { DateRange } from "@/types/common.types";
 import { AssessmentFilters } from "@/store/assessmentStore";
 import DatePickerWithRange from "../ui/form/date-range-picker";
+import { assessmentOptions, userOptions } from "@/shared/constants/data";
+import { useMemo } from "react";
+import { FormField } from "../common/form-field";
 
 export default function AssessmentHeader() {
 
-  const defaultValues = { assessment: 'all', createdBy: "all", date: undefined, view: 'today' }
+  const defaultValues: AssessmentFilters = {
+    assessment: "all",
+    createdBy: "all",
+    date: undefined,
+    view: "today",
+  };
 
-  const { control, register, setValue, watch } = useForm<AssessmentFilters>({ defaultValues })
+  const { control, setValue, watch } = useForm<AssessmentFilters>({ defaultValues })
   const allFields = watch();
+
+  const headerAssessmentOptions = useMemo(() => [{ value: "all", label: "All" }, ...assessmentOptions], [])
+  const headerUsersOptions = useMemo(() => [{ value: "all", label: "All" }, ...userOptions], [])
+
 
   const handleViewChange = (view: string) => {
     if (view != 'calander') {
@@ -29,18 +33,17 @@ export default function AssessmentHeader() {
     }
     setValue("view", view)
   };
-  const isFirstRender = useRef(true);
 
-  // useEffect(() => {
-  //   if (isFirstRender.current) {
-  //     isFirstRender.current = false;
-  //     return;
-  //   }
-  // }, [allFields]);
+  const handleDateChange = (date: DateRange | undefined) => {
+    if (date) {
+      handleViewChange("calendar");
+      setValue("date", date);
+    }
+  };
 
-  const getData = () => {
+  const handleFilterClick = () => {
     console.log(allFields);
-  }
+  };
 
   return (
     <div className="flex flex-col md:flex-row items-center gap-6">
@@ -50,29 +53,31 @@ export default function AssessmentHeader() {
           name="assessment"
           control={control}
           render={({ field }) => (
-            <Select onValueChange={field.onChange} value={field.value}>
-              <SelectTrigger className="w-[200px] bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-300">
-                <SelectValue placeholder="Assessment" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Assessment</SelectItem>
-                <SelectItem value="mern">MERN</SelectItem>
-                <SelectItem value="mean">MEAN</SelectItem>
-              </SelectContent>
-            </Select>
+            <FormField
+              className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-300 min-w-[200px]"
+              type="select"
+              onChange={field.onChange}
+              value={field.value}
+              placeholder="Assessment"
+              options={headerAssessmentOptions}
+            />
+          )}
+        />
+        <Controller
+          name="createdBy"
+          control={control}
+          render={({ field }) => (
+            <FormField
+              className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-300 min-w-[200px]"
+              type="select"
+              onChange={field.onChange}
+              value={field.value}
+              placeholder="createdBy"
+              options={headerUsersOptions}
+            />
           )}
         />
 
-        <Select {...register('createdBy')} onValueChange={(value) => setValue('createdBy', value)} >
-          <SelectTrigger className="w-[200px] bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-300">
-            <SelectValue placeholder="Created" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Created</SelectItem>
-            <SelectItem value="mihir">Mihir</SelectItem>
-            <SelectItem value="john">John</SelectItem>
-          </SelectContent>
-        </Select>
       </div>
 
       {/* View Mode and Create Button */}
@@ -97,18 +102,12 @@ export default function AssessmentHeader() {
           >
             Week
           </Button>
-          <DatePickerWithRange selected={allFields.date} onSelect={(date: DateRange | undefined) => {
-            if (date) {
-              handleViewChange("calendar")
-              setValue('date', date)
-            }
-          }} />
+          <DatePickerWithRange selected={allFields.date} onSelect={handleDateChange} />
         </div>
-        <Button className="ml-2 cursor-pointer" onClick={getData}>
+        <Button className="ml-2 cursor-pointer" onClick={handleFilterClick}>
           <ListFilterIcon size={30} />
         </Button>
 
-        {/* Create Assessment Button */}
         <Link href="/assessment/create-assessment">
           <Button className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm">
             <PlusCircle className="mr-2 h-4 w-4" />

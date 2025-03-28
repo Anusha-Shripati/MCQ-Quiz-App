@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Button } from "@/components/ui/form/button";
 import {
   Card,
@@ -25,6 +25,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Question } from "@/shared/types/app";
+import { FormField } from "../common/form-field";
 
 interface QuestionCardProps {
   question: Question;
@@ -57,6 +58,19 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
     }
     return options.slice(0, 5); // Ensure only 6 options
   };
+  const questionTypeOptions = useMemo(() => [
+    { value: 'multiple-choice', label: 'Multiple Choice' },
+    { value: 'radio-select', label: 'Radio Select' },
+    { value: 'fill-in-the-blanks', label: 'Fill in the Blanks' },
+    { value: "code-snippet", label: "Code Snippet" }
+  ] as { value: Question['type']; label: string }[], [])
+
+  const questionDifficultyOptions = useMemo(() => [
+    { value: 'easy', label: 'Easy' },
+    { value: 'medium', label: 'Medium' },
+    { value: 'hard', label: 'Hard' },
+  ] as { value: Question['difficulty']; label: string }[], [])
+
 
   return (
     <Card
@@ -68,46 +82,34 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
         </CardTitle>
       </CardHeader>
       <CardContent>
-        {/* Question type and difficulty */}
         <div className="flex gap-4 mb-4">
-          <Select
+          <FormField
+            type="select"
+            parentClassName='w-full'
+            className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-300"
             value={question.type}
-            onValueChange={(value: Question["type"]) =>
+            onChange={(value: Question['type']) =>
               handleQuestionTypeChange(value, index)
             }
-          >
-            <SelectTrigger className="w-1/2">
-              <SelectValue placeholder="Question Type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="multiple-choice">Multiple Choice</SelectItem>
-              <SelectItem value="radio-select">Radio Select</SelectItem>
-              <SelectItem value="fill-in-the-blanks">
-                Fill in the Blanks
-              </SelectItem>
-              <SelectItem value="code-snippet">Code Snippet</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select
+            placeholder="Question Type"
+            options={questionTypeOptions}
+          />
+          <FormField
+            type="select"
+            parentClassName='w-full'
+
+            className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-300"
             value={question.difficulty}
-            onValueChange={(value: Question["difficulty"]) => {
+            onChange={(value: Question['difficulty']) => {
               const updatedQuestions = [...questions];
               updatedQuestions[index].difficulty = value;
               setQuestions(updatedQuestions);
             }}
-          >
-            <SelectTrigger className="w-1/2">
-              <SelectValue placeholder="Difficulty" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="easy">Easy</SelectItem>
-              <SelectItem value="medium">Medium</SelectItem>
-              <SelectItem value="hard">Hard</SelectItem>
-            </SelectContent>
-          </Select>
+            placeholder="Difficulty"
+            options={questionDifficultyOptions}
+          />
         </div>
 
-        {/* Question title */}
         <Input
           placeholder="Enter your question"
           value={question.question}
@@ -119,40 +121,39 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
           className="mb-4"
         />
 
-        {/* Dynamic answer section based on question type */}
         {(question.type === "multiple-choice" ||
           question.type === "radio-select") && (
-          <div className="space-y-2">
-            {ensureSixOptions(question.options).map((option, i) => (
-              <div key={i} className="flex items-center gap-2">
-                {question.type === "radio-select" ? (
-                  <input
-                    type="radio"
-                    name={`radio-${question.id}`}
-                    checked={question.correctOptions?.includes(i)}
-                    onChange={() => handleCorrectOptionChange(i, index)}
+            <div className="space-y-2">
+              {ensureSixOptions(question.options).map((option, i) => (
+                <div key={i} className="flex items-center gap-2">
+                  {question.type === "radio-select" ? (
+                    <input
+                      type="radio"
+                      name={`radio-${question.id}`}
+                      checked={question.correctOptions?.includes(i)}
+                      onChange={() => handleCorrectOptionChange(i, index)}
+                    />
+                  ) : (
+                    <input
+                      type="checkbox"
+                      checked={question.correctOptions?.includes(i)}
+                      onChange={() => handleCorrectOptionChange(i, index)}
+                    />
+                  )}
+                  <Input
+                    placeholder={`Option ${i + 1}`}
+                    value={option}
+                    onChange={(e) => {
+                      const updatedQuestions = [...questions];
+                      updatedQuestions[index].options![i] = e.target.value;
+                      setQuestions(updatedQuestions);
+                    }}
+                    className={i >= 4 ? "border-dashed border-gray-400" : ""}
                   />
-                ) : (
-                  <input
-                    type="checkbox"
-                    checked={question.correctOptions?.includes(i)}
-                    onChange={() => handleCorrectOptionChange(i, index)}
-                  />
-                )}
-                <Input
-                  placeholder={`Option ${i + 1}`}
-                  value={option}
-                  onChange={(e) => {
-                    const updatedQuestions = [...questions];
-                    updatedQuestions[index].options![i] = e.target.value;
-                    setQuestions(updatedQuestions);
-                  }}
-                  className={i >= 4 ? "border-dashed border-gray-400" : ""}
-                />
-              </div>
-            ))}
-          </div>
-        )}
+                </div>
+              ))}
+            </div>
+          )}
 
         {question.type === "fill-in-the-blanks" && (
           <Input
@@ -179,6 +180,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
             rows={10}
           />
         )}
+
       </CardContent>
       <CardFooter className="mt-auto">
         <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>

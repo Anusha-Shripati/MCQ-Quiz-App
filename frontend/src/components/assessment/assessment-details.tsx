@@ -161,7 +161,7 @@ export default function AssessmentDetails() {
 
   const handleCancel = () => {
     clearCurrentAssessment();
-
+    setEditing(false);
   };
 
   const handleDelete = (id: string) => {

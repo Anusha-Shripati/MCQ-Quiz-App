@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 
-import { Select, SelectContent, SelectTrigger, SelectItem } from "../ui/form/select";
+import { FormField } from "../common/form-field";
 
 interface LanguageScoreSelect {
   languages: string[];
@@ -17,9 +17,13 @@ export default function LanguageScoreSelect({
 
   return (
     <div className="flex space-x-4">
-      <Select
+      <FormField
         value={selectedLanguage}
-        onValueChange={(value) => setSelectedLanguage(value)}
+        onChange={(value) => setSelectedLanguage(value)}
+        type="select"
+        options={languages}
+      />
+      {/* <Select
       >
         <SelectTrigger className="flex items-center space-x-2 text-xs px-2 py-1 border border-gray-300 rounded-md">
           <span>{selectedLanguage}</span>
@@ -35,9 +39,14 @@ export default function LanguageScoreSelect({
             </SelectItem>
           ))}
         </SelectContent>
-      </Select>
-
-      <Select
+      </Select> */}
+      <FormField
+        value={selectedScore}
+        onChange={(value) => setSelectedScore(value)}
+        type="select"
+        options={scores}
+      />
+      {/* <Select
         value={selectedScore}
         onValueChange={(value) => setSelectedScore(value)}
       >
@@ -55,7 +64,7 @@ export default function LanguageScoreSelect({
             </SelectItem>
           ))}
         </SelectContent>
-      </Select>
+      </Select> */}
     </div>
   );
 }

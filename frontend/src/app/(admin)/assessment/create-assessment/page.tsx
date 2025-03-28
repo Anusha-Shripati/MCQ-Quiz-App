@@ -94,7 +94,8 @@ export default function CreateAssessment() {
         questions: cat.questions,
       })),
     };
-
+    console.log(newAssessment);
+    
     try {
       createAssessment(newAssessment);
       toast.success("Assessment created successfully");

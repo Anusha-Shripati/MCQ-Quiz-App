@@ -6,6 +6,7 @@ import Select, { MultiValue, SingleValue } from 'react-select';
 import { ArrowRight } from 'lucide-react';
 import { UseFormRegister, UseFormSetValue } from "react-hook-form";
 import { AssessmentForm } from "@/types/assessment.types";
+import { FormField } from "@/components/common/form-field";
 
 
 interface OptionType {
@@ -41,10 +42,10 @@ const Step1: React.FC<Step1Props> = ({
     })) || [];
     setValue('categories', selectedCategories.length ? selectedCategories : [])
   }
-  const handleDurationChange = (selectedOption: SingleValue<{ value:  number; label: string | number }>) => {
-    setValue('duration', selectedOption?.value ?? null);
+  const handleDurationChange = (selectedOption: string) => {
+    setValue('duration', parseInt(selectedOption) ?? 0);
   };
-  
+
   return (<Card className="bg-white dark:bg-gray-800">
     <CardHeader>
       <CardTitle className="font-bold text-gray-900 dark:text-white">Assessment Details</CardTitle>
@@ -54,19 +55,15 @@ const Step1: React.FC<Step1Props> = ({
     </CardHeader>
     <CardContent className="space-y-6">
       <div className="space-y-2">
-        <Label htmlFor="assessmentName" className="font-bold text-gray-900 dark:text-white">
-          Assessment Name
-        </Label>
-        <Input
+        <FormField
+          label='Assessment'
           id="assessmentName"
           placeholder="Enter a descriptive name"
           {...register('name')}
           className="bg-white text-gray-900 border-gray-200 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500
                      dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+          error={errors.name?.message}
         />
-        {errors.name && (
-          <p className="text-red-500 text-sm">{errors.name?.message}</p>
-        )}
       </div>
 
       <div className="space-y-3">
@@ -143,46 +140,16 @@ const Step1: React.FC<Step1Props> = ({
         <Label htmlFor="testDuration" className="font-bold text-gray-900 dark:text-white">
           Test Duration (in minutes)
         </Label>
-        <Select
+        <FormField
           id="testDuration"
           options={durationOptions}
-          value={durationOptions.find(option => option.value === formData.duration)}
+          value={formData.duration}
           onChange={handleDurationChange}
           className="mb-4"
           name='duration'
-          classNamePrefix="react-select"
-          styles={{
-            control: (base) => ({
-              ...base,
-              backgroundColor: 'var(--bg-color, white)',
-              borderColor: 'var(--border-color, #e5e7eb)',
-              color: 'var(--text-color, #111827)',
-            }),
-            menu: (base) => ({
-              ...base,
-              backgroundColor: 'var(--bg-color, white)',
-            }),
-            input: (base) => ({
-              ...base,
-              color: 'var(--text-color, #111827)',
-            }),
-            singleValue: (base) => ({
-              ...base,
-              color: 'var(--text-color, #111827)',
-            }),
-            option: (base, state) => ({
-              ...base,
-              backgroundColor: state.isFocused ? 'var(--highlight-color, #f3f4f6)' : 'var(--bg-color, white)',
-              color: 'var(--text-color, #111827)',
-              '&:hover': {
-                backgroundColor: 'var(--highlight-color, #f3f4f6)',
-              },
-            }),
-          }}
+          type="select"
+          error={errors.duration?.message}
         />
-        {errors.duration && (
-          <p className="text-red-500 text-sm">{errors.duration?.message}</p>
-        )}
       </div>
     </CardContent>
     <CardFooter className="flex justify-end">

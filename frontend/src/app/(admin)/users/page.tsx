@@ -94,6 +94,9 @@ const UserTable: React.FC = () => {
     },
   ]);
 
+
+  console.log(z, "zod");
+  
   const {
     control,
     handleSubmit,

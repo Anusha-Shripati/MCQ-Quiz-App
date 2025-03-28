@@ -1,10 +1,9 @@
 import { Button } from "@/components/ui/form/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/form/input";
 import { Label } from "@/components/ui/form/label";
-import Select, { MultiValue, SingleValue } from 'react-select';
+import Select, { MultiValue } from 'react-select';
 import { ArrowRight } from 'lucide-react';
-import { UseFormRegister, UseFormSetValue } from "react-hook-form";
+import { FieldErrors, UseFormRegister, UseFormSetValue } from "react-hook-form";
 import { AssessmentForm } from "@/types/assessment.types";
 import { FormField } from "@/components/common/form-field";
 
@@ -21,7 +20,7 @@ interface Step1Props {
   register: UseFormRegister<AssessmentForm>
   setValue: UseFormSetValue<AssessmentForm>
   formData: AssessmentForm
-  errors: any
+  errors: FieldErrors<AssessmentForm>;
 }
 
 const Step1: React.FC<Step1Props> = ({

@@ -7,11 +7,11 @@ export default function Error({
   error,
   reset,
 }: {
-  error: Error & { digest?: string } |any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  error: Error & { digest?: string } | any;
   reset: () => void;
 }) {
   useEffect(() => {
-    // Optionally log the error to an error reporting service
     console.error(error);
   }, [error]);
 

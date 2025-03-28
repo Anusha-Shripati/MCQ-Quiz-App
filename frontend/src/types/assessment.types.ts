@@ -9,6 +9,6 @@ export interface AssessmentCategory {
 export interface AssessmentForm {
   name: string;
   categories: AssessmentCategory[];
-  duration:number | string  | undefined;
+  duration:number | string ;
   targetQuestions:number
 }

@@ -3,17 +3,12 @@ import React, { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import ProctoredQuiz from "@/components/test/ProctoredQuiz";
 import { VideoRecorder } from "@/components/test/VideoRecorder";
-import BasicInfoForm from "@/components/test/BasicInfo";
+import BasicInfoForm, { BasicInfoData } from "@/components/test/BasicInfo";
 
 // Main Quiz Component
 const QuizPage = () => {
     const [step, setStep] = useState('basicInfo'); // 'basicInfo' | 'videoRecording' | 'quiz'
-    const [formData, setFormData] = useState({
-        userName: '',
-        email: '',
-        experienceYear: '',
-        jobProfile: ''
-    });
+   
     const [timeLeft, setTimeLeft] = useState(30 * 60); // 30 minutes
 
     useEffect(() => {
@@ -26,12 +21,12 @@ const QuizPage = () => {
     }, [timeLeft]);
 
 
-    const handleBasicInfoSubmit = (formData:FormData) => {
+    const handleBasicInfoSubmit = (formData:BasicInfoData) => {
         console.log('Form data:', formData);
         setStep('videoRecording');
     };
 
-    const handleRecordingComplete = (recordedChunks) => {
+    const handleRecordingComplete = (recordedChunks:Blob[]) => {
         console.log('Recording complete:', recordedChunks);
         setStep('quiz');
     };

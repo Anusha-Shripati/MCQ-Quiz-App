@@ -31,6 +31,10 @@ export interface TechnologyOption {
   label: string;
 }
 
+export interface StatusOption {
+  value: string;
+  label: string;
+}
 
 export interface AssessmentOption {
   value: string;

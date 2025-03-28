@@ -57,7 +57,7 @@ export default function ProctoredQuiz() {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [violations, setViolations] = useState<Violation[]>([]);
   const [screenshots, setScreenshots] = useState<Screenshot[]>([]);
-  const [isFullScreen, setIsFullScreen] = useState(false);
+  // const [isFullScreen, setIsFullScreen] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -104,7 +104,7 @@ export default function ProctoredQuiz() {
       if (!document.fullscreenElement) {
         // Wait for user interaction before requesting fullscreen
         await containerRef.current.requestFullscreen();
-        setIsFullScreen(true);
+        // setIsFullScreen(true);
         
         // Update original window size after entering fullscreen
         originalWindowSize.current = {

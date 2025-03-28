@@ -66,7 +66,6 @@ export default function Dashboard() {
         ))}
       </div>
 
-      {/* Interview Scores */}
       <Card className="col-span-12 md:col-span-6 row-span-2">
         <CardHeader>
           <div className="flex items-center justify-between space-x-3">
@@ -123,7 +122,6 @@ export default function Dashboard() {
         </CardContent>
       </Card>
 
-      {/* Questions */}
       <Card className="shadow-lg md:col-span-6">
         <Questions />
       </Card>

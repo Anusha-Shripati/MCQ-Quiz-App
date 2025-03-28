@@ -45,25 +45,27 @@ export default function DialogForm({ candidate, open, setOpen }: CandidateDialog
     assessment: z.string({ message: 'Assessment is required' }).nonempty('Assessment is required'),
     experience: z.string().nonempty('Experience is required'),
     timeValue: z.number({ message: "Duration is required" }).min(0, "Duration is required"),
-    timeUnit: z.enum(["day", "week"], {
+    timeUnit: z.enum(["days", "week"], {
       errorMap: () => ({ message: "Duration must be 'day' or 'week'" }),
     }),
     startDate: z.date({ message: "Duration is required" }),
   });
   const formFields: CandidateFormData = {
-    email: "", name: "", phone: "", technology: "", assessment: "", experience: "", timeValue: 0, timeUnit: "days", startDate: undefined, endDate: undefined,
+    email: "", name: "", phone: "", technology: "", assessment: "", experience: "", timeValue: 0, timeUnit: "days", startDate: new Date(), endDate: new Date(),
   }
 
   const { register, formState: { errors }, handleSubmit, setValue, watch, reset } = useForm<CandidateFormData>({ resolver: zodResolver(validation), defaultValues: candidate || formFields as CandidateFormData })
   const formData = watch()
 
   const validateAndSubmit = (values: CandidateFormData) => {
+    console.log(values,formData);
+    
     reset(formFields)
     setOpen(false);
   }
 
   useEffect(() => {
-    if (formData.startDate && formData.timeUnit && formData.timeValue) {
+    if (formData.startDate && formData.timeUnit && Number(formData.timeValue) >=0 ) {
       const newEndDate = new Date(formData.startDate);
       const numericValue = Number(formData.timeValue);
 
@@ -72,7 +74,6 @@ export default function DialogForm({ candidate, open, setOpen }: CandidateDialog
       } else {
         newEndDate.setHours(newEndDate.getHours() + numericValue);
       }
-
       setValue('endDate', newEndDate);
     } else {
       setValue('endDate', undefined);
@@ -180,7 +181,7 @@ export default function DialogForm({ candidate, open, setOpen }: CandidateDialog
             <Button
               variant="destructive"
               onClick={() => {
-                reset()
+                reset(formFields)
                 setOpen(false);
               }}
               className="hover:bg-gray-500 dark:hover:bg-gray-700"

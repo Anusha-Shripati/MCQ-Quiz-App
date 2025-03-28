@@ -1,4 +1,5 @@
-import { StatusOption, TechnologyOption } from "@/types/candidate.types";
+import {  TechnologyOption } from "@/types/candidate.types";
+import { StatusOption } from "@/types/common.types";
 import { Question } from "../types/app";
 
 export const data = [
@@ -967,6 +968,11 @@ export const assessmentOptions: StatusOption[] = [
   { value: "Java 4 years exp.", label: "Java 4 years exp." },
   { value: "MEAN 2 years exp.", label: "MEAN 2 years exp." },
 ];
+
+export const userOptions:StatusOption[]=[
+  { value: "mihir", label: "Mihir" },
+  { value: "john", label: "John" }
+]
 
 export const questionsDataStatic: Question[] = [
   {

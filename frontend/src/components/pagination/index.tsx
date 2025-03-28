@@ -2,6 +2,7 @@ import React, { useMemo } from 'react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/form/select';
 import { TablePaginationProps } from '@/shared/types/app';
 import { PaginationControls } from './pagination-controls';
+import { FormField } from '../common/form-field';
 
 function Pagination(props:React.PropsWithChildren<TablePaginationProps>) {
     const handleChange=(e:string)=>{
@@ -25,9 +26,14 @@ function Pagination(props:React.PropsWithChildren<TablePaginationProps>) {
                 {/* Items per page selector */}
                 <div className="flex items-center space-x-2">
                     <span className="text-sm text-gray-600 dark:text-gray-400">Results per page</span>
-                    <Select
+                    <FormField
                         value={props.itemsPerPage?.toString() || '10'}
-                        onValueChange={handleChange}
+                        onChange={handleChange}
+                        options={[10,25,50,100]}
+                        className="w-[80px]"
+                        type='select'
+                    />
+                    {/* <Select
                     >
                         <SelectTrigger className="w-[80px]">
                             <SelectValue />
@@ -38,7 +44,7 @@ function Pagination(props:React.PropsWithChildren<TablePaginationProps>) {
                             <SelectItem value="50">50</SelectItem>
                             <SelectItem value="100">100</SelectItem>
                         </SelectContent>
-                    </Select>
+                    </Select> */}
                 </div>
             </div>
             <PaginationControls

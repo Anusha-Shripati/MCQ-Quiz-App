@@ -1,5 +1,7 @@
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/form/select";
 import { Input } from "@/components/ui/form/input";
+import { FormField } from "./form-field";
+import { useMemo } from "react";
 
 interface DurationInputProps {
   label: string;
@@ -17,26 +19,29 @@ export const DurationInput = ({
   setTimeUnit,
   setTimeValue,
   error
-}: DurationInputProps) => (
-  <div>
-    <label className="block text-sm font-medium mb-1">{label}</label>
-    <div className="flex items-center gap-4">
-      <Input
-        type="number"
-        placeholder={`Enter ${timeUnit}`}
-        value={timeValue}
-        onChange={(e) => setTimeValue(e.target.valueAsNumber || '')}
-        min="1"
-      />
-      <Select value={timeUnit} onValueChange={(value) => setTimeUnit(value as 'days' | 'hours')}>
-        <SelectTrigger>
-          <SelectValue placeholder="Duration" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="days">Days</SelectItem>
-        </SelectContent>
-      </Select>
-    </div>
-    {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
-  </div>
-); 
+}: DurationInputProps) => {
+  const durationOptions = useMemo(() => [
+    { value: "days", label: "Days" }
+  ], [])
+    return (
+      <div>
+        <label className="block text-sm font-medium mb-1">{label}</label>
+        <div className="flex items-center gap-4">
+          <FormField
+            type="number"
+            value={timeValue}
+            onChange={(e) => setTimeValue(e.target.valueAsNumber || '')}
+            placeholder={`Enter ${timeUnit}`}
+          />
+          <FormField
+            id="technology"
+            type="select"
+            options={durationOptions}
+            value={timeUnit}
+            onChange={(value) => setTimeUnit(value as 'days' | 'hours')}
+          />
+        </div>
+        {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+      </div>
+    )
+}; 

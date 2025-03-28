@@ -30,7 +30,7 @@ export default function Profile() {
     register: registerUserInfo,
     handleSubmit: handleUserInfoSubmit,
     formState: { errors: userInfoErrors },
-    reset:userRest
+    reset:userReset
   } = useForm({
     resolver: zodResolver(userInfoSchema),
     defaultValues: {
@@ -64,9 +64,9 @@ export default function Profile() {
   }) => {
     console.log("Password Changed:", data);
   };
-  const handleEdit=()=>{
+  const handleEditAndClose=()=>{
     if(isEditing){
-      userRest()
+      userReset()
     }
     setIsEditing((prv)=>!prv)
   }
@@ -80,7 +80,7 @@ export default function Profile() {
       <div className="space-y-4 mb-4 mt-4">
         <div className="mb-1 flex justify-end">
           <Button
-            onClick={handleEdit}
+            onClick={handleEditAndClose}
             className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-600"
             variant="ghost"
           >
@@ -127,7 +127,6 @@ export default function Profile() {
 
       <hr className="mb-4" />
 
-      {/* Change Password Section */}
       <div>
         <h2 className="text-xl font-semibold mb-6 dark:text-white">
           Change Password

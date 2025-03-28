@@ -110,7 +110,11 @@ const Step2: React.FC<Step2Props> = ({
       formData.categories[index].questions[difficulty];
 
     if (numValue > remainingQuestions) {
-      showError(`You can only allocate ${remainingQuestions} questions.`);
+      if(remainingQuestions)
+        showError(`You can only allocate ${remainingQuestions} questions.`);
+      else
+        showError('Please enter total questions');
+
       return;
     }
 

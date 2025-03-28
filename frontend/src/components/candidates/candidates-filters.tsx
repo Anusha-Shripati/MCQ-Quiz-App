@@ -1,6 +1,6 @@
 // Filters component (main file)
 "use client"
-import React, { memo, useEffect } from "react";
+import React, { memo } from "react";
 import { Button } from "../ui/form/button";
 import { cn } from "@/lib/utils";
 import { AssessmentOption, CandidateFilter, FiltersProps, TechnologyOption } from "@/types/candidate.types";

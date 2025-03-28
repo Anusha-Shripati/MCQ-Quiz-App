@@ -27,7 +27,7 @@ interface AssessmentItemProps {
   title: string;
   createdBy: string;
   createdDate: string;
-  duration: string | number | null;
+  duration: string | number ;
   technologies?: Technology[];
   isExpanded: boolean;
   onToggle: () => void;

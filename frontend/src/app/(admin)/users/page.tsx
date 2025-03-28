@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/form/input";
@@ -19,7 +19,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/form/label";
 import PermissionsTable from "@/components/users/permission-table";
 import toast from "react-hot-toast";
 import { FiEdit, FiTrash2 } from "react-icons/fi";
@@ -99,7 +98,6 @@ const UserTable: React.FC = () => {
   console.log(z, "zod");
   
   const {
-    control,
     handleSubmit,
     reset,
     setValue,

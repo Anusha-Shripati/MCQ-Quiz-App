@@ -1,5 +1,3 @@
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/form/select";
-import { Input } from "@/components/ui/form/input";
 import { FormField } from "./form-field";
 import { useMemo } from "react";
 
@@ -30,7 +28,7 @@ export const DurationInput = ({
           <FormField
             type="number"
             value={timeValue}
-            onChange={(e) => setTimeValue(e.target.valueAsNumber || '')}
+            onChange={(e) => setTimeValue(e.target.value || '')}
             placeholder={`Enter ${timeUnit}`}
           />
           <FormField

@@ -9,6 +9,7 @@ interface FormFieldProps {
   options?: SelectOption[] | (string | number)[];
   value?: string | number;
   error?: string | undefined;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onChange: (value: any) => void;
   name?: string;
   className?: string | undefined;
@@ -30,7 +31,7 @@ export const FormField = forwardRef<HTMLInputElement, FormFieldProps>((props: Fo
     ? props.options.map(opt =>
       typeof opt === "object" ? opt : { value: opt, label: opt }
     )
-    : [],[]);
+    : [],[props.options]);
 
   return (
     <div className={props.parentClassName || ''}>
@@ -59,3 +60,4 @@ export const FormField = forwardRef<HTMLInputElement, FormFieldProps>((props: Fo
     </div>
   )
 }); 
+FormField.displayName = "FormField";

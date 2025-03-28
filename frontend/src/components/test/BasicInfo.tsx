@@ -9,11 +9,16 @@ interface FormData {
   experienceYear: number | null;
   jobProfile: string;
 }
+export interface BasicInfoData {
+  name?: string;
+  email: string;
+  // Add other fields as needed
+}
 
 type Errors = Record<keyof FormData, string>;
 
 interface BasicInfoFormProps {
-  handleBasicInfoSubmit: (data: FormData) => void;
+  handleBasicInfoSubmit: (data: BasicInfoData) => void;
 }
 
 const BasicInfoForm: React.FC<BasicInfoFormProps> = ({ handleBasicInfoSubmit }) => {

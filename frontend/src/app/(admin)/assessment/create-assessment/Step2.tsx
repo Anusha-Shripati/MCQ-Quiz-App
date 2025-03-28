@@ -3,7 +3,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { Input } from "@/components/ui/form/input";
 import { Button } from "@/components/ui/form/button";
 import { ArrowLeft, ArrowRight } from "lucide-react";
-import { UseFormRegister, UseFormSetValue } from "react-hook-form";
+import { FieldErrors, UseFormRegister, UseFormSetValue } from "react-hook-form";
 import { AssessmentForm } from "@/types/assessment.types";
 import { Slider } from "@/components/ui/form/slider";
 import toast from "react-hot-toast";
@@ -12,7 +12,7 @@ type Step2Props = {
   formData: AssessmentForm;
   handlePreviousStep: () => void;
   handleNextStep: () => void;
-  errors: any
+  errors: FieldErrors<AssessmentForm>;
   calculateTotalSum: () => number;
 
   setValue: UseFormSetValue<AssessmentForm>

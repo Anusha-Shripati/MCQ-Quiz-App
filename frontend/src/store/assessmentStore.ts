@@ -18,7 +18,7 @@ export interface Assessment {
     createdBy: string;
     createdDate: string;
     totalQuestions: number;
-    duration: string | number | undefined ;
+    duration: string | number  ;
     technologies: Technology[];
 }
 export interface AssessmentFilters{

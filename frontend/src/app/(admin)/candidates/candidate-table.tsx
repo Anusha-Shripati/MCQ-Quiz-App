@@ -97,6 +97,7 @@ function CandidateTable() {
         return `${startTime}–${endTime}`; // e.g., "09:00 AM–12:00 PM"
     };
     const handleEdit = (candidate: Candidate) => {  
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const obj:any ={...candidate}
         obj.startDate = new Date(candidate.testStartTime)
         obj.endDate = new Date(candidate.testStartTime)

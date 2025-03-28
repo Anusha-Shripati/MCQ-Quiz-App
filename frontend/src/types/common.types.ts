@@ -8,3 +8,8 @@ export interface StatusOption {
   value: string;
   label: string;
 }
+
+export interface User{
+  id:number;
+  name:number
+}

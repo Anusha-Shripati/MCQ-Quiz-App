@@ -29,7 +29,6 @@ import { modules as  availableModules, rolesDataStatic } from "@/shared/constant
 
 
 const permissionSchema = z.object({
-  // createEdit: z.boolean(),
   view: z.boolean(),
   edit: z.boolean(),
 });

@@ -3,53 +3,73 @@ import jwt from "jsonwebtoken";
 import { UserService } from "../services/user.services";
 import bcrypt from "bcryptjs";
 import { generateResponse } from "../utils/generateResponse";
+import RoleService from "../services/role.services";
 
+
+type Actions = 'can_read' | 'can_edit'
 export const authenticateAndAuthorize =
-  (allowedRoles: string[] = []): RequestHandler =>
-  (req: Request, res: Response, next: NextFunction): void => {
-    const authHeader = req.headers.authorization || "";
-    const userService = new UserService();
+  (rights?: string, role?: string): RequestHandler =>
+    async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      const authHeader = req.headers.authorization || "";
+      const userService = new UserService();
+      const roleService = new RoleService()
 
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      generateResponse(res, 401, {}, false, "Authorization token is required.");
-    }
-
-    const token = authHeader.split(" ")[1] || "";
-    try {
-      // Decode and verify the token
-      const decoded = jwt.verify(
-        token,
-        process.env.ACCESS_SECRET as string
-      ) as {
-        id: string;
-        email: string;
-        role: string;
-      };
-
-      // Attach the user information to the request object
-      req.user = decoded;
-
-      // Check if the user's role is allowed (if roles are specified)
-      if (allowedRoles.length > 0 && !allowedRoles.includes(decoded.role)) {
-        generateResponse(res, 403, {}, false, "Request not allowed.");
+      if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        generateResponse(res, 401, {}, false, "Authorization token is required.");
+        return
       }
 
-      // Verify the user exists in the database
-      userService
-        .findUserById(decoded.id)
-        .then((user) => {
-          if (!user) {
-            return generateResponse(res, 404, {}, false, "User not found.");
+      const token = authHeader.split(" ")[1] || "";
+      try {
+        const decoded = jwt.verify(
+          token,
+          process.env.ACCESS_SECRET as string
+        ) as {
+          id: string;
+          email: string;
+          role: string;
+        };
+
+        req.user = decoded;
+        if (rights) {
+          const [moduleName, action] = rights.split('.')
+          if (!moduleName || !action) {
+            generateResponse(res, 400, {}, false, "Invalid rights format.");
+            return
           }
-          next(); // Proceed to the next middleware
-        })
-        .catch((error) => {
-          generateResponse(res, 500, {}, false, "Error verifying user.");
-        });
-    } catch (error) {
-      generateResponse(res, 500, {}, false, "Invalid or expired token.");
-    }
-  };
+          const permissions = await roleService.getPermissionByRole(decoded.role);
+          if (!permissions) {
+            generateResponse(res, 403, {}, false, "Permissions not found for the role.");
+            return
+          }
+
+          const modulePermission = permissions.find((p) => p.module?.name === moduleName);
+          if (!modulePermission || !modulePermission[action as Actions]) {
+            generateResponse(res, 403, {}, false, "Request not allowed.");
+            return
+          }
+        }
+        
+        if (role && decoded.role !== role) {
+          generateResponse(res, 403, {}, false, "Request not allowed.");
+          return
+        }
+
+        userService
+          .findUserById(decoded.id)
+          .then((user) => {
+            if (!user) {
+              return generateResponse(res, 404, {}, false, "User not found.");
+            }
+            next();
+          })
+          .catch((error) => {
+            generateResponse(res, 500, {}, false, "Error verifying user.");
+          });
+      } catch (error) {
+        generateResponse(res, 500, {}, false, "Invalid or expired token.");
+      }
+    };
 
 export const createToken = (id: string, email: string, role = "user") => {
   let payload = {

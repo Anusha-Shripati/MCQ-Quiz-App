@@ -1,11 +1,17 @@
 import { Input } from "@/components/ui/form/input";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/form/select";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/form/select";
 import { forwardRef, useMemo } from "react";
 
 interface FormFieldProps {
   label?: string;
   id?: string;
-  type?: 'text' | 'email' | 'tel' | 'select' | 'number' | 'password';
+  type?: "text" | "email" | "tel" | "select" | "number" | "password";
   options?: SelectOption[] | (string | number)[];
   value?: string | number;
   error?: string | undefined;
@@ -14,11 +20,10 @@ interface FormFieldProps {
   name?: string;
   className?: string | undefined;
   placeholder?: string;
-  disabled?:boolean;
-  min?:string | number | undefined;
-  max?:string | number | undefined;
-  parentClassName?:string;
-
+  disabled?: boolean;
+  min?: string | number | undefined;
+  max?: string | number | undefined;
+  parentClassName?: string;
 }
 
 interface SelectOption {

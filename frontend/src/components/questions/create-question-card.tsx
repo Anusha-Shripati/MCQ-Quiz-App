@@ -51,19 +51,26 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
     }
     return options.slice(0, 5); // Ensure only 6 options
   };
-  const questionTypeOptions = useMemo(() => [
-    { value: 'multiple-choice', label: 'Multiple Choice' },
-    { value: 'radio-select', label: 'Radio Select' },
-    { value: 'fill-in-the-blanks', label: 'Fill in the Blanks' },
-    { value: "code-snippet", label: "Code Snippet" }
-  ] as { value: Question['type']; label: string }[], [])
+  const questionTypeOptions = useMemo(
+    () =>
+      [
+        { value: "multiple-choice", label: "Multiple Choice" },
+        { value: "radio-select", label: "Radio Select" },
+        { value: "fill-in-the-blanks", label: "Fill in the Blanks" },
+        { value: "code-snippet", label: "Code Snippet" },
+      ] as { value: Question["type"]; label: string }[],
+    []
+  );
 
-  const questionDifficultyOptions = useMemo(() => [
-    { value: 'easy', label: 'Easy' },
-    { value: 'medium', label: 'Medium' },
-    { value: 'hard', label: 'Hard' },
-  ] as { value: Question['difficulty']; label: string }[], [])
-
+  const questionDifficultyOptions = useMemo(
+    () =>
+      [
+        { value: "easy", label: "Easy" },
+        { value: "medium", label: "Medium" },
+        { value: "hard", label: "Hard" },
+      ] as { value: Question["difficulty"]; label: string }[],
+    []
+  );
 
   return (
     <Card
@@ -78,10 +85,10 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
         <div className="flex gap-4 mb-4">
           <FormField
             type="select"
-            parentClassName='w-full'
+            parentClassName="w-full"
             className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-300"
             value={question.type}
-            onChange={(value: Question['type']) =>
+            onChange={(value: Question["type"]) =>
               handleQuestionTypeChange(value, index)
             }
             placeholder="Question Type"
@@ -89,11 +96,10 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
           />
           <FormField
             type="select"
-            parentClassName='w-full'
-
+            parentClassName="w-full"
             className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-300"
             value={question.difficulty}
-            onChange={(value: Question['difficulty']) => {
+            onChange={(value: Question["difficulty"]) => {
               const updatedQuestions = [...questions];
               updatedQuestions[index].difficulty = value;
               setQuestions(updatedQuestions);
@@ -116,37 +122,37 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
 
         {(question.type === "multiple-choice" ||
           question.type === "radio-select") && (
-            <div className="space-y-2">
-              {ensureSixOptions(question.options).map((option, i) => (
-                <div key={i} className="flex items-center gap-2">
-                  {question.type === "radio-select" ? (
-                    <input
-                      type="radio"
-                      name={`radio-${question.id}`}
-                      checked={question.correctOptions?.includes(i)}
-                      onChange={() => handleCorrectOptionChange(i, index)}
-                    />
-                  ) : (
-                    <input
-                      type="checkbox"
-                      checked={question.correctOptions?.includes(i)}
-                      onChange={() => handleCorrectOptionChange(i, index)}
-                    />
-                  )}
-                  <Input
-                    placeholder={`Option ${i + 1}`}
-                    value={option}
-                    onChange={(e) => {
-                      const updatedQuestions = [...questions];
-                      updatedQuestions[index].options![i] = e.target.value;
-                      setQuestions(updatedQuestions);
-                    }}
-                    className={i >= 4 ? "border-dashed border-gray-400" : ""}
+          <div className="space-y-2">
+            {ensureSixOptions(question.options).map((option, i) => (
+              <div key={i} className="flex items-center gap-2">
+                {question.type === "radio-select" ? (
+                  <input
+                    type="radio"
+                    name={`radio-${question.id}`}
+                    checked={question.correctOptions?.includes(i)}
+                    onChange={() => handleCorrectOptionChange(i, index)}
                   />
-                </div>
-              ))}
-            </div>
-          )}
+                ) : (
+                  <input
+                    type="checkbox"
+                    checked={question.correctOptions?.includes(i)}
+                    onChange={() => handleCorrectOptionChange(i, index)}
+                  />
+                )}
+                <Input
+                  placeholder={`Option ${i + 1}`}
+                  value={option}
+                  onChange={(e) => {
+                    const updatedQuestions = [...questions];
+                    updatedQuestions[index].options![i] = e.target.value;
+                    setQuestions(updatedQuestions);
+                  }}
+                  className={i >= 4 ? "border-dashed border-gray-400" : ""}
+                />
+              </div>
+            ))}
+          </div>
+        )}
 
         {question.type === "fill-in-the-blanks" && (
           <Input
@@ -173,7 +179,6 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
             rows={10}
           />
         )}
-
       </CardContent>
       <CardFooter className="mt-auto">
         <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>

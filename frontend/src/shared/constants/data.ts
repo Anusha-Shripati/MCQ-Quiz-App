@@ -207,7 +207,12 @@ export const technologies = [
   },
 ];
 
-export const AVAILABLE_CATEGORIES = ["MongoDB", "ExpressJs", "ReactJs", "NodeJs", "AngularJs",
+export const AVAILABLE_CATEGORIES = [
+  "MongoDB",
+  "ExpressJs",
+  "ReactJs",
+  "NodeJs",
+  "AngularJs",
   "Vue.Js",
   "JavaScript",
   "TypeScript",
@@ -971,8 +976,8 @@ export const assessmentOptions: StatusOption[] = [
 
 export const userOptions: StatusOption[] = [
   { value: "mihir", label: "Mihir" },
-  { value: "john", label: "John" }
-]
+  { value: "john", label: "John" },
+];
 
 export const questionsDataStatic: Question[] = [
   {

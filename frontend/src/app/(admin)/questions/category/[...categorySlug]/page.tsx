@@ -2,19 +2,22 @@
 
 import { Button } from "@/components/ui/form/button";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import {  useState, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { useTheme } from "next-themes";
 import { ArrowLeft } from "lucide-react";
 import { questionsDataStatic } from "@/shared/constants/data";
 import { FilterBar } from "@/components/questions/filter-bar";
 import { QuestionCard } from "@/components/questions/questions-card";
 import { Pagination } from "@/components/questions/pagination-for-category";
+import { Question } from "@/shared/types/app";
 
 const CategoryPage = () => {
   const { categorySlug } = useParams();
   const searchParams = useSearchParams();
   const { theme } = useTheme();
   const router = useRouter();
+  const [questionsData, setQuestionsData] =
+    useState<Question[]>(questionsDataStatic);
 
   const difficulty = searchParams.get("difficulty");
   const [selectedDifficulties, setSelectedDifficulties] = useState<string[]>(
@@ -25,10 +28,12 @@ const CategoryPage = () => {
   const questionsPerPage = 5;
 
   const filteredQuestions = useMemo(() => {
-    let filtered = questionsDataStatic;
+    let filtered = [...questionsData];
 
     if (selectedDifficulties.length > 0 && selectedDifficulties.length < 3) {
-      filtered = filtered.filter((question) => selectedDifficulties.includes(question.difficulty));
+      filtered = filtered.filter((question) =>
+        selectedDifficulties.includes(question.difficulty)
+      );
     }
 
     if (searchQuery) {
@@ -38,7 +43,7 @@ const CategoryPage = () => {
     }
 
     return filtered;
-  }, [selectedDifficulties, searchQuery]);
+  }, [selectedDifficulties, searchQuery, questionsData]);
 
   const currentQuestions = useMemo(() => {
     const indexOfLastQuestion = currentPage * questionsPerPage;
@@ -48,14 +53,25 @@ const CategoryPage = () => {
 
   const handleDifficultyChange = (difficulties: string[]) => {
     setSelectedDifficulties(difficulties);
-    const queryParam = difficulties.length ? `?difficulty=${difficulties.join(",")}` : "";
+    console.log(difficulties, "difficulties");
+    const queryParam = difficulties.length
+      ? `?difficulty=${difficulties.join(",")}`
+      : "";
     router.push(queryParam);
+  };
+
+  const handleDelete = (question: Question) => {
+    console.log(question, "question");
+    const deleteQuestion = questionsData.filter((q) => q.id !== question.id);
+    setQuestionsData(deleteQuestion);
   };
 
   const totalPages = Math.ceil(filteredQuestions.length / questionsPerPage);
 
   return (
-    <div className={`p-6 flex justify-center min-h-screen ${theme === "dark" ? "bg-gray-900" : "bg-gray-100"}`}>
+    <div
+      className={`p-6 flex justify-center min-h-screen ${theme === "dark" ? "bg-gray-900" : "bg-gray-100"}`}
+    >
       <div
         className={`w-full max-w-6xl ${
           theme === "dark" ? "bg-gray-800 text-white" : "bg-white text-gray-900"
@@ -65,7 +81,9 @@ const CategoryPage = () => {
           <Button variant="ghost" onClick={() => window.history.back()}>
             <ArrowLeft className="h-4 w-4" />
           </Button>
-          <div className={`text-2xl font-bold ${theme === "dark" ? "text-white" : "text-gray-900"}`}>
+          <div
+            className={`text-2xl font-bold ${theme === "dark" ? "text-white" : "text-gray-900"}`}
+          >
             {categorySlug}
           </div>
         </div>
@@ -80,12 +98,20 @@ const CategoryPage = () => {
 
         <div className="w-full">
           {currentQuestions.map((question) => (
-            <QuestionCard key={question.id} question={question} />
+            <QuestionCard
+              key={question.id}
+              question={question}
+              handleDelete={handleDelete}
+            />
           ))}
         </div>
 
         <div className="flex justify-center mt-6 space-x-4">
-          <Pagination currentPage={currentPage} onPageChange={setCurrentPage} totalPages={totalPages} />
+          <Pagination
+            currentPage={currentPage}
+            onPageChange={setCurrentPage}
+            totalPages={totalPages}
+          />
         </div>
       </div>
     </div>

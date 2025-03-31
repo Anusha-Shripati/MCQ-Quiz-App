@@ -125,7 +125,7 @@ const UserTable: React.FC = () => {
     user.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const rolesOptions = useMemo(()=>rolesDataStatic.map(item=>item.name),[rolesDataStatic])
+  const rolesOptions = useMemo(()=>rolesDataStatic.map(item=>item.name),[])
 
   return (
     <div className="p-6 min-h-screen">
@@ -143,7 +143,12 @@ const UserTable: React.FC = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
               autoComplete="off"
             />
-            <Button onClick={handleCreateUser} className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm">Create User</Button>
+            <Button
+              onClick={handleCreateUser}
+              className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
+            >
+              Create User
+            </Button>
           </div>
         </CardHeader>
         <CardContent>
@@ -204,7 +209,7 @@ const UserTable: React.FC = () => {
               <div className="space-y-2">
                 <FormField
                   label="Name"
-                  {...register('name')}
+                  {...register("name")}
                   placeholder="User Name"
                   className="dark:bg-gray-700"
                   error={errors.name?.message}
@@ -214,18 +219,17 @@ const UserTable: React.FC = () => {
               <div className="space-y-2">
                 <FormField
                   label="Email"
-                  {...register('email')}
+                  {...register("email")}
                   placeholder="Email"
                   className="dark:bg-gray-700"
                   error={errors.email?.message}
                 />
               </div>
 
-
               <div className="space-y-2">
                 <FormField
                   label="Password"
-                  {...register('password')}
+                  {...register("password")}
                   placeholder="Password"
                   className="dark:bg-gray-700"
                   type="password"
@@ -235,9 +239,8 @@ const UserTable: React.FC = () => {
               <div className="space-y-2">
                 <FormField
                   label="Confirm Password"
-                  {...register('confirmPassword')}
+                  {...register("confirmPassword")}
                   placeholder="Confirm Password"
-
                   className="dark:bg-gray-700"
                   type="password"
                   error={errors.confirmPassword?.message}

@@ -16,13 +16,16 @@ export function ResultsPerPage({
   currentPageEnd,
   totalItems,
   itemsPerPage,
-  onItemsPerPageChange
+  onItemsPerPageChange,
 }: ResultsPerPageProps) {
-  const options = useMemo(() => [
-    { value: "10", label: 10 },
-    { value: "25", label: 25 },
-    { value: "50", label: 50 },
-  ], [])
+  const options = useMemo(
+    () => [
+      { value: "10", label: 10 },
+      { value: "25", label: 25 },
+      { value: "50", label: 50 },
+    ],
+    []
+  );
   return (
     <div className="flex flex-col sm:flex-row justify-between items-center mb-4 px-4">
       <div className="text-sm text-gray-600 dark:text-gray-400 mb-2 sm:mb-0">
@@ -30,7 +33,9 @@ export function ResultsPerPage({
       </div>
 
       <div className="flex items-center space-x-2">
-        <span className="text-sm text-gray-600 dark:text-gray-400">Results per page</span>
+        <span className="text-sm text-gray-600 dark:text-gray-400">
+          Results per page
+        </span>
         <FormField
           className="w-[80px]"
           value={itemsPerPage.toString()}

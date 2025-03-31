@@ -45,15 +45,18 @@ function CandidateTable() {
   //     ), { ssr: false, loading: () => <Loading /> }
   // );
   const handlePerPageChange = (value: string) => {
+    console.log(value, "value");
     setItemsPerPage(Number(value));
     setCurrentPage(1);
     updateQueryParams({ perPage: value, page: "1" });
   };
   const handlePageChange = (page: number) => {
+    console.log(page, "page");
     setCurrentPage(page);
     updateQueryParams({ page: page.toString() });
   };
   const updateQueryParams = (params: { page?: string; perPage?: string }) => {
+    console.log(params, "params");
     const newParams = new URLSearchParams(searchParams.toString());
 
     if (params.page) newParams.set("page", params.page);
@@ -83,6 +86,7 @@ function CandidateTable() {
   };
 
   const formatTestDateRange = (startDate: string, endDate: string): string => {
+    console.log(startDate, endDate, "startDate, endDate");
     const start = new Date(startDate);
     const end = new Date(endDate);
 

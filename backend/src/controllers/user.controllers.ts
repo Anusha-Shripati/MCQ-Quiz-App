@@ -1,19 +1,20 @@
 import { Request, Response, NextFunction } from "express";
 import { UserService } from "../services/user.services";
 import { generateResponse } from "../utils/generateResponse";
-import { Role } from "@prisma/client"; // Import the Role enum from Prisma
 import {
   createToken,
   encryptStringCrypt,
   matchPassword,
 } from "../middlewares/auth.middleware";
+import RoleService from "../services/role.services";
 
 const userService = new UserService();
+const roleService = new RoleService();
 
 interface UserPayload {
   email: string;
   password: string;
-  role: Role;
+  role_id: string;
 }
 
 export class UserController {
@@ -21,7 +22,7 @@ export class UserController {
     try {
       const { email, password } = req.body;
 
-      
+
 
       // Step 1: Find the user by email
       const user = await userService.findUserByEmail(email);
@@ -36,7 +37,8 @@ export class UserController {
       }
 
       // Step 3: Generate JWT token
-      const token = await createToken(user.id, user.email, user.role);
+      const role = await roleService.findRoleById(user.role_id);
+      const token = createToken(user.id, user.email, role?.name || '');
 
       // Step 4: Respond with the token
       generateResponse(
@@ -55,18 +57,52 @@ export class UserController {
     try {
       const payload: UserPayload = req.body;
 
-      // Hash the password before saving it to the database
+      const user = await userService.findUserByEmail(payload.email);
+      if (user) {
+        return generateResponse(res, 401, {}, false, "User already exists");
+      }
+
       const hashedPassword = await encryptStringCrypt(payload.password);
 
-      // Create the new user
       const newUser = await userService.createUser({
         email: payload.email,
-        password: hashedPassword, // Save the hashed password
-        role: payload.role, // Validated role
+        password: hashedPassword,
+        role_id: payload.role_id,
         createdAt: new Date(),
       });
 
-      generateResponse(res, 201, newUser, true, "User created successfully!");
+      generateResponse(res, 200, newUser, true, "User created successfully!");
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  update = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const userId = req.params.id
+      const payload: UserPayload = req.body;
+
+      const user = await userService.findUserById(userId);
+      if (!user) {
+        return generateResponse(res, 404, {}, false, "User not found!");
+      }
+
+      if (payload.email && payload.email !== user.email) {
+        const duplicateUser = await userService.findUserByEmail(user.email);
+        if (duplicateUser) {
+          return generateResponse(res, 400, {}, false, "Email is already exists!");
+        }
+      }
+
+      const hashedPassword = await encryptStringCrypt(payload.password);
+
+      const newUser = await userService.updateUser(user.id,{
+        email: payload.email,
+        password: hashedPassword,
+        role_id: payload.role_id,
+      });
+
+      generateResponse(res, 200, newUser, true, "User updated successfully!");
     } catch (error) {
       next(error);
     }
@@ -100,7 +136,6 @@ export class UserController {
 
       const users = await userService.findManyUsers({ email: email });
 
-      // Return the filtered users
       generateResponse(
         res,
         200,
@@ -115,14 +150,30 @@ export class UserController {
 
   getUserById = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const userId = req.params.userId;
-      
+      const userId = req.params.id;
+
       const user = await userService.findUserById(userId);
       if (!user) {
         generateResponse(res, 404, {}, false, "User not found");
         return;
       }
       generateResponse(res, 200, user, true, "User found");
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  };
+  delete = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const userId = req.params.id;
+
+      const user = await userService.findUserById(userId);
+      if (!user) {
+        generateResponse(res, 404, {}, false, "User not found");
+        return;
+      }
+      await userService.delete(userId)
+      generateResponse(res, 200, {}, true, "User deleted successfully");
     } catch (error) {
       console.log(error);
       next(error);

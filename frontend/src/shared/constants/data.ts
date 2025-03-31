@@ -1178,7 +1178,7 @@ export default App;`,
   },
 ];
 
-export const modules: string[] = ["assessment", "candidates", "questions", "users"]
+export const modules: string[] = ["assessments", "candidates", "questions", "users"]
 export const rolesDataStatic: Roles[] = [
   {
     name: "Admin",

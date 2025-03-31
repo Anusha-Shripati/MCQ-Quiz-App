@@ -13,7 +13,8 @@ const userController = new UserController();
 
 userRouter.post(
   "/create",
-  authenticateAndAuthorize(["Super_Admin", "Editor"]), // Middleware for auth and role check
+  authenticateAndAuthorize('users.can_edit'),
+  // authenticateAndAuthorize(["Super_Admin", "Editor"]), // Middleware for auth and role check
   validateRequest(createUserSchema),
   asyncHandler(userController.create) // Async handler for the controller
 );
@@ -26,14 +27,28 @@ userRouter.post(
 
 userRouter.get(
   "/list",
-  authenticateAndAuthorize(["Super_Admin", "Editor", "Candidate"]),
+  authenticateAndAuthorize('users.can_read'),
   asyncHandler(userController.list)
 );
 
 userRouter.get(
-  "/:userId",
+  "/:id",
+  authenticateAndAuthorize('users.can_read'),
   // authenticateAndAuthorize(["Super_Admin", "Editor"]),
   asyncHandler(userController.getUserById)
+);
+userRouter.post(
+  "/:id",
+  authenticateAndAuthorize('users.can_edit'),
+  // authenticateAndAuthorize(["Super_Admin", "Editor"]),
+  asyncHandler(userController.update)
+);
+
+userRouter.delete(
+  "/:id",
+  // authenticateAndAuthorize(["Super_Admin", "Editor"]),
+  authenticateAndAuthorize('users.can_edit'),
+  asyncHandler(userController.delete)
 );
 
 export default userRouter;

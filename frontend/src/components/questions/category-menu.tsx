@@ -9,6 +9,7 @@ import {
 import { Edit, Trash, MoreVertical } from "lucide-react";
 import { Button } from "../ui/form/button";
 import { QuestionCategory } from "@/shared/types/app";
+import { useRouter } from "next/navigation";
 
 const CategoryMenu = ({
   category,
@@ -17,7 +18,10 @@ const CategoryMenu = ({
   category: QuestionCategory;
   handleDelete: (category: QuestionCategory) => void;
 }) => {
+  const router = useRouter();
+
   const handleEditCategory = (categoryName: string) => {
+    router.push(`/questions/create-question/${categoryName}`);
     console.log(categoryName);
   };
 

@@ -15,9 +15,10 @@ export interface User {
 }
 
 export interface Permissions {
-  createEdit: boolean;
+  // createEdit: boolean;
+  edit: boolean;
   view: boolean;
-  delete: boolean
+  // delete: boolean
 }
 export interface Roles {
   name: string,

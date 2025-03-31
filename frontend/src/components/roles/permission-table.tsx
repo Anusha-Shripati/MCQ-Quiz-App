@@ -8,24 +8,19 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/form/checkbox";
+import { Permissions } from "@/types/common.types";
+import { modules as availableModules } from "@/shared/constants/data";
 
-const availableModules = ["assessment", "candidates", "questions"];
-
-type Permission = {
-  createEdit: boolean;
-  view: boolean;
-  delete: boolean;
-};
 
 const PermissionsTable: React.FC<{
-  permissions: Record<string, Permission>;
-  onCheckboxChange: (category: string, type: keyof Permission) => void;
+  permissions: Record<string, Permissions>;
+  onCheckboxChange: (category: string, type: keyof Permissions) => void;
 }> = ({ permissions, onCheckboxChange }) => (
   <Table>
     <TableHeader>
       <TableRow>
         <TableHead>Module</TableHead>
-        <TableHead className="text-center">Create/Edit</TableHead>
+        {/* <TableHead className="text-center">Create/Edit</TableHead> */}
         <TableHead className="text-center">View</TableHead>
         <TableHead className="text-center">Delete</TableHead>
       </TableRow>
@@ -34,14 +29,14 @@ const PermissionsTable: React.FC<{
       {availableModules.map((category) => (
         <TableRow key={category}>
           <TableCell>{category}</TableCell>
-          {["createEdit", "view", "delete"].map((type) => (
+          {["edit", "view"].map((type) => (
             <TableCell key={type} className="text-center">
               <Checkbox
                 checked={
-                  permissions[category]?.[type as keyof Permission] || false
+                  permissions[category]?.[type as keyof Permissions] || false
                 }
                 onCheckedChange={() =>
-                  onCheckboxChange(category, type as keyof Permission)
+                  onCheckboxChange(category, type as keyof Permissions)
                 }
                 className="dark:bg-gray-600"
               />

@@ -19,7 +19,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import PermissionsTable from "@/components/users/permission-table";
+import PermissionsTable from "@/components/roles/permission-table";
 import toast from "react-hot-toast";
 import { FiEdit, FiTrash2 } from "react-icons/fi";
 import { Badge } from "@/components/ui/badge";
@@ -29,9 +29,9 @@ import { modules as  availableModules, rolesDataStatic } from "@/shared/constant
 
 
 const permissionSchema = z.object({
-  createEdit: z.boolean(),
+  // createEdit: z.boolean(),
   view: z.boolean(),
-  delete: z.boolean(),
+  edit: z.boolean(),
 });
 
 const roleSchema = z
@@ -44,7 +44,11 @@ type RoleFormValues = z.infer<typeof roleSchema>;
 
 const defaultPermissions = availableModules.reduce(
   (acc, module) => {
-    acc[module] = { createEdit: false, view: false, delete: false };
+    acc[module] = { 
+      // createEdit: false,
+      view: false, 
+      edit: false 
+    };
     return acc;
   },
   {} as Record<string, z.infer<typeof permissionSchema>>

@@ -1178,28 +1178,28 @@ export const rolesDataStatic: Roles[] = [
   {
     name: "Admin",
     permissions: {
-      questions: { createEdit: true, view: true, delete: false },
-      assessment: { createEdit: true, view: true, delete: false },
-      candidates: { createEdit: true, view: false, delete: true },
-      users: { createEdit: true, view: false, delete: true },
+      questions: { edit: true, view: true },
+      assessment: { edit: true, view: true },
+      candidates: { edit: true, view: false },
+      users: { edit: true, view: false },
     }
   },
   {
     name: "LR01",
     permissions: {
-      questions: { createEdit: false, view: true, delete: false },
-      assessment: { createEdit: true, view: true, delete: false },
-      candidates: { createEdit: false, view: false, delete: true },
-      users: { createEdit: true, view: false, delete: true },
+      questions: { edit: false, view: true },
+      assessment: { edit: true, view: true },
+      candidates: { edit: false, view: false },
+      users: { edit: true, view: false },
     }
   },
   {
     name: "LR02",
     permissions: {
-      questions: { createEdit: false, view: true, delete: false },
-      assessment: { createEdit: true, view: true, delete: false },
-      candidates: { createEdit: false, view: false, delete: true },
-      users: { createEdit: true, view: false, delete: true },
+      questions: { edit: false, view: true },
+      assessment: { edit: true, view: true },
+      candidates: { edit: false, view: false },
+      users: { edit: true, view: false },
     }
   },
 ]

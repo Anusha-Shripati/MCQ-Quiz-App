@@ -38,7 +38,13 @@ const CreateCategory: React.FC<CreateCategoryProps> = ({
         <Input
           placeholder="Search Category..."
           className="w-[200px] border-gray-300"
-          // onChange={(e)=>e.target.value}
+          onChange={(e) =>
+            setCategoriesArray((prev) =>
+              prev.filter((cat) =>
+                cat.name.toLowerCase().includes(e.target.value.toLowerCase())
+              )
+            )
+          }
         />
         <Button
           className="bg-blue-600 text-primary-foreground hover:bg-primary/90"

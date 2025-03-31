@@ -7,11 +7,17 @@ import { Button } from "../ui/form/button";
 // import Link from "next/link";
 import { QuestionCategory } from "@/shared/types/app";
 
-export const CategoryCard = ({ category }: { category: QuestionCategory }) => {
+export const CategoryCard = ({
+  category,
+  handleDelete,
+}: {
+  category: QuestionCategory;
+  handleDelete: (category: QuestionCategory) => void;
+}) => {
   const router = useRouter();
 
   const handleNavigate = () => {
-    router.push(`/questions/category/${category.name}`); 
+    router.push(`/questions/category/${category.name}`);
   };
 
   const handleAddQuestion = () => {
@@ -22,12 +28,11 @@ export const CategoryCard = ({ category }: { category: QuestionCategory }) => {
     event: React.MouseEvent,
     difficulty: string
   ) => {
-    event.stopPropagation(); 
+    event.stopPropagation();
     router.push(
       `/questions/category/${category.name}?difficulty=${difficulty}`
     );
   };
-
 
   return (
     <Card className="shadow-md hover:shadow-lg transition-all duration-200">
@@ -93,16 +98,16 @@ export const CategoryCard = ({ category }: { category: QuestionCategory }) => {
             </span>
           </div>
           <div className="flex items-center justify-between">
-          {/* <Link href={`/questions/create-question/`}> */}
-          <Button
-            variant="outline"
-            size="default"
-            className="hover:bg-gray-600"
-            onClick={handleAddQuestion}
-          >
-            <Plus className="h-4 w-4" /> Add Questions
-          </Button>
-          {/* <Button
+            {/* <Link href={`/questions/create-question/`}> */}
+            <Button
+              variant="outline"
+              size="default"
+              className="hover:bg-gray-600"
+              onClick={handleAddQuestion}
+            >
+              <Plus className="h-4 w-4" /> Add Questions
+            </Button>
+            {/* <Button
             variant="outline"
             size="default"
             className="hover:bg-gray-600"
@@ -110,9 +115,13 @@ export const CategoryCard = ({ category }: { category: QuestionCategory }) => {
           >
             <Plus className="h-4 w-4" /> View
           </Button> */}
-          {/* </Link> */}
-          <CategoryMenu category={category} handleNavigate={handleNavigate} />
-        </div>
+            {/* </Link> */}
+            <CategoryMenu
+              category={category}
+              // handleNavigate={handleNavigate}
+              handleDelete={handleDelete}
+            />
+          </div>
         </div>
         {/* <CategoryActions category={category} /> */}
       </CardContent>

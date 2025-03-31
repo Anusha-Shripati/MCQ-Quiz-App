@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/form/input";
@@ -19,7 +19,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/form/label";
+// import { Label } from "@/components/ui/form/label";
 import PermissionsTable from "@/components/users/permission-table";
 import toast from "react-hot-toast";
 import { FiEdit, FiTrash2 } from "react-icons/fi";
@@ -95,11 +95,9 @@ const UserTable: React.FC = () => {
     },
   ]);
 
-
   console.log(z, "zod");
-  
+
   const {
-    control,
     handleSubmit,
     reset,
     setValue,
@@ -183,7 +181,12 @@ const UserTable: React.FC = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
               autoComplete="off"
             />
-            <Button onClick={handleCreateUser} className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm">Create User</Button>
+            <Button
+              onClick={handleCreateUser}
+              className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
+            >
+              Create User
+            </Button>
           </div>
         </CardHeader>
         <CardContent>
@@ -256,7 +259,7 @@ const UserTable: React.FC = () => {
               <div className="space-y-2">
                 <FormField
                   label="Name"
-                  {...register('name')}
+                  {...register("name")}
                   placeholder="User Name"
                   className="dark:bg-gray-700"
                   error={errors.name?.message}
@@ -266,18 +269,17 @@ const UserTable: React.FC = () => {
               <div className="space-y-2">
                 <FormField
                   label="Email"
-                  {...register('email')}
+                  {...register("email")}
                   placeholder="Email"
                   className="dark:bg-gray-700"
                   error={errors.email?.message}
                 />
               </div>
 
-
               <div className="space-y-2">
                 <FormField
                   label="Password"
-                  {...register('password')}
+                  {...register("password")}
                   placeholder="Password"
                   className="dark:bg-gray-700"
                   type="password"
@@ -287,9 +289,8 @@ const UserTable: React.FC = () => {
               <div className="space-y-2">
                 <FormField
                   label="Confirm Password"
-                  {...register('confirmPassword')}
+                  {...register("confirmPassword")}
                   placeholder="Confirm Password"
-
                   className="dark:bg-gray-700"
                   type="password"
                   error={errors.confirmPassword?.message}

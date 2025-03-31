@@ -53,9 +53,16 @@ const IntroPage = () => {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
       <Card className="p-8 shadow-xl rounded-lg">
-        <Text className="text-3xl font-semibold mb-6">Candidate Introduction</Text>
+        <Text className="text-3xl font-semibold mb-6">
+          Candidate Introduction
+        </Text>
 
-        <Video ref={videoRef} autoPlay muted className="rounded-lg shadow-lg w-96 h-64" />
+        <Video
+          ref={videoRef}
+          autoPlay
+          muted
+          className="rounded-lg shadow-lg w-96 h-64"
+        />
 
         {!recording ? (
           <Button onClick={startRecording} className="mt-4">
@@ -70,7 +77,11 @@ const IntroPage = () => {
         {videoBlob && (
           <div className="mt-6">
             <Text className="text-xl font-medium mb-2">Preview</Text>
-            <Video controls src={URL.createObjectURL(videoBlob)} className="w-96 h-64" />
+            <Video
+              controls
+              src={URL.createObjectURL(videoBlob)}
+              className="w-96 h-64"
+            />
             <Button onClick={handleContinue} className="mt-4 bg-green-600">
               Continue to Quiz
             </Button>

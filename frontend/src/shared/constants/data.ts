@@ -1,4 +1,4 @@
-import {  TechnologyOption } from "@/types/candidate.types";
+import { TechnologyOption } from "@/types/candidate.types";
 import { StatusOption } from "@/types/common.types";
 import { Question } from "../types/app";
 
@@ -207,7 +207,12 @@ export const technologies = [
   },
 ];
 
-export const AVAILABLE_CATEGORIES = ["MongoDB", "ExpressJs", "ReactJs", "NodeJs", "AngularJs",
+export const AVAILABLE_CATEGORIES = [
+  "MongoDB",
+  "ExpressJs",
+  "ReactJs",
+  "NodeJs",
+  "AngularJs",
   "Vue.Js",
   "JavaScript",
   "TypeScript",
@@ -969,10 +974,10 @@ export const assessmentOptions: StatusOption[] = [
   { value: "MEAN 2 years exp.", label: "MEAN 2 years exp." },
 ];
 
-export const userOptions:StatusOption[]=[
+export const userOptions: StatusOption[] = [
   { value: "mihir", label: "Mihir" },
-  { value: "john", label: "John" }
-]
+  { value: "john", label: "John" },
+];
 
 export const questionsDataStatic: Question[] = [
   {

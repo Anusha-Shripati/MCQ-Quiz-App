@@ -1,5 +1,10 @@
 import { Input } from "@/components/ui/form/input";
-import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import Link from "next/link";
 import { useTheme } from "next-themes";
 
@@ -10,7 +15,7 @@ interface FilterBarProps {
   selectedDifficulties: string[];
   onDifficultyChange: (difficulties: string[]) => void;
 }
-  
+
 export const FilterBar = ({
   totalQuestions,
   searchQuery,
@@ -35,17 +40,27 @@ export const FilterBar = ({
         <DropdownMenu>
           <DropdownMenuTrigger
             className={`px-4 py-2 rounded-md border cursor-pointer ${
-              theme === "dark" ? "bg-gray-700 text-gray-200 border-gray-600" : "bg-gray-200 text-gray-800 border-gray-300"
+              theme === "dark"
+                ? "bg-gray-700 text-gray-200 border-gray-600"
+                : "bg-gray-200 text-gray-800 border-gray-300"
             }`}
           >
             Select Difficulty
           </DropdownMenuTrigger>
-          <DropdownMenuContent className={theme === "dark" ? "bg-gray-700 text-gray-200" : "bg-white text-gray-800"}>
+          <DropdownMenuContent
+            className={
+              theme === "dark"
+                ? "bg-gray-700 text-gray-200"
+                : "bg-white text-gray-800"
+            }
+          >
             <DropdownMenuCheckboxItem
               checked={selectedDifficulties.length === difficulties.length}
               onCheckedChange={() => {
                 onDifficultyChange(
-                  selectedDifficulties.length === difficulties.length ? [] : difficulties
+                  selectedDifficulties.length === difficulties.length
+                    ? []
+                    : difficulties
                 );
               }}
             >
@@ -56,7 +71,9 @@ export const FilterBar = ({
                 key={difficulty}
                 checked={selectedDifficulties.includes(difficulty)}
                 onCheckedChange={() => {
-                  const updatedSelections = selectedDifficulties.includes(difficulty)
+                  const updatedSelections = selectedDifficulties.includes(
+                    difficulty
+                  )
                     ? selectedDifficulties.filter((item) => item !== difficulty)
                     : [...selectedDifficulties, difficulty];
                   onDifficultyChange(updatedSelections);
@@ -68,7 +85,8 @@ export const FilterBar = ({
           </DropdownMenuContent>
         </DropdownMenu>
         <Link
-          href="/questions/create-question"
+          href="/questions/create-question/[...QuestionSlug]"
+          as={`/questions/create-question/${"ReactJS"}`}
           className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
         >
           Create Questions

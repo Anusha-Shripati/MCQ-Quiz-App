@@ -18,6 +18,7 @@ import {
 import toast from "react-hot-toast";
 import { useAuthStore } from "@/store/authStore";
 import { FormField } from "@/components/common/form-field";
+import useSWR,{mutate} from 'swr'
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address."),
@@ -36,6 +37,7 @@ export default function Home() {
     resolver: zodResolver(loginSchema),
   });
 
+  
   const onSubmit = async (data: z.infer<typeof loginSchema>) => {
     try {
       await login({ email: data.email, password: data.password })

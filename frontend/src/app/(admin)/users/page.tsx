@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -19,20 +19,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import PermissionsTable from "@/components/users/permission-table";
 import toast from "react-hot-toast";
 import { FiEdit, FiTrash2 } from "react-icons/fi";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { FormField } from "@/components/common/form-field";
+import { rolesDataStatic } from "@/shared/constants/data";
 
-const availableModules = ["assessment", "candidates", "questions"];
-
-const permissionSchema = z.object({
-  createEdit: z.boolean(),
-  view: z.boolean(),
-  delete: z.boolean(),
-});
 
 const userSchema = z
   .object({
@@ -40,29 +32,17 @@ const userSchema = z
     email: z.string().email("Invalid email address"),
     password: z.string().min(6, "Password must be at least 6 characters"),
     confirmPassword: z.string().min(6, "Confirm Password must match Password"),
-    permissions: z.record(permissionSchema),
+    role: z.string().min(1, "Role is required"),
   })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match",
-    path: ["confirmPassword"],
-  });
 
 type UserFormValues = z.infer<typeof userSchema>;
-
-const defaultPermissions = availableModules.reduce(
-  (acc, module) => {
-    acc[module] = { createEdit: false, view: false, delete: false };
-    return acc;
-  },
-  {} as Record<string, z.infer<typeof permissionSchema>>
-);
 
 const defaultUser: UserFormValues = {
   name: "",
   email: "",
   password: "",
   confirmPassword: "",
-  permissions: defaultPermissions,
+  role: '',
 };
 
 const UserTable: React.FC = () => {
@@ -75,28 +55,18 @@ const UserTable: React.FC = () => {
       email: "Mihir@logicrays.com",
       password: "LRSMihir",
       confirmPassword: "LRSMihir",
-      permissions: {
-        ...defaultPermissions,
-        assessment: { createEdit: true, view: true, delete: false },
-        candidates: { createEdit: true, view: false, delete: true },
-      },
+      role: 'Admin'
     },
     {
       name: "HR",
       email: "HR@logicrays.com",
       password: "LRSHr",
       confirmPassword: "LRSHr",
-      permissions: {
-        ...defaultPermissions,
-        assessment: { createEdit: true, view: true, delete: true },
-        candidates: { createEdit: false, view: true, delete: true },
-      },
+      role: "LR01"
     },
   ]);
 
 
-  console.log(z, "zod");
-  
   const {
     handleSubmit,
     reset,
@@ -108,17 +78,7 @@ const UserTable: React.FC = () => {
     resolver: zodResolver(userSchema),
     defaultValues: defaultUser,
   });
-
-  const handleCheckboxChange = (
-    category: string,
-    type: keyof z.infer<typeof permissionSchema>,
-    value: boolean
-  ) => {
-    setValue(`permissions.${category}.${type}`, value, {
-      shouldValidate: true,
-    });
-  };
-
+  const userFoms = watch()
   const handleCreateOrUpdateUser = (data: UserFormValues) => {
     if (editingUserIndex !== null) {
       const updatedUsers = [...users];
@@ -165,6 +125,8 @@ const UserTable: React.FC = () => {
     user.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const rolesOptions = useMemo(()=>rolesDataStatic.map(item=>item.name),[rolesDataStatic])
+
   return (
     <div className="p-6 min-h-screen">
       <Card>
@@ -191,7 +153,7 @@ const UserTable: React.FC = () => {
                 <TableHead>User Name</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Password</TableHead>
-                <TableHead>Permissions</TableHead>
+                <TableHead>Roles</TableHead>
                 <TableHead>Action</TableHead>
               </TableRow>
             </TableHeader>
@@ -201,19 +163,7 @@ const UserTable: React.FC = () => {
                   <TableCell>{user.name}</TableCell>
                   <TableCell>{user.email}</TableCell>
                   <TableCell>{user.password}</TableCell>
-                  <TableCell>
-                    <div className="flex flex-wrap gap-2">
-                      {Object.keys(user.permissions)
-                        .filter((module) =>
-                          Object.values(user.permissions[module]).some(Boolean)
-                        )
-                        .map((module) => (
-                          <Badge key={module} variant="default">
-                            {module}
-                          </Badge>
-                        ))}
-                    </div>
-                  </TableCell>
+                  <TableCell>{user.role}</TableCell>
                   <TableCell>
                     <div className="flex space-x-2">
                       <Button
@@ -293,17 +243,18 @@ const UserTable: React.FC = () => {
                   error={errors.confirmPassword?.message}
                 />
               </div>
-              <PermissionsTable
-                permissions={watch("permissions")}
-                onCheckboxChange={(category, type) =>
-                  handleCheckboxChange(
-                    category,
-                    type,
-                    !watch(`permissions.${category}.${type}`)
-                  )
-                }
-              />
 
+              <div className="space-y-2">
+                <FormField
+                  onChange={(e) => setValue('role', e)}
+                  type='select'
+                  value={userFoms.role}
+                  label="Role"
+                  className="dark:bg-gray-700"
+                  options={rolesOptions}
+                  error={errors.role?.message}
+                />
+              </div>
               <div className="flex justify-end space-x-2">
                 <Button variant="destructive" onClick={closeModal}>
                   Close

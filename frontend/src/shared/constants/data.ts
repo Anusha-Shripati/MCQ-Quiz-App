@@ -1,5 +1,5 @@
-import {  TechnologyOption } from "@/types/candidate.types";
-import { StatusOption } from "@/types/common.types";
+import { TechnologyOption } from "@/types/candidate.types";
+import { Roles, StatusOption } from "@/types/common.types";
 import { Question } from "../types/app";
 
 export const data = [
@@ -969,7 +969,7 @@ export const assessmentOptions: StatusOption[] = [
   { value: "MEAN 2 years exp.", label: "MEAN 2 years exp." },
 ];
 
-export const userOptions:StatusOption[]=[
+export const userOptions: StatusOption[] = [
   { value: "mihir", label: "Mihir" },
   { value: "john", label: "John" }
 ]
@@ -1172,6 +1172,37 @@ export default App;`,
     difficulty: "medium",
   },
 ];
+
+export const modules: string[] = ["assessment", "candidates", "questions", "users"]
+export const rolesDataStatic: Roles[] = [
+  {
+    name: "Admin",
+    permissions: {
+      questions: { createEdit: true, view: true, delete: false },
+      assessment: { createEdit: true, view: true, delete: false },
+      candidates: { createEdit: true, view: false, delete: true },
+      users: { createEdit: true, view: false, delete: true },
+    }
+  },
+  {
+    name: "LR01",
+    permissions: {
+      questions: { createEdit: false, view: true, delete: false },
+      assessment: { createEdit: true, view: true, delete: false },
+      candidates: { createEdit: false, view: false, delete: true },
+      users: { createEdit: true, view: false, delete: true },
+    }
+  },
+  {
+    name: "LR02",
+    permissions: {
+      questions: { createEdit: false, view: true, delete: false },
+      assessment: { createEdit: true, view: true, delete: false },
+      candidates: { createEdit: false, view: false, delete: true },
+      users: { createEdit: true, view: false, delete: true },
+    }
+  },
+]
 
 interface Exam {
   date: string;

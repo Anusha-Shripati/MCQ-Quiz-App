@@ -2,7 +2,6 @@ import { Request, Response, NextFunction } from "express";
 import { UserService } from "../services/user.services";
 import { generateResponse } from "../utils/generateResponse";
 import { Role } from "@prisma/client"; // Import the Role enum from Prisma
-import { prisma } from "../db/prisma.client";
 import {
   createToken,
   encryptStringCrypt,

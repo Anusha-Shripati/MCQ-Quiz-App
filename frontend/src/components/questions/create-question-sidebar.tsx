@@ -72,14 +72,6 @@ const QuestionSidebar: React.FC<QuestionSidebarProps> = ({
   const searchParams = useSearchParams();
   const pathname = usePathname();
 
-  const handleQuestionChange = useCallback(
-    (index: number) => {
-      setSelectedQuestion(index);
-      updateQueryParams({ ques: index.toString() });
-    },
-    [setSelectedQuestion]
-  );
-
   const updateQueryParams = useCallback(
     (params: { ques?: string }) => {
       const newParams = new URLSearchParams(searchParams.toString());
@@ -87,6 +79,14 @@ const QuestionSidebar: React.FC<QuestionSidebarProps> = ({
       window.history.pushState(null, "", `${pathname}?${newParams.toString()}`);
     },
     [searchParams, pathname]
+  );
+
+  const handleQuestionChange = useCallback(
+    (index: number) => {
+      setSelectedQuestion(index);
+      updateQueryParams({ ques: index.toString() });
+    },
+    [setSelectedQuestion, updateQueryParams]
   );
 
   const openDeleteModal = useCallback((index: number) => {

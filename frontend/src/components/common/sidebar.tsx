@@ -102,6 +102,13 @@ export default function Sidebar() {
               isCollapsed={isCollapsed}
               isActive={pathname === "/users"}
             />
+            <NavItem
+              href="/roles"
+              icon={<FaUserAlt size={30} />}
+              label="Roles"
+              isCollapsed={isCollapsed}
+              isActive={pathname === "/roles"}
+            />
             <ThemeToggle />
           </nav>
 

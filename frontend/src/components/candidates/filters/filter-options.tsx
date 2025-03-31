@@ -67,7 +67,7 @@ export function FilterOptions({
       case "created":
         return (
           <div className="space-y-2">
-            <DateRangePicker onSelect={(e: any) => { handleDateRange(e) }} selected={formData.created?.range} />
+            <DateRangePicker onSelect={(e: DateRange | undefined) => { handleDateRange(e as DateRange) }} selected={formData.created?.range} />
             <div className="flex gap-2 flex-wrap">
               <Button variant={formData?.created?.days == 'Last 7 Days' ? 'default' : "outline"} onClick={() => handelDateButton('Last 7 Days')} className="text-sm">Last 7 Days</Button>
               <Button variant={formData?.created?.days == 'Last 30 Days' ? 'default' : "outline"} onClick={() => handelDateButton('Last 30 Days')} className="text-sm">Last 30 Days</Button>
@@ -81,7 +81,7 @@ export function FilterOptions({
   return (
     <div className="flex gap-2 flex-wrap md:flex-nowrap shrink-0 z-10">
       {["Created"].map((filter) => (
-        <Popover.Root key={filter} onOpenChange={(e) => { handleOpenFilter(filter.toLowerCase()) }}>
+        <Popover.Root key={filter} onOpenChange={() => { handleOpenFilter(filter.toLowerCase()) }}>
           <Popover.Trigger asChild>
             <div className="relative">
               <Button

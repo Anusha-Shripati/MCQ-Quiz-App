@@ -1,5 +1,5 @@
 import { TechnologyOption } from "@/types/candidate.types";
-import { StatusOption } from "@/types/common.types";
+import { Roles, StatusOption } from "@/types/common.types";
 import { Question } from "../types/app";
 
 export const data = [
@@ -1177,6 +1177,37 @@ export default App;`,
     difficulty: "medium",
   },
 ];
+
+export const modules: string[] = ["assessment", "candidates", "questions", "users"]
+export const rolesDataStatic: Roles[] = [
+  {
+    name: "Admin",
+    permissions: {
+      questions: { edit: true, view: true },
+      assessment: { edit: true, view: true },
+      candidates: { edit: true, view: false },
+      users: { edit: true, view: false },
+    }
+  },
+  {
+    name: "LR01",
+    permissions: {
+      questions: { edit: false, view: true },
+      assessment: { edit: true, view: true },
+      candidates: { edit: false, view: false },
+      users: { edit: true, view: false },
+    }
+  },
+  {
+    name: "LR02",
+    permissions: {
+      questions: { edit: false, view: true },
+      assessment: { edit: true, view: true },
+      candidates: { edit: false, view: false },
+      users: { edit: true, view: false },
+    }
+  },
+]
 
 interface Exam {
   date: string;

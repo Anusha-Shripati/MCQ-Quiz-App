@@ -25,7 +25,7 @@ interface AssessmentEditProps {
     createdDate: string;
     technologies: Technology[];
     totalQuestions: number;
-    duration: string | number | null;
+    duration: string | number;
   };
   onSave: () => void;
   onCancel: () => void;
@@ -145,7 +145,7 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
   };
 
   const handleTotalQuestionsChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    let newValue = parseInt(event.target.value);
+    const newValue = parseInt(event.target.value);
 
     setLocalAssessment(prev => ({ ...prev, totalQuestions: newValue }));
   };
@@ -183,7 +183,9 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
       });
 
       onSave();
-    } catch (err) {
+    } catch (error) {
+      console.log(error);
+      
       toast.error('Failed to save changes');
     } finally {
     }

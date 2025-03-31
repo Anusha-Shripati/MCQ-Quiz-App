@@ -3,7 +3,7 @@ import dynamic from "next/dynamic";
 import { candidatesList } from "@/shared/constants/data";
 import { Card } from "@/components/ui/card";
 import Loading from "@/app/loading";
-import CandidateTable from "./candidate-table";
+import CandidateTable from "../../../components/candidates/candidate-table";
 import CreateCandidateDialog from "@/components/candidates/create-candidate-dialog";
 
 const FiltersCandidates = dynamic(() => import("@/components/candidates/candidates-filters"), {

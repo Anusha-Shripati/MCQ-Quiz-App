@@ -3,17 +3,9 @@ import { Button } from "@/components/ui/form/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Trash2 } from "lucide-react";
-import {
-  Dialog,
-  // DialogTrigger,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
 import { useSearchParams, usePathname } from "next/navigation";
 import clsx from "clsx";
+import { DeleteDialog } from "../common/delete-dialog";
 
 interface QuestionSidebarProps {
   questions: {
@@ -28,37 +20,37 @@ interface QuestionSidebarProps {
   handleAddQuestion: () => void;
 }
 
-const DeleteQuestionDialog: React.FC<{
-  isOpen: boolean;
-  onClose: () => void;
-  onDelete: () => void;
-}> = ({ isOpen, onClose, onDelete }) => (
-  <Dialog open={isOpen} onOpenChange={onClose}>
-    <DialogContent className="sm:max-w-[425px]">
-      <DialogHeader>
-        <DialogTitle className="text-lg font-semibold text-gray-900 dark:text-white">
-          Are you sure?
-        </DialogTitle>
-        <DialogDescription className="text-sm text-gray-600 dark:text-gray-400">
-          This action cannot be undone. This will permanently delete the
-          question.
-        </DialogDescription>
-      </DialogHeader>
-      <DialogFooter>
-        <Button
-          variant="outline"
-          onClick={onClose}
-          className="text-gray-900 dark:text-white"
-        >
-          Cancel
-        </Button>
-        <Button variant="destructive" onClick={onDelete}>
-          Delete
-        </Button>
-      </DialogFooter>
-    </DialogContent>
-  </Dialog>
-);
+// const DeleteQuestionDialog: React.FC<{
+//   isOpen: boolean;
+//   onClose: () => void;
+//   onDelete: () => void;
+// }> = ({ isOpen, onClose, onDelete }) => (
+//   <Dialog open={isOpen} onOpenChange={onClose}>
+//     <DialogContent className="sm:max-w-[425px]">
+//       <DialogHeader>
+//         <DialogTitle className="text-lg font-semibold text-gray-900 dark:text-white">
+//           Are you sure?
+//         </DialogTitle>
+//         <DialogDescription className="text-sm text-gray-600 dark:text-gray-400">
+//           This action cannot be undone. This will permanently delete the
+//           question.
+//         </DialogDescription>
+//       </DialogHeader>
+//       <DialogFooter>
+//         <Button
+//           variant="outline"
+//           onClick={onClose}
+//           className="text-gray-900 dark:text-white"
+//         >
+//           Cancel
+//         </Button>
+//         <Button variant="destructive" onClick={onDelete}>
+//           Delete
+//         </Button>
+//       </DialogFooter>
+//     </DialogContent>
+//   </Dialog>
+// );
 
 const QuestionSidebar: React.FC<QuestionSidebarProps> = ({
   questions,
@@ -84,7 +76,7 @@ const QuestionSidebar: React.FC<QuestionSidebarProps> = ({
   const handleQuestionChange = useCallback(
     (index: number) => {
       setSelectedQuestion(index);
-      updateQueryParams({ ques: index.toString() });
+      updateQueryParams({ ques: (index + 1).toString() });
     },
     [setSelectedQuestion, updateQueryParams]
   );
@@ -155,7 +147,7 @@ const QuestionSidebar: React.FC<QuestionSidebarProps> = ({
       </CardContent>
 
       {/* Delete Modal */}
-      <DeleteQuestionDialog
+      <DeleteDialog
         isOpen={isDeleteModalOpen}
         onClose={closeDeleteModal}
         onDelete={confirmDelete}

@@ -29,6 +29,8 @@ interface QuestionCardProps {
   handleCorrectOptionChange: (optionIndex: number, index: number) => void;
   handleDeleteQuestion: (index: number) => void;
   setQuestions: React.Dispatch<React.SetStateAction<Question[]>>;
+  handleSave: () => void;
+  handleReset: () => void;
 }
 
 const QuestionCard: React.FC<QuestionCardProps> = ({
@@ -40,6 +42,8 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
   handleCorrectOptionChange,
   handleDeleteQuestion,
   setQuestions,
+  handleSave,
+  handleReset,
 }) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
@@ -115,6 +119,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
           onChange={(e) => {
             const updatedQuestions = [...questions];
             updatedQuestions[index].question = e.target.value;
+            console.log("Question", updatedQuestions[index].question);
             setQuestions(updatedQuestions);
           }}
           className="mb-4"
@@ -180,10 +185,12 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
           />
         )}
       </CardContent>
-      <CardFooter className="mt-auto">
+      <CardFooter className="mt-auto flex justify-between items-center">
         <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
           <DialogTrigger asChild>
-            <Button variant="destructive">Delete Question</Button>
+            <Button variant="destructive" className="hover:bg-orange-600">
+              Delete Question
+            </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
@@ -212,6 +219,17 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        {questions.length !== 0 && (
+          <div className="mt-2 flex justify-end gap-4">
+            <Button variant="outline" onClick={handleReset}>
+              Reset
+            </Button>
+            <Button variant="outline" onClick={handleSave}>
+              Save
+            </Button>
+          </div>
+        )}
       </CardFooter>
     </Card>
   );

@@ -16,16 +16,30 @@ interface Category {
 // Define props type
 interface CreateCategoryProps {
   setCategoriesArray: React.Dispatch<React.SetStateAction<Category[]>>;
+  categoriesArray: Category[]; // Pass categories to filter
+  setFilteredCategories: React.Dispatch<React.SetStateAction<Category[]>>;
 }
 
 const CreateCategory: React.FC<CreateCategoryProps> = ({
   setCategoriesArray,
+  categoriesArray,
+  setFilteredCategories,
 }) => {
   const [open, setOpen] = useState(false);
   const [categoryName, setCategoryName] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
 
-  const handleAddCategory = () => {
-    setOpen(true);
+  // Handle search input change
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.toLowerCase();
+    setSearchTerm(value);
+    if (value === "") {
+      setFilteredCategories(categoriesArray); // Reset to all categories when empty
+    } else {
+      setFilteredCategories(
+        categoriesArray.filter((cat) => cat.name.toLowerCase().includes(value))
+      );
+    }
   };
 
   const handleCloseModal = () => {
@@ -38,17 +52,12 @@ const CreateCategory: React.FC<CreateCategoryProps> = ({
         <Input
           placeholder="Search Category..."
           className="w-[200px] border-gray-300"
-          onChange={(e) =>
-            setCategoriesArray((prev) =>
-              prev.filter((cat) =>
-                cat.name.toLowerCase().includes(e.target.value.toLowerCase())
-              )
-            )
-          }
+          value={searchTerm}
+          onChange={handleSearch}
         />
         <Button
           className="bg-blue-600 text-primary-foreground hover:bg-primary/90"
-          onClick={handleAddCategory}
+          onClick={() => setOpen(true)}
         >
           Create Category
         </Button>
@@ -70,10 +79,14 @@ const CreateCategory: React.FC<CreateCategoryProps> = ({
               className="bg-blue-600 text-primary-foreground hover:bg-primary/90"
               onClick={() => {
                 handleCloseModal();
-                setCategoriesArray((prev) => [
-                  ...prev,
-                  { name: categoryName, easy: 0, medium: 0, hard: 0 },
-                ]);
+                const newCategory = {
+                  name: categoryName,
+                  easy: 0,
+                  medium: 0,
+                  hard: 0,
+                };
+                setCategoriesArray((prev) => [...prev, newCategory]);
+                setFilteredCategories((prev) => [...prev, newCategory]);
               }}
             >
               Save

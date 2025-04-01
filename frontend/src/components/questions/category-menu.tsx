@@ -6,10 +6,20 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  // DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Edit, Trash, MoreVertical } from "lucide-react";
 import { Button } from "../ui/form/button";
 import { QuestionCategory } from "@/shared/types/app";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 const CategoryMenu = ({
   category,
@@ -19,6 +29,7 @@ const CategoryMenu = ({
   handleDelete: (category: QuestionCategory) => void;
 }) => {
   const router = useRouter();
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const handleEditCategory = (categoryName: string) => {
     router.push(`/questions/create-question/${categoryName}`);
@@ -48,7 +59,7 @@ const CategoryMenu = ({
           <span className="text-gray-900 dark:text-gray-200">Edit</span>
         </DropdownMenuItem>
         <DropdownMenuItem
-          onClick={() => handleDelete(category)}
+          onClick={() => setIsDeleteModalOpen(true)}
           className="flex items-center space-x-2 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"
         >
           <Trash className="h-4 w-4 text-red-500" />
@@ -62,6 +73,38 @@ const CategoryMenu = ({
           <span className="text-gray-900 dark:text-gray-200">View</span>
         </DropdownMenuItem> */}
       </DropdownMenuContent>
+
+      <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-semibold text-gray-900 dark:text-white">
+              Are you sure?
+            </DialogTitle>
+            <DialogDescription className="text-sm text-gray-600 dark:text-gray-400">
+              This action cannot be undone. This will permanently delete the
+              category.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsDeleteModalOpen(false)}
+              className="text-gray-900 dark:text-white"
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                handleDelete(category);
+                setIsDeleteModalOpen(false); // Close the modal
+              }}
+            >
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </DropdownMenu>
   );
 };

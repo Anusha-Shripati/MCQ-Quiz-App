@@ -19,6 +19,7 @@ const CreateQuestion: React.FC = () => {
   const [selectedQuestion, setSelectedQuestion] = useState<number>(0);
 
   const handleSave = () => {
+    console.log(questions, "questions");
     toast.success("Questions saved successfully!");
   };
 
@@ -156,12 +157,13 @@ const CreateQuestion: React.FC = () => {
                   handleCorrectOptionChange={handleCorrectOptionChange}
                   handleDeleteQuestion={handleDeleteQuestion}
                   setQuestions={setQuestions}
+                  handleSave={handleSave}
+                  handleReset={handleReset}
                 />
               ))
             )}
           </div>
-          {/* Add Question Button */}
-          {questions.length !== 0 && (
+          {/* {questions.length !== 0 && (
             <div className="mt-2 flex justify-end gap-4">
               <Button variant="outline" onClick={handleReset}>
                 Reset
@@ -170,7 +172,7 @@ const CreateQuestion: React.FC = () => {
                 Save
               </Button>
             </div>
-          )}
+          )} */}
         </div>
       </div>
     </div>

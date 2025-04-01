@@ -15,6 +15,7 @@ interface UserPayload {
   email: string;
   password: string;
   role_id: string;
+  name: string
 }
 
 export class UserController {
@@ -27,18 +28,18 @@ export class UserController {
       // Step 1: Find the user by email
       const user = await userService.findUserByEmail(email);
       if (!user) {
-        return generateResponse(res, 401, {}, false, "User not found!");
+        return generateResponse(res, 400, {}, false, "User not found!");
       }
 
       // Step 2: Compare passwords
       const isPasswordValid = await matchPassword(password, user.password);
       if (!isPasswordValid) {
-        return generateResponse(res, 401, {}, false, "Invalid password!");
+        return generateResponse(res, 400, {}, false, "Invalid password!");
       }
 
       // Step 3: Generate JWT token
       const role = await roleService.findRoleById(user.role_id);
-      const token = createToken(user.id, user.email, role?.name || '');
+      const token = createToken(user.id, user.email, role?.name, role?.id);
 
       // Step 4: Respond with the token
       generateResponse(
@@ -59,7 +60,19 @@ export class UserController {
 
       const user = await userService.findUserByEmail(payload.email);
       if (user) {
-        return generateResponse(res, 401, {}, false, "User already exists");
+        if (user.deletedAt) {
+          const hashedPassword = await encryptStringCrypt(payload.password);
+          let updatedUser = await userService.updateUser(user.id, {
+            email: payload.email,
+            name: payload.name,
+            role_id: payload.role_id,
+            password: hashedPassword,
+            deletedAt:null
+          })
+          return generateResponse(res, 200, updatedUser, true, "User created successfully!");
+        } else {
+          return generateResponse(res, 400, {}, false, "User already exists");
+        }
       }
 
       const hashedPassword = await encryptStringCrypt(payload.password);
@@ -69,6 +82,7 @@ export class UserController {
         password: hashedPassword,
         role_id: payload.role_id,
         createdAt: new Date(),
+        name: payload.name
       });
 
       generateResponse(res, 200, newUser, true, "User created successfully!");
@@ -93,13 +107,16 @@ export class UserController {
           return generateResponse(res, 400, {}, false, "Email is already exists!");
         }
       }
+      let hashPass = user.password
+      if(payload.password){
+        hashPass=await encryptStringCrypt(payload.password);
+      } 
 
-      const hashedPassword = await encryptStringCrypt(payload.password);
-
-      const newUser = await userService.updateUser(user.id,{
+      const newUser = await userService.updateUser(user.id, {
         email: payload.email,
-        password: hashedPassword,
+        name: payload.name,
         role_id: payload.role_id,
+        password:hashPass
       });
 
       generateResponse(res, 200, newUser, true, "User updated successfully!");
@@ -171,6 +188,12 @@ export class UserController {
       if (!user) {
         generateResponse(res, 404, {}, false, "User not found");
         return;
+      }
+
+      if (user?.role?.name == 'Super Admin') {
+        generateResponse(res, 400, {}, true, "You can't delete super admin");
+        return;
+
       }
       await userService.delete(userId)
       generateResponse(res, 200, {}, true, "User deleted successfully");

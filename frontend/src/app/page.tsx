@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { TypographyH1, TypographyH4 } from "@/styles/typography";
-import React from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/form/button";
 import {
@@ -19,6 +19,7 @@ import toast from "react-hot-toast";
 import { useAuthStore } from "@/store/authStore";
 import { FormField } from "@/components/common/form-field";
 import useSWR,{mutate} from 'swr'
+import { EyeIcon, EyeOffIcon } from "lucide-react";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address."),
@@ -51,6 +52,10 @@ export default function Home() {
     }
   };
 
+  const [showPassword, setShowPassword] = useState(false);
+
+  const togglePassword = () => setShowPassword((prev) => !prev);
+
   return (
     <div className="bg-gradient-to-r from-gray-700 to-gray-900 h-screen w-screen flex flex-col items-center justify-center gap-5">
       <TypographyH1>Welcome to MCQ APP</TypographyH1>
@@ -76,16 +81,25 @@ export default function Home() {
                   error={errors.email?.message}
                 />
               </div>
-              <div className="flex flex-col space-y-1.5">
+              <div className="flex flex-col space-y-1.5 relative">
                 <FormField
                   label="Password"
                   id="password"
-                  type="password"
+                  type={showPassword ? "text" : "password"}
+
                   placeholder="Enter your password"
                   {...register("password")}
                   className="h-10"
                   error={errors.password?.message}
+                
                 />
+                <button
+                type="button"
+                onClick={togglePassword}
+                className="absolute right-3 top-[60%] transform -translate-y-1/2 text-gray-400" 
+                >
+                {showPassword ? <EyeOffIcon size={20} /> : <EyeIcon size={20} />}
+                </button>
               </div>
             </div>
             <CardFooter className="flex justify-between mt-4">

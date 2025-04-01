@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import api from "@/components/Axios";
+import axios from "@/components/Axios";
 
 interface User {
   email: string;
@@ -25,8 +25,8 @@ export const useAuthStore = create<AuthState>((set) => ({
   login: async ({ email, password }: { email: string; password: string }) => {
     set({ loading: true });
     try {
-      const response = await api({
-        url: "http://localhost:3001/api/v1/user/login",
+      const response = await axios({
+        url: "/user/login",
         method: "POST",
         headers: { "Content-Type": "application/json" },
         data: { email, password },
@@ -34,10 +34,9 @@ export const useAuthStore = create<AuthState>((set) => ({
 
       set({ user: response.data.data, loading: false, error: null });
       localStorage.setItem("user", JSON.stringify(response.data.data));
-      document.cookie = `token=${response.data.token}; path=/;`;
+      document.cookie = `token=${response.data.data.token}; path=/;`;
 
       return response.data;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       const errorMessage = error.response?.data?.message || "Login failed";
       set({ error: errorMessage, loading: false });

@@ -6,6 +6,7 @@ const createUserSchema = {
     email: Joi.string().required(),
     password: Joi.string().required(),
     role_id: Joi.string().required(),
+    name: Joi.string().required(),
   }),
 };
 

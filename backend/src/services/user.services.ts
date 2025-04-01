@@ -1,9 +1,9 @@
-import { User } from "@prisma/client"; // Import Role if needed
+import { Roles, User } from "@prisma/client"; // Import Role if needed
 import { prisma } from "../db/prisma.client";
 
 export class UserService {
   async createUser(
-    data: Pick<User, "email" | "password" | "createdAt" | "role_id">
+    data: Pick<User, "email" | "password" | "createdAt" | "role_id" | "name">
   ): Promise<User> {
     return await prisma.user.create({
       data: {
@@ -11,13 +11,14 @@ export class UserService {
         password: data.password,
         role_id: data.role_id,
         createdAt: data.createdAt,
+        name: data.name
       },
     });
   }
 
   async findUserByEmail(email: string): Promise<User | null> {
     return await prisma.user.findUnique({
-      where: { email,deletedAt: null },
+      where: { email },
       include: {
         role: {
           include: {
@@ -39,13 +40,16 @@ export class UserService {
     });
   }
 
-  async findUserById(userId: string): Promise<User | null> {
+  async findUserById(userId: string): Promise<User & { role: Roles | null } | null> {
     // console.log(userId, "id");
     return await prisma.user.findUnique({
-      where: { id: userId,deletedAt: null},
+      where: { id: userId, deletedAt: null},
+      include:{
+        role:true
+      }
     });
   }
-  async updateUser(id: string, data: Record<string, string>) {
+  async updateUser(id: string, data: Record<string, string | null>) {
     const user = await prisma.user.update({ where: { id }, data })
     if (!user) return null;
     const { password, token, ...rest } = user;
@@ -61,11 +65,13 @@ export class UserService {
       select: {
         id: true,
         email: true,
+        name:true,
         role_id: true,
         createdAt: true,
         updatedAt: true,
         role:{
           select:{
+            id:true,
             name:true
           }
         }

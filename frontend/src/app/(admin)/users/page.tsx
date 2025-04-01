@@ -1,5 +1,5 @@
 "use client";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -23,18 +23,36 @@ import toast from "react-hot-toast";
 import { FiEdit, FiTrash2 } from "react-icons/fi";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { FormField } from "@/components/common/form-field";
-import { rolesDataStatic } from "@/shared/constants/data";
+import { EyeIcon, EyeOffIcon } from "lucide-react";
+import useSWR from "swr";
+import { deleteData, fetcher, isAxiosError, postData } from "@/lib/api";
+import Loading from "@/app/loading";
+import Error from "@/app/error";
+import { Roles } from "@/types/common.types";
 
 
 const userSchema = z
   .object({
     name: z.string().min(1, "Name is required"),
     email: z.string().email("Invalid email address"),
-    password: z.string().min(6, "Password must be at least 6 characters"),
-    confirmPassword: z.string().min(6, "Confirm Password must match Password"),
+    password: z.string().min(6, "Password must be at least 6 characters").optional(),
+    confirmPassword: z.string().min(6, "Confirm Password must match Password").optional(),
     role: z.string().min(1, "Role is required"),
-  })
+  }).refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
 
+
+interface User {
+  id: string,
+  email: string,
+  name: string,
+  role: {
+    id: string
+    name: string
+  } | null
+}
 type UserFormValues = z.infer<typeof userSchema>;
 
 const defaultUser: UserFormValues = {
@@ -47,24 +65,19 @@ const defaultUser: UserFormValues = {
 
 const UserTable: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingUserIndex, setEditingUserIndex] = useState<number | null>(null);
+  const [editingUserId, setEditingUserId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [users, setUsers] = useState<UserFormValues[]>([
-    {
-      name: "Mihir T",
-      email: "Mihir@logicrays.com",
-      password: "LRSMihir",
-      confirmPassword: "LRSMihir",
-      role: 'Admin'
-    },
-    {
-      name: "HR",
-      email: "HR@logicrays.com",
-      password: "LRSHr",
-      confirmPassword: "LRSHr",
-      role: "LR01"
-    },
-  ]);
+  const [passwordChange, setPasswordChange] = useState(false)
+  const [showPassword, setShowPassword] = useState({ password: false, confirmPassword: false });
+
+  const { data: users, isLoading, error, mutate } = useSWR('/user/list', fetcher)
+  const { data: roles } = useSWR('/role/list', fetcher)
+  
+  const rolesOptions = useMemo(() => {
+    if (roles?.data?.list) {
+      return roles.data.list.map((item: Roles) => ({ value: item.id, label: item.name }))
+    }
+  }, [roles])
 
 
   const {
@@ -73,66 +86,99 @@ const UserTable: React.FC = () => {
     setValue,
     watch,
     register,
-    formState: { errors },
+    formState: { errors, isValid, isSubmitting },
   } = useForm<UserFormValues>({
     resolver: zodResolver(userSchema),
     defaultValues: defaultUser,
   });
   const userFoms = watch()
-  const handleCreateOrUpdateUser = (data: UserFormValues) => {
-    if (editingUserIndex !== null) {
-      const updatedUsers = [...users];
-      updatedUsers[editingUserIndex] = data;
-      setUsers(updatedUsers);
-      toast.success("User updated successfully");
-    } else {
-      if (users.some((user) => user.email === data.email)) {
-        toast.error("Sorry! User with this email already exists!");
+  const handleCreateOrUpdateUser = async (data: UserFormValues) => {
+    const payload = {
+      name: data.name,
+      email: data.email,
+      password: data.password,
+      role_id: data.role,
+    }
+    try {
+      if (editingUserId !== null) {
+        const res = await postData(`/user/${editingUserId}`, payload)
+        if (res.sucess) {
+          toast.success("User updated successfully");
+        } else {
+          toast.success(res.message);
+        }
       } else {
-        setUsers([...users, data]);
-        toast.success("User created successfully");
+        const res = await postData('/user/create', payload)
+        if (res.sucess) {
+          toast.success("User created successfully");
+        } else {
+          toast.success(res.message);
+        }
+      }
+      mutate()
+      closeModal();
+    } catch (error) {
+      if (isAxiosError(error)) {
+        toast.error(error.response.data.message || "An unexpected error occurred");
+      } else {
+        toast.error("An unexpected error occurred");
       }
     }
-    closeModal();
   };
 
-  const handleEditUser = (index: number) => {
-    reset(users[index]);
-    setEditingUserIndex(index);
+  const handleEditUser = (user: User) => {
+    const { id, role, ...selectedUser } = user
+    reset({ ...selectedUser, role: role?.id });
+    setEditingUserId(id);
     setIsModalOpen(true);
+    setPasswordChange(false)
   };
 
   const handleCreateUser = () => {
     reset(defaultUser);
-    setEditingUserIndex(null);
+    setPasswordChange(true)
+    setEditingUserId(null);
     setIsModalOpen(true);
   };
 
-  const handleUserDelete = (email: string) => {
+  const handleUserDelete = async (id: string) => {
     if (window.confirm("Are you sure you want to delete this user?")) {
-      setUsers(users.filter((user) => user.email !== email));
-      toast.success("User deleted successfully");
+      try {
+        const res = await deleteData(`/user/${id}`)
+        if (res.success) {
+          toast.success("User deleted successfully");
+        }
+        mutate()
+      } catch (error) {
+        if (isAxiosError(error)) {
+          toast.error(error.response.data.message || "An unexpected error occurred");
+        } else {
+          toast.error("An unexpected error occurred");
+        }
+      }
     }
   };
 
   const closeModal = () => {
     setIsModalOpen(false);
-    setEditingUserIndex(null);
+    setEditingUserId(null);
     reset(defaultUser);
   };
 
-  const filteredUsers = users.filter((user) =>
-    user.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  if (isLoading) {
+    return <Loading />
+  }
+  if (error) {
+    return <Error error={error} reset={() => { window.location.reload() }} />
+  }
 
-  const rolesOptions = useMemo(()=>rolesDataStatic.map(item=>item.name),[])
-
+  const togglePassword = (name: keyof typeof showPassword) => setShowPassword((prv) => ({ ...prv, [name]: !prv[name] }));
   return (
     <div className="p-6 min-h-screen">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
           <CardTitle className="text-xl font-semibold">
-            All Users ({filteredUsers.length})
+            All Users ({users?.data?.count || 0})
           </CardTitle>
           <div className="flex space-x-4 items-center">
             <Input
@@ -157,34 +203,32 @@ const UserTable: React.FC = () => {
               <TableRow>
                 <TableHead>User Name</TableHead>
                 <TableHead>Email</TableHead>
-                <TableHead>Password</TableHead>
                 <TableHead>Roles</TableHead>
                 <TableHead>Action</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredUsers.map((user, index) => (
+              {users?.data?.list && users?.data.list.map((user: User, index: number) => (
                 <TableRow key={index}>
                   <TableCell>{user.name}</TableCell>
                   <TableCell>{user.email}</TableCell>
-                  <TableCell>{user.password}</TableCell>
-                  <TableCell>{user.role}</TableCell>
+                  <TableCell>{user.role?.name}</TableCell>
                   <TableCell>
                     <div className="flex space-x-2">
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => handleEditUser(index)}
+                        onClick={() => handleEditUser(user)}
                       >
                         <FiEdit className="h-4 w-4" />
                       </Button>
-                      <Button
+                      {user.role?.name !== 'Super Admin' && <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => handleUserDelete(user.email)}
+                        onClick={() => handleUserDelete(user.id)}
                       >
                         <FiTrash2 className="h-4 w-4 text-destructive" />
-                      </Button>
+                      </Button>}
                     </div>
                   </TableCell>
                 </TableRow>
@@ -201,7 +245,7 @@ const UserTable: React.FC = () => {
         >
           <DialogHeader>
             <DialogTitle>
-              {editingUserIndex !== null ? "Edit" : "Create"} User
+              {editingUserId !== null ? "Edit" : "Create"} User
             </DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit(handleCreateOrUpdateUser)}>
@@ -225,28 +269,6 @@ const UserTable: React.FC = () => {
                   error={errors.email?.message}
                 />
               </div>
-
-              <div className="space-y-2">
-                <FormField
-                  label="Password"
-                  {...register("password")}
-                  placeholder="Password"
-                  className="dark:bg-gray-700"
-                  type="password"
-                  error={errors.password?.message}
-                />
-              </div>
-              <div className="space-y-2">
-                <FormField
-                  label="Confirm Password"
-                  {...register("confirmPassword")}
-                  placeholder="Confirm Password"
-                  className="dark:bg-gray-700"
-                  type="password"
-                  error={errors.confirmPassword?.message}
-                />
-              </div>
-
               <div className="space-y-2">
                 <FormField
                   onChange={(e) => setValue('role', e)}
@@ -258,11 +280,52 @@ const UserTable: React.FC = () => {
                   error={errors.role?.message}
                 />
               </div>
+              {editingUserId && <div className="space-y-2">
+                <input type='checkbox' className="h-3" onChange={(e) => setPasswordChange(e.target.checked)} /> Change password ?
+              </div>}
+              {passwordChange && <>
+                <div className="space-y-2 relative">
+                  <FormField
+                    label="Password"
+                    {...register("password")}
+                    placeholder="Password"
+                    className="dark:bg-gray-700"
+                    type={showPassword.password ? "text" : "password"}
+                    error={errors.password?.message}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => togglePassword('password')}
+                    className="absolute right-3 top-[55%] transform -translate-y-1/2 text-gray-400 "
+                  >
+                    {showPassword.password ? <EyeOffIcon size={20} /> : <EyeIcon size={20} />}
+                  </button>
+                </div>
+                <div className="space-y-2 relative">
+                  <FormField
+                    label="Confirm Password"
+                    {...register("confirmPassword")}
+                    placeholder="Confirm Password"
+                    className="dark:bg-gray-700"
+                    type={showPassword.confirmPassword ? "text" : "password"}
+                    error={errors.confirmPassword?.message}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => togglePassword('confirmPassword')}
+                    className="absolute right-3 top-[55%] transform -translate-y-1/2 text-gray-400"
+                  >
+                    {showPassword.confirmPassword ? <EyeOffIcon size={20} /> : <EyeIcon size={20} />}
+                  </button>
+                </div>
+              </>}
+
+
               <div className="flex justify-end space-x-2">
                 <Button variant="destructive" onClick={closeModal}>
                   Close
                 </Button>
-                <Button type="submit" className="bg-green-600">
+                <Button type="submit" className="bg-green-600" disabled={isSubmitting}>
                   Save & Update
                 </Button>
               </div>

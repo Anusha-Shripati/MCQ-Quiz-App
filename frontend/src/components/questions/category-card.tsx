@@ -43,7 +43,7 @@ export const CategoryCard = ({
           <Button
             variant="outline"
             size="default"
-            className="hover:bg-gray-600 mb-2"
+            className="dark:border-gray-600 dark:text-white dark:hover:bg-gray-700 mb-2"
             onClick={handleNavigate}
           >
             {/* <Plus className="h-4 w-4" /> Add */}
@@ -102,7 +102,7 @@ export const CategoryCard = ({
             <Button
               variant="outline"
               size="default"
-              className="hover:bg-gray-600"
+              className="dark:border-gray-600 dark:text-white dark:hover:bg-gray-700"
               onClick={handleAddQuestion}
             >
               <Plus className="h-4 w-4" /> Add Questions

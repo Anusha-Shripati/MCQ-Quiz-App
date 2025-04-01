@@ -81,7 +81,7 @@ export class RoleController {
             const roles = await roleService.getRoles({
                 name: name as string,
             });
-            return generateResponse(res, 200, roles, true, "Role fetched successfully");
+            return generateResponse(res, 200,   { list: roles, count: roles.length }, true, "Role fetched successfully");
 
         } catch (error) {
             next(error);

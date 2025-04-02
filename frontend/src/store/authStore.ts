@@ -20,7 +20,9 @@ interface AuthState {
   login: (credentials: { email: string; password: string }) => Promise<void>;
   initializeAuth: () => void;
   logout: () => void;
-  setUserFilter:(filter:string)=>void
+  setUserFilter:(filter:string)=>void;
+  permissions:Record<string,Permissions>;
+  setPermissions:(permissions:Record<string,Permissions>)=>void
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -30,6 +32,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   userFilter:'',
   userList:[],
   userCount:0,
+  permissions:{},
   login: async ({ email, password }: { email: string; password: string }) => {
     set({ loading: true });
     try {
@@ -51,6 +54,9 @@ export const useAuthStore = create<AuthState>((set) => ({
 
       throw new Error(errorMessage);
     }
+  },
+  setPermissions:(permissions:Record<string,Permissions>)=>{
+    set({permissions})
   },
   setUserFilter:(filter:string)=>{
     set({userFilter:filter})

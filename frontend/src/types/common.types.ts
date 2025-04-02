@@ -11,19 +11,25 @@ export interface StatusOption {
 
 export interface User {
   id: number;
-  name: number
+  name?: number;
+  email?: number;
 }
 
 export interface Permissions {
-  // createEdit: boolean;
-  edit: boolean;
-  view: boolean;
-  // delete: boolean
+  id?:string;
+  can_edit: boolean;
+  can_read: boolean;
+  module_id?: string;
+  module?: Module | null
 }
-export interface Roles {
+export interface Module{
+  id?:string;
+  name:string;
+}
+export interface Role {
   id?: string
   name: string,
-  permissions: Record<string, Permissions>
+  permissions: Permissions[]
 }
 
 
@@ -35,4 +41,10 @@ export interface UserData {
     id: string
     name: string
   } | null
+}
+
+export interface RoleData {
+  id: string
+  name: string,
+  rolesPermissions: Permissions[]
 }

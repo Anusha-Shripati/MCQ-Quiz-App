@@ -33,7 +33,6 @@ roleRouter.get(
 roleRouter.delete(
   "/:id",
   authenticateAndAuthorize(undefined,'Super Admin'),
-
   asyncHandler(roleController.delete)
 );
 

@@ -7,7 +7,7 @@ import { FormField } from "../common/form-field";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Roles } from "@/types/common.types";
+import { Role } from "@/types/common.types";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
 import { Button } from "../ui/form/button";
 import { UserData } from "@/types/common.types";
@@ -77,7 +77,7 @@ function UserForm({ open, onClose, userData = null }: UserFormProps) {
 
   const rolesOptions = useMemo(() => {
     if (roles?.data?.list) {
-      return roles.data.list.map((item: Roles) => ({ value: item.id, label: item.name }))
+      return roles.data.list.map((item: Role) => ({ value: item.id, label: item.name }))
     }
   }, [roles])
 
@@ -237,7 +237,7 @@ function UserForm({ open, onClose, userData = null }: UserFormProps) {
                 className="bg-green-600"
                 disabled={isSubmitting}
               >
-                Save & Update
+                {userData?"Update":"Save"} 
               </Button>
             </div>
           </div>

@@ -4,8 +4,8 @@ import React, { useEffect, useState } from 'react'
 import { CardTitle } from '../ui/card'
 import { Input } from '../ui/form/input'
 import { Button } from '../ui/form/button'
-import { useAuthStore } from '@/store/authStore';
-import UserForm from './user-form';
+import RoleForm from './role-form';
+import { useRoleStore } from '@/store/roleStore'
 
 
 
@@ -13,17 +13,18 @@ function Header() {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [open, setOpen] = useState(false);
-  const { setUserFilter,userCount } = useAuthStore()
+  const { setRolesFilter,rolesCount } = useRoleStore()
+
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
   }
-  const handleCreateUser = () => {
+  const handleCreateRole = () => {
     setOpen(true)
   }
   useEffect(() => {
     const timer = setTimeout(() => {
-      setUserFilter(searchTerm);
+      setRolesFilter(searchTerm);
     }, 1000);
 
     return () => clearTimeout(timer);
@@ -32,25 +33,25 @@ function Header() {
   return (
     <div className='flex justify-between w-full'>
       <CardTitle className="text-xl font-semibold">
-        All Users ({userCount || 0})
+        All Roles ({rolesCount || 0})
       </CardTitle>
       <div className="flex space-x-4 items-center">
         <Input
           type="text"
-          placeholder="Search Users..."
+          placeholder="Search Roles..."
           className="w-64"
           value={searchTerm}
           onChange={handleSearch}
           autoComplete="off"
         />
         <Button
-          onClick={handleCreateUser}
+          onClick={handleCreateRole}
           className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
         >
-          Create User
+          Create Role
         </Button>
       </div>
-      <UserForm open={open} onClose={() => setOpen(false)} />
+      <RoleForm open={open} onClose={() => setOpen(false)} />
     </div>
   )
 }

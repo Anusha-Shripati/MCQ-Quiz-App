@@ -21,7 +21,18 @@ export interface Permissions {
   // delete: boolean
 }
 export interface Roles {
-  id?:string
+  id?: string
   name: string,
   permissions: Record<string, Permissions>
+}
+
+
+export interface UserData {
+  id: string,
+  email: string,
+  name: string,
+  role: {
+    id: string
+    name: string
+  } | null
 }

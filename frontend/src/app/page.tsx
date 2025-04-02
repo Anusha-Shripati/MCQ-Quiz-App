@@ -18,7 +18,6 @@ import {
 import toast from "react-hot-toast";
 import { useAuthStore } from "@/store/authStore";
 import { FormField } from "@/components/common/form-field";
-import useSWR,{mutate} from 'swr'
 import { EyeIcon, EyeOffIcon } from "lucide-react";
 
 const loginSchema = z.object({
@@ -96,7 +95,7 @@ export default function Home() {
                 <button
                 type="button"
                 onClick={togglePassword}
-                className="absolute right-3 top-[60%] transform -translate-y-1/2 text-gray-400" 
+                className="absolute right-3 top-[37px] transform -translate-y-1/2 text-gray-400" 
                 >
                 {showPassword ? <EyeOffIcon size={20} /> : <EyeIcon size={20} />}
                 </button>

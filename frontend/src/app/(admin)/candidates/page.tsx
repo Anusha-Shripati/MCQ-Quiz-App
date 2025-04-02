@@ -5,9 +5,10 @@ import { Card } from "@/components/ui/card";
 import Loading from "@/app/loading";
 import CandidateTable from "../../../components/candidates/candidate-table";
 import CreateCandidateDialog from "@/components/candidates/create-candidate-dialog";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 const FiltersCandidates = dynamic(() => import("@/components/candidates/candidates-filters"), {
-  ssr: false, loading: () => <Loading />
+  ssr: false, loading: () => <LoadingSpinner  />
 });
 
 

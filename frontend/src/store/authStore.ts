@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import axios from "@/components/Axios";
+import { UserData } from "@/types/common.types";
 
 interface User {
   email: string;
@@ -12,16 +13,23 @@ interface AuthState {
   loading: boolean;
   error?: string | null;
   success?: boolean;
+  userFilter:string;
+  userList:UserData[];
+  userCount:number;
+  setUserListData:(count:number,list:UserData[])=>void
   login: (credentials: { email: string; password: string }) => Promise<void>;
   initializeAuth: () => void;
   logout: () => void;
+  setUserFilter:(filter:string)=>void
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   initializing: true,
   loading: false,
-
+  userFilter:'',
+  userList:[],
+  userCount:0,
   login: async ({ email, password }: { email: string; password: string }) => {
     set({ loading: true });
     try {
@@ -43,6 +51,12 @@ export const useAuthStore = create<AuthState>((set) => ({
 
       throw new Error(errorMessage);
     }
+  },
+  setUserFilter:(filter:string)=>{
+    set({userFilter:filter})
+  },
+  setUserListData:(count:number,list:UserData[])=>{
+    set({userList:list,userCount:count})
   },
   initializeAuth: () => {
     const storedUser = localStorage.getItem("user");

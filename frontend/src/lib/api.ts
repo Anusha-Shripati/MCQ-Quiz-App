@@ -1,11 +1,10 @@
 import axios from "@/components/Axios";
 
-// Define an interface for the expected params structure
 interface CandidateParams {
   search?: string;
   page?: number;
   limit?: number;
-  [key: string]: string | number | undefined; // Allows additional query parameters
+  [key: string]: string | number | undefined; 
 }
 
 export const fetchCandidates = async (params: CandidateParams) => {
@@ -14,7 +13,9 @@ export const fetchCandidates = async (params: CandidateParams) => {
 };
 
 export const fetcher = async (url:string)=>{
-  const response = await axios.get(url);
+  const apitString = Array.isArray(url) ? url[0]:url;
+  const params =  Array.isArray(url) && url.length == 2 ? url[1] :  {}
+  const response = await axios.get(apitString,{params});
   
   return response.data;
 }

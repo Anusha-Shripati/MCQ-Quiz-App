@@ -23,25 +23,19 @@ export class UserController {
     try {
       const { email, password } = req.body;
 
-
-
-      // Step 1: Find the user by email
       const user = await userService.findUserByEmail(email);
       if (!user) {
         return generateResponse(res, 400, {}, false, "User not found!");
       }
 
-      // Step 2: Compare passwords
       const isPasswordValid = await matchPassword(password, user.password);
       if (!isPasswordValid) {
         return generateResponse(res, 400, {}, false, "Invalid password!");
       }
 
-      // Step 3: Generate JWT token
       const role = await roleService.findRoleById(user.role_id);
       const token = createToken(user.id, user.email, role?.name, role?.id);
 
-      // Step 4: Respond with the token
       generateResponse(
         res,
         200,
@@ -127,31 +121,30 @@ export class UserController {
 
   list = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      // Extract the query parameters
-      const { role, email } = req.query;
+      // const { role, email } = req.query;
+      const { search } = req.query;
 
-      // Build the filter object based on query params
-      const filter: any = req.query;
+      const filter: any = {};
 
-      // Add filters for role, email,
-      if (role) {
-        if (!["Editor", "Candidate"].includes(role as string)) {
-          generateResponse(
-            res,
-            400,
-            {},
-            false,
-            "Invalid role. Only 'Editor' or 'Candidate' are allowed.!"
-          );
-        }
-        filter.role = role;
+      // if (role) {
+      //   if (!["Editor", "Candidate"].includes(role as string)) {
+      //     generateResponse(
+      //       res,
+      //       400,
+      //       {},
+      //       false,
+      //       "Invalid role. Only 'Editor' or 'Candidate' are allowed.!"
+      //     );
+      //   }
+      //   filter.role = role;
+      // }
+
+      if (search) {
+        filter.email = { contains: search as string, mode: "insensitive" };
+        filter.name = { contains: search as string, mode: "insensitive" };
       }
-
-      if (email) {
-        filter.email = { contains: email as string, mode: "insensitive" };
-      }
-
-      const users = await userService.findManyUsers({ email: email });
+      
+      const users = await userService.findManyUsers(filter);
 
       generateResponse(
         res,

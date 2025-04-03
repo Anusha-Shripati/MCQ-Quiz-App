@@ -1180,7 +1180,15 @@ export default App;`,
 
 export const modules: string[] = ["assessments", "candidates", "questions", "users"]
 
+export const commonRoutes: string[] = [
+  'dashboard',
+  'profile',
+  '',
+]
 
+export const superAdminRoutes: string[] = [
+  'roles',
+]
 interface Exam {
   date: string;
   task: string;

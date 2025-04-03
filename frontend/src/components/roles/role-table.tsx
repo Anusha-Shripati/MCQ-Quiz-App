@@ -14,10 +14,12 @@ import { LoadingSpinner } from '../ui/loading-spinner'
 import ReusableTable from '../common/reusable-table'
 import { useRoleStore } from '@/store/roleStore'
 import { Badge } from '../ui/badge'
+import { useAuthStore } from '@/store/authStore'
 
 function RoleTable() {
 
     const [role, setRole] = useState<any | null>(null)
+    const { user } = useAuthStore()
     const [open, setOpen] = useState(false);
     const handleEditRole = (role: any) => {
         setRole(role)
@@ -55,8 +57,8 @@ function RoleTable() {
         {
             key: 'permissions', header: "Permissions", render: (row: RoleData) => (
                 <div className="flex flex-wrap gap-2">
-                    {row.rolesPermissions.map((item) => {
-                       return  <React.Fragment key={item.id}>
+                    {row.rolePermissions.map((item) => {
+                        return <React.Fragment key={item.id}>
                             {(item.can_edit || item.can_read) && <Badge key={item.id} variant="default">
                                 {item.module?.name}
                             </Badge>}
@@ -68,24 +70,26 @@ function RoleTable() {
         },
         {
             key: 'action', header: "Action", render: (row: RoleData) => (
-                <div className="flex space-x-2">
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleEditRole(row)}
-                    >
-                        <FiEdit className="h-4 w-4" />
-                    </Button>
-                    {row.name !== 'Super Admin' &&
+                <>
+                    {user?.role?.name =='Super Admin'&& <div className="flex space-x-2">
                         <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() => handleDeleteRole(row.id)}
+                            onClick={() => handleEditRole(row)}
                         >
-                            <FiTrash2 className="h-4 w-4 text-destructive" />
+                            <FiEdit className="h-4 w-4" />
                         </Button>
-                    }
-                </div>
+                        {row.name !== 'Super Admin' &&
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleDeleteRole(row.id)}
+                            >
+                                <FiTrash2 className="h-4 w-4 text-destructive" />
+                            </Button>
+                        }
+                    </div>}
+                </>
             )
         },
     ]

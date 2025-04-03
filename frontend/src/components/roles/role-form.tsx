@@ -19,12 +19,12 @@ const permissionSchema = z.object({
 
 const roleSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  rolesPermissions: z.array(permissionSchema),
+  rolePermissions: z.array(permissionSchema),
 });
 
 const defaultRole: Omit<RoleData, "id"> & Partial<Pick<RoleData, "id">> = {
   name: "",
-  rolesPermissions: [],
+  rolePermissions: [],
 };
 
 function RoleForm({ open, onClose, roleData = null }: any) {
@@ -48,7 +48,7 @@ function RoleForm({ open, onClose, roleData = null }: any) {
     setPermissionData((prev) => {
       const updatedPermissions = [...prev];
       updatedPermissions[index][type] = value;
-      setValue("rolesPermissions", updatedPermissions, { shouldValidate: true });
+      setValue("rolePermissions", updatedPermissions, { shouldValidate: true });
       return updatedPermissions;
     });
   };
@@ -72,12 +72,12 @@ function RoleForm({ open, onClose, roleData = null }: any) {
     if (open) {
       const formData = {
         name: roleData?.name || "",
-        permissions:
-          roleData?.rolesPermissions.length > 0
-            ? roleData.rolesPermissions
+        rolePermissions:
+          roleData?.rolePermissions.length > 0
+            ? roleData.rolePermissions
             : permissionData,
       };
-      setPermissionData(formData.permissions)
+      setPermissionData(formData.rolePermissions)
       reset(formData);
     }
   }, [open]);
@@ -89,7 +89,7 @@ function RoleForm({ open, onClose, roleData = null }: any) {
 
       const payload = {
         name: data.name,
-        rolesPermissions: data.rolesPermissions.map((perm) => ({
+        rolePermissions: data.rolePermissions.map((perm) => ({
           module_id: perm.module_id,
           can_read: perm.can_read,
           can_edit: perm.can_edit,
@@ -110,6 +110,12 @@ function RoleForm({ open, onClose, roleData = null }: any) {
       } else {
         toast.error(res.message);
       }
+      modules.data.list.map((item: Module) => ({
+        module: { id: item.id, name: item.name },
+        module_id: item.id,
+        can_edit: false,
+        can_read: false,
+      }))
     } catch (error) {
       toast.error(
         isAxiosError(error) ? error.response?.data?.message || "An error occurred" : "An unexpected error occurred"

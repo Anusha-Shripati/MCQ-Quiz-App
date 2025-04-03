@@ -16,15 +16,15 @@ const roleService = new RoleService()
 export class RoleController {
     create = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const { name, permissions } = req.body;
+            const { name, rolePermissions } = req.body;
             const existingRole = await roleService.findRoleByName(name)
             if (existingRole) {
                 return generateResponse(res, 400, {}, false, "Role name already exists");
             }
 
             const newRole = await roleService.createRole(name);
-            if (permissions && permissions.length > 0) {
-                await roleService.assignPermissionsToRole(newRole.id, permissions);
+            if (rolePermissions && rolePermissions.length > 0) {
+                await roleService.assignPermissionsToRole(newRole.id, rolePermissions);
             }
             return generateResponse(res, 200, newRole, true, "Role created successfully");
         } catch (error) {
@@ -35,7 +35,7 @@ export class RoleController {
     update = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const { id } = req.params;
-            const { name, permissions } = req.body;
+            const { name, rolePermissions } = req.body;
             const existingRole = await roleService.findRoleById(id);
             if (!existingRole) {
                 return generateResponse(res, 404, {}, false, "Role not found!");
@@ -50,9 +50,9 @@ export class RoleController {
 
             const updatedRole = await roleService.updateRole(id, { name });
             
-            if (permissions && Array.isArray(permissions)) {
+            if (rolePermissions && Array.isArray(rolePermissions)) {
                 await roleService.deleteRolePermissions(id)
-                await roleService.assignPermissionsToRole(updatedRole.id, permissions);
+                await roleService.assignPermissionsToRole(updatedRole.id, rolePermissions);
             }
             return generateResponse(res, 200, updatedRole, true, "Role updated successfully");
         } catch (error) {

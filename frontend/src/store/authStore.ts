@@ -1,10 +1,19 @@
 import { create } from "zustand";
-import axios from "@/components/Axios";
-import { UserData } from "@/types/common.types";
+import { Module, Permissions, UserData } from "@/types/common.types";
+import {  postData } from "@/lib/api";
 
 interface User {
+  id?: string;
+  name: string;
   email: string;
   password: string;
+  role: {
+    id: string;
+    name: string;
+    rolePermissions: Permissions
+  },
+  token: string;
+
 }
 
 interface AuthState {
@@ -13,56 +22,60 @@ interface AuthState {
   loading: boolean;
   error?: string | null;
   success?: boolean;
-  userFilter:string;
-  userList:UserData[];
-  userCount:number;
-  setUserListData:(count:number,list:UserData[])=>void
+  userFilter: string;
+  userList: UserData[];
+  userCount: number;
+  setUserListData: (count: number, list: UserData[]) => void
   login: (credentials: { email: string; password: string }) => Promise<void>;
   initializeAuth: () => void;
   logout: () => void;
-  setUserFilter:(filter:string)=>void;
-  permissions:Record<string,Permissions>;
-  setPermissions:(permissions:Record<string,Permissions>)=>void
+  setUserFilter: (filter: string) => void;
+  permissions: Record<string, Permissions> | null;
+  setPermissions: (permissions: Record<string, Permissions> | null, user: User|null) => Promise<void>
 }
+
 
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   initializing: true,
   loading: false,
-  userFilter:'',
-  userList:[],
-  userCount:0,
-  permissions:{},
+  userFilter: '',
+  userList: [],
+  userCount: 0,
+  permissions: null,
   login: async ({ email, password }: { email: string; password: string }) => {
     set({ loading: true });
     try {
-      const response = await axios({
-        url: "/user/login",
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        data: { email, password },
-      });
+      const response = await postData("/user/login", { email, password });
+      if (response.success) {
+        const permissions = response.data?.role?.rolePermissions?.reduce((obj: Record<string, Permissions>, pr: Omit<Permissions, 'module'> & { module: Module }) => {
+          obj[pr.module?.name] = { can_edit: pr.can_edit, can_read: pr.can_read };
+          return obj
+        }, {})
+        set({ user: response.data, loading: false, error: null, permissions });
+        localStorage.setItem("user", JSON.stringify(response.data));
+        document.cookie = `token=${response.data.token}; path=/;`;
+        document.cookie = `role=${response.data?.role?.name}; path=/;`;
+        document.cookie = `permissions=${encodeURIComponent(JSON.stringify(permissions))}; path=/;`;
+        
 
-      set({ user: response.data.data, loading: false, error: null });
-      localStorage.setItem("user", JSON.stringify(response.data.data));
-      document.cookie = `token=${response.data.data.token}; path=/;`;
-
-      return response.data;
+        return response.data;
+      }
     } catch (error: any) {
       const errorMessage = error.response?.data?.message || "Login failed";
-      set({ error: errorMessage, loading: false });
+      set({ error: errorMessage, loading: false, permissions: null });
 
       throw new Error(errorMessage);
     }
   },
-  setPermissions:(permissions:Record<string,Permissions>)=>{
-    set({permissions})
+  setPermissions: async (permissions: Record<string, Permissions> | null, user: User|null) => {
+    set({ permissions, user })
   },
-  setUserFilter:(filter:string)=>{
-    set({userFilter:filter})
+  setUserFilter: (filter: string) => {
+    set({ userFilter: filter })
   },
-  setUserListData:(count:number,list:UserData[])=>{
-    set({userList:list,userCount:count})
+  setUserListData: (count: number, list: UserData[]) => {
+    set({ userList: list, userCount: count })
   },
   initializeAuth: () => {
     const storedUser = localStorage.getItem("user");
@@ -71,15 +84,19 @@ export const useAuthStore = create<AuthState>((set) => ({
         set({ user: JSON.parse(storedUser) });
       } catch (error) {
         console.error("Error parsing stored user:", error);
-        localStorage.removeItem("user"); // Remove invalid data
+        localStorage.removeItem("user");
         set({ user: null });
       }
+    }else{
+      document.cookie = "token=; path=/;";
+      document.cookie = "role=; path=/;";
+      document.cookie = "permissions=; path=/;";
     }
     set({ initializing: false });
   },
   logout: () => {
-    localStorage.removeItem("user"); // Remove entire user object
-    document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+    localStorage.removeItem("user");
+    document.cookie = "token=; path=/;";
     set({ user: null, loading: false });
   },
 }));

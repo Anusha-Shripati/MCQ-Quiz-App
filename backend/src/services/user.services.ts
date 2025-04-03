@@ -22,7 +22,7 @@ export class UserService {
       include: {
         role: {
           include: {
-            rolesPermissions: {
+            rolePermissions: {
               select: {
                 can_read: true,
                 can_edit: true,
@@ -41,11 +41,25 @@ export class UserService {
   }
 
   async findUserById(userId: string): Promise<User & { role: Roles | null } | null> {
-    // console.log(userId, "id");
     return await prisma.user.findUnique({
-      where: { id: userId, deletedAt: null},
-      include:{
-        role:true
+      where: { id: userId, deletedAt: null },
+      include: {
+        role: {
+          include: {
+            rolePermissions: {
+              select: {
+                can_read: true,
+                can_edit: true,
+                module: {
+                  select: {
+                    name: true,
+                  },
+                },
+              },
+
+            }
+          },
+        },
       }
     });
   }
@@ -60,19 +74,19 @@ export class UserService {
     return await prisma.user.findMany({
       where: {
         ...filter,
-        deletedAt: null,  
+        deletedAt: null,
       },
       select: {
         id: true,
         email: true,
-        name:true,
+        name: true,
         role_id: true,
         createdAt: true,
         updatedAt: true,
-        role:{
-          select:{
-            id:true,
-            name:true
+        role: {
+          select: {
+            id: true,
+            name: true
           }
         }
       },
@@ -81,7 +95,7 @@ export class UserService {
   async delete(id: string) {
     return await prisma.user.update({
       where: { id: id },
-      data: { deletedAt: new Date() }, 
+      data: { deletedAt: new Date() },
     });
   }
 }

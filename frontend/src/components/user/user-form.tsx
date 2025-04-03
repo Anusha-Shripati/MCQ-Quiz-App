@@ -50,8 +50,6 @@ interface UserFormProps {
 
 function UserForm({ open, onClose, userData = null }: UserFormProps) {
 
-  const { cache } = useSWRConfig();
-
   const {
     handleSubmit,
     reset,

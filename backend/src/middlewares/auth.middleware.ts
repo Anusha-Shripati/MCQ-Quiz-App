@@ -53,7 +53,6 @@ export const authenticateAndAuthorize =
         }
         
         if (role && decoded.role_name !== role) {
-          console.log(role,decoded);
           generateResponse(res, 403, {}, false, "Request not allowed.");
           return
         }

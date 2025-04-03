@@ -1,5 +1,5 @@
-import AssessmentHeader from "@/components/assessment/assessment-header";
-import AssessmentDetails from "@/components/assessment/assessment-details";
+import AssessmentHeader from "@/components/assessments/assessment-header";
+import AssessmentDetails from "@/components/assessments/assessment-details";
 
 export default function AssessmentPage() {
   return (

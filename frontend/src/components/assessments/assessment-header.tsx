@@ -108,7 +108,7 @@ export default function AssessmentHeader() {
           <ListFilterIcon size={30} />
         </Button>
 
-        <Link href="/assessment/create-assessment">
+        <Link href="/assessments/create-assessment">
           <Button className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm">
             <PlusCircle className="mr-2 h-4 w-4" />
             Create Assessment

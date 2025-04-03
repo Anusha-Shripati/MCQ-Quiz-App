@@ -39,14 +39,14 @@ CREATE TABLE "Modules" (
 );
 
 -- CreateTable
-CREATE TABLE "Roles_Permissions" (
+CREATE TABLE "Role_permissions" (
     "id" TEXT NOT NULL,
     "role_id" TEXT NOT NULL,
     "module_id" TEXT NOT NULL,
     "can_read" BOOLEAN NOT NULL DEFAULT false,
     "can_edit" BOOLEAN NOT NULL DEFAULT false,
 
-    CONSTRAINT "Roles_Permissions_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "Role_permissions_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
@@ -59,13 +59,13 @@ CREATE UNIQUE INDEX "Roles_name_key" ON "Roles"("name");
 CREATE UNIQUE INDEX "Modules_name_key" ON "Modules"("name");
 
 -- CreateIndex
-CREATE INDEX "Roles_Permissions_role_id_idx" ON "Roles_Permissions"("role_id");
+CREATE INDEX "Role_permissions_role_id_idx" ON "Role_permissions"("role_id");
 
 -- AddForeignKey
 ALTER TABLE "users" ADD CONSTRAINT "users_role_id_fkey" FOREIGN KEY ("role_id") REFERENCES "Roles"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Roles_Permissions" ADD CONSTRAINT "Roles_Permissions_role_id_fkey" FOREIGN KEY ("role_id") REFERENCES "Roles"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Role_permissions" ADD CONSTRAINT "Role_permissions_role_id_fkey" FOREIGN KEY ("role_id") REFERENCES "Roles"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Roles_Permissions" ADD CONSTRAINT "Roles_Permissions_module_id_fkey" FOREIGN KEY ("module_id") REFERENCES "Modules"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Role_permissions" ADD CONSTRAINT "Role_permissions_module_id_fkey" FOREIGN KEY ("module_id") REFERENCES "Modules"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

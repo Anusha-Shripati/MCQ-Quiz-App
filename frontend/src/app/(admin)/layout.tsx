@@ -4,6 +4,8 @@ import Sidebar from "@/components/common/sidebar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import AdminAuth from "@/components/common/admin-auth";
 import{ SWRConfig } from 'swr'
+
+
 export default function AdminLayout({
   children,
 }: {

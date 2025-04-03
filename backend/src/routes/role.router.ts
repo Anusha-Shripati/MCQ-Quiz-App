@@ -25,8 +25,6 @@ roleRouter.post(
 
 roleRouter.get(
   "/list",
-  authenticateAndAuthorize(undefined,'Super Admin'),
-
   asyncHandler(roleController.get)
 );
 

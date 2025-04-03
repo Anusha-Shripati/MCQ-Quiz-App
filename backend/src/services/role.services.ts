@@ -14,7 +14,7 @@ export class RoleService {
                 name: name ? { contains: name, mode: 'insensitive' } : undefined
             },
             include:{
-                rolesPermissions:{
+                rolePermissions:{
                     include:{
                         module:{
                             select:{name:true}
@@ -47,7 +47,7 @@ export class RoleService {
         })
     }
     async deleteRolePermissions(roleId: string) {
-        return prisma.roles_Permissions.deleteMany({
+        return prisma.role_permissions.deleteMany({
             where: {
                 role_id: roleId
             }
@@ -62,7 +62,7 @@ export class RoleService {
         })
     }
     async assignPermissionsToRole(roleId: string, permissions: Permissions[]) {
-        const roles_permissions = permissions.map((p) => {
+        const role_permissions = permissions.map((p) => {
             return {
                 can_read: p.can_read,
                 can_edit: p.can_edit,
@@ -70,14 +70,14 @@ export class RoleService {
                 role_id: roleId
             }
         })
-        return prisma.roles_Permissions.createMany({ data: roles_permissions })
+        return prisma.role_permissions.createMany({ data: role_permissions })
     }
 
     async updateRole(id: string, data: { name?: string }) {
         return prisma.roles.update({ where: { id }, data })
     }
     async getPermissionByRole(id: string) {
-        return prisma.roles_Permissions.findMany({ where: { role_id: id }, include: { module: true } })
+        return prisma.role_permissions.findMany({ where: { role_id: id }, include: { module: true } })
     }
 }
 

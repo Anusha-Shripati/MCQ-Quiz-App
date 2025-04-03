@@ -99,7 +99,7 @@ export default function CreateAssessment() {
     try {
       createAssessment(newAssessment);
       toast.success("Assessment created successfully");
-      router.push("/assessment");
+      router.push("/assessments");
     } catch (error) {
       toast.error("Failed to create assessment");
       console.error(error);

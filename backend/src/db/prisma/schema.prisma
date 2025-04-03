@@ -26,7 +26,7 @@ model Roles{
     id                  String          @id @default(uuid())
     name                String          @unique
     users               User[]          @relation("UserRole")
-    rolesPermissions    Roles_Permissions[]
+    rolePermissions    Role_permissions[]
     createdAt           DateTime        @default(now())
     updatedAt           DateTime        @updatedAt
     deletedAt           DateTime?          
@@ -35,11 +35,11 @@ model Roles{
 model Modules{
     id                  String          @id @default(uuid())
     name                String          @unique
-    permissions         Roles_Permissions[]
+    permissions         Role_permissions[]
 }
 
 
-model Roles_Permissions {   
+model Role_permissions {   
     id                  String          @id @default(uuid())
     role_id             String
     role                Roles           @relation(fields: [role_id], references: [id]) 

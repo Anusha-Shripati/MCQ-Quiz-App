@@ -1,4 +1,5 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useAuthStore } from "@/store/authStore";
 
 const UserAvatar = ({
   isCollapsed = false,
@@ -7,6 +8,8 @@ const UserAvatar = ({
   isCollapsed?: boolean;
   className?: string;
 }) => {
+
+  const {user} = useAuthStore()
   return (
     <div className={`flex items-center gap-4 ${className}`}>
       <Avatar>
@@ -18,8 +21,8 @@ const UserAvatar = ({
       </Avatar>
       {!isCollapsed && (
         <div>
-          <p className="font-semibold">John Doe</p>
-          <p className="text-sm text-gray-500">Admin</p>
+          <p className="font-semibold">{user?.name}</p>
+          <p className="text-sm text-gray-500">{user?.role?.name}</p>
         </div>
       )}
     </div>

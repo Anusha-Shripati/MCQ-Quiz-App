@@ -28,7 +28,7 @@ import useSWR from "swr";
 import { deleteData, fetcher, isAxiosError, postData } from "@/lib/api";
 import Loading from "@/app/loading";
 import Error from "@/app/error";
-import { Roles, UserData } from "@/types/common.types";
+import { Role, UserData } from "@/types/common.types";
 
 
 const userSchema = z
@@ -66,7 +66,7 @@ const UserTable: React.FC = () => {
   
   const rolesOptions = useMemo(() => {
     if (roles?.data?.list) {
-      return roles.data.list.map((item: Roles) => ({ value: item.id, label: item.name }))
+      return roles.data.list.map((item: Role) => ({ value: item.id, label: item.name }))
     }
   }, [roles])
 

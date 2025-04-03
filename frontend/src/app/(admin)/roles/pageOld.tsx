@@ -25,7 +25,7 @@ import { FiEdit, FiTrash2 } from "react-icons/fi";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { FormField } from "@/components/common/form-field";
-import { modules as  availableModules, rolesDataStatic } from "@/shared/constants/data";
+import { modules as  availableModules } from "@/shared/constants/data";
 
 
 const permissionSchema = z.object({
@@ -62,7 +62,7 @@ const UserTable: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingRoleIndex, setEditingRoleIndex] = useState<number | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [roles, setRoles] = useState<RoleFormValues[]>(rolesDataStatic || []);
+  const [roles, setRoles] = useState<RoleFormValues[]>( []);
 
 
   
@@ -225,7 +225,7 @@ const UserTable: React.FC = () => {
                   error={errors.name?.message}
                 />
               </div>
-              <PermissionsTable
+              {/* <PermissionsTable
                 permissions={watch("permissions")}
                 onCheckboxChange={(category, type) =>
                   handleCheckboxChange(
@@ -234,7 +234,7 @@ const UserTable: React.FC = () => {
                     !watch(`permissions.${category}.${type}`)
                   )
                 }
-              />
+              /> */}
 
               <div className="flex justify-end space-x-2">
                 <Button variant="destructive" onClick={closeModal}>

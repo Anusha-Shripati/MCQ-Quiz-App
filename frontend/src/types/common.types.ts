@@ -46,5 +46,5 @@ export interface UserData {
 export interface RoleData {
   id: string
   name: string,
-  rolesPermissions: Permissions[]
+  rolePermissions: Permissions[]
 }

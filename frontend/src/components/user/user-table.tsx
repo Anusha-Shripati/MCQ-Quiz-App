@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { UserData } from '@/types/common.types'
 import { Button } from '../ui/form/button'
 import { FiEdit, FiTrash2 } from 'react-icons/fi'
@@ -13,6 +13,7 @@ import { useAuthStore } from '@/store/authStore'
 import Error from '@/app/error'
 import { LoadingSpinner } from '../ui/loading-spinner'
 import ReusableTable from '../common/reusable-table'
+import { actionAccess } from '@/lib/permission'
 
 function UserTable() {
 
@@ -25,6 +26,7 @@ function UserTable() {
     const { userFilter, setUserListData, userList } = useAuthStore();
 
     const { data: users, isLoading, error, mutate } = useSWR(`/user/list?search=${userFilter}`, fetcher)
+    const canEditUser = useMemo(() => actionAccess("users.can_edit"), []);
 
     useEffect(() => {
         setUserListData(users?.data?.count || 0, users?.data?.list || [])
@@ -55,14 +57,14 @@ function UserTable() {
         {
             key: 'action', header: "Action", render: (row: UserData) => (
                 <div className="flex space-x-2">
-                    <Button
+                   {canEditUser && <Button
                         variant="ghost"
                         size="icon"
                         onClick={() => handleEditUser(row)}
                     >
                         <FiEdit className="h-4 w-4" />
-                    </Button>
-                    {row.role?.name !== 'Super Admin' &&
+                    </Button>}
+                    {row.role?.name !== 'Super Admin' && canEditUser &&
                         <Button
                             variant="ghost"
                             size="icon"

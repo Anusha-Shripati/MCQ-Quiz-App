@@ -13,7 +13,6 @@ import { useAuthStore } from '@/store/authStore'
 import Error from '@/app/error'
 import { LoadingSpinner } from '../ui/loading-spinner'
 import ReusableTable from '../common/reusable-table'
-import { actionAccess } from '@/lib/permission'
 
 function UserTable() {
 
@@ -23,10 +22,9 @@ function UserTable() {
         setUser(user)
         setOpen(true)
     };
-    const { userFilter, setUserListData, userList } = useAuthStore();
+    const { userFilter, setUserListData, userList,permissions } = useAuthStore();
 
     const { data: users, isLoading, error, mutate } = useSWR(`/user/list?search=${userFilter}`, fetcher)
-    const canEditUser = useMemo(() => actionAccess("users.can_edit"), []);
 
     useEffect(() => {
         setUserListData(users?.data?.count || 0, users?.data?.list || [])
@@ -57,14 +55,14 @@ function UserTable() {
         {
             key: 'action', header: "Action", render: (row: UserData) => (
                 <div className="flex space-x-2">
-                   {canEditUser && <Button
+                   {permissions?.users.can_edit && <Button
                         variant="ghost"
                         size="icon"
                         onClick={() => handleEditUser(row)}
                     >
                         <FiEdit className="h-4 w-4" />
                     </Button>}
-                    {row.role?.name !== 'Super Admin' && canEditUser &&
+                    {row.role?.name !== 'Super Admin' && permissions?.users.can_edit &&
                         <Button
                             variant="ghost"
                             size="icon"

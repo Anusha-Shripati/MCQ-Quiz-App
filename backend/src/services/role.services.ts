@@ -22,9 +22,6 @@ export class RoleService {
                     },
                 }
             },
-            orderBy: {
-                createdAt: 'desc'
-            }
         })
     }
     async findRoleByName(name: string): Promise<Roles | null> {

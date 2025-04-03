@@ -2,7 +2,8 @@
 
 import axios from "axios";
 import Cookies from "js-cookie";
-import { useRouter } from "next/navigation";
+import { NextRouter } from "next/router";
+
 
 const instance = axios.create({
     baseURL: `${process.env.NEXT_PUBLIC_API_URL}/api/v1`,
@@ -19,20 +20,21 @@ instance.interceptors.request.use(
     (error) => Promise.reject(error)
 );
 
-instance.interceptors.response.use(
-    (res) => res,
-    (err) => {
-        console.log(err);
-        
-        if (err.response.status === 401) {
-            localStorage.clear()
-            document.cookie = "token=; path=/;";
-            router.push("/");
-        } else {
-            return Promise.reject(err)
+export const setupResponseInterceptor = (router:NextRouter) => {
+    instance.interceptors.response.use(
+        (res) => res,
+        (err) => {
+            if (err.response?.status === 401) {
+                if (typeof window !== "undefined") {
+                    localStorage.clear();
+                    document.cookie = "token=; path=/;";
+                    router.push("/");
+                }
+            }
+            return Promise.reject(err);
         }
-    }
-)
+    );
+};
 
 
 export default instance

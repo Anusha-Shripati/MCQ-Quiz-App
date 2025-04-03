@@ -2,8 +2,7 @@ import express from "express";
 import { UserController } from "../controllers/user.controllers";
 import { validateRequest } from "../middlewares/validation.middleware";
 import {
-  createUserSchema,
-  loginSchema,
+  userSchema
 } from "../validationSchemas/user.validations";
 import { asyncHandler } from "../utils/asyncHandler";
 import { authenticateAndAuthorize } from "../middlewares/auth.middleware";
@@ -15,13 +14,13 @@ userRouter.post(
   "/create",
   authenticateAndAuthorize('users.can_edit'),
   // authenticateAndAuthorize(["Super_Admin", "Editor"]), // Middleware for auth and role check
-  validateRequest(createUserSchema),
-  asyncHandler(userController.create) // Async handler for the controller
+  validateRequest(userSchema.create),
+  asyncHandler(userController.create) 
 );
 
 userRouter.post(
   "/login",
-  validateRequest(loginSchema),
+  validateRequest(userSchema.login),
   asyncHandler(userController.login)
 );
 
@@ -33,13 +32,13 @@ userRouter.get(
 
 userRouter.get(
   "/:id",
-  authenticateAndAuthorize('users.can_read'),
+  validateRequest(userSchema.get),
   asyncHandler(userController.getUserById)
 );
 userRouter.post(
   "/:id",
   authenticateAndAuthorize('users.can_edit'),
-  // authenticateAndAuthorize(["Super_Admin", "Editor"]),
+  validateRequest(userSchema.update),
   asyncHandler(userController.update)
 );
 
@@ -47,6 +46,7 @@ userRouter.delete(
   "/:id",
   // authenticateAndAuthorize(["Super_Admin", "Editor"]),
   authenticateAndAuthorize('users.can_edit'),
+  validateRequest(userSchema.delete),
   asyncHandler(userController.delete)
 );
 

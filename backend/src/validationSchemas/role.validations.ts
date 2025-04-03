@@ -14,8 +14,8 @@ export const roleSchema = {
     update: {
         params: Joi.object({
             id: Joi.string().uuid().required().messages({
-                "string.empty": "Role ID is required",
-                "string.uuid": "Invalid Role ID format",
+                "string.empty": "Role Id is required",
+                "string.uuid": "Invalid Role Id format",
             }),
         }),
         body: Joi.object({
@@ -27,8 +27,16 @@ export const roleSchema = {
     delete: {
         params: Joi.object({
             id: Joi.string().uuid().required().messages({
-                "string.empty": "Role ID is required",
-                "string.uuid": "Invalid Role ID format",
+                "string.empty": "Role Id is required",
+                "string.uuid": "Invalid Role Id format",
+            }),
+        }),
+    },
+    get: {
+        params: Joi.object({
+            id: Joi.string().uuid().required().messages({
+                "string.empty": "Role Id is required",
+                "string.uuid": "Invalid Role Id format",
             }),
         }),
     },

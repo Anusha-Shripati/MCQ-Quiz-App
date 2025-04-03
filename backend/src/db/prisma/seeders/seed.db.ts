@@ -24,6 +24,7 @@ async function main() {
       email: "superadmin@example.com",
       password: hashedPassword,
       role_id: role.id,
+      name :"Super Admin"
     },
   });
   

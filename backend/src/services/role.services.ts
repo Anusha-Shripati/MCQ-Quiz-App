@@ -11,7 +11,7 @@ export class RoleService {
         const { name } = filters;
         return prisma.roles.findMany({
             where: {
-                name: name ? { contains: 'name', mode: 'insensitive' } : undefined
+                name: name ? { contains: name, mode: 'insensitive' } : undefined
             },
             include:{
                 rolesPermissions:{
@@ -19,7 +19,7 @@ export class RoleService {
                         module:{
                             select:{name:true}
                         }
-                    }
+                    },
                 }
             },
             orderBy: {

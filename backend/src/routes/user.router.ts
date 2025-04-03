@@ -34,7 +34,6 @@ userRouter.get(
 userRouter.get(
   "/:id",
   authenticateAndAuthorize('users.can_read'),
-  // authenticateAndAuthorize(["Super_Admin", "Editor"]),
   asyncHandler(userController.getUserById)
 );
 userRouter.post(

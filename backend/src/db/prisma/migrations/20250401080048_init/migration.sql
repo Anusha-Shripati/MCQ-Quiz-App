@@ -8,6 +8,7 @@ CREATE TYPE "ExamStatus" AS ENUM ('passed', 'failed', 'in_progress');
 CREATE TABLE "users" (
     "id" TEXT NOT NULL,
     "role_id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "password" TEXT NOT NULL,
     "token" TEXT,

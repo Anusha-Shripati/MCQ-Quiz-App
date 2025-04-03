@@ -10,7 +10,7 @@ export interface Permissions {
 
 export interface RolePayload {
     name: string,
-    permission: Permissions[]
+    permissions: Permissions[]
 }
 const roleService = new RoleService()
 export class RoleController {
@@ -77,11 +77,11 @@ export class RoleController {
     }
     get = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const { name } = req.query
+            const { search } = req.query
             const roles = await roleService.getRoles({
-                name: name as string,
+                name: search as string,
             });
-            return generateResponse(res, 200, roles, true, "Role fetched successfully");
+            return generateResponse(res, 200,   { list: roles, count: roles.length }, true, "Role fetched successfully");
 
         } catch (error) {
             next(error);

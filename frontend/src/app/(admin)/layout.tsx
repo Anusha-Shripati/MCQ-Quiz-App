@@ -15,12 +15,7 @@ export default function AdminLayout({
       <Sidebar />
       <div className="flex-1 bg-secondary border h-screen overflow-y flex justify-center">
         <ScrollArea className="px-6 w-full xl:max-w-[1600px]">
-          <SWRConfig
-            value={{
-              refreshInterval: 3000,
-              fetcher: (resource, init) => fetch(resource, init).then(res => res.json())
-            }}
-          >
+          <SWRConfig value={{dedupingInterval:10000}}>
             <AdminAuth>{children}</AdminAuth>
           </SWRConfig>
         </ScrollArea>

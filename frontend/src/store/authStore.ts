@@ -1,5 +1,6 @@
 import { create } from "zustand";
-import api from "@/components/Axios";
+import axios from "@/components/Axios";
+import { UserData } from "@/types/common.types";
 
 interface User {
   email: string;
@@ -12,21 +13,31 @@ interface AuthState {
   loading: boolean;
   error?: string | null;
   success?: boolean;
+  userFilter:string;
+  userList:UserData[];
+  userCount:number;
+  setUserListData:(count:number,list:UserData[])=>void
   login: (credentials: { email: string; password: string }) => Promise<void>;
   initializeAuth: () => void;
   logout: () => void;
+  setUserFilter:(filter:string)=>void;
+  permissions:Record<string,Permissions>;
+  setPermissions:(permissions:Record<string,Permissions>)=>void
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   initializing: true,
   loading: false,
-
+  userFilter:'',
+  userList:[],
+  userCount:0,
+  permissions:{},
   login: async ({ email, password }: { email: string; password: string }) => {
     set({ loading: true });
     try {
-      const response = await api({
-        url: "http://localhost:3001/api/v1/user/login",
+      const response = await axios({
+        url: "/user/login",
         method: "POST",
         headers: { "Content-Type": "application/json" },
         data: { email, password },
@@ -34,16 +45,24 @@ export const useAuthStore = create<AuthState>((set) => ({
 
       set({ user: response.data.data, loading: false, error: null });
       localStorage.setItem("user", JSON.stringify(response.data.data));
-      document.cookie = `token=${response.data.token}; path=/;`;
+      document.cookie = `token=${response.data.data.token}; path=/;`;
 
       return response.data;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       const errorMessage = error.response?.data?.message || "Login failed";
       set({ error: errorMessage, loading: false });
 
       throw new Error(errorMessage);
     }
+  },
+  setPermissions:(permissions:Record<string,Permissions>)=>{
+    set({permissions})
+  },
+  setUserFilter:(filter:string)=>{
+    set({userFilter:filter})
+  },
+  setUserListData:(count:number,list:UserData[])=>{
+    set({userList:list,userCount:count})
   },
   initializeAuth: () => {
     const storedUser = localStorage.getItem("user");

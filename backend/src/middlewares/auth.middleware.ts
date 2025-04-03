@@ -27,7 +27,8 @@ export const authenticateAndAuthorize =
         ) as {
           id: string;
           email: string;
-          role: string;
+          role_id: string;
+          role_name: string;
         };
 
         req.user = decoded;
@@ -37,12 +38,13 @@ export const authenticateAndAuthorize =
             generateResponse(res, 400, {}, false, "Invalid rights format.");
             return
           }
-          const permissions = await roleService.getPermissionByRole(decoded.role);
+          const permissions = await roleService.getPermissionByRole(decoded.role_id);
+          
           if (!permissions) {
             generateResponse(res, 403, {}, false, "Permissions not found for the role.");
             return
           }
-
+          
           const modulePermission = permissions.find((p) => p.module?.name === moduleName);
           if (!modulePermission || !modulePermission[action as Actions]) {
             generateResponse(res, 403, {}, false, "Request not allowed.");
@@ -50,7 +52,8 @@ export const authenticateAndAuthorize =
           }
         }
         
-        if (role && decoded.role !== role) {
+        if (role && decoded.role_name !== role) {
+          console.log(role,decoded);
           generateResponse(res, 403, {}, false, "Request not allowed.");
           return
         }
@@ -59,7 +62,7 @@ export const authenticateAndAuthorize =
           .findUserById(decoded.id)
           .then((user) => {
             if (!user) {
-              return generateResponse(res, 404, {}, false, "User not found.");
+              return generateResponse(res, 401, {}, false, "User not found.");
             }
             next();
           })
@@ -71,11 +74,12 @@ export const authenticateAndAuthorize =
       }
     };
 
-export const createToken = (id: string, email: string, role = "user") => {
+export const createToken = (id: string, email: string, role_name = "",role_id='') => {
   let payload = {
     id: id,
     email: email,
-    role: role,
+    role_name: role_name,
+    role_id: role_id,
     token: "",
   };
 

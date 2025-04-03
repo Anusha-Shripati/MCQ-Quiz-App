@@ -8,48 +8,90 @@ datasource db {
 }
 
 model User {
-    id                 String            @id @default(uuid())
-    role_id            String          
-    name               String          
-    email              String            @unique
-    password           String
-    token              String?
-    createdAt          DateTime          @default(now())
-    updatedAt          DateTime          @updatedAt
-    deletedAt          DateTime?          
-    role               Roles             @relation(fields: [role_id], references: [id], name: "UserRole")
+    id          String        @id @default(uuid())
+    role_id     String
+    name        String
+    email       String        @unique
+    password    String
+    token       String?
+    created_at  DateTime      @default(now())
+    updated_at  DateTime      @updatedAt
+    deleted_at  DateTime?
+    role        Roles         @relation(fields: [role_id], references: [id], name: "UserRole")
+    assessments Assessments[]
 
-    @@map("users") 
+    @@map("users")
 }
 
-model Roles{
-    id                  String          @id @default(uuid())
-    name                String          @unique
-    users               User[]          @relation("UserRole")
-    rolePermissions    Role_permissions[]
-    createdAt           DateTime        @default(now())
-    updatedAt           DateTime        @updatedAt
-    deletedAt           DateTime?          
+model Roles {
+    id              String             @id @default(uuid())
+    name            String             @unique
+    users           User[]             @relation("UserRole")
+    rolePermissions Role_permissions[]
 }
 
-model Modules{
-    id                  String          @id @default(uuid())
-    name                String          @unique
-    permissions         Role_permissions[]
+model Modules {
+    id          String             @id @default(uuid())
+    name        String             @unique
+    permissions Role_permissions[]
 }
 
+model Role_permissions {
+    id        String  @id @default(uuid())
+    role_id   String
+    role      Roles   @relation(fields: [role_id], references: [id])
+    module_id String
+    module    Modules @relation(fields: [module_id], references: [id])
+    can_read  Boolean @default(false)
+    can_edit  Boolean @default(false)
 
-model Role_permissions {   
-    id                  String          @id @default(uuid())
-    role_id             String
-    role                Roles           @relation(fields: [role_id], references: [id]) 
-    module_id           String
-    module              Modules         @relation(fields: [module_id], references: [id])
-    can_read            Boolean         @default(false)
-    can_edit            Boolean         @default(false)
-
-    @@index([role_id]) 
+    @@index([role_id])
 }
+
+model Assessments {
+    id               String                  @id @default(uuid())
+    name             String
+    created_by       String
+    easy             Int                     @default(0)
+    medium           Int                     @default(0)
+    hard             Int                     @default(0)
+    difficulty_score Int                     @default(0)
+    duration         Int                     @default(0)
+    created_at       DateTime                @default(now())
+    updated_at       DateTime                @updatedAt
+    deleted_at       DateTime?
+    technologies     Assessment_technology[]
+    created_by_user  User                    @relation(fields: [created_by], references: [id])
+}
+
+model Assessment_technology {
+    id            String      @id @default(uuid())
+    technology_id String
+    assessment_id String
+    easy          Int         @default(0)
+    medium        Int         @default(0)
+    hard          Int         @default(0)
+    assessments   Assessments @relation(fields: [assessment_id], references: [id])
+    technology    Technology  @relation(fields: [technology_id], references: [id])
+}
+
+model Technology {
+    id                    String                  @id @default(uuid())
+    name                  String
+    created_at            DateTime                @default(now())
+    updated_at            DateTime                @updatedAt
+    deleted_at            DateTime?
+    Assessment_technology Assessment_technology[]
+}
+
+// model Assessments_technology{
+//     id                  String         @id @default(uuid())
+//     assessment_id       String
+//     technology_id       String
+//     assessment          Assessments     @relation(fields: [assessment_id],references: [id])
+//     technology          Technology      @relation(fields: [technology_id],references: [id])
+
+// }
 
 // model Profile {
 //     id            String  @id @default(uuid())

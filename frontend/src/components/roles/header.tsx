@@ -1,11 +1,12 @@
 "use client"
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { CardTitle } from '../ui/card'
 import { Input } from '../ui/form/input'
 import { Button } from '../ui/form/button'
 import RoleForm from './role-form';
 import { useRoleStore } from '@/store/roleStore'
+import { useAuthStore } from '@/store/authStore'
 
 
 
@@ -13,9 +14,8 @@ function Header() {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [open, setOpen] = useState(false);
-  const { setRolesFilter,rolesCount } = useRoleStore()
-
-
+  const { setRolesFilter, rolesCount } = useRoleStore()
+  const { user } = useAuthStore()
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
   }
@@ -44,12 +44,12 @@ function Header() {
           onChange={handleSearch}
           autoComplete="off"
         />
-        <Button
+        {user?.role?.name == 'Super Admin' && <Button
           onClick={handleCreateRole}
           className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
         >
           Create Role
-        </Button>
+        </Button>}
       </div>
       <RoleForm open={open} onClose={() => setOpen(false)} />
     </div>

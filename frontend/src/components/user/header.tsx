@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { CardTitle } from '../ui/card'
 import { Input } from '../ui/form/input'
 import { Button } from '../ui/form/button'
@@ -13,14 +13,14 @@ function Header() {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [open, setOpen] = useState(false);
-  const { setUserFilter,userCount } = useAuthStore()
-
+  const { setUserFilter, userCount, permissions } = useAuthStore()
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
   }
   const handleCreateUser = () => {
     setOpen(true)
   }
+
   useEffect(() => {
     const timer = setTimeout(() => {
       setUserFilter(searchTerm);
@@ -43,12 +43,12 @@ function Header() {
           onChange={handleSearch}
           autoComplete="off"
         />
-        <Button
+        {permissions?.users?.can_edit && <Button
           onClick={handleCreateUser}
           className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
         >
           Create User
-        </Button>
+        </Button>}
       </div>
       <UserForm open={open} onClose={() => setOpen(false)} />
     </div>

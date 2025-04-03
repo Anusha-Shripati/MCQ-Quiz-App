@@ -3,14 +3,14 @@ import { prisma } from "../db/prisma.client";
 
 export class UserService {
   async createUser(
-    data: Pick<User, "email" | "password" | "createdAt" | "role_id" | "name">
+    data: Pick<User, "email" | "password" | "created_at" | "role_id" | "name">
   ): Promise<User> {
     return await prisma.user.create({
       data: {
         email: data.email,
         password: data.password,
         role_id: data.role_id,
-        createdAt: data.createdAt,
+        created_at: data.created_at,
         name: data.name
       },
     });
@@ -42,7 +42,7 @@ export class UserService {
 
   async findUserById(userId: string): Promise<User & { role: Roles | null } | null> {
     return await prisma.user.findUnique({
-      where: { id: userId, deletedAt: null },
+      where: { id: userId, deleted_at: null },
       include: {
         role: {
           include: {
@@ -74,15 +74,15 @@ export class UserService {
     return await prisma.user.findMany({
       where: {
         ...filter,
-        deletedAt: null,
+        deleted_at: null,
       },
       select: {
         id: true,
         email: true,
         name: true,
         role_id: true,
-        createdAt: true,
-        updatedAt: true,
+        created_at: true,
+        deleted_at: true,
         role: {
           select: {
             id: true,
@@ -95,7 +95,7 @@ export class UserService {
   async delete(id: string) {
     return await prisma.user.update({
       where: { id: id },
-      data: { deletedAt: new Date() },
+      data: { deleted_at: new Date() },
     });
   }
 }

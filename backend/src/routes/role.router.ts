@@ -19,7 +19,6 @@ roleRouter.post(
   "/:id",
   validateRequest(roleSchema.update),
   authenticateAndAuthorize(undefined,'Super Admin'),
-
   asyncHandler(roleController.update)
 );
 

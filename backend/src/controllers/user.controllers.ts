@@ -54,7 +54,7 @@ export class UserController {
 
       const user = await userService.findUserByEmail(payload.email);
       if (user) {
-        if (user.deletedAt) {
+        if (user.deleted_at) {
           const hashedPassword = await encryptStringCrypt(payload.password);
           let updatedUser = await userService.updateUser(user.id, {
             email: payload.email,
@@ -75,7 +75,7 @@ export class UserController {
         email: payload.email,
         password: hashedPassword,
         role_id: payload.role_id,
-        createdAt: new Date(),
+        created_at: new Date(),
         name: payload.name
       });
 
@@ -96,7 +96,7 @@ export class UserController {
       }
 
       if (payload.email && payload.email !== user.email) {
-        const duplicateUser = await userService.findUserByEmail(user.email);
+        const duplicateUser = await userService.findUserByEmail(payload.email);
         if (duplicateUser) {
           return generateResponse(res, 400, {}, false, "Email is already exists!");
         }

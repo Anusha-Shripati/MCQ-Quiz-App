@@ -119,25 +119,43 @@ export class UserController {
     }
   };
 
+
+  changePassword = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const userId = req.params.id
+      const {oldPassword , newPassword} = req.body;
+
+      const user = await userService.findUserById(userId);
+      if (!user) {
+        return generateResponse(res, 404, {}, false, "User not found!");
+      }
+
+      if (oldPassword) {
+        console.log(user.password);
+        
+      const isPasswordValid = await matchPassword(oldPassword, user.password);
+        
+        if (!isPasswordValid) {
+          return generateResponse(res, 400, {}, false, "Invalid old password!");
+        }
+      }
+      let hashPass = user.password
+      if(newPassword){
+        hashPass=await encryptStringCrypt(newPassword);
+      } 
+      const newUser = await userService.changePassword(user.id, hashPass);
+
+      generateResponse(res, 200, newUser, true, "Password updated successfully!");
+    } catch (error) {
+      next(error);
+    }
+  };
+
   list = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      // const { role, email } = req.query;
       const { search } = req.query;
 
       const filter: any = {};
-
-      // if (role) {
-      //   if (!["Editor", "Candidate"].includes(role as string)) {
-      //     generateResponse(
-      //       res,
-      //       400,
-      //       {},
-      //       false,
-      //       "Invalid role. Only 'Editor' or 'Candidate' are allowed.!"
-      //     );
-      //   }
-      //   filter.role = role;
-      // }
 
       if (search) {
         filter.email = { contains: search as string, mode: "insensitive" };

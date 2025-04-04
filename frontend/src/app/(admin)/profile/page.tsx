@@ -1,11 +1,15 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/form/button";
 import ProfilePictureUpload from "@/components/profile/ProfilePictureUpload";
 import { FormField } from "@/components/common/form-field";
+import { useAuthStore } from "@/store/authStore";
+import { api, isAxiosError } from "@/lib/api";
+import toast from "react-hot-toast";
+import { EyeIcon, EyeOffIcon } from "lucide-react";
 
 const userInfoSchema = z.object({
   userName: z.string().min(1, "User Name is required"),
@@ -25,12 +29,22 @@ const passwordChangeSchema = z
 
 export default function Profile() {
   const [isEditing, setIsEditing] = useState(false);
+  const { user } = useAuthStore()
 
+
+
+  const [showPassword, setShowPassword] = useState({ old: false, new: false, reNew: false });
+  const togglePassword = (type: 'old' | 'new' | 'reNew') => {
+    setShowPassword((prev) => ({
+      ...prev,
+      [type]: !prev[type],
+    }));
+  }
   const {
     register: registerUserInfo,
     handleSubmit: handleUserInfoSubmit,
     formState: { errors: userInfoErrors },
-    reset:userReset
+    reset: userReset
   } = useForm({
     resolver: zodResolver(userInfoSchema),
     defaultValues: {
@@ -39,10 +53,21 @@ export default function Profile() {
     },
   });
 
+  useEffect(() => {
+    if (user) {
+      userReset({
+        userName: user.name,
+        email: user.email
+      })
+    }
+  }, [user])
+
+
   const {
     register: registerPassword,
     handleSubmit: handlePasswordSubmit,
     formState: { errors: passwordErrors },
+    reset: passwordReset
   } = useForm({
     resolver: zodResolver(passwordChangeSchema),
     defaultValues: {
@@ -52,23 +77,59 @@ export default function Profile() {
     },
   });
 
-  const onSaveUserInfo = (data: { userName: string; email: string }) => {
-    console.log("User Info Saved:", data);
-    setIsEditing(false);
+  const onSaveUserInfo = async (data: { userName: string; email: string }) => {
+    try {
+      if (user?.id) {
+        const res = await api.put(`/user/${user?.id}`, { name: data.userName, email: data.email })
+        if (res.success) {
+          toast.success("User Info Updated Successfully")
+          userReset({
+            userName: res.data.name,
+            email: res.data.email
+          })
+        } else {
+          toast.error(res.message)
+        }
+      }
+    } catch (error) {
+      if (isAxiosError(error)) {
+        toast.error(error.response?.data?.message);
+      } else {
+        toast.error("An unexpected error occurred");
+      }
+    } finally {
+      setIsEditing(false);
+    }
   };
 
-  const onChangePassword = (data: {
+  const onChangePassword = async (data: {
     oldPassword: string;
     newPassword: string;
     reNewPassword: string;
   }) => {
-    console.log("Password Changed:", data);
+    try {
+      if (user?.id) {
+        const res = await api.put(`/user/change-password/${user?.id}`, { oldPassword: data.oldPassword, newPassword: data.newPassword })
+        if (res.success) {
+          toast.success("Password Updated Successfully")
+          passwordReset()
+        } else {
+          toast.error(res.message)
+        }
+      }
+    } catch (error) {
+      if (isAxiosError(error)) {
+        toast.error(error.response?.data?.message);
+      } else {
+        toast.error("An unexpected error occurred");
+      }
+    }
   };
-  const handleEditAndClose=()=>{
-    if(isEditing){
+  const handleEditAndClose = () => {
+    if (isEditing) {
       userReset()
     }
-    setIsEditing((prv)=>!prv)
+    setIsEditing((prv) => !prv)
   }
 
   return (
@@ -135,37 +196,58 @@ export default function Profile() {
           className="space-y-4"
           onSubmit={handlePasswordSubmit(onChangePassword)}
         >
-          <div>
+          <div className="relative">
             <FormField
-              type="password"
+              type={showPassword.old ? "text" : "password"}
               label="Old Password"
               {...registerPassword("oldPassword")}
               className="w-full dark:bg-gray-800 dark:text-white"
               error={passwordErrors.oldPassword?.message}
-              disabled={!isEditing}
             />
+            <button
+              type="button"
+              onClick={() => togglePassword('old')}
+              className="absolute right-3 top-[42px] transform -translate-y-1/2 text-gray-400"
+            >
+              {showPassword.old ? <EyeOffIcon size={20} /> : <EyeIcon size={20} />}
+            </button>
           </div>
 
-          <div>
+          <div className="relative">
+
             <FormField
               label='New Password'
-              type="password"
+              type={showPassword.new ? "text" : "password"}
+
               {...registerPassword("newPassword")}
               className="w-full dark:bg-gray-800 dark:text-white"
-              disabled={!isEditing}
               error={passwordErrors.newPassword?.message}
             />
+            <button
+              type="button"
+              onClick={() => togglePassword('new')}
+              className="absolute right-3 top-[42px] transform -translate-y-1/2 text-gray-400"
+            >
+              {showPassword.new ? <EyeOffIcon size={20} /> : <EyeIcon size={20} />}
+            </button>
           </div>
 
-          <div>
+          <div className="relative">
+
             <FormField
-              type="password"
+              type={showPassword.reNew ? "text" : "password"}
               label="Re-New Password"
               {...registerPassword("reNewPassword")}
               className="w-full dark:bg-gray-800 dark:text-white"
-              disabled={!isEditing}
               error={passwordErrors.reNewPassword?.message}
             />
+            <button
+              type="button"
+              onClick={() => togglePassword('reNew')}
+              className="absolute right-3 top-[42px] transform -translate-y-1/2 text-gray-400"
+            >
+              {showPassword.reNew ? <EyeOffIcon size={20} /> : <EyeIcon size={20} />}
+            </button>
           </div>
 
           <div className="flex justify-end">

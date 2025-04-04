@@ -1,4 +1,4 @@
-import { fetcher, isAxiosError, postData } from "@/lib/api";
+import { api, isAxiosError } from "@/lib/api";
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import useSWR, { mutate } from "swr";
@@ -53,7 +53,7 @@ function RoleForm({ open, onClose, roleData = null }: any) {
     });
   };
 
-  const { data: modules } = useSWR("/module/list", fetcher);
+  const { data: modules } = useSWR("/module/list", api.get);
 
   useEffect(() => {
     if (modules?.data?.list) {
@@ -95,11 +95,12 @@ function RoleForm({ open, onClose, roleData = null }: any) {
           can_edit: perm.can_edit,
         })),
       };
-
-      const res = await postData(
-        roleData ? `/role/${roleData.id}` : "/role/create",
-        payload
-      );
+      let res;
+      if(roleData){
+        res = await api.put(`/role/${roleData.id}`,payload);
+      }else{
+        res = await api.post("/role/create",payload);
+      }
 
       if (res.success) {
         toast.success(
@@ -117,6 +118,8 @@ function RoleForm({ open, onClose, roleData = null }: any) {
         can_read: false,
       }))
     } catch (error) {
+      console.log(error);
+      
       toast.error(
         isAxiosError(error) ? error.response?.data?.message || "An error occurred" : "An unexpected error occurred"
       );

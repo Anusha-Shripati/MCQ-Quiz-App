@@ -1,4 +1,4 @@
-import { fetcher, isAxiosError, postData } from "@/lib/api";
+import { api, isAxiosError } from "@/lib/api";
 import React, { useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import useSWR, { mutate } from "swr";
@@ -11,7 +11,6 @@ import { Role } from "@/types/common.types";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
 import { Button } from "../ui/form/button";
 import { UserData } from "@/types/common.types";
-import { useSWRConfig } from 'swr';
 
 const userSchema = z
   .object({
@@ -71,7 +70,7 @@ function UserForm({ open, onClose, userData = null }: UserFormProps) {
 
   const userFoms = watch()
 
-  const { data: roles } = useSWR('/role/list', fetcher)
+  const { data: roles } = useSWR('/role/list', api.get)
 
   const rolesOptions = useMemo(() => {
     if (roles?.data?.list) {
@@ -88,8 +87,13 @@ function UserForm({ open, onClose, userData = null }: UserFormProps) {
       role_id: data.role,
     }
     try {
-      const res = await postData(userData ? `/user/${userData.id}` : '/user/create', payload);
+      let res;
 
+      if (userData) {
+        res = await api.put(`/user/${userData.id}`, payload);
+      } else {
+        res = await api.post("/user/create", payload);
+      }
       if (res.success) {
         toast.success(userData ? 'User updated successfully' : 'User created successfully');
         mutate((key) => typeof key === 'string' && key.startsWith('/user/list'));
@@ -235,7 +239,7 @@ function UserForm({ open, onClose, userData = null }: UserFormProps) {
                 className="bg-green-600"
                 disabled={isSubmitting}
               >
-                {userData?"Update":"Save"} 
+                {userData ? "Update" : "Save"}
               </Button>
             </div>
           </div>

@@ -69,7 +69,7 @@ export const authenticateAndAuthorize =
             generateResponse(res, 500, {}, false, "Error verifying user.");
           });
       } catch (error) {
-        generateResponse(res, 500, {}, false, "Invalid or expired token.");
+        generateResponse(res, 401, {}, false, "Invalid or expired token.");
       }
     };
 

@@ -1,3 +1,5 @@
+import { Technology } from "@/store/assessmentStore";
+
 export interface AssessmentCategory {
   name: string;
   questions: {
@@ -8,7 +10,13 @@ export interface AssessmentCategory {
 }
 export interface AssessmentForm {
   name: string;
-  categories: AssessmentCategory[];
+  technologies: {
+    id: string;
+    name:string;
+    easy: number;
+    medium: number;
+    hard: number;
+  }[];
   duration:number | string ;
   targetQuestions:number
 }

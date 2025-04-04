@@ -30,14 +30,15 @@ import { AssessmentForm } from "@/types/assessment.types";
   const calculateDifficultyPercentage = (
     difficulty: "easy" | "medium" | "hard"
   ) => {
-    const totalForDifficulty = formData.categories.reduce(
-      (sum, cat) => sum + cat.questions[difficulty],
+    const totalForDifficulty = formData.technologies.reduce(
+      (sum, tech) => sum + tech[difficulty],
       0
     );
     return formData.targetQuestions > 0
       ? Math.round((totalForDifficulty / formData.targetQuestions) * 100)
       : 0;
   };
+
 
     return (
       <Card className="max-h-[80vh] overflow-y-auto dark:bg-gray-800 dark:border-gray-700">
@@ -64,7 +65,7 @@ import { AssessmentForm } from "@/types/assessment.types";
               <div>
                 <Label className="text-xs text-gray-500 dark:text-gray-400">Selected Technologies</Label>
                 <div className="mt-1 flex flex-wrap gap-1">
-                  {formData.categories.map((category) => (
+                  {formData.technologies.map((category) => (
                     <div key={category.name} className="px-2 py-1 bg-blue-50 dark:bg-blue-900 text-blue-700 dark:text-blue-200 rounded-full text-xs font-medium">
                       {category.name}
                     </div>
@@ -94,18 +95,25 @@ import { AssessmentForm } from "@/types/assessment.types";
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {formData.categories.map((category) => {
-                    const total = category.questions.easy + category.questions.medium + category.questions.hard;
+                  {formData.technologies.map((tech) => {
+                    const total = tech.easy + tech.medium + tech.hard;
                     return (
-                      <TableRow key={category.name} className="hover:bg-gray-50 dark:hover:bg-gray-600">
-                        <TableCell className="font-medium p-2 dark:text-white">{category.name}</TableCell>
-                        <TableCell className="text-center p-2 dark:text-gray-300">{category.questions.easy}</TableCell>
-                        <TableCell className="text-center p-2 dark:text-gray-300">{category.questions.medium}</TableCell>
-                        <TableCell className="text-center p-2 dark:text-gray-300">{category.questions.hard}</TableCell>
+                      <TableRow key={tech.name} className="hover:bg-gray-50 dark:hover:bg-gray-600">
+                        <TableCell className="font-medium p-2 dark:text-white">{tech.name}</TableCell>
+                        <TableCell className="text-center p-2 dark:text-gray-300">{tech.easy}</TableCell>
+                        <TableCell className="text-center p-2 dark:text-gray-300">{tech.medium}</TableCell>
+                        <TableCell className="text-center p-2 dark:text-gray-300">{tech.hard}</TableCell>
                         <TableCell className="text-center p-2 font-semibold dark:text-white">{total}</TableCell>
                       </TableRow>
                     );
                   })}
+                    <TableRow  className="hover:bg-gray-50 dark:hover:bg-gray-600">
+                        <TableCell className="font-medium p-2 dark:text-white">Total</TableCell>
+                        <TableCell className="text-center p-2 dark:text-gray-300">{formData.technologies.reduce((sum, tech) => sum + tech.easy, 0)}</TableCell>
+                        <TableCell className="text-center p-2 dark:text-gray-300">{formData.technologies.reduce((sum, tech) => sum + tech.medium, 0)}</TableCell>
+                        <TableCell className="text-center p-2 dark:text-gray-300">{formData.technologies.reduce((sum, tech) => sum + tech.hard, 0)}</TableCell>
+                        <TableCell className="text-center p-2 font-semibold dark:text-white">{calculateTotalSum()}</TableCell>
+                      </TableRow>
                 </TableBody>
               </Table>
             </div>
@@ -128,7 +136,7 @@ import { AssessmentForm } from "@/types/assessment.types";
         <CardFooter className="flex flex-col sm:flex-row justify-end gap-2 p-4">
           <Button variant="outline" onClick={handlePreviousStep} className="text-sm dark:border-gray-600 dark:text-white dark:hover:bg-gray-700">
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back
+            Previous
           </Button>
           <Button onClick={handleSubmit} className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-white text-sm">
             Create Assessment

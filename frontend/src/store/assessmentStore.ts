@@ -8,23 +8,33 @@ export interface Question {
 }
 
 export interface Technology {
-    name: string;
-    percentage: number;
-    questions: Question;
+    id?:string;
+    technology:{
+        id: string;
+        name: string;
+    },
+    technology_id?: string;
+    hard: number;
+    easy: number;
+    medium: number;
 }
 export interface Assessment {
-    id: string;
-    title: string;
-    createdBy: string;
-    createdDate: string;
+    id?: string;
+    name: string;
+    created_by: string;
+    created_at: string;
     totalQuestions: number;
-    duration: string | number  ;
+    duration: string | number ;
     technologies: Technology[];
+    created_by_user:{
+        id:string,
+        name:string
+    }
 }
 export interface AssessmentFilters{
-    assessment:string,
-    createdBy:string,
-    date: DateRange | undefined, 
+    name:string,
+    created_by:string,
+    created_duation: DateRange | undefined, 
     view: string 
 }
 interface AssessmentState {
@@ -33,43 +43,18 @@ interface AssessmentState {
     filters:AssessmentFilters;
     isLoading: boolean;
     error: string | null;
-    createAssessment: (payload: Omit<Assessment, "id" | "createdDate">) => void;
-    updateAssessment: (payload: Assessment) => void;
-    deleteAssessment: (id: string) => void;
-    setCurrentAssessment: (id: string) => void;
-    updateTechnologyQuestions: (payload: {
-        assessmentId: string;
-        techName: string;
-        questions: Technology["questions"];
-    }) => void;
-    removeTechnology: (payload: { assessmentId: string; techName: string }) => void;
-    addTechnology: (payload: { assessmentId: string; technology: Omit<Technology, "questions"> }) => void;
+    setCurrentAssessment: (assessment: Assessment) => void;
     clearCurrentAssessment: () => void;
     fetchAssessments: () => Promise<Assessment[]>;
     setFilters:(filters:AssessmentFilters)=>void
 }
 
 export const useAssessmentStore = create<AssessmentState>((set, get) => ({
-    assessments: [
-        {
-            id: "mern",
-            title: "MERN 3 years",
-            createdBy: "MihirBhai",
-            createdDate: "20-Jan-2025",
-            totalQuestions: 60,
-            duration: 60,
-            technologies: [
-                { name: "MongoDB", percentage: 25, questions: { easy: 5, medium: 5, hard: 5 } },
-                { name: "ExpressJs", percentage: 25, questions: { easy: 5, medium: 5, hard: 5 } },
-                { name: "ReactJs", percentage: 25, questions: { easy: 5, medium: 5, hard: 5 } },
-                { name: "NodeJs", percentage: 25, questions: { easy: 5, medium: 5, hard: 5 } },
-            ],
-        },
-    ],
+    assessments: [],
     filters:{
-        assessment:"all",
-        createdBy:"all",
-        date: undefined, 
+        name:"",
+        created_by:"all",
+        created_duation: undefined, 
         view: 'today' 
     },
     currentAssessment: null,
@@ -86,69 +71,8 @@ export const useAssessmentStore = create<AssessmentState>((set, get) => ({
     setFilters:(filters:AssessmentFilters)=>{
         set({filters})
     },
-    createAssessment: (payload: Omit<Assessment, 'id' | 'createdDate'>) => {
-        const newAssessment: Assessment = {
-            ...payload,
-            id: `assessment-${Date.now()}`, // Generate a unique ID
-            createdDate: new Date().toLocaleDateString('en-US', {
-                day: '2-digit',
-                month: 'short',
-                year: 'numeric'
-            })
-        };
-        set((state) => ({ assessments: [newAssessment, ...state.assessments] }));
-    },
-    updateAssessment(payload: Assessment) {
-        set((state) => ({
-            assessments: state.assessments.map((a) => (a.id === payload.id ? payload : a)),
-        }));
-    },
-    deleteAssessment(id: string) {
-        set((state) => ({
-            assessments: state.assessments.filter((a) => a.id !== id),
-        }));
-    },
-    setCurrentAssessment(id: string) {
-        const assessment = get().assessments.find((a) => a.id === id) || null;
+    setCurrentAssessment(assessment: Assessment) {
         set({ currentAssessment: assessment });
-    },
-    updateTechnologyQuestions(payload: { assessmentId: string; techName: string; questions: Technology['questions'] }) {
-        set((state) => ({
-            assessments: state.assessments.map((a) =>
-                a.id === payload.assessmentId
-                    ? {
-                        ...a,
-                        technologies: a.technologies.map((t) =>
-                            t.name === payload.techName ? { ...t, questions: payload.questions } : t
-                        ),
-                    }
-                    : a
-            ),
-        }));
-    },
-    removeTechnology(payload: { assessmentId: string; techName: string }) {
-        set((state) => ({
-            assessments: state.assessments.map((a) =>
-                a.id === payload.assessmentId
-                    ? { ...a, technologies: a.technologies.filter((t) => t.name !== payload.techName) }
-                    : a
-            ),
-        }));
-    },
-    addTechnology(payload: { assessmentId: string; technology: Omit<Technology, 'questions'> }) {
-        set((state) => ({
-            assessments: state.assessments.map((a) =>
-                a.id === payload.assessmentId
-                    ? {
-                        ...a,
-                        technologies: [
-                            ...a.technologies,
-                            { ...payload.technology, questions: { easy: 0, medium: 0, hard: 0 } },
-                        ],
-                    }
-                    : a
-            ),
-        }));
     },
     clearCurrentAssessment() {
         set({ currentAssessment: null })

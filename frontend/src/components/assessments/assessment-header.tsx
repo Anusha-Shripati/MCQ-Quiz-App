@@ -4,67 +4,84 @@ import { Button } from "@/components/ui/form/button";
 import { ListFilterIcon, PlusCircle } from "lucide-react";
 import Link from "next/link";
 import { Controller, useForm } from "react-hook-form";
-import { DateRange } from "@/types/common.types";
-import { AssessmentFilters } from "@/store/assessmentStore";
+import { DateRange, User } from "@/types/common.types";
+import { AssessmentFilters, useAssessmentStore } from "@/store/assessmentStore";
 import DatePickerWithRange from "../ui/form/date-range-picker";
-import { assessmentOptions, userOptions } from "@/shared/constants/data";
 import { useMemo } from "react";
 import { FormField } from "../common/form-field";
+import useSWR from "swr";
+import { fetcher } from "@/lib/api";
 
 export default function AssessmentHeader() {
 
   const defaultValues: AssessmentFilters = {
-    assessment: "all",
-    createdBy: "all",
-    date: undefined,
+    name: "",
+    created_by: "all",
+    created_duation: {
+      from: undefined,
+      to: undefined,
+    },
     view: "today",
   };
 
-  const { control, setValue, watch } = useForm<AssessmentFilters>({ defaultValues })
+  const { data: users } = useSWR('/user/list', fetcher);
+  const {setFilters} = useAssessmentStore()
+
+  const { control, setValue, watch, register } = useForm<AssessmentFilters>({ defaultValues })
   const allFields = watch();
 
-  const headerAssessmentOptions = useMemo(() => [{ value: "all", label: "All" }, ...assessmentOptions], [])
-  const headerUsersOptions = useMemo(() => [{ value: "all", label: "All" }, ...userOptions], [])
+  const headerUsersOptions = useMemo(() => {
+    if (users) {
+      return [
+        { label: "All", value: "all" },
+        ...users.data?.list?.map((user: User) => ({
+          label: user.name,
+          value: user.id,
+        })),
+      ];
+    }
+    return [];
+  }, [users])
 
 
   const handleViewChange = (view: string) => {
-    if (view != 'calander') {
-      setValue('date', undefined)
-    }
-    setValue("view", view)
+    if (view == 'today')
+      setValue('created_duation', {
+        from: new Date(new Date().setHours(0, 0, 0, 0)),
+        to: new Date(new Date().setHours(23, 59, 59, 999))
+      })
+    else if (view == 'week')
+      setValue('created_duation', {
+        from: new Date(new Date().setDate(new Date().getDate() - 7)),
+        to: new Date()
+      })
+    setValue("view", view);
   };
 
   const handleDateChange = (date: DateRange | undefined) => {
     if (date) {
       handleViewChange("calendar");
-      setValue("date", date);
+      setValue("created_duation", date);
     }
   };
 
   const handleFilterClick = () => {
-    console.log(allFields);
+    setFilters(allFields);
   };
 
   return (
     <div className="flex flex-col md:flex-row items-center gap-6">
-      {/* Select Dropdowns */}
       <div className="flex flex-wrap items-center gap-3">
-        <Controller
-          name="assessment"
-          control={control}
-          render={({ field }) => (
-            <FormField
-              className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-300 min-w-[200px]"
-              type="select"
-              onChange={field.onChange}
-              value={field.value}
-              placeholder="Assessment"
-              options={headerAssessmentOptions}
-            />
-          )}
+
+        <FormField
+          className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-300 min-w-[200px]"
+          type="text"
+          value={allFields.name}
+          placeholder="Search by name"
+          {...register("name")}
         />
         <Controller
-          name="createdBy"
+          name="created_by"
           control={control}
           render={({ field }) => (
             <FormField
@@ -72,7 +89,7 @@ export default function AssessmentHeader() {
               type="select"
               onChange={field.onChange}
               value={field.value}
-              placeholder="createdBy"
+              placeholder="created_by"
               options={headerUsersOptions}
             />
           )}
@@ -102,7 +119,7 @@ export default function AssessmentHeader() {
           >
             Week
           </Button>
-          <DatePickerWithRange selected={allFields.date} onSelect={handleDateChange} />
+          <DatePickerWithRange selected={allFields.created_duation} onSelect={handleDateChange} />
         </div>
         <Button className="ml-2 cursor-pointer" onClick={handleFilterClick}>
           <ListFilterIcon size={30} />

@@ -30,7 +30,7 @@ technologyRouter.get(
   authenticateAndAuthorize('assessments.can_read'),
   asyncHandler(technologyController.getTechnologyById)
 );
-technologyRouter.post(
+technologyRouter.put(
   "/:id",
   authenticateAndAuthorize('assessments.can_edit'),
   validateRequest(teachnologySchema.update),

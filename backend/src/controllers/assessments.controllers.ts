@@ -18,7 +18,6 @@ export class AssessmentController {
             const total = easy + medium + hard;
             if (total === 0) return 0;
             const score = (easy * 1 + medium * 2 + hard * 3) / total;
-            console.log(score);
             
             const difficulty_score= Math.round(score);
 

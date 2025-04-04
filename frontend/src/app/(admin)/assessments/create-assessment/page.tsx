@@ -1,26 +1,38 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/form/button";
 import { ArrowLeft } from "lucide-react";
-import { AVAILABLE_CATEGORIES, steps } from "@/shared/constants/data";
+import {  steps } from "@/shared/constants/data";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import Step1 from "./Step1";
 import Step2 from "./Step2";
 import Step3 from "./Step3";
 import StepsStepperNumber from "./StepsStepperNumber";
-import { useAssessmentStore } from "@/store/assessmentStore";
 import { useForm } from "react-hook-form";
 import { AssessmentForm } from "@/types/assessment.types";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { api, isAxiosError } from "@/lib/api";
+import useSWR, { mutate } from "swr";
 
 
 export default function CreateAssessment() {
-  const { createAssessment } = useAssessmentStore();
   const router = useRouter();
   const [step, setStep] = useState(1);
+  const [technologyOptions, setTechnologyOptions] = useState([]);
 
+  const {data} = useSWR('/technology/list', api.get);
+
+  useEffect(() => {
+    if (data) {
+      const options = data.data.list.map((tech:{ id: string; name: string }) => ({
+        value: tech.id,
+        label: tech.name,
+      }));
+      setTechnologyOptions(options);
+    }
+  }, [data]);
 
   const technologySchema = z.object({
     name: z.string().min(1, "Technology name is required"),
@@ -28,13 +40,13 @@ export default function CreateAssessment() {
   const validation = z.object({
     name: z.string().nonempty("Name is required."),
     duration: z.number().min(1, "Duration is required"),
-    categories:z.array(technologySchema).min(1,'At least one category is required')
+    technologies:z.array(technologySchema).min(1,'At least one category is required')
   });
 
   const { register, watch, setValue, formState: { errors }, trigger } = useForm<AssessmentForm>({
     resolver: zodResolver(validation), defaultValues: {
       name: "",
-      categories: [],
+      technologies: [],
       duration: 15,
       targetQuestions:0
     }
@@ -51,9 +63,7 @@ export default function CreateAssessment() {
     const valudate = await trigger()
     if (step === 2) {
 
-      const isValid = formData.categories.every((cat) =>
-        Object.values(cat.questions).some((count) => count > 0)
-      );
+      const isValid = formData.technologies.every((cat) => cat.easy || cat.medium || cat.hard);
       if (!isValid) {
         toast.error("Each category must have at least one question");
         return;
@@ -69,39 +79,47 @@ export default function CreateAssessment() {
   };
 
   const calculateTotalSum = () => {
-    return formData.categories.reduce((sum, category) => {
+    return formData.technologies.reduce((sum, tech) => {
       return (
         sum +
-        category.questions.easy +
-        category.questions.medium +
-        category.questions.hard
+        tech.easy +
+        tech.medium +
+        tech.hard
       );
     }, 0);
   };
 
 
-  const handleSubmit = () => {
+  const handleSubmit = async() => {
 
     // Create the assessment
     const newAssessment = {
-      title: formData.name,
-      createdBy: "Current User", // Replace with actual user data
-      totalQuestions: formData.targetQuestions,
+      name: formData.name,
       duration: formData.duration,
-      technologies: formData.categories.map((cat) => ({
-        name: cat.name,
-        percentage: Math.round((100 / formData.categories.length) * 10) / 10,
-        questions: cat.questions,
+      technologies: formData.technologies.map(tech => ({
+        technology_id: tech.id,
+        easy: tech.easy,
+        medium: tech.medium,
+        hard: tech.hard,
       })),
     };
-    console.log(newAssessment);
     
     try {
-      createAssessment(newAssessment);
-      toast.success("Assessment created successfully");
-      router.push("/assessments");
+
+      const res = await api.post("/assessment/create", newAssessment);
+      if(res.success){
+        toast.success("Assessment created successfully");
+        router.push("/assessments");
+        mutate((key) => typeof key === 'string' && key.startsWith('/assessment/list'));
+      }else{
+        toast.error(res.messae);
+      }
     } catch (error) {
-      toast.error("Failed to create assessment");
+      if (isAxiosError(error)) {
+        toast.error(error.response.data.message || "An unexpected error occurred");
+      } else {
+        toast.error("An unexpected error occurred");
+      }
       console.error(error);
     }
   };
@@ -152,7 +170,7 @@ export default function CreateAssessment() {
       {step === 1 && (
         <Step1
           formData={formData}
-          AVAILABLE_CATEGORIES={AVAILABLE_CATEGORIES}
+          technologyOptions={technologyOptions}
           durationOptions={durationOptions}
           handleNextStep={handleNextStep}
           register={register}

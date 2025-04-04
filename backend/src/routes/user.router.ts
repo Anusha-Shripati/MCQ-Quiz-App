@@ -13,7 +13,6 @@ const userController = new UserController();
 userRouter.post(
   "/create",
   authenticateAndAuthorize('users.can_edit'),
-  // authenticateAndAuthorize(["Super_Admin", "Editor"]), // Middleware for auth and role check
   validateRequest(userSchema.create),
   asyncHandler(userController.create) 
 );
@@ -35,7 +34,7 @@ userRouter.get(
   validateRequest(userSchema.get),
   asyncHandler(userController.getUserById)
 );
-userRouter.post(
+userRouter.put(
   "/:id",
   authenticateAndAuthorize('users.can_edit'),
   validateRequest(userSchema.update),

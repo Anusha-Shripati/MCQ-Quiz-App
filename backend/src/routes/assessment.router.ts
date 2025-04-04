@@ -15,10 +15,10 @@ assessmentRouter.post(
     asyncHandler(assessmentController.create)
 );
 
-assessmentRouter.post(
+assessmentRouter.put(
     "/:id",
     validateRequest(assessmentSchema.update),
-    authenticateAndAuthorize('assessments.can_read'),
+    authenticateAndAuthorize('assessments.can_edit'),
     asyncHandler(assessmentController.update)
 );
 assessmentRouter.get(

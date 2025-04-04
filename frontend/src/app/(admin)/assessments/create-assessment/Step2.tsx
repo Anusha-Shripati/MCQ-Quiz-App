@@ -16,7 +16,7 @@ type Step2Props = {
   calculateTotalSum: () => number;
 
   setValue: UseFormSetValue<AssessmentForm>
-  register:UseFormRegister<AssessmentForm>
+  register: UseFormRegister<AssessmentForm>
 
 
 };
@@ -47,9 +47,9 @@ const Step2: React.FC<Step2Props> = ({
       errorTimeoutRef.current = null;
     }, 1000);
   };
-  const gotoNext=()=>{
+  const gotoNext = () => {
     const total = calculateTotalSum();
-    if(total != formData.targetQuestions){
+    if (total != formData.targetQuestions) {
       toast.error('Target questions must be eqla to total question')
       return
     }
@@ -64,12 +64,12 @@ const Step2: React.FC<Step2Props> = ({
     const totalForDifficulty = Math.floor((formData.targetQuestions * percentage[0]) / 100);
 
     // Calculate the current total questions for the other difficulties
-    const totalForOtherDifficulties = formData.categories.reduce((sum, cat) => {
+    const totalForOtherDifficulties = formData.technologies.reduce((sum, tech) => {
       return (
         sum +
-        (difficulty === "easy" ? 0 : cat.questions.easy) +
-        (difficulty === "medium" ? 0 : cat.questions.medium) +
-        (difficulty === "hard" ? 0 : cat.questions.hard)
+        (difficulty === "easy" ? 0 : tech.easy) +
+        (difficulty === "medium" ? 0 : tech.medium) +
+        (difficulty === "hard" ? 0 : tech.hard)
       );
     }, 0);
 
@@ -81,18 +81,15 @@ const Step2: React.FC<Step2Props> = ({
 
     // Calculate questions per category based on the percentage
     const questionsPerCategory = Math.floor(
-      totalForDifficulty / formData.categories.length
+      totalForDifficulty / formData.technologies.length
     );
 
     // Update the form data
-    const updated = formData.categories.map((category) => ({
-      ...category,
-      questions: {
-        ...category.questions,
-        [difficulty]: questionsPerCategory,
-      },
+    const updated = formData.technologies.map((tech) => ({
+      ...tech,
+      [difficulty]: questionsPerCategory,
     }))
-    setValue('categories', updated)
+    setValue('technologies', updated)
   };
 
 
@@ -101,16 +98,16 @@ const Step2: React.FC<Step2Props> = ({
     difficulty: "easy" | "medium" | "hard",
     value: string
   ) => {
-    const numValue = isNaN(parseInt(value))?0:parseInt(value);
+    const numValue = isNaN(parseInt(value)) ? 0 : parseInt(value);
 
     const totalSum = calculateTotalSum();
     const remainingQuestions =
-    formData.targetQuestions -
+      formData.targetQuestions -
       totalSum +
-      formData.categories[index].questions[difficulty];
+      formData.technologies[index][difficulty];
 
     if (numValue > remainingQuestions) {
-      if(remainingQuestions)
+      if (remainingQuestions)
         showError(`You can only allocate ${remainingQuestions} questions.`);
       else
         showError('Please enter total questions');
@@ -118,12 +115,11 @@ const Step2: React.FC<Step2Props> = ({
       return;
     }
 
-    const updatedCategories = formData.categories;
-    updatedCategories[index].questions[difficulty] = numValue;
+    const updatedTechnologies = formData.technologies;
+    updatedTechnologies[index][difficulty] = numValue;
 
-    setValue('categories', updatedCategories)
+    setValue('technologies', updatedTechnologies)
   };
-
 
 
   return (
@@ -139,7 +135,7 @@ const Step2: React.FC<Step2Props> = ({
           <h3 className="text-lg font-medium dark:text-white">Total Questions</h3>
           <Input
             type="number"
-           {...register('targetQuestions')}
+            {...register('targetQuestions')}
             className="w-24 text-center dark:bg-gray-700 dark:border-gray-600 dark:text-white"
             min="0"
           />
@@ -147,8 +143,8 @@ const Step2: React.FC<Step2Props> = ({
         <div className="grid grid-cols-[2fr,1fr,1fr,1fr,auto] gap-4 items-center">
           <div className="dark:text-gray-300">Technology</div>
           {["easy", "medium", "hard"].map((difficulty) => {
-            const totalForDifficulty = formData.categories.reduce(
-              (sum, cat) => sum + cat.questions[difficulty as "easy" | "medium" | "hard"],
+            const totalForDifficulty = formData.technologies.reduce(
+              (sum, tech) => sum + tech[difficulty as "easy" | "medium" | "hard"],
               0
             );
             const percentage = formData.targetQuestions > 0 ? Math.round((totalForDifficulty / formData.targetQuestions) * 100) : 0;
@@ -171,30 +167,46 @@ const Step2: React.FC<Step2Props> = ({
           <div className="text-center dark:text-gray-300">Total</div>
         </div>
         <div className="space-y-4">
-          {formData.categories.map((category, index) => {
+          {formData.technologies.map((technology, index) => {
             return (
               <div key={index} className="grid grid-cols-[2fr,1fr,1fr,1fr,auto] gap-4 items-center">
                 <div className="flex items-center gap-2">
-                  <span className="font-medium dark:text-white">{category.name}</span>
+                  <span className="font-medium dark:text-white">{technology.name}</span>
                 </div>
                 {["easy", "medium", "hard"].map((difficulty) => (
                   <div key={difficulty} className="text-center">
                     <Input
                       type="number"
                       min="0"
-                      value={category.questions[difficulty as "easy" | "medium" | "hard"]}
+                      value={technology[difficulty as "easy" | "medium" | "hard"]}
                       onChange={(e) => handleQuestionCountChange(index, difficulty as "easy" | "medium" | "hard", e.target.value)}
                       className="w-16 text-center mx-auto bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                     />
                   </div>
                 ))}
                 <div className="text-center font-medium dark:text-white">
-                  {category.questions.easy + category.questions.medium + category.questions.hard}
+                  {technology.easy + technology.medium + technology.hard}
                 </div>
               </div>
             );
           })}
+          <div className="grid grid-cols-[2fr,1fr,1fr,1fr,auto] gap-4 items-center">
+            <div className="font-medium text-gray-900 dark:text-gray-300">Total</div>
+            <div className="text-center font-medium text-gray-900 dark:text-gray-300">
+              {formData.technologies.reduce((sum, tech) => sum + tech.easy, 0)}
+            </div>
+            <div className="text-center font-medium text-gray-900 dark:text-gray-300">
+              {formData.technologies.reduce((sum, tech) => sum + tech.medium, 0)}
+            </div>
+            <div className="text-center font-medium text-gray-900 dark:text-gray-300">
+              {formData.technologies.reduce((sum, tech) => sum + tech.hard, 0)}
+            </div>
+            <div className="text-center font-medium text-blue-600">
+              {calculateTotalSum()}
+            </div>
+          </div>
         </div>
+
       </CardContent>
       <CardFooter className="flex flex-col sm:flex-row justify-end gap-4">
         <Button variant="outline" onClick={handlePreviousStep} className="dark:border-gray-600 dark:text-white dark:hover:bg-gray-700">

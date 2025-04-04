@@ -14,7 +14,7 @@ interface OptionType {
 }
 
 interface Step1Props {
-  AVAILABLE_CATEGORIES: string[];
+  technologyOptions: OptionType[];
   durationOptions: { value: number; label: string | number }[];
   handleNextStep: () => void;
   register: UseFormRegister<AssessmentForm>
@@ -25,7 +25,7 @@ interface Step1Props {
 
 const Step1: React.FC<Step1Props> = ({
   formData,
-  AVAILABLE_CATEGORIES,
+  technologyOptions,
   durationOptions,
   handleNextStep,
   setValue,
@@ -33,13 +33,12 @@ const Step1: React.FC<Step1Props> = ({
   errors
 }) => {
   const handelChangeTechnology = (newValue: MultiValue<OptionType>) => {
-    const selectedCategories = newValue?.map((option) => ({
-      value: option.value,
-      label: option.label,
-      name: option.value,
-      questions: { easy: 0, medium: 0, hard: 0 }
+    const selectedTechnology = newValue?.map((option) => ({
+      id: option.value,
+      name: option.label,
+      easy: 0, medium: 0, hard: 0
     })) || [];
-    setValue('categories', selectedCategories.length ? selectedCategories : [])
+    setValue('technologies', selectedTechnology.length ? selectedTechnology : [])
   }
   const handleDurationChange = (selectedOption: string) => {
     setValue('duration', parseInt(selectedOption) ?? 0);
@@ -69,15 +68,12 @@ const Step1: React.FC<Step1Props> = ({
         <Label className="font-bold text-gray-900 dark:text-white">Select Technology</Label>
         <Select
           isMulti
-          value={formData.categories
-            .filter(cat => cat.name)
-            .map(cat => ({ value: cat.name, label: cat.name }))}
+          value={formData.technologies
+            .filter(tech => tech.id)
+            .map(tech => ({ value: tech.id, label: tech.name }))}
           onChange={handelChangeTechnology}
-          options={AVAILABLE_CATEGORIES.map(category => ({
-            value: category,
-            label: category
-          }))}
-          name='categories'
+          options={technologyOptions}
+          name='technology'
           className="mb-4"
           classNamePrefix="react-select"
           placeholder="Search Technology"
@@ -130,8 +126,8 @@ const Step1: React.FC<Step1Props> = ({
             }),
           }}
         />
-        {errors.categories && (
-          <p className="text-red-500 text-sm">{errors.categories?.message}</p>
+        {errors.technologies && (
+          <p className="text-red-500 text-sm">{errors.technologies?.message}</p>
         )}
       </div>
 

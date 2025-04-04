@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { Module, Permissions, UserData } from "@/types/common.types";
-import {  postData } from "@/lib/api";
+import {  api } from "@/lib/api";
 
 interface User {
   id?: string;
@@ -46,7 +46,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   login: async ({ email, password }: { email: string; password: string }) => {
     set({ loading: true });
     try {
-      const response = await postData("/user/login", { email, password });
+      const response = await api.post("/user/login", { email, password });
       if (response.success) {
         const permissions = response.data?.role?.rolePermissions?.reduce((obj: Record<string, Permissions>, pr: Omit<Permissions, 'module'> & { module: Module }) => {
           obj[pr.module?.name] = { can_edit: pr.can_edit, can_read: pr.can_read };

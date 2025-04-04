@@ -1,42 +1,54 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/form/button";
 import Select from "react-select";
-import { AVAILABLE_CATEGORIES } from "@/shared/constants/data";
 import { toast } from "react-hot-toast";
 import { Input } from "../ui/form/input";
-import { useAssessmentStore, Technology } from "@/store/assessmentStore";
+import { Technology, Assessment } from "@/store/assessmentStore";
 import { Slider } from "../ui/form/slider";
+import dayjs from "dayjs";
+import useSWR, { mutate } from "swr";
+import { api, isAxiosError } from "@/lib/api";
+import { FormField } from "../common/form-field";
+import { Label } from "../ui/form/label";
 
 interface Option {
   value: string;
   label: string;
 }
 
-const categoryOptions: Option[] = AVAILABLE_CATEGORIES.map(category => ({
-  value: category,
-  label: category
-}));
 
 interface AssessmentEditProps {
-  assessment: {
-    id: string;
-    title: string;
-    createdBy: string;
-    createdDate: string;
-    technologies: Technology[];
-    totalQuestions: number;
-    duration: string | number;
-  };
+  assessment: Assessment;
   onSave: () => void;
   onCancel: () => void;
 }
+type Difficulty = 'easy' | 'medium' | 'hard';
 
 export default function AssessmentEdit({ assessment, onSave, onCancel }: AssessmentEditProps) {
-  const [localAssessment, setLocalAssessment] = useState(assessment);
-  const [localTechnologies, setLocalTechnologies] = useState(assessment.technologies);
+  const [localAssessment, setLocalAssessment] = useState<Assessment & { totalQuestions: number }>(assessment);
+  const [localTechnologies, setLocalTechnologies] = useState<(Technology & { percentage?: number })[]>([]);
+  const [technologyOptions, setTechnologyOptions] = useState<Option[]>([]);
 
-  const { removeTechnology, updateAssessment } = useAssessmentStore()
+  const { data: technologyData } = useSWR('/technology/list', api.get)
 
+  useEffect(() => {
+    if (technologyData) {
+      setTechnologyOptions(technologyData?.data?.list.map((tech: { id: string; name: string }) => ({
+        value: tech.id,
+        label: tech.name,
+      })));
+    }
+  }, [technologyData])
+
+  useEffect(() => {
+    const totalQuestions = assessment.technologies.reduce((sum, tech) => sum + tech.easy + tech.medium + tech.hard, 0);
+    setLocalAssessment({ ...assessment, totalQuestions });
+    const updatedTechnologies = assessment.technologies.map(tech => ({
+      ...tech,
+      percentage: Math.floor((tech.easy + tech.medium + tech.hard) / totalQuestions * 100)
+    }));
+    setLocalTechnologies(updatedTechnologies);
+  }, [assessment])
 
   const errorTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const showError = (message: string) => {
@@ -49,10 +61,6 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
     }, 1000);
   };
 
-  useEffect(() => {
-    setLocalAssessment(assessment);
-    setLocalTechnologies(assessment.technologies);
-  }, [assessment]);
   const colors = {
     easy: 'bg-green-500',
     medium: 'bg-blue-500',
@@ -60,38 +68,35 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
   };
 
   const handleQuestionChange = (
-    techName: string,
-    difficulty: keyof Technology["questions"],
+    techId: string,
+    difficulty: Difficulty,
     value: number
   ) => {
-    // if (isNaN(value) || value < 0) {
-    //   toast.error("Please enter a valid number");
-    //   return;
-    // }
 
     const updatedTechnologies = localTechnologies.map(tech => {
-      if (tech.name !== techName) return tech;
+      if (tech?.technology.id !== techId) return tech;
 
-      const newQuestions = { ...tech.questions, [difficulty]: value || 0 };
+      const newTech = { ...tech, [difficulty]: value || 0 };
 
       // Calculate new total for this technology
-      const newTotalForTech = Object.values(newQuestions).reduce((a, b) => a + b, 0);
+      const newTotalForTech = newTech.easy + newTech.medium + newTech.hard;
 
       // Calculate total for other technologies
       const otherTechsTotal = localTechnologies.reduce((sum, t) => {
-        if (t.name === techName) return sum;
-        return sum + t.questions.easy + t.questions.medium + t.questions.hard;
+        if (t.technology.id === techId) return sum;
+        return sum + t.easy + t.medium + t.hard;
       }, 0);
 
       // Check if new total would exceed the limit
-      if (newTotalForTech + otherTechsTotal > localAssessment.totalQuestions) {
-        showError(`Total questions cannot exceed ${localAssessment.totalQuestions || 0}`);
+      if (newTotalForTech + otherTechsTotal > (localAssessment?.totalQuestions)) {
+        showError(`Total questions cannot exceed ${localAssessment?.totalQuestions}`);
 
         // toast.error(`Total questions cannot exceed ${localAssessment.totalQuestions}`);
         return tech;
       }
 
-      return { ...tech, questions: newQuestions };
+
+      return { ...newTech };
     });
 
     setLocalTechnologies(updatedTechnologies);
@@ -99,15 +104,15 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
 
   const handleDifficultySliderChange = (
     percentage: number[],
-    difficulty: keyof Technology["questions"]
+    difficulty: Difficulty
   ) => {
-    const totalQuestionsTarget = localAssessment.totalQuestions || 0;
+    const totalQuestionsTarget = localAssessment?.totalQuestions || 0;
     const newQuestionsForDifficulty = Math.floor((totalQuestionsTarget * percentage[0]) / 100);
     const questionsPerTech = Math.floor(newQuestionsForDifficulty / localTechnologies.length);
 
     const otherDifficulties = ['easy', 'medium', 'hard'].filter(d => d !== difficulty);
     const otherDifficultiesTotal = localTechnologies.reduce((sum, tech) =>
-      otherDifficulties.reduce((s, d) => s + tech.questions[d as keyof Technology['questions']], sum),
+      otherDifficulties.reduce((s, d) => s + tech[d as Difficulty], sum),
       0
     );
 
@@ -120,83 +125,101 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
 
     setLocalTechnologies(prev => prev.map(tech => ({
       ...tech,
-      questions: { ...tech.questions, [difficulty]: questionsPerTech }
+      [difficulty]: questionsPerTech || 0,
     })));
   };
 
   const handleTechnologyChange = (selectedOptions: readonly Option[]) => {
-    const selectedTechs = selectedOptions.map(o => o.value);
-    const updatedTechnologies = selectedTechs.map(techName => {
-      const existingTech = localTechnologies.find(t => t.name === techName);
+    const updatedTechnologies = selectedOptions.map(tech => {
+      const existingTech = localTechnologies.find(t => t.technology?.id === tech?.value);
       if (existingTech) return existingTech;
 
       return {
-        name: techName,
-        percentage: Math.floor(100 / selectedTechs.length),
-        questions: { easy: 0, medium: 0, hard: 0 }
+        technology: { id: tech?.value, name: tech?.label },
+        percentage: Math.floor(100 / selectedOptions.length),
+        easy: 0,
+        medium: 0,
+        hard: 0
       };
     });
 
     setLocalTechnologies(updatedTechnologies);
   };
 
-  const handleRemoveTechnology = (techName: string) => {
-    removeTechnology({ assessmentId: localAssessment.id, techName });
+  const handleRemoveTechnology = (id: string) => {
+    setLocalTechnologies(prev => prev.filter(tech => tech.technology?.id !== id));
   };
 
   const handleTotalQuestionsChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = parseInt(event.target.value);
-
+    const newValue = parseInt(event.target.value ?? '0') || 0;
     setLocalAssessment(prev => ({ ...prev, totalQuestions: newValue }));
   };
 
   const validateQuestionTotals = () => {
     const totalQuestions = localTechnologies.reduce(
-      (sum, tech) => sum + tech.questions.easy + tech.questions.medium + tech.questions.hard,
+      (sum, tech) => sum + tech.easy + tech.medium + tech.hard,
       0
     );
 
-    if (totalQuestions > localAssessment.totalQuestions) {
-      toast.error(`Total questions (${totalQuestions}) exceed the limit (${localAssessment.totalQuestions || 0})`);
+    if (totalQuestions > (localAssessment?.totalQuestions || 0)) {
+      toast.error(`Total questions (${totalQuestions}) exceed the limit (${localAssessment?.totalQuestions || 0})`);
       return false;
     }
-    if (totalQuestions != localAssessment.totalQuestions) {
-      toast.error(`Total questions (${totalQuestions}) is not equal to (${localAssessment.totalQuestions || 0})`);
+    if (totalQuestions != (localAssessment?.totalQuestions || 0)) {
+      toast.error(`Total questions (${totalQuestions}) is not equal to (${localAssessment?.totalQuestions || 0})`);
       return false;
     }
 
     return true;
   };
 
-  const handleSaveChanges = () => {
+  const handleSaveChanges = async () => {
     try {
 
       if (!validateQuestionTotals()) {
         toast.error('Failed to save changes');
         return;
       }
-
-      updateAssessment({
-        ...localAssessment,
-        technologies: localTechnologies,
-        duration: localAssessment.duration
-      });
+      const payload = {
+        name: localAssessment.name,
+        duration: localAssessment.duration,
+        technologies: localTechnologies.map(tech => ({
+          technology_id: tech.technology?.id,
+          easy: tech.easy,
+          medium: tech.medium,
+          hard: tech.hard,
+        })),
+      }
+      const res = await api.put(`/assessment/${localAssessment.id}`, payload);
+      if (res.success) {
+        toast.success('Assessment updated successfully');
+        mutate((key) => typeof key === 'string' && key.startsWith('/assessment/list'));
+      } else {
+        toast.error(res.message);
+      }
 
       onSave();
     } catch (error) {
-      console.log(error);
-      
-      toast.error('Failed to save changes');
-    } finally {
-    }
+      if (isAxiosError(error)) {
+        toast.error(error.response.data.message || "An unexpected error occurred");
+      } else {
+        toast.error("An unexpected error occurred");
+      }
+    } 
   };
 
   const totalQuestions = localTechnologies.reduce(
-    (sum, tech) => sum + tech.questions.easy + tech.questions.medium + tech.questions.hard,
+    (sum, tech) => sum + tech.easy + tech.medium + tech.hard,
     0
   );
 
-
+  const durationOptions = Array.from(Array(37).keys()).map((i) => ({
+    value: 15 + i * 5,
+    label: `${15 + i * 5} minutes`,
+  }));
+  const handleDurationChange = (selectedOption: string) => {
+    setLocalAssessment(prev => ({ ...prev, duration: parseInt(selectedOption) || 0 }));
+  };
   return (
     <div className="min-h-screen dark:bg-gray-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -205,10 +228,10 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
             <div className="flex justify-between items-start">
               <div>
                 <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
-                  Edit - {localAssessment.title}
+                  Edit - {localAssessment.name}
                 </h1>
                 <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                  Created by {localAssessment.createdBy} on {localAssessment.createdDate}
+                  Created by {localAssessment.created_by_user?.name} on {localAssessment.created_at ? dayjs(localAssessment.created_at).format("DD MMM YYYY h:m A") : 'N/A'}
                 </p>
               </div>
               <div className="flex gap-3">
@@ -230,33 +253,60 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
           </div>
 
           <div className="px-6 py-5">
-            <div className="flex items-center gap-4 mb-4">
-              <label
-                htmlFor="total-questions"
-                className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[120px]"
-              >
-                Total Questions
-              </label>
-              <Input
-                type="number"
-                id="total-questions"
-                value={localAssessment.totalQuestions}
-                onChange={handleTotalQuestionsChange}
-                className="w-32 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 
-              hover:border-gray-400 transition-colors dark:bg-gray-800 dark:border-gray-600 
-              dark:text-gray-100 dark:hover:border-gray-500 dark:focus:ring-blue-600"
-                min="1"
-              />
+
+            <div className="flex items-start w-100 gap-4 mb-4">
+              <div className="space-y-2 w-1/2">
+                <Label htmlFor="name" className="font-bold text-gray-900 dark:text-white">
+                  Name
+                </Label>
+                <FormField
+                  id="name"
+                  options={durationOptions}
+                  value={localAssessment.name}
+                  onChange={(e) => setLocalAssessment({ ...localAssessment, name: e.target.value })}
+                  className="mb-4"
+                  name='name'
+                />
+              </div>
+              <div className="space-y-2 w-1/2">
+                <Label htmlFor="testDuration" className="font-bold text-gray-900 dark:text-white">
+                  Test Duration (in minutes)
+                </Label>
+                <FormField
+                  id="testDuration"
+                  options={durationOptions}
+                  value={localAssessment.duration}
+                  onChange={(e) => handleDurationChange(e)}
+                  className="mb-4"
+                  name='duration'
+                  type="select"
+                />
+              </div>
+              <div className="space-y-2 w-1/2">
+                <Label htmlFor="total-questions" className="font-bold text-gray-900 dark:text-white">
+                  Total Questions
+                </Label>
+                <FormField
+                  type="number"
+                  id="total-questions"
+                  value={localAssessment.totalQuestions ?? 0}
+                  onChange={handleTotalQuestionsChange}
+                  className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 
+                        hover:border-gray-400 transition-colors dark:bg-gray-800 dark:border-gray-600 
+                        dark:text-gray-100 dark:hover:border-gray-500 dark:focus:ring-blue-600"
+                  min="1"
+                />
+              </div>
             </div>
 
             {/* Technologies Pills */}
             <div className="space-y-4">
               <Select
                 isMulti
-                options={categoryOptions}
+                options={technologyOptions}
                 value={localTechnologies.map(tech => ({
-                  value: tech.name,
-                  label: tech.name
+                  value: tech?.technology.id,
+                  label: tech?.technology.name
                 }))}
                 onChange={handleTechnologyChange}
                 className="mb-4 dark:bg-gray-700 dark:text-white"
@@ -301,16 +351,16 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
               <div className="flex flex-wrap gap-2">
                 {localTechnologies.map((tech) => (
                   <div
-                    key={tech.name}
+                    key={tech.technology?.id}
                     className="flex items-center bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 
                                dark:hover:bg-gray-600 transition-colors rounded-full px-4 py-2"
                   >
                     <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      {tech.name}
+                      {tech.technology?.name}
                     </span>
                     <Button
                       variant="ghost"
-                      onClick={() => handleRemoveTechnology(tech.name)}
+                      onClick={() => handleRemoveTechnology(tech.technology?.id)}
                       className="ml-2 text-gray-400 hover:text-gray-600 dark:text-gray-500 
                                  dark:hover:text-gray-300"
                     >
@@ -325,9 +375,9 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
               {/* Headers */}
               <div className="grid grid-cols-1 md:grid-cols-[2fr,1fr,1fr,1fr,1fr] gap-4 md:gap-6 mb-6">
                 <div className="text-sm font-medium text-gray-700 dark:text-gray-300">Technology</div>
-                {['easy', 'medium', 'hard'].map((difficulty) => {
+                {(['easy', 'medium', 'hard'] as Difficulty[]).map((difficulty) => {
                   const totalForDifficulty = localTechnologies.reduce(
-                    (sum, tech) => sum + tech.questions[difficulty as keyof Technology['questions']],
+                    (sum, tech) => sum + tech[difficulty as Difficulty],
                     0
                   );
                   const percentage = localAssessment.totalQuestions > 0
@@ -341,7 +391,7 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
                         className="relative flex items-center select-none touch-none w-[200px] h-5"
                         max={100}
                         step={1}
-                        onValueChange={(e: number[]) => handleDifficultySliderChange(e, difficulty as keyof typeof colors)}
+                        onValueChange={(e: number[]) => handleDifficultySliderChange(e, difficulty)}
                         value={[percentage > 100 ? 0 : percentage]}
                         color={colors[difficulty as keyof typeof colors]}
                       >
@@ -371,37 +421,35 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
               <div className="space-y-4">
                 {localTechnologies.map((tech) => (
                   <div
-                    key={tech.name}
+                    key={tech?.technology?.id}
                     className="grid grid-cols-[2fr,1fr,1fr,1fr,1fr] gap-6 items-center py-3 border-b border-gray-100 last:border-0"
                   >
                     <div className="text-gray-900 dark:text-gray-300">
-                      {tech.name}
+                      {tech?.technology?.name}
                       <span className="ml-1 text-sm text-gray-500">({tech.percentage}%)</span>
                     </div>
                     <input
                       type="number"
-                      min="0"
-                      max={localAssessment.totalQuestions || 0}
-                      value={tech.questions.easy}
-                      onChange={(e) => handleQuestionChange(tech.name, 'easy', parseInt(e.target.value))}
+                      value={tech.easy ?? 0}
+                      onChange={(e) => handleQuestionChange(tech.technology?.id, 'easy', parseInt(e.target.value))}
                       className="w-20 px-3 py-2 text-center rounded-md border border-gray-300 
                                  focus:ring-2 focus:ring-blue-500 focus:border-blue-500
                                  dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
                     />
                     <input
                       type="number"
-                      value={tech.questions.medium}
-                      onChange={(e) => handleQuestionChange(tech.name, 'medium', parseInt(e.target.value))}
+                      value={tech.medium ?? 0}
+                      onChange={(e) => handleQuestionChange(tech.technology?.id, 'medium', parseInt(e.target.value))}
                       className="dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 w-20 px-3 py-2 text-center rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                     <input
                       type="number"
-                      value={tech.questions.hard}
-                      onChange={(e) => handleQuestionChange(tech.name, 'hard', parseInt(e.target.value))}
+                      value={tech.hard ?? 0}
+                      onChange={(e) => handleQuestionChange(tech.technology?.id, 'hard', parseInt(e.target.value))}
                       className="dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 w-20 px-3 py-2 text-center rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                     <div className="text-center font-medium text-gray-900 dark:text-gray-300">
-                      {tech.questions.easy + tech.questions.medium + tech.questions.hard}
+                      {tech.easy + tech.medium + tech.hard}
                     </div>
                   </div>
                 ))}
@@ -410,13 +458,13 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
                 <div className="grid grid-cols-[2fr,1fr,1fr,1fr,1fr] gap-6 items-center pt-4 border-t border-gray-200 dark:border-gray-700">
                   <div className="font-medium text-gray-900 dark:text-gray-300">Total</div>
                   <div className="text-center font-medium text-gray-900 dark:text-gray-300">
-                    {localTechnologies.reduce((sum, tech) => sum + tech.questions.easy, 0)}
+                    {localTechnologies.reduce((sum, tech) => sum + tech.easy, 0)}
                   </div>
                   <div className="text-center font-medium text-gray-900 dark:text-gray-300">
-                    {localTechnologies.reduce((sum, tech) => sum + tech.questions.medium, 0)}
+                    {localTechnologies.reduce((sum, tech) => sum + tech.medium, 0)}
                   </div>
                   <div className="text-center font-medium text-gray-900 dark:text-gray-300">
-                    {localTechnologies.reduce((sum, tech) => sum + tech.questions.hard, 0)}
+                    {localTechnologies.reduce((sum, tech) => sum + tech.hard, 0)}
                   </div>
                   <div className="text-center font-medium text-blue-600">
                     {totalQuestions}

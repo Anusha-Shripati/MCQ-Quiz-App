@@ -4,10 +4,8 @@ import { prisma } from "../db/prisma.client";
 interface Filters {
     name?: string;
     created_by?: string;
-    created_duation?: {
-        from: Date;
-        to: Date;
-    };
+    created_from?: string;
+    created_to?: string;
     page?: number;
     limit?: number;
 }
@@ -23,13 +21,13 @@ type AseessmentPayload = Pick<Assessments, ('name' | 'created_by' | 'easy' | 'me
 
 export class AssessmentsService {
     async getAssessments(filters: Filters) {
-        const { name, created_by, created_duation } = filters;
+        const { name, created_by, created_from, created_to } = filters;
         const page = Number(filters.page) || 1;
         const limit = Number(filters.limit) || 10;
         const query: any = {
-            name: name && name != 'All' ? { contains: name, mode: 'insensitive' } : undefined,
-            created_by: created_by && created_by != 'All' ? created_by : undefined,
-            created_at: created_duation ? { gte: created_duation.from, lte: created_duation.to } : undefined,
+            name: name ? { contains: name, mode: 'insensitive' } : undefined,
+            created_by: created_by && created_by != 'all' ? created_by : undefined,
+            created_at: created_from && created_to ? { gte: new Date(created_from), lte: new Date(created_to) } : undefined,
             deleted_at: null
         }
         const assessments = await prisma.assessments.findMany({
@@ -43,6 +41,12 @@ export class AssessmentsService {
                                 name: true
                             }
                         }
+                    }
+                },
+                created_by_user: {
+                    select: {
+                        id: true,
+                        name: true
                     }
                 }
             },

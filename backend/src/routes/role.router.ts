@@ -15,7 +15,7 @@ roleRouter.post(
   asyncHandler(roleController.create)
 );
 
-roleRouter.post(
+roleRouter.put(
   "/:id",
   validateRequest(roleSchema.update),
   authenticateAndAuthorize(undefined,'Super Admin'),

@@ -15,9 +15,9 @@ function Pagination(props:React.PropsWithChildren<TablePaginationProps>) {
         }
     }
     return (
-        <div className={props.className || ''}>
+        <div className={props.className}>
             {props.children}
-            <div className="flex flex-col sm:flex-row justify-between items-center mb-4 px-4">
+            <div className="flex flex-col sm:flex-row justify-between items-center mb-4 px-4 mt-4">
                 <div className="text-sm text-gray-600 dark:text-gray-400 mb-2 sm:mb-0">
                     Showing {props.currentPageStart || 0}-{props.currentPageEnd || 0} of {props.totalItems || 0}
                 </div>

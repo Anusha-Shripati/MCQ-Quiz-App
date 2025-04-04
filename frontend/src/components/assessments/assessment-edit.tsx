@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/form/button";
 import Select from "react-select";
 import { toast } from "react-hot-toast";
-import { Input } from "../ui/form/input";
 import { Technology, Assessment } from "@/store/assessmentStore";
 import { Slider } from "../ui/form/slider";
 import dayjs from "dayjs";

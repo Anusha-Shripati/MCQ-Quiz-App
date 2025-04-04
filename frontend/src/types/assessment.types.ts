@@ -1,5 +1,3 @@
-import { Technology } from "@/store/assessmentStore";
-
 export interface AssessmentCategory {
   name: string;
   questions: {

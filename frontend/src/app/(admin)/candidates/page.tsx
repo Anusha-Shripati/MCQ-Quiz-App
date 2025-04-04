@@ -2,7 +2,6 @@ import React from "react";
 import dynamic from "next/dynamic";
 import { candidatesList } from "@/shared/constants/data";
 import { Card } from "@/components/ui/card";
-import Loading from "@/app/loading";
 import CandidateTable from "../../../components/candidates/candidate-table";
 import CreateCandidateDialog from "@/components/candidates/create-candidate-dialog";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";

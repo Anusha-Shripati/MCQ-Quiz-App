@@ -70,6 +70,13 @@ export class UserService {
     return rest
 
   }
+  async changePassword(id: string, password: string) {
+    const user = await prisma.user.update({ where: { id }, data:{password} })
+    if (!user) return null;
+    const { password:_, token, ...rest } = user;
+    return rest
+
+  }
   async findManyUsers(filter: Record<string, any>): Promise<Pick<User, 'id' | 'email' | 'role_id'>[]> {
     return await prisma.user.findMany({
       where: {

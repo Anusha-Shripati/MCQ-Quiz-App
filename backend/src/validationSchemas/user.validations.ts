@@ -56,9 +56,21 @@ export const userSchema = {
     body: Joi.object({
       email: Joi.string().required(),
       password: Joi.optional(),
-      role_id: Joi.string().required(),
+      role_id: Joi.string().optional(),
       name: Joi.string().required(),
     }),
   },
+  changePassword:{
+    params: Joi.object({
+      id: Joi.string().uuid().required().messages({
+        "string.empty": "User Id is required",
+        "string.uuid": "Invalid User Id format",
+      }),
+    }),
+    body: Joi.object({
+      oldPassword: Joi.string().required(),
+      newPassword: Joi.optional(),
+    }),
+  }
 }
 

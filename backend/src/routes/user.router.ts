@@ -34,12 +34,21 @@ userRouter.get(
   validateRequest(userSchema.get),
   asyncHandler(userController.getUserById)
 );
+
 userRouter.put(
   "/:id",
   authenticateAndAuthorize('users.can_edit'),
   validateRequest(userSchema.update),
   asyncHandler(userController.update)
 );
+
+userRouter.put(
+  "/change-password/:id",
+  authenticateAndAuthorize('users.can_edit'),
+  validateRequest(userSchema.changePassword),
+  asyncHandler(userController.changePassword)
+);
+
 
 userRouter.delete(
   "/:id",

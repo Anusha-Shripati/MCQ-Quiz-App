@@ -70,10 +70,10 @@ export class TechnologyController {
     list = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const { search } = req.query
-            const roles = await technologyService.getTechnologies({
+            const technologies = await technologyService.getTechnologies({
                 name: search as string,
             });
-            return generateResponse(res, 200, { list: roles, count: roles.length }, true, "Technology fetched successfully");
+            return generateResponse(res, 200, { list: technologies, count: technologies.length }, true, "Technology fetched successfully");
 
         } catch (error) {
             next(error);

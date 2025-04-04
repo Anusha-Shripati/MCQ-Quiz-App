@@ -49,18 +49,30 @@ CREATE TABLE "Role_permissions" (
 -- CreateTable
 CREATE TABLE "Assessments" (
     "id" TEXT NOT NULL,
-    "created_by" TEXT NOT NULL,
-    "total" DECIMAL(65,30) NOT NULL DEFAULT 0.00,
-    "easy" DECIMAL(65,30) NOT NULL DEFAULT 0.00,
-    "medium" DECIMAL(65,30) NOT NULL DEFAULT 0.00,
-    "hard" DECIMAL(65,30) NOT NULL DEFAULT 0.00,
     "name" TEXT NOT NULL,
+    "created_by" TEXT NOT NULL,
+    "easy" INTEGER NOT NULL DEFAULT 0,
+    "medium" INTEGER NOT NULL DEFAULT 0,
+    "hard" INTEGER NOT NULL DEFAULT 0,
     "difficulty_score" INTEGER NOT NULL DEFAULT 0,
+    "duration" INTEGER NOT NULL DEFAULT 0,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
     "deleted_at" TIMESTAMP(3),
 
     CONSTRAINT "Assessments_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Assessment_technology" (
+    "id" TEXT NOT NULL,
+    "technology_id" TEXT NOT NULL,
+    "assessment_id" TEXT NOT NULL,
+    "easy" INTEGER NOT NULL DEFAULT 0,
+    "medium" INTEGER NOT NULL DEFAULT 0,
+    "hard" INTEGER NOT NULL DEFAULT 0,
+
+    CONSTRAINT "Assessment_technology_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -72,15 +84,6 @@ CREATE TABLE "Technology" (
     "deleted_at" TIMESTAMP(3),
 
     CONSTRAINT "Technology_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "Assessments_technology" (
-    "id" TEXT NOT NULL,
-    "assessment_id" TEXT NOT NULL,
-    "technology_id" TEXT NOT NULL,
-
-    CONSTRAINT "Assessments_technology_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
@@ -111,7 +114,7 @@ ALTER TABLE "Role_permissions" ADD CONSTRAINT "Role_permissions_module_id_fkey" 
 ALTER TABLE "Assessments" ADD CONSTRAINT "Assessments_created_by_fkey" FOREIGN KEY ("created_by") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Assessments_technology" ADD CONSTRAINT "Assessments_technology_assessment_id_fkey" FOREIGN KEY ("assessment_id") REFERENCES "Assessments"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Assessment_technology" ADD CONSTRAINT "Assessment_technology_assessment_id_fkey" FOREIGN KEY ("assessment_id") REFERENCES "Assessments"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Assessments_technology" ADD CONSTRAINT "Assessments_technology_technology_id_fkey" FOREIGN KEY ("technology_id") REFERENCES "Technology"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Assessment_technology" ADD CONSTRAINT "Assessment_technology_technology_id_fkey" FOREIGN KEY ("technology_id") REFERENCES "Technology"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

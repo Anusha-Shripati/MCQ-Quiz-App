@@ -77,7 +77,7 @@ model Assessment_technology {
 
 model Technology {
     id                    String                  @id @default(uuid())
-    name                  String
+    name                  String                  @unique
     created_at            DateTime                @default(now())
     updated_at            DateTime                @updatedAt
     deleted_at            DateTime?

@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect,  useState } from 'react'
 import { UserData } from '@/types/common.types'
 import { Button } from '../ui/form/button'
 import { FiEdit, FiTrash2 } from 'react-icons/fi'

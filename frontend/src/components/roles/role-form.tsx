@@ -9,7 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Button } from "../ui/form/button";
 import PermissionsTable from "./permission-table";
-import { Module, Permissions, RoleData } from "@/types/common.types";
+import { Module,  Permissions,  RoleData } from "@/types/common.types";
 
 const permissionSchema = z.object({
   can_read: z.boolean(),
@@ -27,7 +27,7 @@ const defaultRole: Omit<RoleData, "id"> & Partial<Pick<RoleData, "id">> = {
   rolePermissions: [],
 };
 
-function RoleForm({ open, onClose, roleData = null }: any) {
+function RoleForm({ open, onClose, roleData = null }: {open:boolean, onClose: () => void, roleData?: RoleData | null}) {
   const {
     handleSubmit,
     reset,
@@ -72,12 +72,14 @@ function RoleForm({ open, onClose, roleData = null }: any) {
     if (open) {
       const formData = {
         name: roleData?.name || "",
-        rolePermissions:
-          roleData?.rolePermissions.length > 0
-            ? roleData.rolePermissions
-            : permissionData,
+        rolePermissions: (roleData?.rolePermissions ?? []).length > 0
+        ? roleData?.rolePermissions
+        : permissionData
+          // roleData?.rolePermissions?.length > 0
+          //   ? roleData.rolePermissions
+          //   : permissionData,
       };
-      setPermissionData(formData.rolePermissions)
+      setPermissionData(formData.rolePermissions || [])
       reset(formData);
     }
   }, [open]);

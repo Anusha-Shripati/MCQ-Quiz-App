@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useEffect, useState } from 'react'
-import { Role, RoleData, UserData } from '@/types/common.types'
+import {  RoleData } from '@/types/common.types'
 import { Button } from '../ui/form/button'
 import { FiEdit, FiTrash2 } from 'react-icons/fi'
 import { deleteData, fetcher } from '@/lib/api'
@@ -18,10 +18,10 @@ import { useAuthStore } from '@/store/authStore'
 
 function RoleTable() {
 
-    const [role, setRole] = useState<any | null>(null)
+    const [role, setRole] = useState<RoleData | null>(null)
     const { user } = useAuthStore()
     const [open, setOpen] = useState(false);
-    const handleEditRole = (role: any) => {
+    const handleEditRole = (role: RoleData) => {
         setRole(role)
         setOpen(true)
     };

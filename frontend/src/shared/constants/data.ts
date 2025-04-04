@@ -1,5 +1,5 @@
 import { TechnologyOption } from "@/types/candidate.types";
-import { Role, StatusOption } from "@/types/common.types";
+import {StatusOption } from "@/types/common.types";
 import { Question } from "../types/app";
 
 export const data = [

@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { Module, Permissions, UserData } from "@/types/common.types";
-import {  api } from "@/lib/api";
+import { api, isAxiosError } from "@/lib/api";
 
 interface User {
   id?: string;
@@ -31,7 +31,7 @@ interface AuthState {
   logout: () => void;
   setUserFilter: (filter: string) => void;
   permissions: Record<string, Permissions> | null;
-  setPermissions: (permissions: Record<string, Permissions> | null, user: User|null) => Promise<void>
+  setPermissions: (permissions: Record<string, Permissions> | null, user: User | null) => Promise<void>
 }
 
 
@@ -57,18 +57,20 @@ export const useAuthStore = create<AuthState>((set) => ({
         document.cookie = `token=${response.data.token}; path=/;`;
         document.cookie = `role=${response.data?.role?.name}; path=/;`;
         document.cookie = `permissions=${encodeURIComponent(JSON.stringify(permissions))}; path=/;`;
-        
+
 
         return response.data;
       }
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.message || "Login failed";
-      set({ error: errorMessage, loading: false, permissions: null });
-
-      throw new Error(errorMessage);
+    } catch (error) {
+      if (isAxiosError(error)) {
+        const errorMessage = error.response?.data?.message || "Login failed";
+        set({ error: errorMessage, loading: false, permissions: null });
+        throw new Error(errorMessage);
+      }
+      set({ error: "An unexpected error occurred", loading: false, permissions: null });
     }
   },
-  setPermissions: async (permissions: Record<string, Permissions> | null, user: User|null) => {
+  setPermissions: async (permissions: Record<string, Permissions> | null, user: User | null) => {
     set({ permissions, user })
   },
   setUserFilter: (filter: string) => {
@@ -87,7 +89,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         localStorage.removeItem("user");
         set({ user: null });
       }
-    }else{
+    } else {
       document.cookie = "token=; path=/;";
       document.cookie = "role=; path=/;";
       document.cookie = "permissions=; path=/;";

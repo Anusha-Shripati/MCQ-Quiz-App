@@ -7,7 +7,7 @@ export const roleSchema = {
             name: Joi.string().required().messages({
                 "string.empty": "Role name is required",
             }),
-            rolePermissions:Joi.array()
+            role_permissions:Joi.array()
         }),
     },
 
@@ -20,7 +20,7 @@ export const roleSchema = {
         }),
         body: Joi.object({
             name: Joi.string().optional(),
-            rolePermissions:Joi.array()
+            role_permissions:Joi.array()
         }),
     },
 

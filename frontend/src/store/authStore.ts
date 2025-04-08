@@ -10,7 +10,7 @@ interface User {
   role: {
     id: string;
     name: string;
-    rolePermissions: Permissions
+    role_permissions: Permissions
   },
   token: string;
 
@@ -48,7 +48,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       const response = await api.post("/user/login", { email, password });
       if (response.success) {
-        const permissions = response.data?.role?.rolePermissions?.reduce((obj: Record<string, Permissions>, pr: Omit<Permissions, 'module'> & { module: Module }) => {
+        const permissions = response.data?.role?.role_permissions?.reduce((obj: Record<string, Permissions>, pr: Omit<Permissions, 'module'> & { module: Module }) => {
           obj[pr.module?.name] = { can_edit: pr.can_edit, can_read: pr.can_read };
           return obj
         }, {})

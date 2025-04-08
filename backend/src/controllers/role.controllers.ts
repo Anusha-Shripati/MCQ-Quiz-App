@@ -16,15 +16,15 @@ const roleService = new RoleService()
 export class RoleController {
     create = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const { name, rolePermissions } = req.body;
+            const { name, role_permissions } = req.body;
             const existingRole = await roleService.findRoleByName(name)
             if (existingRole) {
                 return generateResponse(res, 400, {}, false, "Role name already exists");
             }
 
             const newRole = await roleService.createRole(name);
-            if (rolePermissions && rolePermissions.length > 0) {
-                await roleService.assignPermissionsToRole(newRole.id, rolePermissions);
+            if (role_permissions && role_permissions.length > 0) {
+                await roleService.assignPermissionsToRole(newRole.id, role_permissions);
             }
             return generateResponse(res, 200, newRole, true, "Role created successfully");
         } catch (error) {
@@ -35,7 +35,7 @@ export class RoleController {
     update = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const { id } = req.params;
-            const { name, rolePermissions } = req.body;
+            const { name, role_permissions } = req.body;
             const existingRole = await roleService.findRoleById(id);
             if (!existingRole) {
                 return generateResponse(res, 404, {}, false, "Role not found!");
@@ -50,9 +50,9 @@ export class RoleController {
 
             const updatedRole = await roleService.updateRole(id, { name });
             
-            if (rolePermissions && Array.isArray(rolePermissions)) {
+            if (role_permissions && Array.isArray(role_permissions)) {
                 await roleService.deleteRolePermissions(id)
-                await roleService.assignPermissionsToRole(updatedRole.id, rolePermissions);
+                await roleService.assignPermissionsToRole(updatedRole.id, role_permissions);
             }
             return generateResponse(res, 200, updatedRole, true, "Role updated successfully");
         } catch (error) {

@@ -27,7 +27,7 @@ model Roles {
     id              String             @id @default(uuid())
     name            String             @unique
     users           User[]             @relation("UserRole")
-    rolePermissions Role_permissions[]
+    role_permissions Role_permissions[]
 }
 
 model Modules {
@@ -49,19 +49,22 @@ model Role_permissions {
 }
 
 model Assessments {
-    id               String                  @id @default(uuid())
-    name             String
-    created_by       String
-    easy             Int                     @default(0)
-    medium           Int                     @default(0)
-    hard             Int                     @default(0)
-    difficulty_score Int                     @default(0)
-    duration         Int                     @default(0)
-    created_at       DateTime                @default(now())
-    updated_at       DateTime                @updatedAt
-    deleted_at       DateTime?
-    technologies     Assessment_technology[]
-    created_by_user  User                    @relation(fields: [created_by], references: [id])
+    id                    String                  @id @default(uuid())
+    name                  String
+    created_by            String
+    easy                  Int                     @default(0)
+    medium                Int                     @default(0)
+    hard                  Int                     @default(0)
+    difficulty_score      Int                     @default(0)
+    duration              Int                     @default(0)
+    created_at            DateTime                @default(now())
+    updated_at            DateTime                @updatedAt
+    deleted_at            DateTime?
+    technologies          Assessment_technology[]
+    created_by_user       User                    @relation(fields: [created_by], references: [id])
+    candidates            Candidate[]
+    candidate_assessments Candidate_assessments[]
+    exams                 Exam[]
 }
 
 model Assessment_technology {
@@ -81,7 +84,105 @@ model Technology {
     created_at            DateTime                @default(now())
     updated_at            DateTime                @updatedAt
     deleted_at            DateTime?
-    Assessment_technology Assessment_technology[]
+    assessment_technology Assessment_technology[]
+    questions             Questions[]
+}
+
+model Questions {
+    id               String           @id @default(uuid())
+    technology_id    String
+    question         String
+    correct_answer   String
+    options          Json
+    time             String
+    difficulty_level Difficulty
+    type             Question_type
+    meta             Json
+    created_at       DateTime         @default(now())
+    updated_at       DateTime         @updatedAt
+    deleted_at       DateTime?
+    technology       Technology       @relation(fields: [technology_id], references: [id])
+    exam_questions   Exam_questions[]
+    answers          Answers[]
+}
+
+model Candidate {
+    id                    String                  @id @default(uuid())
+    assessment_id         String
+    name                  String
+    email                 String                  @unique
+    experience            String
+    phone                 String                  @unique
+    meta                  Json
+    created_at            DateTime                @default(now())
+    updated_at            DateTime                @updatedAt
+    deleted_at            DateTime?
+    assessment            Assessments             @relation(fields: [assessment_id], references: [id])
+    candidate_assessments Candidate_assessments[]
+    exams                 Exam[]
+    results               Results[]
+}
+
+model Candidate_assessments {
+    id            String      @id @default(uuid())
+    candidate_id  String
+    assessment_id String
+    assessment    Assessments @relation(fields: [assessment_id], references: [id])
+    candidate     Candidate   @relation(fields: [candidate_id], references: [id])
+}
+
+model Exam {
+    id             String           @id @default(uuid())
+    user_id        String
+    assessment_id  String
+    end_time       DateTime
+    start_time     DateTime
+    is_completed   Boolean
+    meta           Json
+    created_at     DateTime         @default(now())
+    updated_at     DateTime         @updatedAt
+    deleted_at     DateTime?
+    user           Candidate        @relation(fields: [user_id], references: [id])
+    assessment     Assessments      @relation(fields: [assessment_id], references: [id])
+    exam_questions Exam_questions[]
+    results        Results[]
+    answers        Answers[]
+}
+
+model Exam_questions {
+    id          String    @id @default(uuid())
+    exam_id     String
+    question_id String
+    exam        Exam      @relation(fields: [exam_id], references: [id])
+    question    Questions @relation(fields: [question_id], references: [id])
+}
+
+model Results {
+    id           String    @id @default(uuid())
+    exam_id      String
+    candidate_id String
+    score        Float
+    created_at   DateTime  @default(now())
+    updated_at   DateTime  @updatedAt
+    deleted_at   DateTime?
+    exam         Exam      @relation(fields: [exam_id], references: [id])
+    candidate    Candidate @relation(fields: [candidate_id], references: [id])
+    answers      Answers[]
+}
+
+model Answers {
+    id          String    @id @default(uuid())
+    result_id   String
+    exam_id     String
+    question_id String
+    user_answer String
+    created_at  DateTime  @default(now())
+    updated_at  DateTime  @updatedAt
+    deleted_at  DateTime?
+
+    result   Results   @relation(fields: [result_id], references: [id])
+    exam     Exam      @relation(fields: [exam_id], references: [id])
+    question Questions @relation(fields: [question_id], references: [id])
 }
 
 // model Assessments_technology{
@@ -136,4 +237,17 @@ enum ExamStatus {
     passed
     failed
     in_progress
+}
+
+enum Difficulty {
+    easy
+    medium
+    hard
+}
+
+enum Question_type {
+    multiple_select
+    video
+    text
+    mcq
 }

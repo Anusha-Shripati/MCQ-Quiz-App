@@ -14,7 +14,7 @@ export class RoleService {
                 name: name ? { contains: name, mode: 'insensitive' } : undefined
             },
             include:{
-                rolePermissions:{
+                role_permissions:{
                     include:{
                         module:{
                             select:{name:true}

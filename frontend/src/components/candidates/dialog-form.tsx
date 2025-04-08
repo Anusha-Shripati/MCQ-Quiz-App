@@ -11,14 +11,18 @@ import {
 } from "@/components/ui/dialog";
 import { FormField } from "@/components/common/form-field";
 import { DatePickerInput } from "@/components/common/date-picker-input";
-import { technologyOptions, assessmentOptions } from "@/shared/constants/data";
 import { DurationInput } from "../common/duration-input";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { api, isAxiosError } from "@/lib/api";
+import toast from "react-hot-toast";
+import { mutate } from "swr";
+import { useCandidateStore } from "@/store/candidateStore";
 
 type ErrorType = string | undefined;
 type CandidateFormData = {
+  id?: string;
   name: string;
   email: string;
   technology: string;
@@ -56,16 +60,36 @@ export default function DialogForm({ candidate, open, setOpen }: CandidateDialog
 
   const { register, formState: { errors }, handleSubmit, setValue, watch, reset } = useForm<CandidateFormData>({ resolver: zodResolver(validation), defaultValues: candidate || formFields as CandidateFormData })
   const formData = watch()
+  const {assessmentOptions,technologyOptions} = useCandidateStore()
 
-  const validateAndSubmit = (values: CandidateFormData) => {
-    console.log(values,formData);
-    
-    reset(formFields)
-    setOpen(false);
+  const validateAndSubmit = async(values: CandidateFormData) => {
+    try {
+      let res;
+      if (candidate) {
+        res = await api.put(`/candidate/${candidate?.id}`, values);
+      } else {
+        res = await api.post("/candidate/create", values);
+      }
+      if (res.success) {
+        toast.success(candidate ? 'Candidate updated successfully' : 'Candidate created successfully');
+        mutate((key) => typeof key === 'string' && key.startsWith('/candidate/list'));
+        reset(formFields)
+      } else {
+        toast.error(res.message);
+      }
+      setOpen(false);
+    } catch (error) {
+      if (isAxiosError(error)) {
+        toast.error(error.response.data.message || "An unexpected error occurred");
+      } else {
+        toast.error("An unexpected error occurred");
+      }
+    }
+
   }
 
   useEffect(() => {
-    if (formData.startDate && formData.timeUnit && Number(formData.timeValue) >=0 ) {
+    if (formData.startDate && formData.timeUnit && Number(formData.timeValue) >= 0) {
       const newEndDate = new Date(formData.startDate);
       const numericValue = Number(formData.timeValue);
 
@@ -88,9 +112,9 @@ export default function DialogForm({ candidate, open, setOpen }: CandidateDialog
     }
   }, [open, candidate, reset]);
 
-  
+
   return (
-    <Dialog open={open} onOpenChange={(e) => {setOpen(e)}}>
+    <Dialog open={open} onOpenChange={(e) => { setOpen(e) }}>
       <DialogContent className="sm:max-w-[600px]">
         {/* Animation Wrapper */}
         <div className="animate-in fade-in zoom-in-95 duration-300">

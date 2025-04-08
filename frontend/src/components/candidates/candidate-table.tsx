@@ -17,10 +17,16 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import DialogForm from "@/components/candidates/dialog-form";
-import { Edit } from "lucide-react";
+import { Edit, Trash2 } from "lucide-react";
 import dayjs from "dayjs";
 import ReusableTable from "@/components/common/reusable-table";
+import { useCandidateStore } from "@/store/candidateStore";
+import qs from 'query-string';
+import useSWR, { mutate } from "swr";
+import { api, deleteData, isAxiosError } from "@/lib/api";
+
 function CandidateTable() {
+
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const searchParams = useSearchParams();
@@ -31,6 +37,19 @@ function CandidateTable() {
   const pathname = usePathname();
   const totalItems = candidatesList.length;
 
+  const { candidateFilter } = useCandidateStore()
+
+
+  const queryObj = {
+    page: currentPage || 1,
+    limit: itemsPerPage || 10,
+    ...candidateFilter
+  };
+
+  const cleanedQuery = qs.stringify(queryObj);
+
+  const { data: candidateData, error, isLoading } = useSWR(`/candidate/list?${cleanedQuery}`, api.get)
+
   useEffect(() => {
     const pageParam = searchParams.get("page");
     const perPageParam = searchParams.get("perPage");
@@ -39,24 +58,17 @@ function CandidateTable() {
     if (perPageParam) setItemsPerPage(Number(perPageParam));
   }, [searchParams]);
 
-  // const ReusableTable = dynamic(() =>
-  //     import("@/components/common/reusable-table").then(mod =>
-  //         mod.default as React.FC<TableProps<Candidate>>
-  //     ), { ssr: false, loading: () => <Loading /> }
-  // );
+
   const handlePerPageChange = (value: string) => {
-    console.log(value, "value");
     setItemsPerPage(Number(value));
     setCurrentPage(1);
-    updateQueryParams({ perPage: value, page: "1" });
+    // updateQueryParams({ perPage: value, page: "1" });
   };
   const handlePageChange = (page: number) => {
-    console.log(page, "page");
     setCurrentPage(page);
-    updateQueryParams({ page: page.toString() });
+    // updateQueryParams({ page: page.toString() });
   };
   const updateQueryParams = (params: { page?: string; perPage?: string }) => {
-    console.log(params, "params");
     const newParams = new URLSearchParams(searchParams.toString());
 
     if (params.page) newParams.set("page", params.page);
@@ -85,8 +97,27 @@ function CandidateTable() {
     return `${duration} hours`; // e.g., "3 hours"
   };
 
+
+  const handleDelete = async (id: string) => {
+    if (window.confirm("Are you sure you want to delete this user?")) {
+      try {
+        const res = await deleteData(`/candidate/${id}`)
+        if (res.success) {
+          toast.success("Assessment deleted successfully");
+        }
+        mutate((key) => typeof key === 'string' && key.startsWith('/candidate/list'));
+      } catch (error) {
+        if (isAxiosError(error)) {
+          toast.error(error.response.data.message || "An unexpected error occurred");
+        } else {
+          toast.error("An unexpected error occurred");
+        }
+      }
+    }
+  }
+
+
   const formatTestDateRange = (startDate: string, endDate: string): string => {
-    console.log(startDate, endDate, "startDate, endDate");
     const start = new Date(startDate);
     const end = new Date(endDate);
 
@@ -185,6 +216,9 @@ function CandidateTable() {
               className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all duration-200"
             >
               <Edit className="h-4 w-4 text-gray-600 dark:text-gray-300" />
+            </Button>
+            <Button variant="ghost" size="icon" className="hover:bg-red-50 hover:text-red-600" onClick={() => handleDelete(candidate.id as string)}>
+              <Trash2 className="h-4 w-4" />
             </Button>
           </div>
         ),

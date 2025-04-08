@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/form/input";
 import { Button } from "@/components/ui/form/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 
-// Define Category type
 interface Category {
   name: string;
   easy: number;
@@ -13,7 +12,6 @@ interface Category {
   hard: number;
 }
 
-// Define props type
 interface CreateCategoryProps {
   setCategoriesArray: React.Dispatch<React.SetStateAction<Category[]>>;
   categoriesArray: Category[]; // Pass categories to filter
@@ -26,7 +24,7 @@ const CreateCategory: React.FC<CreateCategoryProps> = ({
   setFilteredCategories,
 }) => {
   const [open, setOpen] = useState(false);
-  const [categoryName, setCategoryName] = useState("");
+  const [technologyName, setTechnologyName] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
 
   // Handle search input change
@@ -50,7 +48,7 @@ const CreateCategory: React.FC<CreateCategoryProps> = ({
     <>
       <div className="flex gap-4">
         <Input
-          placeholder="Search Category..."
+          placeholder="Search Technology..."
           className="w-[200px] border-gray-300"
           value={searchTerm}
           onChange={handleSearch}
@@ -59,7 +57,7 @@ const CreateCategory: React.FC<CreateCategoryProps> = ({
           className="bg-blue-600 text-primary-foreground hover:bg-primary/90"
           onClick={() => setOpen(true)}
         >
-          Create Category
+          Create Technology
         </Button>
       </div>
 
@@ -67,20 +65,20 @@ const CreateCategory: React.FC<CreateCategoryProps> = ({
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add Category</DialogTitle>
+            <DialogTitle>Add Technology</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <Input
-              placeholder="Category Name"
+              placeholder="Technology Name"
               className="border-gray-300"
-              onChange={(e) => setCategoryName(e.target.value)}
+              onChange={(e) => setTechnologyName(e.target.value)}
             />
             <Button
               className="bg-blue-600 text-primary-foreground hover:bg-primary/90"
               onClick={() => {
                 handleCloseModal();
                 const newCategory = {
-                  name: categoryName,
+                  name: technologyName,
                   easy: 0,
                   medium: 0,
                   hard: 0,

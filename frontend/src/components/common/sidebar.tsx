@@ -59,7 +59,7 @@ export default function Sidebar() {
   const pathname = usePathname();
 
   const toggleSidebar = useCallback(() => {
-    setIsCollapsed(!isCollapsed);
+    setIsCollapsed((prv)=>!prv);
   }, []);
 
   const handleLogout = () => {

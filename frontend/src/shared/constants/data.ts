@@ -41,7 +41,6 @@ export const data = [
   },
 ];
 
-export const monthData = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul"];
 
 export const exams: Exam[] = [
   {
@@ -383,7 +382,7 @@ interface CandidateDetails {
 }
 
 interface Candidate {
-  id: number;
+  id: string;
   testDate: string;
   testStartTime: string;
   testEndTime: string;
@@ -399,7 +398,7 @@ interface Candidate {
 
 export const candidatesList: Candidate[] = [
   {
-    id: 1,
+    id:' 1',
     testDate: "2023-01-15",
     testStartTime: "2023-01-15T09:00:00",
     testEndTime: "2023-01-15T10:00:00",
@@ -421,7 +420,7 @@ export const candidatesList: Candidate[] = [
     },
   },
   {
-    id: 2,
+    id:' 2',
     testDate: "2024-11-18",
     testStartTime: "2024-11-18T09:00:00",
     testEndTime: "2024-11-18T10:00:00",
@@ -445,7 +444,7 @@ export const candidatesList: Candidate[] = [
     },
   },
   {
-    id: 3,
+    id:' 3',
     testDate: "2024-11-20",
     testStartTime: "2024-11-20T09:00:00",
     testEndTime: "2024-11-20T10:00:00",
@@ -469,7 +468,7 @@ export const candidatesList: Candidate[] = [
     },
   },
   {
-    id: 4,
+    id:' 4',
     testDate: "2024-11-20",
     testStartTime: "2024-11-20T09:00:00",
     testEndTime: "2024-11-20T10:00:00",
@@ -493,7 +492,7 @@ export const candidatesList: Candidate[] = [
     },
   },
   {
-    id: 5,
+    id:' 5',
     testDate: "2024-11-22",
     testStartTime: "2024-11-22T09:00:00",
     testEndTime: "2024-11-22T10:00:00",
@@ -517,7 +516,7 @@ export const candidatesList: Candidate[] = [
     },
   },
   {
-    id: 6,
+    id:' 6',
     testDate: "2024-11-22",
     testStartTime: "2024-11-22T09:00:00",
     testEndTime: "2024-11-22T10:00:00",
@@ -541,7 +540,7 @@ export const candidatesList: Candidate[] = [
     },
   },
   {
-    id: 7,
+    id:' 7',
     testDate: "2024-11-24",
     testStartTime: "2024-11-24T09:00:00",
     testEndTime: "2024-11-24T10:00:00",
@@ -565,7 +564,7 @@ export const candidatesList: Candidate[] = [
     },
   },
   {
-    id: 8,
+    id:' 8',
     testDate: "2024-11-24",
     testStartTime: "2024-11-24T09:00:00",
     testEndTime: "2024-11-24T10:00:00",
@@ -589,7 +588,7 @@ export const candidatesList: Candidate[] = [
     },
   },
   {
-    id: 9,
+    id:' 9',
     testDate: "2024-11-26",
     testStartTime: "2024-11-26T09:00:00",
     testEndTime: "2024-11-26T10:00:00",
@@ -613,7 +612,7 @@ export const candidatesList: Candidate[] = [
     },
   },
   {
-    id: 10,
+    id:' 10',
     testDate: "2024-11-26",
     testStartTime: "2024-11-26T09:00:00",
     testEndTime: "2024-11-26T10:00:00",
@@ -637,7 +636,7 @@ export const candidatesList: Candidate[] = [
     },
   },
   {
-    id: 11,
+    id:' 11',
     testDate: "2024-11-28",
     testStartTime: "2024-11-28T09:00:00",
     testEndTime: "2024-11-28T10:00:00",
@@ -661,7 +660,7 @@ export const candidatesList: Candidate[] = [
     },
   },
   {
-    id: 12,
+    id:' 12',
     testDate: "2024-11-28",
     testStartTime: "2024-11-28T09:00:00",
     testEndTime: "2024-11-28T10:00:00",
@@ -685,7 +684,7 @@ export const candidatesList: Candidate[] = [
     },
   },
   {
-    id: 13,
+    id:' 13',
     testDate: "2024-11-30",
     testStartTime: "2024-11-30T09:00:00",
     testEndTime: "2024-11-30T10:00:00",
@@ -709,7 +708,7 @@ export const candidatesList: Candidate[] = [
     },
   },
   {
-    id: 14,
+    id:' 14',
     testDate: "2024-11-30",
     testStartTime: "2024-11-30T09:00:00",
     testEndTime: "2024-11-30T10:00:00",
@@ -733,7 +732,7 @@ export const candidatesList: Candidate[] = [
     },
   },
   {
-    id: 15,
+    id:' 15',
     testDate: "2024-12-02",
     testStartTime: "2024-12-02T09:00:00",
     testEndTime: "2024-12-02T10:00:00",
@@ -757,7 +756,7 @@ export const candidatesList: Candidate[] = [
     },
   },
   {
-    id: 16,
+    id:' 16',
     testDate: "2024-12-02",
     testStartTime: "2024-12-02T09:00:00",
     testEndTime: "2024-12-02T10:00:00",
@@ -781,7 +780,7 @@ export const candidatesList: Candidate[] = [
     },
   },
   {
-    id: 17,
+    id:' 17',
     testDate: "2024-12-04",
     testStartTime: "2024-12-04T09:00:00",
     testEndTime: "2024-12-04T10:00:00",
@@ -805,7 +804,7 @@ export const candidatesList: Candidate[] = [
     },
   },
   {
-    id: 18,
+    id:' 18',
     testDate: "2024-12-04",
     testStartTime: "2024-12-04T09:00:00",
     testEndTime: "2024-12-04T10:00:00",
@@ -829,7 +828,7 @@ export const candidatesList: Candidate[] = [
     },
   },
   {
-    id: 19,
+    id:' 19',
     testDate: "2024-12-06",
     testStartTime: "2024-12-06T09:00:00",
     testEndTime: "2024-12-06T10:00:00",
@@ -853,7 +852,7 @@ export const candidatesList: Candidate[] = [
     },
   },
   {
-    id: 20,
+    id:' 20',
     testDate: "2024-12-06",
     testStartTime: "2024-12-06T09:00:00",
     testEndTime: "2024-12-06T10:00:00",
@@ -877,7 +876,7 @@ export const candidatesList: Candidate[] = [
     },
   },
   {
-    id: 21,
+    id:' 21',
     testDate: "2024-12-08",
     testStartTime: "2024-12-08T09:00:00",
     testEndTime: "2024-12-08T10:00:00",
@@ -901,7 +900,7 @@ export const candidatesList: Candidate[] = [
     },
   },
   {
-    id: 22,
+    id:' 22',
     testDate: "2024-12-08",
     testStartTime: "2024-12-08T09:00:00",
     testEndTime: "2024-12-08T10:00:00",
@@ -925,7 +924,7 @@ export const candidatesList: Candidate[] = [
     },
   },
   {
-    id: 23,
+    id:' 23',
     testDate: "2024-12-10",
     testStartTime: "2024-12-10T09:00:00",
     testEndTime: "2024-12-10T10:00:00",

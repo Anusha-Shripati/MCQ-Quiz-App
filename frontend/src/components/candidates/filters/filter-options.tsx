@@ -39,8 +39,12 @@ export function FilterOptions({
       setValue('experience.range', value)
     }
     const handelDateButton = (value: string) => {
-      setValue('created.range', undefined)
       setValue('created.days', value)
+      if(value == 'Last 7 Days'){
+        setValue('created.range', { from: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), to: new Date(Date.now()) })
+      }else if(value == 'Last 30 Days'){
+        setValue('created.range', { from: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), to: new Date(Date.now()) })
+      }
     }
     const handleDateRange = (e: DateRange) => {
       setValue('created.days', '');

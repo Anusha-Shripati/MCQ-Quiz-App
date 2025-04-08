@@ -8,7 +8,7 @@ export interface CandidateDetails {
 }
 
 export interface Candidate {
-  id: number;
+  id?: string;
   testDate: string;
   testStartTime: string;
   testEndTime: string;

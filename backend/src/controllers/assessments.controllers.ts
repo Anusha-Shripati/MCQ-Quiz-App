@@ -87,6 +87,14 @@ export class AssessmentController {
             next(error);
         }
     }
+    getAllAssessment = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const assessmentData = await assessmentService.getAllAssessments();
+            return generateResponse(res, 200, assessmentData, true, "Assessments fetched successfully");
+        } catch (error) {
+            next(error);
+        }
+    }
     getAssessmentById = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const { id } = req.params

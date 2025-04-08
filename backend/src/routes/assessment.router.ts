@@ -27,6 +27,11 @@ assessmentRouter.get(
     asyncHandler(assessmentController.get)
 );
 assessmentRouter.get(
+    "/all",
+    authenticateAndAuthorize('assessments.can_read'),
+    asyncHandler(assessmentController.getAllAssessment)
+);
+assessmentRouter.get(
     "/:id",
     validateRequest(assessmentSchema.get),
     authenticateAndAuthorize('assessments.can_read'),

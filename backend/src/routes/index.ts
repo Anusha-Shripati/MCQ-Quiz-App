@@ -9,6 +9,7 @@ import moduleRouter from './module.router'
 import technologyRouter from './technology.router'
 import assessmentRouter from "./assessment.router";
 import questionRouter from "./question.router";
+import dashboardRouter from "./dasboard.router";
 const router = express.Router();
 
 router.use("/articles", articleRouter);
@@ -17,6 +18,7 @@ router.use("/role", roleRouter);
 router.use("/module", moduleRouter);
 router.use("/technology", technologyRouter);
 router.use("/assessment", assessmentRouter);
+router.use("/dashboard", dashboardRouter);
 router.use("/question", questionRouter);
 
 

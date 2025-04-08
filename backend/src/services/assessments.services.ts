@@ -104,6 +104,18 @@ export class AssessmentsService {
             where: { assessment_id }
         })
     }
+    async getAllAssessments() {
+        return prisma.assessments.findMany({
+            where: {
+                deleted_at: null
+            },
+            select:{
+                id:true,
+                name:true
+            },
+            orderBy: { created_at: 'desc' }
+        })
+    }
 }
 
 export default AssessmentsService;

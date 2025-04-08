@@ -25,16 +25,17 @@ technologyRouter.get(
 );
 
 technologyRouter.get(
+  "/questions",
+  authenticateAndAuthorize('assessments.can_read'),
+  asyncHandler(technologyController.getTechnologyWithQuestion)
+);
+
+
+technologyRouter.get(
   "/:id",
   validateRequest(teachnologySchema.get),
   authenticateAndAuthorize('assessments.can_read'),
   asyncHandler(technologyController.getTechnologyById)
-);
-
-technologyRouter.get(
-  "/questions",
-  authenticateAndAuthorize('assessments.can_read'),
-  asyncHandler(technologyController.getTechnologyWithQuestion)
 );
 
 technologyRouter.put(

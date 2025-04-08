@@ -14,11 +14,11 @@ interface QuestionsPayload {
 
 export class QuestionService {
 
-    async getQuestions() {
-        return prisma.questions.findMany()
+    async getQuestions(filters:{technology_id?: string}) {
+        return prisma.questions.findMany({ where: { technology_id: filters.technology_id ? filters.technology_id : undefined } })
     }
 
-    async findQuestionById(id: string): Promise<Questions | null> {
+    async getQuestionById(id: string): Promise<Questions | null> {
         return prisma.questions.findUnique({ where: { id } });
     }
 
@@ -34,9 +34,6 @@ export class QuestionService {
     }
     async updateQuestion(id: string, data: QuestionsPayload) {
         return prisma.questions.update({ where: { id }, data })
-    }
-    async getQuestionsByTechnology(id: string) {
-        return prisma.questions.findMany({ where: { technology_id: id }, include: { technology: true } })
     }
 }
 

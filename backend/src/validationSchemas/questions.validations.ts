@@ -7,19 +7,13 @@ export const questionsSchema = {
                 "string.empty": "Technology is required",
                 "string.uuid": "Invalid Technology Id format",
             }),
-            quesion:Joi.string().required().messages({
+            question:Joi.string().required().messages({
                 "string.empty": "Question is required",
             }),
             correct_answer: Joi.string().required().messages({
                 "string.empty": "Correct answer is required",
             }),
-            options: Joi.array().items(
-                Joi.object({
-                    option: Joi.string().required().messages({
-                        "string.empty": "Option is required",
-                    }),
-                })
-            ),
+            options: Joi.array().items(),
             time: Joi.string().required().messages({
                 "string.empty": "Time is required",
             }),
@@ -48,19 +42,13 @@ export const questionsSchema = {
                 "string.empty": "Technology is required",
                 "string.uuid": "Invalid Technology Id format",
             }),
-            quesion:Joi.string().required().messages({
+            question:Joi.string().required().messages({
                 "string.empty": "Question is required",
             }),
             correct_answer: Joi.string().required().messages({
                 "string.empty": "Correct answer is required",
             }),
-            options: Joi.array().items(
-                Joi.object({
-                    option: Joi.string().required().messages({
-                        "string.empty": "Option is required",
-                    }),
-                })
-            ),
+            options: Joi.array().items(),
             time: Joi.string().required().messages({
                 "string.empty": "Time is required",
             }),

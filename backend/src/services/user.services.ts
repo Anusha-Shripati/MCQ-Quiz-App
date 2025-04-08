@@ -22,7 +22,7 @@ export class UserService {
       include: {
         role: {
           include: {
-            rolePermissions: {
+            role_permissions: {
               select: {
                 can_read: true,
                 can_edit: true,
@@ -46,7 +46,7 @@ export class UserService {
       include: {
         role: {
           include: {
-            rolePermissions: {
+            role_permissions: {
               select: {
                 can_read: true,
                 can_edit: true,

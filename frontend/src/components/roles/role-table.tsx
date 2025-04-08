@@ -57,7 +57,7 @@ function RoleTable() {
         {
             key: 'permissions', header: "Permissions", render: (row: RoleData) => (
                 <div className="flex flex-wrap gap-2">
-                    {row.rolePermissions.map((item) => {
+                    {row.role_permissions.map((item) => {
                         return <React.Fragment key={item.id}>
                             {(item.can_edit || item.can_read) && <Badge key={item.id} variant="default">
                                 {item.module?.name}

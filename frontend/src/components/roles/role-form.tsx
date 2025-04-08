@@ -19,12 +19,12 @@ const permissionSchema = z.object({
 
 const roleSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  rolePermissions: z.array(permissionSchema),
+  role_permissions: z.array(permissionSchema),
 });
 
 const defaultRole: Omit<RoleData, "id"> & Partial<Pick<RoleData, "id">> = {
   name: "",
-  rolePermissions: [],
+  role_permissions: [],
 };
 
 function RoleForm({ open, onClose, roleData = null }: {open:boolean, onClose: () => void, roleData?: RoleData | null}) {
@@ -48,7 +48,7 @@ function RoleForm({ open, onClose, roleData = null }: {open:boolean, onClose: ()
     setPermissionData((prev) => {
       const updatedPermissions = [...prev];
       updatedPermissions[index][type] = value;
-      setValue("rolePermissions", updatedPermissions, { shouldValidate: true });
+      setValue("role_permissions", updatedPermissions, { shouldValidate: true });
       return updatedPermissions;
     });
   };
@@ -72,14 +72,14 @@ function RoleForm({ open, onClose, roleData = null }: {open:boolean, onClose: ()
     if (open) {
       const formData = {
         name: roleData?.name || "",
-        rolePermissions: (roleData?.rolePermissions ?? []).length > 0
-        ? roleData?.rolePermissions
+        role_permissions: (roleData?.role_permissions ?? []).length > 0
+        ? roleData?.role_permissions
         : permissionData
-          // roleData?.rolePermissions?.length > 0
-          //   ? roleData.rolePermissions
+          // roleData?.role_permissions?.length > 0
+          //   ? roleData.role_permissions
           //   : permissionData,
       };
-      setPermissionData(formData.rolePermissions || [])
+      setPermissionData(formData.role_permissions || [])
       reset(formData);
     }
   }, [open]);
@@ -91,7 +91,7 @@ function RoleForm({ open, onClose, roleData = null }: {open:boolean, onClose: ()
 
       const payload = {
         name: data.name,
-        rolePermissions: data.rolePermissions.map((perm) => ({
+        role_permissions: data.role_permissions.map((perm) => ({
           module_id: perm.module_id,
           can_read: perm.can_read,
           can_edit: perm.can_edit,

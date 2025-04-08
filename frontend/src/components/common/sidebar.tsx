@@ -38,7 +38,7 @@ export default function Sidebar() {
     if (user?.id) {
       const response = await fetcher(url);
       if (response.success) {
-        const permissions = response.data?.role?.rolePermissions?.reduce((obj: Record<string, Permissions>, pr: Omit<Permissions, 'module'> & { module: Module }) => {
+        const permissions = response.data?.role?.role_permissions?.reduce((obj: Record<string, Permissions>, pr: Omit<Permissions, 'module'> & { module: Module }) => {
           obj[pr.module?.name] = { can_edit: pr.can_edit, can_read: pr.can_read };
           return obj
         }, {})

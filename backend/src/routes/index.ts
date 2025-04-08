@@ -8,6 +8,7 @@ import roleRouter from './role.router'
 import moduleRouter from './module.router'
 import technologyRouter from './technology.router'
 import assessmentRouter from "./assessment.router";
+import questionRouter from "./question.router";
 const router = express.Router();
 
 router.use("/articles", articleRouter);
@@ -16,6 +17,7 @@ router.use("/role", roleRouter);
 router.use("/module", moduleRouter);
 router.use("/technology", technologyRouter);
 router.use("/assessment", assessmentRouter);
+router.use("/question", questionRouter);
 
 
 export default router;

@@ -45,9 +45,9 @@ export class TechnologyService {
                     difficultyCount[q.difficulty_level]++;
                 }
             });
-
+            const { questions, ...rest } = tech;
             return {
-                ...tech,
+                ...rest,
                 difficultyCount,
             };
         });

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/form/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 import { QuestionCategory } from "@/shared/types/app";
 
+// Define props type
 interface CreateCategoryProps {
   setCategoriesArray: React.Dispatch<React.SetStateAction<QuestionCategory[]>>;
   categoriesArray: QuestionCategory[]; 

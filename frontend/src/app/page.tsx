@@ -33,6 +33,10 @@ export default function Home() {
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<z.infer<typeof loginSchema>>({
+    defaultValues: {
+      email: "superadmin@example.com",
+      password: "superadminpassword",
+    },
     resolver: zodResolver(loginSchema),
   });
 

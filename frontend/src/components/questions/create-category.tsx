@@ -4,20 +4,13 @@ import React, { useState } from "react";
 import { Input } from "@/components/ui/form/input";
 import { Button } from "@/components/ui/form/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
-
-// Define Category type
-interface Category {
-  name: string;
-  easy: number;
-  medium: number;
-  hard: number;
-}
+import { QuestionCategory } from "@/shared/types/app";
 
 // Define props type
 interface CreateCategoryProps {
-  setCategoriesArray: React.Dispatch<React.SetStateAction<Category[]>>;
-  categoriesArray: Category[]; // Pass categories to filter
-  setFilteredCategories: React.Dispatch<React.SetStateAction<Category[]>>;
+  setCategoriesArray: React.Dispatch<React.SetStateAction<QuestionCategory[]>>;
+  categoriesArray: QuestionCategory[]; 
+  setFilteredCategories: React.Dispatch<React.SetStateAction<QuestionCategory[]>>;
 }
 
 const CreateCategory: React.FC<CreateCategoryProps> = ({
@@ -59,7 +52,7 @@ const CreateCategory: React.FC<CreateCategoryProps> = ({
           className="bg-blue-600 text-primary-foreground hover:bg-primary/90"
           onClick={() => setOpen(true)}
         >
-          Create Category
+          Create Technology
         </Button>
       </div>
 
@@ -79,11 +72,17 @@ const CreateCategory: React.FC<CreateCategoryProps> = ({
               className="bg-blue-600 text-primary-foreground hover:bg-primary/90"
               onClick={() => {
                 handleCloseModal();
-                const newCategory = {
+                const newCategory: QuestionCategory = {
+                  id: Date.now().toString(),
                   name: categoryName,
-                  easy: 0,
-                  medium: 0,
-                  hard: 0,
+                  created_at: new Date().toISOString(),
+                  updated_at: new Date().toISOString(),
+                  deleted_at: null,
+                  difficultyCount: {
+                    easy: 0,
+                    medium: 0,
+                    hard: 0
+                  }
                 };
                 setCategoriesArray((prev) => [...prev, newCategory]);
                 setFilteredCategories((prev) => [...prev, newCategory]);

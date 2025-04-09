@@ -99,12 +99,16 @@ const CreateQuestion: React.FC = () => {
     setSelectedQuestion(questions.length);
   };
 
+  const handleBack = () => {
+    router.push("/questions");
+  };
+
   return (
     // Main container
     <div className="min-h-screen bg-gray-100 p-6 dark:bg-gray-900 ">
       {/* Header */}
       <div className="flex justify-start items-center mb-4">
-        <Button variant="ghost" size="icon" onClick={() => router.back()}>
+        <Button variant="ghost" size="icon" onClick={handleBack}>
           <ArrowLeft className="h-5 w-5" />
         </Button>{" "}
         <div className="text-2xl font-bold text-gray-900 dark:text-white">

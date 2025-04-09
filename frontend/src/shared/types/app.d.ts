@@ -4,11 +4,23 @@ type Exam = {
   candidate: string;
 };
 
-interface QuestionCategory {
+// interface QuestionCategory {
+//   name: string;
+//   easy: number;
+//   medium: number;
+//   hard: number;
+// }
+export type QuestionCategory = {
+  id: string;
   name: string;
-  easy: number;
-  medium: number;
-  hard: number;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
+  difficultyCount: {
+    easy: number;
+    medium: number;
+    hard: number;
+  };
 }
 
 export interface Question {

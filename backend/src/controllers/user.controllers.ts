@@ -15,7 +15,7 @@ interface UserPayload {
   email: string;
   password: string;
   role_id: string;
-  name: string
+  name: string;
 }
 
 export class UserController {
@@ -61,9 +61,15 @@ export class UserController {
             name: payload.name,
             role_id: payload.role_id,
             password: hashedPassword,
-            deletedAt:null
-          })
-          return generateResponse(res, 200, updatedUser, true, "User created successfully!");
+            deletedAt: null,
+          });
+          return generateResponse(
+            res,
+            200,
+            updatedUser,
+            true,
+            "User created successfully!"
+          );
         } else {
           return generateResponse(res, 400, {}, false, "User already exists");
         }
@@ -76,7 +82,7 @@ export class UserController {
         password: hashedPassword,
         role_id: payload.role_id,
         created_at: new Date(),
-        name: payload.name
+        name: payload.name,
       });
 
       generateResponse(res, 200, newUser, true, "User created successfully!");
@@ -87,7 +93,7 @@ export class UserController {
 
   update = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const userId = req.params.id
+      const userId = req.params.id;
       const payload: UserPayload = req.body;
 
       const user = await userService.findUserById(userId);
@@ -98,19 +104,25 @@ export class UserController {
       if (payload.email && payload.email !== user.email) {
         const duplicateUser = await userService.findUserByEmail(payload.email);
         if (duplicateUser) {
-          return generateResponse(res, 400, {}, false, "Email is already exists!");
+          return generateResponse(
+            res,
+            400,
+            {},
+            false,
+            "Email is already exists!"
+          );
         }
       }
-      let hashPass = user.password
-      if(payload.password){
-        hashPass=await encryptStringCrypt(payload.password);
-      } 
+      let hashPass = user.password;
+      if (payload.password) {
+        hashPass = await encryptStringCrypt(payload.password);
+      }
 
       const newUser = await userService.updateUser(user.id, {
         email: payload.email,
         name: payload.name,
         role_id: payload.role_id,
-        password:hashPass
+        password: hashPass,
       });
 
       generateResponse(res, 200, newUser, true, "User updated successfully!");
@@ -119,11 +131,10 @@ export class UserController {
     }
   };
 
-
   changePassword = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const userId = req.params.id
-      const {oldPassword , newPassword} = req.body;
+      const userId = req.params.id;
+      const { oldPassword, newPassword } = req.body;
 
       const user = await userService.findUserById(userId);
       if (!user) {
@@ -132,20 +143,26 @@ export class UserController {
 
       if (oldPassword) {
         console.log(user.password);
-        
-      const isPasswordValid = await matchPassword(oldPassword, user.password);
-        
+
+        const isPasswordValid = await matchPassword(oldPassword, user.password);
+
         if (!isPasswordValid) {
           return generateResponse(res, 400, {}, false, "Invalid old password!");
         }
       }
-      let hashPass = user.password
-      if(newPassword){
-        hashPass=await encryptStringCrypt(newPassword);
-      } 
+      let hashPass = user.password;
+      if (newPassword) {
+        hashPass = await encryptStringCrypt(newPassword);
+      }
       const newUser = await userService.changePassword(user.id, hashPass);
 
-      generateResponse(res, 200, newUser, true, "Password updated successfully!");
+      generateResponse(
+        res,
+        200,
+        newUser,
+        true,
+        "Password updated successfully!"
+      );
     } catch (error) {
       next(error);
     }
@@ -161,7 +178,7 @@ export class UserController {
         filter.email = { contains: search as string, mode: "insensitive" };
         filter.name = { contains: search as string, mode: "insensitive" };
       }
-      
+
       const users = await userService.findManyUsers(filter);
 
       generateResponse(
@@ -201,12 +218,11 @@ export class UserController {
         return;
       }
 
-      if (user?.role?.name == 'Super Admin') {
+      if (user?.role?.name == "Super Admin") {
         generateResponse(res, 400, {}, true, "You can't delete super admin");
         return;
-
       }
-      await userService.delete(userId)
+      await userService.delete(userId);
       generateResponse(res, 200, {}, true, "User deleted successfully");
     } catch (error) {
       console.log(error);

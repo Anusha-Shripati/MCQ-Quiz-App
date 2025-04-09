@@ -25,9 +25,9 @@ model User {
 }
 
 model Roles {
-    id              String             @id @default(uuid())
-    name            String             @unique
-    users           User[]             @relation("UserRole")
+    id               String             @id @default(uuid())
+    name             String             @unique
+    users            User[]             @relation("UserRole")
     role_permissions Role_permissions[]
 }
 

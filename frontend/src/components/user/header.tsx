@@ -1,25 +1,22 @@
-"use client"
+"use client";
 
-import React, { useEffect, useState } from 'react'
-import { CardTitle } from '../ui/card'
-import { Input } from '../ui/form/input'
-import { Button } from '../ui/form/button'
-import { useAuthStore } from '@/store/authStore';
-import UserForm from './user-form';
-
-
+import React, { useEffect, useState } from "react";
+import { CardTitle } from "../ui/card";
+import { Input } from "../ui/form/input";
+import { Button } from "../ui/form/button";
+import { useAuthStore } from "@/store/authStore";
+import UserForm from "./user-form";
 
 function Header() {
-
   const [searchTerm, setSearchTerm] = useState("");
   const [open, setOpen] = useState(false);
-  const { setUserFilter, userCount, permissions } = useAuthStore()
+  const { setUserFilter, userCount, permissions } = useAuthStore();
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
-  }
+  };
   const handleCreateUser = () => {
-    setOpen(true)
-  }
+    setOpen(true);
+  };
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -27,10 +24,10 @@ function Header() {
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [searchTerm]);
+  }, [searchTerm, setUserFilter]);
 
   return (
-    <div className='flex justify-between w-full'>
+    <div className="flex justify-between w-full">
       <CardTitle className="text-xl font-semibold">
         All Users ({userCount || 0})
       </CardTitle>
@@ -43,16 +40,18 @@ function Header() {
           onChange={handleSearch}
           autoComplete="off"
         />
-        {permissions?.users?.can_edit && <Button
-          onClick={handleCreateUser}
-          className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
-        >
-          Create User
-        </Button>}
+        {permissions?.users?.can_edit && (
+          <Button
+            onClick={handleCreateUser}
+            className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
+          >
+            Create User
+          </Button>
+        )}
       </div>
       <UserForm open={open} onClose={() => setOpen(false)} />
     </div>
-  )
+  );
 }
 
-export default Header
+export default Header;

@@ -33,7 +33,9 @@ export const validateRequest = (schema: IValidationSchema) => {
     });
 
     if (errors.length > 0) {
+      console.log("errors", errors);
       const message = `Validation error: ${errors.join(", ")}`;
+      console.log("message", message);
       return next(new AppError(message, 400));
     } else {
       req.validatedData = validatedData;

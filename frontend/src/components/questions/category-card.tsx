@@ -64,7 +64,7 @@ export const CategoryCard = ({
               <span className="font-semibold text-green-600">●</span>
               <span className="font-medium">Easy</span>
             </div>
-            <div>{category.easy}</div>
+            <div>{category.difficultyCount.easy}</div>
           </div>
           <div className="flex justify-between items-center">
             <div
@@ -74,7 +74,7 @@ export const CategoryCard = ({
               <span className="font-semibold text-orange-300">●</span>
               <span className="font-medium">Medium</span>
             </div>
-            <div>{category.medium}</div>
+            <div>{category.difficultyCount.medium}</div>
           </div>
           <div className="flex justify-between items-center">
             <div
@@ -84,7 +84,7 @@ export const CategoryCard = ({
               <span className="font-semibold text-red-500">●</span>
               <span className="font-medium">Hard</span>
             </div>
-            <div>{category.hard}</div>
+            <div>{category.difficultyCount.hard}</div>
           </div>
           <div className="flex justify-between items-center border-t pt-2 mt-2">
             <span
@@ -94,7 +94,7 @@ export const CategoryCard = ({
               Total
             </span>
             <span className="font-extrabold">
-              {category.easy + category.medium + category.hard}
+              {category.difficultyCount.easy + category.difficultyCount.medium + category.difficultyCount.hard}
             </span>
           </div>
           <div className="flex items-center justify-between">

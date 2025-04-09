@@ -1,15 +1,24 @@
 "use client";
 import { CategoryCard } from "@/components/questions/category-card";
 import CreateCategory from "@/components/questions/create-category";
-import { categories } from "@/shared/constants/data";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { QuestionCategory } from "@/shared/types/app";
 import toast from "react-hot-toast";
+import useSWR from "swr";
+import { api } from "@/lib/api";
 
 export default function QuestionsPage() {
-  const [categoriesArray, setCategoriesArray] = useState(categories);
-  const [filteredCategories, setFilteredCategories] = useState(categories); // Track filtered list
+  const [categoriesArray, setCategoriesArray] = useState<QuestionCategory[]>([]);
+  const [filteredCategories, setFilteredCategories] = useState<QuestionCategory[]>([]); // Track filtered list
+  const {data} = useSWR('/technology/questions', api.get);
 
+  useEffect(() => {
+    if (data) {
+      setCategoriesArray(data.data.list);
+      setFilteredCategories(data.data.list);
+    }
+  }, [data]);
+  
   const handleDelete = (category: QuestionCategory) => {
     const updatedCategories = categoriesArray.filter(
       (cat) => cat.name !== category.name
@@ -35,10 +44,10 @@ export default function QuestionsPage() {
 
       {/* Categories Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredCategories.map((category, index) => (
+        {filteredCategories.map((list: QuestionCategory) => (
           <CategoryCard
-            key={index}
-            category={category}
+            key={list.id}
+            category={list}
             handleDelete={handleDelete}
           />
         ))}

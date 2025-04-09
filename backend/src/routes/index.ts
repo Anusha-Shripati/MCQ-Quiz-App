@@ -1,14 +1,14 @@
 //library imports
-import express from "express";
-
-//local imports
+import express from 'express';
 import articleRouter from "./articles.router";
-import adminRouter from "./user.router";
-import roleRouter from './role.router'
-import moduleRouter from './module.router'
-import technologyRouter from './technology.router'
 import assessmentRouter from "./assessment.router";
+import moduleRouter from './module.router';
 import questionRouter from "./question.router";
+import roleRouter from './role.router';
+import technologyRouter from './technology.router';
+import adminRouter from "./user.router";
+import candidateRouter from './candidates.router';
+
 const router = express.Router();
 
 router.use("/articles", articleRouter);
@@ -18,6 +18,6 @@ router.use("/module", moduleRouter);
 router.use("/technology", technologyRouter);
 router.use("/assessment", assessmentRouter);
 router.use("/question", questionRouter);
-
+router.use('/candidates', candidateRouter);
 
 export default router;

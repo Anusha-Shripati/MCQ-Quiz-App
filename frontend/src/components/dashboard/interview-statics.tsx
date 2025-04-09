@@ -2,14 +2,33 @@
 import React from "react";
 import ReactECharts from "echarts-for-react";
 import { useTheme } from "next-themes";
-interface Props {
-  monthdata: string[];
-}
-const InterviewStatics: React.FC<Props> = ({ monthdata }) => {
+import useSWR from "swr";
+import { api } from "@/lib/api";
+
+interface InterviewData { pass: number[], failed: number[], months: string[] }
+const InterviewStatics: React.FC = () => {
 
   const { theme } = useTheme();
+  const { data, isLoading } = useSWR('/dashboard/get-interview-data', api.get)
+  const [interviewData, setInterviewData] = React.useState<InterviewData>({
+    pass: [],
+    failed: [],
+    months: []
+  })
 
-  // Chart configuration
+  React.useEffect(() => {
+    if (data) {
+      setInterviewData((prv: InterviewData) => {
+        const newData = {...prv}
+        newData.pass = data.data.pass
+        newData.failed = data.data.failed
+        newData.months = data.data.months
+        return newData
+      })
+    }
+  }, [data])
+
+
   const options = {
     title: {
       text: "Exam Results Statistics",
@@ -47,7 +66,7 @@ const InterviewStatics: React.FC<Props> = ({ monthdata }) => {
     xAxis: {
       type: "category",
       boundaryGap: false,
-      data: monthdata,
+      data: interviewData.months || [],
       axisLine: {
         lineStyle: {
           color: theme === "light" ? "#888" : "#fff",
@@ -78,7 +97,7 @@ const InterviewStatics: React.FC<Props> = ({ monthdata }) => {
       {
         name: "Passed",
         type: "line",
-        data: [120, 180, 160, 200, 190, 230, 280],
+        data: interviewData.pass || [],
         smooth: true,
         lineStyle: {
           color: theme === "light" ? "#adebbc" : "#00e676", // Bright green for "Passed"
@@ -108,7 +127,7 @@ const InterviewStatics: React.FC<Props> = ({ monthdata }) => {
       {
         name: "Failed",
         type: "line",
-        data: [30, 50, 60, 40, 70, 80, 100],
+        data: interviewData.failed || [],
         smooth: true,
         lineStyle: {
           color: theme === "light" ? "#f0a8af" : "#ff5252", // Bright red for "Failed"
@@ -140,12 +159,12 @@ const InterviewStatics: React.FC<Props> = ({ monthdata }) => {
 
   return (
     <div style={{ maxWidth: "800px", margin: "0 auto" }}>
-      <ReactECharts
+      {!isLoading && <ReactECharts
         option={options}
         style={{ height: "450px", width: "100%" }}
         notMerge={true}
         lazyUpdate={true}
-      />
+      />}
     </div>
   );
 };

@@ -1,14 +1,26 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import * as echarts from "echarts";
-import { questionsData } from "../../shared/constants/data";
 import { useTheme } from "next-themes";
+import useSWR from "swr";
+import { api } from "@/lib/api";
+
+interface GraphData { _count: number, technology_id: string, name: string }
 
 export default function Questions() {
   const chartRef = useRef<HTMLDivElement>(null);
   const { theme } = useTheme();
-  const totalCount = questionsData.reduce((sum, item) => sum + item.value, 0);
+  const { data: questionsData, isLoading } = useSWR('/dashboard/get-questions-data', api.get);
+  
+  const totalCount = useMemo(() => questionsData?.data?.reduce((sum: number, item: GraphData) => sum + item._count, 0) || 0, [questionsData]);
+  const graphData = useMemo(() => {
+    return questionsData?.data?.map((item: GraphData) => ({
+      value: item._count,
+      name: item.name,
+    })) || [];
+  }, [questionsData])
+
   useEffect(() => {
     if (chartRef.current) {
       const myChart = echarts.init(chartRef.current);
@@ -55,7 +67,7 @@ export default function Questions() {
             labelLine: {
               show: true,
             },
-            data: questionsData,
+            data: graphData,
           },
         ],
       };
@@ -66,17 +78,16 @@ export default function Questions() {
         myChart.dispose();
       };
     }
-  }, [theme]);
+  }, [theme,graphData]);
 
   return (
     <div className="p-4 rounded-md shadow-md border">
       <h2 className="font-semibold mb-4 sticky top-0 z-10">Questions Data</h2>
-
-      <div
+      {!isLoading && <div
         ref={chartRef}
         style={{ width: "100%", height: "400px" }}
         className="rounded-md  mb-4"
-      ></div>
+      ></div>}
     </div>
   );
 }

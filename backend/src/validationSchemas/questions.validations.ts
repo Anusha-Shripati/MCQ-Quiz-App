@@ -13,7 +13,7 @@ export const questionsSchema = {
             correct_answer: Joi.string().required().messages({
                 "string.empty": "Correct answer is required",
             }),
-            options: Joi.array().items(),
+            options: Joi.array().items(Joi.string()),
             time: Joi.string().required().messages({
                 "string.empty": "Time is required",
             }),
@@ -48,7 +48,7 @@ export const questionsSchema = {
             correct_answer: Joi.string().required().messages({
                 "string.empty": "Correct answer is required",
             }),
-            options: Joi.array().items(),
+            options: Joi.array().items(Joi.string()),
             time: Joi.string().required().messages({
                 "string.empty": "Time is required",
             }),

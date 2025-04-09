@@ -1,6 +1,5 @@
-// Filters component (main file)
 "use client"
-import React, { memo } from "react";
+import React, { memo, useMemo } from "react";
 import { Button } from "../ui/form/button";
 import { cn } from "@/lib/utils";
 import { AssessmentOption, CandidateFilter, FiltersProps, TechnologyOption } from "@/types/candidate.types";
@@ -8,11 +7,36 @@ import { SearchFilter } from "./filters/search-filter";
 import { TechnologyFilter } from "./filters/technology-filter";
 import { FilterOptions } from "./filters/filter-options";
 import { AssessmentFilter } from "./filters/assessment-filter";
-import { assessmentOptions, technologyOptions } from "@/shared/constants/data";
+
 import { useForm } from "react-hook-form";
 import { ListFilterIcon } from "lucide-react";
+import useSWR from "swr";
+import { api } from "@/lib/api";
+import { useCandidateStore } from "@/store/candidateStore";
 
 const Filters = memo(({ candidates = [] }: FiltersProps) => {
+
+
+  const { data: assessments } = useSWR("/assessment/all", api.get);
+  const { data: technology } = useSWR("/technology/list", api.get);
+
+  const { setCandidateFilter,setAssessmentOptions,setTechnologyOptions } = useCandidateStore()
+
+  const assessmentOptions = useMemo(() => {
+
+    const assessmentData= assessments?.data?.map((item: { id: string, name: string }) => ({ value: item.id, label: item.name })) || []
+    setAssessmentOptions(assessmentData)
+    return assessmentData
+
+  }, [assessments])
+
+
+  const technologyOptions = useMemo(() => {
+
+    const technologyData = technology?.data?.list?.map((item: { id: string, name: string }) => ({ value: item.id, label: item.name })) || []
+    setTechnologyOptions(technologyData)
+    return technologyData
+  }, [technology])
 
   const defaultValues: CandidateFilter = {
     searchQuery: "",
@@ -25,12 +49,32 @@ const Filters = memo(({ candidates = [] }: FiltersProps) => {
   }
   const { setValue, watch, reset, register } = useForm<CandidateFilter>({ defaultValues })
   const formData = watch()
+
   const clearAllFilters = () => {
     reset()
   };
+
   const getData = () => {
-    console.log(formData);
+    const payload = {
+      searchQuery: formData.searchQuery,
+      technologyFilter: formData.technologyFilter.map((item: TechnologyOption) => item.value),
+      AssessmentFilter: formData.assessmentFilter.map((item: AssessmentOption) => item.value),
+      created: formData.created?.range,
+    }
+    setCandidateFilter(payload)
   }
+  const isFilter = useMemo(() => {
+    return Object.keys(formData).some((key:string) => {
+      const typedKey = key as keyof CandidateFilter;
+      if (typedKey === "technologyFilter" || typedKey === "assessmentFilter") {
+        return formData[typedKey].length > 0;
+      } else if (typedKey === "created") {
+        return formData[typedKey]?.days !== "" || formData[typedKey]?.range !== undefined;
+      } else {
+        return formData[typedKey] !== "";
+      }
+    });
+  }, [formData]);
 
 
 
@@ -42,7 +86,7 @@ const Filters = memo(({ candidates = [] }: FiltersProps) => {
 
         <TechnologyFilter
           value={formData.technologyFilter}
-          onChange={(value: TechnologyOption[]) => {setValue('technologyFilter', value)}}
+          onChange={(value: TechnologyOption[]) => { setValue('technologyFilter', value) }}
           options={technologyOptions}
         />
 
@@ -58,7 +102,7 @@ const Filters = memo(({ candidates = [] }: FiltersProps) => {
           register={register}
         />
         <Button className="ml-2 cursor-pointer" onClick={getData}>
-          <ListFilterIcon size={30}/>
+          <ListFilterIcon size={30} />
         </Button>
       </div>
       <div className="flex justify-between items-center gap-4 flex-wrap mt-2 ml-2">
@@ -71,7 +115,7 @@ const Filters = memo(({ candidates = [] }: FiltersProps) => {
           </span>
         </div>
 
-        <Button
+        {isFilter && <Button
           variant="destructive"
           onClick={clearAllFilters}
           className={cn(
@@ -81,7 +125,7 @@ const Filters = memo(({ candidates = [] }: FiltersProps) => {
           )}
         >
           Clear All
-        </Button>
+        </Button>}
       </div>
     </section>
   );

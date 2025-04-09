@@ -1,12 +1,12 @@
 import React from 'react';
 import Select from "react-select";
-import { TechnologyOption } from "@/types/candidate.types";
 import { cn } from "@/lib/utils";
+import { StatusOption } from '@/types/common.types';
 
 interface TechnologyFilterProps {
-  value: TechnologyOption[];
-  onChange: (value: TechnologyOption[]) => void;
-  options: TechnologyOption[];
+  value: StatusOption[];
+  onChange: (value: StatusOption[]) => void;
+  options: StatusOption[];
   className?: string;
 }
 
@@ -16,7 +16,7 @@ export function TechnologyFilter({ value, onChange, options, className }: Techno
       <Select
         isMulti
         value={value}
-        onChange={(newValue) => onChange(newValue as TechnologyOption[])}
+        onChange={(newValue) => onChange(newValue as StatusOption[])}
         options={options}
         placeholder="Select technologies"
         className="react-select-container"

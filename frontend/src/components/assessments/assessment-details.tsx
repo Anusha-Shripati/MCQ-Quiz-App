@@ -10,7 +10,7 @@ import { LoadingSpinner } from "../ui/loading-spinner";
 import Error from "@/app/error";
 import useSWR, { mutate } from "swr";
 import Pagination from "../pagination";
-import { deleteData, fetcher, isAxiosError } from "@/lib/api";
+import { api, deleteData, fetcher, isAxiosError } from "@/lib/api";
 import qs from 'query-string';
 import dayjs from "dayjs";
 
@@ -167,7 +167,7 @@ export default function AssessmentDetails() {
 
   const { data:assessmentsData, error, isLoading } = useSWR(
     `/assessment/list?${cleanedQuery}`,
-    fetcher
+    api.get
   );
 
   useEffect(()=>{
@@ -219,10 +219,6 @@ export default function AssessmentDetails() {
 
   if (error) {
     return <Error error={error} reset={() => window.location.reload()} />
-  }
-
-  if (assessments && assessments.length === 0) {
-    return <div className="flex-grow w-full h-full center">No assessments found</div>;
   }
 
   const handlePageChange = (page: number) => {

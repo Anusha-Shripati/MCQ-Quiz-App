@@ -1,70 +1,50 @@
 "use client";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import { FormField } from "../common/form-field";
+import useSWR from "swr";
+import { api } from "@/lib/api";
 
 interface LanguageScoreSelect {
-  languages: string[];
+  setFilters: (name: string, value: string) => void;
   scores: string[];
+  filters: {
+    language: string;
+    score: string;
+  }
 }
 
 export default function LanguageScoreSelect({
-  languages,
+  setFilters,
   scores,
+  filters
 }: LanguageScoreSelect) {
-  const [selectedLanguage, setSelectedLanguage] = useState(languages[0]);
-  const [selectedScore, setSelectedScore] = useState(scores[0]);
+
+  const { data: technologies } = useSWR('technology/list', api.get)
+
+  const technologyOptions = useMemo(
+    () =>
+      technologies?.data?.list.map((tech:{name:string,id:string}) => ({
+        label: tech.name,
+        value: tech.id,
+      })) || [],
+    [technologies]
+  );
 
   return (
     <div className="flex space-x-4">
       <FormField
-        value={selectedLanguage}
-        onChange={(value) => setSelectedLanguage(value)}
+        value={filters.language}
+        onChange={(value) => setFilters('language', value)}
         type="select"
-        options={languages}
+        options={technologyOptions}
       />
-      {/* <Select
-      >
-        <SelectTrigger className="flex items-center space-x-2 text-xs px-2 py-1 border border-gray-300 rounded-md">
-          <span>{selectedLanguage}</span>
-        </SelectTrigger>
-        <SelectContent>
-          {languages.map((language) => (
-            <SelectItem
-              key={language}
-              className="cursor-pointer hover:bg-gray-100 px-2 py-1 rounded-md"
-              value={language}
-            >
-              {language}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select> */}
       <FormField
-        value={selectedScore}
-        onChange={(value) => setSelectedScore(value)}
+        value={filters.score}
+        onChange={(value) => setFilters('score', value)}
         type="select"
         options={scores}
       />
-      {/* <Select
-        value={selectedScore}
-        onValueChange={(value) => setSelectedScore(value)}
-      >
-        <SelectTrigger className="flex items-center space-x-2 text-xs px-2 py-1 border border-gray-300 rounded-md">
-          <span>{selectedScore}</span>
-        </SelectTrigger>
-        <SelectContent>
-          {scores.map((score) => (
-            <SelectItem
-              key={score}
-              className="cursor-pointer hover:bg-gray-100 px-2 py-1 rounded-md"
-              value={score}
-            >
-              {score}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select> */}
     </div>
   );
 }

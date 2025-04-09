@@ -43,7 +43,7 @@ const CreateCategory: React.FC<CreateCategoryProps> = ({
     <>
       <div className="flex gap-4">
         <Input
-          placeholder="Search Category..."
+          placeholder="Search Technology..."
           className="w-[200px] border-gray-300"
           value={searchTerm}
           onChange={handleSearch}
@@ -60,11 +60,11 @@ const CreateCategory: React.FC<CreateCategoryProps> = ({
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add Category</DialogTitle>
+            <DialogTitle>Add Technology</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <Input
-              placeholder="Category Name"
+              placeholder="Technology Name"
               className="border-gray-300"
               onChange={(e) => setCategoryName(e.target.value)}
             />

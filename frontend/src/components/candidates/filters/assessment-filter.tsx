@@ -1,12 +1,12 @@
 import React from 'react';
 import Select from "react-select";
-import { AssessmentOption } from "@/types/candidate.types";
+import { StatusOption } from "@/types/candidate.types";
 import { cn } from "@/lib/utils";
 
 interface AssessmentFilterProps {
-  value: AssessmentOption[];
-  onChange: (value: AssessmentOption[]) => void;
-  options: AssessmentOption[];
+  value: StatusOption[];
+  onChange: (value: StatusOption[]) => void;
+  options: StatusOption[];
   className?: string;
 }
 
@@ -16,7 +16,7 @@ export function AssessmentFilter({ value, onChange, options, className }: Assess
       <Select
         isMulti
         value={value}
-        onChange={(newValue) => onChange(newValue as AssessmentOption[])}
+        onChange={(newValue) => onChange(newValue as StatusOption[])}
         options={options}
         placeholder="Select assessments"
         className="react-select-container"

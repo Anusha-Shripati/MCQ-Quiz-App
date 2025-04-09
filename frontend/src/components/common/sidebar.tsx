@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation"; // Import usePathname
+import { usePathname } from "next/navigation";
 import {
   FiMenu,
   FiChevronLeft,
@@ -10,32 +10,20 @@ import {
   FiFileText,
   FiHelpCircle,
   FiUsers,
-  FiSettings,
 } from "react-icons/fi";
 import { Button } from "@/components/ui/form/button";
-// import UserAvatar from "@/components/common/user-avatar";
-// import { ThemeToggle } from "@/components/common/theme-toggle";
-// import {
-//   Tooltip,
-//   TooltipContent,
-//   TooltipTrigger,
-// } from "@/components/ui/tooltip";
-// import { LogOut } from "lucide-react";
-// import { useRouter } from "next/navigation";
+import LogicRaysImage from "../../app/assets/images/logicrays_logo.jpg";
 import { FaUserAlt } from "react-icons/fa";
 import { useAuthStore } from "@/store/authStore";
 import useSWR from "swr";
 import { fetcher } from "@/lib/api";
 import { Module, Permissions } from "@/types/common.types";
+import { Avatar, AvatarImage } from "../ui/avatar";
 
 export default function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const sidebarRef = useRef<HTMLDivElement | null>(null);
-  const {
-    // logout,
-    setPermissions,
-    user,
-  } = useAuthStore();
+  const { setPermissions, user } = useAuthStore();
 
   const getPermission = async (url: string) => {
     if (user?.id) {
@@ -70,31 +58,31 @@ export default function Sidebar() {
     getPermission,
     { refreshInterval: 30000 }
   );
-  // const router = useRouter();
-
   const pathname = usePathname();
 
   const toggleSidebar = useCallback(() => {
-    setIsCollapsed((prv)=>!prv);
+    setIsCollapsed((prv) => !prv);
   }, []);
-
-  // const handleLogout = () => {
-  //   logout();
-  //   router.push("/");
-  // };
 
   return (
     <aside
       ref={sidebarRef}
       className={`${
         isCollapsed ? "w-16" : "w-60"
-      } bg-primary text-primary-foreground sticky top-0 left-0 text-white h-screen flex flex-col justify-center items-center transition-all duration-300 border-r-2 border-r-gray-100 overflow-x-hidden`}
+      } bg-primary text-primary-foreground sticky top-0 left-0 text-white h-screen flex flex-col justify-center items-center transition-all duration-300 border-r-2 border-r-gray-100`}
     >
       <div className="w-[calc(100%-20px)] space-y-4 h-full">
         <Button
           onClick={toggleSidebar}
-          className="flex items-center justify-start w-full h-12 p-4 text-white hover:bg-gray-700 focus:outline-none"
+          className="flex items-center justify-between w-full h-15 p-4 text-white hover:bg-gray-700 focus:outline-none"
         >
+          {!isCollapsed ? (
+            <Avatar>
+              <AvatarImage src={LogicRaysImage.src} className="w-10 h-10" />
+            </Avatar>
+          ) : (
+            ""
+          )}
           {isCollapsed ? <FiMenu size={24} /> : <FiChevronLeft size={24} />}
         </Button>
 
@@ -135,13 +123,22 @@ export default function Sidebar() {
                   isActive={pathname === "/candidates"}
                 />
               )}
-              <NavItem
+              {/* <NavItem
                 href="/profile"
                 icon={<FiSettings size={30} />}
                 label="Profile"
                 isCollapsed={isCollapsed}
                 isActive={pathname === "/profile"}
-              />
+              /> */}
+              {!isCollapsed && (
+                <div className="relative flex py-1 items-center">
+                  <div className="flex-grow border-t border-gray-400"></div>
+                  <span className="flex-shrink mx-4 text-gray-400">
+                    Permissions Info
+                  </span>
+                  <div className="flex-grow border-t border-gray-400"></div>
+                </div>
+              )}
               {permissions?.users?.can_read && (
                 <NavItem
                   href="/users"
@@ -160,27 +157,7 @@ export default function Sidebar() {
                   isActive={pathname === "/roles"}
                 />
               )}
-              {/* <ThemeToggle /> */}
             </nav>
-
-            {/* <div className="flex items-center justify-between w-full">
-              <UserAvatar isCollapsed={isCollapsed} />
-              {!isCollapsed && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      onClick={handleLogout}
-                      className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-                    >
-                      <LogOut className="h-5 w-5 text-gray-600 hover:text-gray-900" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Logout</p>
-                  </TooltipContent>
-                </Tooltip>
-              )}
-            </div> */}
           </div>
         )}
       </div>

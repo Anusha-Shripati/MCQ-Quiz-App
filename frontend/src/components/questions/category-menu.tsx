@@ -65,13 +65,7 @@ const CategoryMenu = ({
           <Trash className="h-4 w-4 text-red-500" />
           <span className="text-gray-900 dark:text-gray-200">Delete</span>
         </DropdownMenuItem>
-        {/* <DropdownMenuItem
-          onClick={() => handleNavigate()}
-          className="flex items-center space-x-2 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"
-        >
-          <Eye className="h-4 w-4 text-blue-500" />
-          <span className="text-gray-900 dark:text-gray-200">View</span>
-        </DropdownMenuItem> */}
+       
       </DropdownMenuContent>
 
       <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
@@ -97,7 +91,7 @@ const CategoryMenu = ({
               variant="destructive"
               onClick={() => {
                 handleDelete(category);
-                setIsDeleteModalOpen(false); // Close the modal
+                setIsDeleteModalOpen(false); 
               }}
             >
               Delete

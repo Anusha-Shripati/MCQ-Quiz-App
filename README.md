@@ -20,6 +20,31 @@ mcq-quiz-new/
 
 ## Getting Started
 
+#### Start Backend Services
+
+To start the complete backend infrastructure (includes PostgreSQL, Redis, Prisma setup, and backend server):
+
+```bash
+make local-backend
+```
+
+This command will:
+
+- Stop any running containers
+- Start PostgreSQL database container
+- Start Redis container
+- Generate Prisma client
+- Run database migrations
+- Start the backend development server
+
+#### Start Frontend Services
+
+To start the frontend development server:
+
+```bash
+make local-frontend
+```
+
 ### 1. Initial Setup
 
 1. Clone the repository:

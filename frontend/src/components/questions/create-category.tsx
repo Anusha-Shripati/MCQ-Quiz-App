@@ -4,18 +4,12 @@ import React, { useState } from "react";
 import { Input } from "@/components/ui/form/input";
 import { Button } from "@/components/ui/form/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
-
-interface Category {
-  name: string;
-  easy: number;
-  medium: number;
-  hard: number;
-}
+import { QuestionCategory } from "@/shared/types/app";
 
 interface CreateCategoryProps {
-  setCategoriesArray: React.Dispatch<React.SetStateAction<Category[]>>;
-  categoriesArray: Category[]; // Pass categories to filter
-  setFilteredCategories: React.Dispatch<React.SetStateAction<Category[]>>;
+  setCategoriesArray: React.Dispatch<React.SetStateAction<QuestionCategory[]>>;
+  categoriesArray: QuestionCategory[]; 
+  setFilteredCategories: React.Dispatch<React.SetStateAction<QuestionCategory[]>>;
 }
 
 const CreateCategory: React.FC<CreateCategoryProps> = ({
@@ -24,7 +18,7 @@ const CreateCategory: React.FC<CreateCategoryProps> = ({
   setFilteredCategories,
 }) => {
   const [open, setOpen] = useState(false);
-  const [technologyName, setTechnologyName] = useState("");
+  const [categoryName, setCategoryName] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
 
   // Handle search input change
@@ -71,17 +65,23 @@ const CreateCategory: React.FC<CreateCategoryProps> = ({
             <Input
               placeholder="Technology Name"
               className="border-gray-300"
-              onChange={(e) => setTechnologyName(e.target.value)}
+              onChange={(e) => setCategoryName(e.target.value)}
             />
             <Button
               className="bg-blue-600 text-primary-foreground hover:bg-primary/90"
               onClick={() => {
                 handleCloseModal();
-                const newCategory = {
-                  name: technologyName,
-                  easy: 0,
-                  medium: 0,
-                  hard: 0,
+                const newCategory: QuestionCategory = {
+                  id: Date.now().toString(),
+                  name: categoryName,
+                  created_at: new Date().toISOString(),
+                  updated_at: new Date().toISOString(),
+                  deleted_at: null,
+                  difficultyCount: {
+                    easy: 0,
+                    medium: 0,
+                    hard: 0
+                  }
                 };
                 setCategoriesArray((prev) => [...prev, newCategory]);
                 setFilteredCategories((prev) => [...prev, newCategory]);

@@ -11,7 +11,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -56,7 +55,7 @@ export default function Home() {
   const togglePassword = () => setShowPassword((prev) => !prev);
 
   return (
-    <div className="bg-gradient-to-r from-gray-700 to-gray-900 h-screen w-screen flex flex-col items-center justify-center gap-5">
+    <Card className="bg-gradient-to-r from-gray-700 to-gray-900 h-screen w-screen flex flex-col items-center justify-center gap-5">
       <TypographyH1>Welcome to MCQ APP</TypographyH1>
       <Card className="w-[600px] h-[400px] p-5">
         <CardHeader>
@@ -92,16 +91,16 @@ export default function Home() {
                   error={errors.password?.message}
                 
                 />
-                <button
+                <Button
                 type="button"
                 onClick={togglePassword}
-                className="absolute right-3 top-[37px] transform -translate-y-1/2 text-gray-400" 
+                className="absolute right-3 top-[37px] transform -translate-y-1/2 bg-transparent border-none shadow-none" 
                 >
                 {showPassword ? <EyeOffIcon size={20} /> : <EyeIcon size={20} />}
-                </button>
+                </Button> 
               </div>
             </div>
-            <CardFooter className="flex justify-between mt-4">
+            <div className="mt-4">
               <Button
                 type="submit"
                 disabled={isSubmitting}
@@ -109,7 +108,7 @@ export default function Home() {
               >
                 {isSubmitting ? "Signing in..." : "Sign In"}
               </Button>
-            </CardFooter>
+            </div>
           </form>
         </CardContent>
       </Card>
@@ -120,6 +119,6 @@ export default function Home() {
           Contact Admin
         </Link>
       </TypographyH4>
-    </div>
+    </Card>
   );
 }

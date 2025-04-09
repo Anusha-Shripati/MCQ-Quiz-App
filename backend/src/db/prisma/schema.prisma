@@ -19,6 +19,7 @@ model User {
     deleted_at  DateTime?
     role        Roles         @relation(fields: [role_id], references: [id], name: "UserRole")
     assessments Assessments[]
+    exams       Exam[]
 
     @@map("users")
 }
@@ -119,7 +120,6 @@ model Candidate {
     deleted_at            DateTime?
     assessment            Assessments             @relation(fields: [assessment_id], references: [id])
     candidate_assessments Candidate_assessments[]
-    exams                 Exam[]
     results               Results[]
 }
 
@@ -142,7 +142,7 @@ model Exam {
     created_at     DateTime         @default(now())
     updated_at     DateTime         @updatedAt
     deleted_at     DateTime?
-    user           Candidate        @relation(fields: [user_id], references: [id])
+    user           User        @relation(fields: [user_id], references: [id])
     assessment     Assessments      @relation(fields: [assessment_id], references: [id])
     exam_questions Exam_questions[]
     results        Results[]

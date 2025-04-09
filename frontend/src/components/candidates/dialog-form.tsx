@@ -72,7 +72,7 @@ export default function DialogForm({ candidate, open, setOpen }: CandidateDialog
       }
       if (res.success) {
         toast.success(candidate ? 'Candidate updated successfully' : 'Candidate created successfully');
-        mutate((key) => typeof key === 'string' && key.startsWith('/candidate/list'));
+        mutate((key) => typeof key === 'string' && key.startsWith('/candidates/list'));
         reset(formFields)
       } else {
         toast.error(res.message);

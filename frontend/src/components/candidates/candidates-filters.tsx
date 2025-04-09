@@ -49,9 +49,11 @@ const Filters = memo(({ candidates = [] }: FiltersProps) => {
   }
   const { setValue, watch, reset, register } = useForm<CandidateFilter>({ defaultValues })
   const formData = watch()
+
   const clearAllFilters = () => {
     reset()
   };
+
   const getData = () => {
     const payload = {
       searchQuery: formData.searchQuery,
@@ -61,6 +63,18 @@ const Filters = memo(({ candidates = [] }: FiltersProps) => {
     }
     setCandidateFilter(payload)
   }
+  const isFilter = useMemo(() => {
+    return Object.keys(formData).some((key:string) => {
+      const typedKey = key as keyof CandidateFilter;
+      if (typedKey === "technologyFilter" || typedKey === "assessmentFilter") {
+        return formData[typedKey].length > 0;
+      } else if (typedKey === "created") {
+        return formData[typedKey]?.days !== "" || formData[typedKey]?.range !== undefined;
+      } else {
+        return formData[typedKey] !== "";
+      }
+    });
+  }, [formData]);
 
 
 
@@ -101,7 +115,7 @@ const Filters = memo(({ candidates = [] }: FiltersProps) => {
           </span>
         </div>
 
-        <Button
+        {isFilter && <Button
           variant="destructive"
           onClick={clearAllFilters}
           className={cn(
@@ -111,7 +125,7 @@ const Filters = memo(({ candidates = [] }: FiltersProps) => {
           )}
         >
           Clear All
-        </Button>
+        </Button>}
       </div>
     </section>
   );

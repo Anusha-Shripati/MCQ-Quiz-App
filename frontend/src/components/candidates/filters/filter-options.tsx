@@ -1,12 +1,11 @@
 import { Button } from "@/components/ui/form/button";
-import { Input } from "@/components/ui/form/input";
 import DateRangePicker from "../../ui/form/date-range-picker";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 import * as  Popover from "@radix-ui/react-popover";
 import { UseFormRegister, UseFormSetValue } from "react-hook-form";
-import { useEffect, useState } from "react";
+import {  useState } from "react";
 import { CandidateFilter } from "@/types/candidate.types";
 import { DateRange } from "@/types/common.types";
 
@@ -22,9 +21,9 @@ export function FilterOptions({
   register,
 
 }: FilterOptionsProps) {
-  useEffect(() => {
-    setValue('experience.range', '')
-  }, [formData?.experience?.min || formData?.experience?.max])
+  // useEffect(() => {
+  //   setValue('experience.range', '')
+  // }, [formData?.experience?.min || formData?.experience?.max])
   const [activeFilter, setActiveFilter] = useState("");
 
 
@@ -55,7 +54,7 @@ export function FilterOptions({
       case "experience":
         return (
           <div className="space-y-4 w-64">
-            <div className="flex items-center gap-4">
+            {/* <div className="flex items-center gap-4">
               <Input type="number" placeholder="Min" className="w-20" {...register('experience.min')} />
               <span className="text-gray-500">to</span>
               <Input type="number" placeholder="Max" className="w-20" {...register('experience.max')} />
@@ -64,7 +63,7 @@ export function FilterOptions({
               <Button variant="outline" className="text-sm" onClick={() => handleExpRange('0–2 years')}>0–2 years</Button>
               <Button variant="outline" className="text-sm" onClick={() => handleExpRange('3–5 years')}>3–5 years</Button>
               <Button variant="outline" className="text-sm" onClick={() => handleExpRange('5 years')}>5+ years</Button>
-            </div>
+            </div> */}
           </div>
         );
 

@@ -9,7 +9,7 @@ const candidateRouter = express.Router();
 const candidateController = new CandidateController();
 
 candidateRouter.post(
-	'/',
+	'/create',
 	authenticateAndAuthorize('candidates.can_edit'),
 	validateRequest(candidateSchema.create),
 	asyncHandler(candidateController.create)
@@ -30,7 +30,7 @@ candidateRouter.delete(
 );
 
 candidateRouter.get(
-	'/',
+	'/list',
 	authenticateAndAuthorize('candidates.can_read'),
 	asyncHandler(candidateController.get)
 );

@@ -221,10 +221,6 @@ export default function AssessmentDetails() {
     return <Error error={error} reset={() => window.location.reload()} />
   }
 
-  if (assessments && assessments.length === 0) {
-    return <div className="flex-grow w-full h-full center">No assessments found</div>;
-  }
-
   const handlePageChange = (page: number) => {
     setCurrentPageStart((page - 1) * itemsPerPage + 1);
     setCurrentPageEnd(Math.min(page * itemsPerPage, assessments.length));

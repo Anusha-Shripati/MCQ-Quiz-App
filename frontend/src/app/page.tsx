@@ -24,6 +24,11 @@ const loginSchema = z.object({
   password: z.string().min(6, "Password must be at least 6 characters."),
 });
 
+const defaultValues = {
+  email: "superadmin@example.com",
+  password: "superadminpassword",
+};
+
 export default function Home() {
   const router = useRouter();
   const { login } = useAuthStore();
@@ -33,24 +38,18 @@ export default function Home() {
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<z.infer<typeof loginSchema>>({
-    defaultValues: {
-      email: "superadmin@example.com",
-      password: "superadminpassword",
-    },
+    defaultValues: defaultValues,
     resolver: zodResolver(loginSchema),
   });
 
-  
   const onSubmit = async (data: z.infer<typeof loginSchema>) => {
     try {
-      await login({ email: data.email, password: data.password })
-      toast.success('Login successfully')
+      await login({ email: data.email, password: data.password });
+      toast.success("Login successfully");
       router.push("/dashboard");
     } catch (err) {
-      if (err instanceof Error)
-        toast.error(err.message)
-      else
-        toast.error('Something went wrong')
+      if (err instanceof Error) toast.error(err.message);
+      else toast.error("Something went wrong");
     }
   };
 
@@ -75,7 +74,7 @@ export default function Home() {
             <div className="grid w-full items-center gap-5">
               <div className="flex flex-col space-y-1.5">
                 <FormField
-                  label='Email'
+                  label="Email"
                   id="email"
                   placeholder="Enter your email"
                   {...register("email")}
@@ -88,20 +87,22 @@ export default function Home() {
                   label="Password"
                   id="password"
                   type={showPassword ? "text" : "password"}
-
                   placeholder="Enter your password"
                   {...register("password")}
                   className="h-10"
                   error={errors.password?.message}
-                
                 />
                 <Button
-                type="button"
-                onClick={togglePassword}
-                className="absolute right-3 top-[37px] transform -translate-y-1/2 bg-transparent border-none shadow-none" 
+                  type="button"
+                  onClick={togglePassword}
+                  className="absolute right-3 top-[37px] transform -translate-y-1/2 bg-transparent border-none shadow-none"
                 >
-                {showPassword ? <EyeOffIcon size={20} /> : <EyeIcon size={20} />}
-                </Button> 
+                  {showPassword ? (
+                    <EyeOffIcon size={20} />
+                  ) : (
+                    <EyeIcon size={20} />
+                  )}
+                </Button>
               </div>
             </div>
             <div className="mt-4">

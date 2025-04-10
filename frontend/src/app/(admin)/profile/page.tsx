@@ -210,7 +210,6 @@ export default function Profile() {
 
       {activeTab === "changePassword" && (
         <div className="mt-4">
-          <ProfilePictureUpload />
           <form
             className="space-y-4 mt-6 "
             onSubmit={handlePasswordSubmit(onChangePassword)}

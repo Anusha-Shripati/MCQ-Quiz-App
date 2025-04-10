@@ -3,7 +3,6 @@
 import { Button } from "@/components/ui/form/button";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useState, useMemo } from "react";
-import { useTheme } from "next-themes";
 import { ArrowLeft } from "lucide-react";
 import { questionsDataStatic } from "@/shared/constants/data";
 import { FilterBar } from "@/components/questions/filter-bar";
@@ -14,7 +13,6 @@ import { Question } from "@/shared/types/app";
 const CategoryPage = () => {
   const { categorySlug } = useParams();
   const searchParams = useSearchParams();
-  const { theme } = useTheme();
   const router = useRouter();
   const [questionsData, setQuestionsData] =
     useState<Question[]>(questionsDataStatic);
@@ -70,19 +68,17 @@ const CategoryPage = () => {
 
   return (
     <div
-      className={`p-6 flex justify-center min-h-screen ${theme === "dark" ? "bg-gray-900" : "bg-gray-100"}`}
+      className={`p-6 flex justify-center min-h-screen dark:bg-gray-900 bg-gray-100"}`}
     >
       <div
-        className={`w-full max-w-6xl ${
-          theme === "dark" ? "bg-gray-800 text-white" : "bg-white text-gray-900"
-        } shadow-lg rounded-lg p-6 mx-auto md:w-11/12 sm:w-full`}
+        className={`w-full max-w-6xl dark:bg-gray-800 dark:text-white bg-white text-gray-900 shadow-lg rounded-lg p-6 mx-auto md:w-11/12 sm:w-full`}
       >
         <div className="flex items-center mb-6">
           <Button variant="ghost" onClick={() => window.history.back()}>
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div
-            className={`text-2xl font-bold ${theme === "dark" ? "text-white" : "text-gray-900"}`}
+            className={`text-2xl font-bold dark:text-white dark:text-gray-900"}`}
           >
             {categorySlug}
           </div>

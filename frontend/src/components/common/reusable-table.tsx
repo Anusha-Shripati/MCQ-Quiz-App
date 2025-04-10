@@ -17,7 +17,7 @@ export interface ExpandableRow<T> {
 }
 
 export interface TableProps<T> {
-  columns: Array<Column<T>>;
+  columns: Column<T>[];
   rows: T[];
   expandableRow?: ExpandableRow<T>;
   onRowClick?: (row: T) => void;
@@ -61,6 +61,14 @@ const ReusableTable = <T extends object>({
           </TableRow>
         </TableHeader>
         <TableBody>
+          {rows.length === 0 && (
+            <TableRow>
+
+              <TableCell colSpan={columns.length + (expandableRow ? 1 : 0)} className="text-center py-4">
+                No data available
+              </TableCell>
+            </TableRow>
+          )}
           {rows.map((row, rowIndex) => (
             <React.Fragment key={rowIndex}>
               <TableRow

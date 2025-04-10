@@ -67,7 +67,7 @@ export default function Questions() {
             labelLine: {
               show: true,
             },
-            data: graphData,
+            data: [graphData],
           },
         ],
       };
@@ -84,11 +84,17 @@ export default function Questions() {
     <>
     <div className="p-4 rounded-md shadow-md border">
       <h2 className="font-semibold mb-4 sticky top-0 z-10">Questions Data</h2>
-      {!isLoading && <div
+      {/* {!isLoading && graphData.length>0 && <div
         ref={chartRef}
         style={{ width: "100%", height: "400px" }}
         className="rounded-md  mb-4"
-      ></div>}
+      ></div>} */}
+      {/* {!isLoading && graphData.length==0 && */}
+       <div className="w-full h-[400px] flex items-center justify-center">
+        There is no data available
+      </div>
+
+      {/* } */}
     </div>
     </>
   );

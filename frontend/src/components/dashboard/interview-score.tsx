@@ -7,9 +7,10 @@ import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
 import { Progress } from '../ui/progress'
 import { api } from '@/lib/api'
 import useSWR from 'swr'
-import {  scores } from '@/shared/constants/data'
+import { scores } from '@/shared/constants/data'
+import ReusableTable from '../common/reusable-table'
 
-interface ScoreData{
+interface ScoreData {
     date: string
     name: string
     score: string
@@ -18,25 +19,45 @@ interface ScoreData{
 function InterviewScore() {
 
 
-    
+
     const [scoreData, setScoreData] = React.useState<ScoreData[]>([])
-    const [filters, setFilters] = React.useState({language:"",score:""})
+    const [filters, setFilters] = React.useState({ language: "", score: "" })
     const { data } = useSWR(`/dashboard/get-interview-score?language=${filters.language}&score=${filters.score}`, api.get)
 
-    useEffect(()=>{
-        if(data){
+    useEffect(() => {
+        if (data) {
             setScoreData(data.data)
         }
-    },[data])
-    const hanldeSetFilter=(name:string,value:string)=>{
-        setFilters((prev)=>{
+    }, [data])
+    const hanldeSetFilter = (name: string, value: string) => {
+        setFilters((prev) => {
             return {
                 ...prev,
-                [name]:value
+                [name]: value
             }
         })
     }
-
+    const columns = [
+        { key: 'date', header: "Date", render: (row: ScoreData) => row.date },
+        {
+            key: 'name', header: "Name", render: (row: ScoreData) => <div className='flex items-center space-x-2'>
+                <Avatar>
+                    <AvatarImage src="https://github.com/shadcn.png" />
+                    <AvatarFallback>{row.name}</AvatarFallback>
+                </Avatar>
+                <span>{row.name}</span>
+            </div>
+        },
+        {
+            key: 'score', header: "Score", render: (row: ScoreData) => <div className="flex items-center space-x-2">
+                <Progress
+                    value={parseInt(row.score)}
+                    className="w-32 "
+                />
+                <span>{row.score}</span>
+            </div>
+        },
+    ]
     return (
         <Card className="col-span-12 md:col-span-6 row-span-2">
             <CardHeader>
@@ -50,47 +71,15 @@ function InterviewScore() {
                         </CardDescription>
                     </div>
 
-                    <LanguageScoreSelect setFilters={hanldeSetFilter} scores={scores}  filters={filters}/>
+                    <LanguageScoreSelect setFilters={hanldeSetFilter} scores={scores} filters={filters} />
                 </div>
             </CardHeader>
             <CardContent>
-                <div className="overflow-x-auto">
-                    <table className="w-full text-sm text-left">
-                        <thead className="text-xs uppercase bg-gray-200 text-gray-600">
-                            <tr>
-                                <th className="px-4 py-2">Date</th>
-                                <th className="px-4 py-2">Name</th>
-                                <th className="px-4 py-2">Score</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {scoreData.map((score, index) => (
-                                <tr
-                                    key={index}
-                                    className="border-b hover:bg-gray-50 hover:text-gray-700 transition"
-                                >
-                                    <td className="px-4 py-2">{score.date}</td>
-                                    <td className="px-4 py-2 flex items-center space-x-2">
-                                        <Avatar>
-                                            <AvatarImage src="https://github.com/shadcn.png" />
-                                            <AvatarFallback>CN</AvatarFallback>
-                                        </Avatar>
-                                        <span>{score.name}</span>
-                                    </td>
-                                    <td className="px-4 py-2">
-                                        <div className="flex items-center space-x-2">
-                                            <Progress
-                                                value={parseInt(score.score)}
-                                                className="w-32 "
-                                            />
-                                            <span>{score.score}</span>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+                <ReusableTable
+                    columns={columns}
+                    rows={scoreData}
+                    rowKey='name'
+                />
             </CardContent>
         </Card>
     )

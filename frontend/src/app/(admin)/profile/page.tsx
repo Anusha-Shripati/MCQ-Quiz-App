@@ -10,6 +10,7 @@ import { useAuthStore } from "@/store/authStore";
 import { api, isAxiosError } from "@/lib/api";
 import toast from "react-hot-toast";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
+import { useProfileStore } from "@/store/profileStore";
 
 const userInfoSchema = z.object({
   userName: z.string().min(1, "User Name is required"),
@@ -29,7 +30,7 @@ const passwordChangeSchema = z
 
 export default function Profile() {
   const [activeTab, setActiveTab] = useState("emailPassword");
-  const [isEditing, setIsEditing] = useState(false);
+  const { isEditing, setIsEditing } = useProfileStore();
   const { user } = useAuthStore();
 
   const [showPassword, setShowPassword] = useState({
@@ -159,15 +160,6 @@ export default function Profile() {
         <div className="mt-4">
           <ProfilePictureUpload />
           <div className="space-y-4 mb-4 mt-4">
-            <div className="mb-1 flex justify-end">
-              <Button
-                onClick={() => setIsEditing((prev) => !prev)}
-                className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-600"
-                variant="ghost"
-              >
-                {isEditing ? "Cancel" : "Edit"}
-              </Button>
-            </div>
             <form onSubmit={handleUserInfoSubmit(onSaveUserInfo)}>
               <div className="pb-4 dark:border-gray-700">
                 <FormField

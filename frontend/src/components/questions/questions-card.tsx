@@ -2,7 +2,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/form/button";
 import { Card } from "@/components/ui/card";
 import { Question } from "@/shared/types/app";
-import { useTheme } from "next-themes";
 import Link from "next/link";
 import {
   Dialog,
@@ -26,7 +25,6 @@ export const QuestionCard = ({
   question: Question;
   handleDelete: (question: Question) => void;
 }) => {
-  const { theme } = useTheme();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   // const handleEditQuestion = (questionId: number) => {
@@ -36,7 +34,7 @@ export const QuestionCard = ({
   return (
     <>
       <Card
-        className={`${theme === "dark" ? "bg-gray-700 text-gray-200" : "bg-gray-100 text-gray-800"} mb-4 p-4 shadow-sm`}
+        className={`dark:bg-gray-700 dark:text-gray-200 bg-gray-100 text-gray-800 mb-4 p-4 shadow-sm`}
       >
         <div className="text-lg font-semibold mb-2">
           {question.id}. {question.question}
@@ -47,12 +45,8 @@ export const QuestionCard = ({
               key={index}
               className={`p-2 rounded-md text-sm md:text-base ${
                 option === question?.correctAnswer
-                  ? theme === "dark"
-                    ? "bg-green-800 text-green-100"
-                    : "bg-green-100 text-green-800"
-                  : theme === "dark"
-                    ? "bg-gray-800 text-gray-400"
-                    : "bg-gray-100 text-gray-800"
+                  ? "dark:bg-green-800 dark:text-green-100 bg-green-100 text-green-800"
+                  : "dark:bg-gray-800 dark:text-gray-400 bg-gray-100 text-gray-800"
               }`}
             >
               {String.fromCharCode(65 + index)}. {option}
@@ -78,7 +72,7 @@ export const QuestionCard = ({
             </Button>
           </div>
           <Badge
-            className={`${theme === "dark" ? "bg-gray-600 text-gray-200" : "bg-gray-200 text-gray-800"} py-1 px-3`}
+            className={`dark:bg-gray-600 dark:text-gray-200 bg-gray-200 text-gray-800" py-1 px-3`}
           >
             {question.difficulty}
           </Badge>

@@ -5,7 +5,7 @@ import UserTable from "@/components/user/user-table";
 
 const User: React.FC = () => {
   return (
-    <div className="p-6 min-h-screen">
+    <div className="p-6">
       <Card >
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
           <Header />

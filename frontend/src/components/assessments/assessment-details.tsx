@@ -245,7 +245,7 @@ export default function AssessmentDetails() {
 
 
   return (
-    <div className="p-4 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-200 hover:shadow-md">
+    <div className="p-4 bg-white dark:bg-[#334155] rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-200 hover:shadow-md">
 
       <Pagination
         className="flex-grow"
@@ -258,11 +258,11 @@ export default function AssessmentDetails() {
         onPageChange={handlePageChange}
       >
 
-        <div className="h-[700px] overflow-auto">
+        <div className="h-[600px] overflow-auto">
           {
             isLoading && <LoadingSpinner className="h-full w-full" />
           }
-          {!isLoading && !error && assessments && assessments.map((assessment:Required<Assessment>) => (
+          {!isLoading && !error && assessments && [...assessments,...assessments,...assessments,...assessments,...assessments,...assessments].map((assessment:Required<Assessment>) => (
             <AssessmentItem
               key={assessment.id}
               assessmentId={assessment.id}

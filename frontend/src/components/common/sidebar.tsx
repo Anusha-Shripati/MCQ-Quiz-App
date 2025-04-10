@@ -12,8 +12,8 @@ import {
   FiUsers,
 } from "react-icons/fi";
 import { Button } from "@/components/ui/form/button";
-import LogicRaysImage from "../../app/assets/images/logicrays_logo.jpg";
-import { FaUserAlt } from "react-icons/fa";
+import LogicRaysImage from "../../app/assets/images/logicrays_logo-bg.png";
+import { FaUserAlt,FaUserCog, FaUserSecret } from "react-icons/fa";
 import { useAuthStore } from "@/store/authStore";
 import useSWR from "swr";
 import { fetcher } from "@/lib/api";
@@ -70,30 +70,29 @@ export default function Sidebar() {
   return (
     <aside
       ref={sidebarRef}
-      className={`${
-        isCollapsed ? "w-16" : "w-60"
-      } bg-primary text-primary-foreground sticky top-0 left-0 text-white h-screen flex flex-col justify-center items-center transition-all duration-300 border-r-2 border-r-gray-100 `}
+      className={`${isCollapsed ? "w-20" : "w-60"
+        } bg-primary text-primary-foreground sticky top-0 left-0 text-white h-screen flex flex-col justify-center items-center transition-all duration-300 border-r-2 border-r-gray-100 overflow-auto`}
     >
       <div className="w-[calc(100%-20px)] space-y-4 h-full">
-        <div className="flex items-center justify-between w-full h-13 p-4 text-white hover:bg-gray-700 focus:outline-none rounded-lg transition-colors duration-200">
-          {!isCollapsed ? (
-            <Avatar>
+        <div className="flex items-center justify-between w-full h-[80px] p-2 text-white ">
+          {!isCollapsed && (
+            <Avatar className="w-16 h-16">
               <AvatarImage
                 src={LogicRaysImage.src}
-                className="w-10 h-10 cursor-pointer"
+                className="w-16 h-16 cursor-pointer"
                 onClick={() => router.push("/dashboard")}
               />
             </Avatar>
-          ) : (
-            ""
-          )}
-          <span onClick={toggleSidebar} className="cursor-pointer">
-            {isCollapsed ? <FiMenu size={15} /> : <FiChevronLeft size={22} />}
-          </span>
+          ) }
+          <div  onClick={toggleSidebar}  className="cursor-pointer hover:bg-gray-700 focus:outline-none flex justify-center items-center rounded-lg transition-colors duration-200 w-[40px] h-[40px]">
+            <span>
+              {isCollapsed ? <FiMenu size={22} /> : <FiChevronLeft size={22} />}
+            </span>
+          </div>
         </div>
 
         {!isLoading && permissions && (
-          <div className="h-[90%] flex flex-col justify-between">
+          <div className="flex flex-col justify-center">
             <nav className="flex-1 flex flex-col gap-4">
               <NavItem
                 href="/dashboard"
@@ -157,7 +156,7 @@ export default function Sidebar() {
               {user?.role?.name == "Super Admin" && (
                 <NavItem
                   href="/roles"
-                  icon={<FaUserAlt size={30} />}
+                  icon={<FaUserSecret size={30} />}
                   label="Roles"
                   isCollapsed={isCollapsed}
                   isActive={pathname === "/roles"}
@@ -187,11 +186,10 @@ function NavItem({
   return (
     <Link href={href} className="w-full" prefetch={true}>
       <Button
-        className={`w-full text-base relative h-12 flex items-center justify-start gap-4 p-3 rounded-lg transition-colors ${
-          isActive
+        className={`w-full text-base relative h-12 flex items-center ${isCollapsed ? "justify-center" : "justify-start"}  gap-4 p-3 rounded-lg transition-colors ${isActive
             ? "bg-secondary text-secondary-foreground"
             : "hover:bg-secondary hover:text-secondary-foreground"
-        }`}
+          }`}
       >
         <span className="h-5 w-5">{icon}</span>
         {!isCollapsed && <span>{label}</span>}

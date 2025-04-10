@@ -12,7 +12,7 @@ export default function Questions() {
   const chartRef = useRef<HTMLDivElement>(null);
   const { theme } = useTheme();
   const { data: questionsData, isLoading } = useSWR('/dashboard/get-questions-data', api.get);
-  
+
   const totalCount = useMemo(() => questionsData?.data?.reduce((sum: number, item: GraphData) => sum + item._count, 0) || 0, [questionsData]);
   const graphData = useMemo(() => {
     return questionsData?.data?.map((item: GraphData) => ({
@@ -67,7 +67,7 @@ export default function Questions() {
             labelLine: {
               show: true,
             },
-            data: [graphData],
+            data: graphData,
           },
         ],
       };
@@ -78,24 +78,24 @@ export default function Questions() {
         myChart.dispose();
       };
     }
-  }, [theme,graphData]);
+  }, [theme, graphData]);
 
   return (
     <>
-    <div className="p-4 rounded-md shadow-md border">
-      <h2 className="font-semibold mb-4 sticky top-0 z-10">Questions Data</h2>
-      {/* {!isLoading && graphData.length>0 && <div
-        ref={chartRef}
-        style={{ width: "100%", height: "400px" }}
-        className="rounded-md  mb-4"
-      ></div>} */}
-      {/* {!isLoading && graphData.length==0 && */}
-       <div className="w-full h-[400px] flex items-center justify-center">
-        There is no data available
-      </div>
+      <div className="p-4 rounded-md h-full">
+        <h2 className="font-semibold mb-4 top-0 z-5">Questions Data</h2>
+        {!isLoading && graphData.length > 0 && <div
+          ref={chartRef}
+          style={{ width: "100%", height: "400px" }}
+          className="rounded-md  mb-4"
+        ></div>}
+        {!isLoading && graphData.length == 0 &&
+          <div className="w-full h-[400px] flex items-center justify-center">
+            There is no data available
+          </div>
 
-      {/* } */}
-    </div>
+        }
+      </div>
     </>
   );
 }

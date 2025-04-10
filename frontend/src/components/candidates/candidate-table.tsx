@@ -48,6 +48,7 @@ function CandidateTable() {
 
   const cleanedQuery = qs.stringify(queryObj);
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { data: candidateData, error, isLoading } = useSWR(`/candidate/list?${cleanedQuery}`, api.get)
 
   useEffect(() => {
@@ -57,7 +58,6 @@ function CandidateTable() {
     if (pageParam) setCurrentPage(Number(pageParam));
     if (perPageParam) setItemsPerPage(Number(perPageParam));
   }, [searchParams]);
-
 
   const handlePerPageChange = (value: string) => {
     setItemsPerPage(Number(value));

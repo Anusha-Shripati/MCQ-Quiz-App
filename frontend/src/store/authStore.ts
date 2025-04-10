@@ -10,10 +10,9 @@ interface User {
   role: {
     id: string;
     name: string;
-    role_permissions: Permissions
-  },
+    role_permissions: Permissions;
+  };
   token: string;
-
 }
 
 interface AuthState {
@@ -25,21 +24,23 @@ interface AuthState {
   userFilter: string;
   userList: UserData[];
   userCount: number;
-  setUserListData: (count: number, list: UserData[]) => void
+  setUserListData: (count: number, list: UserData[]) => void;
   login: (credentials: { email: string; password: string }) => Promise<void>;
   initializeAuth: () => void;
   logout: () => void;
   setUserFilter: (filter: string) => void;
   permissions: Record<string, Permissions> | null;
-  setPermissions: (permissions: Record<string, Permissions> | null, user: User | null) => Promise<void>
+  setPermissions: (
+    permissions: Record<string, Permissions> | null,
+    user: User | null
+  ) => Promise<void>;
 }
-
 
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   initializing: true,
   loading: false,
-  userFilter: '',
+  userFilter: "",
   userList: [],
   userCount: 0,
   permissions: null,
@@ -48,16 +49,24 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       const response = await api.post("/user/login", { email, password });
       if (response.success) {
-        const permissions = response.data?.role?.role_permissions?.reduce((obj: Record<string, Permissions>, pr: Omit<Permissions, 'module'> & { module: Module }) => {
-          obj[pr.module?.name] = { can_edit: pr.can_edit, can_read: pr.can_read };
-          return obj
-        }, {})
+        const permissions = response.data?.role?.role_permissions?.reduce(
+          (
+            obj: Record<string, Permissions>,
+            pr: Omit<Permissions, "module"> & { module: Module }
+          ) => {
+            obj[pr.module?.name] = {
+              can_edit: pr.can_edit,
+              can_read: pr.can_read,
+            };
+            return obj;
+          },
+          {}
+        );
         set({ user: response.data, loading: false, error: null, permissions });
         localStorage.setItem("user", JSON.stringify(response.data));
         document.cookie = `token=${response.data.token}; path=/;`;
         document.cookie = `role=${response.data?.role?.name}; path=/;`;
         document.cookie = `permissions=${encodeURIComponent(JSON.stringify(permissions))}; path=/;`;
-
 
         return response.data;
       }
@@ -67,17 +76,24 @@ export const useAuthStore = create<AuthState>((set) => ({
         set({ error: errorMessage, loading: false, permissions: null });
         throw new Error(errorMessage);
       }
-      set({ error: "An unexpected error occurred", loading: false, permissions: null });
+      set({
+        error: "An unexpected error occurred",
+        loading: false,
+        permissions: null,
+      });
     }
   },
-  setPermissions: async (permissions: Record<string, Permissions> | null, user: User | null) => {
-    set({ permissions, user })
+  setPermissions: async (
+    permissions: Record<string, Permissions> | null,
+    user: User | null
+  ) => {
+    set({ permissions, user });
   },
   setUserFilter: (filter: string) => {
-    set({ userFilter: filter })
+    set({ userFilter: filter });
   },
   setUserListData: (count: number, list: UserData[]) => {
-    set({ userList: list, userCount: count })
+    set({ userList: list, userCount: count });
   },
   initializeAuth: () => {
     const storedUser = localStorage.getItem("user");

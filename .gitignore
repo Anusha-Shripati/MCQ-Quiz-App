@@ -13,6 +13,8 @@ node_modules
 /.next/
 /frontend/.next
 /out/
+/dist
+/backend/dist
 
 # production
 /build

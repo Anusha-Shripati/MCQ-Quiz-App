@@ -185,7 +185,7 @@ function NavItem({
   isActive: boolean;
 }) {
   return (
-    <Link href={href} className="w-full">
+    <Link href={href} className="w-full" prefetch={true}>
       <Button
         className={`w-full text-base relative h-12 flex items-center justify-start gap-4 p-3 rounded-lg transition-colors ${
           isActive

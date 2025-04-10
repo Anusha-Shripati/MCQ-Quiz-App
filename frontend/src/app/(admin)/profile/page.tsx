@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -28,46 +28,40 @@ const passwordChangeSchema = z
   });
 
 export default function Profile() {
+  const [activeTab, setActiveTab] = useState("emailPassword");
   const [isEditing, setIsEditing] = useState(false);
-  const { user } = useAuthStore()
+  const { user } = useAuthStore();
 
-
-
-  const [showPassword, setShowPassword] = useState({ old: false, new: false, reNew: false });
-  const togglePassword = (type: 'old' | 'new' | 'reNew') => {
+  const [showPassword, setShowPassword] = useState({
+    old: false,
+    new: false,
+    reNew: false,
+  });
+  const togglePassword = (type: "old" | "new" | "reNew") => {
     setShowPassword((prev) => ({
       ...prev,
       [type]: !prev[type],
     }));
-  }
+  };
+
   const {
     register: registerUserInfo,
     handleSubmit: handleUserInfoSubmit,
     formState: { errors: userInfoErrors },
-    reset: userReset
+    reset: userReset,
   } = useForm({
     resolver: zodResolver(userInfoSchema),
     defaultValues: {
-      userName: "LogicRays",
-      email: "hello@iclrays.com",
+      userName: user?.name || "",
+      email: user?.email || "",
     },
   });
-
-  useEffect(() => {
-    if (user) {
-      userReset({
-        userName: user.name,
-        email: user.email
-      })
-    }
-  }, [user])
-
 
   const {
     register: registerPassword,
     handleSubmit: handlePasswordSubmit,
     formState: { errors: passwordErrors },
-    reset: passwordReset
+    reset: passwordReset,
   } = useForm({
     resolver: zodResolver(passwordChangeSchema),
     defaultValues: {
@@ -80,15 +74,18 @@ export default function Profile() {
   const onSaveUserInfo = async (data: { userName: string; email: string }) => {
     try {
       if (user?.id) {
-        const res = await api.put(`/user/${user?.id}`, { name: data.userName, email: data.email })
+        const res = await api.put(`/user/${user?.id}`, {
+          name: data.userName,
+          email: data.email,
+        });
         if (res.success) {
-          toast.success("User Info Updated Successfully")
+          toast.success("User Info Updated Successfully");
           userReset({
             userName: res.data.name,
-            email: res.data.email
-          })
+            email: res.data.email,
+          });
         } else {
-          toast.error(res.message)
+          toast.error(res.message);
         }
       }
     } catch (error) {
@@ -109,12 +106,15 @@ export default function Profile() {
   }) => {
     try {
       if (user?.id) {
-        const res = await api.put(`/user/change-password/${user?.id}`, { oldPassword: data.oldPassword, newPassword: data.newPassword })
+        const res = await api.put(`/user/change-password/${user?.id}`, {
+          oldPassword: data.oldPassword,
+          newPassword: data.newPassword,
+        });
         if (res.success) {
-          toast.success("Password Updated Successfully")
-          passwordReset()
+          toast.success("Password Updated Successfully");
+          passwordReset();
         } else {
-          toast.error(res.message)
+          toast.error(res.message);
         }
       }
     } catch (error) {
@@ -125,141 +125,170 @@ export default function Profile() {
       }
     }
   };
-  const handleEditAndClose = () => {
-    if (isEditing) {
-      userReset()
-    }
-    setIsEditing((prv) => !prv)
-  }
 
   return (
     <div className="max-w-4xl mx-auto p-7 bg-white dark:bg-gray-700 m-4 rounded-lg shadow-sm">
       <h1 className="text-2xl font-bold mb-8 dark:text-white">Profile</h1>
 
-      <ProfilePictureUpload />
+      {/* Tabs */}
+      <div className="flex border-b dark:border-gray-600">
+        <button
+          className={`px-4 py-2 ${
+            activeTab === "emailPassword"
+              ? "border-b-2 border-blue-600 text-blue-600"
+              : "text-gray-500 dark:text-gray-400"
+          }`}
+          onClick={() => setActiveTab("emailPassword")}
+        >
+          Email and Password
+        </button>
+        <button
+          className={`px-4 py-2 ${
+            activeTab === "changePassword"
+              ? "border-b-2 border-blue-600 text-blue-600"
+              : "text-gray-500 dark:text-gray-400"
+          }`}
+          onClick={() => setActiveTab("changePassword")}
+        >
+          Change Password
+        </button>
+      </div>
 
-      <div className="space-y-4 mb-4 mt-4">
-        <div className="mb-1 flex justify-end">
-          <Button
-            onClick={handleEditAndClose}
-            className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-600"
-            variant="ghost"
-          >
-            {isEditing ? "Cancel" : "Edit"}
-          </Button>
+      {/* Tab Panels */}
+      {activeTab === "emailPassword" && (
+        <div className="mt-4">
+          <ProfilePictureUpload />
+          <div className="space-y-4 mb-4 mt-4">
+            <div className="mb-1 flex justify-end">
+              <Button
+                onClick={() => setIsEditing((prev) => !prev)}
+                className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-600"
+                variant="ghost"
+              >
+                {isEditing ? "Cancel" : "Edit"}
+              </Button>
+            </div>
+            <form onSubmit={handleUserInfoSubmit(onSaveUserInfo)}>
+              <div className="pb-4 dark:border-gray-700">
+                <FormField
+                  label="User Name"
+                  {...registerUserInfo("userName")}
+                  className="w-full mt-2 dark:bg-gray-800 dark:text-white"
+                  error={userInfoErrors.userName?.message}
+                  disabled={!isEditing}
+                />
+              </div>
+
+              <div className="pb-2 dark:border-gray-700">
+                <FormField
+                  label="Email"
+                  {...registerUserInfo("email")}
+                  className="w-full mt-2 dark:bg-gray-800 dark:text-white"
+                  disabled={!isEditing}
+                />
+                {userInfoErrors.email && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {userInfoErrors.email.message}
+                  </p>
+                )}
+              </div>
+
+              {isEditing && (
+                <div className="flex justify-end">
+                  <Button
+                    type="submit"
+                    className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800"
+                  >
+                    Save
+                  </Button>
+                </div>
+              )}
+            </form>
+          </div>
         </div>
-        <form onSubmit={handleUserInfoSubmit(onSaveUserInfo)}>
-          <div className="pb-4 dark:border-gray-700">
-            <FormField
-              label='User Name'
-              {...registerUserInfo("userName")}
-              className="w-full mt-2 dark:bg-gray-800 dark:text-white"
-              error={userInfoErrors.userName?.message}
-              disabled={!isEditing}
-            />
-          </div>
+      )}
 
-          <div className="pb-2 dark:border-gray-700">
-            <FormField
-              label="Email"
-              {...registerUserInfo("email")}
-              className="w-full mt-2 dark:bg-gray-800 dark:text-white"
-              disabled={!isEditing}
-            />
-            {userInfoErrors.email && (
-              <p className="text-red-500 text-sm mt-1">
-                {userInfoErrors.email.message}
-              </p>
-            )}
-          </div>
+      {activeTab === "changePassword" && (
+        <div className="mt-4">
+          <ProfilePictureUpload />
+          <form
+            className="space-y-4 mt-6 "
+            onSubmit={handlePasswordSubmit(onChangePassword)}
+          >
+            <div className="relative">
+              <FormField
+                type={showPassword.old ? "text" : "password"}
+                label="Old Password"
+                {...registerPassword("oldPassword")}
+                className="w-full dark:bg-gray-800 dark:text-white"
+                error={passwordErrors.oldPassword?.message}
+              />
+              <button
+                type="button"
+                onClick={() => togglePassword("old")}
+                className="absolute right-3 top-[42px] transform -translate-y-1/2 text-gray-400"
+              >
+                {showPassword.old ? (
+                  <EyeOffIcon size={20} />
+                ) : (
+                  <EyeIcon size={20} />
+                )}
+              </button>
+            </div>
 
-          {isEditing && (
+            <div className="relative">
+              <FormField
+                label="New Password"
+                type={showPassword.new ? "text" : "password"}
+                {...registerPassword("newPassword")}
+                className="w-full dark:bg-gray-800 dark:text-white"
+                error={passwordErrors.newPassword?.message}
+              />
+              <button
+                type="button"
+                onClick={() => togglePassword("new")}
+                className="absolute right-3 top-[42px] transform -translate-y-1/2 text-gray-400"
+              >
+                {showPassword.new ? (
+                  <EyeOffIcon size={20} />
+                ) : (
+                  <EyeIcon size={20} />
+                )}
+              </button>
+            </div>
+
+            <div className="relative">
+              <FormField
+                type={showPassword.reNew ? "text" : "password"}
+                label="Re-New Password"
+                {...registerPassword("reNewPassword")}
+                className="w-full dark:bg-gray-800 dark:text-white"
+                error={passwordErrors.reNewPassword?.message}
+              />
+              <button
+                type="button"
+                onClick={() => togglePassword("reNew")}
+                className="absolute right-3 top-[42px] transform -translate-y-1/2 text-gray-400"
+              >
+                {showPassword.reNew ? (
+                  <EyeOffIcon size={20} />
+                ) : (
+                  <EyeIcon size={20} />
+                )}
+              </button>
+            </div>
+
             <div className="flex justify-end">
               <Button
                 type="submit"
                 className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800"
               >
-                Save
+                Save Changes
               </Button>
             </div>
-          )}
-        </form>
-      </div>
-
-      <hr className="mb-4" />
-
-      <div>
-        <h2 className="text-xl font-semibold mb-6 dark:text-white">
-          Change Password
-        </h2>
-        <form
-          className="space-y-4"
-          onSubmit={handlePasswordSubmit(onChangePassword)}
-        >
-          <div className="relative">
-            <FormField
-              type={showPassword.old ? "text" : "password"}
-              label="Old Password"
-              {...registerPassword("oldPassword")}
-              className="w-full dark:bg-gray-800 dark:text-white"
-              error={passwordErrors.oldPassword?.message}
-            />
-            <button
-              type="button"
-              onClick={() => togglePassword('old')}
-              className="absolute right-3 top-[42px] transform -translate-y-1/2 text-gray-400"
-            >
-              {showPassword.old ? <EyeOffIcon size={20} /> : <EyeIcon size={20} />}
-            </button>
-          </div>
-
-          <div className="relative">
-
-            <FormField
-              label='New Password'
-              type={showPassword.new ? "text" : "password"}
-
-              {...registerPassword("newPassword")}
-              className="w-full dark:bg-gray-800 dark:text-white"
-              error={passwordErrors.newPassword?.message}
-            />
-            <button
-              type="button"
-              onClick={() => togglePassword('new')}
-              className="absolute right-3 top-[42px] transform -translate-y-1/2 text-gray-400"
-            >
-              {showPassword.new ? <EyeOffIcon size={20} /> : <EyeIcon size={20} />}
-            </button>
-          </div>
-
-          <div className="relative">
-
-            <FormField
-              type={showPassword.reNew ? "text" : "password"}
-              label="Re-New Password"
-              {...registerPassword("reNewPassword")}
-              className="w-full dark:bg-gray-800 dark:text-white"
-              error={passwordErrors.reNewPassword?.message}
-            />
-            <button
-              type="button"
-              onClick={() => togglePassword('reNew')}
-              className="absolute right-3 top-[42px] transform -translate-y-1/2 text-gray-400"
-            >
-              {showPassword.reNew ? <EyeOffIcon size={20} /> : <EyeIcon size={20} />}
-            </button>
-          </div>
-
-          <div className="flex justify-end">
-            <Button
-              type="submit"
-              className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800"
-            >
-              Save Changes
-            </Button>
-          </div>
-        </form>
-      </div>
+          </form>
+        </div>
+      )}
     </div>
   );
 }

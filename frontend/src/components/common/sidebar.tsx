@@ -19,11 +19,14 @@ import useSWR from "swr";
 import { fetcher } from "@/lib/api";
 import { Module, Permissions } from "@/types/common.types";
 import { Avatar, AvatarImage } from "../ui/avatar";
+import { useRouter } from "next/navigation";
 
 export default function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const sidebarRef = useRef<HTMLDivElement | null>(null);
   const { setPermissions, user } = useAuthStore();
+
+  const router = useRouter();
 
   const getPermission = async (url: string) => {
     if (user?.id) {
@@ -69,22 +72,25 @@ export default function Sidebar() {
       ref={sidebarRef}
       className={`${
         isCollapsed ? "w-16" : "w-60"
-      } bg-primary text-primary-foreground sticky top-0 left-0 text-white h-screen flex flex-col justify-center items-center transition-all duration-300 border-r-2 border-r-gray-100`}
+      } bg-primary text-primary-foreground sticky top-0 left-0 text-white h-screen flex flex-col justify-center items-center transition-all duration-300 border-r-2 border-r-gray-100 `}
     >
       <div className="w-[calc(100%-20px)] space-y-4 h-full">
-        <Button
-          onClick={toggleSidebar}
-          className="flex items-center justify-between w-full h-15 p-4 text-white hover:bg-gray-700 focus:outline-none"
-        >
+        <div className="flex items-center justify-between w-full h-13 p-4 text-white hover:bg-gray-700 focus:outline-none rounded-lg transition-colors duration-200">
           {!isCollapsed ? (
             <Avatar>
-              <AvatarImage src={LogicRaysImage.src} className="w-10 h-10" />
+              <AvatarImage
+                src={LogicRaysImage.src}
+                className="w-10 h-10 cursor-pointer"
+                onClick={() => router.push("/dashboard")}
+              />
             </Avatar>
           ) : (
             ""
           )}
-          {isCollapsed ? <FiMenu size={24} /> : <FiChevronLeft size={24} />}
-        </Button>
+          <span onClick={toggleSidebar} className="cursor-pointer">
+            {isCollapsed ? <FiMenu size={15} /> : <FiChevronLeft size={22} />}
+          </span>
+        </div>
 
         {!isLoading && permissions && (
           <div className="h-[90%] flex flex-col justify-between">
@@ -134,7 +140,7 @@ export default function Sidebar() {
                 <div className="relative flex py-1 items-center">
                   <div className="flex-grow border-t border-gray-400"></div>
                   <span className="flex-shrink mx-4 text-gray-400">
-                    Permissions Info
+                    Users Info
                   </span>
                   <div className="flex-grow border-t border-gray-400"></div>
                 </div>

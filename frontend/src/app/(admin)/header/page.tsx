@@ -9,7 +9,7 @@ export const Header = () => {
 
   return (
     <div
-      className={`flex flex-row-reverse items-center justify-start p-4 rounded-lg mt-3 ${backgroundColor} shadow-md mb-2 w-full gap-6`}
+      className={`flex flex-row-reverse items-center justify-start p-4 rounded-lg mt-3 ${backgroundColor} shadow-md mb-2 w-full gap-6 position: sticky top-3 z-10`}
     >
       <UserAvatar />
       <ThemeToggle />

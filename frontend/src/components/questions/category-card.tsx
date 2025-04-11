@@ -14,10 +14,9 @@ export const CategoryCard = ({
   category: QuestionCategory;
   handleDelete: (category: QuestionCategory) => void;
 }) => {
-  console.log(category, "category");
   const router = useRouter();
   const handleNavigate = () => {
-    router.push(`/questions/category/${category.name}`);
+    router.push(`/questions/category/${category.id}`);
   };
 
   const handleAddQuestion = () => {
@@ -30,7 +29,7 @@ export const CategoryCard = ({
   ) => {
     event.stopPropagation();
     router.push(
-      `/questions/category/${category.name}?difficulty=${difficulty}`
+      `/questions/category/${category.id}?difficulty=${difficulty}`
     );
   };
 

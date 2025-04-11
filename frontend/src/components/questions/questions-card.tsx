@@ -2,7 +2,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/form/button";
 import { Card } from "@/components/ui/card";
 import { Question } from "@/shared/types/app";
-import Link from "next/link";
 import {
   Dialog,
   // DialogTrigger,
@@ -12,57 +11,94 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 // interface QuestionCardProps {
 //   question: Question;
 // }
+const questionType = {
+  mcq: { label: "Multiple Choice", color: "blue" },
+  code_snippet: { label: "Code Snippet", color: "purple" },
+  text: { label: "Fill in the blanks", color: "green" },
+  multiple_select: { label: "Multiple Select", color: "orange" },
+  video: { label: "Video", color: "red" },
+};
+
+const difficulties: Record<Question['difficulty_level'], { label: string; color: string }> = {
+
+  easy: { label: "Easy", color: "green" },
+  medium: { label: "Medium", color: "yellow" },
+  hard: { label: "Hard", color: "red" },
+};
+
+const badgeClass = {
+  blue: "bg-blue-100 text-blue-800",
+  purple: "bg-purple-100 text-purple-800",
+  green: "bg-green-100 text-green-800",
+  orange: "bg-orange-100 text-orange-800",
+  red: "bg-red-100 text-red-800",
+  yellow: "bg-yellow-100 text-yellow-800",
+};
+
 
 export const QuestionCard = ({
   question,
   handleDelete,
+  index,
+  handleEdit
 }: {
-  question: Question;
-  handleDelete: (question: Question) => void;
+  question: Required<Question>;
+  index: number;
+  handleDelete: (id: string) => void;
+  handleEdit: () => void
 }) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-
-  // const handleEditQuestion = (questionId: number) => {
-  //   console.log(questionId, "questionId");
-  // };
-
   return (
     <>
       <Card
         className={`dark:bg-gray-700 dark:text-gray-200 bg-gray-100 text-gray-800 mb-4 p-4 shadow-sm`}
       >
-        <div className="text-lg font-semibold mb-2">
-          {question.id}. {question.question}
+        <div className="text-lg font-semibold mb-2 flex justify-between items-start">
+          {index + 1}. {question.question}
+          <Badge
+            className={`dark:bg-gray-600 dark:text-gray-200 bg-gray-200 text-gray-800" py-1 px-3`}
+          >
+            {questionType[question.type]?.label || 'Unknown'}
+          </Badge>
         </div>
         <ul className="space-y-2">
           {question.options?.map((option, index) => (
             <li
               key={index}
-              className={`p-2 rounded-md text-sm md:text-base ${
-                option === question?.correctAnswer
+              className={`p-2 rounded-md text-sm md:text-base ${question?.correct_answer.includes(index.toString())
                   ? "dark:bg-green-800 dark:text-green-100 bg-green-100 text-green-800"
                   : "dark:bg-gray-800 dark:text-gray-400 bg-gray-100 text-gray-800"
-              }`}
+                }`}
             >
               {String.fromCharCode(65 + index)}. {option}
             </li>
           ))}
+          {question.meta?.code && (
+            <li
+              key={index}
+              className={`p-2 rounded-md text-sm md:text-base ${question?.correct_answer.includes(index.toString())
+                  ? "dark:bg-green-800 dark:text-green-100 bg-green-100 text-green-800"
+                  : "dark:bg-gray-800 dark:text-gray-400 bg-gray-100 text-gray-800"
+                }`}
+            >
+              {question.meta?.code}
+            </li>
+          )}
         </ul>
         <div className="flex justify-between items-center mt-4 text-sm">
           <div className="space-x-1">
-            <Link
-              href="/questions/create-question/[...QuestionSlug]"
-              as={`/questions/create-question/${"ReactJS"}`}
+            <Button
+              variant="link"
               className="text-blue-500 hover:underline"
-              // onClick={() => handleEditQuestion(question.id)}
+              onClick={handleEdit}
             >
               Edit
-            </Link>
+            </Button>
             <Button
               variant="link"
               className="text-red-500 hover:underline"
@@ -72,9 +108,9 @@ export const QuestionCard = ({
             </Button>
           </div>
           <Badge
-            className={`dark:bg-gray-600 dark:text-gray-200 bg-gray-200 text-gray-800" py-1 px-3`}
+            className={`${badgeClass[difficulties[question.difficulty_level]?.color as keyof typeof badgeClass] || ''} py-1 px-3`}
           >
-            {question.difficulty}
+            {difficulties[question.difficulty_level].label || 'Unknown'}
           </Badge>
         </div>
 
@@ -100,7 +136,7 @@ export const QuestionCard = ({
               <Button
                 variant="destructive"
                 onClick={() => {
-                  handleDelete(question);
+                  handleDelete(question.id);
                   setIsDeleteModalOpen(false); // Close the modal
                 }}
               >

@@ -26,39 +26,41 @@ import { AxiosError } from "axios";
 
 interface QuestionCardProps {
   question: Question;
-  index: number;
   selectedQuestion: number;
-  questions: Question[];
+  questions: Question[] | Required<Question>[];
   handleQuestionTypeChange: (value: Question["type"], index: number) => void;
-  handleDeleteQuestion: (index: number) => void;
-  setQuestions: React.Dispatch<React.SetStateAction<Question[]>>;
+  handleDeleteQuestion: (question: Question, index: number) => void;
+  setQuestions: React.Dispatch<React.SetStateAction<Question[]>>
   handleReset: () => void;
   technologyId: string;
+  onSave?: () => void;
+  onCancel?: () => void;
+  editQuestion?: boolean;
 }
 
 interface CreateQuestionPayload {
   technology_id: string;
   question: string;
-  correct_answer: string;
+  correct_answer: string[]
   options: string[];
   time: string;
   difficulty_level: Question["difficulty_level"];
   type: Question["type"];
   meta: Record<string, unknown>;
+
 }
 
 async function createQuestion(url: string, { arg }: { arg: CreateQuestionPayload }) {
   const response = await api.post(url, arg);
-  return response.data;
+  return response;
 }
 const updateQuestion = async (url: string, { arg }: { arg: CreateQuestionPayload }) => {
   const response = await api.put(url, arg);
-  return response.data;
+  return response;
 };
 
 const QuestionCard: React.FC<QuestionCardProps> = ({
   question,
-  index,
   selectedQuestion,
   questions,
   handleQuestionTypeChange,
@@ -66,6 +68,9 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
   setQuestions,
   handleReset,
   technologyId,
+  onSave,
+  onCancel,
+  editQuestion
 }) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
@@ -79,10 +84,11 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
   const questionTypeOptions = useMemo(
     () =>
       [
-        { value: "mcq", label: "Multiple Choice" },
-        { value: "radio-select", label: "Radio Select" },
-        { value: "fill-in-the-blanks", label: "Fill in the Blanks" },
-        { value: "code-snippet", label: "Code Snippet" },
+        { value: "multiple_select", label: "Multiple Choice" },
+        { value: "mcq", label: "Radio Select" },
+        { value: "text", label: "Fill in the Blanks" },
+        { value: "code_snippet", label: "Code Snippet" },
+        { value: "video", label: "Video" },
       ] as { value: Question["type"]; label: string }[],
     []
   );
@@ -107,11 +113,24 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
       question: question.question,
       correct_answer: question.correct_answer,
       options: question.options.filter((opt) => opt.trim() !== ""),
-      time: "2",
+      time: question.time,
       difficulty_level: question.difficulty_level,
       type: question.type,
-      meta: {},
+      meta: question.meta || {},
     };
+    let valid = true
+    if (question.type == 'mcq' || question.type == 'multiple_select') {
+      question.correct_answer.forEach((opt) => {
+        if (!question.options[parseInt(opt)]) {
+          toast.error("Correct answer cannot be empty");
+          valid = false
+          return;
+        }
+      })
+    }
+    if (!valid) {
+      return
+    }
     try {
       let response;
       if (question.id) {
@@ -121,9 +140,22 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
         response = await trigger(payload);
         toast.success("Question created successfully!");
       }
-      console.log(response, "response");
+      if (response.success) {
+
+        setQuestions((prev) => {
+          const updatedQuestions = [...prev];
+          const questionIndex = updatedQuestions.findIndex(q => q.id === question.id);
+          updatedQuestions[questionIndex] = response.data;
+          return updatedQuestions;
+        }
+        );
+        if (editQuestion && typeof onSave !== 'undefined') {
+          onSave()
+        }
+      }
     } catch (error: unknown) {
-      
+      console.log(error);
+
       const axiosError = error as AxiosError<{ message: string }>;
       toast.error(axiosError.response?.data?.message || "Something went wrong.");
     }
@@ -139,77 +171,115 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
   };
 
 
-  const handleCorrectOptionChange = (option: string, index: number) => {
+  const handleCorrectOptionChange = (optionIndex: number, index: number, type: 'mcq' | 'multiple_select', e: React.ChangeEvent<HTMLInputElement>) => {
     const updatedQuestions = [...questions];
-    updatedQuestions[index].correct_answer = option;
+    if (type === 'mcq') {
+      updatedQuestions[index].correct_answer = [optionIndex.toString()];
+    } else {
+      if (e.target.checked) {
+        updatedQuestions[index].correct_answer.push(optionIndex.toString());
+      } else {
+        let op_index = updatedQuestions[index].correct_answer.indexOf(optionIndex.toString());
+        updatedQuestions[index].correct_answer.splice(op_index, 1);
+
+      }
+    }
     setQuestions(updatedQuestions);
   };
 
+  const handleCodeQuestions = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const updatedQuestions = [...questions];
+    if (updatedQuestions[selectedQuestion].meta) {
+      updatedQuestions[selectedQuestion].meta.code = e.target.value;
+    }
+    setQuestions(updatedQuestions);
+  }
+
   return (
     <Card
-      className={`h-[570px] flex flex-col ${selectedQuestion === index ? "" : "hidden"
+      className={`h-[570px] flex flex-col 
         }`}
     >
       <CardHeader>
-        <CardTitle className="text-xl font-bold text-gray-900 dark:text-white">
-          Question {index + 1}
+        <CardTitle className="text-xl font-bold flex justify-between text-gray-900 dark:text-white">
+          Question {selectedQuestion + 1}
+          {editQuestion && <div>
+            <Button variant="destructive" className="hover:bg-orange-600" onClick={onCancel}>Close</Button>
+          </div>}
         </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="flex gap-4 mb-4">
           <FormField
+            label="Type"
             type="select"
             parentClassName="w-full"
             className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-300"
             value={question.type}
             onChange={(value: Question["type"]) =>
-              handleQuestionTypeChange(value, index)
+              handleQuestionTypeChange(value, selectedQuestion)
             }
             placeholder="Question Type"
             options={questionTypeOptions}
           />
           <FormField
+            label="Difficulty Type"
             type="select"
             parentClassName="w-full"
             className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-300"
             value={question.difficulty_level}
             onChange={(value: Question["difficulty_level"]) => {
               const updatedQuestions = [...questions];
-              updatedQuestions[index].difficulty_level = value;
+              updatedQuestions[selectedQuestion].difficulty_level = value;
               setQuestions(updatedQuestions);
             }}
             placeholder="Difficulty"
             options={questionDifficultyOptions}
           />
+          <FormField
+            parentClassName="w-full"
+            label='Time (In minutes)'
+            type="number"
+            className="bg-white dark:bg-gray-800 min-w-[100px] border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-300"
+            placeholder="Enter time in minutes"
+            value={question.time}
+            onChange={(e) => {
+              const updatedQuestions = [...questions];
+              updatedQuestions[selectedQuestion].time = e.target.value > 0 && e.target.value < 100  ? e.target.value : 0;
+              setQuestions(updatedQuestions);
+            }}
+          />
+
         </div>
 
-        <Input
+        <FormField
+          label="Question"
           placeholder="Enter your question"
           value={question.question}
           onChange={(e) => {
             const updatedQuestions = [...questions];
-            updatedQuestions[index].question = e.target.value;
+            updatedQuestions[selectedQuestion].question = e.target.value;
             setQuestions(updatedQuestions);
           }}
           className="mb-4"
         />
 
-        {(question.type === "mcq" || question.type === "radio-select") && (
+        {(question.type === "mcq" || question.type === "multiple_select") && (
           <div className="space-y-2">
             {ensureFiveOptions(question.options).map((option, i) => (
               <div key={i} className="flex items-center gap-2">
-                {question.type === "radio-select" ? (
+                {question.type === "mcq" ? (
                   <input
                     type="radio"
                     name={`radio-${question.id}`}
-                    checked={question.correct_answer === option}
-                    onChange={() => handleCorrectOptionChange(option, index)}
+                    checked={question.correct_answer.includes(i.toString())}
+                    onChange={(e) => handleCorrectOptionChange(i, selectedQuestion, 'mcq', e)}
                   />
                 ) : (
                   <input
                     type="checkbox"
-                    checked={question.correct_answer === option}
-                    onChange={() => handleCorrectOptionChange(option, index)}
+                    checked={question.correct_answer.includes(i.toString())}
+                    onChange={(e) => handleCorrectOptionChange(i, selectedQuestion, 'multiple_select', e)}
                   />
                 )}
                 <Input
@@ -218,14 +288,21 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
                   onChange={(e) => {
                     const updatedQuestions = [...questions];
                     const newValue = e.target.value;
-                    updatedQuestions[index].options[i] = newValue;
-
-                    // If this was the correct answer, update it
-                    if (option === question.correct_answer) {
-                      updatedQuestions[index].correct_answer = newValue;
-                    }
-
+                    updatedQuestions[selectedQuestion].options[i] = newValue;
                     setQuestions(updatedQuestions);
+                  }}
+                  onBlur={(e) => {
+                    // if same option than denied
+                    const updatedQuestions = [...questions];
+                    const newValue = e.target.value;
+                    const op_index = updatedQuestions[selectedQuestion].options.indexOf(newValue);
+                    if (op_index !== -1 && op_index !== i && newValue) {
+                      updatedQuestions[selectedQuestion].options[i] = '';
+                      e.target.value = '';
+                      toast.error("Option already exists");
+                      return;
+                    }
+                    setQuestions(updatedQuestions)
                   }}
                   className={i >= 4 ? "border-dashed border-gray-400" : ""}
                 />
@@ -234,27 +311,23 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
           </div>
         )}
 
-        {question.type === "fill-in-the-blanks" && (
+        {question.type === "text" && (
           <Input
             placeholder="Enter the correct answer"
             value={question.correct_answer}
             onChange={(e) => {
               const updatedQuestions = [...questions];
-              updatedQuestions[index].correct_answer = e.target.value;
+              updatedQuestions[selectedQuestion].correct_answer = [e.target.value];
               setQuestions(updatedQuestions);
             }}
           />
         )}
 
-        {question.type === "code-snippet" && (
+        {question.type === "code_snippet" && (
           <textarea
             placeholder="Enter your code snippet"
-            value={question.correct_answer}
-            onChange={(e) => {
-              const updatedQuestions = [...questions];
-              updatedQuestions[index].correct_answer = e.target.value;
-              setQuestions(updatedQuestions);
-            }}
+            value={question?.meta?.code || ''}
+            onChange={handleCodeQuestions}
             className="w-full p-2 border rounded-md dark:bg-gray-700 dark:text-white"
             rows={10}
           />
@@ -285,7 +358,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
               <Button
                 variant="destructive"
                 onClick={() => {
-                  handleDeleteQuestion(index);
+                  handleDeleteQuestion(question, selectedQuestion);
                   setIsDeleteModalOpen(false);
                 }}
               >

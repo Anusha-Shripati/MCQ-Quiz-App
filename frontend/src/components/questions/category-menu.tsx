@@ -40,9 +40,9 @@ const CategoryMenu = ({
   const router = useRouter();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
-  const handleEditCategory = (categoryName: string) => {
-    router.push(`/questions/create-question/${categoryName}`);
-    console.log(categoryName);
+  const handleEditCategory = (category: string) => {
+    router.push(`/questions/create-question/${category}`);
+    console.log(category);
   };
 
   // const handleDeleteCategory = (category: QuestionCategory) => {
@@ -71,7 +71,7 @@ const CategoryMenu = ({
         className="w-48 flex flex-col space-y-1 p-2 bg-white dark:bg-gray-800 rounded-md shadow-md dark:shadow-lg"
       >
         <DropdownMenuItem
-          onClick={() => handleEditCategory(category.name)}
+          onClick={() => handleEditCategory(category.id)}
           className="flex items-center space-x-2 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"
         >
           <Edit className="h-4 w-4 text-gray-600 dark:text-gray-300" />

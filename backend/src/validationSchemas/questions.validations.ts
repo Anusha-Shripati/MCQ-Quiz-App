@@ -7,11 +7,15 @@ export const questionsSchema = {
                 "string.empty": "Technology is required",
                 "string.uuid": "Invalid Technology Id format",
             }),
-            question:Joi.string().required().messages({
+            question: Joi.string().required().messages({
                 "string.empty": "Question is required",
             }),
-            correct_answer: Joi.string().required().messages({
-                "string.empty": "Correct answer is required",
+             correct_answer: Joi.when("type", {
+                is: "code_snippet",
+                then: Joi.any().optional(),
+                otherwise: Joi.array().items(Joi.string()).required().messages({
+                    "string.empty": "Correct answer is required",
+                })
             }),
             options: Joi.array().items(Joi.string()),
             time: Joi.string().required().messages({
@@ -21,11 +25,11 @@ export const questionsSchema = {
                 "string.empty": "Level is required",
                 "any.only": "Level must be one of easy, medium, hard",
             }),
-            type:Joi.string().valid("mcq", "multiple_select","text","video").required().messages({
+            type: Joi.string().valid("mcq", "multiple_select", "text", "video", 'code_snippet').required().messages({
                 "string.empty": "Type is required",
                 "any.only": "Type must be one of mcq, multiple_select, text, video",
             }),
-            meta:Joi.object().messages({
+            meta: Joi.object().messages({
                 "object.base": "Meta must be an object",
             }),
         }),
@@ -42,11 +46,15 @@ export const questionsSchema = {
                 "string.empty": "Technology is required",
                 "string.uuid": "Invalid Technology Id format",
             }),
-            question:Joi.string().required().messages({
+            question: Joi.string().required().messages({
                 "string.empty": "Question is required",
             }),
-            correct_answer: Joi.string().required().messages({
-                "string.empty": "Correct answer is required",
+            correct_answer: Joi.when("type", {
+                is: "code_snippet",
+                then: Joi.any().optional(),
+                otherwise: Joi.array().items(Joi.string()).required().messages({
+                    "string.empty": "Correct answer is required",
+                })
             }),
             options: Joi.array().items(Joi.string()),
             time: Joi.string().required().messages({
@@ -56,11 +64,11 @@ export const questionsSchema = {
                 "string.empty": "Level is required",
                 "any.only": "Level must be one of easy, medium, hard",
             }),
-            type:Joi.string().valid("mcq", "multiple_select","text","video").required().messages({
+            type: Joi.string().valid("mcq", "multiple_select", "text", "video", 'code_snippet').required().messages({
                 "string.empty": "Type is required",
                 "any.only": "Type must be one of mcq, multiple_select, text, video",
             }),
-            meta:Joi.object().messages({
+            meta: Joi.object().messages({
                 "object.base": "Meta must be an object",
             }),
         }),

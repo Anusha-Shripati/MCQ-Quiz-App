@@ -12,6 +12,9 @@ export class TechnologyService {
       include: {
         questions: true,
       },
+      orderBy:{
+        created_at: "desc",
+      }
     });
 
     return technologies.map((tech) => {

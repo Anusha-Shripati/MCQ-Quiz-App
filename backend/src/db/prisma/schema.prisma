@@ -93,7 +93,7 @@ model Questions {
     id               String           @id @default(uuid())
     technology_id    String
     question         String
-    correct_answer   String
+    correct_answer   String[]
     options          Json
     time             String
     difficulty_level Difficulty
@@ -142,7 +142,7 @@ model Exam {
     created_at     DateTime         @default(now())
     updated_at     DateTime         @updatedAt
     deleted_at     DateTime?
-    user           User        @relation(fields: [user_id], references: [id])
+    user           User             @relation(fields: [user_id], references: [id])
     assessment     Assessments      @relation(fields: [assessment_id], references: [id])
     exam_questions Exam_questions[]
     results        Results[]
@@ -250,4 +250,6 @@ enum Question_type {
     video
     text
     mcq
+    code_snippet
 }
+

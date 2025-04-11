@@ -124,23 +124,23 @@ export class TechnologyController {
       next(error);
     }
   };
-  getTechnologyWithQuestion = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ) => {
-    try {
-      const technologies =
-        await technologyService.getTechnologiesWithQuestions();
-      return generateResponse(
-        res,
-        200,
-        { list: technologies, count: technologies.length },
-        true,
-        "Technologies fetched successfully"
-      );
-    } catch (error) {
-      next(error);
-    }
-  };
+  // getTechnologyWithQuestion = async (
+  //   req: Request,
+  //   res: Response,
+  //   next: NextFunction
+  // ) => {
+  //   try {
+  //     const technologies =
+  //       await technologyService.getTechnologiesWithQuestions();
+  //     return generateResponse(
+  //       res,
+  //       200,
+  //       { list: technologies, count: technologies.length },
+  //       true,
+  //       "Technologies fetched successfully"
+  //     );
+  //   } catch (error) {
+  //     next(error);
+  //   }
+  // };
 }

@@ -23,17 +23,33 @@ export type QuestionCategory = {
   };
 }
 
+// export interface Question {
+//   id: number;
+//   type: "multiple-choice" | "radio-select" | "fill-in-the-blanks" | "code-snippet";
+//   question: string;
+//   options?: string[];
+//   correctOptions?: (string | number)[];
+//   correctAnswer?: string; 
+//   difficulty: "easy" | "medium" | "hard";
+//   answer?: string;
+//   code?: string;
+// }
+
 export interface Question {
-  id: number;
-  type: "multiple-choice" | "radio-select" | "fill-in-the-blanks" | "code-snippet";
+  id: string;
+  technology_id: string;
   question: string;
-  options?: string[];
-  correctOptions?: (string | number)[];
-  correctAnswer?: string; 
-  difficulty: "easy" | "medium" | "hard";
-  answer?: string;
-  code?: string;
+  correct_answer: string; // use string from API
+  options: string[];
+  time: string;
+  difficulty_level: "easy" | "medium" | "hard";
+  type: "mcq" | "radio-select" | "fill-in-the-blanks" | "code-snippet";
+  meta?: Record<string, string>;
+  created_at?: string;
+  updated_at?: string;
+  deleted_at?: string | null;
 }
+
 
 export interface PaginationProps {
   currentPage: number;

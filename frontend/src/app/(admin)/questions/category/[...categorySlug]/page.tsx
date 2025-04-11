@@ -30,7 +30,7 @@ const CategoryPage = () => {
 
     if (selectedDifficulties.length > 0 && selectedDifficulties.length < 3) {
       filtered = filtered.filter((question) =>
-        selectedDifficulties.includes(question.difficulty)
+        selectedDifficulties.includes(question.difficulty_level)
       );
     }
 

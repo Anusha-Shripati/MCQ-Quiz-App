@@ -3,6 +3,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/common/theme-provider";
 import { nunito } from "@/lib/fonts";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { NavigationProgress } from "@/components/ui/navigation-progress";
 
 import { Toaster } from "react-hot-toast";
 import AuthInitializer from "@/components/common/auth-initializer";
@@ -23,6 +24,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             enableSystem
             disableTransitionOnChange
           >
+            <NavigationProgress />
             <TooltipProvider>{children}</TooltipProvider>
             <Toaster position="top-right" />
           </ThemeProvider>

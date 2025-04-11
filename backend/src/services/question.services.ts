@@ -15,7 +15,10 @@ interface QuestionsPayload {
 export class QuestionService {
 
     async getQuestions(filters:{technology_id?: string}) {
-        return prisma.questions.findMany({ where: { technology_id: filters.technology_id ? filters.technology_id : undefined } })
+        if(filters.technology_id){
+            return prisma.technology.findUnique({ where: { id: filters.technology_id },include:{questions:true} })
+        }
+        return prisma.questions.findMany({include:{technology:true}})
     }
 
     async getQuestionById(id: string): Promise<Questions | null> {

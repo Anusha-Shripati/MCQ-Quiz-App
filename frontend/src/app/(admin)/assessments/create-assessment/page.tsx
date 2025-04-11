@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/form/button";
 import { ArrowLeft } from "lucide-react";
-import {  steps } from "@/shared/constants/data";
+import { steps } from "@/shared/constants/data";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import Step1 from "./Step1";
@@ -15,18 +15,33 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { api, isAxiosError } from "@/lib/api";
 import useSWR, { mutate } from "swr";
+import useSWRMutation from "swr/mutation";
+import { Technology } from "@/store/assessmentStore";
 
+interface CreateAssessmentPayload {
+  name: string, 
+  duration: string | number, 
+  technologies: Partial<Technology>[]
+}
+
+async function create(url: string, { arg }: { arg: CreateAssessmentPayload }) {
+  const response = await api.post(url, arg);
+  return response
+}
 
 export default function CreateAssessment() {
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [technologyOptions, setTechnologyOptions] = useState([]);
 
-  const {data} = useSWR('/technology/list', api.get);
+  const { data } = useSWR('/technology/list', api.get);
+
+  const { trigger, isMutating } = useSWRMutation(`/assessment/create`, create);
+
 
   useEffect(() => {
     if (data) {
-      const options = data.data.list.map((tech:{ id: string; name: string }) => ({
+      const options = data.data.list.map((tech: { id: string; name: string }) => ({
         value: tech.id,
         label: tech.name,
       }));
@@ -40,15 +55,15 @@ export default function CreateAssessment() {
   const validation = z.object({
     name: z.string().nonempty("Name is required."),
     duration: z.number().min(1, "Duration is required"),
-    technologies:z.array(technologySchema).min(1,'At least one category is required')
+    technologies: z.array(technologySchema).min(1, 'At least one category is required')
   });
 
-  const { register, watch, setValue, formState: { errors }, trigger } = useForm<AssessmentForm>({
+  const { register, watch, setValue, formState: { errors }, trigger: fromTrigger } = useForm<AssessmentForm>({
     resolver: zodResolver(validation), defaultValues: {
       name: "",
       technologies: [],
       duration: 15,
-      targetQuestions:0
+      targetQuestions: 0
     }
   })
   const formData = watch()
@@ -60,7 +75,7 @@ export default function CreateAssessment() {
 
 
   const handleNextStep = async () => {
-    const valudate = await trigger()
+    const valudate = await fromTrigger()
     if (step === 2) {
 
       const isValid = formData.technologies.every((cat) => cat.easy || cat.medium || cat.hard);
@@ -69,7 +84,7 @@ export default function CreateAssessment() {
         return;
       }
     }
-    if(valudate){
+    if (valudate) {
       setStep((prev) => prev + 1);
     }
   };
@@ -90,7 +105,7 @@ export default function CreateAssessment() {
   };
 
 
-  const handleSubmit = async() => {
+  const handleSubmit = async () => {
 
     // Create the assessment
     const newAssessment = {
@@ -103,15 +118,15 @@ export default function CreateAssessment() {
         hard: tech.hard,
       })),
     };
-    
+
     try {
 
-      const res = await api.post("/assessment/create", newAssessment);
-      if(res.success){
+      const res = await trigger(newAssessment);
+      if (res.success) {
         toast.success("Assessment created successfully");
         router.push("/assessments");
         mutate((key) => typeof key === 'string' && key.startsWith('/assessment/list'));
-      }else{
+      } else {
         toast.error(res.messae);
       }
     } catch (error) {
@@ -125,7 +140,7 @@ export default function CreateAssessment() {
   };
 
   // // Add this new function to handle slider changes
-  
+
 
   // Add this handler for duration change
 
@@ -194,6 +209,7 @@ export default function CreateAssessment() {
         <Step3
           formData={formData}
           setStep={setStep}
+          isMutating={isMutating}
           handleSubmit={handleSubmit}
           calculateTotalSum={calculateTotalSum}
           handlePreviousStep={handlePreviousStep}

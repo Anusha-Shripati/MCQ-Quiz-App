@@ -262,7 +262,7 @@ export default function AssessmentDetails() {
           {
             isLoading && <LoadingSpinner className="h-full w-full" />
           }
-          {!isLoading && !error && assessments && [...assessments,...assessments,...assessments,...assessments,...assessments,...assessments].map((assessment:Required<Assessment>) => (
+          {!isLoading && !error && assessments && assessments.map((assessment:Required<Assessment>) => (
             <AssessmentItem
               key={assessment.id}
               assessmentId={assessment.id}

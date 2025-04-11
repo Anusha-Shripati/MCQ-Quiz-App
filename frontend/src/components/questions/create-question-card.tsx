@@ -51,6 +51,10 @@ async function createQuestion(url: string, { arg }: { arg: CreateQuestionPayload
   const response = await api.post(url, arg);
   return response.data;
 }
+const updateQuestion = async (url: string, { arg }: { arg: CreateQuestionPayload }) => {
+  const response = await api.put(url, arg);
+  return response.data;
+};
 
 const QuestionCard: React.FC<QuestionCardProps> = ({
   question,
@@ -92,11 +96,14 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
       ] as { value: Question["difficulty_level"]; label: string }[],
     []
   );
-  
-  const { trigger } = useSWRMutation(`/question/create`,createQuestion);
+
+  const { trigger, isMutating } = useSWRMutation(`/question/create`, createQuestion);
+  const { trigger: update, isMutating: updating } = useSWRMutation(`/question/${question.id}`, updateQuestion);
+
+
   const handleSave = async () => {
     const payload = {
-      technology_id: technologyId, 
+      technology_id: technologyId,
       question: question.question,
       correct_answer: question.correct_answer,
       options: question.options.filter((opt) => opt.trim() !== ""),
@@ -106,24 +113,31 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
       meta: {},
     };
     try {
-      const response =  await trigger(payload);
+      let response;
+      if (question.id) {
+        response = await update(payload)
+        toast.success("Question update successfully!");
+      } else {
+        response = await trigger(payload);
+        toast.success("Question created successfully!");
+      }
       console.log(response, "response");
-      toast.success("Question created successfully!");
     } catch (error: unknown) {
+      
       const axiosError = error as AxiosError<{ message: string }>;
       toast.error(axiosError.response?.data?.message || "Something went wrong.");
     }
-  
+
     console.log("Payload to be sent:", payload);
-    
+
     // Optionally send it via an API:
     // await fetch('/api/question', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(payload),
-      // });
-    };
-    
+    //   method: 'POST',
+    //   headers: { 'Content-Type': 'application/json' },
+    //   body: JSON.stringify(payload),
+    // });
+  };
+
 
   const handleCorrectOptionChange = (option: string, index: number) => {
     const updatedQuestions = [...questions];
@@ -133,9 +147,8 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
 
   return (
     <Card
-      className={`h-[570px] flex flex-col ${
-        selectedQuestion === index ? "" : "hidden"
-      }`}
+      className={`h-[570px] flex flex-col ${selectedQuestion === index ? "" : "hidden"
+        }`}
     >
       <CardHeader>
         <CardTitle className="text-xl font-bold text-gray-900 dark:text-white">
@@ -186,8 +199,8 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
             {ensureFiveOptions(question.options).map((option, i) => (
               <div key={i} className="flex items-center gap-2">
                 {question.type === "radio-select" ? (
-                <input
-                  type="radio"
+                  <input
+                    type="radio"
                     name={`radio-${question.id}`}
                     checked={question.correct_answer === option}
                     onChange={() => handleCorrectOptionChange(option, index)}
@@ -284,10 +297,10 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
 
         {questions.length !== 0 && (
           <div className="mt-2 flex justify-end gap-4">
-            <Button variant="outline" onClick={handleReset}>
+            <Button variant="outline" onClick={handleReset} disabled={isMutating || updating}>
               Reset
             </Button>
-            <Button variant="outline" onClick={handleSave}>
+            <Button variant="outline" onClick={handleSave} disabled={isMutating || updating}>
               Save
             </Button>
           </div>

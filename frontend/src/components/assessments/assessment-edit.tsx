@@ -9,6 +9,7 @@ import useSWR, { mutate } from "swr";
 import { api, isAxiosError } from "@/lib/api";
 import { FormField } from "../common/form-field";
 import { Label } from "../ui/form/label";
+import useSWRMutation from "swr/mutation";
 
 interface Option {
   value: string;
@@ -21,7 +22,15 @@ interface AssessmentEditProps {
   onSave: () => void;
   onCancel: () => void;
 }
+
+
+
 type Difficulty = 'easy' | 'medium' | 'hard';
+
+async function update(url: string, { arg }: { arg: { name: string; duration: number | string; technologies: Partial<Technology>[] } }) {
+  const response = await api.put(url, arg);
+  return response
+}
 
 export default function AssessmentEdit({ assessment, onSave, onCancel }: AssessmentEditProps) {
   const [localAssessment, setLocalAssessment] = useState<Assessment & { totalQuestions: number }>(assessment);
@@ -29,6 +38,10 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
   const [technologyOptions, setTechnologyOptions] = useState<Option[]>([]);
 
   const { data: technologyData } = useSWR('/technology/list', api.get)
+
+
+  const { trigger, isMutating } = useSWRMutation(`/assessment/${assessment.id}`, update);
+
 
   useEffect(() => {
     if (technologyData) {
@@ -189,7 +202,7 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
           hard: tech.hard,
         })),
       }
-      const res = await api.put(`/assessment/${localAssessment.id}`, payload);
+      const res = await trigger(payload);
       if (res.success) {
         toast.success('Assessment updated successfully');
         mutate((key) => typeof key === 'string' && key.startsWith('/assessment/list'));
@@ -237,12 +250,14 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
                 <Button
                   variant="destructive"
                   onClick={onCancel}
+                  disabled={isMutating}
                   className="hover:bg-red-600 dark:hover:bg-gray-700"
                 >
                   Cancel
                 </Button>
                 <Button
                   onClick={handleSaveChanges}
+                  disabled={isMutating}
                   className="bg-blue-600 hover:bg-blue-700 text-white"
                 >
                   Save Changes

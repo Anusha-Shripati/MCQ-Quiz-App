@@ -10,7 +10,8 @@ import { z } from "zod";
 import { Button } from "../ui/form/button";
 import PermissionsTable from "./permission-table";
 import { Module,  Permissions,  RoleData } from "@/types/common.types";
-
+import useSWRMutation from "swr/mutation";
+import { cache } from 'swr/_internal';
 const permissionSchema = z.object({
   can_read: z.boolean(),
   can_edit: z.boolean(),
@@ -27,7 +28,17 @@ const defaultRole: Omit<RoleData, "id"> & Partial<Pick<RoleData, "id">> = {
   role_permissions: [],
 };
 
+async function create(url: string, { arg }: { arg:  Partial<RoleData> }) {
+  const response = await api.post(url, arg);
+  return response;
+}
+async function update(url: string, { arg }: { arg: Partial<RoleData> }) {
+  const response = await api.put(url, arg);
+  return response;
+};
+
 function RoleForm({ open, onClose, roleData = null }: {open:boolean, onClose: () => void, roleData?: RoleData | null}) {
+  
   const {
     handleSubmit,
     reset,
@@ -54,6 +65,10 @@ function RoleForm({ open, onClose, roleData = null }: {open:boolean, onClose: ()
   };
 
   const { data: modules } = useSWR("/module/list", api.get);
+
+
+  const { trigger, isMutating } = useSWRMutation(`/role/create`, create);
+  const { trigger: updateTrigger, isMutating: updating } = useSWRMutation(`/role/${roleData?.id}`, update);
 
   useEffect(() => {
     if (modules?.data?.list) {
@@ -99,9 +114,9 @@ function RoleForm({ open, onClose, roleData = null }: {open:boolean, onClose: ()
       };
       let res;
       if(roleData){
-        res = await api.put(`/role/${roleData.id}`,payload);
+        res = await updateTrigger(payload);
       }else{
-        res = await api.post("/role/create",payload);
+        res = await trigger(payload);
       }
 
       if (res.success) {
@@ -158,10 +173,10 @@ function RoleForm({ open, onClose, roleData = null }: {open:boolean, onClose: ()
               onCheckboxChange={handleCheckboxChange}
             />
             <div className="flex justify-end space-x-2">
-              <Button variant="destructive" onClick={handleClose}>
+              <Button variant="destructive" onClick={handleClose}  disabled={isMutating || updating}>
                 Close
               </Button>
-              <Button type="submit" className="bg-green-600">
+              <Button type="submit" className="bg-green-600" disabled={isMutating || updating}>
                 {roleData ? "Update" : "Save"}
 
               </Button>

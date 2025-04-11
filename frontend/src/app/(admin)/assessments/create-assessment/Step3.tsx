@@ -16,6 +16,7 @@ import { AssessmentForm } from "@/types/assessment.types";
     handlePreviousStep: () => void;
     handleSubmit: () => void;
     calculateTotalSum: () => number;
+    isMutating:boolean
 
   }
   
@@ -24,7 +25,8 @@ import { AssessmentForm } from "@/types/assessment.types";
     setStep,
     handlePreviousStep,
     handleSubmit,
-    calculateTotalSum
+    calculateTotalSum,
+    isMutating
   }) => {
 
   const calculateDifficultyPercentage = (
@@ -134,11 +136,11 @@ import { AssessmentForm } from "@/types/assessment.types";
         
         {/* Footer Actions */}
         <CardFooter className="flex flex-col sm:flex-row justify-end gap-2 p-4">
-          <Button variant="outline" onClick={handlePreviousStep} className="text-sm dark:border-gray-600 dark:text-white dark:hover:bg-gray-700">
+          <Button variant="outline" disabled={isMutating} onClick={handlePreviousStep} className="text-sm dark:border-gray-600 dark:text-white dark:hover:bg-gray-700">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Previous
           </Button>
-          <Button onClick={handleSubmit} className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-white text-sm">
+          <Button onClick={handleSubmit} disabled={isMutating} className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-white text-sm">
             Create Assessment
           </Button>
         </CardFooter>

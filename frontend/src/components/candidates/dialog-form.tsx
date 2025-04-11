@@ -1,39 +1,27 @@
 "use client";
 
-import React, { useEffect } from "react";
-import { Button } from "@/components/ui/form/button";
+import { DatePickerInput } from "@/components/common/date-picker-input";
+import { FormField } from "@/components/common/form-field";
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "@/components/ui/dialog";
-import { FormField } from "@/components/common/form-field";
-import { DatePickerInput } from "@/components/common/date-picker-input";
-import { DurationInput } from "../common/duration-input";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { Button } from "@/components/ui/form/button";
 import { api, isAxiosError } from "@/lib/api";
+import { useCandidateStore } from "@/store/candidateStore";
+import { CandidateFormData } from "@/types/candidate.types";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { mutate } from "swr";
-import { useCandidateStore } from "@/store/candidateStore";
+import { z } from "zod";
+import { DurationInput } from "../common/duration-input";
 
 type ErrorType = string | undefined;
-type CandidateFormData = {
-  id?: string;
-  name: string;
-  email: string;
-  technology: string;
-  experience: string;
-  assessment: string;
-  phone: string;
-  timeUnit: "days" | "hours";
-  startDate: Date | undefined;
-  endDate: Date | undefined;
-  timeValue: number | "";
-};
 interface CandidateDialogProps {
   candidate?: Partial<CandidateFormData> | undefined | null;
   open: boolean | undefined;
@@ -46,57 +34,66 @@ export default function DialogForm({
 }: CandidateDialogProps) {
   const validation = z.object({
     email: z.string().email("Invalid email address."),
-    name: z.string().nonempty("Name is required"),
-    phone: z.string().nonempty("Phone is required"),
+    name: z.string().min(2, "Name must be at least 2 characters").max(50, "Name must be less than 50 characters"),
+    phone: z.string()
+      .min(10, "Phone number must be at least 10 digits")
+      .max(10, "Phone number must be less than 15 digits")
+      .regex(/^[0-9+\-() ]*$/, "Phone number can only contain numbers, +, -, (, ) and spaces"),
     technology: z
       .string({ message: "Technology is required" })
       .nonempty("Technology is required"),
     assessment: z
       .string({ message: "Assessment is required" })
       .nonempty("Assessment is required"),
-    experience: z.string().nonempty("Experience is required"),
+    experience: z.string()
+      .min(1, "Experience is required")
+      .max(2, "Experience must be less than 100 years")
+      .regex(/^[0-9]*$/, "Experience must be a number"),
     timeValue: z
       .number({ message: "Duration is required" })
-      .min(0, "Duration is required"),
+      .min(0, "Duration must be greater than 0")
+      .max(365, "Duration must be less than 365 days"),
     timeUnit: z.enum(["days", "week"], {
       errorMap: () => ({ message: "Duration must be 'day' or 'week'" }),
     }),
-    startDate: z.date({ message: "Duration is required" }),
+    startDate: z.date({ message: "Start date is required" }),
+    endDate: z.date({ message: "End date is required" }),
   });
   const formFields: CandidateFormData = {
-    email: "",
-    name: "",
-    phone: "",
-    technology: "",
-    assessment: "",
-    experience: "",
-    timeValue: 0,
-    timeUnit: "days",
-    startDate: new Date(),
-    endDate: new Date(),
-  };
+		email: '',
+		name: '',
+		phone: '',
+		technology: '',
+		assessment: '',
+		experience: '',
+		timeValue: 0,
+		timeUnit: 'days',
+		startDate: new Date(),
+		endDate: new Date(),
+	};
 
-  const {
-    register,
-    formState: { errors },
-    handleSubmit,
-    setValue,
-    watch,
-    reset,
-  } = useForm<CandidateFormData>({
-    resolver: zodResolver(validation),
-    defaultValues: candidate || (formFields as CandidateFormData),
-  });
-  const formData = watch();
-  const { assessmentOptions, technologyOptions } = useCandidateStore();
+  const { register, formState: { errors }, handleSubmit, setValue, watch, reset } = useForm<CandidateFormData>({ resolver: zodResolver(validation), defaultValues: formFields as CandidateFormData })
+  const formData = watch()
+  const {assessmentOptions,technologyOptions} = useCandidateStore()
 
   const validateAndSubmit = async (values: CandidateFormData) => {
     try {
       let res;
+      const createCandidate = {
+        name: values.name,
+        email: values.email,
+        phone: values.phone,
+        technology_id: values.technology,
+        experience: values.experience,
+        assessment_id: values.assessment,
+        start_date: values.startDate,
+        end_date: values.endDate,
+      };
+
       if (candidate) {
-        res = await api.put(`/candidate/${candidate?.id}`, values);
+        res = await api.put(`/candidate/${candidate?.id}`, createCandidate);
       } else {
-        res = await api.post("/candidate/create", values);
+        res = await api.post("/candidate/create", createCandidate);
       }
       if (res.success) {
         toast.success(
@@ -124,11 +121,7 @@ export default function DialogForm({
   };
 
   useEffect(() => {
-    if (
-      formData.startDate &&
-      formData.timeUnit &&
-      Number(formData.timeValue) >= 0
-    ) {
+    if (formData.startDate && formData.timeUnit && Number(formData.timeValue) >=0 ) {
       const newEndDate = new Date(formData.startDate);
       const numericValue = Number(formData.timeValue);
 
@@ -144,10 +137,12 @@ export default function DialogForm({
   }, [formData.startDate, formData.timeUnit, formData.timeValue]);
 
   useEffect(() => {
-    if (open) {
-      reset(candidate || formFields);
-    }
-  }, [open, candidate, reset]);
+		console.log('candidate in dialog form', candidate);
+		console.log('formFields', formFields);
+		if (open) {
+				reset(candidate || formFields);
+		}
+	}, [open, candidate, reset]);
 
   return (
     <Dialog
@@ -171,6 +166,7 @@ export default function DialogForm({
               label="Name"
               id="name"
               value={formData.name}
+              maxLength={50}
               {...register("name")}
               error={errors.name?.message as ErrorType}
             />
@@ -181,6 +177,7 @@ export default function DialogForm({
                 id="email"
                 type="email"
                 value={formData.email}
+                maxLength={100}
                 {...register("email")}
                 error={errors.email?.message as ErrorType}
               />
@@ -189,6 +186,9 @@ export default function DialogForm({
                 id="phone"
                 type="tel"
                 value={formData.phone}
+                maxLength={10}
+                pattern="[0-9+\-() ]*"
+                inputMode="numeric"
                 {...register("phone")}
                 error={errors.phone?.message as ErrorType}
               />
@@ -205,10 +205,16 @@ export default function DialogForm({
                   setValue("technology", value, { shouldValidate: true })
                 }
                 error={errors?.technology?.message as ErrorType}
+                disabled={technologyOptions.length === 0}
               />
               <FormField
                 label="Experience"
                 id="experience"
+                type="number"
+                min="0"
+                max="99"
+                maxLength={2}
+                inputMode="numeric"
                 {...register("experience")}
                 error={errors.experience?.message as ErrorType}
               />
@@ -224,6 +230,7 @@ export default function DialogForm({
                 setValue("assessment", value, { shouldValidate: true })
               }
               error={errors?.assessment?.message as ErrorType}
+              disabled={assessmentOptions.length === 0}
             />
 
             <div className="grid grid-cols-2 gap-4">
@@ -239,16 +246,9 @@ export default function DialogForm({
                 label="Ends in"
                 timeUnit={formData.timeUnit}
                 timeValue={formData.timeValue}
-                setTimeUnit={(e) =>
-                  setValue("timeUnit", e, { shouldValidate: true })
-                }
-                setTimeValue={(e) =>
-                  setValue("timeValue", e, { shouldValidate: true })
-                }
-                error={
-                  (errors?.timeValue?.message as ErrorType) ||
-                  (errors?.timeUnit?.message as ErrorType)
-                }
+                setTimeUnit={(e) => setValue('timeUnit', e, { shouldValidate: true })}
+                setTimeValue={(e) => setValue('timeValue', e, { shouldValidate: true })}
+                error={errors?.timeValue?.message as ErrorType || errors?.timeUnit?.message as ErrorType}
               />
             </div>
           </div>

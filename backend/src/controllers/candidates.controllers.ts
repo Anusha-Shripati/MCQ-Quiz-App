@@ -1,15 +1,42 @@
-import { Request, Response, NextFunction } from 'express';
+import { NextFunction, Request, Response } from 'express';
+import { AppError } from '../common/errors/AppError';
 import CandidatesService from '../services/candidates.services';
+import ExamService from '../services/exam.services';
+import { CreateCandidate, UpdateCandidate } from "../types/candidate.types";
 import { generateResponse } from '../utils/generateResponse';
 
 const candidateService = new CandidatesService();
+const examService = new ExamService();
 
 export class CandidateController {
 	create = async (req: Request, res: Response, next: NextFunction) => {
 		try {
-			const candidateData = req.body;
-			const newCandidate =
-				await candidateService.createCandidate(candidateData);
+			const candidateData: CreateCandidate = req.body;
+			const user = req.user;
+
+			const newExam = await examService.createExam({
+				user_id: user.id,
+				assessment_id: candidateData.assessment_id,
+				meta: candidateData.meta || {},
+				start_time: candidateData.start_date || new Date(),
+				end_time: candidateData.end_date || new Date(),
+			});
+
+			if (!newExam) {
+				throw new AppError('Failed to create exam', 400);
+			}
+
+			const newCandidate = await candidateService.createCandidate({
+				assessment_id: candidateData.assessment_id,
+				technology_id: candidateData.technology_id,
+				exam_id: newExam.id,
+				name: candidateData.name,
+				email: candidateData.email,
+				experience: candidateData.experience,
+				phone: candidateData.phone,
+				meta: candidateData.meta || {},
+			});
+
 			return generateResponse(
 				res,
 				201,
@@ -25,9 +52,10 @@ export class CandidateController {
 	update = async (req: Request, res: Response, next: NextFunction) => {
 		try {
 			const { id } = req.params;
-			const candidateData = req.body;
+			const candidateData: UpdateCandidate = req.body;
 
 			const existingCandidate = await candidateService.getCandidateById(id);
+
 			if (!existingCandidate) {
 				return generateResponse(res, 404, {}, false, 'Candidate not found!');
 			}
@@ -36,6 +64,7 @@ export class CandidateController {
 				id,
 				candidateData
 			);
+
 			return generateResponse(
 				res,
 				200,
@@ -71,8 +100,8 @@ export class CandidateController {
 
 	get = async (req: Request, res: Response, next: NextFunction) => {
 		try {
-			const search = req.query;
-			const candidates = await candidateService.getCandidates(search);
+			const query = req.query;
+			const candidates = await candidateService.getCandidates(query);
 			return generateResponse(
 				res,
 				200,

@@ -18,7 +18,7 @@ interface FilterOptionsProps {
 export function FilterOptions({
   formData,
   setValue,
-  register,
+  // register,
 
 }: FilterOptionsProps) {
   // useEffect(() => {
@@ -32,11 +32,11 @@ export function FilterOptions({
   };
   const renderFilterContent = (filter: string) => {
 
-    const handleExpRange = (value: string) => {
-      setValue('experience.min', null)
-      setValue('experience.max', null)
-      setValue('experience.range', value)
-    }
+    // const handleExpRange = (value: string) => {
+    //   setValue('experience.min', null)
+    //   setValue('experience.max', null)
+    //   setValue('experience.range', value)
+    // }
     const handelDateButton = (value: string) => {
       setValue('created.days', value)
       if(value == 'Last 7 Days'){
@@ -46,6 +46,7 @@ export function FilterOptions({
       }
     }
     const handleDateRange = (e: DateRange) => {
+      console.log("date ",e,)
       setValue('created.days', '');
       setValue('created.range', e)
     }

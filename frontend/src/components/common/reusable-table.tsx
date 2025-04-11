@@ -77,13 +77,26 @@ const ReusableTable = <T extends object>({
                 }}
                 className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200"
               >
-                {columns.map((column) => (
-                  <TableCell key={column.key as string}>
-                    {column.render
-                      ? column.render(row)
-                      : (row[column.key as keyof T] as React.ReactNode)}
-                  </TableCell>
-                ))}
+                {columns.map((column) => {
+                  const getNestedValue = (obj: Record<string, unknown>, path: string): unknown => {
+                    return path.split('.').reduce<Record<string, unknown> | null>((o, key) => 
+                      o && o[key] !== undefined ? o[key] as Record<string, unknown> : null, 
+                      obj
+                    );
+                  };
+
+                  const value = typeof column.key === 'string' && column.key.includes('.') 
+                    ? getNestedValue(row as Record<string, unknown>, column.key)
+                    : row[column.key as keyof T];
+
+                  return (
+                    <TableCell key={column.key as string}>
+                      {column.render
+                        ? column.render(row)
+                        : (value as React.ReactNode)}
+                    </TableCell>
+                  );
+                })}
                 {/* Add the expand/collapse icon if expandableRow is provided */}
                 {expandableRow && (
                   <TableCell onClick={() => {

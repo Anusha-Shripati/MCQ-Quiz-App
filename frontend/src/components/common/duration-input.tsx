@@ -28,7 +28,7 @@ export const DurationInput = ({
           <FormField
             type="number"
             value={timeValue}
-            onChange={(e) => setTimeValue(e.target.value || '')}
+            onChange={(e) => setTimeValue(parseInt(e.target.value) || '')}
             placeholder={`Enter ${timeUnit}`}
           />
           <FormField

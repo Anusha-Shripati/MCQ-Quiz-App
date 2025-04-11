@@ -1,4 +1,6 @@
+import { api } from '@/lib/api';
 import { DateRange } from '@/types/common.types';
+import { isAxiosError } from 'axios';
 import { create } from 'zustand'
 
 export interface Question {
@@ -45,11 +47,11 @@ interface AssessmentState {
     error: string | null;
     setCurrentAssessment: (assessment: Assessment) => void;
     clearCurrentAssessment: () => void;
-    fetchAssessments: () => Promise<Assessment[]>;
+    fetchAssessments: () => Promise<void>;
     setFilters:(filters:AssessmentFilters)=>void
 }
 
-export const useAssessmentStore = create<AssessmentState>((set, get) => ({
+export const useAssessmentStore = create<AssessmentState>((set) => ({
     assessments: [],
     filters:{
         name:"",
@@ -60,13 +62,20 @@ export const useAssessmentStore = create<AssessmentState>((set, get) => ({
     currentAssessment: null,
     isLoading: false,
     error: null,
-    fetchAssessments: () => {
-        console.log('opopop');
-        
-        return new Promise((resolve) => {
-            const assessments = get().assessments
-            resolve(assessments)
-        })
+    fetchAssessments: async () => {
+        set({ isLoading: true });
+        try {
+          const response = await api.get('/assessment/list');
+          console.log("assessments",response.data);
+          set({ assessments: response.data.data, isLoading: false, error: null });
+        } catch (error) {
+          if (isAxiosError(error)) {
+            const errorMessage = error.response?.data?.message || "Failed to fetch assessments";
+            set({ error: errorMessage, isLoading: false });
+            throw new Error(errorMessage);
+          }
+          set({ error: 'Failed to fetch assessments', isLoading: false });
+        }
     },
     setFilters:(filters:AssessmentFilters)=>{
         set({filters})

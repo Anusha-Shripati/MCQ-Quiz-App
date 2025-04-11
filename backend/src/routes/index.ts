@@ -9,6 +9,7 @@ import roleRouter from './role.router';
 import technologyRouter from './technology.router';
 import adminRouter from "./user.router";
 import candidateRouter from './candidates.router';
+import examRouter from './exam.router';
 
 const router = express.Router();
 
@@ -20,6 +21,7 @@ router.use("/technology", technologyRouter);
 router.use("/assessment", assessmentRouter);
 router.use("/dashboard", dashboardRouter);
 router.use("/question", questionRouter);
-router.use('/candidates', candidateRouter);
+router.use('/candidate', candidateRouter);
+router.use('/exam', examRouter);
 
 export default router;

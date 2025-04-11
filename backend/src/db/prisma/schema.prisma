@@ -87,6 +87,7 @@ model Technology {
     deleted_at            DateTime?
     assessment_technology Assessment_technology[]
     questions             Questions[]
+    candidates            Candidate[]
 }
 
 model Questions {
@@ -110,17 +111,21 @@ model Questions {
 model Candidate {
     id                    String                  @id @default(uuid())
     assessment_id         String
+    technology_id         String
+    exam_id               String?
     name                  String
     email                 String                  @unique
     experience            String
     phone                 String                  @unique
-    meta                  Json
+    meta                  Json?
     created_at            DateTime                @default(now())
     updated_at            DateTime                @updatedAt
     deleted_at            DateTime?
     assessment            Assessments             @relation(fields: [assessment_id], references: [id])
+    technology            Technology              @relation(fields: [technology_id], references: [id])
     candidate_assessments Candidate_assessments[]
     results               Results[]
+    exam                  Exam?                   @relation(fields: [exam_id], references: [id])
 }
 
 model Candidate_assessments {
@@ -137,16 +142,17 @@ model Exam {
     assessment_id  String
     end_time       DateTime
     start_time     DateTime
-    is_completed   Boolean
-    meta           Json
+    is_completed   Boolean          @default(false)
+    meta           Json?
     created_at     DateTime         @default(now())
     updated_at     DateTime         @updatedAt
     deleted_at     DateTime?
-    user           User        @relation(fields: [user_id], references: [id])
+    user           User             @relation(fields: [user_id], references: [id])
     assessment     Assessments      @relation(fields: [assessment_id], references: [id])
     exam_questions Exam_questions[]
     results        Results[]
     answers        Answers[]
+    candidates     Candidate[]     
 }
 
 model Exam_questions {

@@ -1,27 +1,134 @@
-import { PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
+import { AppError } from '../common/errors/AppError';
+import { CreateCandidate, UpdateCandidate } from '../types/candidate.types';
+import ExamService from './exam.services';
 
 const prisma = new PrismaClient();
+const examService = new ExamService();
 
 export default class CandidatesService {
-	async createCandidate(data: any) {
-		return await prisma.candidate.create({
-			data,
-			include: {
-				assessment: true,
-				candidate_assessments: true,
-				results: true,
-			},
-		});
+	async createCandidate(data: CreateCandidate & { exam_id: string }) {
+		try {
+			const existingEmail = await prisma.candidate.findUnique({
+				where: { email: data.email },
+			});
+			if (existingEmail) {
+				throw new AppError('Email already exists', 400);
+			}
+
+			const existingPhone = await prisma.candidate.findUnique({
+				where: { phone: data.phone },
+			});
+			if (existingPhone) {
+				throw new AppError('Phone number already exists', 400);
+			}
+
+			await examService.createExamQuestionsForAssessment(data.exam_id, data.assessment_id);
+
+			return await prisma.candidate.create({
+				data: {
+					name: data.name,
+					email: data.email,
+					phone: data.phone,
+					experience: data.experience,
+					assessment_id: data.assessment_id,
+					technology_id: data.technology_id,
+					exam_id: data.exam_id,
+					meta: data.meta as Prisma.JsonObject,
+				},
+				include: {
+					assessment: true,
+					candidate_assessments: true,
+					results: true,
+				},
+			});
+		} catch (error) {
+			console.log('error', error);
+			if (error instanceof AppError) {
+				throw error;
+			}
+			throw new AppError(
+				'Failed to create candidate. Please try again later.',
+				500
+			);
+		}
 	}
 
-	async updateCandidate(id: string, data: any) {
-		return await prisma.candidate.update({
+	async updateCandidate(id: string, data: UpdateCandidate) {
+		const existingCandidate = await prisma.candidate.findUnique({
 			where: { id },
-			data,
 			include: {
 				assessment: true,
 				candidate_assessments: true,
 				results: true,
+				exam: {
+					include: {
+						exam_questions: true
+					}
+				}
+			},
+		});
+
+		if (!existingCandidate) {
+			throw new AppError('Candidate not found', 404);
+		}
+
+		if (data.email && data.email !== existingCandidate.email) {
+			const existingEmail = await prisma.candidate.findUnique({
+				where: { email: data.email },
+			});
+
+			if (existingEmail) {
+				throw new AppError('Email already exists', 400);
+			}
+		}
+
+		if (data.phone && data.phone !== existingCandidate.phone) {
+			const existingPhone = await prisma.candidate.findUnique({
+				where: { phone: data.phone },
+			});
+
+			if (existingPhone) {
+				throw new AppError('Phone number already exists', 400);
+			}
+		}
+
+		if (data.assessment_id && data.assessment_id !== existingCandidate.assessment_id) {
+			if (!existingCandidate.exam) {
+				throw new AppError('Exam not found for candidate', 404);
+			}
+
+			if(existingCandidate.exam.is_completed){
+				throw new AppError('Exam is completed. Cannot change assessment', 400);
+			}
+
+			await prisma.exam_questions.deleteMany({
+				where: { exam_id: existingCandidate.exam.id }
+			});
+
+			await examService.createExamQuestionsForAssessment(existingCandidate.exam.id, data.assessment_id);
+		}
+
+		return await prisma.candidate.update({
+			where: { id },
+			data: {
+				name: data.name,
+				email: data.email,
+				phone: data.phone,
+				experience: data.experience,
+				assessment_id: data.assessment_id,
+				technology_id: data.technology_id,
+				meta: data.meta as Prisma.JsonObject,
+			},
+			include: {
+				assessment: true,
+				candidate_assessments: true,
+				results: true,
+				exam: {
+					include: {
+						exam_questions: true
+					}
+				}
 			},
 		});
 	}
@@ -32,38 +139,113 @@ export default class CandidatesService {
 		});
 	}
 
-	async getCandidates(search: any) {
-		const where: any = {};
+	async getCandidates(query: {
+		created?: string;
+		limit?: string;
+		page?: string;
+		searchQuery?: string;
+		technologyFilter?: string | string[];
+		assessmentFilter?: string | string[];
+	}) {
+		const where: Prisma.CandidateWhereInput = {};
 
-		if (search.name) {
-			where.name = {
-				contains: search.name,
-				mode: 'insensitive',
-			};
+		console.log('query', query);
+
+		if (query.searchQuery) {
+			where.OR = [
+				{
+					name: {
+						contains: query.searchQuery,
+						mode: 'insensitive',
+					},
+				},
+				{
+					email: {
+						contains: query.searchQuery,
+						mode: 'insensitive',
+					},
+				},
+			];
 		}
 
-		if (search.email) {
-			where.email = {
-				contains: search.email,
-				mode: 'insensitive',
-			};
+		if (query.created) {
+			try {
+				console.log('Received created query:', query.created);
+				const dateRange = JSON.parse(query.created)?.range;
+				console.log('Parsed date range:', dateRange);
+
+				if (!dateRange) {
+					throw new AppError('Invalid date range format', 400);
+				}
+
+				const fromDate = dateRange.from ? new Date(dateRange.from) : null;
+				const toDate = dateRange.to ? new Date(dateRange.to) : null;
+
+				console.log('Converted dates:', {
+					fromDate: fromDate,
+					toDate: toDate,
+				});
+
+				if (
+					fromDate &&
+					toDate &&
+					!isNaN(fromDate.getTime()) &&
+					!isNaN(toDate.getTime())
+				) {
+					where.created_at = {
+						gte: fromDate,
+						lte: toDate,
+					};
+					console.log('Final where clause for dates:', where.created_at);
+				} else {
+					console.log('Invalid dates:', { fromDate, toDate });
+				}
+			} catch (error) {
+				console.error('Invalid date range format:', error);
+			}
 		}
 
-		if (search.assessment_id) {
-			where.assessment_id = search.assessment_id;
+		if (query.technologyFilter) {
+			where.technology_id = Array.isArray(query.technologyFilter)
+				? { in: query.technologyFilter }
+				: query.technologyFilter;
 		}
 
-		return await prisma.candidate.findMany({
+		if (query.assessmentFilter) {
+			where.assessment_id = Array.isArray(query.assessmentFilter)
+				? { in: query.assessmentFilter }
+				: query.assessmentFilter;
+		}
+
+		const page = Number(query.page) || 1;
+		const limit = Number(query.limit) || 10;
+		const skip = (page - 1) * limit;
+
+		const total = await prisma.candidate.count({ where });
+
+		const candidates = await prisma.candidate.findMany({
 			where,
 			include: {
 				assessment: true,
+				technology: true,
+				exam: true,
 				candidate_assessments: true,
 				results: true,
 			},
 			orderBy: {
 				created_at: 'desc',
 			},
+			skip,
+			take: limit,
 		});
+
+		return {
+			list: candidates,
+			total,
+			page,
+			limit,
+			totalPages: Math.ceil(total / limit),
+		};
 	}
 
 	async getCandidateById(id: string) {

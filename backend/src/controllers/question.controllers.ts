@@ -63,5 +63,15 @@ export class QuestionsController {
             next(error);
         }
     }
+    getQuestionByTechnologyId = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const {technology} = req.params
+            const search = req.query
+            const assessmentData = await questionsService.getQuestionByTechnologyId(technology,search);
+            return generateResponse(res, 200, assessmentData, true, "Question fetched successfully");
+        } catch (error) {
+            next(error);
+        }
+    }
 
 }

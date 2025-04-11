@@ -8,25 +8,30 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import toast from "react-hot-toast";
 import { Question } from "@/shared/types/app";
-import useSWR from "swr";
+import useSWR, { mutate } from "swr";
 import { api } from "@/lib/api";
-const CreateQuestion: React.FC<{ params: { questionSlug: string } }> = ({
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
+const CreateQuestion: React.FC<{ params: { technology: string } }> = ({
   params,
 }) => {
-  
+
   const [questions, setQuestions] = useState<Question[]>([]);
   const router = useRouter();
-  console.log(params.questionSlug[0], "params");
   const [selectedQuestion, setSelectedQuestion] = useState<number>(0);
 
-  const { data } = useSWR(
-    `/question/list?technology_id=${params.questionSlug[0]}`,
+  const { data,isLoading } = useSWR(
+    `/question/list?technology_id=${params.technology}`,
     api.get
   );
 
-  
+
   useEffect(() => {
-    setQuestions(data?.data?.questions);
+    if (data?.data?.questions?.length) {
+      setQuestions(data?.data?.questions);
+      if (selectedQuestion >= data?.data?.questions.length) {
+        setSelectedQuestion(data?.data?.questions.length - 1);
+      }
+    }
   }, [data]);
 
   // const handleSave = () => {
@@ -35,15 +40,36 @@ const CreateQuestion: React.FC<{ params: { questionSlug: string } }> = ({
   // };
 
   const handleReset = () => {
+    setQuestions((prv) => {
+      return prv.map((q, index) => {
+        if (index != selectedQuestion) return q;
+        return {
+          ...q,
+          question: "",
+          options: ["", "", "", "", "", ""],
+          correct_answer: [],
+          time: "",
+          difficulty_level: "easy",
+          type: "mcq",
+          meta: {}
+        };
+      });
+    })
     toast.success("Questions Reset successfully!");
   };
 
-  const handleDeleteQuestion = (index: number) => {
-    console.log(index, "indexx");
-    const updatedQuestions = questions.filter((_, i) => i !== index);
-    setQuestions(updatedQuestions);
-    if (selectedQuestion >= updatedQuestions.length) {
-      setSelectedQuestion(updatedQuestions.length - 1);
+  const handleDeleteQuestion = async (question: Question, index: number) => {
+    try {
+      if (question.id) {
+        await api.delete(`/question/${question.id}`);
+      }
+      const updatedQuestions = questions.filter((_, i) => i !== index);
+      setQuestions(updatedQuestions);
+      if (selectedQuestion >= updatedQuestions.length) {
+        setSelectedQuestion(updatedQuestions.length - 1);
+      }
+    } catch (error) {
+      toast.error("Failed to delete question");
     }
   };
 
@@ -52,18 +78,22 @@ const CreateQuestion: React.FC<{ params: { questionSlug: string } }> = ({
     updatedQuestions[index].type = value;
 
     // Reset answer/options based on the new type
-    if (value === "mcq" || value === "radio-select") {
+    if (value === "mcq" || value === "multiple_select") {
       updatedQuestions[index].options = ["", "", "", "", "", ""]; // 4 compulsory + 2 optional
-      updatedQuestions[index].correct_answer = ""; // Reset correct options
+      updatedQuestions[index].correct_answer = []; // Reset correct options
       // delete updatedQuestions[index].answer; // Remove answer field if it exists
       // delete updatedQuestions[index].code; // Remove code field if it exists
-    } else if (value === "fill-in-the-blanks") {
-      updatedQuestions[index].correct_answer = "";
+    } else if (value === "text") {
+      updatedQuestions[index].correct_answer = [];
       // delete updatedQuestions[index].options; // Remove options field if it exists
       // delete updatedQuestions[index].correctOptions; // Remove correct options field if it exists
       // delete updatedQuestions[index].code; // Remove code field if it exists
-    } else if (value === "code-snippet") {
-      updatedQuestions[index].correct_answer = "";
+    } else if (value === "code_snippet") {
+      updatedQuestions[index].correct_answer = [];
+      if (updatedQuestions[index]?.meta?.code === undefined) {
+        updatedQuestions[index].meta = { code: "" };
+
+      }
       // delete updatedQuestions[index].options; // Remove options field if it exists
       // delete updatedQuestions[index].correctOptions; // Remove correct options field if it exists
       // delete updatedQuestions[index].answer; // Remove answer field if it exists
@@ -99,14 +129,14 @@ const CreateQuestion: React.FC<{ params: { questionSlug: string } }> = ({
 
   const handleAddQuestion = () => {
     const newQuestion: Question = {
-      id: "",
-      technology_id: params.questionSlug[0],
+      technology_id: params.technology,
       type: "mcq",
       question: "",
       options: ["", "", "", "", "", ""],
-      correct_answer: "",
+      correct_answer: [],
       time: "",
       difficulty_level: "easy",
+      meta: {}
     };
     setQuestions([...questions, newQuestion]);
     setSelectedQuestion(questions.length);
@@ -115,10 +145,13 @@ const CreateQuestion: React.FC<{ params: { questionSlug: string } }> = ({
   const handleBack = () => {
     router.push("/questions");
   };
+  if(isLoading){
+    return <LoadingSpinner className="w-full h-screen"/>
+  }
 
   return (
     // Main container
-    <div className="min-h-screen bg-gray-100 p-6 dark:bg-gray-900 ">
+    <div className="min-h-screen p-6 dark:bg-gray-900 ">
       {/* Header */}
       <div className="flex justify-start items-center mb-4">
         <Button variant="ghost" size="icon" onClick={handleBack}>
@@ -152,45 +185,33 @@ const CreateQuestion: React.FC<{ params: { questionSlug: string } }> = ({
                 onAction={() => {
                   // Example: Add a new question
                   const newQuestion: Question = {
-                    id: "1",
-                    technology_id: params.questionSlug[0],
+                    technology_id: params.technology,
                     question: "",
                     options: ["", "", "", "", "", ""],
-                    correct_answer: "",
+                    correct_answer: [],
                     time: "",
                     difficulty_level: "easy",
                     type: "mcq",
+                    meta: {}
                   };
                   setQuestions([newQuestion]);
                 }}
               />
             ) : (
-              questions.map((q, index) => (
+              // questions.map((q, index) => (
                 <QuestionCard
-                  key={q.id}
-                  question={q}
-                  index={index}
+                  question={questions[selectedQuestion]}
                   selectedQuestion={selectedQuestion}
                   questions={questions}
                   handleQuestionTypeChange={handleQuestionTypeChange}
                   handleDeleteQuestion={handleDeleteQuestion}
                   setQuestions={setQuestions}
                   handleReset={handleReset}
-                  technologyId={params.questionSlug[0]}
+                  technologyId={params.technology}
                 />
-              ))
+              // ))
             )}
           </div>
-          {/* {questions.length !== 0 && (
-            <div className="mt-2 flex justify-end gap-4">
-              <Button variant="outline" onClick={handleReset}>
-                Reset
-              </Button>
-              <Button variant="outline" onClick={handleSave}>
-                Save
-              </Button>
-            </div>
-          )} */}
         </div>
       </div>
     </div>

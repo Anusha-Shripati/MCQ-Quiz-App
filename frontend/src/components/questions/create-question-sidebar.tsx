@@ -6,17 +6,13 @@ import { Trash2 } from "lucide-react";
 import { useSearchParams, usePathname } from "next/navigation";
 import clsx from "clsx";
 import { DeleteDialog } from "../common/delete-dialog";
+import { Question } from "@/shared/types/app";
 
 interface QuestionSidebarProps {
-  questions: {
-    id: string;
-    type: string;
-    difficulty_level: string;
-    question: string;
-  }[];
+  questions: Question[];
   selectedQuestion: number;
   setSelectedQuestion: (index: number) => void;
-  handleDeleteQuestion: (index: number) => void;
+  handleDeleteQuestion: (question: Question, index: number) => void;
   handleAddQuestion: () => void;
 }
 
@@ -60,7 +56,7 @@ const QuestionSidebar: React.FC<QuestionSidebarProps> = ({
   handleAddQuestion,
 }) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [questionToDelete, setQuestionToDelete] = useState<number | null>(null);
+  const [questionToDelete, setQuestionToDelete] = useState<{ question: Question, index: number } | null>(null);
   const searchParams = useSearchParams();
   const pathname = usePathname();
 
@@ -81,8 +77,8 @@ const QuestionSidebar: React.FC<QuestionSidebarProps> = ({
     [setSelectedQuestion, updateQueryParams]
   );
 
-  const openDeleteModal = useCallback((index: number) => {
-    setQuestionToDelete(index);
+  const openDeleteModal = useCallback((question: Question, index: number) => {
+    setQuestionToDelete({ question, index });
     setIsDeleteModalOpen(true);
   }, []);
 
@@ -93,13 +89,13 @@ const QuestionSidebar: React.FC<QuestionSidebarProps> = ({
 
   const confirmDelete = useCallback(() => {
     if (questionToDelete !== null) {
-      handleDeleteQuestion(questionToDelete);
+      handleDeleteQuestion(questionToDelete.question, questionToDelete.index);
     }
     closeDeleteModal();
   }, [questionToDelete, handleDeleteQuestion, closeDeleteModal]);
 
   return (
-    <Card className="w-1/4 h-[calc(100vh-8rem)] flex flex-col overflow-hidden shadow-lg bg-white dark:bg-gray-900">
+    <Card className="w-1/4 h-[calc(100vh-8rem)] flex flex-col overflow-hidden shadow-lg">
       {/* Header */}
       <CardHeader className="border-b border-gray-200 dark:border-gray-700 p-4 flex flex-row justify-between items-center">
         <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -119,23 +115,27 @@ const QuestionSidebar: React.FC<QuestionSidebarProps> = ({
           <ul className="space-y-1 p-2">
             {questions?.map((q, index) => (
               <li
-                key={q.id}
+                key={index}
                 className={clsx(
-                  "p-3 rounded-lg cursor-pointer flex justify-between items-center transition-all duration-200 ease-in-out",
+                  "p-3 rounded-lg cursor-pointer flex justify-between items-center transition-all duration-200 ease-in-out border max-w-[335px]",
+                  q.id ? '' : 'border-[#ffa500]',
                   selectedQuestion === index
                     ? "bg-blue-500 text-white hover:bg-blue-600 shadow-md"
                     : "bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 shadow-sm"
                 )}
                 onClick={() => handleQuestionChange(index)}
               >
-                <span className="text-sm font-medium">Question {index + 1}</span>
+                <div className="flex flex-col gap-1 max-w-[269px]">
+                  <span className="text-sm font-medium max-w-[269px] truncate">{index + 1}. {q.question ? q.question : `Question ${index + 1}`}</span>
+                  {!q.id && <small className="text-xs">Not saved</small>}
+                </div>
                 <Button
                   variant="ghost"
                   size="icon"
                   className="hover:bg-red-500/10 rounded-full p-2"
                   onClick={(e) => {
                     e.stopPropagation(); // Prevent triggering the li onClick
-                    openDeleteModal(index);
+                    openDeleteModal(q, index);
                   }}
                 >
                   <Trash2 className="h-4 w-4 text-red-500 hover:text-red-600" />

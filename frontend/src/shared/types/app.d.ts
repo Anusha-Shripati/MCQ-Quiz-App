@@ -36,14 +36,14 @@ export type QuestionCategory = {
 // }
 
 export interface Question {
-  id: string;
+  id?: string;
   technology_id: string;
   question: string;
-  correct_answer: string; // use string from API
+  correct_answer: string[]; // use string from API
   options: string[];
   time: string;
   difficulty_level: "easy" | "medium" | "hard";
-  type: "mcq" | "radio-select" | "fill-in-the-blanks" | "code-snippet";
+  type:'multiple_select' |'video' |  'text' |  'mcq' | 'code_snippet';
   meta?: Record<string, string>;
   created_at?: string;
   updated_at?: string;

@@ -197,11 +197,11 @@ function NavItem({
   return (
     <Link href={href} className="w-full" prefetch={true}>
       <Button
-        className={`w-full flex items-end text-base relative h-12 ${isCollapsed ? "justify-center" : "justify-start"}  gap-4 p-3 rounded-lg transition-colors ${
-          isActive
-            ? "bg-secondary text-secondary-foreground"
-            : "hover:bg-secondary hover:text-secondary-foreground"
-        }`}
+        onMouseEnter={handleMouseEnter}
+        className={`w-full text-base relative h-12 flex items-center ${isCollapsed ? "justify-center" : "justify-start"}  gap-4 p-3 rounded-lg transition-colors ${isActive
+          ? "bg-secondary text-secondary-foreground"
+          : "hover:bg-secondary hover:text-secondary-foreground"
+          }`}
       >
         <span className="h-5 w-5">{icon}</span>
         {!isCollapsed && <span>{label}</span>}

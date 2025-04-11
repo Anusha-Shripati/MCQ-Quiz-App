@@ -21,11 +21,11 @@ technologyRouter.get(
   asyncHandler(technologyController.list)
 );
 
-technologyRouter.get(
-  "/questions",
-  authenticateAndAuthorize("assessments.can_read"),
-  asyncHandler(technologyController.getTechnologyWithQuestion)
-);
+// technologyRouter.get(
+//   "/questions",
+//   authenticateAndAuthorize("assessments.can_read"),
+//   asyncHandler(technologyController.getTechnologyWithQuestion)
+// );
 
 technologyRouter.get(
   "/:id",

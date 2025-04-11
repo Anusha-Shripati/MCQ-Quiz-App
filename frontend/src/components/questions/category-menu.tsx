@@ -20,7 +20,16 @@ import { Button } from "../ui/form/button";
 import { QuestionCategory } from "@/shared/types/app";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import useSWRMutation from "swr/mutation";
+import { api } from "@/lib/api";
+import { mutate } from "swr";
+import { toast } from "react-hot-toast";
+import { AxiosError } from "axios";
 
+async function deleteCategory(url: string) {
+  const response = await api.delete(url);
+  return response.data;
+}
 const CategoryMenu = ({
   category,
   handleDelete,
@@ -39,7 +48,17 @@ const CategoryMenu = ({
   // const handleDeleteCategory = (category: QuestionCategory) => {
   //   console.log(category);
   // };
-
+  const { trigger } = useSWRMutation(`/technology/${category.id}`,deleteCategory);
+  const handleDeleteCategory = async () => {
+    try {
+      await trigger();
+      handleDelete(category);
+      mutate('/technology/list');
+    }catch (error: unknown) {
+      const axiosError = error as AxiosError<{ message: string }>;
+      toast.error(axiosError.response?.data?.message || "Something went wrong.");
+    }
+  };
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -65,7 +84,13 @@ const CategoryMenu = ({
           <Trash className="h-4 w-4 text-red-500" />
           <span className="text-gray-900 dark:text-gray-200">Delete</span>
         </DropdownMenuItem>
-       
+        {/* <DropdownMenuItem
+          onClick={() => handleNavigate()}
+          className="flex items-center space-x-2 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"
+        >
+          <Eye className="h-4 w-4 text-blue-500" />
+          <span className="text-gray-900 dark:text-gray-200">View</span>
+        </DropdownMenuItem> */}
       </DropdownMenuContent>
 
       <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
@@ -90,8 +115,8 @@ const CategoryMenu = ({
             <Button
               variant="destructive"
               onClick={() => {
-                handleDelete(category);
-                setIsDeleteModalOpen(false); 
+                handleDeleteCategory();
+                setIsDeleteModalOpen(false); // Close the modal
               }}
             >
               Delete

@@ -5,16 +5,25 @@ import { Input } from "@/components/ui/form/input";
 import { Button } from "@/components/ui/form/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 import { QuestionCategory } from "@/shared/types/app";
+import { api } from "@/lib/api";
+import { toast } from "react-hot-toast";
+import { AxiosError } from "axios";
+import useSWRMutation from 'swr/mutation';
+import { mutate } from "swr";
 
 // Define props type
 interface CreateCategoryProps {
-  setCategoriesArray: React.Dispatch<React.SetStateAction<QuestionCategory[]>>;
-  categoriesArray: QuestionCategory[]; 
+  categoriesArray: QuestionCategory[];
   setFilteredCategories: React.Dispatch<React.SetStateAction<QuestionCategory[]>>;
 }
 
+async function createCategory(url: string, { arg }: { arg: { name: string } }) {
+  const response = await api.post(url, arg);
+  return response.data;
+}
+
 const CreateCategory: React.FC<CreateCategoryProps> = ({
-  setCategoriesArray,
+
   categoriesArray,
   setFilteredCategories,
 }) => {
@@ -27,16 +36,28 @@ const CreateCategory: React.FC<CreateCategoryProps> = ({
     const value = e.target.value.toLowerCase();
     setSearchTerm(value);
     if (value === "") {
-      setFilteredCategories(categoriesArray); // Reset to all categories when empty
+      setFilteredCategories(categoriesArray);
     } else {
       setFilteredCategories(
         categoriesArray.filter((cat) => cat.name.toLowerCase().includes(value))
       );
     }
   };
-
-  const handleCloseModal = () => {
-    setOpen(false);
+  const { trigger } = useSWRMutation('/technology/create', createCategory);
+ 
+  const handleCreateCategory = async () => {
+    try {
+      const data = await trigger({ name: categoryName });
+      if (data) {
+        setCategoryName("");
+        setOpen(false);
+        toast.success("Technology created successfully");
+        mutate('/technology/list');
+      }
+    } catch (error: unknown) {
+      const axiosError = error as AxiosError<{ message: string }>;
+      toast.error(axiosError.response?.data?.message || "Something went wrong.");
+    }
   };
 
   return (
@@ -71,21 +92,7 @@ const CreateCategory: React.FC<CreateCategoryProps> = ({
             <Button
               className="bg-blue-600 text-primary-foreground hover:bg-primary/90"
               onClick={() => {
-                handleCloseModal();
-                const newCategory: QuestionCategory = {
-                  id: Date.now().toString(),
-                  name: categoryName,
-                  created_at: new Date().toISOString(),
-                  updated_at: new Date().toISOString(),
-                  deleted_at: null,
-                  difficultyCount: {
-                    easy: 0,
-                    medium: 0,
-                    hard: 0
-                  }
-                };
-                setCategoriesArray((prev) => [...prev, newCategory]);
-                setFilteredCategories((prev) => [...prev, newCategory]);
+                handleCreateCategory();
               }}
             >
               Save

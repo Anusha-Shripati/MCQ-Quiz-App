@@ -14,14 +14,14 @@ export const CategoryCard = ({
   category: QuestionCategory;
   handleDelete: (category: QuestionCategory) => void;
 }) => {
+  console.log(category, "category");
   const router = useRouter();
-
   const handleNavigate = () => {
     router.push(`/questions/category/${category.name}`);
   };
 
   const handleAddQuestion = () => {
-    router.push(`/questions/create-question/${category.name}`);
+    router.push(`/questions/create-question/${category.id}`);
   };
 
   const handleNavigateDifficulty = (

@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter as useNavRouter } from "next/navigation"; // Import useRouter for prefetching
 import {
   FiMenu,
   FiChevronLeft,
@@ -187,14 +187,21 @@ function NavItem({
   isCollapsed: boolean;
   isActive: boolean;
 }) {
+  const router = useNavRouter();
+  
+  // Prefetch the route data when mouse hovers over the navigation item
+  const handleMouseEnter = useCallback(() => {
+    router.prefetch(href);
+  }, [router, href]);
+  
   return (
     <Link href={href} className="w-full" prefetch={true}>
       <Button
-        className={`w-full text-base relative h-12 flex items-center ${isCollapsed ? "justify-center" : "justify-start"}  gap-4 p-3 rounded-lg transition-colors ${
-          isActive
-            ? "bg-secondary text-secondary-foreground"
-            : "hover:bg-secondary hover:text-secondary-foreground"
-        }`}
+        onMouseEnter={handleMouseEnter}
+        className={`w-full text-base relative h-12 flex items-center justify-start gap-4 p-3 rounded-lg transition-colors ${isActive
+          ? "bg-secondary text-secondary-foreground"
+          : "hover:bg-secondary hover:text-secondary-foreground"
+          }`}
       >
         <span className="h-5 w-5">{icon}</span>
         {!isCollapsed && <span>{label}</span>}

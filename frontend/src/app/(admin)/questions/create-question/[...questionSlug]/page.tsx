@@ -1,27 +1,38 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/form/button";
 import QuestionCard from "@/components/questions/create-question-card";
-import { CREATE_QUESTIONS_STATIC_LIST } from "@/shared/constants/data";
 import QuestionSidebar from "@/components/questions/create-question-sidebar";
 import EmptyState from "@/components/common/EmptyCreateQuestionState";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import toast from "react-hot-toast";
 import { Question } from "@/shared/types/app";
-
-const CreateQuestion: React.FC = () => {
-  const { questionSlug } = useParams();
-  const [questions, setQuestions] = useState<Question[]>(
-    CREATE_QUESTIONS_STATIC_LIST
-  );
+import useSWR from "swr";
+import { api } from "@/lib/api";
+const CreateQuestion: React.FC<{ params: { questionSlug: string } }> = ({
+  params,
+}) => {
+  
+  const [questions, setQuestions] = useState<Question[]>([]);
   const router = useRouter();
+  console.log(params.questionSlug[0], "params");
   const [selectedQuestion, setSelectedQuestion] = useState<number>(0);
 
-  const handleSave = () => {
-    console.log(questions, "questions");
-    toast.success("Questions saved successfully!");
-  };
+  const { data } = useSWR(
+    `/question/list?technology_id=${params.questionSlug[0]}`,
+    api.get
+  );
+
+  
+  useEffect(() => {
+    setQuestions(data?.data?.questions);
+  }, [data]);
+
+  // const handleSave = () => {
+  //   console.log(questions, "questions");
+  //   toast.success("Questions saved successfully!");
+  // };
 
   const handleReset = () => {
     toast.success("Questions Reset successfully!");
@@ -41,59 +52,61 @@ const CreateQuestion: React.FC = () => {
     updatedQuestions[index].type = value;
 
     // Reset answer/options based on the new type
-    if (value === "multiple-choice" || value === "radio-select") {
+    if (value === "mcq" || value === "radio-select") {
       updatedQuestions[index].options = ["", "", "", "", "", ""]; // 4 compulsory + 2 optional
-      updatedQuestions[index].correctOptions = []; // Reset correct options
-      delete updatedQuestions[index].answer; // Remove answer field if it exists
-      delete updatedQuestions[index].code; // Remove code field if it exists
+      updatedQuestions[index].correct_answer = ""; // Reset correct options
+      // delete updatedQuestions[index].answer; // Remove answer field if it exists
+      // delete updatedQuestions[index].code; // Remove code field if it exists
     } else if (value === "fill-in-the-blanks") {
-      updatedQuestions[index].answer = "";
-      delete updatedQuestions[index].options; // Remove options field if it exists
-      delete updatedQuestions[index].correctOptions; // Remove correct options field if it exists
-      delete updatedQuestions[index].code; // Remove code field if it exists
+      updatedQuestions[index].correct_answer = "";
+      // delete updatedQuestions[index].options; // Remove options field if it exists
+      // delete updatedQuestions[index].correctOptions; // Remove correct options field if it exists
+      // delete updatedQuestions[index].code; // Remove code field if it exists
     } else if (value === "code-snippet") {
-      updatedQuestions[index].code = "";
-      delete updatedQuestions[index].options; // Remove options field if it exists
-      delete updatedQuestions[index].correctOptions; // Remove correct options field if it exists
-      delete updatedQuestions[index].answer; // Remove answer field if it exists
+      updatedQuestions[index].correct_answer = "";
+      // delete updatedQuestions[index].options; // Remove options field if it exists
+      // delete updatedQuestions[index].correctOptions; // Remove correct options field if it exists
+      // delete updatedQuestions[index].answer; // Remove answer field if it exists
     }
 
     setQuestions(updatedQuestions);
   };
 
-  const handleCorrectOptionChange = (optionIndex: number, index: number) => {
-    const updatedQuestions = [...questions];
-    const question = updatedQuestions[index];
+  // const handleCorrectOptionChange = (optionIndex: number, index: number) => {
+  //   const updatedQuestions = [...questions];
+  //   const question = updatedQuestions[index];
 
-    // Replace optional chaining with type assertion
-    if (!question.correctOptions) {
-      question.correctOptions = [];
-    }
+  //   // Replace optional chaining with type assertion
+  //   if (!question.correctOptions) {
+  //     question.correctOptions = [];
+  //   }
 
-    if (question.type === "radio-select") {
-      question.correctOptions = [optionIndex];
-    } else if (question.type === "multiple-choice") {
-      const currentOptions = question.correctOptions;
-      if (currentOptions.includes(optionIndex as number)) {
-        question.correctOptions = (currentOptions as number[]).filter(
-          (i: number) => i !== optionIndex
-        );
-      } else {
-        question.correctOptions = [...currentOptions, optionIndex];
-      }
-    }
+  //   if (question.type === "radio-select") {
+  //     question.correctOptions = [optionIndex];
+  //   } else if (question.type === "multiple-choice") {
+  //     const currentOptions = question.correctOptions;
+  //     if (currentOptions.includes(optionIndex as number)) {
+  //       question.correctOptions = (currentOptions as number[]).filter(
+  //         (i: number) => i !== optionIndex
+  //       );
+  //     } else {
+  //       question.correctOptions = [...currentOptions, optionIndex];
+  //     }
+  //   }
 
-    setQuestions(updatedQuestions);
-  };
+  //   setQuestions(updatedQuestions);
+  // };
 
   const handleAddQuestion = () => {
     const newQuestion: Question = {
-      id: questions.length + 1,
-      type: "multiple-choice",
-      difficulty: "easy",
+      id: "",
+      technology_id: params.questionSlug[0],
+      type: "mcq",
       question: "",
       options: ["", "", "", "", "", ""],
-      correctOptions: [],
+      correct_answer: "",
+      time: "",
+      difficulty_level: "easy",
     };
     setQuestions([...questions, newQuestion]);
     setSelectedQuestion(questions.length);
@@ -112,7 +125,7 @@ const CreateQuestion: React.FC = () => {
           <ArrowLeft className="h-5 w-5" />
         </Button>{" "}
         <div className="text-2xl font-bold text-gray-900 dark:text-white">
-          {questionSlug}
+          {data?.data?.name}
         </div>
         {/* <Button onClick={handleSave}>Save</Button> */}
       </div>
@@ -131,7 +144,7 @@ const CreateQuestion: React.FC = () => {
         {/* Questions list with data for real questions which can be edited */}
         <div className="flex-1 h-[calc(100vh-8rem)] ">
           <div className="flex-1">
-            {questions.length === 0 ? ( // Check if there are no questions
+            {(questions?.length === 0 || !questions) ? (
               <EmptyState
                 title="No Questions Added"
                 description="Get started by adding a new question."
@@ -139,12 +152,14 @@ const CreateQuestion: React.FC = () => {
                 onAction={() => {
                   // Example: Add a new question
                   const newQuestion: Question = {
-                    id: 1,
-                    type: "multiple-choice",
-                    difficulty: "easy",
+                    id: "1",
+                    technology_id: params.questionSlug[0],
                     question: "",
                     options: ["", "", "", "", "", ""],
-                    correctOptions: [],
+                    correct_answer: "",
+                    time: "",
+                    difficulty_level: "easy",
+                    type: "mcq",
                   };
                   setQuestions([newQuestion]);
                 }}
@@ -158,11 +173,10 @@ const CreateQuestion: React.FC = () => {
                   selectedQuestion={selectedQuestion}
                   questions={questions}
                   handleQuestionTypeChange={handleQuestionTypeChange}
-                  handleCorrectOptionChange={handleCorrectOptionChange}
                   handleDeleteQuestion={handleDeleteQuestion}
                   setQuestions={setQuestions}
-                  handleSave={handleSave}
                   handleReset={handleReset}
+                  technologyId={params.questionSlug[0]}
                 />
               ))
             )}

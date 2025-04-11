@@ -19,6 +19,10 @@ import {
 } from "@/components/ui/dialog";
 import { Question } from "@/shared/types/app";
 import { FormField } from "../common/form-field";
+import { toast } from "react-hot-toast";
+import useSWRMutation from "swr/mutation";
+import { api } from "@/lib/api";
+import { AxiosError } from "axios";
 
 interface QuestionCardProps {
   question: Question;
@@ -26,11 +30,26 @@ interface QuestionCardProps {
   selectedQuestion: number;
   questions: Question[];
   handleQuestionTypeChange: (value: Question["type"], index: number) => void;
-  handleCorrectOptionChange: (optionIndex: number, index: number) => void;
   handleDeleteQuestion: (index: number) => void;
   setQuestions: React.Dispatch<React.SetStateAction<Question[]>>;
-  handleSave: () => void;
   handleReset: () => void;
+  technologyId: string;
+}
+
+interface CreateQuestionPayload {
+  technology_id: string;
+  question: string;
+  correct_answer: string;
+  options: string[];
+  time: string;
+  difficulty_level: Question["difficulty_level"];
+  type: Question["type"];
+  meta: Record<string, unknown>;
+}
+
+async function createQuestion(url: string, { arg }: { arg: CreateQuestionPayload }) {
+  const response = await api.post(url, arg);
+  return response.data;
 }
 
 const QuestionCard: React.FC<QuestionCardProps> = ({
@@ -39,26 +58,24 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
   selectedQuestion,
   questions,
   handleQuestionTypeChange,
-  handleCorrectOptionChange,
   handleDeleteQuestion,
   setQuestions,
-  handleSave,
   handleReset,
+  technologyId,
 }) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
-  // Ensure 6 options for multiple-choice and radio-select
-  const ensureSixOptions = (options: string[] | undefined) => {
-    if (!options) return Array(5).fill("");
+  const ensureFiveOptions = (options: string[] = []) => {
     while (options.length < 5) {
       options.push("");
     }
-    return options.slice(0, 5); // Ensure only 6 options
+    return options.slice(0, 5);
   };
+
   const questionTypeOptions = useMemo(
     () =>
       [
-        { value: "multiple-choice", label: "Multiple Choice" },
+        { value: "mcq", label: "Multiple Choice" },
         { value: "radio-select", label: "Radio Select" },
         { value: "fill-in-the-blanks", label: "Fill in the Blanks" },
         { value: "code-snippet", label: "Code Snippet" },
@@ -72,17 +89,57 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
         { value: "easy", label: "Easy" },
         { value: "medium", label: "Medium" },
         { value: "hard", label: "Hard" },
-      ] as { value: Question["difficulty"]; label: string }[],
+      ] as { value: Question["difficulty_level"]; label: string }[],
     []
   );
+  
+  const { trigger } = useSWRMutation(`/question/create`,createQuestion);
+  const handleSave = async () => {
+    const payload = {
+      technology_id: technologyId, 
+      question: question.question,
+      correct_answer: question.correct_answer,
+      options: question.options.filter((opt) => opt.trim() !== ""),
+      time: "2",
+      difficulty_level: question.difficulty_level,
+      type: question.type,
+      meta: {},
+    };
+    try {
+      const response =  await trigger(payload);
+      console.log(response, "response");
+      toast.success("Question created successfully!");
+    } catch (error: unknown) {
+      const axiosError = error as AxiosError<{ message: string }>;
+      toast.error(axiosError.response?.data?.message || "Something went wrong.");
+    }
+  
+    console.log("Payload to be sent:", payload);
+    
+    // Optionally send it via an API:
+    // await fetch('/api/question', {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify(payload),
+      // });
+    };
+    
+
+  const handleCorrectOptionChange = (option: string, index: number) => {
+    const updatedQuestions = [...questions];
+    updatedQuestions[index].correct_answer = option;
+    setQuestions(updatedQuestions);
+  };
 
   return (
     <Card
-      className={` h-[570px] flex flex-col ${selectedQuestion === index ? "" : "hidden"}`}
+      className={`h-[570px] flex flex-col ${
+        selectedQuestion === index ? "" : "hidden"
+      }`}
     >
       <CardHeader>
         <CardTitle className="text-xl font-bold text-gray-900 dark:text-white">
-          Question {question.id}
+          Question {index + 1}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -102,10 +159,10 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
             type="select"
             parentClassName="w-full"
             className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-300"
-            value={question.difficulty}
-            onChange={(value: Question["difficulty"]) => {
+            value={question.difficulty_level}
+            onChange={(value: Question["difficulty_level"]) => {
               const updatedQuestions = [...questions];
-              updatedQuestions[index].difficulty = value;
+              updatedQuestions[index].difficulty_level = value;
               setQuestions(updatedQuestions);
             }}
             placeholder="Difficulty"
@@ -119,29 +176,27 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
           onChange={(e) => {
             const updatedQuestions = [...questions];
             updatedQuestions[index].question = e.target.value;
-            console.log("Question", updatedQuestions[index].question);
             setQuestions(updatedQuestions);
           }}
           className="mb-4"
         />
 
-        {(question.type === "multiple-choice" ||
-          question.type === "radio-select") && (
+        {(question.type === "mcq" || question.type === "radio-select") && (
           <div className="space-y-2">
-            {ensureSixOptions(question.options).map((option, i) => (
+            {ensureFiveOptions(question.options).map((option, i) => (
               <div key={i} className="flex items-center gap-2">
                 {question.type === "radio-select" ? (
-                  <input
-                    type="radio"
+                <input
+                  type="radio"
                     name={`radio-${question.id}`}
-                    checked={question.correctOptions?.includes(i)}
-                    onChange={() => handleCorrectOptionChange(i, index)}
+                    checked={question.correct_answer === option}
+                    onChange={() => handleCorrectOptionChange(option, index)}
                   />
                 ) : (
                   <input
                     type="checkbox"
-                    checked={question.correctOptions?.includes(i)}
-                    onChange={() => handleCorrectOptionChange(i, index)}
+                    checked={question.correct_answer === option}
+                    onChange={() => handleCorrectOptionChange(option, index)}
                   />
                 )}
                 <Input
@@ -149,7 +204,14 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
                   value={option}
                   onChange={(e) => {
                     const updatedQuestions = [...questions];
-                    updatedQuestions[index].options![i] = e.target.value;
+                    const newValue = e.target.value;
+                    updatedQuestions[index].options[i] = newValue;
+
+                    // If this was the correct answer, update it
+                    if (option === question.correct_answer) {
+                      updatedQuestions[index].correct_answer = newValue;
+                    }
+
                     setQuestions(updatedQuestions);
                   }}
                   className={i >= 4 ? "border-dashed border-gray-400" : ""}
@@ -162,10 +224,10 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
         {question.type === "fill-in-the-blanks" && (
           <Input
             placeholder="Enter the correct answer"
-            value={question.answer}
+            value={question.correct_answer}
             onChange={(e) => {
               const updatedQuestions = [...questions];
-              updatedQuestions[index].answer = e.target.value;
+              updatedQuestions[index].correct_answer = e.target.value;
               setQuestions(updatedQuestions);
             }}
           />
@@ -174,10 +236,10 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
         {question.type === "code-snippet" && (
           <textarea
             placeholder="Enter your code snippet"
-            value={question.code}
+            value={question.correct_answer}
             onChange={(e) => {
               const updatedQuestions = [...questions];
-              updatedQuestions[index].code = e.target.value;
+              updatedQuestions[index].correct_answer = e.target.value;
               setQuestions(updatedQuestions);
             }}
             className="w-full p-2 border rounded-md dark:bg-gray-700 dark:text-white"
@@ -210,8 +272,8 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
               <Button
                 variant="destructive"
                 onClick={() => {
-                  handleDeleteQuestion(index); // Delete the question
-                  setIsDeleteModalOpen(false); // Close the modal
+                  handleDeleteQuestion(index);
+                  setIsDeleteModalOpen(false);
                 }}
               >
                 Delete

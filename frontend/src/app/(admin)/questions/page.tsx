@@ -10,10 +10,12 @@ import { api } from "@/lib/api";
 export default function QuestionsPage() {
   const [categoriesArray, setCategoriesArray] = useState<QuestionCategory[]>([]);
   const [filteredCategories, setFilteredCategories] = useState<QuestionCategory[]>([]); // Track filtered list
-  const {data} = useSWR('/technology/questions', api.get);
-
+  const {data} = useSWR('/technology/list', api.get);
+  console.log("data///////////////////", data);
+  console.log("dafilteredCategoriesta", filteredCategories);
   useEffect(() => {
     if (data) {
+      console.log("data", data);
       setCategoriesArray(data.data.list);
       setFilteredCategories(data.data.list);
     }
@@ -36,7 +38,6 @@ export default function QuestionsPage() {
           Questions
         </h1>
         <CreateCategory
-          setCategoriesArray={setCategoriesArray}
           categoriesArray={categoriesArray}
           setFilteredCategories={setFilteredCategories}
         />
@@ -44,13 +45,21 @@ export default function QuestionsPage() {
 
       {/* Categories Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredCategories.map((list: QuestionCategory) => (
-          <CategoryCard
-            key={list.id}
-            category={list}
-            handleDelete={handleDelete}
-          />
-        ))}
+        {filteredCategories.length > 0 ? (
+          filteredCategories.map((list: QuestionCategory) => (
+            <CategoryCard
+              key={list.id}
+              category={list}
+              handleDelete={handleDelete}
+            />
+          ))
+        ) : (
+          <div className="col-span-full min-h-[80vh] flex items-center justify-center">
+            <div className="text-muted-foreground">
+              No technology found. Please create a new technology.
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

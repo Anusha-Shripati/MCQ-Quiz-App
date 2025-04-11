@@ -9,9 +9,9 @@ import { DeleteDialog } from "../common/delete-dialog";
 
 interface QuestionSidebarProps {
   questions: {
-    id: number;
+    id: string;
     type: string;
-    difficulty: string;
+    difficulty_level: string;
     question: string;
   }[];
   selectedQuestion: number;
@@ -117,7 +117,7 @@ const QuestionSidebar: React.FC<QuestionSidebarProps> = ({
       <CardContent className="flex-1 p-0 overflow-hidden">
         <ScrollArea className="h-full">
           <ul className="space-y-1 p-2">
-            {questions.map((q, index) => (
+            {questions?.map((q, index) => (
               <li
                 key={q.id}
                 className={clsx(
@@ -128,7 +128,7 @@ const QuestionSidebar: React.FC<QuestionSidebarProps> = ({
                 )}
                 onClick={() => handleQuestionChange(index)}
               >
-                <span className="text-sm font-medium">Question {q.id}</span>
+                <span className="text-sm font-medium">Question {index + 1}</span>
                 <Button
                   variant="ghost"
                   size="icon"

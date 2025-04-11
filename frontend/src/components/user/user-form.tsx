@@ -11,6 +11,7 @@ import { Role } from "@/types/common.types";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
 import { Button } from "../ui/form/button";
 import { UserData } from "@/types/common.types";
+import useSWRMutation from "swr/mutation";
 
 const userSchema = z
   .object({
@@ -47,6 +48,14 @@ interface UserFormProps {
   userData?: UserData | null
 }
 
+async function create(url: string, { arg }: { arg: Partial<UserFormValues> }) {
+  const response = await api.post(url, arg);
+  return response;
+}
+async function update(url: string, { arg }: { arg: Partial<UserFormValues> }) {
+  const response = await api.put(url, arg);
+  return response;
+};
 function UserForm({ open, onClose, userData = null }: UserFormProps) {
 
   const {
@@ -72,6 +81,10 @@ function UserForm({ open, onClose, userData = null }: UserFormProps) {
 
   const { data: roles } = useSWR('/role/list', api.get)
 
+
+  const { trigger, isMutating } = useSWRMutation(`/user/create`, create);
+  const { trigger: updateTrigger, isMutating: updating } = useSWRMutation(`/user/${userData?.id}`, update);
+
   const rolesOptions = useMemo(() => {
     if (roles?.data?.list) {
       return roles.data.list.map((item: Role) => ({ value: item.id, label: item.name }))
@@ -90,9 +103,9 @@ function UserForm({ open, onClose, userData = null }: UserFormProps) {
       let res;
 
       if (userData) {
-        res = await api.put(`/user/${userData.id}`, payload);
+        res = await updateTrigger(payload);
       } else {
-        res = await api.post("/user/create", payload);
+        res = await trigger(payload);
       }
       if (res.success) {
         toast.success(userData ? 'User updated successfully' : 'User created successfully');
@@ -231,13 +244,15 @@ function UserForm({ open, onClose, userData = null }: UserFormProps) {
             )}
 
             <div className="flex justify-end space-x-2">
-              <Button type="reset" variant="destructive" onClick={handleClose}>
+              <Button type="reset" variant="destructive" onClick={handleClose}
+                disabled={isMutating || updating}
+              >
                 Close
               </Button>
               <Button
                 type="submit"
                 className="bg-green-600"
-                disabled={isSubmitting}
+                disabled={isMutating || updating}
               >
                 {userData ? "Update" : "Save"}
               </Button>

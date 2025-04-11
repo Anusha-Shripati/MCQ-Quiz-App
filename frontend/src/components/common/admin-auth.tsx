@@ -12,13 +12,11 @@ export default function AdminAuth({ children }: { children: ReactNode }) {
 
     useEffect(() => {
         const storedUser = localStorage.getItem("user");
-
         if (storedUser) {
             setUser(JSON.parse(storedUser));
         } else {
             router.push("/");
         }
-
         setLoading(false);
     }, [router]);
 

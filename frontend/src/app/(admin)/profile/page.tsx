@@ -129,11 +129,11 @@ export default function Profile() {
 
   return (
     <>
-      <div className="mt-11 mb-16 p-4 rounded-lg shadow-md">
+      <div className="mt-11 mb-16 p-4">
         <h1 className="text-3xl font-bold mb-8 dark:text-white flex align-center justify-center">
           User Profile
         </h1>
-        <div className="max-w-4xl mx-auto p-7 bg-white dark:bg-gray-700 m-4 rounded-lg shadow-sm">
+        <div className="max-w-4xl mx-auto p-7 bg-white dark:bg-gray-700 m-4 rounded-lg shadow-md">
           {/* Tabs */}
           <div className="flex border-b dark:border-gray-600 bg">
             <button

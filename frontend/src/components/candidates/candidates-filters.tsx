@@ -1,26 +1,35 @@
 "use client"
-import React, { memo, useMemo } from "react";
-import { Button } from "../ui/form/button";
 import { cn } from "@/lib/utils";
-import { AssessmentOption, CandidateFilter, FiltersProps, TechnologyOption } from "@/types/candidate.types";
+import { AssessmentOption, CandidateFilter, TechnologyOption } from "@/types/candidate.types";
+import { useCallback, useEffect, useMemo } from "react";
+import { Button } from "../ui/form/button";
+import { AssessmentFilter } from "./filters/assessment-filter";
+import { FilterOptions } from "./filters/filter-options";
 import { SearchFilter } from "./filters/search-filter";
 import { TechnologyFilter } from "./filters/technology-filter";
-import { FilterOptions } from "./filters/filter-options";
-import { AssessmentFilter } from "./filters/assessment-filter";
-
-import { useForm } from "react-hook-form";
-import { ListFilterIcon } from "lucide-react";
-import useSWR from "swr";
 import { api } from "@/lib/api";
 import { useCandidateStore } from "@/store/candidateStore";
+import debounce from "lodash/debounce";
+import { ListFilterIcon } from "lucide-react";
+import { useForm } from "react-hook-form";
+import useSWR from "swr";
 
-const Filters = memo(({ candidates = [] }: FiltersProps) => {
+const Filters = () => {
 
+  const { data: assessments } = useSWR("/assessment/all", api.get, {
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+    dedupingInterval: 60000,
+    staleWhileRevalidate: true
+  });
+  const { data: technology } = useSWR("/technology/list", api.get, {
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+    dedupingInterval: 60000,
+    staleWhileRevalidate: true
+  });
 
-  const { data: assessments } = useSWR("/assessment/all", api.get);
-  const { data: technology } = useSWR("/technology/list", api.get);
-
-  const { setCandidateFilter,setAssessmentOptions,setTechnologyOptions } = useCandidateStore()
+  const { setCandidateFilter,setAssessmentOptions,setTechnologyOptions, candidateList } = useCandidateStore()
 
   const assessmentOptions = useMemo(() => {
 
@@ -48,33 +57,76 @@ const Filters = memo(({ candidates = [] }: FiltersProps) => {
     },
   }
   const { setValue, watch, reset, register } = useForm<CandidateFilter>({ defaultValues })
-  const formData = watch()
+  
+  const searchQuery = watch('searchQuery')
+  const technologyFilter = watch('technologyFilter')
+  const assessmentFilter = watch('assessmentFilter')
+  const created = watch('created')
+  const createdDays = watch('created.days')
+  const createdRange = watch('created.range')
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const debouncedApplyFilters = useCallback(
+    debounce((data: Partial<CandidateFilter>) => {
+      const payload: CandidateFilter = {
+        searchQuery: data.searchQuery || "",
+        technologyFilter: (data.technologyFilter || []).map((item: TechnologyOption) => ({value:item.value,label:item.label})),
+        assessmentFilter: (data.assessmentFilter || []).map((item: AssessmentOption) => ({value:item.value,label:item.label})),
+        created: data.created?.range ? {
+          days: "",
+          range: {
+            from: data.created.range.from ? new Date(data.created.range.from.setHours(0, 0, 0, 0)) : undefined,
+            to: data.created.range.to ? new Date(data.created.range.to.setHours(23, 59, 59, 999)) : undefined
+          }
+        } : undefined
+      };
+      console.log("logs 899999 payload",JSON.stringify(payload))
+      setCandidateFilter(payload);
+    }, 500),
+    [setCandidateFilter]
+  );
+
+  const getData = ()=>{
+    debouncedApplyFilters({
+      searchQuery,
+      technologyFilter,
+      assessmentFilter,
+      created: {
+        days: createdDays,
+        range: createdRange
+      }
+    });
+  }
+
+  useEffect(() => {
+    console.log("created ",created)
+    debouncedApplyFilters({
+      searchQuery,
+      technologyFilter,
+      assessmentFilter,
+      created: {
+        days: createdDays,
+        range: createdRange
+      }
+    });
+  }, [searchQuery, technologyFilter, assessmentFilter, createdDays, createdRange, debouncedApplyFilters]);
 
   const clearAllFilters = () => {
     reset()
   };
 
-  const getData = () => {
-    const payload = {
-      searchQuery: formData.searchQuery,
-      technologyFilter: formData.technologyFilter.map((item: TechnologyOption) => item.value),
-      AssessmentFilter: formData.assessmentFilter.map((item: AssessmentOption) => item.value),
-      created: formData.created?.range,
-    }
-    setCandidateFilter(payload)
-  }
   const isFilter = useMemo(() => {
-    return Object.keys(formData).some((key:string) => {
+    return Object.keys(watch()).some((key:string) => {
       const typedKey = key as keyof CandidateFilter;
       if (typedKey === "technologyFilter" || typedKey === "assessmentFilter") {
-        return formData[typedKey].length > 0;
+        return watch(typedKey).length > 0;
       } else if (typedKey === "created") {
-        return formData[typedKey]?.days !== "" || formData[typedKey]?.range !== undefined;
+        return watch(typedKey)?.days !== "" || watch(typedKey)?.range !== undefined;
       } else {
-        return formData[typedKey] !== "";
+        return watch(typedKey) !== "";
       }
     });
-  }, [formData]);
+  }, [watch]);
 
 
 
@@ -82,22 +134,22 @@ const Filters = memo(({ candidates = [] }: FiltersProps) => {
     <section className="w-full">
 
       <div className="flex flex-col md:flex-row md:items-center gap-2 flex-wrap mb-2">
-        <SearchFilter searchQuery={formData.searchQuery} setSearchQuery={(value) => setValue('searchQuery', value)} />
+        <SearchFilter searchQuery={searchQuery} setSearchQuery={(value) => setValue('searchQuery', value)} />
 
         <TechnologyFilter
-          value={formData.technologyFilter}
+          value={technologyFilter}
           onChange={(value: TechnologyOption[]) => { setValue('technologyFilter', value) }}
           options={technologyOptions}
         />
 
         <AssessmentFilter
-          value={formData.assessmentFilter}
+          value={assessmentFilter}
           onChange={(value: AssessmentOption[]) => setValue('assessmentFilter', value)}
           options={assessmentOptions}
         />
 
         <FilterOptions
-          formData={formData}
+          formData={watch()}
           setValue={setValue}
           register={register}
         />
@@ -111,7 +163,7 @@ const Filters = memo(({ candidates = [] }: FiltersProps) => {
             Results found
           </h2>
           <span className="inline-flex items-center justify-center w-8 h-8 bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-100 rounded-full text-sm font-medium">
-            {candidates.length}
+            {candidateList.length}
           </span>
         </div>
 
@@ -129,7 +181,7 @@ const Filters = memo(({ candidates = [] }: FiltersProps) => {
       </div>
     </section>
   );
-});
+};
 
 Filters.displayName = "Filters";
 export default Filters;

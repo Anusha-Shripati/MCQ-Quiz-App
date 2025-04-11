@@ -1,5 +1,20 @@
 import { DateRange } from "./common.types";
 
+
+export type CandidateFormData = {
+  id?: string;
+  name: string;
+  email: string;
+  technology: string;
+  experience: string;
+  assessment: string;
+  phone: string;
+  timeUnit: 'days' | 'hours';
+  startDate: Date | undefined;
+  endDate: Date | undefined;
+  timeValue: number | '';
+};
+
 export interface CandidateDetails {
   totalPercentage: string;
   categories: Record<string, string>;
@@ -9,17 +24,51 @@ export interface CandidateDetails {
 
 export interface Candidate {
   id?: string;
-  testDate: string;
-  testStartTime: string;
-  testEndTime: string;
+  assessment_id: string;
+  technology_id: string;
+  exam_id: string;
   name: string;
   email: string;
-  technology: string;
   experience: string;
-  assessment: string;
-  result: string;
-  created: string;
-  details?: CandidateDetails;
+  phone: string;
+  meta: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
+  assessment?: {
+    id: string;
+    name: string;
+    created_by: string;
+    easy: number;
+    medium: number;
+    hard: number;
+    difficulty_score: number;
+    duration: number;
+    created_at: string;
+    updated_at: string;
+    deleted_at: string | null;
+  };
+  technology?: {
+    id: string;
+    name: string;
+    created_at: string;
+    updated_at: string;
+    deleted_at: string | null;
+  };
+  exam?: {
+    id: string;
+    user_id: string;
+    assessment_id: string;
+    end_time: string;
+    start_time: string;
+    is_completed: boolean;
+    meta: Record<string, unknown>;
+    created_at: string;
+    updated_at: string;
+    deleted_at: string | null;
+  };
+  candidate_assessments: CandidateAssessment[];
+  results: string[];
 }
 
 export interface FiltersProps {
@@ -56,4 +105,23 @@ export interface CandidateFilter {
     range:string
   }
 
+}
+
+export interface CandidateAssessment {
+  id: string;
+  candidate_id: string;
+  assessment_id: string;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
+}
+
+export interface CandidateResult {
+  id: string;
+  candidate_id: string;
+  assessment_id: string;
+  score: number;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
 }

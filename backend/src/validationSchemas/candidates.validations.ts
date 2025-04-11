@@ -6,6 +6,9 @@ export const candidateSchema = {
 			assessment_id: Joi.string().required().messages({
 				'string.empty': 'Assessment ID is required',
 			}),
+			technology_id: Joi.string().required().messages({
+				'string.empty': 'Technology ID is required',
+			}),
 			name: Joi.string().required().messages({
 				'string.empty': 'Candidate name is required',
 			}),
@@ -18,8 +21,14 @@ export const candidateSchema = {
 			phone: Joi.string().required().messages({
 				'string.empty': 'Candidate phone is required',
 			}),
-			meta: Joi.object({
-				'string.empty': 'Candidate meta is required',
+			start_date: Joi.date().required().messages({
+				'date.base': 'Start date must be a date',
+			}),
+			end_date: Joi.date().required().messages({
+				'date.base': 'End date must be a date',
+			}),
+			meta: Joi.object().default({}).messages({
+				'object.base': 'Meta must be an object',
 			}),
 		}),
 	},
@@ -34,6 +43,9 @@ export const candidateSchema = {
 			assessment_id: Joi.string().required().messages({
 				'string.empty': 'Assessment ID is required',
 			}),
+			technology_id: Joi.string().required().messages({
+				'string.empty': 'Technology ID is required',
+			}),
 			name: Joi.string().required().messages({
 				'string.empty': 'Candidate name is required',
 			}),
@@ -46,8 +58,14 @@ export const candidateSchema = {
 			phone: Joi.string().required().messages({
 				'string.empty': 'Candidate phone is required',
 			}),
-			meta: Joi.object({
-				'string.empty': 'Candidate meta is required',
+			start_date: Joi.date().required().messages({
+				'date.base': 'Start date must be a date',
+			}),
+			end_date: Joi.date().required().messages({
+				'date.base': 'End date must be a date',
+			}),
+			meta: Joi.object().default({}).messages({
+				'object.base': 'Meta must be an object',
 			}),
 		}),
 	},
@@ -59,7 +77,6 @@ export const candidateSchema = {
 			}),
 		}),
 	},
-
 	get: {
 		params: Joi.object({
 			id: Joi.string().uuid().required().messages({

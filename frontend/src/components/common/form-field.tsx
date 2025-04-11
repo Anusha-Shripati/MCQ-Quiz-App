@@ -24,6 +24,9 @@ interface FormFieldProps {
   min?: string | number | undefined;
   max?: string | number | undefined;
   parentClassName?: string;
+  inputMode?: "none" | "text" | "tel" | "url" | "email" | "numeric" | "decimal" | "search";
+  pattern?: string;
+  maxLength?: number;
 }
 
 interface SelectOption {
@@ -38,6 +41,28 @@ export const FormField = forwardRef<HTMLInputElement, FormFieldProps>((props: Fo
     )
     : [],[props.options]);
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (props.type === 'tel' || props.inputMode === 'numeric') {
+      // Allow: backspace, delete, tab, escape, enter, decimal point, numbers
+      if (
+        [46, 8, 9, 27, 13, 110, 190].indexOf(e.keyCode) !== -1 ||
+        // Allow: Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+        (e.keyCode === 65 && e.ctrlKey === true) ||
+        (e.keyCode === 67 && e.ctrlKey === true) ||
+        (e.keyCode === 86 && e.ctrlKey === true) ||
+        (e.keyCode === 88 && e.ctrlKey === true) ||
+        // Allow: home, end, left, right
+        (e.keyCode >= 35 && e.keyCode <= 39) ||
+        // Allow numbers
+        (e.keyCode >= 48 && e.keyCode <= 57) ||
+        (e.keyCode >= 96 && e.keyCode <= 105)
+      ) {
+        return;
+      }
+      e.preventDefault();
+    }
+  };
+
   return (
     <div className={props.parentClassName || ''}>
       {props.label && <label className="block text-sm font-medium mb-1">{props.label}</label>}
@@ -47,11 +72,17 @@ export const FormField = forwardRef<HTMLInputElement, FormFieldProps>((props: Fo
             <SelectValue placeholder={`Select ${props.placeholder || props.label || ''}`} />
           </SelectTrigger>
           <SelectContent>
-            {normalizedOptions?.map(option => (
-              <SelectItem key={option.value} value={String(option.value)}>
-                {option.label}
+          {normalizedOptions?.length > 0 ? (
+              normalizedOptions.map((option: SelectOption) => (
+                <SelectItem key={option.value} value={String(option.value)}>
+                  {option.label}
+                </SelectItem>
+              ))
+            ) : (
+              <SelectItem value="no-options" disabled>
+                No options available
               </SelectItem>
-            ))}
+            )}
           </SelectContent>
         </Select>
       ) : (
@@ -59,6 +90,7 @@ export const FormField = forwardRef<HTMLInputElement, FormFieldProps>((props: Fo
           {...props}
           placeholder={`${props.placeholder || 'Enter '+ (props.label || '')} `}
           ref={ref}
+          onKeyDown={handleKeyDown}
         />
       )}
       {props.error && <p className="text-red-500 text-sm mt-1">{props.error}</p>}

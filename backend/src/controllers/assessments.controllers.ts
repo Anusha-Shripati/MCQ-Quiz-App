@@ -1,8 +1,12 @@
 import { Request, Response, NextFunction } from "express";
 import AssessmentsService from "../services/assessments.services";
 import { generateResponse } from "../utils/generateResponse";
+import { prisma } from "../db/prisma.client";
+import ExamService from "../services/exam.services";
 
 const assessmentService = new AssessmentsService()
+const examService = new ExamService()
+
 export class AssessmentController {
     create = async (req: Request, res: Response, next: NextFunction) => {
         try {
@@ -56,6 +60,25 @@ export class AssessmentController {
             if (technologies && Array.isArray(technologies)) {
                 await assessmentService.deleteTechnologyAssessment(id)
                 await assessmentService.assignTechnologiesToAssessment(updatedRole.id, technologies);
+
+                // Find all incomplete exams for this assessment
+                const incompleteExams = await prisma.exam.findMany({
+                    where: {
+                        assessment_id: id,
+                        is_completed: false
+                    }
+                });
+
+                // For each incomplete exam, delete existing questions and create new ones
+                for (const exam of incompleteExams) {
+                    // Delete existing exam questions
+                    await prisma.exam_questions.deleteMany({
+                        where: { exam_id: exam.id }
+                    });
+
+                    // Create new exam questions based on updated assessment
+                    await examService.createExamQuestionsForAssessment(exam.id, id);
+                }
             }
             return generateResponse(res, 200, updatedRole, true, "Assessment updated successfully");
         } catch (error) {

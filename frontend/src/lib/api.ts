@@ -7,16 +7,41 @@ interface CandidateParams {
   [key: string]: string | number | undefined;
 }
 
+interface CreateCandidateData {
+	name: string;
+	email: string;
+	phone: string;
+	experience: string;
+	assessment_id: string;
+  technology_id: string;
+	meta: {
+		startDate: Date;
+		endDate: Date;
+		timeUnit: string;
+		timeValue: number;
+	};
+}
+
 export const fetchCandidates = async (params: CandidateParams) => {
-  const response = await axios.get("/api/candidates", { params });
+  const response = await axios.get("/candidates", { params });
   return response.data;
 };
 
-export const fetcher = async (url: string) => {
-  const apitString = Array.isArray(url) ? url[0] : url;
-  const params = Array.isArray(url) && url.length == 2 ? url[1] : {};
-  const response = await axios.get(apitString, { params });
+export const createCandidate = async (data: CreateCandidateData) => {
+  const response = await axios.post("/candidates", data);
+  return response.data;
+};
 
+export const fetchTechnologies = async () => {
+  const response = await axios.get("/technology/list");
+  return response.data.data;
+};
+
+export const fetcher = async (url:string)=>{
+  const apitString = Array.isArray(url) ? url[0]:url;
+  const params =  Array.isArray(url) && url.length == 2 ? url[1] :  {}
+  const response = await axios.get(apitString,{params});
+  
   return response.data;
 };
 export const postData = async <T>(url: string, data: T) => {

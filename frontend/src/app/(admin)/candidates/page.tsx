@@ -1,6 +1,5 @@
 import React from "react";
 import dynamic from "next/dynamic";
-import { candidatesList } from "@/shared/constants/data";
 import { Card } from "@/components/ui/card";
 import CandidateTable from "../../../components/candidates/candidate-table";
 import CreateCandidateDialog from "@/components/candidates/create-candidate-dialog";
@@ -22,7 +21,7 @@ export default function Candidates() {
         <CreateCandidateDialog  />
       </div>
       <Card className="flex flex-col p-4 sm:p-6 gap-2 min-h-[50%]">
-        <FiltersCandidates candidates={candidatesList} />
+        <FiltersCandidates />
         <CandidateTable />
       </Card>
     </div>

@@ -25,6 +25,19 @@ export default function DatePickerWithRange({
   onSelect
 }: DateRangePickerProps) {
 
+  const handleSelect = (range: DateRange | undefined) => {
+    if (range?.from && range?.to) {
+      // Set time to noon to avoid timezone issues
+      const from = new Date(range.from);
+      from.setHours(12, 0, 0, 0);
+      const to = new Date(range.to);
+      to.setHours(12, 0, 0, 0);
+      onSelect({ from, to });
+    } else {
+      onSelect(range);
+    }
+  };
+
   return (
     <div className={cn("grid gap-2", className)}>
       <Popover>
@@ -59,7 +72,7 @@ export default function DatePickerWithRange({
             mode="range"
             defaultMonth={date?.from}
             selected={date}
-            onSelect={onSelect}
+            onSelect={handleSelect}
             numberOfMonths={2}
           />
         </PopoverContent>

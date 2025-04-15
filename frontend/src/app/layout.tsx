@@ -15,7 +15,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <link rel="icon" type="image/png" href="/favicon.ico" />
       </head>
       <body
-        className={`flex min-h-screen relative overflow-hidden ${nunito.className}`}
+        className={`flex min-h-screen relative hide-scroller ${nunito.className}`}
       >
         <AuthInitializer>
           <ThemeProvider

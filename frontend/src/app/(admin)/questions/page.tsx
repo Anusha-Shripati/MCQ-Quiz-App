@@ -8,20 +8,16 @@ import useSWR from "swr";
 import { api } from "@/lib/api";
 
 export default function QuestionsPage() {
-  const [categoriesArray, setCategoriesArray] = useState<QuestionCategory[]>(
-    []
-  );
-  const [filteredCategories, setFilteredCategories] = useState<
-    QuestionCategory[]
-  >([]); // Track filtered list
-  const { data } = useSWR("/technology/list", api.get);
+  const [categoriesArray, setCategoriesArray] = useState<QuestionCategory[]>([]);
+  const [filteredCategories, setFilteredCategories] = useState<QuestionCategory[]>([]); // Track filtered list
+  const {data} = useSWR('/technology/list', api.get);
   useEffect(() => {
     if (data) {
       setCategoriesArray(data.data.list);
       setFilteredCategories(data.data.list);
     }
   }, [data]);
-
+  
   const handleDelete = (category: QuestionCategory) => {
     const updatedCategories = categoriesArray.filter(
       (cat) => cat.name !== category.name
@@ -32,7 +28,7 @@ export default function QuestionsPage() {
   };
 
   return (
-    <div className="p-6">
+    <div className="p-6 h-screen">
       {/* Page Header */}
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold text-secondary-foreground">

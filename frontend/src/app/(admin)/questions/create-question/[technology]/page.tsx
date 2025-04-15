@@ -15,7 +15,7 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({
   params,
 }) => {
   const [questions, setQuestions] = useState<Question[]>([]);
-  const [showSidebar, setShowSidebar] = useState(false);
+  // const [showSidebar, setShowSidebar] = useState(false);
   const router = useRouter();
   const [selectedQuestion, setSelectedQuestion] = useState<number>(0);
 
@@ -26,11 +26,20 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({
 
   useEffect(() => {
     if (data?.data?.questions?.length) {
+      console.log(data?.data?.questions, "questions");
+      console.log(data?.data?.questions.length, "questions length");
+      console.log(questions.length, "questions length state");
+      console.log(selectedQuestion, "selected question");
       setQuestions(data?.data?.questions);
       if (selectedQuestion >= data?.data?.questions.length) {
         setSelectedQuestion(data?.data?.questions.length - 1);
       }
     }
+
+    console.log(data?.data?.questions, "questions");
+    console.log(data?.data?.questions.length, "questions length");
+    console.log(questions.length, "questions length state");
+    console.log(selectedQuestion, "selected question");
 
     if (!data?.data?.questions?.length) {
       setQuestions([
@@ -46,7 +55,7 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({
         },
       ]);
     }
-    setShowSidebar(data?.data?.questions?.length > 0);
+    // setShowSidebar(data?.data?.questions?.length > 0);
   }, [data]);
 
   // const handleSave = () => {
@@ -79,13 +88,6 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({
         await api.delete(`/question/${question.id}`);
       }
       const updatedQuestions = questions.filter((_, i) => i !== index);
-      // setShowSidebar(updatedQuestions.length > 0);
-      // if (updatedQuestions.length === 0) {
-      //   setSelectedQuestion(0);
-      // }
-      // if (selectedQuestion > updatedQuestions.length - 1) {
-      //   setSelectedQuestion(updatedQuestions.length - 1);
-      // }
       setQuestions(updatedQuestions);
       if (selectedQuestion >= updatedQuestions.length) {
         setSelectedQuestion(updatedQuestions.length - 1);
@@ -188,7 +190,7 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({
       {/* Remaining body */}
       <div className="flex gap-6">
         {/* Sidebar for questions no. list */}
-        {showSidebar && (
+        {questions.length ? (
           <QuestionSidebar
             questions={questions}
             selectedQuestion={selectedQuestion}
@@ -196,6 +198,8 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({
             handleDeleteQuestion={handleDeleteQuestion}
             handleAddQuestion={handleAddQuestion}
           />
+        ) : (
+          ""
         )}
 
         {/* Questions list with data for real questions which can be edited */}
@@ -218,7 +222,7 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({
                     type: "mcq",
                     meta: {},
                   };
-                  setShowSidebar(true);
+                  // setShowSidebar(true);
                   setQuestions([newQuestion]);
                 }}
               />

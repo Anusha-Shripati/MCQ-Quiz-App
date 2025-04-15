@@ -14,11 +14,12 @@ export function ThemeToggle() {
   }
 
   return (
-    <Button onClick={toggleTheme} variant="outline" size="default" className="bg-secondary dark:outline-white dark:border-white dark:hover:bg-white dark:hover:text-primary">
+    <>
+    <Button onClick={toggleTheme} variant="outline" size="icon" className="bg-secondary dark:outline-white dark:border-gray rounded-full w-11 h-11 dark:hover:bg-white dark:hover:text-primary">
       <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
       <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-      <span className="sr-only">Toggle theme</span>
     </Button>
+    </>
   );
 }
 

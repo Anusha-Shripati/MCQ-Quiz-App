@@ -179,7 +179,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
       if (e.target.checked) {
         updatedQuestions[index].correct_answer.push(optionIndex.toString());
       } else {
-        let op_index = updatedQuestions[index].correct_answer.indexOf(optionIndex.toString());
+        const op_index = updatedQuestions[index].correct_answer.indexOf(optionIndex.toString());
         updatedQuestions[index].correct_answer.splice(op_index, 1);
 
       }

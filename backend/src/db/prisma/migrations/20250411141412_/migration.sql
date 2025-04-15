@@ -8,7 +8,7 @@ CREATE TYPE "ExamStatus" AS ENUM ('passed', 'failed', 'in_progress');
 CREATE TYPE "Difficulty" AS ENUM ('easy', 'medium', 'hard');
 
 -- CreateEnum
-CREATE TYPE "Question_type" AS ENUM ('multiple_select', 'video', 'text', 'mcq');
+CREATE TYPE "Question_type" AS ENUM ('multiple_select', 'video', 'text', 'mcq', 'code_snippet');
 
 -- CreateTable
 CREATE TABLE "users" (
@@ -97,7 +97,7 @@ CREATE TABLE "Questions" (
     "id" TEXT NOT NULL,
     "technology_id" TEXT NOT NULL,
     "question" TEXT NOT NULL,
-    "correct_answer" TEXT NOT NULL,
+    "correct_answer" TEXT[],
     "options" JSONB NOT NULL,
     "time" TEXT NOT NULL,
     "difficulty_level" "Difficulty" NOT NULL,
@@ -114,11 +114,13 @@ CREATE TABLE "Questions" (
 CREATE TABLE "Candidate" (
     "id" TEXT NOT NULL,
     "assessment_id" TEXT NOT NULL,
+    "technology_id" TEXT NOT NULL,
+    "exam_id" TEXT,
     "name" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "experience" TEXT NOT NULL,
     "phone" TEXT NOT NULL,
-    "meta" JSONB NOT NULL,
+    "meta" JSONB,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
     "deleted_at" TIMESTAMP(3),
@@ -142,8 +144,8 @@ CREATE TABLE "Exam" (
     "assessment_id" TEXT NOT NULL,
     "end_time" TIMESTAMP(3) NOT NULL,
     "start_time" TIMESTAMP(3) NOT NULL,
-    "is_completed" BOOLEAN NOT NULL,
-    "meta" JSONB NOT NULL,
+    "is_completed" BOOLEAN NOT NULL DEFAULT false,
+    "meta" JSONB,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
     "deleted_at" TIMESTAMP(3),
@@ -231,6 +233,12 @@ ALTER TABLE "Questions" ADD CONSTRAINT "Questions_technology_id_fkey" FOREIGN KE
 
 -- AddForeignKey
 ALTER TABLE "Candidate" ADD CONSTRAINT "Candidate_assessment_id_fkey" FOREIGN KEY ("assessment_id") REFERENCES "Assessments"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Candidate" ADD CONSTRAINT "Candidate_technology_id_fkey" FOREIGN KEY ("technology_id") REFERENCES "Technology"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Candidate" ADD CONSTRAINT "Candidate_exam_id_fkey" FOREIGN KEY ("exam_id") REFERENCES "Exam"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Candidate_assessments" ADD CONSTRAINT "Candidate_assessments_assessment_id_fkey" FOREIGN KEY ("assessment_id") REFERENCES "Assessments"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

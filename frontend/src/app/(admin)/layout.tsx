@@ -11,14 +11,16 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     <>
       <AdminAuth>
         <Sidebar />
-        <div className="flex-1 bg-secondary border h-screen overflow-y flex justify-center">
-          {/* <ScrollArea className="px-6 w-full xl:max-w-[1600px]"> */}
-          <ScrollArea className="px-6 w-full">
-            <Header />
-            <SWRConfig value={{ dedupingInterval: 10000 }}>
-              {children}
-            </SWRConfig>
-          </ScrollArea>
+        <div className="flex-1">
+          <Header />
+          <div className="flex-1 bg-secondary border h-screen overflow-y flex justify-center">
+            {/* <ScrollArea className="px-6 w-full xl:max-w-[1600px]"> */}
+            <ScrollArea className="px-6 w-full">
+              <SWRConfig value={{ dedupingInterval: 10000 }}>
+                {children}
+              </SWRConfig>
+            </ScrollArea>
+          </div>
         </div>
       </AdminAuth>
     </>

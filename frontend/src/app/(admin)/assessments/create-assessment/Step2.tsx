@@ -123,7 +123,7 @@ const Step2: React.FC<Step2Props> = ({
 
 
   return (
-    <Card className="dark:bg-gray-800 dark:border-gray-700">
+    <Card className="max-h-[calc(50vh+10px)] overflow-y-auto dark:bg-gray-800 dark:border-gray-700">
       <CardHeader>
         <CardTitle className="font-bold dark:text-white">Question Distribution</CardTitle>
         <CardDescription className="dark:text-gray-300">

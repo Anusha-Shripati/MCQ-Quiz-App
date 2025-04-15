@@ -4,9 +4,9 @@ import { ThemeToggle } from "../../../components/common/theme-toggle";
 
 export const Header = () => {
   return (
-    <div className="px-6 position: sticky top-3 z-20">
+    <div className="z-20 w-full">
       <div
-        className={`flex flex-row-reverse items-center justify-start p-4 rounded-lg dark:bg-[#334155] bg-[#ffffff] shadow-md mb-2 w-full gap-6 `}
+        className={`flex flex-row-reverse h-18 items-center justify-start p-3 dark:bg-[#1f2937] bg-[#ffffff] w-full gap-3 `}
       >
         <UserAvatar />
         <ThemeToggle />

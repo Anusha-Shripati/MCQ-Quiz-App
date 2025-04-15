@@ -8,19 +8,20 @@ import useSWR from "swr";
 import { api } from "@/lib/api";
 
 export default function QuestionsPage() {
-  const [categoriesArray, setCategoriesArray] = useState<QuestionCategory[]>([]);
-  const [filteredCategories, setFilteredCategories] = useState<QuestionCategory[]>([]); // Track filtered list
-  const {data} = useSWR('/technology/list', api.get);
-  console.log("data///////////////////", data);
-  console.log("dafilteredCategoriesta", filteredCategories);
+  const [categoriesArray, setCategoriesArray] = useState<QuestionCategory[]>(
+    []
+  );
+  const [filteredCategories, setFilteredCategories] = useState<
+    QuestionCategory[]
+  >([]); // Track filtered list
+  const { data } = useSWR("/technology/list", api.get);
   useEffect(() => {
     if (data) {
-      console.log("data", data);
       setCategoriesArray(data.data.list);
       setFilteredCategories(data.data.list);
     }
   }, [data]);
-  
+
   const handleDelete = (category: QuestionCategory) => {
     const updatedCategories = categoriesArray.filter(
       (cat) => cat.name !== category.name

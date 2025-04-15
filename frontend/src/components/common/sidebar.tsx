@@ -2,24 +2,19 @@
 
 import { useState, useRef, useCallback } from "react";
 import Link from "next/link";
-import { usePathname, useRouter as useNavRouter } from "next/navigation"; // Import useRouter for prefetching
-import {
-  FiMenu,
-  FiChevronLeft,
-  FiHome,
-  FiFileText,
-  FiHelpCircle,
-  FiUsers,
-} from "react-icons/fi";
+import { usePathname, useRouter as useNavRouter } from "next/navigation";
+import { FiHome, FiFileText, FiHelpCircle, FiUsers } from "react-icons/fi";
 import { Button } from "@/components/ui/form/button";
-import LogicRaysImage from "../../app/assets/images/logicrays_logo-bg.png";
+import ImageLinks from "@/app/assets/images/imageLinks";
 import { FaUserAlt, FaUserSecret } from "react-icons/fa";
 import { useAuthStore } from "@/store/authStore";
 import useSWR from "swr";
 import { fetcher } from "@/lib/api";
 import { Module, Permissions } from "@/types/common.types";
-import { Avatar, AvatarImage } from "../ui/avatar";
+// import { Avatar, AvatarImage } from "../ui/avatar";
 import { useRouter } from "next/navigation";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import Image from "next/image";
 
 export default function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -71,104 +66,139 @@ export default function Sidebar() {
     <aside
       ref={sidebarRef}
       className={`${
-        isCollapsed ? "w-20" : "w-60"
-      } bg-primary text-primary-foreground sticky top-0 left-0 text-white h-screen flex flex-col justify-center items-center transition-all duration-300 border-r-2 border-r-gray-100 overflow-auto`}
+        isCollapsed ? "w-16" : "w-56"
+      } bg-primary text-primary-foreground sticky top-0 left-0 text-white h-screen z-50  transition-all duration-300 relative`}
     >
-      <div className="w-[calc(100%-20px)] space-y-4 h-full">
-        <div className="flex items-center justify-between w-full h-[80px] p-2 text-white ">
-          {!isCollapsed && (
-            <Avatar className="w-16 h-16">
-              <AvatarImage
-                src={LogicRaysImage.src}
-                className="w-16 h-16 cursor-pointer"
-                onClick={() => router.push("/dashboard")}
-              />
-            </Avatar>
-          )}
-          <div
+      <div className="overflow-auto flex flex-row justify-center items-center h-full">
+        <div className="w-[calc(100%-20px)] space-y-4 h-full">
+          <div className="flex items-center justify-center w-full h-20 text-white">
+            {isCollapsed ? (
+              <div className="w-full h-full flex justify-center items-center">
+                <Image
+                  alt="Logic Rays Logo"
+                  src={ImageLinks.logicrays_logo_bg}
+                  className="cursor-pointer"
+                  width={200}
+                  height={200}
+                  onClick={() => router.push("/dashboard")}
+                />
+              </div>
+            ) : (
+              <div className="w-full h-full flex justify-center items-center">
+                <Image
+                  alt="Logic Rays Logo"
+                  src={ImageLinks.main_logo}
+                  className="cursor-pointer"
+                  width={170}
+                  height={170}
+                  onClick={() => router.push("/dashboard")}
+                />
+              </div>
+            )}
+            {/* <Button
             onClick={toggleSidebar}
-            className="cursor-pointer hover:bg-gray-700 focus:outline-none flex justify-center items-center rounded-lg transition-colors duration-200 w-[40px] h-[40px]"
+            className="absolute top-1/2 -right-2 -translate-y-1/2 bg-white text-gray-800 border border-gray-300 rounded-full shadow-md flex items-center justify-center z-50"
           >
-            <span>
-              {isCollapsed ? <FiMenu size={22} /> : <FiChevronLeft size={22} />}
-            </span>
+            {!isCollapsed ? (
+              <ChevronLeft size={16} />
+            ) : (
+              <ChevronRight size={16} />
+            )}
+          </Button> */}
           </div>
-        </div>
 
-        {!isLoading && permissions && (
-          <div className="flex flex-col justify-center">
-            <nav className="flex-1 flex flex-col gap-4">
-              <NavItem
-                href="/dashboard"
-                icon={<FiHome size={30} />}
-                label="Dashboard"
-                isCollapsed={isCollapsed}
-                isActive={pathname === "/dashboard"}
-              />
-              {permissions?.assessments?.can_read && (
+          {!isLoading && permissions && (
+            <div className="flex flex-col justify-center">
+              <nav className="flex-1 flex flex-col gap-4">
                 <NavItem
-                  href="/assessments"
-                  icon={<FiFileText size={30} />}
-                  label="Assessment"
+                  href="/dashboard"
+                  icon={<FiHome size={30} />}
+                  label="Dashboard"
                   isCollapsed={isCollapsed}
-                  isActive={pathname === "/assessments"}
+                  isActive={pathname === "/dashboard"}
                 />
-              )}
-              {permissions?.questions?.can_read && (
-                <NavItem
-                  href="/questions"
-                  icon={<FiHelpCircle size={30} />}
-                  label="Questions"
-                  isCollapsed={isCollapsed}
-                  isActive={pathname === "/questions"}
-                />
-              )}
-              {permissions?.candidates?.can_read && (
-                <NavItem
-                  href="/candidates"
-                  icon={<FiUsers size={30} />}
-                  label="Candidates"
-                  isCollapsed={isCollapsed}
-                  isActive={pathname === "/candidates"}
-                />
-              )}
-              {/* <NavItem
+                {permissions?.assessments?.can_read && (
+                  <NavItem
+                    href="/assessments"
+                    icon={<FiFileText size={30} />}
+                    label="Assessment"
+                    isCollapsed={isCollapsed}
+                    isActive={pathname === "/assessments"}
+                  />
+                )}
+                {permissions?.questions?.can_read && (
+                  <NavItem
+                    href="/questions"
+                    icon={<FiHelpCircle size={30} />}
+                    label="Questions"
+                    isCollapsed={isCollapsed}
+                    isActive={pathname === "/questions"}
+                  />
+                )}
+                {permissions?.candidates?.can_read && (
+                  <NavItem
+                    href="/candidates"
+                    icon={<FiUsers size={30} />}
+                    label="Candidates"
+                    isCollapsed={isCollapsed}
+                    isActive={pathname === "/candidates"}
+                  />
+                )}
+                {/* <NavItem
                 href="/profile"
                 icon={<FiSettings size={30} />}
                 label="Profile"
                 isCollapsed={isCollapsed}
                 isActive={pathname === "/profile"}
               /> */}
-              {!isCollapsed && (
-                <div className="relative flex py-1 items-center">
-                  <div className="flex-grow border-t border-gray-400"></div>
-                  <span className="flex-shrink mx-4 text-gray-400">
-                    Users Info
-                  </span>
-                  <div className="flex-grow border-t border-gray-400"></div>
-                </div>
-              )}
-              {permissions?.users?.can_read && (
-                <NavItem
-                  href="/users"
-                  icon={<FaUserAlt size={30} />}
-                  label="Users"
-                  isCollapsed={isCollapsed}
-                  isActive={pathname === "/users"}
-                />
-              )}
-              {user?.role?.name == "Super Admin" && (
-                <NavItem
-                  href="/roles"
-                  icon={<FaUserSecret size={30} />}
-                  label="Roles"
-                  isCollapsed={isCollapsed}
-                  isActive={pathname === "/roles"}
-                />
-              )}
-            </nav>
-          </div>
-        )}
+                {/* {!isCollapsed && (
+                  <div className="relative flex py-1 items-center">
+                    <div className="flex-grow border-t border-gray-400"></div>
+                    <span className="flex align-center justify-center mx-4 text-gray-400 text-sm font-semibold">
+                      Users Info
+                    </span>
+                    <div className="flex-grow border-t border-gray-400"></div>
+                  </div>
+                )} */}
+                {permissions?.users?.can_read && (
+                  <NavItem
+                    href="/users"
+                    icon={<FaUserAlt size={30} />}
+                    label="Users"
+                    isCollapsed={isCollapsed}
+                    isActive={pathname === "/users"}
+                  />
+                )}
+                {user?.role?.name == "Super Admin" && (
+                  <NavItem
+                    href="/roles"
+                    icon={<FaUserSecret size={30} />}
+                    label="Roles"
+                    isCollapsed={isCollapsed}
+                    isActive={pathname === "/roles"}
+                  />
+                )}
+              </nav>
+            </div>
+          )}
+        </div>
+        <div
+          onClick={toggleSidebar}
+          className={`absolute  bottom-4 -right-[11%] transform -translate-y-1/2 cursor-pointer ${
+            isCollapsed ? "translate-x-2" : "-translate-x-2"
+          }`}
+        >
+          <Button
+            className="bg-white text-gray-800 border border-gray-300 rounded-full shadow-md flex items-center justify-center"
+            size="icon"
+          >
+            {!isCollapsed ? (
+              <ChevronLeft size={16} />
+            ) : (
+              <ChevronRight size={16} />
+            )}
+          </Button>
+        </div>
       </div>
     </aside>
   );
@@ -188,20 +218,21 @@ function NavItem({
   isActive: boolean;
 }) {
   const router = useNavRouter();
-  
+
   // Prefetch the route data when mouse hovers over the navigation item
   const handleMouseEnter = useCallback(() => {
     router.prefetch(href);
   }, [router, href]);
-  
+
   return (
-    <Link href={href} className="w-full" prefetch={true}>
+    <Link href={href} prefetch={true}>
       <Button
         onMouseEnter={handleMouseEnter}
-        className={`w-full text-base relative h-12 flex items-center ${isCollapsed ? "justify-center" : "justify-start"}  gap-4 p-3 rounded-lg transition-colors ${isActive
-          ? "bg-secondary text-secondary-foreground"
-          : "hover:bg-secondary hover:text-secondary-foreground"
-          }`}
+        className={`w-full text-base relative h-12 flex items-center ${isCollapsed ? "justify-center" : "justify-start"}  gap-4 p-3 rounded-lg transition-colors ${
+          isActive
+            ? "bg-secondary text-secondary-foreground"
+            : "hover:bg-secondary hover:text-secondary-foreground"
+        }`}
       >
         <span className="h-5 w-5">{icon}</span>
         {!isCollapsed && <span>{label}</span>}

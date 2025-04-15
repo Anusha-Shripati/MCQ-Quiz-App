@@ -8,22 +8,21 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import toast from "react-hot-toast";
 import { Question } from "@/shared/types/app";
-import useSWR, { mutate } from "swr";
+import useSWR from "swr";
 import { api } from "@/lib/api";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 const CreateQuestion: React.FC<{ params: { technology: string } }> = ({
   params,
 }) => {
-
   const [questions, setQuestions] = useState<Question[]>([]);
+  const [showSidebar, setShowSidebar] = useState(false);
   const router = useRouter();
   const [selectedQuestion, setSelectedQuestion] = useState<number>(0);
 
-  const { data,isLoading } = useSWR(
+  const { data, isLoading } = useSWR(
     `/question/list?technology_id=${params.technology}`,
     api.get
   );
-
 
   useEffect(() => {
     if (data?.data?.questions?.length) {
@@ -32,6 +31,22 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({
         setSelectedQuestion(data?.data?.questions.length - 1);
       }
     }
+
+    if (!data?.data?.questions?.length) {
+      setQuestions([
+        {
+          technology_id: params.technology,
+          question: "",
+          options: ["", "", "", "", "", ""],
+          correct_answer: [],
+          time: "",
+          difficulty_level: "easy",
+          type: "mcq",
+          meta: {},
+        },
+      ]);
+    }
+    setShowSidebar(data?.data?.questions?.length > 0);
   }, [data]);
 
   // const handleSave = () => {
@@ -51,10 +66,10 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({
           time: "",
           difficulty_level: "easy",
           type: "mcq",
-          meta: {}
+          meta: {},
         };
       });
-    })
+    });
     toast.success("Questions Reset successfully!");
   };
 
@@ -64,10 +79,18 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({
         await api.delete(`/question/${question.id}`);
       }
       const updatedQuestions = questions.filter((_, i) => i !== index);
+      // setShowSidebar(updatedQuestions.length > 0);
+      // if (updatedQuestions.length === 0) {
+      //   setSelectedQuestion(0);
+      // }
+      // if (selectedQuestion > updatedQuestions.length - 1) {
+      //   setSelectedQuestion(updatedQuestions.length - 1);
+      // }
       setQuestions(updatedQuestions);
       if (selectedQuestion >= updatedQuestions.length) {
         setSelectedQuestion(updatedQuestions.length - 1);
       }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       toast.error("Failed to delete question");
     }
@@ -92,7 +115,6 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({
       updatedQuestions[index].correct_answer = [];
       if (updatedQuestions[index]?.meta?.code === undefined) {
         updatedQuestions[index].meta = { code: "" };
-
       }
       // delete updatedQuestions[index].options; // Remove options field if it exists
       // delete updatedQuestions[index].correctOptions; // Remove correct options field if it exists
@@ -136,7 +158,7 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({
       correct_answer: [],
       time: "",
       difficulty_level: "easy",
-      meta: {}
+      meta: {},
     };
     setQuestions([...questions, newQuestion]);
     setSelectedQuestion(questions.length);
@@ -145,8 +167,8 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({
   const handleBack = () => {
     router.push("/questions");
   };
-  if(isLoading){
-    return <LoadingSpinner className="w-full h-screen"/>
+  if (isLoading) {
+    return <LoadingSpinner className="w-full h-screen" />;
   }
 
   return (
@@ -166,18 +188,20 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({
       {/* Remaining body */}
       <div className="flex gap-6">
         {/* Sidebar for questions no. list */}
-        <QuestionSidebar
-          questions={questions}
-          selectedQuestion={selectedQuestion}
-          setSelectedQuestion={setSelectedQuestion}
-          handleDeleteQuestion={handleDeleteQuestion}
-          handleAddQuestion={handleAddQuestion}
-        />
+        {showSidebar && (
+          <QuestionSidebar
+            questions={questions}
+            selectedQuestion={selectedQuestion}
+            setSelectedQuestion={setSelectedQuestion}
+            handleDeleteQuestion={handleDeleteQuestion}
+            handleAddQuestion={handleAddQuestion}
+          />
+        )}
 
         {/* Questions list with data for real questions which can be edited */}
         <div className="flex-1 h-[calc(100vh-8rem)] ">
           <div className="flex-1">
-            {(questions?.length === 0 || !questions) ? (
+            {questions?.length === 0 || !questions ? (
               <EmptyState
                 title="No Questions Added"
                 description="Get started by adding a new question."
@@ -192,23 +216,24 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({
                     time: "",
                     difficulty_level: "easy",
                     type: "mcq",
-                    meta: {}
+                    meta: {},
                   };
+                  setShowSidebar(true);
                   setQuestions([newQuestion]);
                 }}
               />
             ) : (
               // questions.map((q, index) => (
-                <QuestionCard
-                  question={questions[selectedQuestion]}
-                  selectedQuestion={selectedQuestion}
-                  questions={questions}
-                  handleQuestionTypeChange={handleQuestionTypeChange}
-                  handleDeleteQuestion={handleDeleteQuestion}
-                  setQuestions={setQuestions}
-                  handleReset={handleReset}
-                  technologyId={params.technology}
-                />
+              <QuestionCard
+                question={questions[selectedQuestion]}
+                selectedQuestion={selectedQuestion}
+                questions={questions}
+                handleQuestionTypeChange={handleQuestionTypeChange}
+                handleDeleteQuestion={handleDeleteQuestion}
+                setQuestions={setQuestions}
+                handleReset={handleReset}
+                technologyId={params.technology}
+              />
               // ))
             )}
           </div>

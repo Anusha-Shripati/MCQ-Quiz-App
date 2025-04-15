@@ -11,7 +11,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     <>
       <AdminAuth>
         <Sidebar />
-        <div className="flex-1">
+        <div className="flex flex-col w-full">
           <Header />
           <div className="flex-1 bg-secondary border  overflow-y flex justify-center">
             {/* <ScrollArea className="px-6 w-full xl:max-w-[1600px]"> */}

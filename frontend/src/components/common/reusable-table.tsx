@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { ChevronDown, ChevronUp } from "lucide-react"; // Add expand/collapse icons
+import { LoadingSpinner } from "../ui/loading-spinner";
 
 // Define interfaces
 export interface Column<T> {
@@ -23,6 +24,7 @@ export interface TableProps<T> {
   onRowClick?: (row: T) => void;
   className?: string;
   rowKey: keyof T;
+  loading?: boolean
 }
 
 const ReusableTable = <T extends object>({
@@ -31,6 +33,7 @@ const ReusableTable = <T extends object>({
   expandableRow,
   onRowClick,
   className,
+  loading
 }: TableProps<T>) => {
   const [expandedRow, setExpandedRow] = useState<number | null>(null);
 
@@ -40,8 +43,9 @@ const ReusableTable = <T extends object>({
   };
 
   return (
-    <div className={`overflow-x-auto ${className} h-[580px] overflow-y-auto`}>
-      <Table className="min-w-full">
+    <div className={`overflow-x-auto ${className}  animate-in fade-in duration-300  overflow-y-auto`}>
+      {loading && <LoadingSpinner className="h-full" />}
+      {!loading && <Table className="min-w-full">
         <TableHeader className="sticky z-10">
           <TableRow className="bg-gradient-to-r from-blue-50 to-blue-100 dark:from-gray-700 dark:to-gray-800">
             {columns.map((column) => (
@@ -79,13 +83,13 @@ const ReusableTable = <T extends object>({
               >
                 {columns.map((column) => {
                   const getNestedValue = (obj: Record<string, unknown>, path: string): unknown => {
-                    return path.split('.').reduce<Record<string, unknown> | null>((o, key) => 
-                      o && o[key] !== undefined ? o[key] as Record<string, unknown> : null, 
+                    return path.split('.').reduce<Record<string, unknown> | null>((o, key) =>
+                      o && o[key] !== undefined ? o[key] as Record<string, unknown> : null,
                       obj
                     );
                   };
 
-                  const value = typeof column.key === 'string' && column.key.includes('.') 
+                  const value = typeof column.key === 'string' && column.key.includes('.')
                     ? getNestedValue(row as Record<string, unknown>, column.key)
                     : row[column.key as keyof T];
 
@@ -121,7 +125,7 @@ const ReusableTable = <T extends object>({
             </React.Fragment>
           ))}
         </TableBody>
-      </Table>
+      </Table>}
     </div>
   );
 };

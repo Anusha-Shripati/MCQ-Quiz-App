@@ -85,9 +85,6 @@ function UserTable() {
       ),
     },
   ];
-  if (isLoading) {
-    return <LoadingSpinner className="min-h-[500px]" />;
-  }
   if (error) {
     return (
       <Error
@@ -100,7 +97,7 @@ function UserTable() {
   }
   return (
     <div className="min-h-[500px]">
-      <ReusableTable columns={columns} rows={userList} rowKey="id" />
+      <ReusableTable columns={columns} rows={userList} rowKey="id" loading={isLoading}/>
       <UserForm open={open} userData={user} onClose={() => setOpen(false)} />
     </div>
   );

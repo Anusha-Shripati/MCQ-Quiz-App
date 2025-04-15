@@ -15,7 +15,7 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({
   params,
 }) => {
   const [questions, setQuestions] = useState<Question[]>([]);
-  // const [showSidebar, setShowSidebar] = useState(false);
+  const [showSidebar, setShowSidebar] = useState(false);
   const router = useRouter();
   const [selectedQuestion, setSelectedQuestion] = useState<number>(0);
 
@@ -25,23 +25,13 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({
   );
 
   useEffect(() => {
-    if (data?.data?.questions?.length) {
-      console.log(data?.data?.questions, "questions");
-      console.log(data?.data?.questions.length, "questions length");
-      console.log(questions.length, "questions length state");
-      console.log(selectedQuestion, "selected question");
-      setQuestions(data?.data?.questions);
-      if (selectedQuestion >= data?.data?.questions.length) {
-        setSelectedQuestion(data?.data?.questions.length - 1);
+    if (data?.data?.list?.length) {
+      setQuestions(data?.data?.list);
+      if (selectedQuestion > data?.data?.list.length) {
+        setSelectedQuestion(data?.data?.list.length - 1);
       }
     }
-
-    console.log(data?.data?.questions, "questions");
-    console.log(data?.data?.questions.length, "questions length");
-    console.log(questions.length, "questions length state");
-    console.log(selectedQuestion, "selected question");
-
-    if (!data?.data?.questions?.length) {
+    if (!data?.data?.list?.length) {
       setQuestions([
         {
           technology_id: params.technology,
@@ -55,7 +45,6 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({
         },
       ]);
     }
-    // setShowSidebar(data?.data?.questions?.length > 0);
   }, [data]);
 
   // const handleSave = () => {
@@ -89,10 +78,13 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({
       }
       const updatedQuestions = questions.filter((_, i) => i !== index);
       setQuestions(updatedQuestions);
-      if (selectedQuestion >= updatedQuestions.length) {
+      console.log(selectedQuestion,updatedQuestions.length);
+      
+      if (selectedQuestion >= updatedQuestions.length  && updatedQuestions.length) {
         setSelectedQuestion(updatedQuestions.length - 1);
+      }else if(updatedQuestions.length==0){
+        setSelectedQuestion(0)
       }
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       toast.error("Failed to delete question");
     }
@@ -102,25 +94,16 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({
     const updatedQuestions = [...questions];
     updatedQuestions[index].type = value;
 
-    // Reset answer/options based on the new type
     if (value === "mcq" || value === "multiple_select") {
       updatedQuestions[index].options = ["", "", "", "", "", ""]; // 4 compulsory + 2 optional
       updatedQuestions[index].correct_answer = []; // Reset correct options
-      // delete updatedQuestions[index].answer; // Remove answer field if it exists
-      // delete updatedQuestions[index].code; // Remove code field if it exists
     } else if (value === "text") {
       updatedQuestions[index].correct_answer = [];
-      // delete updatedQuestions[index].options; // Remove options field if it exists
-      // delete updatedQuestions[index].correctOptions; // Remove correct options field if it exists
-      // delete updatedQuestions[index].code; // Remove code field if it exists
     } else if (value === "code_snippet") {
       updatedQuestions[index].correct_answer = [];
       if (updatedQuestions[index]?.meta?.code === undefined) {
         updatedQuestions[index].meta = { code: "" };
       }
-      // delete updatedQuestions[index].options; // Remove options field if it exists
-      // delete updatedQuestions[index].correctOptions; // Remove correct options field if it exists
-      // delete updatedQuestions[index].answer; // Remove answer field if it exists
     }
 
     setQuestions(updatedQuestions);
@@ -169,6 +152,12 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({
   const handleBack = () => {
     router.push("/questions");
   };
+
+  useEffect(()=>{
+    if(questions.length){
+      setShowSidebar(true)
+    }
+  },[questions])
   if (isLoading) {
     return <LoadingSpinner className="w-full h-screen" />;
   }
@@ -182,7 +171,7 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({
           <ArrowLeft className="h-5 w-5" />
         </Button>{" "}
         <div className="text-2xl font-bold text-gray-900 dark:text-white">
-          {data?.data?.name}
+          {data?.data?.technology?.name}
         </div>
         {/* <Button onClick={handleSave}>Save</Button> */}
       </div>
@@ -190,7 +179,7 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({
       {/* Remaining body */}
       <div className="flex gap-6">
         {/* Sidebar for questions no. list */}
-        {questions.length ? (
+        {showSidebar ? (
           <QuestionSidebar
             questions={questions}
             selectedQuestion={selectedQuestion}
@@ -222,7 +211,6 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({
                     type: "mcq",
                     meta: {},
                   };
-                  // setShowSidebar(true);
                   setQuestions([newQuestion]);
                 }}
               />

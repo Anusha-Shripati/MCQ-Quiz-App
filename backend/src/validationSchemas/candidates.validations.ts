@@ -6,9 +6,7 @@ export const candidateSchema = {
 			assessment_id: Joi.string().required().messages({
 				'string.empty': 'Assessment ID is required',
 			}),
-			technology_id: Joi.string().required().messages({
-				'string.empty': 'Technology ID is required',
-			}),
+			
 			name: Joi.string().required().messages({
 				'string.empty': 'Candidate name is required',
 			}),
@@ -43,9 +41,7 @@ export const candidateSchema = {
 			assessment_id: Joi.string().required().messages({
 				'string.empty': 'Assessment ID is required',
 			}),
-			technology_id: Joi.string().required().messages({
-				'string.empty': 'Technology ID is required',
-			}),
+			
 			name: Joi.string().required().messages({
 				'string.empty': 'Candidate name is required',
 			}),

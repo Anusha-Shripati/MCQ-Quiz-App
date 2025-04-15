@@ -756,15 +756,15 @@ async function main() {
   }
 
   // Create technologies
-  await createTechnologies();
+  // await createTechnologies();
 
   // Seed questions for all technologies
-  await seedQuestions(mongodbQuestions, "MongoDB");
-  await seedQuestions(javascriptQuestions, "JavaScript");
-  await seedQuestions(pythonQuestions, "Python");
+  // await seedQuestions(mongodbQuestions, "MongoDB");
+  // await seedQuestions(javascriptQuestions, "JavaScript");
+  // await seedQuestions(pythonQuestions, "Python");
 
   // Create test candidates
-  await createTestCandidates();
+  // await createTestCandidates();
 }
 
 main()

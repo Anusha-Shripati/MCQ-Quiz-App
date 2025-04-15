@@ -114,7 +114,6 @@ CREATE TABLE "Questions" (
 CREATE TABLE "Candidate" (
     "id" TEXT NOT NULL,
     "assessment_id" TEXT NOT NULL,
-    "technology_id" TEXT NOT NULL,
     "exam_id" TEXT,
     "name" TEXT NOT NULL,
     "email" TEXT NOT NULL,
@@ -233,9 +232,6 @@ ALTER TABLE "Questions" ADD CONSTRAINT "Questions_technology_id_fkey" FOREIGN KE
 
 -- AddForeignKey
 ALTER TABLE "Candidate" ADD CONSTRAINT "Candidate_assessment_id_fkey" FOREIGN KEY ("assessment_id") REFERENCES "Assessments"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Candidate" ADD CONSTRAINT "Candidate_technology_id_fkey" FOREIGN KEY ("technology_id") REFERENCES "Technology"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Candidate" ADD CONSTRAINT "Candidate_exam_id_fkey" FOREIGN KEY ("exam_id") REFERENCES "Exam"("id") ON DELETE SET NULL ON UPDATE CASCADE;

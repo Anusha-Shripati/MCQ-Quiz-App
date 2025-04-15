@@ -158,6 +158,7 @@ const Filters = () => {
         </Button>
       </div>
       <div className="flex justify-between items-center gap-4 flex-wrap mt-2 ml-2">
+        {candidateList.length > 0 &&
         <div className="flex items-center gap-2 min-w-fit shrink-0">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
             Results found
@@ -166,7 +167,7 @@ const Filters = () => {
             {candidateList.length}
           </span>
         </div>
-
+        }
         {isFilter && <Button
           variant="destructive"
           onClick={clearAllFilters}

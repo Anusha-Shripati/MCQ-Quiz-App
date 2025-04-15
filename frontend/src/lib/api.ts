@@ -8,18 +8,18 @@ interface CandidateParams {
 }
 
 interface CreateCandidateData {
-	name: string;
-	email: string;
-	phone: string;
-	experience: string;
-	assessment_id: string;
+  name: string;
+  email: string;
+  phone: string;
+  experience: string;
+  assessment_id: string;
   technology_id: string;
-	meta: {
-		startDate: Date;
-		endDate: Date;
-		timeUnit: string;
-		timeValue: number;
-	};
+  meta: {
+    startDate: Date;
+    endDate: Date;
+    timeUnit: string;
+    timeValue: number;
+  };
 }
 
 export const fetchCandidates = async (params: CandidateParams) => {
@@ -37,11 +37,11 @@ export const fetchTechnologies = async () => {
   return response.data.data;
 };
 
-export const fetcher = async (url:string)=>{
-  const apitString = Array.isArray(url) ? url[0]:url;
-  const params =  Array.isArray(url) && url.length == 2 ? url[1] :  {}
-  const response = await axios.get(apitString,{params});
-  
+export const fetcher = async (url: string) => {
+  const apitString = Array.isArray(url) ? url[0] : url;
+  const params = Array.isArray(url) && url.length == 2 ? url[1] : {};
+  const response = await axios.get(apitString, { params });
+
   return response.data;
 };
 export const postData = async <T>(url: string, data: T) => {
@@ -66,7 +66,10 @@ export const api = {
     return response.data;
   },
   post: async <T>(url: string, data: T) => {
+    console.log("url", url);
+    console.log("data", data);
     const response = await axios.post(url, data);
+    console.log("response", response);
     return response.data;
   },
   delete: async (url: string) => {

@@ -19,14 +19,14 @@ import useSWRMutation from "swr/mutation";
 import { Technology } from "@/store/assessmentStore";
 
 interface CreateAssessmentPayload {
-  name: string, 
-  duration: string | number, 
-  technologies: Partial<Technology>[]
+  name: string;
+  duration: string | number;
+  technologies: Partial<Technology>[];
 }
 
 async function create(url: string, { arg }: { arg: CreateAssessmentPayload }) {
   const response = await api.post(url, arg);
-  return response
+  return response;
 }
 
 export default function CreateAssessment() {
@@ -34,17 +34,20 @@ export default function CreateAssessment() {
   const [step, setStep] = useState(1);
   const [technologyOptions, setTechnologyOptions] = useState([]);
 
-  const { data } = useSWR('/technology/list', api.get);
+  const { data } = useSWR("/technology/list", api.get);
 
   const { trigger, isMutating } = useSWRMutation(`/assessment/create`, create);
 
-
   useEffect(() => {
+    console.log(data, "data");
     if (data) {
-      const options = data.data.list.map((tech: { id: string; name: string }) => ({
-        value: tech.id,
-        label: tech.name,
-      }));
+      const options = data.data.list.map(
+        (tech: { id: string; name: string }) => ({
+          value: tech.id,
+          label: tech.name,
+        })
+      );
+      console.log(options, "options");
       setTechnologyOptions(options);
     }
   }, [data]);
@@ -55,30 +58,42 @@ export default function CreateAssessment() {
   const validation = z.object({
     name: z.string().nonempty("Name is required."),
     duration: z.number().min(1, "Duration is required"),
-    technologies: z.array(technologySchema).min(1, 'At least one category is required')
+    technologies: z
+      .array(technologySchema)
+      .min(1, "At least one category is required"),
   });
 
-  const { register, watch, setValue, formState: { errors }, trigger: fromTrigger } = useForm<AssessmentForm>({
-    resolver: zodResolver(validation), defaultValues: {
+  const {
+    register,
+    watch,
+    setValue,
+    formState: { errors },
+    trigger: fromTrigger,
+  } = useForm<AssessmentForm>({
+    resolver: zodResolver(validation),
+    defaultValues: {
       name: "",
       technologies: [],
       duration: 15,
-      targetQuestions: 0
-    }
-  })
-  const formData = watch()
+      targetQuestions: 0,
+    },
+  });
+  const formData = watch();
   // Add this options array for the duration select
   const durationOptions = Array.from(Array(37).keys()).map((i) => ({
     value: 15 + i * 5,
     label: `${15 + i * 5} minutes`,
   }));
 
+  // console.log(formData, "formData");
+  // console.log(durationOptions, "durationOptions");
 
   const handleNextStep = async () => {
-    const valudate = await fromTrigger()
+    const valudate = await fromTrigger();
     if (step === 2) {
-
-      const isValid = formData.technologies.every((cat) => cat.easy || cat.medium || cat.hard);
+      const isValid = formData.technologies.every(
+        (cat) => cat.easy || cat.medium || cat.hard
+      );
       if (!isValid) {
         toast.error("Each category must have at least one question");
         return;
@@ -90,28 +105,22 @@ export default function CreateAssessment() {
   };
 
   const handlePreviousStep = () => {
+    // console.log("Previous step clicked");
     setStep((prev) => prev - 1);
   };
 
   const calculateTotalSum = () => {
     return formData.technologies.reduce((sum, tech) => {
-      return (
-        sum +
-        tech.easy +
-        tech.medium +
-        tech.hard
-      );
+      return sum + tech.easy + tech.medium + tech.hard;
     }, 0);
   };
 
-
   const handleSubmit = async () => {
-
     // Create the assessment
     const newAssessment = {
       name: formData.name,
       duration: formData.duration,
-      technologies: formData.technologies.map(tech => ({
+      technologies: formData.technologies.map((tech) => ({
         technology_id: tech.id,
         easy: tech.easy,
         medium: tech.medium,
@@ -120,18 +129,21 @@ export default function CreateAssessment() {
     };
 
     try {
-
       const res = await trigger(newAssessment);
       if (res.success) {
         toast.success("Assessment created successfully");
         router.push("/assessments");
-        mutate((key) => typeof key === 'string' && key.startsWith('/assessment/list'));
+        mutate(
+          (key) => typeof key === "string" && key.startsWith("/assessment/list")
+        );
       } else {
         toast.error(res.messae);
       }
     } catch (error) {
       if (isAxiosError(error)) {
-        toast.error(error.response.data.message || "An unexpected error occurred");
+        toast.error(
+          error.response.data.message || "An unexpected error occurred"
+        );
       } else {
         toast.error("An unexpected error occurred");
       }
@@ -141,9 +153,7 @@ export default function CreateAssessment() {
 
   // // Add this new function to handle slider changes
 
-
   // Add this handler for duration change
-
 
   return (
     <div className="mx-auto py-8 px-6">
@@ -202,7 +212,6 @@ export default function CreateAssessment() {
           setValue={setValue}
           errors={errors}
           calculateTotalSum={calculateTotalSum}
-
         />
       )}
       {step === 3 && (

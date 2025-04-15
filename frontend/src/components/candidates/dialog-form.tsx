@@ -20,6 +20,7 @@ import toast from "react-hot-toast";
 import { mutate } from "swr";
 import { z } from "zod";
 import { DurationInput } from "../common/duration-input";
+import useSWRMutation from "swr/mutation";
 
 type ErrorType = string | undefined;
 interface CandidateDialogProps {
@@ -27,6 +28,18 @@ interface CandidateDialogProps {
   open: boolean | undefined;
   setOpen: (opem: boolean) => void;
 }
+
+
+
+async function create(url: string, { arg }: { arg: Partial<CandidateFormData> }) {
+  const response = await api.post(url, arg);
+  return response;
+}
+async function update(url: string, { arg }: { arg: Partial<CandidateFormData> }) {
+  const response = await api.put(url, arg);
+  return response;
+};
+
 export default function DialogForm({
   candidate,
   open,
@@ -60,21 +73,27 @@ export default function DialogForm({
     endDate: z.date({ message: "End date is required" }),
   });
   const formFields: CandidateFormData = {
-		email: '',
-		name: '',
-		phone: '',
-		technology: '',
-		assessment: '',
-		experience: '',
-		timeValue: 0,
-		timeUnit: 'days',
-		startDate: new Date(),
-		endDate: new Date(),
-	};
+    email: '',
+    name: '',
+    phone: '',
+    technology: '',
+    assessment: '',
+    experience: '',
+    timeValue: 0,
+    timeUnit: 'days',
+    startDate: new Date(),
+    endDate: new Date(),
+  };
 
   const { register, formState: { errors }, handleSubmit, setValue, watch, reset } = useForm<CandidateFormData>({ resolver: zodResolver(validation), defaultValues: formFields as CandidateFormData })
   const formData = watch()
-  const {assessmentOptions,technologyOptions} = useCandidateStore()
+  const { assessmentOptions, technologyOptions } = useCandidateStore()
+
+
+
+  const { trigger, isMutating } = useSWRMutation(`/candidate/create`, create);
+  const { trigger: updateTrigger, isMutating: updating } = useSWRMutation(`/candidate/${candidate?.id}`, update);
+
 
   const validateAndSubmit = async (values: CandidateFormData) => {
     try {
@@ -83,7 +102,6 @@ export default function DialogForm({
         name: values.name,
         email: values.email,
         phone: values.phone,
-        technology_id: values.technology,
         experience: values.experience,
         assessment_id: values.assessment,
         start_date: values.startDate,
@@ -91,9 +109,9 @@ export default function DialogForm({
       };
 
       if (candidate) {
-        res = await api.put(`/candidate/${candidate?.id}`, createCandidate);
+        res = await updateTrigger(createCandidate);
       } else {
-        res = await api.post("/candidate/create", createCandidate);
+        res = await trigger(createCandidate);
       }
       if (res.success) {
         toast.success(
@@ -121,7 +139,7 @@ export default function DialogForm({
   };
 
   useEffect(() => {
-    if (formData.startDate && formData.timeUnit && Number(formData.timeValue) >=0 ) {
+    if (formData.startDate && formData.timeUnit && Number(formData.timeValue) >= 0) {
       const newEndDate = new Date(formData.startDate);
       const numericValue = Number(formData.timeValue);
 
@@ -137,12 +155,19 @@ export default function DialogForm({
   }, [formData.startDate, formData.timeUnit, formData.timeValue]);
 
   useEffect(() => {
-		console.log('candidate in dialog form', candidate);
-		console.log('formFields', formFields);
-		if (open) {
-				reset(candidate || formFields);
-		}
-	}, [open, candidate, reset]);
+    if (open) {
+      reset(candidate || formFields);
+    }
+  }, [open, candidate, reset]);
+
+  const handleAssessmentChange = (value: string) => {
+    setValue("assessment", value, { shouldValidate: true })
+    // !TODO: Fix here
+    // const assessment = assessmentOptions.find((item)=>item.value == value)
+    // if(assessment && assessment.technologies ){
+    //   setValue('technology',assessment.technologies?.map(item=>item.name).join(', '))
+    // }
+  }
 
   return (
     <Dialog
@@ -196,16 +221,14 @@ export default function DialogForm({
 
             <div className="grid grid-cols-2 gap-4">
               <FormField
-                label="Technology"
-                id="technology"
+                label="Assessment"
+                id="assessment"
                 type="select"
-                options={technologyOptions}
-                value={formData.technology}
-                onChange={(value) =>
-                  setValue("technology", value, { shouldValidate: true })
-                }
-                error={errors?.technology?.message as ErrorType}
-                disabled={technologyOptions.length === 0}
+                options={assessmentOptions}
+                value={formData.assessment}
+                onChange={handleAssessmentChange}
+                error={errors?.assessment?.message as ErrorType}
+                disabled={assessmentOptions.length === 0}
               />
               <FormField
                 label="Experience"
@@ -219,19 +242,17 @@ export default function DialogForm({
                 error={errors.experience?.message as ErrorType}
               />
             </div>
-
             <FormField
-              label="Assessment"
-              id="assessment"
-              type="select"
-              options={assessmentOptions}
-              value={formData.assessment}
+              label="Technology"
+              id="technology"
+              options={technologyOptions}
+              value={formData.technology}
               onChange={(value) =>
-                setValue("assessment", value, { shouldValidate: true })
+                setValue("technology", value, { shouldValidate: true })
               }
-              error={errors?.assessment?.message as ErrorType}
-              disabled={assessmentOptions.length === 0}
+              disabled={true}
             />
+
 
             <div className="grid grid-cols-2 gap-4">
               <DatePickerInput
@@ -261,6 +282,7 @@ export default function DialogForm({
                 reset(formFields);
                 setOpen(false);
               }}
+              disabled={isMutating || updating}
               className="hover:bg-gray-500 dark:hover:bg-gray-700"
             >
               Cancel
@@ -268,6 +290,7 @@ export default function DialogForm({
             <Button
               className="bg-blue-600 text-white hover:bg-blue-700"
               onClick={handleSubmit(validateAndSubmit)}
+              disabled={isMutating || updating}
             >
               {candidate ? "Update" : "Create"}
             </Button>

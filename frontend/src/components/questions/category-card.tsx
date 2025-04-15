@@ -12,7 +12,7 @@ export const CategoryCard = ({
   handleDelete,
 }: {
   category: QuestionCategory;
-  handleDelete: (category: QuestionCategory) => void;
+  handleDelete: (id:string) => void;
 }) => {
   const router = useRouter();
   const handleNavigate = () => {

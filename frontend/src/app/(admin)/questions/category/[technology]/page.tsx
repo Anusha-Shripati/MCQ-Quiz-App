@@ -1,77 +1,91 @@
 "use client";
 
 import { Button } from "@/components/ui/form/button";
-import { useParams, useRouter, useSearchParams } from "next/navigation";
-import { useState, useMemo, useEffect } from "react";
+import { useParams, usePathname, useRouter, useSearchParams } from "next/navigation";
+import React, { useState, useMemo, useEffect } from "react";
 import { ArrowLeft } from "lucide-react";
 import { FilterBar } from "@/components/questions/filter-bar";
 import { QuestionCard } from "@/components/questions/questions-card";
 import CreateQuestionCard from "@/components/questions/create-question-card";
-import { Pagination } from "@/components/questions/pagination-for-category";
+import Pagination from "@/components/pagination";
 import { Question } from "@/shared/types/app";
 import useSWR, { mutate } from "swr";
 import { api } from "@/lib/api";
 import toast from "react-hot-toast";
+import { useQuestionStore } from "@/store/questionStore";
 
 const CategoryPage = () => {
   const { technology } = useParams();
   const searchParams = useSearchParams();
-  const router = useRouter();
   const [questionsData, setQuestionsData] =
     useState<Required<Question>[]>([]);
 
-  const { data } = useSWR(
-    `/question/list?technology_id=${technology}`,
+  const difficulty = searchParams.get("difficulty_level");
+  const [selectedDifficulties, setSelectedDifficulties] = useState<Question['difficulty_level'][]>(
+    difficulty ? difficulty.split(",") as Question['difficulty_level'][] : ["easy", "medium", "hard"]
+  );
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [total, setTotal] = useState(0)
+  const [selectedQuestion, setSelectedQuestion] = useState<null | number>(null);
+  const { setQuestionFilter, questionFilter } = useQuestionStore()
+
+
+  const { data, isLoading } = useSWR(
+    `/question/list?technology_id=${technology}&search=${questionFilter.search}&difficulty_level=${questionFilter.difficulty}&page=${currentPage}&limit=${itemsPerPage}`,
     api.get
   );
 
   useEffect(() => {
-    if (data?.data?.questions) {
-      setQuestionsData(data?.data?.questions);
+    if (data?.data?.list) {
+      setQuestionsData(data?.data?.list);
+      setTotal(data?.data?.total)
     }
   }, [data]);
 
 
 
-  const difficulty = searchParams.get("difficulty");
-  const [selectedDifficulties, setSelectedDifficulties] = useState<string[]>(
-    difficulty ? difficulty.split(",") : ["easy", "medium", "hard"]
-  );
-  const [searchQuery, setSearchQuery] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
-  const [selectedQuestion, setSelectedQuestion] = useState<null | number>(null);
-  const questionsPerPage = 5;
 
-  const filteredQuestions = useMemo(() => {
-    let filtered = [...questionsData];
 
-    if (selectedDifficulties.length > 0 && selectedDifficulties.length < 3) {
-      filtered = filtered.filter((question) =>
-        selectedDifficulties.includes(question.difficulty_level)
-      );
-    }
 
-    if (searchQuery) {
-      filtered = filtered.filter((question) =>
-        question.question.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
+  const handlePerPageChange = (value: string) => {
+    setItemsPerPage(Number(value));
+    setCurrentPage(1);
+  };
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    // updateQueryParams({ page: page.toString() });
+  };
 
-    return filtered;
-  }, [selectedDifficulties, searchQuery, questionsData]);
+  // const pathname = usePathname();
 
-  const currentQuestions = useMemo(() => {
-    const indexOfLastQuestion = currentPage * questionsPerPage;
-    const indexOfFirstQuestion = indexOfLastQuestion - questionsPerPage;
-    return filteredQuestions.slice(indexOfFirstQuestion, indexOfLastQuestion);
-  }, [filteredQuestions, currentPage]);
+  // const updateQueryParams = (params: { page?: string; perPage?: string }) => {
+  //   const newParams = new URLSearchParams(searchParams.toString());
 
-  const handleDifficultyChange = (difficulties: string[]) => {
+  //   if (params.page) newParams.set("page", params.page);
+  //   if (params.perPage) newParams.set("perPage", params.perPage);
+  //   window.history.pushState(null, "", `${pathname}?${newParams.toString()}`);
+  // };
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+
+      setQuestionFilter(searchQuery, selectedDifficulties);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery, selectedDifficulties]);
+
+
+
+  const handleDifficultyChange = (difficulties: Question['difficulty_level'][]) => {
     setSelectedDifficulties(difficulties);
-    const queryParam = difficulties.length
-      ? `?difficulty=${difficulties.join(",")}`
-      : "";
-    router.push(queryParam);
+    // const queryParam = difficulties.length
+    //   ? `?difficulty_level=${difficulties.join(",")}`
+    //   : "";
+    // router.push(queryParam);
   };
 
   const handleDelete = async (id: string) => {
@@ -85,36 +99,29 @@ const CategoryPage = () => {
     }
   };
 
-  const totalPages = Math.ceil(filteredQuestions.length / questionsPerPage);
+
   const handleEdit = (index: number) => {
     setSelectedQuestion(index)
   }
 
+  const currentPageStart = useMemo(() => (currentPage - 1) * itemsPerPage + 1, [itemsPerPage, currentPage]);
+  const currentPageEnd = useMemo(() => Math.min(currentPage * itemsPerPage, total), [itemsPerPage, total, currentPage]);
+
 
   const handleQuestionTypeChange = (value: Question["type"], index: number) => {
-    const updatedQuestions = [...currentQuestions];
+    const updatedQuestions = [...questionsData];
     updatedQuestions[index].type = value;
 
-    // Reset answer/options based on the new type
     if (value === "mcq" || value === "multiple_select") {
-      updatedQuestions[index].options = ["", "", "", "", "", ""]; // 4 compulsory + 2 optional
-      updatedQuestions[index].correct_answer = []; // Reset correct options
-      // delete updatedQuestions[index].answer; // Remove answer field if it exists
-      // delete updatedQuestions[index].code; // Remove code field if it exists
+      updatedQuestions[index].options = ["", "", "", "", "", ""];
+      updatedQuestions[index].correct_answer = []; 
     } else if (value === "text") {
       updatedQuestions[index].correct_answer = [];
-      // delete updatedQuestions[index].options; // Remove options field if it exists
-      // delete updatedQuestions[index].correctOptions; // Remove correct options field if it exists
-      // delete updatedQuestions[index].code; // Remove code field if it exists
     } else if (value === "code_snippet") {
       updatedQuestions[index].correct_answer = [];
       if (updatedQuestions[index]?.meta?.code === undefined) {
         updatedQuestions[index].meta = { code: "" };
-
       }
-      // delete updatedQuestions[index].options; // Remove options field if it exists
-      // delete updatedQuestions[index].correctOptions; // Remove correct options field if it exists
-      // delete updatedQuestions[index].answer; // Remove answer field if it exists
     }
 
     setQuestionsData(updatedQuestions);
@@ -129,7 +136,7 @@ const CategoryPage = () => {
       className={`p-6 flex justify-center min-h-screen dark:bg-gray-900 bg-gray-100"}`}
     >
       <div
-        className={`w-full max-w-6xl dark:bg-gray-800 dark:text-white bg-white text-gray-900 shadow-lg rounded-lg p-6 mx-auto md:w-11/12 sm:w-full`}
+        className={`w-full flex flex-col max-w-6xl dark:bg-gray-800 dark:text-white bg-white text-gray-900 shadow-lg rounded-lg p-6 mx-auto md:w-11/12 sm:w-full`}
       >
         <div className="flex items-center mb-6">
           <Button variant="ghost" onClick={() => window.history.back()}>
@@ -138,54 +145,57 @@ const CategoryPage = () => {
           <div
             className={`text-2xl font-bold dark:text-white dark:text-gray-900"}`}
           >
-            {data?.data?.name}
+            {data?.data?.technology?.name}
           </div>
         </div>
 
         <FilterBar
-          totalQuestions={filteredQuestions.length}
+          totalQuestions={questionsData.length}
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
           selectedDifficulties={selectedDifficulties}
           onDifficultyChange={handleDifficultyChange}
           technology={technology as string}
         />
-        {currentQuestions.length == 0 && <div className="flex justify-center min-h-[500px] items-center">No data found</div>}
-        <div className="w-full">
-          {currentQuestions.map((question: Required<Question>, index) => (
-            <>
-              {selectedQuestion !== index && <QuestionCard
-                index={index}
-                key={question.id}
-                question={question}
-                handleDelete={handleDelete}
-                handleEdit={() => handleEdit(index)}
-              />}
+        <Pagination
+          className="flex-grow"
+          currentPageStart={currentPageStart}
+          currentPageEnd={currentPageEnd}
+          totalItems={total}
+          itemsPerPage={itemsPerPage}
+          onPerPageChange={handlePerPageChange}
+          currentPage={currentPage}
+          onPageChange={handlePageChange}
+          loading={isLoading}
+        >
+          <div className="w-full">
+            {questionsData.map((question: Required<Question>, index) => (
+              <React.Fragment key={index}>
+                {selectedQuestion !== index && <QuestionCard
+                  index={index}
+                  key={index}
+                  question={question}
+                  handleDelete={handleDelete}
+                  handleEdit={() => handleEdit(index)}
+                />}
 
-              {selectedQuestion == index && <CreateQuestionCard
-                question={currentQuestions[selectedQuestion as number]}
-                selectedQuestion={selectedQuestion}
-                questions={currentQuestions}
-                handleQuestionTypeChange={handleQuestionTypeChange}
-                handleDeleteQuestion={() => handleDelete(question.id as string)}
-                setQuestions={setQuestionsData as any}
-                handleReset={handleReset}
-                technologyId={technology as string}
-                editQuestion={true}
-                onSave={() => setSelectedQuestion(null)}
-                onCancel={() => setSelectedQuestion(null)}
-              />}
-            </>
-          ))}
-        </div>
-
-        <div className="flex justify-center mt-6 space-x-4">
-          <Pagination
-            currentPage={currentPage}
-            onPageChange={setCurrentPage}
-            totalPages={totalPages}
-          />
-        </div>
+                {selectedQuestion == index && <CreateQuestionCard
+                  question={questionsData[selectedQuestion as number]}
+                  selectedQuestion={selectedQuestion}
+                  questions={questionsData}
+                  handleQuestionTypeChange={handleQuestionTypeChange}
+                  handleDeleteQuestion={() => handleDelete(question.id as string)}
+                  setQuestions={setQuestionsData as any}
+                  handleReset={handleReset}
+                  technologyId={technology as string}
+                  editQuestion={true}
+                  onSave={() => setSelectedQuestion(null)}
+                  onCancel={() => setSelectedQuestion(null)}
+                />}
+              </React.Fragment>
+            ))}
+          </div>
+        </Pagination>
       </div>
     </div>
   );

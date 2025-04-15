@@ -104,7 +104,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
   );
 
   const { trigger, isMutating } = useSWRMutation(`/question/create`, createQuestion);
-  const { trigger: update, isMutating: updating } = useSWRMutation(`/question/${question.id}`, updateQuestion);
+  const { trigger: update, isMutating: updating } = useSWRMutation(`/question/${question?.id}`, updateQuestion);
 
 
   const handleSave = async () => {
@@ -162,12 +162,6 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
 
     console.log("Payload to be sent:", payload);
 
-    // Optionally send it via an API:
-    // await fetch('/api/question', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify(payload),
-    // });
   };
 
 

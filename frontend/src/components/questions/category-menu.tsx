@@ -35,7 +35,7 @@ const CategoryMenu = ({
   handleDelete,
 }: {
   category: QuestionCategory;
-  handleDelete: (category: QuestionCategory) => void;
+  handleDelete: (id: string) => void;
 }) => {
   const router = useRouter();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -52,8 +52,7 @@ const CategoryMenu = ({
   const handleDeleteCategory = async () => {
     try {
       await trigger();
-      handleDelete(category);
-      mutate('/technology/list');
+      handleDelete(category.id);
     }catch (error: unknown) {
       const axiosError = error as AxiosError<{ message: string }>;
       toast.error(axiosError.response?.data?.message || "Something went wrong.");

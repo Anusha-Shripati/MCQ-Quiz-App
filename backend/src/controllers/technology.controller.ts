@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { TechnologyService } from "../services/technology.services";
 import { generateResponse } from "../utils/generateResponse";
+import QuestionService from "../services/question.services";
 
 const technologyService = new TechnologyService();
 export class TechnologyController {
@@ -9,12 +10,13 @@ export class TechnologyController {
       const { name } = req.body;
       const technology = await technologyService.getTechnologyByName(name);
       if (technology) {
+        const newTechnology = await technologyService.updateTechnology(technology.id, { name, deleted_at: null });
         return generateResponse(
           res,
-          400,
-          {},
+          200,
+          newTechnology,
           false,
-          "Technology name already exists"
+          "Technology created successfully"
         );
       }
       const newTechnology = await technologyService.createTechnology({ name });
@@ -94,6 +96,10 @@ export class TechnologyController {
       const existingTechnology = await technologyService.getTechnologyById(id);
       if (!existingTechnology) {
         return generateResponse(res, 400, {}, false, "Technology not found");
+      }
+
+      if (existingTechnology?.questions?.length > 0) {
+        return generateResponse(res, 400, {}, false, "There are questions associated with this technology");
       }
       await technologyService.deleteTechnology(id);
       return generateResponse(

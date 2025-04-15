@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Input } from "@/components/ui/form/input";
 import { Button } from "@/components/ui/form/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
@@ -10,41 +10,36 @@ import { toast } from "react-hot-toast";
 import { AxiosError } from "axios";
 import useSWRMutation from 'swr/mutation';
 import { mutate } from "swr";
+import { useQuestionStore } from "@/store/questionStore";
 
 // Define props type
-interface CreateCategoryProps {
-  categoriesArray: QuestionCategory[];
-  setFilteredCategories: React.Dispatch<React.SetStateAction<QuestionCategory[]>>;
-}
 
 async function createCategory(url: string, { arg }: { arg: { name: string } }) {
   const response = await api.post(url, arg);
   return response.data;
 }
 
-const CreateCategory: React.FC<CreateCategoryProps> = ({
-
-  categoriesArray,
-  setFilteredCategories,
-}) => {
+const CreateCategory: React.FC = () => {
   const [open, setOpen] = useState(false);
   const [categoryName, setCategoryName] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Handle search input change
+  const { setTechnologyFilter,technologyFilter } = useQuestionStore()
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setTechnologyFilter(searchTerm);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm, setTechnologyFilter]);
+
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.toLowerCase();
     setSearchTerm(value);
-    if (value === "") {
-      setFilteredCategories(categoriesArray);
-    } else {
-      setFilteredCategories(
-        categoriesArray.filter((cat) => cat.name.toLowerCase().includes(value))
-      );
-    }
   };
   const { trigger } = useSWRMutation('/technology/create', createCategory);
- 
+
   const handleCreateCategory = async () => {
     try {
       const data = await trigger({ name: categoryName });
@@ -52,7 +47,7 @@ const CreateCategory: React.FC<CreateCategoryProps> = ({
         setCategoryName("");
         setOpen(false);
         toast.success("Technology created successfully");
-        mutate('/technology/list');
+        mutate(`/technology/list?search=${technologyFilter}`);
       }
     } catch (error: unknown) {
       const axiosError = error as AxiosError<{ message: string }>;

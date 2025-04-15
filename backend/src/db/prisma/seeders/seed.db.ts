@@ -677,7 +677,7 @@ async function createTestCandidates() {
   console.log("Test candidates and their assessments created successfully");
 }
 
-async function main() {
+const resetDB = async ()=>{
   await prisma.$executeRawUnsafe(`
     TRUNCATE TABLE 
       "Answers",
@@ -696,8 +696,11 @@ async function main() {
       "Roles"
     CASCADE;
   `);
-                 // Has child: Users, Role_permissions
-  
+}
+
+async function main() {
+  // await resetDB();
+
   const hashedPassword = await bcrypt.hash(
     process.env.SUPER_ADMIN_PASSWORD || "superadminpassword",
     10

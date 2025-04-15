@@ -107,9 +107,6 @@ function RoleTable() {
       ),
     },
   ];
-  if (isLoading) {
-    return <LoadingSpinner className="min-h-[500px]" />;
-  }
   if (error) {
     return (
       <Error
@@ -122,7 +119,7 @@ function RoleTable() {
   }
   return (
     <div className="min-h-[500px]">
-      <ReusableTable columns={columns} rows={rolesList} rowKey="id" />
+      <ReusableTable columns={columns} rows={rolesList} rowKey="id" loading={isLoading} />
       <RoleForm open={open} roleData={role} onClose={() => setOpen(false)} />
     </div>
   );

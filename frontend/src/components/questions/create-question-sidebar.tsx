@@ -117,7 +117,7 @@ const QuestionSidebar: React.FC<QuestionSidebarProps> = ({
               <li
                 key={index}
                 className={clsx(
-                  "p-3 rounded-lg cursor-pointer flex justify-between items-center transition-all duration-200 ease-in-out border max-w-[335px]",
+                  "p-3 rounded-lg cursor-pointer flex justify-between items-center transition-all duration-200 ease-in-out border",
                   q.id ? '' : 'border-[#ffa500]',
                   selectedQuestion === index
                     ? "bg-blue-500 text-white hover:bg-blue-600 shadow-md"

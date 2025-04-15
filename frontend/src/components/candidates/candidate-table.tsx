@@ -1,11 +1,11 @@
 "use client";
 
+import Error from "@/app/error";
 import DialogForm from "@/components/candidates/dialog-form";
 import type { Column, ExpandableRow } from "@/components/common/reusable-table";
 import ReusableTable from "@/components/common/reusable-table";
 import Pagination from "@/components/pagination";
 import { Button } from "@/components/ui/form/button";
-import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import {
   Tooltip,
   TooltipContent,
@@ -40,26 +40,30 @@ function CandidateTable() {
     page: currentPage || 1,
     limit: itemsPerPage || 10,
     ...candidateFilter,
+    search: candidateFilter.searchQuery,
     technologyFilter: candidateFilter.technologyFilter.map((item: TechnologyOption) => item.value),
     assessmentFilter: candidateFilter.assessmentFilter.map((item: AssessmentOption) => item.value),
     created: candidateFilter.created ? JSON.stringify(candidateFilter.created) : undefined
   }), [currentPage, itemsPerPage, candidateFilter]);
 
-  console.log("logs 899999 ","candidateFilter",candidateFilter ,"stringifed created",JSON.stringify(candidateFilter.created))
 
   const cleanedQuery = useMemo(() => qs.stringify(queryObj, {
     skipNull: true,
     skipEmptyString: true
   }), [queryObj]);
-  
+
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { data: candidateData, error, isLoading } = useSWR(`/candidate/list?${cleanedQuery}`, api.get)
 
   useEffect(() => {
-    console.log("candidateData", candidateData)
+    
     if (candidateData?.data?.list) {
-      console.log("candidateData", candidateData.data.total)
-      setCandidateListData(candidateData.data.total, candidateData.data.list)
+      const res =JSON.parse(JSON.stringify(candidateData.data.list))
+      const candidateRes= res.map((item: any) => {
+        item.assessment.technologies = item.assessment.technologies.map((inner: { technology: { id: string, name: string } }) => inner.technology)
+        return item
+      })
+      setCandidateListData(candidateData.data.total, candidateRes)
     }
   }, [candidateData])
 
@@ -74,7 +78,6 @@ function CandidateTable() {
   const handlePerPageChange = (value: string) => {
     setItemsPerPage(Number(value));
     setCurrentPage(1);
-    // updateQueryParams({ perPage: value, page: "1" });
   };
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -149,11 +152,10 @@ function CandidateTable() {
     return `${startTime}–${endTime}`; // e.g., "09:00 AM–12:00 PM"
   };
   const handleEdit = (candidate: Candidate) => {
-    console.log("candidate in edit",candidate)
     const obj: CandidateFormData = {
       ...candidate,
       assessment: candidate.assessment?.id as string,
-      technology: candidate.technology?.id as string,
+      technology: candidate.assessment?.technologies ? candidate.assessment?.technologies.map(item=>item.name).join(', ') as string:"",
       startDate: new Date(candidate.exam?.start_time as string),
       endDate: new Date(candidate.exam?.end_time as string),
       timeUnit: 'days',
@@ -169,14 +171,14 @@ function CandidateTable() {
 
   const columns = useMemo<Array<Column<Candidate>>>(
     () => [
-      { 
-        key: "exam.start_time", 
+      {
+        key: "exam.start_time",
         header: "Test Date",
         render: (row) => row.exam?.start_time ? format(new Date(row.exam.start_time), 'MMM dd, yyyy hh:mm a') : '-'
       },
       { key: "name", header: "Name" },
       { key: "email", header: "Email" },
-      { key: "technology.name", header: "Technology" },
+      { key: "technology", header: "Technology", render: (row) => row.assessment?.technologies ? row.assessment?.technologies.map(item=>item.name).join(',') : '-' },
       { key: "experience", header: "Exp." },
       { key: "assessment.name", header: "Assessment" },
       // {
@@ -190,8 +192,8 @@ function CandidateTable() {
       //     </span>
       //   ),
       // },
-      { 
-        key: "created_at", 
+      {
+        key: "created_at",
         header: "Created",
         render: (row) => format(new Date(row.created_at), 'MMM dd, yyyy hh:mm a')
       },
@@ -296,7 +298,7 @@ function CandidateTable() {
                   Total Percentage
                 </th>
                 {/* Dynamically render category headers */}
-                  {/* {Object.keys(row?.details?.categories ?? {}).map((category) => (
+                {/* {Object.keys(row?.details?.categories ?? {}).map((category) => (
                     <th
                       key={category}
                       className="border border-gray-300 px-4 py-2 text-left"
@@ -330,9 +332,10 @@ function CandidateTable() {
     ),
   };
 
-  useEffect(() => {
-    console.log("candidateList", candidateList)
-  }, [candidateList])
+
+  if (error) {
+    return <div className="h-[500px]"><Error error={error} reset={() => window.location.reload()} /></div>
+  }
 
   return (
     <>
@@ -345,19 +348,16 @@ function CandidateTable() {
         onPerPageChange={handlePerPageChange}
         currentPage={currentPage}
         onPageChange={handlePageChange}
+        loading={isLoading}
       >
         <div className="min-h-[500px]">
-          {isLoading ? (
-            <LoadingSpinner className="h-full w-full" />
-          ) : (
-            <ReusableTable
-              columns={columns}
-              rows={currentItems}
-              expandableRow={expandableRow}
-              className="mb-6 animate-in fade-in duration-300"
-              rowKey="id"
-            />
-          )}
+          <ReusableTable
+            columns={columns}
+            rows={currentItems}
+            expandableRow={expandableRow}
+            className="mb-6 "
+            rowKey="id"
+          />
         </div>
       </Pagination>
       <DialogForm candidate={selectedCandidate} open={open} setOpen={setOpen} />

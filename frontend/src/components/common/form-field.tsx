@@ -42,17 +42,13 @@ interface SelectOption {
   label: string | number;
 }
 
-export const FormField = forwardRef<HTMLInputElement, FormFieldProps>(
-  (props: FormFieldProps, ref) => {
-    const normalizedOptions: SelectOption[] = useMemo(
-      () =>
-        Array.isArray(props.options)
-          ? props.options.map((opt) =>
-              typeof opt === "object" ? opt : { value: opt, label: opt }
-            )
-          : [],
-      [props.options]
-    );
+export const FormField = forwardRef<HTMLInputElement, FormFieldProps>(({ parentClassName, ...props }: FormFieldProps, ref) => {
+  
+  const normalizedOptions: SelectOption[] = useMemo(()=> Array.isArray(props.options)
+    ? props.options.map(opt =>
+      typeof opt === "object" ? opt : { value: opt, label: opt }
+    )
+    : [],[props.options]);
 
     // const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     //   if (props.type === "tel" || props.inputMode === "numeric") {
@@ -98,7 +94,7 @@ export const FormField = forwardRef<HTMLInputElement, FormFieldProps>(
     };
 
     return (
-      <div className={props.parentClassName || ""}>
+      <div className={parentClassName || ""}>
         {props.label && (
           <label className="block text-sm font-medium mb-1">
             {props.label}

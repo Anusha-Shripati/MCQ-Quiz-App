@@ -12,19 +12,31 @@ interface Questions {
 }
 
 interface QuestionStore {
-    questionFilter: string
+    questionFilter: {
+        search: string,
+        difficulty: Questions['difficulty_level'][]
+    }
+    technologyFilter: string
     questionCount: number
     questionList: Questions[]
-    setQuestionFilter: (filter: string) => void
+    setQuestionFilter: (search: string, difficulty:Questions['difficulty_level'][] ) => void
+    setTechnologyFilter: (filter: string) => void
     setQuestionListData: (count: number, list: Questions[]) => void
 }
 
 export const useQuestionStore = create<QuestionStore>((set) => ({
-    questionFilter: "",
+    questionFilter: {
+        search: "",
+        difficulty: ['easy', 'medium', 'hard']
+    },
+    technologyFilter: "",
     questionCount: 0,
     questionList: [],
-    setQuestionFilter: (filter: string) => {
-        set({ questionFilter: filter })
+    setQuestionFilter: (search: string, difficulty:Questions['difficulty_level'][] ) => {
+        set({ questionFilter: { search, difficulty } })
+    },
+    setTechnologyFilter: (filter: string) => {
+        set({ technologyFilter: filter })
     },
     setQuestionListData: (count: number, list: Questions[]) => {
         set({ questionList: list, questionCount: count })

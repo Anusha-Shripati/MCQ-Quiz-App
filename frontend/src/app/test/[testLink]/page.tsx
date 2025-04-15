@@ -1,11 +1,10 @@
 "use client";
-import React, { useState, useEffect } from "react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import BasicInfoForm from "@/components/test/BasicInfo";
 import ProctoredQuiz from "@/components/test/ProctoredQuiz";
 import { VideoRecorder } from "@/components/test/VideoRecorder";
-import BasicInfoForm, { BasicInfoData } from "@/components/test/BasicInfo";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useEffect, useState } from "react";
 
-// Main Quiz Component
 const QuizPage = () => {
     const [step, setStep] = useState('basicInfo'); // 'basicInfo' | 'videoRecording' | 'quiz'
    
@@ -21,8 +20,7 @@ const QuizPage = () => {
     }, [timeLeft]);
 
 
-    const handleBasicInfoSubmit = (formData:BasicInfoData) => {
-        console.log('Form data:', formData);
+    const handleNextStep = () => {
         setStep('videoRecording');
     };
 
@@ -32,7 +30,7 @@ const QuizPage = () => {
     };
 
     const renderBasicInfo = () => (
-      <BasicInfoForm handleBasicInfoSubmit={handleBasicInfoSubmit}/>
+      <BasicInfoForm handleBasicInfoSubmit={handleNextStep}/>
     );
 
     const renderVideoRecording = () => (
@@ -49,7 +47,7 @@ const QuizPage = () => {
     );
 
     return (
-        <div className="flex justify-center items-center w-screen h-screen w-auto bg-gray-50 p-8">
+        <div className="flex justify-center items-center w-screen h-screen bg-gray-50 p-8">
             {step === 'basicInfo' && renderBasicInfo()}
             {step === 'videoRecording' && renderVideoRecording()}
             {step === 'quiz' && <ProctoredQuiz />}

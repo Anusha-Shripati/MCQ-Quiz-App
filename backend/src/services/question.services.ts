@@ -1,6 +1,5 @@
 import { Prisma, Questions } from "@prisma/client";
 import { prisma } from "../db/prisma.client";
-import { filter } from "compression";
 
 interface QuestionsPayload {
     technology_id: string;
@@ -17,10 +16,13 @@ export class QuestionService {
 
     async getQuestions(filters: { technology_id?: string, page?: string, limit?: string, difficulty_level?: string, search?: string }) {
 
+        const page = filters.page ? Number(filters.page) : undefined;
+        const limit = filters.page ? Number(filters.limit) :undefined;
+
         const query: Prisma.QuestionsWhereInput = {
             deleted_at: null,
             technology_id: filters.technology_id ? filters.technology_id : undefined,
-            difficulty_level: filters.difficulty_level ? filters.difficulty_level as Questions['difficulty_level'] : undefined,
+            difficulty_level: filters.difficulty_level ? { in: filters.difficulty_level.split(",") as QuestionsPayload['difficulty_level'][]  } : undefined,
             question: filters.search ? { contains: filters.search, mode: "insensitive" } : undefined,
         }
         if (filters.technology_id) {
@@ -59,30 +61,31 @@ export class QuestionService {
         return prisma.questions.update({ where: { id }, data })
     }
 
-    async getQuestionByTechnologyId(technology_id: string, filters: { page?: string, limit?: string, difficulty_level?: string, search?: string }) {
-        const page = Number(filters.page) || 1;
-        const limit = Number(filters.limit) || 10;
-
-        const query: any = {
-            technology_id: technology_id ? technology_id : undefined,
-            difficulty_level: filters.difficulty_level ? filters.difficulty_level : undefined,
+    async getQuestionByTechnologyId( filters: {technology_id?: string, page?: string, limit?: string, difficulty_level?: string, search?: string }) {
+        
+        const query:Prisma.QuestionsWhereInput = {
+            technology_id: filters.technology_id ? filters.technology_id : undefined,
+            difficulty_level: filters.difficulty_level ? { in: filters.difficulty_level.split(",") as QuestionsPayload['difficulty_level'][]  } : undefined,
             question: filters.search ? { contains: filters.search, mode: "insensitive" } : undefined,
             deleted_at: null,
         }
+        
+        const totalQuestions = await prisma.questions.count({
+            where: { ...query }
+        })
+        const page = Number(filters.page) || 1;
+        const limit = Number(filters.limit) || totalQuestions;
 
         const questions = await prisma.questions.findMany({
-            where: { ...query.where },
+            where: { ...query },
             orderBy: { created_at: "desc" },
             skip: (page - 1) * limit,
             take: limit,
         })
 
-        const totalQuestions = await prisma.questions.count({
-            where: { ...query.where }
-        })
 
         const totalPages = Math.ceil(totalQuestions / (filters.limit ? Number(filters.limit) : totalQuestions))
-        const technology = await prisma.technology.findUnique({ where: { id: technology_id } })
+        const technology = await prisma.technology.findUnique({ where: { id: filters.technology_id } })
         return {
             list: questions,
             total: totalQuestions,

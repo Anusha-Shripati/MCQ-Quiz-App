@@ -45,7 +45,7 @@ export class QuestionsController {
     get = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const search = req.query
-            const assessmentData = await questionsService.getQuestions(search);
+            const assessmentData = await questionsService.getQuestionByTechnologyId(search);
             return generateResponse(res, 200, assessmentData, true, "Question fetched successfully");
         } catch (error) {
             next(error);
@@ -67,7 +67,7 @@ export class QuestionsController {
         try {
             const {technology} = req.params
             const search = req.query
-            const assessmentData = await questionsService.getQuestionByTechnologyId(technology,search);
+            const assessmentData = await questionsService.getQuestionByTechnologyId(search);
             return generateResponse(res, 200, assessmentData, true, "Question fetched successfully");
         } catch (error) {
             next(error);

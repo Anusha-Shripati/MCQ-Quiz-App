@@ -282,10 +282,6 @@ export default function AssessmentDetails() {
     }
   };
 
-  if (isLoading) {
-    return;
-  }
-
   if (error) {
     return <Error error={error} reset={() => window.location.reload()} />;
   }
@@ -316,7 +312,7 @@ export default function AssessmentDetails() {
   return (
     <div className="p-4 bg-white dark:bg-[#334155] rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-200 hover:shadow-md">
       <Pagination
-        className="flex-grow"
+        className="flex-grow min-h-[500px]"
         currentPageStart={currentPageStart}
         currentPageEnd={currentPageEnd}
         totalItems={assessmentsData?.data?.total || 0}
@@ -324,31 +320,25 @@ export default function AssessmentDetails() {
         onPerPageChange={handlePerPageChange}
         currentPage={currentPage}
         onPageChange={handlePageChange}
+        loading={isLoading}
       >
-        <div className="h-[600px] overflow-auto">
-          {isLoading && <LoadingSpinner className="h-full w-full" />}
-          {!isLoading &&
-            !error &&
-            assessments &&
-            assessments.map((assessment: Required<Assessment>) => (
-              <AssessmentItem
-                key={assessment.id}
-                assessmentId={assessment.id}
-                title={assessment.name}
-                createdBy={assessment.created_by_user?.name || ""}
-                createdDate={assessment.created_at}
-                duration={assessment.duration}
-                technologies={assessment.technologies}
-                isExpanded={expandedId === assessment.id}
-                onToggle={() =>
-                  setExpandedId(
-                    expandedId === assessment.id ? "" : assessment.id
-                  )
-                }
-                handleEdit={() => handleEdit(assessment)}
-                handleDelete={handleDelete}
-              />
-            ))}
+
+        <div className="h-[550px] overflow-auto">
+          {!error && assessments && assessments.map((assessment:Required<Assessment>) => (
+            <AssessmentItem
+              key={assessment.id}
+              assessmentId={assessment.id}
+              title={assessment.name}
+              createdBy={assessment.created_by_user?.name || ''}
+              createdDate={assessment.created_at}
+              duration={assessment.duration}
+              technologies={assessment.technologies}
+              isExpanded={expandedId === assessment.id}
+              onToggle={() => setExpandedId(expandedId === assessment.id ? "" : assessment.id)}
+              handleEdit={() => handleEdit(assessment)}
+              handleDelete={handleDelete}
+            />
+          ))}
         </div>
       </Pagination>
     </div>

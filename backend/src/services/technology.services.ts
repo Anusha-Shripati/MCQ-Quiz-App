@@ -44,12 +44,12 @@ export class TechnologyService {
 
   async updateTechnology(
     id: string,
-    data: { name: string }
+    data: { name: string,deleted_at?: Date | null }
   ): Promise<Technology | null> {
     return prisma.technology.update({ where: { id }, data });
   }
   async getTechnologyById(id: string) {
-    return prisma.technology.findUnique({ where: { id } });
+    return prisma.technology.findUnique({ where: { id },include: { questions: true } });
   }
   async getTechnologyByName(name: string): Promise<Technology | null> {
     return prisma.technology.findUnique({ where: { name } });

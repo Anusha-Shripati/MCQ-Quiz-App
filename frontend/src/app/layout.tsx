@@ -1,35 +1,35 @@
-import { ReactNode } from "react";
-import "./globals.css";
-import { ThemeProvider } from "@/components/common/theme-provider";
-import { nunito } from "@/lib/fonts";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { NavigationProgress } from "@/components/ui/navigation-progress";
+import { ReactNode } from 'react';
+import './globals.css';
+import { ThemeProvider } from '@/components/common/theme-provider';
+import { nunito } from '@/lib/fonts';
+import { TooltipProvider } from '@/components/ui/tooltip';
+import { NavigationProgress } from '@/components/ui/navigation-progress';
 
-import { Toaster } from "react-hot-toast";
-import AuthInitializer from "@/components/common/auth-initializer";
+import { Toaster } from 'react-hot-toast';
+import AuthInitializer from '@/components/common/auth-initializer';
 
 export default function RootLayout({ children }: { children: ReactNode }) {
-  return (
-    <html lang="en" suppressHydrationWarning={true}>
-      <head>
-        <link rel="icon" type="image/png" href="/favicon.ico" />
-      </head>
-      <body
-        className={`flex min-h-screen relative hide-scroller ${nunito.className}`}
-      >
-        <AuthInitializer>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-            <NavigationProgress />
-            <TooltipProvider>{children}</TooltipProvider>
-            <Toaster position="top-right" />
-          </ThemeProvider>
-        </AuthInitializer>
-      </body>
-    </html>
-  );
+	return (
+		<html lang='en' suppressHydrationWarning={true}>
+			<head>
+				<link rel='icon' type='image/png' href='/favicon.ico' />
+			</head>
+			<body
+				className={`flex min-h-screen relative hide-scroller ${nunito.className}`}
+			>
+				<AuthInitializer>
+					<ThemeProvider
+						attribute='class'
+						defaultTheme='system'
+						enableSystem
+						disableTransitionOnChange
+					>
+						<NavigationProgress />
+						<TooltipProvider>{children}</TooltipProvider>
+						<Toaster position='top-right' />
+					</ThemeProvider>
+				</AuthInitializer>
+			</body>
+		</html>
+	);
 }

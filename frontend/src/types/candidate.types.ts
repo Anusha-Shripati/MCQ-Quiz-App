@@ -47,6 +47,10 @@ export interface Candidate {
     created_at: string;
     updated_at: string;
     deleted_at: string | null;
+    technologies?:{
+      name:string,
+      id:string
+    }[]
   };
   technology?: {
     id: string;

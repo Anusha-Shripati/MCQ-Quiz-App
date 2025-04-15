@@ -6,13 +6,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
+import { Question } from "@/shared/types/app";
 
 interface FilterBarProps {
   totalQuestions: number;
   searchQuery: string;
   onSearchChange: (value: string) => void;
-  selectedDifficulties: string[];
-  onDifficultyChange: (difficulties: string[]) => void;
+  selectedDifficulties: Question['difficulty_level'][];
+  onDifficultyChange: (difficulties: Question['difficulty_level'][]) => void;
   technology:string
 }
 
@@ -24,7 +25,7 @@ export const FilterBar = ({
   onDifficultyChange,
   technology
 }: FilterBarProps) => {
-  const difficulties = ["easy", "medium", "hard"];
+  const difficulties:Question['difficulty_level'][] = ["easy", "medium", "hard"];
 
   return (
     <div className="flex flex-col mb-6 sm:flex-row items-start sm:items-center justify-between sm:space-x-6 space-y-4 sm:space-y-0">
@@ -59,7 +60,7 @@ export const FilterBar = ({
             >
               Select All
             </DropdownMenuCheckboxItem>
-            {difficulties.map((difficulty) => (
+            {difficulties.map((difficulty:Question['difficulty_level']) => (
               <DropdownMenuCheckboxItem
                 key={difficulty}
                 checked={selectedDifficulties.includes(difficulty)}

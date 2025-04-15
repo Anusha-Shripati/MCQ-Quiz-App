@@ -77,7 +77,6 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({
         await api.delete(`/question/${question.id}`);
       }
       const updatedQuestions = questions.filter((_, i) => i !== index);
-      setShowSidebar(updatedQuestions.length > 0 ? true : false)
       setQuestions(updatedQuestions);
       console.log(selectedQuestion,updatedQuestions.length);
       
@@ -180,7 +179,7 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({
       {/* Remaining body */}
       <div className="flex gap-6">
         {/* Sidebar for questions no. list */}
-        {showSidebar && (
+        {showSidebar ? (
           <QuestionSidebar
             questions={questions}
             selectedQuestion={selectedQuestion}
@@ -188,6 +187,8 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({
             handleDeleteQuestion={handleDeleteQuestion}
             handleAddQuestion={handleAddQuestion}
           />
+        ) : (
+          ""
         )}
 
         {/* Questions list with data for real questions which can be edited */}

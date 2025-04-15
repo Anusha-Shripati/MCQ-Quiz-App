@@ -134,3 +134,11 @@
 .animate-progress-bar {
   animation: progress-bar 1s ease-out;
 }
+
+
+
+.hide-scroller::-webkit-scrollbar
+{
+	width: 0px;
+	background-color: #F5F5F5;
+}

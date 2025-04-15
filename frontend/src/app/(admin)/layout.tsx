@@ -13,7 +13,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         <Sidebar />
         <div className="flex flex-col w-full">
           <Header />
-          <div className="flex-grow bg-secondary border overflow-auto flex justify-center" style={{maxHeight:'calc(100vh - 5rem)'}}>
+          <div className="flex-1 bg-secondary border  overflow-y flex justify-center">
             {/* <ScrollArea className="px-6 w-full xl:max-w-[1600px]"> */}
             <ScrollArea className="px-6 w-full">
               <SWRConfig value={{ dedupingInterval: 10000 }}>

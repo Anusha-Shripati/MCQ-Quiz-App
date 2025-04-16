@@ -11,6 +11,7 @@ import { Question } from "@/shared/types/app";
 import useSWR from "swr";
 import { api } from "@/lib/api";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import StatusWrapper from "@/components/common/status-wrapper";
 const CreateQuestion: React.FC<{ params: { technology: string } }> = ({
   params,
 }) => {
@@ -19,7 +20,7 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({
   const router = useRouter();
   const [selectedQuestion, setSelectedQuestion] = useState<number>(0);
 
-  const { data, isLoading } = useSWR(
+  const { data, isLoading,error } = useSWR(
     `/question/list?technology_id=${params.technology}`,
     api.get
   );
@@ -158,13 +159,10 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({
       // setShowSidebar(true)
     }
   },[questions])
-  if (isLoading) {
-    return <LoadingSpinner className="w-full h-screen" />;
-  }
 
   return (
     // Main container
-    <div className="min-h-screen p-6 dark:bg-gray-900 ">
+    <StatusWrapper className="min-h-screen p-6 dark:bg-gray-900 " loading={isLoading} error={error}>
       {/* Header */}
       <div className="flex justify-start items-center mb-4">
         <Button variant="ghost" size="icon" onClick={handleBack}>
@@ -231,7 +229,7 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({
           </div>
         </div>
       </div>
-    </div>
+    </StatusWrapper>
   );
 };
 

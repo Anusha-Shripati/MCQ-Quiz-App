@@ -15,6 +15,7 @@ import ReusableTable from "../common/reusable-table";
 import { useRoleStore } from "@/store/roleStore";
 import { Badge } from "../ui/badge";
 import { useAuthStore } from "@/store/authStore";
+import StatusWrapper from "../common/status-wrapper";
 
 function RoleTable() {
   const [role, setRole] = useState<RoleData | null>(null);
@@ -107,21 +108,11 @@ function RoleTable() {
       ),
     },
   ];
-  if (error) {
-    return (
-      <Error
-        error={error}
-        reset={() => {
-          window.location.reload();
-        }}
-      />
-    );
-  }
   return (
-    <div className="min-h-[500px]">
-      <ReusableTable columns={columns} rows={rolesList} rowKey="id" loading={isLoading} />
+    <StatusWrapper loading={isLoading} error={error} className="min-h-[500px]">
+      <ReusableTable columns={columns} rows={rolesList} rowKey="id"/>
       <RoleForm open={open} roleData={role} onClose={() => setOpen(false)} />
-    </div>
+    </StatusWrapper>
   );
 }
 

@@ -24,6 +24,7 @@ import toast from "react-hot-toast";
 import { FiCopy, FiMail } from "react-icons/fi";
 import useSWR, { mutate } from "swr";
 import { LoadingSpinner } from "../ui/loading-spinner";
+import StatusWrapper from "../common/status-wrapper";
 
 function CandidateTable() {
 
@@ -396,12 +397,8 @@ function CandidateTable() {
   };
 
 
-  if (error) {
-    return <div className="h-[500px]"><Error error={error} reset={() => window.location.reload()} /></div>
-  }
-
   return (
-    <>
+    <StatusWrapper loading={isLoading} className="min-h-[500px]" error={error}>
       <Pagination
         className="flex-grow"
         currentPageStart={currentPageStart}
@@ -411,7 +408,6 @@ function CandidateTable() {
         onPerPageChange={handlePerPageChange}
         currentPage={currentPage}
         onPageChange={handlePageChange}
-        loading={isLoading}
       >
         <div className="min-h-[440px]">
           {isLoading ? (
@@ -428,7 +424,7 @@ function CandidateTable() {
         </div>
       </Pagination>
       <DialogForm candidate={selectedCandidate} open={open} setOpen={setOpen} />
-    </>
+    </StatusWrapper>
   );
 }
 

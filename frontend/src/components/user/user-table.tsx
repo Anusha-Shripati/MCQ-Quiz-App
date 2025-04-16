@@ -13,6 +13,7 @@ import { useAuthStore } from "@/store/authStore";
 import Error from "@/app/error";
 import { LoadingSpinner } from "../ui/loading-spinner";
 import ReusableTable from "../common/reusable-table";
+import StatusWrapper from "../common/status-wrapper";
 
 function UserTable() {
   const [user, setUser] = useState<UserData | null>(null);
@@ -85,21 +86,11 @@ function UserTable() {
       ),
     },
   ];
-  if (error) {
-    return (
-      <Error
-        error={error}
-        reset={() => {
-          window.location.reload();
-        }}
-      />
-    );
-  }
   return (
-    <div className="min-h-[500px]">
-      <ReusableTable columns={columns} rows={userList} rowKey="id" loading={isLoading}/>
+    <StatusWrapper className="min-h-[500px]" error={error} loading={isLoading}>
+      <ReusableTable columns={columns} rows={userList} rowKey="id" />
       <UserForm open={open} userData={user} onClose={() => setOpen(false)} />
-    </div>
+    </StatusWrapper>
   );
 }
 

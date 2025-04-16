@@ -8,13 +8,14 @@ import useSWR, { mutate } from "swr";
 import { api, isAxiosError } from "@/lib/api";
 import { useQuestionStore } from "@/store/questionStore";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import StatusWrapper from "@/components/common/status-wrapper";
 
 export default function QuestionsPage() {
   const [categoriesArray, setCategoriesArray] = useState<QuestionCategory[]>([]);
 
 
   const { technologyFilter } = useQuestionStore()
-  const { data, isLoading } = useSWR(`/technology/list?search=${technologyFilter}`, api.get);
+  const { data, isLoading,error } = useSWR(`/technology/list?search=${technologyFilter}`, api.get);
 
   useEffect(() => {
     if (data) {
@@ -43,7 +44,7 @@ export default function QuestionsPage() {
   };
 
   return (
-    <div className="p-6 h-screen">
+    <div className="p-6">
       {/* Page Header */}
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold text-secondary-foreground">
@@ -54,24 +55,26 @@ export default function QuestionsPage() {
       </div>
 
       {/* Categories Grid */}
-      {isLoading && <LoadingSpinner className="w-full h-[700px]"/>}
-      {!isLoading && <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {categoriesArray.length > 0 ? (
-          categoriesArray.map((list: QuestionCategory) => (
-            <CategoryCard
-              key={list.id}
-              category={list}
-              handleDelete={handleDelete}
-            />
-          ))
-        ) : (
-          <div className="col-span-full min-h-[80vh] flex items-center justify-center">
-            <div className="text-muted-foreground">
-              No technology found. Please create a new technology.
+      <StatusWrapper className="w-full min-h-[600px]" loading={isLoading} error={error}>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-in fade-in duration-300">
+          {categoriesArray.length > 0 ? (
+            categoriesArray.map((list: QuestionCategory) => (
+              <CategoryCard
+                key={list.id}
+                category={list}
+                handleDelete={handleDelete}
+              />
+            ))
+          ) : (
+            <div className="col-span-full min-h-[80vh] flex items-center justify-center">
+              <div className="text-muted-foreground">
+                No technology found. Please create a new technology.
+              </div>
             </div>
-          </div>
-        )}
-      </div>}
+          )}
+        </div>
+      </StatusWrapper>
+
     </div>
   );
 }

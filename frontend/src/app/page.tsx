@@ -95,10 +95,10 @@ export default function Home() {
                 <Button
                   type="button"
                   onClick={togglePassword}
-                  className="absolute right-3 top-[37px] transform -translate-y-1/2 bg-transparent border-none shadow-none"
+                  className="absolute right-3  text-primary dark:text-white top-[37px]  transform -translate-y-1/2 bg-transparent border-none shadow-none"
                 >
                   {showPassword ? (
-                    <EyeOffIcon size={20} />
+                    <EyeOffIcon size={20}  />
                   ) : (
                     <EyeIcon size={20} />
                   )}

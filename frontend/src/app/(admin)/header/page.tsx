@@ -4,7 +4,7 @@ import { ThemeToggle } from "../../../components/common/theme-toggle";
 
 export const Header = () => {
   return (
-    <div className="z-20 w-full sticky top-0">
+    <div className="z-20 h-20 w-full sticky top-0 shadow-md">
       <div
         className={`flex flex-row-reverse items-center justify-start p-3 dark:bg-[#1f2937] bg-[#ffffff] w-full gap-3 `}
       >

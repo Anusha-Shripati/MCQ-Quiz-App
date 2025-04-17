@@ -7,15 +7,19 @@ import toast from "react-hot-toast";
 import useSWR, { mutate } from "swr";
 import { api, isAxiosError } from "@/lib/api";
 import { useQuestionStore } from "@/store/questionStore";
-import { LoadingSpinner } from "@/components/ui/loading-spinner";
+// import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import StatusWrapper from "@/components/common/status-wrapper";
 
 export default function QuestionsPage() {
-  const [categoriesArray, setCategoriesArray] = useState<QuestionCategory[]>([]);
+  const [categoriesArray, setCategoriesArray] = useState<QuestionCategory[]>(
+    []
+  );
 
-
-  const { technologyFilter } = useQuestionStore()
-  const { data, isLoading,error } = useSWR(`/technology/list?search=${technologyFilter}`, api.get);
+  const { technologyFilter } = useQuestionStore();
+  const { data, isLoading, error } = useSWR(
+    `/technology/list?search=${technologyFilter}`,
+    api.get
+  );
 
   useEffect(() => {
     if (data) {
@@ -24,23 +28,23 @@ export default function QuestionsPage() {
   }, [data]);
 
   const handleDelete = async (techId: string) => {
-    if (window.confirm("Are you sure you want to delete this Technology?")) {
-      try {
-        const res = await api.delete(`/technology/${techId}`);
-        if (res.success) {
-          toast.success("Technology deleted successfully");
-        }
-        mutate(`/technology/list?search=${technologyFilter}`);
-      } catch (error) {
-        if (isAxiosError(error)) {
-          toast.error(
-            error.response.data.message || "An unexpected error occurred"
-          );
-        } else {
-          toast.error("An unexpected error occurred");
-        }
+    // if (window.confirm("Are you sure you want to delete this Technology?")) {
+    try {
+      const res = await api.delete(`/technology/${techId}`);
+      if (res.success) {
+        toast.success("Technology deleted successfully");
+      }
+      mutate(`/technology/list?search=${technologyFilter}`);
+    } catch (error) {
+      if (isAxiosError(error)) {
+        toast.error(
+          error.response.data.message || "An unexpected error occurred"
+        );
+      } else {
+        toast.error("An unexpected error occurred");
       }
     }
+    // }
   };
 
   return (
@@ -50,12 +54,15 @@ export default function QuestionsPage() {
         <h1 className="text-3xl font-bold text-secondary-foreground">
           Questions
         </h1>
-        <CreateCategory
-        />
+        <CreateCategory />
       </div>
 
       {/* Categories Grid */}
-      <StatusWrapper className="w-full min-h-[600px]" loading={isLoading} error={error}>
+      <StatusWrapper
+        className="w-full min-h-[600px]"
+        loading={isLoading}
+        error={error}
+      >
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-in fade-in duration-300">
           {categoriesArray.length > 0 ? (
             categoriesArray.map((list: QuestionCategory) => (
@@ -74,7 +81,6 @@ export default function QuestionsPage() {
           )}
         </div>
       </StatusWrapper>
-
     </div>
   );
 }

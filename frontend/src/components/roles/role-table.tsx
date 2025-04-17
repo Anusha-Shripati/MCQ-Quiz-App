@@ -9,8 +9,8 @@ import toast from "react-hot-toast";
 import useSWR from "swr";
 import { isAxiosError } from "@/lib/api";
 import RoleForm from "./role-form";
-import Error from "@/app/error";
-import { LoadingSpinner } from "../ui/loading-spinner";
+// import Error from "@/app/error";
+// import { LoadingSpinner } from "../ui/loading-spinner";
 import ReusableTable from "../common/reusable-table";
 import { useRoleStore } from "@/store/roleStore";
 import { Badge } from "../ui/badge";
@@ -110,7 +110,7 @@ function RoleTable() {
   ];
   return (
     <StatusWrapper loading={isLoading} error={error} className="min-h-[500px]">
-      <ReusableTable columns={columns} rows={rolesList} rowKey="id"/>
+      <ReusableTable columns={columns} rows={rolesList} rowKey="id" />
       <RoleForm open={open} roleData={role} onClose={() => setOpen(false)} />
     </StatusWrapper>
   );

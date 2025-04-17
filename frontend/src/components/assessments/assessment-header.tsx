@@ -13,7 +13,6 @@ import useSWR from "swr";
 import { fetcher } from "@/lib/api";
 
 export default function AssessmentHeader() {
-
   const defaultValues: AssessmentFilters = {
     name: "",
     created_by: "all",
@@ -24,10 +23,12 @@ export default function AssessmentHeader() {
     view: "today",
   };
 
-  const { data: users } = useSWR('/user/list', fetcher);
-  const {setFilters} = useAssessmentStore()
+  const { data: users } = useSWR("/user/list", fetcher);
+  const { setFilters } = useAssessmentStore();
 
-  const { control, setValue, watch, register } = useForm<AssessmentFilters>({ defaultValues })
+  const { control, setValue, watch, register } = useForm<AssessmentFilters>({
+    defaultValues,
+  });
   const allFields = watch();
 
   const headerUsersOptions = useMemo(() => {
@@ -41,20 +42,19 @@ export default function AssessmentHeader() {
       ];
     }
     return [];
-  }, [users])
-
+  }, [users]);
 
   const handleViewChange = (view: string) => {
-    if (view == 'today')
-      setValue('created_duation', {
+    if (view == "today")
+      setValue("created_duation", {
         from: new Date(new Date().setHours(0, 0, 0, 0)),
-        to: new Date(new Date().setHours(23, 59, 59, 999))
-      })
-    else if (view == 'week')
-      setValue('created_duation', {
+        to: new Date(new Date().setHours(23, 59, 59, 999)),
+      });
+    else if (view == "week")
+      setValue("created_duation", {
         from: new Date(new Date().setDate(new Date().getDate() - 7)),
-        to: new Date()
-      })
+        to: new Date(),
+      });
     setValue("view", view);
   };
 
@@ -72,7 +72,6 @@ export default function AssessmentHeader() {
   return (
     <div className="flex flex-col md:flex-row items-center gap-6">
       <div className="flex flex-wrap items-center gap-3">
-
         <FormField
           className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-300 min-w-[200px]"
           type="text"
@@ -94,7 +93,6 @@ export default function AssessmentHeader() {
             />
           )}
         />
-
       </div>
 
       {/* View Mode and Create Button */}
@@ -104,8 +102,9 @@ export default function AssessmentHeader() {
           <Button
             variant={allFields.view === "today" ? "secondary" : "ghost"}
             size="sm"
-            className={`${allFields.view === "today" ? "bg-gray-100 dark:bg-gray-700" : ""
-              } text-gray-900 dark:text-gray-300`}
+            className={`${
+              allFields.view === "today" ? "bg-gray-100 dark:bg-gray-700" : ""
+            } text-gray-900 dark:text-gray-300`}
             onClick={() => handleViewChange("today")}
           >
             Today
@@ -113,13 +112,17 @@ export default function AssessmentHeader() {
           <Button
             variant={allFields.view === "week" ? "secondary" : "ghost"}
             size="sm"
-            className={`${allFields.view === "week" ? "bg-gray-100 dark:bg-gray-700" : ""
-              } text-gray-900 dark:text-gray-300`}
+            className={`${
+              allFields.view === "week" ? "bg-gray-100 dark:bg-gray-700" : ""
+            } text-gray-900 dark:text-gray-300`}
             onClick={() => handleViewChange("week")}
           >
             Week
           </Button>
-          <DatePickerWithRange selected={allFields.created_duation} onSelect={handleDateChange} />
+          <DatePickerWithRange
+            selected={allFields.created_duation}
+            onSelect={handleDateChange}
+          />
         </div>
         <Button className="ml-2 cursor-pointer" onClick={handleFilterClick}>
           <ListFilterIcon size={30} />

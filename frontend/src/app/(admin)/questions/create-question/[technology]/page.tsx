@@ -10,7 +10,7 @@ import toast from "react-hot-toast";
 import { Question } from "@/shared/types/app";
 import useSWR from "swr";
 import { api } from "@/lib/api";
-import { LoadingSpinner } from "@/components/ui/loading-spinner";
+// import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import StatusWrapper from "@/components/common/status-wrapper";
 const CreateQuestion: React.FC<{ params: { technology: string } }> = ({
   params,
@@ -20,7 +20,7 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({
   const router = useRouter();
   const [selectedQuestion, setSelectedQuestion] = useState<number>(0);
 
-  const { data, isLoading,error } = useSWR(
+  const { data, isLoading, error } = useSWR(
     `/question/list?technology_id=${params.technology}`,
     api.get
   );
@@ -32,6 +32,11 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({
         setSelectedQuestion(data?.data?.list.length - 1);
       }
     }
+
+    console.log(data?.data?.list, "data?.data?.list");
+    console.log(questions, "questions");
+    console.log(questions.length, "questions.length");
+
     if (!data?.data?.list?.length) {
       setQuestions([
         {
@@ -56,6 +61,7 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({
   const handleReset = () => {
     setQuestions((prv) => {
       return prv.map((q, index) => {
+        console.log(q, "q");
         if (index != selectedQuestion) return q;
         return {
           ...q,
@@ -79,13 +85,22 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({
       }
       const updatedQuestions = questions.filter((_, i) => i !== index);
       setQuestions(updatedQuestions);
-      console.log(selectedQuestion,updatedQuestions.length);
-      
-      if (selectedQuestion >= updatedQuestions.length  && updatedQuestions.length) {
+      console.log(
+        selectedQuestion,
+        updatedQuestions.length,
+        "selectedQuestion,updatedQuestions.length"
+      );
+      console.log(questions, "questions");
+
+      if (
+        selectedQuestion >= updatedQuestions.length &&
+        updatedQuestions.length
+      ) {
         setSelectedQuestion(updatedQuestions.length - 1);
-      }else if(updatedQuestions.length==0){
-        setSelectedQuestion(0)
+      } else if (updatedQuestions.length == 0) {
+        setSelectedQuestion(0);
       }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       toast.error("Failed to delete question");
     }
@@ -158,11 +173,15 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({
     if(questions.length){
       // setShowSidebar(true)
     }
-  },[questions])
+  }, [questions]);
 
   return (
     // Main container
-    <StatusWrapper className="min-h-screen p-6 dark:bg-gray-900 " loading={isLoading} error={error}>
+    <StatusWrapper
+      className="min-h-screen p-6 dark:bg-gray-900 "
+      loading={isLoading}
+      error={error}
+    >
       {/* Header */}
       <div className="flex justify-start items-center mb-4">
         <Button variant="ghost" size="icon" onClick={handleBack}>

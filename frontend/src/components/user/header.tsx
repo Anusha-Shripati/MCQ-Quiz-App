@@ -10,7 +10,7 @@ import UserForm from "./user-form";
 function Header() {
   const [searchTerm, setSearchTerm] = useState("");
   const [open, setOpen] = useState(false);
-  const { setUserFilter, userCount, permissions } = useAuthStore();
+  const { setUserFilter, userCount, permissions, userList } = useAuthStore();
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
   };
@@ -21,6 +21,7 @@ function Header() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setUserFilter(searchTerm);
+      console.log(userList, "list");
     }, 1000);
 
     return () => clearTimeout(timer);

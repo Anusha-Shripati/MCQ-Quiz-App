@@ -30,7 +30,7 @@ interface QuestionCardProps {
   questions: Question[] | Required<Question>[];
   handleQuestionTypeChange: (value: Question["type"], index: number) => void;
   handleDeleteQuestion: (question: Question, index: number) => void;
-  setQuestions: React.Dispatch<React.SetStateAction<Question[]>>
+  setQuestions: React.Dispatch<React.SetStateAction<Question[]>>;
   handleReset: () => void;
   technologyId: string;
   onSave?: () => void;
@@ -41,20 +41,25 @@ interface QuestionCardProps {
 interface CreateQuestionPayload {
   technology_id: string;
   question: string;
-  correct_answer: string[]
+  correct_answer: string[];
   options: string[];
   time: string;
   difficulty_level: Question["difficulty_level"];
   type: Question["type"];
   meta: Record<string, unknown>;
-
 }
 
-async function createQuestion(url: string, { arg }: { arg: CreateQuestionPayload }) {
+async function createQuestion(
+  url: string,
+  { arg }: { arg: CreateQuestionPayload }
+) {
   const response = await api.post(url, arg);
   return response;
 }
-const updateQuestion = async (url: string, { arg }: { arg: CreateQuestionPayload }) => {
+const updateQuestion = async (
+  url: string,
+  { arg }: { arg: CreateQuestionPayload }
+) => {
   const response = await api.put(url, arg);
   return response;
 };
@@ -70,7 +75,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
   technologyId,
   onSave,
   onCancel,
-  editQuestion
+  editQuestion,
 }) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
@@ -103,9 +108,14 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
     []
   );
 
-  const { trigger, isMutating } = useSWRMutation(`/question/create`, createQuestion);
-  const { trigger: update, isMutating: updating } = useSWRMutation(`/question/${question?.id}`, updateQuestion);
-
+  const { trigger, isMutating } = useSWRMutation(
+    `/question/create`,
+    createQuestion
+  );
+  const { trigger: update, isMutating: updating } = useSWRMutation(
+    `/question/${question?.id}`,
+    updateQuestion
+  );
 
   const handleSave = async () => {
     const payload = {
@@ -118,64 +128,98 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
       type: question.type,
       meta: question.meta || {},
     };
-    let valid = true
-    if (question.type == 'mcq' || question.type == 'multiple_select') {
-      question.correct_answer.forEach((opt) => {
-        if (!question.options[parseInt(opt)]) {
-          toast.error("Correct answer cannot be empty");
-          valid = false
-          return;
-        }
-      })
+
+    let valid = true;
+
+    if (
+      (question.type === "mcq" || question.type === "multiple_select") &&
+      question.correct_answer.length === 0
+    ) {
+      toast.error("Please select at least one correct answer.");
+      valid = false;
     }
+
+    if (
+      question.type === "text" &&
+      (!question.correct_answer[0] || question.correct_answer[0].trim() === "")
+    ) {
+      toast.error(
+        "Please provide the correct answer for the fill-in-the-blank question."
+      );
+      valid = false;
+    }
+
+    if (
+      question.type === "code_snippet" &&
+      (!question.meta?.code || question.meta.code.trim() === "")
+    ) {
+      toast.error("Please provide the code snippet.");
+      valid = false;
+    }
+
+    if (
+      question.type === "video" &&
+      (!question.meta?.video_url || question.meta.video_url.trim() === "")
+    ) {
+      toast.error("Please provide the video URL.");
+      valid = false;
+    }
+
     if (!valid) {
-      return
+      return;
     }
+
     try {
       let response;
       if (question.id) {
-        response = await update(payload)
-        toast.success("Question update successfully!");
+        response = await update(payload);
+        toast.success("Question updated successfully!");
       } else {
         response = await trigger(payload);
         toast.success("Question created successfully!");
       }
       if (response.success) {
-
         setQuestions((prev) => {
           const updatedQuestions = [...prev];
-          const questionIndex = updatedQuestions.findIndex(q => q.id === question.id);
+          const questionIndex = updatedQuestions.findIndex(
+            (q) => q.id === question.id
+          );
           updatedQuestions[questionIndex] = response.data;
           return updatedQuestions;
-        }
-        );
-        if (editQuestion && typeof onSave !== 'undefined') {
-          onSave()
+        });
+        if (editQuestion && typeof onSave !== "undefined") {
+          onSave();
         }
       }
     } catch (error: unknown) {
       console.log(error);
 
       const axiosError = error as AxiosError<{ message: string }>;
-      toast.error(axiosError.response?.data?.message || "Something went wrong.");
+      toast.error(
+        axiosError.response?.data?.message || "Something went wrong."
+      );
     }
 
     console.log("Payload to be sent:", payload);
-
   };
 
-
-  const handleCorrectOptionChange = (optionIndex: number, index: number, type: 'mcq' | 'multiple_select', e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleCorrectOptionChange = (
+    optionIndex: number,
+    index: number,
+    type: "mcq" | "multiple_select",
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const updatedQuestions = [...questions];
-    if (type === 'mcq') {
+    if (type === "mcq") {
       updatedQuestions[index].correct_answer = [optionIndex.toString()];
     } else {
       if (e.target.checked) {
         updatedQuestions[index].correct_answer.push(optionIndex.toString());
       } else {
-        const op_index = updatedQuestions[index].correct_answer.indexOf(optionIndex.toString());
+        const op_index = updatedQuestions[index].correct_answer.indexOf(
+          optionIndex.toString()
+        );
         updatedQuestions[index].correct_answer.splice(op_index, 1);
-
       }
     }
     setQuestions(updatedQuestions);
@@ -187,7 +231,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
       updatedQuestions[selectedQuestion].meta.code = e.target.value;
     }
     setQuestions(updatedQuestions);
-  }
+  };
 
   return (
     <Card
@@ -197,9 +241,17 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
       <CardHeader>
         <CardTitle className="text-xl font-bold flex justify-between text-gray-900 dark:text-white">
           Question {selectedQuestion + 1}
-          {editQuestion && <div>
-            <Button variant="destructive" className="hover:bg-orange-600" onClick={onCancel}>Close</Button>
-          </div>}
+          {editQuestion && (
+            <div>
+              <Button
+                variant="destructive"
+                className="hover:bg-orange-600"
+                onClick={onCancel}
+              >
+                Close
+              </Button>
+            </div>
+          )}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -232,18 +284,18 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
           />
           <FormField
             parentClassName="w-full"
-            label='Time (In minutes)'
+            label="Time (In minutes)"
             type="number"
             className="bg-white dark:bg-gray-800 min-w-[100px] border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-300"
             placeholder="Enter time in minutes"
             value={question.time}
             onChange={(e) => {
               const updatedQuestions = [...questions];
-              updatedQuestions[selectedQuestion].time = e.target.value > 0 && e.target.value < 100  ? e.target.value : 0;
+              updatedQuestions[selectedQuestion].time =
+                e.target.value > 0 && e.target.value < 100 ? e.target.value : 0;
               setQuestions(updatedQuestions);
             }}
           />
-
         </div>
 
         <FormField
@@ -267,13 +319,22 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
                     type="radio"
                     name={`radio-${question.id}`}
                     checked={question.correct_answer.includes(i.toString())}
-                    onChange={(e) => handleCorrectOptionChange(i, selectedQuestion, 'mcq', e)}
+                    onChange={(e) =>
+                      handleCorrectOptionChange(i, selectedQuestion, "mcq", e)
+                    }
                   />
                 ) : (
                   <input
                     type="checkbox"
                     checked={question.correct_answer.includes(i.toString())}
-                    onChange={(e) => handleCorrectOptionChange(i, selectedQuestion, 'multiple_select', e)}
+                    onChange={(e) =>
+                      handleCorrectOptionChange(
+                        i,
+                        selectedQuestion,
+                        "multiple_select",
+                        e
+                      )
+                    }
                   />
                 )}
                 <Input
@@ -289,14 +350,17 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
                     // if same option than denied
                     const updatedQuestions = [...questions];
                     const newValue = e.target.value;
-                    const op_index = updatedQuestions[selectedQuestion].options.indexOf(newValue);
+                    const op_index =
+                      updatedQuestions[selectedQuestion].options.indexOf(
+                        newValue
+                      );
                     if (op_index !== -1 && op_index !== i && newValue) {
-                      updatedQuestions[selectedQuestion].options[i] = '';
-                      e.target.value = '';
+                      updatedQuestions[selectedQuestion].options[i] = "";
+                      e.target.value = "";
                       toast.error("Option already exists");
                       return;
                     }
-                    setQuestions(updatedQuestions)
+                    setQuestions(updatedQuestions);
                   }}
                   className={i >= 4 ? "border-dashed border-gray-400" : ""}
                 />
@@ -311,7 +375,9 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
             value={question.correct_answer}
             onChange={(e) => {
               const updatedQuestions = [...questions];
-              updatedQuestions[selectedQuestion].correct_answer = [e.target.value];
+              updatedQuestions[selectedQuestion].correct_answer = [
+                e.target.value,
+              ];
               setQuestions(updatedQuestions);
             }}
           />
@@ -320,7 +386,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
         {question.type === "code_snippet" && (
           <textarea
             placeholder="Enter your code snippet"
-            value={question?.meta?.code || ''}
+            value={question?.meta?.code || ""}
             onChange={handleCodeQuestions}
             className="w-full p-2 border rounded-md dark:bg-gray-700 dark:text-white"
             rows={10}
@@ -364,10 +430,18 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
 
         {questions.length !== 0 && (
           <div className="mt-2 flex justify-end gap-4">
-            <Button variant="outline" onClick={handleReset} disabled={isMutating || updating}>
+            <Button
+              variant="outline"
+              onClick={handleReset}
+              disabled={isMutating || updating}
+            >
               Reset
             </Button>
-            <Button variant="outline" onClick={handleSave} disabled={isMutating || updating}>
+            <Button
+              variant="outline"
+              onClick={handleSave}
+              disabled={isMutating || updating}
+            >
               Save
             </Button>
           </div>

@@ -699,7 +699,7 @@ const resetDB = async ()=>{
 }
 
 async function main() {
-  // await resetDB();
+  await resetDB();
 
   const hashedPassword = await bcrypt.hash(
     process.env.SUPER_ADMIN_PASSWORD || "superadminpassword",

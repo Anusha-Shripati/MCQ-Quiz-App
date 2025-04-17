@@ -56,7 +56,10 @@ const QuestionSidebar: React.FC<QuestionSidebarProps> = ({
   handleAddQuestion,
 }) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [questionToDelete, setQuestionToDelete] = useState<{ question: Question, index: number } | null>(null);
+  const [questionToDelete, setQuestionToDelete] = useState<{
+    question: Question;
+    index: number;
+  } | null>(null);
   const searchParams = useSearchParams();
   const pathname = usePathname();
 
@@ -95,7 +98,7 @@ const QuestionSidebar: React.FC<QuestionSidebarProps> = ({
   }, [questionToDelete, handleDeleteQuestion, closeDeleteModal]);
 
   return (
-    <Card className="w-1/4 h-[calc(100vh-8rem)] flex flex-col overflow-hidden shadow-lg">
+    <Card className="w-1/4 h-[calc(100vh-8rem)] flex flex-col overflow-hidden shadow-lg bg-black gap-2">
       {/* Header */}
       <CardHeader className="border-b border-gray-200 dark:border-gray-700 p-4 flex flex-row justify-between items-center">
         <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -112,21 +115,24 @@ const QuestionSidebar: React.FC<QuestionSidebarProps> = ({
       {/* Scrollable List */}
       <CardContent className="flex-1 p-0 overflow-hidden">
         <ScrollArea className="h-full">
-          <ul className="space-y-1 p-2">
+          <ul className="space-y-2 p-2">
             {questions?.map((q, index) => (
               <li
                 key={index}
                 className={clsx(
                   "p-3 rounded-lg cursor-pointer flex justify-between items-center transition-all duration-200 ease-in-out border",
-                  q.id ? '' : 'border-[#ffa500]',
+                  q.id ? "" : "border-[#ffa500]",
                   selectedQuestion === index
                     ? "bg-blue-500 text-white hover:bg-blue-600 shadow-md"
                     : "bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 shadow-sm"
                 )}
                 onClick={() => handleQuestionChange(index)}
               >
-                <div className="flex flex-col gap-1 max-w-[269px]">
-                  <span className="text-sm font-medium max-w-[269px] truncate">{index + 1}. {q.question ? q.question : `Question ${index + 1}`}</span>
+                <div className="flex flex-col gap-1 w-[230px]">
+                  <span className="text-sm font-medium w-[230px] truncate">
+                    {index + 1}.{" "}
+                    {q.question ? q.question : `Question ${index + 1}`}
+                  </span>
                   {!q.id && <small className="text-xs">Not saved</small>}
                 </div>
                 <Button

@@ -1,5 +1,6 @@
 "use client";
 
+import Error from "@/app/error";
 import DialogForm from "@/components/candidates/dialog-form";
 import type { Column, ExpandableRow } from "@/components/common/reusable-table";
 import ReusableTable from "@/components/common/reusable-table";

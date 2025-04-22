@@ -29,8 +29,7 @@
     "docker:redis": "cd backend && docker-compose up -d redis",
     "docker:logs": "cd backend && docker-compose logs -f",
     "docker:ps": "cd backend && docker-compose ps",
-    "seed:db": "cd backend && npm run seed:db",
-    "prepare": "husky init && echo 'Run husky setup manually'"
+    "seed:db": "cd backend && npm run seed:db"
   },
   "config": {
     "backend_port": "3001"

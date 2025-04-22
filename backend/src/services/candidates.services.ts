@@ -83,6 +83,16 @@ export default class CandidatesService {
 			}
 
 			if (data.email && data.email !== existingCandidate.email) {
+				const existingEmail = await prisma.candidate.findUnique({
+					where: { email: data.email },
+				});
+
+				if (existingEmail) {
+					throw new AppError('Email already exists', 400);
+				}
+			}
+
+			if (data.email && data.email !== existingCandidate.email) {
 				const existingEmail = await tx.candidate.findUnique({
 					where: { email: data.email },
 				});

@@ -1,6 +1,5 @@
 "use client";
 
-import Error from "@/app/error";
 import DialogForm from "@/components/candidates/dialog-form";
 import type { Column, ExpandableRow } from "@/components/common/reusable-table";
 import ReusableTable from "@/components/common/reusable-table";
@@ -122,7 +121,7 @@ function CandidateTable() {
     
     if (candidateData?.data?.list) {
       const res =JSON.parse(JSON.stringify(candidateData.data.list))
-      const candidateRes= res.map((item: any) => {
+      const candidateRes= res.map((item:any) => {
         item.assessment.technologies = item.assessment.technologies.map((inner: { technology: { id: string, name: string } }) => inner.technology)
         return item
       })
@@ -409,18 +408,14 @@ function CandidateTable() {
         currentPage={currentPage}
         onPageChange={handlePageChange}
       >
-        <div className="min-h-[440px]">
-          {isLoading ? (
-            <LoadingSpinner className="h-full w-full" />
-          ) : (
-            <ReusableTable
-              columns={columns}
-              rows={currentItems}
-              expandableRow={expandableRow}
-              className="mb-6 h-[460px] animate-in fade-in duration-300"
-              rowKey="id"
-            />
-          )}
+        <div className="min-h-[500px]">
+          <ReusableTable
+            columns={columns}
+            rows={currentItems}
+            expandableRow={expandableRow}
+            className="mb-6 h-[460px] animate-in fade-in duration-300"
+            rowKey="id"
+          />
         </div>
       </Pagination>
       <DialogForm candidate={selectedCandidate} open={open} setOpen={setOpen} />

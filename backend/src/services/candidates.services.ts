@@ -37,7 +37,6 @@ export default class CandidatesService {
 						phone: data.phone,
 						experience: data.experience,
 						assessment_id: data.assessment_id,
-						technology_id: data.technology_id,
 						exam_id: data.exam_id,
 						meta: data.meta as Prisma.JsonObject,
 					},
@@ -267,7 +266,6 @@ export default class CandidatesService {
 				where: { id },
 				include: {
 					assessment: true,
-					technology: true,
 					exam: true,
 				},
 			});
@@ -284,11 +282,6 @@ export default class CandidatesService {
 				email: true,
 				phone: true,
 				experience: true,
-				technology: {
-					select: {
-						name: true,
-					},
-				},
 			},
 		});
 	}

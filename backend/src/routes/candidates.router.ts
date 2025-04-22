@@ -1,9 +1,9 @@
 import express from 'express';
 import { CandidateController } from '../controllers/candidates.controllers';
-import { validateRequest } from '../middlewares/validation.middleware';
 import { authenticateAndAuthorize } from '../middlewares/auth.middleware';
-import { candidateSchema } from '../validationSchemas/candidates.validations';
+import { validateRequest } from '../middlewares/validation.middleware';
 import { asyncHandler } from '../utils/asyncHandler';
+import { candidateSchema } from '../validationSchemas/candidates.validations';
 
 const candidateRouter = express.Router();
 const candidateController = new CandidateController();
@@ -37,8 +37,8 @@ candidateRouter.get(
 
 candidateRouter.get(
 	'/:id',
-	validateRequest(candidateSchema.get),
 	authenticateAndAuthorize('candidates.can_read'),
+	validateRequest(candidateSchema.get),
 	asyncHandler(candidateController.getCandidateById)
 );
 

@@ -3,6 +3,7 @@ import { Exam } from '@prisma/client';
 import { Prisma } from '@prisma/client';
 import { JsonValue } from '@prisma/client/runtime/library';
 import { AppError } from '../common/errors/AppError';
+import jwt from 'jsonwebtoken';
 
 const prisma = new PrismaClient();
 
@@ -74,6 +75,83 @@ export default class ExamService {
 			);
 		}
 	}
+
+	async startExam(examId: string) {
+		const exam = await prisma.exam.findUnique({
+			where: { id: examId },
+		});
+
+		if (!exam) {
+			throw new AppError('Exam not found', 404);
+		}
+
+		const updatedExam = await prisma.exam.update({
+			where: { id: examId },
+			data: {
+				status: 'in_progress',
+				start_time: new Date(),
+			},
+		});
+
+		return updatedExam;
+	}
+
+	// async submitExam(examId: string, submission: ExamSubmission) {
+	//   const exam = await prisma.exam.findUnique({
+	//     where: { id: examId }
+	//   });
+
+	//   if (!exam) {
+	//     throw new AppError("Exam not found", 404);
+	//   }
+
+	//   // Save exam answers
+	//   const answers = await prisma.answers.createMany({
+	//     data: Object.entries(submission.answers).map(([questionId, answer]) => ({
+	//       exam_id: examId,
+	//       question_id: questionId,
+	//       answer: answer
+	//     }))
+	//   });
+
+	//   // Save violations if any
+	//   if (submission.violations.length > 0) {
+	//     await prisma.violations.createMany({
+	//       data: submission.violations.map(violation => ({
+	//         exam_id: examId,
+	//         type: violation.type,
+	//         timestamp: new Date(violation.timestamp),
+	//         details: violation.details
+	//       }))
+	//     });
+	//   }
+
+	//   // Save screenshots
+	//   if (submission.screenshots.length > 0) {
+	//     await prisma.screenshots.createMany({
+	//       data: submission.screenshots.map(screenshot => ({
+	//         exam_id: examId,
+	//         timestamp: new Date(screenshot.timestamp),
+	//         image_data: screenshot.image
+	//       }))
+	//     });
+	//   }
+
+	//   // Update exam status to completed
+	//   const updatedExam = await prisma.exam.update({
+	//     where: { id: examId },
+	//     data: {
+	//       status: 'COMPLETED',
+	//       completed_at: new Date()
+	//     }
+	//   });
+
+	//   return {
+	//     examId: updatedExam.id,
+	//     status: updatedExam.status,
+	//     answersSubmitted: answers.count
+	//   };
+	// }
 
 	async createExam(data: CreateExamData) {
 		try {

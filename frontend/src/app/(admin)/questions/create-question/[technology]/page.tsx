@@ -16,7 +16,7 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({
   params,
 }) => {
   const [questions, setQuestions] = useState<Question[]>([]);
-  const [showSidebar, setShowSidebar] = useState(false);
+  // const [showSidebar, setShowSidebar] = useState(false);
   const router = useRouter();
   const [selectedQuestion, setSelectedQuestion] = useState<number>(0);
 
@@ -169,11 +169,9 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({
     router.push("/questions");
   };
 
-  useEffect(() => {
-    if (questions.length) {
-      setShowSidebar(true);
-    } else {
-      setShowSidebar(false);
+  useEffect(()=>{
+    if(questions.length){
+      // setShowSidebar(true)
     }
   }, [questions]);
 
@@ -198,7 +196,7 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({
       {/* Remaining body */}
       <div className="flex gap-6">
         {/* Sidebar for questions no. list */}
-        {showSidebar ? (
+        {questions.length ? (
           <QuestionSidebar
             questions={questions}
             selectedQuestion={selectedQuestion}

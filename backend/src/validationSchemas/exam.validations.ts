@@ -63,4 +63,31 @@ export const examSchema = {
             }),
         }),
     },
+    generateLink: {
+        params: Joi.object({
+            id: Joi.string().uuid().required().messages({
+                "string.empty": "Exam Id is required",
+                "string.uuid": "Invalid Exam Id format",
+            })
+        }),
+        body: Joi.object({
+            candidateId: Joi.string().uuid().required().messages({
+                "string.empty": "Candidate Id is required",
+                "string.uuid": "Invalid Candidate Id format",
+            })
+        })
+    },
+    access: {
+        params: Joi.object({
+            id: Joi.string().uuid().required().messages({
+                "string.empty": "Exam Id is required",
+                "string.uuid": "Invalid Exam Id format",
+            })
+        }),
+        query: Joi.object({
+            token: Joi.string().required().messages({
+                "string.empty": "Access token is required",
+            })
+        }).unknown(true)
+    }
 }; 

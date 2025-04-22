@@ -23,6 +23,7 @@ import { useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import { FiCopy, FiMail } from "react-icons/fi";
 import useSWR, { mutate } from "swr";
+import { LoadingSpinner } from "../ui/loading-spinner";
 import StatusWrapper from "../common/status-wrapper";
 
 function CandidateTable() {
@@ -34,8 +35,67 @@ function CandidateTable() {
     null
   );
   const [open, setOpen] = useState(false);
-  const { candidateFilter, setCandidateListData, candidateCount, candidateList } = useCandidateStore()
+  const { candidateFilter, setCandidateFilter, setCandidateListData, candidateCount, candidateList ,technologyOptions,assessmentOptions } = useCandidateStore()
   const totalItems = candidateCount;
+  const pathname = usePathname();
+
+
+  useEffect(() => {
+    const params = new URLSearchParams();
+    
+    params.set('page', currentPage.toString());
+    params.set('perPage', itemsPerPage.toString());
+    
+    if (candidateFilter.searchQuery) {
+      params.set('searchQuery', candidateFilter.searchQuery);
+    }
+    
+    if (candidateFilter.technologyFilter.length > 0) {
+      const techLabels = candidateFilter.technologyFilter.map(item => item.label);
+      params.set('technologyFilter', JSON.stringify(techLabels));
+    }
+   
+    if (candidateFilter.assessmentFilter.length > 0) {
+      const assessmentLabels = candidateFilter.assessmentFilter.map(item => item.label);
+      params.set('assessmentFilter', JSON.stringify(assessmentLabels));
+    }
+    
+    if (candidateFilter.created) {
+      params.set('created', JSON.stringify(candidateFilter.created));
+    }
+    
+    window.history.replaceState(null, '', `${pathname}?${params.toString()}`);
+  }, [currentPage, itemsPerPage, candidateFilter, pathname]);
+  
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams.toString());
+    
+    if (params.get('page')) setCurrentPage(Number(params.get('page')));
+    if (params.get('perPage')) setItemsPerPage(Number(params.get('perPage')));
+    
+    
+    const filterParams = {
+      searchQuery: params.get('searchQuery') || '',
+      technologyFilter: params.get('technologyFilter')
+        ? JSON.parse(params.get('technologyFilter') as string).map((label:string) => {
+            const found = technologyOptions.find(opt => opt.label === label);
+            return found || { value: '', label };
+          })
+        : [],
+      assessmentFilter: params.get('assessmentFilter')
+        ? JSON.parse(params.get('assessmentFilter') as string).map((label: string) => {
+            const found = assessmentOptions.find(opt => opt.label === label);
+            return found || { value: '', label };
+          })
+        : [],
+      created: params.get('created') 
+        ? JSON.parse(params.get('created') as string)
+        : null
+    };
+    
+    setCandidateFilter(filterParams);
+  }, [searchParams, setCandidateFilter]);
+
 
   const queryObj = useMemo(() => ({
     page: currentPage || 1,
@@ -52,6 +112,8 @@ function CandidateTable() {
     skipNull: true,
     skipEmptyString: true
   }), [queryObj]);
+  
+  
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { data: candidateData, error, isLoading } = useSWR(`/candidate/list?${cleanedQuery}`, api.get)
@@ -60,32 +122,25 @@ function CandidateTable() {
     
     if (candidateData?.data?.list) {
       const res =JSON.parse(JSON.stringify(candidateData.data.list))
-      const candidateRes= res.map((item: any) => {
+      const candidateRes= res.map((item:any) => {
         item.assessment.technologies = item.assessment.technologies.map((inner: { technology: { id: string, name: string } }) => inner.technology)
         return item
       })
       setCandidateListData(candidateData.data.total, candidateRes)
     }
-  }, [candidateData])
+  }, [candidateData,setCandidateListData])
 
-  useEffect(() => {
-    const pageParam = searchParams.get("page");
-    const perPageParam = searchParams.get("perPage");
-
-    if (pageParam) setCurrentPage(Number(pageParam));
-    if (perPageParam) setItemsPerPage(Number(perPageParam));
-  }, [searchParams]);
 
   const handlePerPageChange = (value: string) => {
     setItemsPerPage(Number(value));
     setCurrentPage(1);
   };
+
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
     updateQueryParams({ page: page.toString() });
   };
 
-  const pathname = usePathname();
 
   const updateQueryParams = (params: { page?: string; perPage?: string }) => {
     const newParams = new URLSearchParams(searchParams.toString());
@@ -120,9 +175,9 @@ function CandidateTable() {
       try {
         const res = await deleteData(`/candidate/${id}`)
         if (res.success) {
-          toast.success("Assessment deleted successfully");
+          toast.success("Candidate deleted successfully");
         }
-        mutate((key) => typeof key === 'string' && key.startsWith('/candidate/list'));
+        await mutate((key) => typeof key === 'string' && key.startsWith('/candidate/list'));
       } catch (error) {
         if (isAxiosError(error)) {
           toast.error(error.response.data.message || "An unexpected error occurred");
@@ -204,15 +259,23 @@ function CandidateTable() {
         render: (candidate: Candidate) => (
           <div className="flex items-center gap-2">
             <Button
-              onClick={(e) => {
+              onClick={async (e) => {
                 e.stopPropagation();
-                navigator.clipboard.writeText(
-                  "https://example.com/candidate-link"
-                );
-                toast.success("Link copied to clipboard!");
+                try {
+                  
+                  navigator.clipboard.writeText(candidate.meta.examLink as string);                  
+                  const expiresAt = new Date(candidate.meta.tokenExpiresAt as string);
+                  const formattedExpiration = expiresAt.toLocaleString();
+                  
+                  toast.success(`Exam link copied! Valid until ${formattedExpiration}`);
+                } catch (error) {
+                  console.error("Error getting exam link:", error);
+                  toast.error("Failed to get exam link");
+                }
               }}
               variant="ghost"
               className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all duration-200"
+              title="Copy exam access link"
             >
               <FiCopy className="h-5 w-5 text-gray-700 dark:text-gray-300" />
             </Button>
@@ -351,7 +414,7 @@ function CandidateTable() {
             columns={columns}
             rows={currentItems}
             expandableRow={expandableRow}
-            className="mb-6 "
+            className="mb-6 h-[460px] animate-in fade-in duration-300"
             rowKey="id"
           />
         </div>

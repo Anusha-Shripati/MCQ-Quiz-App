@@ -129,3 +129,14 @@ export interface CandidateResult {
   updated_at: string;
   deleted_at: string | null;
 }
+
+
+export interface ICandidateData {
+	name: string;
+	email: string;
+	phone: string;
+	experience: string;
+	technology: {
+		name: string;
+	};
+}

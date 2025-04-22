@@ -660,19 +660,19 @@ async function createTestCandidates() {
   );
 
   // Create candidates with their unique assessments
-  const candidates = assessments.map((assessment, i) => ({
-    name: `test2_${i + 1}`,
-    email: `test${i + 1}@gmail.com`,
-    phone: `12345678${i}${i + 2}`,
-    technology_id: TECHNOLOGY_IDS.MONGODB,
-    experience: "6",
-    assessment_id: assessment.id,
-  }));
+  // const candidates = assessments.map((assessment, i) => ({
+  //   name: `test2_${i + 1}`,
+  //   email: `test${i + 1}@gmail.com`,
+  //   phone: `12345678${i}${i + 2}`,
+  //   technology_id: TECHNOLOGY_IDS.MONGODB,
+  //   experience: "6",
+  //   assessment_id: assessment.id,
+  // }));
 
-  await prisma.candidate.createMany({
-    data: candidates,
-    skipDuplicates: true,
-  });
+  // await prisma.candidate.createMany({
+  //   data: candidates,
+  //   skipDuplicates: true,
+  // });
 
   console.log("Test candidates and their assessments created successfully");
 }
@@ -684,7 +684,6 @@ const resetDB = async ()=>{
       "Results",
       "Exam_questions",
       "Exam",
-      "Candidate_assessments",
       "Candidate",
       "Questions",
       "Assessment_technology",
@@ -756,12 +755,12 @@ async function main() {
   }
 
   // Create technologies
-  // await createTechnologies();
+  await createTechnologies();
 
   // Seed questions for all technologies
-  // await seedQuestions(mongodbQuestions, "MongoDB");
-  // await seedQuestions(javascriptQuestions, "JavaScript");
-  // await seedQuestions(pythonQuestions, "Python");
+  await seedQuestions(mongodbQuestions, "MongoDB");
+  await seedQuestions(javascriptQuestions, "JavaScript");
+  await seedQuestions(pythonQuestions, "Python");
 
   // Create test candidates
   // await createTestCandidates();

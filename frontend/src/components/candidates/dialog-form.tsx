@@ -119,7 +119,7 @@ export default function DialogForm({
             ? "Candidate updated successfully"
             : "Candidate created successfully"
         );
-        mutate(
+        await mutate(
           (key) => typeof key === "string" && key.startsWith("/candidate/list")
         );
         reset(formFields);
@@ -159,12 +159,14 @@ export default function DialogForm({
       reset(candidate || formFields);
     }
   }, [open, candidate, reset]);
+
   const handleAssessmentChange = (value: string) => {
     setValue("assessment", value, { shouldValidate: true })
-    const assessment = assessmentOptions.find((item)=>item.value == value)
-    if(assessment && assessment.technologies ){
-      setValue('technology',assessment.technologies?.map(item=>item.name).join(', '))
-    }
+    // !TODO: Fix here
+    // const assessment = assessmentOptions.find((item)=>item.value == value)
+    // if(assessment && assessment.technologies ){
+    //   setValue('technology',assessment.technologies?.map(item=>item.name).join(', '))
+    // }
   }
 
   return (

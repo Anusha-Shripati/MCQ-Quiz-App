@@ -114,17 +114,7 @@ CREATE TABLE "Questions" (
 CREATE TABLE "Candidate" (
     "id" TEXT NOT NULL,
     "assessment_id" TEXT NOT NULL,
-<<<<<<< HEAD
-    "technology_id" TEXT NOT NULL,
     "exam_id" TEXT NOT NULL,
-=======
-<<<<<<<< HEAD:backend/src/db/prisma/migrations/20250417070344_/migration.sql
-    "exam_id" TEXT,
-========
-    "technology_id" TEXT NOT NULL,
-    "exam_id" TEXT NOT NULL,
->>>>>>>> 068536a (Added routes for candidate access with access code):backend/src/db/prisma/migrations/20250421125346_init/migration.sql
->>>>>>> a418aa6 (Added routes for candidate access with access code)
     "name" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "experience" TEXT NOT NULL,
@@ -244,26 +234,7 @@ ALTER TABLE "Questions" ADD CONSTRAINT "Questions_technology_id_fkey" FOREIGN KE
 ALTER TABLE "Candidate" ADD CONSTRAINT "Candidate_assessment_id_fkey" FOREIGN KEY ("assessment_id") REFERENCES "Assessments"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-<<<<<<< HEAD
-=======
-<<<<<<<< HEAD:backend/src/db/prisma/migrations/20250417070344_/migration.sql
-ALTER TABLE "Candidate" ADD CONSTRAINT "Candidate_exam_id_fkey" FOREIGN KEY ("exam_id") REFERENCES "Exam"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Candidate_assessments" ADD CONSTRAINT "Candidate_assessments_assessment_id_fkey" FOREIGN KEY ("assessment_id") REFERENCES "Assessments"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Candidate_assessments" ADD CONSTRAINT "Candidate_assessments_candidate_id_fkey" FOREIGN KEY ("candidate_id") REFERENCES "Candidate"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-========
->>>>>>> a418aa6 (Added routes for candidate access with access code)
-ALTER TABLE "Candidate" ADD CONSTRAINT "Candidate_technology_id_fkey" FOREIGN KEY ("technology_id") REFERENCES "Technology"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "Candidate" ADD CONSTRAINT "Candidate_exam_id_fkey" FOREIGN KEY ("exam_id") REFERENCES "Exam"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-<<<<<<< HEAD
-=======
->>>>>>>> 068536a (Added routes for candidate access with access code):backend/src/db/prisma/migrations/20250421125346_init/migration.sql
->>>>>>> a418aa6 (Added routes for candidate access with access code)
 
 -- AddForeignKey
 ALTER TABLE "Exam" ADD CONSTRAINT "Exam_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

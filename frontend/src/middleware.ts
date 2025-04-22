@@ -20,7 +20,17 @@ export function middleware(request: NextRequest) {
     "roles",
     "assessment",
   ]);
+
+  // 🔹 Define public routes
+  const PUBLIC_ROUTES = new Set([
+    "test"
+  ]);
   
+  // Skip middleware for public routes
+  if (PUBLIC_ROUTES.has(currentModule)) {
+    return NextResponse.next();
+  }
+
   // 🔹 Redirect if accessing protected route without authentication
   if (PROTECTED_ROUTES.has(currentModule) && !token) {
     return NextResponse.redirect(new URL("/", request.url));
@@ -68,5 +78,6 @@ export const config = {
     "/assessments/:path*",
     "/roles/:path*",
     "/users/:path*",
+    "/test/:path*",  // Add test route to matcher but it will be handled by PUBLIC_ROUTES
   ],
 };

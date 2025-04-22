@@ -175,10 +175,13 @@ export class UserController {
       const filter: any = {};
 
       if (search) {
-        filter.email = { contains: search as string, mode: "insensitive" };
-        filter.name = { contains: search as string, mode: "insensitive" };
+        filter.OR = [
+          { email: { contains: search as string, mode: "insensitive" } },
+          { name: { contains: search as string, mode: "insensitive" } }
+        ];
       }
-
+      console.log({search});
+      console.log({filter});
       const users = await userService.findManyUsers(filter);
 
       generateResponse(

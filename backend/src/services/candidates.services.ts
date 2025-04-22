@@ -1,4 +1,5 @@
 import { Prisma, PrismaClient } from '@prisma/client';
+import jwt from 'jsonwebtoken';
 import { AppError } from '../common/errors/AppError';
 import { CreateCandidate, UpdateCandidate } from '../types/candidate.types';
 import ExamService from './exam.services';
@@ -23,9 +24,12 @@ export default class CandidatesService {
 				throw new AppError('Phone number already exists', 400);
 			}
 
-			await examService.createExamQuestionsForAssessment(data.exam_id, data.assessment_id);
+			await examService.createExamQuestionsForAssessment(
+				data.exam_id,
+				data.assessment_id
+			);
 
-			return await prisma.candidate.create({
+			const newCandidate = await prisma.candidate.create({
 				data: {
 					name: data.name,
 					email: data.email,
@@ -38,10 +42,12 @@ export default class CandidatesService {
 				},
 				include: {
 					assessment: true,
-					candidate_assessments: true,
-					results: true,
 				},
 			});
+
+			await this.generateCandiateAccessToken(data.exam_id, newCandidate.id);
+
+			return newCandidate;
 		} catch (error) {
 			console.log('error', error);
 			if (error instanceof AppError) {
@@ -59,13 +65,11 @@ export default class CandidatesService {
 			where: { id },
 			include: {
 				assessment: true,
-				candidate_assessments: true,
-				results: true,
 				exam: {
 					include: {
-						exam_questions: true
-					}
-				}
+						exam_questions: true,
+					},
+				},
 			},
 		});
 
@@ -93,20 +97,26 @@ export default class CandidatesService {
 			}
 		}
 
-		if (data.assessment_id && data.assessment_id !== existingCandidate.assessment_id) {
+		if (
+			data.assessment_id &&
+			data.assessment_id !== existingCandidate.assessment_id
+		) {
 			if (!existingCandidate.exam) {
 				throw new AppError('Exam not found for candidate', 404);
 			}
 
-			if(existingCandidate.exam.is_completed){
+			if (existingCandidate.exam.is_completed) {
 				throw new AppError('Exam is completed. Cannot change assessment', 400);
 			}
 
 			await prisma.exam_questions.deleteMany({
-				where: { exam_id: existingCandidate.exam.id }
+				where: { exam_id: existingCandidate.exam.id },
 			});
 
-			await examService.createExamQuestionsForAssessment(existingCandidate.exam.id, data.assessment_id);
+			await examService.createExamQuestionsForAssessment(
+				existingCandidate.exam.id,
+				data.assessment_id
+			);
 		}
 
 		return await prisma.candidate.update({
@@ -122,13 +132,11 @@ export default class CandidatesService {
 			},
 			include: {
 				assessment: true,
-				candidate_assessments: true,
-				results: true,
 				exam: {
 					include: {
-						exam_questions: true
-					}
-				}
+						exam_questions: true,
+					},
+				},
 			},
 		});
 	}
@@ -229,8 +237,6 @@ export default class CandidatesService {
 				assessment: true,
 				technology: true,
 				exam: true,
-				candidate_assessments: true,
-				results: true,
 			},
 			orderBy: {
 				created_at: 'desc',
@@ -249,13 +255,107 @@ export default class CandidatesService {
 	}
 
 	async getCandidateById(id: string) {
-		return await prisma.candidate.findUnique({
-			where: { id },
-			include: {
-				assessment: true,
-				candidate_assessments: true,
-				results: true,
+		try {
+			return await prisma.candidate.findUnique({
+				where: { id },
+				include: {
+					assessment: true,
+					technology: true,
+					exam: true,
+				},
+			});
+		} catch (error) {
+			throw new AppError('Failed to fetch candidate', 500);
+		}
+	}
+
+	async getCandidateByExamId(id: string) {
+		return await prisma.candidate.findFirst({
+			where: { exam_id: id },
+			select: {
+				name: true,
+				email: true,
+				phone: true,
+				experience: true,
+				technology: {
+					select: {
+						name: true,
+					},
+				},
 			},
 		});
+	}
+
+	private async generateCandiateAccessToken(
+		examId: string,
+		candidateId: string
+	) {
+		try {
+			const candidate = await prisma.candidate.findFirst({
+				where: {
+					id: candidateId,
+					exam_id: examId,
+				},
+				include: {
+					exam: true,
+				},
+			});
+
+			if (!candidate) {
+				throw new AppError('Candidate not found', 404);
+			}
+
+			if (!candidate.exam) {
+				throw new AppError('No exam associated with this candidate', 404);
+			}
+
+			const examEndTime = new Date(candidate.exam.end_time);
+			const now = new Date();
+			const expiresInSeconds = Math.floor(
+				(examEndTime.getTime() - now.getTime()) / 1000
+			);
+			const code = Math.random().toString(36).substring(2, 15);
+
+			if (expiresInSeconds <= 0) {
+				throw new AppError('Exam has already expired', 400);
+			}
+
+			const token = jwt.sign(
+				{
+					examId,
+					candidateId,
+				},
+				process.env.ACCESS_SECRET || 'exam-secret-key',
+				{ expiresIn: expiresInSeconds }
+			);
+
+			const examLink = `${process.env.FRONTEND_URL}/test/${examId}?code=${code}`;
+
+			await prisma.candidate.update({
+				where: { id: candidateId },
+				data: {
+					meta: {
+						...((candidate.meta as object) || {}),
+						accessCode: code,
+						accessToken: token,
+						examLink: examLink,
+						tokenCreatedAt: now.toISOString(),
+						tokenExpiresAt: examEndTime.toISOString(),
+					},
+				},
+			});
+
+			return {
+				code,
+				token,
+				examLink,
+				expiresAt: examEndTime.toISOString(),
+			};
+		} catch (error) {
+			if (error instanceof AppError) {
+				throw error;
+			}
+			throw new AppError('Failed to generate exam access token', 500);
+		}
 	}
 }

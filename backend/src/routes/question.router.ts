@@ -17,8 +17,8 @@ questionRouter.post(
 
 questionRouter.put(
     "/:id",
-    validateRequest(questionsSchema.update),
     authenticateAndAuthorize('questions.can_edit'),
+    validateRequest(questionsSchema.update),
     asyncHandler(questionsController.update)
 );
 questionRouter.get(
@@ -28,8 +28,8 @@ questionRouter.get(
 );
 questionRouter.get(
     "/:id",
-    validateRequest(questionsSchema.get),
     authenticateAndAuthorize('questions.can_read'),
+    validateRequest(questionsSchema.get),
     asyncHandler(questionsController.getQuestionById)
 );
 

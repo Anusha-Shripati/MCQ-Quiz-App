@@ -101,8 +101,8 @@ export default function DialogForm({
             ? "Candidate updated successfully"
             : "Candidate created successfully"
         );
-        mutate(
-          (key) => typeof key === "string" && key.startsWith("/candidates/list")
+        await mutate(
+          (key) => typeof key === "string" && key.startsWith("/candidate/list")
         );
         reset(formFields);
       } else {

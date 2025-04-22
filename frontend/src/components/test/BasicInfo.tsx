@@ -1,179 +1,178 @@
-import React, { useState, ChangeEvent, FormEvent } from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/form/button";
-import { Input } from "@/components/ui/form/input";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/form/button';
+import { Input } from '@/components/ui/form/input';
+import { ICandidateData } from '@/types/candidate.types';
+import { Camera, FileText, Info, Mail, User, UserCircle } from 'lucide-react';
+import { memo, useEffect, useState } from 'react';
 
 interface FormData {
-  userName: string;
-  email: string;
-  experienceYear: number | null;
-  jobProfile: string;
+	userName: string;
+	email: string;
+	experienceYear: number | null;
+	jobProfile: string;
 }
-export interface BasicInfoData {
-  name?: string;
-  email: string;
-  // Add other fields as needed
-}
-
-type Errors = Record<keyof FormData, string>;
 
 interface BasicInfoFormProps {
-  handleBasicInfoSubmit: (data: BasicInfoData) => void;
+	handleBasicInfoSubmit: () => void;
+	candidateData?: ICandidateData | null;
 }
 
-const BasicInfoForm: React.FC<BasicInfoFormProps> = ({ handleBasicInfoSubmit }) => {
-  const [formData, setFormData] = useState<FormData>({
-    userName: '',
-    email: '',
-    experienceYear: null,
-    jobProfile: ''
-  });
+// Subcomponents
+const InstructionCard = () => (
+	<Card className='bg-white shadow-lg hover:shadow-xl transition-shadow duration-300 border-0'>
+		<CardHeader className='space-y-1'>
+			<div className='flex items-center gap-2 text-blue-600'>
+				<Info className='h-5 w-5' />
+				<CardTitle className='text-xl font-semibold'>
+					Proctored Mode Instructions
+				</CardTitle>
+			</div>
+			<p className='text-sm text-gray-500'>
+				Please read carefully before proceeding
+			</p>
+		</CardHeader>
+		<CardContent className='space-y-6'>
+			<div className='p-4 bg-blue-50 rounded-lg border border-blue-100'>
+				<p className='text-gray-700 mb-4'>
+					This test will run in <strong>full-screen mode</strong>. Follow these
+					instructions carefully:
+				</p>
+				<ul className='space-y-3'>
+					{[
+						{
+							icon: <FileText className='h-4 w-4' />,
+							text: 'Do not switch tabs or windows during the test',
+						},
+						{
+							icon: <Camera className='h-4 w-4' />,
+							text: 'Enable camera and microphone access when prompted',
+						},
+						{
+							icon: <UserCircle className='h-4 w-4' />,
+							text: 'Stay visible in the camera throughout the test',
+						},
+						{
+							icon: <Info className='h-4 w-4' />,
+							text: 'Maintain a quiet, well-lit environment',
+						},
+					].map((item, index) => (
+						<li key={index} className='flex items-start gap-3 text-gray-600'>
+							<div className='mt-1 text-blue-600'>{item.icon}</div>
+							<span>{item.text}</span>
+						</li>
+					))}
+				</ul>
+			</div>
+		</CardContent>
+	</Card>
+);
 
-  const [errors, setErrors] = useState<Errors>({
-    userName: '',
-    email: '',
-    experienceYear: '',
-    jobProfile: ''
-  });
+const FormInput = ({
+	label,
+	icon,
+	value,
+	type = 'text',
+}: {
+	label: string;
+	icon: React.ReactNode;
+	value: string | number | null;
+	type?: string;
+}) => (
+	<div className='relative'>
+		<div className='absolute left-3 top-11 text-gray-400'>{icon}</div>
+		<div className='space-y-2'>
+			<label className='text-sm font-medium text-gray-700'>{label}</label>
+			<Input
+				type={type}
+				value={value ?? ''}
+				className='text-gray-700 pl-10 bg-gray-50/50 border-gray-200'
+				disabled={true}
+			/>
+		</div>
+	</div>
+);
 
-  const [touched, setTouched] = useState<Record<keyof FormData, boolean>>({
-    userName: false,
-    email: false,
-    experienceYear: false,
-    jobProfile: false
-  });
+const BasicInfoForm: React.FC<BasicInfoFormProps> = memo(
+	({ handleBasicInfoSubmit, candidateData }) => {
+		const [formData, setFormData] = useState<FormData>({
+			userName: '',
+			email: '',
+			experienceYear: null,
+			jobProfile: '',
+		});
 
-  const validateField = (name: keyof FormData, value: string | number | null): string => {
-    let error = '';
+		useEffect(() => {
+			if (candidateData) {
+				setFormData({
+					userName: candidateData.name || '',
+					email: candidateData.email || '',
+					experienceYear: Number(candidateData.experience) || null,
+					jobProfile: candidateData.technology?.name || '',
+				});
+			}
+		}, [candidateData]);
 
-    switch (name) {
-      case 'userName':
-        if (typeof value === 'string' && !value.trim()) error = 'Username is required';
-        else if (typeof value === 'string' && value.length < 2) error = 'Username must be at least 2 characters';
-        break;
+		return (
+			<div className='min-h-screen bg-gray-50 flex items-center justify-center p-6'>
+				<div className='max-w-6xl w-full grid grid-cols-1 lg:grid-cols-2 gap-8'>
+					<InstructionCard />
 
-      case 'email':
-        if (typeof value === 'string' && !value.trim()) error = 'Email is required';
-        else if (typeof value === 'string' && !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(value)) error = 'Invalid email address';
-        break;
+					<Card className='bg-white shadow-lg hover:shadow-xl transition-shadow duration-300 border-0'>
+						<CardHeader className='space-y-1'>
+							<div className='flex items-center gap-2 text-purple-600'>
+								<User className='h-5 w-5' />
+								<CardTitle className='text-xl font-semibold'>
+									Candidate Information
+								</CardTitle>
+							</div>
+							<p className='text-sm text-gray-500'>
+								Please verify your details before proceeding
+							</p>
+						</CardHeader>
+						<CardContent>
+							<div className='space-y-6'>
+								<FormInput
+									label='Full Name'
+									icon={<User className='h-4 w-4' />}
+									value={formData.userName}
+								/>
+								<FormInput
+									label='Email Address'
+									icon={<Mail className='h-4 w-4' />}
+									value={formData.email}
+									type='email'
+								/>
+								<FormInput
+									label='Years of Experience'
+									icon={<UserCircle className='h-4 w-4' />}
+									value={formData.experienceYear}
+									type='number'
+								/>
+								<FormInput
+									label='Technology'
+									icon={<FileText className='h-4 w-4' />}
+									value={formData.jobProfile}
+								/>
 
-      case 'experienceYear':
-        if (typeof value !== 'number' || isNaN(value) || value <= 0) error = 'Please enter a valid number for experience';
-        break;
+								<div className='pt-4'>
+									<Button
+										onClick={handleBasicInfoSubmit}
+										className='w-full bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-lg
+										shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200'
+									>
+										<Camera className='w-4 h-4 mr-2' />
+										Proceed to Video Recording
+									</Button>
+								</div>
+							</div>
+						</CardContent>
+					</Card>
+				</div>
+			</div>
+		);
+	}
+);
 
-      case 'jobProfile':
-        if (typeof value === 'string' && !value.trim()) error = 'Job profile is required';
-        else if (typeof value === 'string' && value.length < 2) error = 'Job profile must be at least 2 characters';
-        break;
+BasicInfoForm.displayName = 'BasicInfoForm';
 
-      default:
-        break;
-    }
-
-    return error;
-  };
-
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type } = e.target;
-
-    const updatedValue = type === 'number' ? Number(value) || null : value;
-
-    setFormData(prev => ({ ...prev, [name]: updatedValue }));
-
-    if (touched[name as keyof FormData]) {
-      setErrors(prev => ({
-        ...prev,
-        [name]: validateField(name as keyof FormData, updatedValue)
-      }));
-    }
-  };
-
-  const handleBlur = (e: ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type } = e.target;
-
-    const updatedValue = type === 'number' ? Number(value) || null : value;
-
-    setTouched(prev => ({ ...prev, [name]: true }));
-    setErrors(prev => ({ ...prev, [name]: validateField(name as keyof FormData, updatedValue) }));
-  };
-
-  const validateForm = (): boolean => {
-    const newErrors: Errors = { userName: '', email: '', experienceYear: '', jobProfile: '' };
-    let isValid = true;
-
-    (Object.keys(formData) as Array<keyof FormData>).forEach(key => {
-      const error = validateField(key, formData[key]);
-      newErrors[key] = error;
-      if (error) isValid = false;
-    });
-
-    setErrors(newErrors);
-    return isValid;
-  };
-
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault();
-
-    setTouched({ userName: true, email: true, experienceYear: true, jobProfile: true });
-
-    if (validateForm()) {
-      handleBasicInfoSubmit(formData);
-    }
-  };
-
-  const renderInput = (name: keyof FormData, label: string, placeholder: string, type = 'text') => (
-    <div className="space-y-2">
-      <label className="text-sm text-gray-600">
-        {label} <span className="text-red-500">*</span>
-      </label>
-      <Input
-        name={name}
-        type={type}
-        value={formData[name] ?? ''}
-        onChange={handleInputChange}
-        onBlur={handleBlur}
-        placeholder={placeholder}
-        className={`w-full ${errors[name] && touched[name] ? 'border-red-500' : ''}`}
-      />
-      {errors[name] && touched[name] && <p className="text-red-500 text-xs mt-1">{errors[name]}</p>}
-    </div>
-  );
-
-  return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <div className="max-w-6xl w-full grid grid-cols-1 md:grid-cols-2 gap-8">
-        <Card className="bg-white shadow-sm">
-          <CardHeader>
-            <CardTitle className="text-xl text-gray-800">Proctored Mode Instructions</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <p className="text-gray-700">This test will run in <strong>full-screen mode</strong>. Follow these instructions:</p>
-            <ul className="list-disc list-inside text-gray-600 space-y-2">
-              <li>Do not switch tabs or windows.</li>
-              <li>Enable camera and microphone if required.</li>
-              <li>Close unnecessary applications.</li>
-              <li>Stay in a quiet, well-lit environment.</li>
-            </ul>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-white shadow-sm">
-          <CardHeader>
-            <CardTitle className="text-xl text-gray-800">Basic Information</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {renderInput('userName', 'User Name', 'Alex Thompson')}
-              {renderInput('experienceYear', 'Experience Year', '2.5 years', 'number')}
-              {renderInput('email', 'Email', 'alexthompson@example.com', 'email')}
-              {renderInput('jobProfile', 'Job Profile', 'Web Developer')}
-              <Button type="submit" className="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-md">Go to Next Step</Button>
-            </form>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
-  );
-};
-
-export default BasicInfoForm;
+export { BasicInfoForm };

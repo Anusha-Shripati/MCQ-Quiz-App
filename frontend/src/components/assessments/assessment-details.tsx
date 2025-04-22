@@ -326,6 +326,7 @@ export default function AssessmentDetails() {
         onPerPageChange={handlePerPageChange}
         currentPage={currentPage}
         onPageChange={handlePageChange}
+        loading={false}
       >
         <div className="h-[550px] overflow-auto">
           {!error &&

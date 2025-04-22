@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+echo "🔍 Checking TypeScript and lint errors..."
+
+# Block commit on any TypeScript error
+(cd frontend && npx tsc --noEmit) || exit 1
+(cd backend && npx tsc --noEmit) || exit 1
+
+# Block commit on any ESLint error (quiet mode hides warnings like console logs)
+(cd frontend && npx eslint . --ext .ts,.tsx --quiet) || exit 1
+(cd backend && npx eslint . --ext .ts,.tsx --quiet) || exit 1
+
+echo "✅ All checks passed!"

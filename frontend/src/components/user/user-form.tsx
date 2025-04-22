@@ -55,7 +55,7 @@ async function create(url: string, { arg }: { arg: Partial<UserFormValues> }) {
 async function update(url: string, { arg }: { arg: Partial<UserFormValues> }) {
   const response = await api.put(url, arg);
   return response;
-};
+}
 function UserForm({ open, onClose, userData = null }: UserFormProps) {
 
   const {
@@ -64,7 +64,7 @@ function UserForm({ open, onClose, userData = null }: UserFormProps) {
     setValue,
     watch,
     register,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<UserFormValues>({
     resolver: zodResolver(userSchema),
     defaultValues: defaultUser,

@@ -29,7 +29,8 @@
     "docker:redis": "cd backend && docker-compose up -d redis",
     "docker:logs": "cd backend && docker-compose logs -f",
     "docker:ps": "cd backend && docker-compose ps",
-    "seed:db": "cd backend && npm run seed:db"
+    "seed:db": "cd backend && npm run seed:db",
+    "prepare": "husky init && echo 'Run husky setup manually'"
   },
   "config": {
     "backend_port": "3001"
@@ -39,8 +40,12 @@
     "@types/jsonwebtoken": "^9.0.7",
     "@types/lodash": "^4.17.16",
     "@types/node": "^22.10.5",
+    "@typescript-eslint/eslint-plugin": "^8.31.0",
+    "@typescript-eslint/parser": "^8.31.0",
     "concurrently": "^8.2.2",
     "cross-env": "^7.0.3",
+    "eslint": "^8.57.1",
+    "husky": "^9.1.7",
     "wait-on": "^7.2.0"
   },
   "dependencies": {

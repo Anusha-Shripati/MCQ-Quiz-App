@@ -11,7 +11,6 @@ import { Button } from "../ui/form/button";
 import PermissionsTable from "./permission-table";
 import { Module,  Permissions,  RoleData } from "@/types/common.types";
 import useSWRMutation from "swr/mutation";
-import { cache } from 'swr/_internal';
 const permissionSchema = z.object({
   can_read: z.boolean(),
   can_edit: z.boolean(),
@@ -35,7 +34,7 @@ async function create(url: string, { arg }: { arg:  Partial<RoleData> }) {
 async function update(url: string, { arg }: { arg: Partial<RoleData> }) {
   const response = await api.put(url, arg);
   return response;
-};
+}
 
 function RoleForm({ open, onClose, roleData = null }: {open:boolean, onClose: () => void, roleData?: RoleData | null}) {
   

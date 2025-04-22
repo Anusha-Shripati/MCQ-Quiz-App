@@ -1,6 +1,4 @@
 "use client";
-
-import Error from "@/app/error";
 import DialogForm from "@/components/candidates/dialog-form";
 import type { Column, ExpandableRow } from "@/components/common/reusable-table";
 import ReusableTable from "@/components/common/reusable-table";
@@ -23,7 +21,6 @@ import { useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import { FiCopy, FiMail } from "react-icons/fi";
 import useSWR, { mutate } from "swr";
-import { LoadingSpinner } from "../ui/loading-spinner";
 import StatusWrapper from "../common/status-wrapper";
 
 function CandidateTable() {
@@ -121,11 +118,22 @@ function CandidateTable() {
   useEffect(() => {
     
     if (candidateData?.data?.list) {
+      console.log(candidateData.data.list, "candidateData.data.list")
       const res =JSON.parse(JSON.stringify(candidateData.data.list))
-      const candidateRes= res.map((item:any) => {
-        item.assessment.technologies = item.assessment.technologies.map((inner: { technology: { id: string, name: string } }) => inner.technology)
-        return item
+      const candidateRes = res.map((item: Candidate) => {
+        if (item.assessment?.technologies) {
+          const techNames = item.assessment.technologies.map(t => t.name);
+          return {
+            ...item,
+            assessment: {
+              ...item.assessment,
+              techNames,
+            }
+          }
+        }
+        return item;
       })
+      
       setCandidateListData(candidateData.data.total, candidateRes)
     }
   }, [candidateData,setCandidateListData])
@@ -408,6 +416,7 @@ function CandidateTable() {
         onPerPageChange={handlePerPageChange}
         currentPage={currentPage}
         onPageChange={handlePageChange}
+        loading={isLoading}
       >
         <div className="min-h-[500px]">
           <ReusableTable

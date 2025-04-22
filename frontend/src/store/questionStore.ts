@@ -4,11 +4,11 @@ interface Questions {
     technology_id: string
     question: string
     correct_answer: string
-    options: any
+    options: [string, string, string, string, string, string]
     time: string
     difficulty_level: 'easy' | 'medium' | 'hard';
     type: 'multiple_select' | 'video' | 'text' | 'mcq';
-    meta: any
+    meta: Record<string, unknown>
 }
 
 interface QuestionStore {

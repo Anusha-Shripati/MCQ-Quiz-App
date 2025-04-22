@@ -35,7 +35,7 @@ export default function AssessmentHeader() {
     if (users) {
       return [
         { label: "All", value: "all" },
-        ...users.data?.list?.map((user: User) => ({
+        ...users.data.list.map((user: User) => ({
           label: user.name,
           value: user.id,
         })),

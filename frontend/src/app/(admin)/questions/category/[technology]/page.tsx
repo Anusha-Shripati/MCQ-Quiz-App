@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/form/button";
-import { useParams, usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import React, { useState, useMemo, useEffect } from "react";
 import { ArrowLeft } from "lucide-react";
 import { FilterBar } from "@/components/questions/filter-bar";
@@ -95,6 +95,7 @@ const CategoryPage = () => {
         mutate((key: string) => typeof key === 'string' && key.startsWith(`/question/list?technology_id=${technology}`))
       }
     } catch (error) {
+      console.error("Error deleting question:", error);
       toast.error("Failed to delete question");
     }
   };
@@ -185,7 +186,7 @@ const CategoryPage = () => {
                   questions={questionsData}
                   handleQuestionTypeChange={handleQuestionTypeChange}
                   handleDeleteQuestion={() => handleDelete(question.id as string)}
-                  setQuestions={setQuestionsData as any}
+                  setQuestions={setQuestionsData as React.Dispatch<React.SetStateAction<Question[] | Required<Question>[]>>}
                   handleReset={handleReset}
                   technologyId={technology as string}
                   editQuestion={true}

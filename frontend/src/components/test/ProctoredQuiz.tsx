@@ -403,19 +403,19 @@ export default function ProctoredQuiz({ accessCode }: ProctoredQuizProps) {
 			}
 
 			// Convert answers to the format expected by the API
-			const formattedAnswers = Object.entries(answers).map(
-				([questionId, answer]) => ({
-					questionId,
-					answer,
-				})
-			);
+			// const formattedAnswers = Object.entries(answers).map(
+			// 	([questionId, answer]) => ({
+			// 		questionId,
+			// 		answer,
+			// 	})
+			// );
 
 			// Create submission data
-			const submissionData = {
-				answers: formattedAnswers,
-				violations,
-				screenshots,
-			};
+			// const submissionData = {
+			// 	answers: formattedAnswers,
+			// 	violations,
+			// 	screenshots,
+			// };
 
 			// Submit exam using the access code and candidateApi
 			// const result = await candidateApi.submitExam(quizAccessCode, submissionData);

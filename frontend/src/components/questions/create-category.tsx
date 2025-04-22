@@ -4,7 +4,6 @@ import React, { useEffect, useState } from "react";
 import { Input } from "@/components/ui/form/input";
 import { Button } from "@/components/ui/form/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
-import { QuestionCategory } from "@/shared/types/app";
 import { api } from "@/lib/api";
 import { toast } from "react-hot-toast";
 import { AxiosError } from "axios";

@@ -22,7 +22,6 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import useSWRMutation from "swr/mutation";
 import { api } from "@/lib/api";
-import { mutate } from "swr";
 import { toast } from "react-hot-toast";
 import { AxiosError } from "axios";
 

@@ -46,8 +46,6 @@ export const authenticateAndAuthorize =
 				role_id: string;
 				role_name: string;
 			};
-
-			console.log('decoded', decoded);
 			
 			req.user = decoded;
 			if (rights) {

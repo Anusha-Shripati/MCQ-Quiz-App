@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+echo "🔍 Checking TypeScript and lint errors..."
+
+(cd frontend && npx eslint . --ext .ts,.tsx --quiet) || exit 1
+(cd backend && npx eslint . --ext .ts,.tsx --quiet) || exit 1
+
+echo "✅ Lint passed!"

@@ -38,7 +38,7 @@ async function create(url: string, { arg }: { arg: Partial<CandidateFormData> })
 async function update(url: string, { arg }: { arg: Partial<CandidateFormData> }) {
   const response = await api.put(url, arg);
   return response;
-};
+}
 
 export default function DialogForm({
   candidate,

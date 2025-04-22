@@ -30,7 +30,9 @@ interface QuestionCardProps {
   questions: Question[] | Required<Question>[];
   handleQuestionTypeChange: (value: Question["type"], index: number) => void;
   handleDeleteQuestion: (question: Question, index: number) => void;
-  setQuestions: React.Dispatch<React.SetStateAction<Question[]>>;
+  setQuestions: React.Dispatch<
+    React.SetStateAction<Question[] | Required<Question>[]>
+  >;
   handleReset: () => void;
   technologyId: string;
   onSave?: () => void;

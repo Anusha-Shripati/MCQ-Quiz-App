@@ -22,7 +22,7 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({
 
   const { data, isLoading, error } = useSWR(
     `/question/list?technology_id=${params.technology}`,
-    api.get
+    api.get,
   );
 
   useEffect(() => {
@@ -88,7 +88,7 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({
       console.log(
         selectedQuestion,
         updatedQuestions.length,
-        "selectedQuestion,updatedQuestions.length"
+        "selectedQuestion,updatedQuestions.length",
       );
       console.log(questions, "questions");
 
@@ -166,11 +166,12 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({
   };
 
   const handleBack = () => {
+    console.log("Back button clicked");
     router.push("/questions");
   };
 
-  useEffect(()=>{
-    if(questions.length){
+  useEffect(() => {
+    if (questions.length) {
       // setShowSidebar(true)
     }
   }, [questions]);

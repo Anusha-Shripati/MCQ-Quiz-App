@@ -10,6 +10,7 @@ import technologyRouter from "./technology.router";
 import adminRouter from "./user.router";
 import candidateRouter from "./candidates.router";
 import examRouter from "./exam.router";
+import candidateExamRouter from "./candidate-exam.router";
 
 const router = express.Router();
 
@@ -23,5 +24,6 @@ router.use("/dashboard", dashboardRouter);
 router.use("/question", questionRouter);
 router.use("/candidate", candidateRouter);
 router.use("/exam", examRouter);
+router.use("/candidate-exam",candidateExamRouter)
 
 export default router;

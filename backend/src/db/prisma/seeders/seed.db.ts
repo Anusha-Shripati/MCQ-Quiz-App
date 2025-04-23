@@ -618,64 +618,64 @@ async function createTechnologies() {
   console.log("Technologies created successfully");
 }
 
-async function createTestCandidates() {
-  console.log("Creating test candidates...");
+// async function createTestCandidates() {
+//   console.log("Creating test candidates...");
 
-  // Get superadmin user ID
-  const superadmin = await prisma.user.findFirst({
-    where: { email: "superadmin@example.com" },
-  });
+//   // Get superadmin user ID
+//   const superadmin = await prisma.user.findFirst({
+//     where: { email: "superadmin@example.com" },
+//   });
 
-  if (!superadmin) {
-    throw new Error("Superadmin user not found");
-  }
+//   if (!superadmin) {
+//     throw new Error("Superadmin user not found");
+//   }
 
-  // Create assessments for each candidate
-  const assessments = await Promise.all(
-    Array.from({ length: 30 }, async (_, i) => {
-      const assessment = await prisma.assessments.create({
-        data: {
-          name: `Test Assessment ${i + 1}`,
-          created_by: superadmin.id,
-          easy: 5,
-          medium: 3,
-          hard: 2,
-          duration: 60,
-        },
-      });
+//   // Create assessments for each candidate
+//   const assessments = await Promise.all(
+//     Array.from({ length: 30 }, async (_, i) => {
+//       const assessment = await prisma.assessments.create({
+//         data: {
+//           name: `Test Assessment ${i + 1}`,
+//           created_by: superadmin.id,
+//           easy: 5,
+//           medium: 3,
+//           hard: 2,
+//           duration: 60,
+//         },
+//       });
 
-      // Assign technology to assessment
-      await prisma.assessment_technology.create({
-        data: {
-          assessment_id: assessment.id,
-          technology_id: TECHNOLOGY_IDS.MONGODB,
-          easy: 5,
-          medium: 3,
-          hard: 2,
-        },
-      });
+//       // Assign technology to assessment
+//       await prisma.assessment_technology.create({
+//         data: {
+//           assessment_id: assessment.id,
+//           technology_id: TECHNOLOGY_IDS.MONGODB,
+//           easy: 5,
+//           medium: 3,
+//           hard: 2,
+//         },
+//       });
 
-      return assessment;
-    })
-  );
+//       return assessment;
+//     })
+//   );
 
-  // Create candidates with their unique assessments
-  // const candidates = assessments.map((assessment, i) => ({
-  //   name: `test2_${i + 1}`,
-  //   email: `test${i + 1}@gmail.com`,
-  //   phone: `12345678${i}${i + 2}`,
-  //   technology_id: TECHNOLOGY_IDS.MONGODB,
-  //   experience: "6",
-  //   assessment_id: assessment.id,
-  // }));
+//   // Create candidates with their unique assessments
+//   // const candidates = assessments.map((assessment, i) => ({
+//   //   name: `test2_${i + 1}`,
+//   //   email: `test${i + 1}@gmail.com`,
+//   //   phone: `12345678${i}${i + 2}`,
+//   //   technology_id: TECHNOLOGY_IDS.MONGODB,
+//   //   experience: "6",
+//   //   assessment_id: assessment.id,
+//   // }));
 
-  // await prisma.candidate.createMany({
-  //   data: candidates,
-  //   skipDuplicates: true,
-  // });
+//   // await prisma.candidate.createMany({
+//   //   data: candidates,
+//   //   skipDuplicates: true,
+//   // });
 
-  console.log("Test candidates and their assessments created successfully");
-}
+//   console.log("Test candidates and their assessments created successfully");
+// }
 
 const resetDB = async ()=>{
   await prisma.$executeRawUnsafe(`

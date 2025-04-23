@@ -21,13 +21,6 @@ router.post(
 );
 
 router.get(
-	'/:examId',
-	authenticateCandidate,
-  validateRequest(candidateExamSchema.get),
-	asyncHandler(candidateExamController.getExam)
-);
-
-router.get(
 	'/:examId/next-question',
 	authenticateCandidate,
 	asyncHandler(candidateExamController.getNextQuestion)
@@ -49,6 +42,13 @@ router.get(
 	'/:examId/status',
 	authenticateCandidate,
 	asyncHandler(candidateExamController.getExamStatus)
+);
+
+router.get(
+	'/:examId',
+	authenticateCandidate,
+  validateRequest(candidateExamSchema.get),
+	asyncHandler(candidateExamController.getExam)
 );
 
 export default router;

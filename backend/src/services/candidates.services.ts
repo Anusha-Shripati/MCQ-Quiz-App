@@ -243,6 +243,15 @@ export default class CandidatesService {
 		const candidates = await prisma.candidate.findMany({
 			where,
 			include: {
+				assessment: {
+					include: {
+						technologies: {
+							include:{
+								technology: true,
+							}
+						},
+					},
+				},
 				exam: true,
 			},
 			orderBy: {

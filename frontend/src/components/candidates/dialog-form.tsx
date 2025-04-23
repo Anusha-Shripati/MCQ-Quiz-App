@@ -162,11 +162,10 @@ export default function DialogForm({
 
   const handleAssessmentChange = (value: string) => {
     setValue("assessment", value, { shouldValidate: true })
-    // !TODO: Fix here
-    // const assessment = assessmentOptions.find((item)=>item.value == value)
-    // if(assessment && assessment.technologies ){
-    //   setValue('technology',assessment.technologies?.map(item=>item.name).join(', '))
-    // }
+    const assessment = assessmentOptions.find((item)=>item.value == value)
+    if(assessment && assessment.technologies ){
+      setValue('technology',assessment.technologies?.map(item=>item.name).join(', '))
+    }
   }
 
   return (

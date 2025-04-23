@@ -5,7 +5,6 @@ import { Input } from '@/components/ui/form/input';
 import { Button } from '@/components/ui/form/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import html2canvas from 'html2canvas';
-import { candidateApi } from '@/lib/api';
 
 // Types
 type Question = {
@@ -461,26 +460,17 @@ export default function ProctoredQuiz({ accessCode }: ProctoredQuizProps) {
 					return;
 				}
 
-				const data = await candidateApi.get('/candidate', quizAccessCode);
-
-				if (!data.success) {
-					setAccessError(
-						data.message || 'Access denied. Invalid or expired access code.'
-					);
-					setIsLoading(false);
-					return;
-				}
 
 				// Set exam data and questions
-				const examData = data.data;
+				// const examData = data.data;
 
-				// Update time limit based on exam data
-				if (examData.end_time) {
-					const endTime = new Date(examData.end_time).getTime();
-					const now = new Date().getTime();
-					const remainingTime = Math.max(0, Math.floor((endTime - now) / 1000));
-					setTimeLeft(remainingTime);
-				}
+				// // Update time limit based on exam data
+				// if (examData.end_time) {
+				// 	const endTime = new Date(examData.end_time).getTime();
+				// 	const now = new Date().getTime();
+				// 	const remainingTime = Math.max(0, Math.floor((endTime - now) / 1000));
+				// 	setTimeLeft(remainingTime);
+				// }
 
 				// If all is good, initialize the exam
 				setIsLoading(false);

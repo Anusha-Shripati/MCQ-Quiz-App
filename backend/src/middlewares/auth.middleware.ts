@@ -46,7 +46,14 @@ export const authenticateAndAuthorize =
 				role_id: string;
 				role_name: string;
 			};
-			
+
+			const user = await userService.findUserById(decoded.id);
+
+			if (!user) {
+				generateResponse(res, 401, {}, false, 'User not found.');
+				return;
+			}
+
 			req.user = decoded;
 			if (rights) {
 				const [moduleName, action] = rights.split('.');
@@ -82,18 +89,7 @@ export const authenticateAndAuthorize =
 				generateResponse(res, 403, {}, false, 'Request not allowed.');
 				return;
 			}
-
-			userService
-				.findUserById(decoded.id)
-				.then((user) => {
-					if (!user) {
-						return generateResponse(res, 401, {}, false, 'User not found.');
-					}
-					next();
-				})
-				.catch((error) => {
-					generateResponse(res, 500, {}, false, 'Error verifying user.');
-				});
+			next();
 		} catch (error) {
 			generateResponse(res, 401, {}, false, 'Invalid or expired token.');
 		}
@@ -150,7 +146,7 @@ export const authenticateCandidate: RequestHandler = async (req, res, next) => {
 			email: candidate.email,
 		};
 
-	next();
+		next();
 	} catch (error) {
 		console.error('Error verifying candidate access:', error);
 		generateResponse(res, 500, {}, false, 'Error verifying exam access');

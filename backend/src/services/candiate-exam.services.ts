@@ -1,6 +1,5 @@
 import { AppError } from '../common/errors/AppError';
 import { prisma } from '../db/prisma.client';
-import { generateResponse } from '../utils/generateResponse';
 
 export class CandidateExamService {
 	async validateCandidateAccess(candidateId: string) {
@@ -25,6 +24,16 @@ export class CandidateExamService {
 		const exam = await prisma.exam.findUnique({
 			where: { id: examId },
 			include: {
+				candidate: true,
+				assessment: {
+					include: {
+						technologies: {
+							include: {
+								technology: true,
+							},
+						},
+					},
+				},
 				exam_questions: {
 					include: { question: true },
 				},

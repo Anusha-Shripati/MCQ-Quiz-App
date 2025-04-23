@@ -1,9 +1,9 @@
-"use client";
-import { useMemo } from "react";
+'use client';
+import { useMemo } from 'react';
 
-import { FormField } from "../common/form-field";
-import useSWR from "swr";
-import { api } from "@/lib/api";
+import { FormField } from '../common/form-field';
+import useSWR from 'swr';
+import { api } from '@/lib/api';
 
 interface LanguageScoreSelect {
   setFilters: (name: string, value: string) => void;
@@ -11,20 +11,15 @@ interface LanguageScoreSelect {
   filters: {
     language: string;
     score: string;
-  }
+  };
 }
 
-export default function LanguageScoreSelect({
-  setFilters,
-  scores,
-  filters
-}: LanguageScoreSelect) {
-
-  const { data: technologies } = useSWR('technology/list', api.get)
+export default function LanguageScoreSelect({ setFilters, scores, filters }: LanguageScoreSelect) {
+  const { data: technologies } = useSWR('technology/list', api.get);
 
   const technologyOptions = useMemo(
     () =>
-      technologies?.data?.list.map((tech:{name:string,id:string}) => ({
+      technologies?.data?.list.map((tech: { name: string; id: string }) => ({
         label: tech.name,
         value: tech.id,
       })) || [],

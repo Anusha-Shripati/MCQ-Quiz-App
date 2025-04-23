@@ -5,4 +5,3 @@
 //     medium: number;
 //     hard: number;
 //   }
-

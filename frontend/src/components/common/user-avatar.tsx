@@ -1,13 +1,13 @@
-import { Avatar, AvatarImage } from "@/components/ui/avatar";
-import { useAuthStore } from "@/store/authStore";
+import { Avatar, AvatarImage } from '@/components/ui/avatar';
+import { useAuthStore } from '@/store/authStore';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
-import { LogOut, Settings } from "lucide-react";
-import { useRouter } from "next/navigation";
+} from '../ui/dropdown-menu';
+import { LogOut, Settings } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 const UserAvatar = () => {
   const { user } = useAuthStore();
@@ -16,11 +16,11 @@ const UserAvatar = () => {
 
   const handleLogout = () => {
     logout();
-    router.push("/");
+    router.push('/');
   };
 
   const handleProfileNavigate = () => {
-    router.push("/profile");
+    router.push('/profile');
   };
 
   return (

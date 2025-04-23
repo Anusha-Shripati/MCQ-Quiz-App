@@ -1,5 +1,5 @@
-import { Button } from "@/components/ui/form/button";
-import { PaginationProps } from "@/shared/types/app";
+import { Button } from '@/components/ui/form/button';
+import { PaginationProps } from '@/shared/types/app';
 
 export const Pagination = ({ currentPage, totalPages, onPageChange }: PaginationProps) => {
   const pageNumbers = Array.from({ length: totalPages }, (_, i) => i + 1);
@@ -10,7 +10,7 @@ export const Pagination = ({ currentPage, totalPages, onPageChange }: Pagination
         disabled={currentPage === 1}
         variant="ghost"
         onClick={() => onPageChange(currentPage - 1)}
-        className={`px-3 py-1 border rounded-md ${currentPage === 1 ? "text-gray-400 cursor-not-allowed" : "text-blue-600"} dark:bg-white`}
+        className={`px-3 py-1 border rounded-md ${currentPage === 1 ? 'text-gray-400 cursor-not-allowed' : 'text-blue-600'} dark:bg-white`}
       >
         Prev
       </Button>
@@ -19,7 +19,7 @@ export const Pagination = ({ currentPage, totalPages, onPageChange }: Pagination
           key={number}
           onClick={() => onPageChange(number)}
           className={`px-3 py-1 border rounded-md ${
-            number === currentPage ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-800"
+            number === currentPage ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800'
           }`}
         >
           {number}
@@ -30,7 +30,7 @@ export const Pagination = ({ currentPage, totalPages, onPageChange }: Pagination
         variant="ghost"
         onClick={() => onPageChange(currentPage + 1)}
         className={`px-3 py-1 border rounded-md ${
-          currentPage === totalPages ? "text-gray-400 cursor-not-allowed" : "text-blue-600"
+          currentPage === totalPages ? 'text-gray-400 cursor-not-allowed' : 'text-blue-600'
         } dark:bg-white`}
       >
         Next

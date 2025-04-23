@@ -1,6 +1,6 @@
-import Joi from "joi";
+import Joi from 'joi';
 
-export type TRequestPart = "body" | "params" | "query";
+export type TRequestPart = 'body' | 'params' | 'query';
 
 export type IValidatedSchema = {
   [P in TRequestPart]: any;

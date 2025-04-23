@@ -24,7 +24,7 @@ export const useTechnologyStore = create<TechnologyState>((set) => ({
       set({ technologies: data?.list, loading: false, error: null });
     } catch (error) {
       if (isAxiosError(error)) {
-        const errorMessage = error.response?.data?.message || "Failed to fetch technologies";
+        const errorMessage = error.response?.data?.message || 'Failed to fetch technologies';
         set({ error: errorMessage, loading: false });
         throw new Error(errorMessage);
       }

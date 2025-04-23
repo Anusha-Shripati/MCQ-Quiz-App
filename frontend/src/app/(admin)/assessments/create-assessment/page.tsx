@@ -1,32 +1,32 @@
-"use client";
-import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/form/button";
-import { ArrowLeft } from "lucide-react";
-import { steps } from "@/shared/constants/data";
-import toast from "react-hot-toast";
-import { useRouter } from "next/navigation";
-import Step1 from "./Step1";
-import Step2 from "./Step2";
-import Step3 from "./Step3";
-import StepsStepperNumber from "./StepsStepperNumber";
-import { useForm } from "react-hook-form";
-import { AssessmentForm } from "@/types/assessment.types";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { api, isAxiosError } from "@/lib/api";
-import useSWR, { mutate } from "swr";
-import useSWRMutation from "swr/mutation";
-import { Technology } from "@/store/assessmentStore";
+'use client';
+import { useEffect, useState } from 'react';
+import { Button } from '@/components/ui/form/button';
+import { ArrowLeft } from 'lucide-react';
+import { steps } from '@/shared/constants/data';
+import toast from 'react-hot-toast';
+import { useRouter } from 'next/navigation';
+import Step1 from './Step1';
+import Step2 from './Step2';
+import Step3 from './Step3';
+import StepsStepperNumber from './StepsStepperNumber';
+import { useForm } from 'react-hook-form';
+import { AssessmentForm } from '@/types/assessment.types';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { api, isAxiosError } from '@/lib/api';
+import useSWR, { mutate } from 'swr';
+import useSWRMutation from 'swr/mutation';
+import { Technology } from '@/store/assessmentStore';
 
 interface CreateAssessmentPayload {
-  name: string, 
-  duration: string | number, 
-  technologies: Partial<Technology>[]
+  name: string;
+  duration: string | number;
+  technologies: Partial<Technology>[];
 }
 
 async function create(url: string, { arg }: { arg: CreateAssessmentPayload }) {
   const response = await api.post(url, arg);
-  return response
+  return response;
 }
 
 export default function CreateAssessment() {
@@ -37,7 +37,6 @@ export default function CreateAssessment() {
   const { data } = useSWR('/technology/list', api.get);
 
   const { trigger, isMutating } = useSWRMutation(`/assessment/create`, create);
-
 
   useEffect(() => {
     if (data) {
@@ -50,37 +49,42 @@ export default function CreateAssessment() {
   }, [data]);
 
   const technologySchema = z.object({
-    name: z.string().min(1, "Technology name is required"),
+    name: z.string().min(1, 'Technology name is required'),
   });
   const validation = z.object({
-    name: z.string().nonempty("Name is required."),
-    duration: z.number().min(1, "Duration is required"),
-    technologies: z.array(technologySchema).min(1, 'At least one category is required')
+    name: z.string().nonempty('Name is required.'),
+    duration: z.number().min(1, 'Duration is required'),
+    technologies: z.array(technologySchema).min(1, 'At least one category is required'),
   });
 
-  const { register, watch, setValue, formState: { errors }, trigger: fromTrigger } = useForm<AssessmentForm>({
-    resolver: zodResolver(validation), defaultValues: {
-      name: "",
+  const {
+    register,
+    watch,
+    setValue,
+    formState: { errors },
+    trigger: fromTrigger,
+  } = useForm<AssessmentForm>({
+    resolver: zodResolver(validation),
+    defaultValues: {
+      name: '',
       technologies: [],
       duration: 15,
-      targetQuestions: 0
-    }
-  })
-  const formData = watch()
+      targetQuestions: 0,
+    },
+  });
+  const formData = watch();
   // Add this options array for the duration select
   const durationOptions = Array.from(Array(37).keys()).map((i) => ({
     value: 15 + i * 5,
     label: `${15 + i * 5} minutes`,
   }));
 
-
   const handleNextStep = async () => {
-    const valudate = await fromTrigger()
+    const valudate = await fromTrigger();
     if (step === 2) {
-
       const isValid = formData.technologies.every((cat) => cat.easy || cat.medium || cat.hard);
       if (!isValid) {
-        toast.error("Each category must have at least one question");
+        toast.error('Each category must have at least one question');
         return;
       }
     }
@@ -95,23 +99,16 @@ export default function CreateAssessment() {
 
   const calculateTotalSum = () => {
     return formData.technologies.reduce((sum, tech) => {
-      return (
-        sum +
-        tech.easy +
-        tech.medium +
-        tech.hard
-      );
+      return sum + tech.easy + tech.medium + tech.hard;
     }, 0);
   };
 
-
   const handleSubmit = async () => {
-
     // Create the assessment
     const newAssessment = {
       name: formData.name,
       duration: formData.duration,
-      technologies: formData.technologies.map(tech => ({
+      technologies: formData.technologies.map((tech) => ({
         technology_id: tech.id,
         easy: tech.easy,
         medium: tech.medium,
@@ -120,20 +117,19 @@ export default function CreateAssessment() {
     };
 
     try {
-
       const res = await trigger(newAssessment);
       if (res.success) {
-        toast.success("Assessment created successfully");
-        router.push("/assessments");
+        toast.success('Assessment created successfully');
+        router.push('/assessments');
         mutate((key) => typeof key === 'string' && key.startsWith('/assessment/list'));
       } else {
         toast.error(res.messae);
       }
     } catch (error) {
       if (isAxiosError(error)) {
-        toast.error(error.response.data.message || "An unexpected error occurred");
+        toast.error(error.response.data.message || 'An unexpected error occurred');
       } else {
-        toast.error("An unexpected error occurred");
+        toast.error('An unexpected error occurred');
       }
       console.error(error);
     }
@@ -141,9 +137,7 @@ export default function CreateAssessment() {
 
   // // Add this new function to handle slider changes
 
-
   // Add this handler for duration change
-
 
   return (
     <div className="mx-auto py-8 px-6">
@@ -155,11 +149,7 @@ export default function CreateAssessment() {
               <ArrowLeft className="h-5 w-5" />
             </Button>
           ) : (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => window.history.back()}
-            >
+            <Button variant="ghost" size="icon" onClick={() => window.history.back()}>
               <ArrowLeft className="h-5 w-5" />
             </Button>
           )}
@@ -202,7 +192,6 @@ export default function CreateAssessment() {
           setValue={setValue}
           errors={errors}
           calculateTotalSum={calculateTotalSum}
-
         />
       )}
       {step === 3 && (

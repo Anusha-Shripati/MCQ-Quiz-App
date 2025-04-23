@@ -1,7 +1,7 @@
 // components/pagination/ResultsPerPage.tsx
-"use client";
-import { FormField } from "../common/form-field";
-import { useMemo } from "react";
+'use client';
+import { FormField } from '../common/form-field';
+import { useMemo } from 'react';
 
 interface ResultsPerPageProps {
   currentPageStart: number;
@@ -20,9 +20,9 @@ export function ResultsPerPage({
 }: ResultsPerPageProps) {
   const options = useMemo(
     () => [
-      { value: "10", label: 10 },
-      { value: "25", label: 25 },
-      { value: "50", label: 50 },
+      { value: '10', label: 10 },
+      { value: '25', label: 25 },
+      { value: '50', label: 50 },
     ],
     []
   );
@@ -33,9 +33,7 @@ export function ResultsPerPage({
       </div>
 
       <div className="flex items-center space-x-2">
-        <span className="text-sm text-gray-600 dark:text-gray-400">
-          Results per page
-        </span>
+        <span className="text-sm text-gray-600 dark:text-gray-400">Results per page</span>
         <FormField
           className="w-[80px]"
           value={itemsPerPage.toString()}

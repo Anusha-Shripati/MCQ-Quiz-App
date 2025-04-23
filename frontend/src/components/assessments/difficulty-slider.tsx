@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
 
 interface DifficultySliderProps {
   label: string;
@@ -17,7 +17,7 @@ export function DifficultySlider({ label, value, onChange }: DifficultySliderPro
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = parseInt(e.target.value);
     setSliderValue(newValue);
-    onChange(newValue);  // Pass the new value back to parent
+    onChange(newValue); // Pass the new value back to parent
   };
 
   return (

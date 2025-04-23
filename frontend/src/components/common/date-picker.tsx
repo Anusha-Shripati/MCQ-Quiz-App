@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Popover, PopoverTrigger, PopoverContent } from '@radix-ui/react-popover';
-import { Input } from '@/components/ui/form/input';  // Assuming you have the Input component from shadcn
+import { Input } from '@/components/ui/form/input'; // Assuming you have the Input component from shadcn
 import { format } from 'date-fns'; // For formatting date
 import { CalendarIcon } from 'lucide-react';
 import { Calendar } from '../ui/calendar';
@@ -8,8 +8,8 @@ import { Button } from '../ui/form/button';
 
 // Define the DatePicker component
 const DatePicker: React.FC = () => {
-  const [startDate, setStartDate] = useState<Date | null>(null);  // State for selected date
-  const [inputDate, setInputDate] = useState<string>('');  // State for the input field value
+  const [startDate, setStartDate] = useState<Date | null>(null); // State for selected date
+  const [inputDate, setInputDate] = useState<string>(''); // State for the input field value
 
   // Handle input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -19,7 +19,7 @@ const DatePicker: React.FC = () => {
     // Parse the input value to a date
     const parsedDate = new Date(value);
     if (!isNaN(parsedDate.getTime())) {
-      setStartDate(parsedDate);  // Set the parsed date if valid
+      setStartDate(parsedDate); // Set the parsed date if valid
     }
   };
 
@@ -42,8 +42,8 @@ const DatePicker: React.FC = () => {
         {/* Input Field for Selected Date */}
         <Input
           type="text"
-          value={inputDate}  // Bind inputDate to the input field
-          onChange={handleInputChange}  // Handle input changes
+          value={inputDate} // Bind inputDate to the input field
+          onChange={handleInputChange} // Handle input changes
           placeholder="YYYY-MM-DD"
           className="w-[200px]"
         />
@@ -63,15 +63,16 @@ const DatePicker: React.FC = () => {
             className="p-2 w-auto rounded-md border bg-white shadow-lg"
           >
             <Calendar
-              selected={startDate || undefined}  // Bind Shadcn Calendar to startDate state
-              onSelect={handleDateSelect}  // Handle date selection
+              selected={startDate || undefined} // Bind Shadcn Calendar to startDate state
+              onSelect={handleDateSelect} // Handle date selection
               className="rounded-md border"
             />
           </PopoverContent>
         </Popover>
       </div>
       {/* Error Message */}
-      {false && <p className="text-red-500 text-sm mt-1">Error Message</p>}  {/* Add error handling logic here */}
+      {false && <p className="text-red-500 text-sm mt-1">Error Message</p>}{' '}
+      {/* Add error handling logic here */}
     </div>
   );
 };

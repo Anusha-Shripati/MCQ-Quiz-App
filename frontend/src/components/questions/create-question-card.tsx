@@ -1,13 +1,7 @@
-import React, { useMemo, useState } from "react";
-import { Button } from "@/components/ui/form/button";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-  CardFooter,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/form/input";
+import React, { useMemo, useState } from 'react';
+import { Button } from '@/components/ui/form/button';
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
+import { Input } from '@/components/ui/form/input';
 import {
   Dialog,
   DialogTrigger,
@@ -16,23 +10,21 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from "@/components/ui/dialog";
-import { Question } from "@/shared/types/app";
-import { FormField } from "../common/form-field";
-import { toast } from "react-hot-toast";
-import useSWRMutation from "swr/mutation";
-import { api } from "@/lib/api";
-import { AxiosError } from "axios";
+} from '@/components/ui/dialog';
+import { Question } from '@/shared/types/app';
+import { FormField } from '../common/form-field';
+import { toast } from 'react-hot-toast';
+import useSWRMutation from 'swr/mutation';
+import { api } from '@/lib/api';
+import { AxiosError } from 'axios';
 
 interface QuestionCardProps {
   question: Question;
   selectedQuestion: number;
   questions: Question[] | Required<Question>[];
-  handleQuestionTypeChange: (value: Question["type"], index: number) => void;
+  handleQuestionTypeChange: (value: Question['type'], index: number) => void;
   handleDeleteQuestion: (question: Question, index: number) => void;
-  setQuestions: React.Dispatch<
-    React.SetStateAction<Question[] | Required<Question>[]>
-  >;
+  setQuestions: React.Dispatch<React.SetStateAction<Question[] | Required<Question>[]>>;
   handleReset: () => void;
   technologyId: string;
   onSave?: () => void;
@@ -46,22 +38,16 @@ interface CreateQuestionPayload {
   correct_answer: string[];
   options: string[];
   time: string;
-  difficulty_level: Question["difficulty_level"];
-  type: Question["type"];
+  difficulty_level: Question['difficulty_level'];
+  type: Question['type'];
   meta: Record<string, unknown>;
 }
 
-async function createQuestion(
-  url: string,
-  { arg }: { arg: CreateQuestionPayload }
-) {
+async function createQuestion(url: string, { arg }: { arg: CreateQuestionPayload }) {
   const response = await api.post(url, arg);
   return response;
 }
-const updateQuestion = async (
-  url: string,
-  { arg }: { arg: CreateQuestionPayload }
-) => {
+const updateQuestion = async (url: string, { arg }: { arg: CreateQuestionPayload }) => {
   const response = await api.put(url, arg);
   return response;
 };
@@ -83,7 +69,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
 
   const ensureFiveOptions = (options: string[] = []) => {
     while (options.length < 5) {
-      options.push("");
+      options.push('');
     }
     return options.slice(0, 5);
   };
@@ -91,29 +77,26 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
   const questionTypeOptions = useMemo(
     () =>
       [
-        { value: "multiple_select", label: "Multiple Choice" },
-        { value: "mcq", label: "Radio Select" },
-        { value: "text", label: "Fill in the Blanks" },
-        { value: "code_snippet", label: "Code Snippet" },
-        { value: "video", label: "Video" },
-      ] as { value: Question["type"]; label: string }[],
+        { value: 'multiple_select', label: 'Multiple Choice' },
+        { value: 'mcq', label: 'Radio Select' },
+        { value: 'text', label: 'Fill in the Blanks' },
+        { value: 'code_snippet', label: 'Code Snippet' },
+        { value: 'video', label: 'Video' },
+      ] as { value: Question['type']; label: string }[],
     []
   );
 
   const questionDifficultyOptions = useMemo(
     () =>
       [
-        { value: "easy", label: "Easy" },
-        { value: "medium", label: "Medium" },
-        { value: "hard", label: "Hard" },
-      ] as { value: Question["difficulty_level"]; label: string }[],
+        { value: 'easy', label: 'Easy' },
+        { value: 'medium', label: 'Medium' },
+        { value: 'hard', label: 'Hard' },
+      ] as { value: Question['difficulty_level']; label: string }[],
     []
   );
 
-  const { trigger, isMutating } = useSWRMutation(
-    `/question/create`,
-    createQuestion
-  );
+  const { trigger, isMutating } = useSWRMutation(`/question/create`, createQuestion);
   const { trigger: update, isMutating: updating } = useSWRMutation(
     `/question/${question?.id}`,
     updateQuestion
@@ -124,7 +107,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
       technology_id: technologyId,
       question: question.question,
       correct_answer: question.correct_answer,
-      options: question.options.filter((opt) => opt.trim() !== ""),
+      options: question.options.filter((opt) => opt.trim() !== ''),
       time: question.time,
       difficulty_level: question.difficulty_level,
       type: question.type,
@@ -134,36 +117,34 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
     let valid = true;
 
     if (
-      (question.type === "mcq" || question.type === "multiple_select") &&
+      (question.type === 'mcq' || question.type === 'multiple_select') &&
       question.correct_answer.length === 0
     ) {
-      toast.error("Please select at least one correct answer.");
+      toast.error('Please select at least one correct answer.');
       valid = false;
     }
 
     if (
-      question.type === "text" &&
-      (!question.correct_answer[0] || question.correct_answer[0].trim() === "")
+      question.type === 'text' &&
+      (!question.correct_answer[0] || question.correct_answer[0].trim() === '')
     ) {
-      toast.error(
-        "Please provide the correct answer for the fill-in-the-blank question."
-      );
+      toast.error('Please provide the correct answer for the fill-in-the-blank question.');
       valid = false;
     }
 
     if (
-      question.type === "code_snippet" &&
-      (!question.meta?.code || question.meta.code.trim() === "")
+      question.type === 'code_snippet' &&
+      (!question.meta?.code || question.meta.code.trim() === '')
     ) {
-      toast.error("Please provide the code snippet.");
+      toast.error('Please provide the code snippet.');
       valid = false;
     }
 
     if (
-      question.type === "video" &&
-      (!question.meta?.video_url || question.meta.video_url.trim() === "")
+      question.type === 'video' &&
+      (!question.meta?.video_url || question.meta.video_url.trim() === '')
     ) {
-      toast.error("Please provide the video URL.");
+      toast.error('Please provide the video URL.');
       valid = false;
     }
 
@@ -175,21 +156,19 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
       let response;
       if (question.id) {
         response = await update(payload);
-        toast.success("Question updated successfully!");
+        toast.success('Question updated successfully!');
       } else {
         response = await trigger(payload);
-        toast.success("Question created successfully!");
+        toast.success('Question created successfully!');
       }
       if (response.success) {
         setQuestions((prev) => {
           const updatedQuestions = [...prev];
-          const questionIndex = updatedQuestions.findIndex(
-            (q) => q.id === question.id
-          );
+          const questionIndex = updatedQuestions.findIndex((q) => q.id === question.id);
           updatedQuestions[questionIndex] = response.data;
           return updatedQuestions;
         });
-        if (editQuestion && typeof onSave !== "undefined") {
+        if (editQuestion && typeof onSave !== 'undefined') {
           onSave();
         }
       }
@@ -197,30 +176,26 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
       console.log(error);
 
       const axiosError = error as AxiosError<{ message: string }>;
-      toast.error(
-        axiosError.response?.data?.message || "Something went wrong."
-      );
+      toast.error(axiosError.response?.data?.message || 'Something went wrong.');
     }
 
-    console.log("Payload to be sent:", payload);
+    console.log('Payload to be sent:', payload);
   };
 
   const handleCorrectOptionChange = (
     optionIndex: number,
     index: number,
-    type: "mcq" | "multiple_select",
+    type: 'mcq' | 'multiple_select',
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
     const updatedQuestions = [...questions];
-    if (type === "mcq") {
+    if (type === 'mcq') {
       updatedQuestions[index].correct_answer = [optionIndex.toString()];
     } else {
       if (e.target.checked) {
         updatedQuestions[index].correct_answer.push(optionIndex.toString());
       } else {
-        const op_index = updatedQuestions[index].correct_answer.indexOf(
-          optionIndex.toString()
-        );
+        const op_index = updatedQuestions[index].correct_answer.indexOf(optionIndex.toString());
         updatedQuestions[index].correct_answer.splice(op_index, 1);
       }
     }
@@ -245,11 +220,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
           Question {selectedQuestion + 1}
           {editQuestion && (
             <div>
-              <Button
-                variant="destructive"
-                className="hover:bg-orange-600"
-                onClick={onCancel}
-              >
+              <Button variant="destructive" className="hover:bg-orange-600" onClick={onCancel}>
                 Close
               </Button>
             </div>
@@ -264,7 +235,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
             parentClassName="w-full"
             className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-300"
             value={question.type}
-            onChange={(value: Question["type"]) =>
+            onChange={(value: Question['type']) =>
               handleQuestionTypeChange(value, selectedQuestion)
             }
             placeholder="Question Type"
@@ -276,7 +247,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
             parentClassName="w-full"
             className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-300"
             value={question.difficulty_level}
-            onChange={(value: Question["difficulty_level"]) => {
+            onChange={(value: Question['difficulty_level']) => {
               const updatedQuestions = [...questions];
               updatedQuestions[selectedQuestion].difficulty_level = value;
               setQuestions(updatedQuestions);
@@ -312,30 +283,23 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
           className="mb-4"
         />
 
-        {(question.type === "mcq" || question.type === "multiple_select") && (
+        {(question.type === 'mcq' || question.type === 'multiple_select') && (
           <div className="space-y-2">
             {ensureFiveOptions(question.options).map((option, i) => (
               <div key={i} className="flex items-center gap-2">
-                {question.type === "mcq" ? (
+                {question.type === 'mcq' ? (
                   <input
                     type="radio"
                     name={`radio-${question.id}`}
                     checked={question.correct_answer.includes(i.toString())}
-                    onChange={(e) =>
-                      handleCorrectOptionChange(i, selectedQuestion, "mcq", e)
-                    }
+                    onChange={(e) => handleCorrectOptionChange(i, selectedQuestion, 'mcq', e)}
                   />
                 ) : (
                   <input
                     type="checkbox"
                     checked={question.correct_answer.includes(i.toString())}
                     onChange={(e) =>
-                      handleCorrectOptionChange(
-                        i,
-                        selectedQuestion,
-                        "multiple_select",
-                        e
-                      )
+                      handleCorrectOptionChange(i, selectedQuestion, 'multiple_select', e)
                     }
                   />
                 )}
@@ -352,43 +316,38 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
                     // if same option than denied
                     const updatedQuestions = [...questions];
                     const newValue = e.target.value;
-                    const op_index =
-                      updatedQuestions[selectedQuestion].options.indexOf(
-                        newValue
-                      );
+                    const op_index = updatedQuestions[selectedQuestion].options.indexOf(newValue);
                     if (op_index !== -1 && op_index !== i && newValue) {
-                      updatedQuestions[selectedQuestion].options[i] = "";
-                      e.target.value = "";
-                      toast.error("Option already exists");
+                      updatedQuestions[selectedQuestion].options[i] = '';
+                      e.target.value = '';
+                      toast.error('Option already exists');
                       return;
                     }
                     setQuestions(updatedQuestions);
                   }}
-                  className={i >= 4 ? "border-dashed border-gray-400" : ""}
+                  className={i >= 4 ? 'border-dashed border-gray-400' : ''}
                 />
               </div>
             ))}
           </div>
         )}
 
-        {question.type === "text" && (
+        {question.type === 'text' && (
           <Input
             placeholder="Enter the correct answer"
             value={question.correct_answer}
             onChange={(e) => {
               const updatedQuestions = [...questions];
-              updatedQuestions[selectedQuestion].correct_answer = [
-                e.target.value,
-              ];
+              updatedQuestions[selectedQuestion].correct_answer = [e.target.value];
               setQuestions(updatedQuestions);
             }}
           />
         )}
 
-        {question.type === "code_snippet" && (
+        {question.type === 'code_snippet' && (
           <textarea
             placeholder="Enter your code snippet"
-            value={question?.meta?.code || ""}
+            value={question?.meta?.code || ''}
             onChange={handleCodeQuestions}
             className="w-full p-2 border rounded-md dark:bg-gray-700 dark:text-white"
             rows={10}
@@ -406,15 +365,11 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
             <DialogHeader>
               <DialogTitle>Are you sure?</DialogTitle>
               <DialogDescription>
-                This action cannot be undone. This will permanently delete the
-                question.
+                This action cannot be undone. This will permanently delete the question.
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={() => setIsDeleteModalOpen(false)}
-              >
+              <Button variant="outline" onClick={() => setIsDeleteModalOpen(false)}>
                 Cancel
               </Button>
               <Button
@@ -432,18 +387,10 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
 
         {questions.length !== 0 && (
           <div className="mt-2 flex justify-end gap-4">
-            <Button
-              variant="outline"
-              onClick={handleReset}
-              disabled={isMutating || updating}
-            >
+            <Button variant="outline" onClick={handleReset} disabled={isMutating || updating}>
               Reset
             </Button>
-            <Button
-              variant="outline"
-              onClick={handleSave}
-              disabled={isMutating || updating}
-            >
+            <Button variant="outline" onClick={handleSave} disabled={isMutating || updating}>
               Save
             </Button>
           </div>

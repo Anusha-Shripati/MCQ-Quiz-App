@@ -1,20 +1,18 @@
-"use client";
-import React, { useEffect, useState } from "react";
-import { Button } from "@/components/ui/form/button";
-import QuestionCard from "@/components/questions/create-question-card";
-import QuestionSidebar from "@/components/questions/create-question-sidebar";
-import EmptyState from "@/components/common/EmptyCreateQuestionState";
-import { useRouter } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
-import toast from "react-hot-toast";
-import { Question } from "@/shared/types/app";
-import useSWR from "swr";
-import { api } from "@/lib/api";
+'use client';
+import React, { useEffect, useState } from 'react';
+import { Button } from '@/components/ui/form/button';
+import QuestionCard from '@/components/questions/create-question-card';
+import QuestionSidebar from '@/components/questions/create-question-sidebar';
+import EmptyState from '@/components/common/EmptyCreateQuestionState';
+import { useRouter } from 'next/navigation';
+import { ArrowLeft } from 'lucide-react';
+import toast from 'react-hot-toast';
+import { Question } from '@/shared/types/app';
+import useSWR from 'swr';
+import { api } from '@/lib/api';
 // import { LoadingSpinner } from "@/components/ui/loading-spinner";
-import StatusWrapper from "@/components/common/status-wrapper";
-const CreateQuestion: React.FC<{ params: { technology: string } }> = ({
-  params,
-}) => {
+import StatusWrapper from '@/components/common/status-wrapper';
+const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }) => {
   const [questions, setQuestions] = useState<Question[]>([]);
   // const [showSidebar, setShowSidebar] = useState(false);
   const router = useRouter();
@@ -22,7 +20,7 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({
 
   const { data, isLoading, error } = useSWR(
     `/question/list?technology_id=${params.technology}`,
-    api.get,
+    api.get
   );
 
   useEffect(() => {
@@ -33,20 +31,20 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({
       }
     }
 
-    console.log(data?.data?.list, "data?.data?.list");
-    console.log(questions, "questions");
-    console.log(questions.length, "questions.length");
+    console.log(data?.data?.list, 'data?.data?.list');
+    console.log(questions, 'questions');
+    console.log(questions.length, 'questions.length');
 
     if (!data?.data?.list?.length) {
       setQuestions([
         {
           technology_id: params.technology,
-          question: "",
-          options: ["", "", "", "", "", ""],
+          question: '',
+          options: ['', '', '', '', '', ''],
           correct_answer: [],
-          time: "",
-          difficulty_level: "easy",
-          type: "mcq",
+          time: '',
+          difficulty_level: 'easy',
+          type: 'mcq',
           meta: {},
         },
       ]);
@@ -61,21 +59,21 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({
   const handleReset = () => {
     setQuestions((prv) => {
       return prv.map((q, index) => {
-        console.log(q, "q");
+        console.log(q, 'q');
         if (index != selectedQuestion) return q;
         return {
           ...q,
-          question: "",
-          options: ["", "", "", "", "", ""],
+          question: '',
+          options: ['', '', '', '', '', ''],
           correct_answer: [],
-          time: "",
-          difficulty_level: "easy",
-          type: "mcq",
+          time: '',
+          difficulty_level: 'easy',
+          type: 'mcq',
           meta: {},
         };
       });
     });
-    toast.success("Questions Reset successfully!");
+    toast.success('Questions Reset successfully!');
   };
 
   const handleDeleteQuestion = async (question: Question, index: number) => {
@@ -88,37 +86,34 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({
       console.log(
         selectedQuestion,
         updatedQuestions.length,
-        "selectedQuestion,updatedQuestions.length",
+        'selectedQuestion,updatedQuestions.length'
       );
-      console.log(questions, "questions");
+      console.log(questions, 'questions');
 
-      if (
-        selectedQuestion >= updatedQuestions.length &&
-        updatedQuestions.length
-      ) {
+      if (selectedQuestion >= updatedQuestions.length && updatedQuestions.length) {
         setSelectedQuestion(updatedQuestions.length - 1);
       } else if (updatedQuestions.length == 0) {
         setSelectedQuestion(0);
       }
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-      toast.error("Failed to delete question");
+      toast.error('Failed to delete question');
     }
   };
 
-  const handleQuestionTypeChange = (value: Question["type"], index: number) => {
+  const handleQuestionTypeChange = (value: Question['type'], index: number) => {
     const updatedQuestions = [...questions];
     updatedQuestions[index].type = value;
 
-    if (value === "mcq" || value === "multiple_select") {
-      updatedQuestions[index].options = ["", "", "", "", "", ""]; // 4 compulsory + 2 optional
+    if (value === 'mcq' || value === 'multiple_select') {
+      updatedQuestions[index].options = ['', '', '', '', '', '']; // 4 compulsory + 2 optional
       updatedQuestions[index].correct_answer = []; // Reset correct options
-    } else if (value === "text") {
+    } else if (value === 'text') {
       updatedQuestions[index].correct_answer = [];
-    } else if (value === "code_snippet") {
+    } else if (value === 'code_snippet') {
       updatedQuestions[index].correct_answer = [];
       if (updatedQuestions[index]?.meta?.code === undefined) {
-        updatedQuestions[index].meta = { code: "" };
+        updatedQuestions[index].meta = { code: '' };
       }
     }
 
@@ -153,12 +148,12 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({
   const handleAddQuestion = () => {
     const newQuestion: Question = {
       technology_id: params.technology,
-      type: "mcq",
-      question: "",
-      options: ["", "", "", "", "", ""],
+      type: 'mcq',
+      question: '',
+      options: ['', '', '', '', '', ''],
       correct_answer: [],
-      time: "",
-      difficulty_level: "easy",
+      time: '',
+      difficulty_level: 'easy',
       meta: {},
     };
     setQuestions([...questions, newQuestion]);
@@ -166,8 +161,8 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({
   };
 
   const handleBack = () => {
-    console.log("Back button clicked");
-    router.push("/questions");
+    console.log('Back button clicked');
+    router.push('/questions');
   };
 
   useEffect(() => {
@@ -178,16 +173,12 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({
 
   return (
     // Main container
-    <StatusWrapper
-      className="min-h-screen p-6 dark:bg-gray-900 "
-      loading={isLoading}
-      error={error}
-    >
+    <StatusWrapper className="min-h-screen p-6 dark:bg-gray-900 " loading={isLoading} error={error}>
       {/* Header */}
       <div className="flex justify-start items-center mb-4">
         <Button variant="ghost" size="icon" onClick={handleBack}>
           <ArrowLeft className="h-5 w-5" />
-        </Button>{" "}
+        </Button>{' '}
         <div className="text-2xl font-bold text-gray-900 dark:text-white">
           {data?.data?.technology?.name}
         </div>
@@ -206,7 +197,7 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({
             handleAddQuestion={handleAddQuestion}
           />
         ) : (
-          ""
+          ''
         )}
 
         {/* Questions list with data for real questions which can be edited */}
@@ -221,12 +212,12 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({
                   // Example: Add a new question
                   const newQuestion: Question = {
                     technology_id: params.technology,
-                    question: "",
-                    options: ["", "", "", "", "", ""],
+                    question: '',
+                    options: ['', '', '', '', '', ''],
                     correct_answer: [],
-                    time: "",
-                    difficulty_level: "easy",
-                    type: "mcq",
+                    time: '',
+                    difficulty_level: 'easy',
+                    type: 'mcq',
                     meta: {},
                   };
                   setQuestions([newQuestion]);

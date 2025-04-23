@@ -1,4 +1,4 @@
-"use client";
+'use client';
 // import { useRef, useState } from "react";
 // import { useRouter } from "next/navigation";
 // import { Button, Card, Text, Video } from "@shadcn/ui"; // Assuming you have the shadcn components

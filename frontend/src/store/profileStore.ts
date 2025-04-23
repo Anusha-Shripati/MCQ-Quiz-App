@@ -36,7 +36,7 @@
 //     },
 // }));
 
-import { create } from "zustand";
+import { create } from 'zustand';
 
 interface ProfileState {
   userName: string;
@@ -58,23 +58,23 @@ interface ProfileState {
   setOldPassword: (oldPassword: string) => void;
   setNewPassword: (newPassword: string) => void;
   setReNewPassword: (reNewPassword: string) => void;
-  setErrors: (errors: Partial<ProfileState["errors"]>) => void;
+  setErrors: (errors: Partial<ProfileState['errors']>) => void;
   setIsEditing: (isEditing: boolean) => void;
   validatePasswordForm: () => void;
 }
 
 export const useProfileStore = create<ProfileState>((set, get) => ({
-  userName: "LogicRays",
-  email: "hello@iclrays.com",
-  oldPassword: "",
-  newPassword: "",
-  reNewPassword: "",
+  userName: 'LogicRays',
+  email: 'hello@iclrays.com',
+  oldPassword: '',
+  newPassword: '',
+  reNewPassword: '',
   errors: {
-    userNameError: "",
-    emailError: "",
-    oldPasswordError: "",
-    newPasswordError: "",
-    reNewPasswordError: "",
+    userNameError: '',
+    emailError: '',
+    oldPasswordError: '',
+    newPasswordError: '',
+    reNewPasswordError: '',
   },
   isEditing: false,
   isPasswordFormValid: true,
@@ -83,24 +83,19 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
   setOldPassword: (oldPassword) => set({ oldPassword }),
   setNewPassword: (newPassword) => set({ newPassword }),
   setReNewPassword: (reNewPassword) => set({ reNewPassword }),
-  setErrors: (errors) =>
-    set((state) => ({ errors: { ...state.errors, ...errors } })),
+  setErrors: (errors) => set((state) => ({ errors: { ...state.errors, ...errors } })),
   setIsEditing: (isEditing) => set({ isEditing }),
   validatePasswordForm: () => {
     const { oldPassword, newPassword, reNewPassword, setErrors } = get();
     const errors = {
-      oldPasswordError: oldPassword.trim() ? "" : "Old Password is required",
-      newPasswordError:
-        newPassword.length >= 8 ? "" : "Password must be at least 8 characters",
-      reNewPasswordError:
-        newPassword === reNewPassword ? "" : "Passwords do not match",
+      oldPasswordError: oldPassword.trim() ? '' : 'Old Password is required',
+      newPasswordError: newPassword.length >= 8 ? '' : 'Password must be at least 8 characters',
+      reNewPasswordError: newPassword === reNewPassword ? '' : 'Passwords do not match',
     };
     setErrors(errors);
     set({
       isPasswordFormValid:
-        !errors.oldPasswordError &&
-        !errors.newPasswordError &&
-        !errors.reNewPasswordError,
+        !errors.oldPasswordError && !errors.newPasswordError && !errors.reNewPasswordError,
     });
   },
 }));

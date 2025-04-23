@@ -1,12 +1,8 @@
-import { Request, Response, NextFunction } from "express";
-import Joi from "joi";
+import { Request, Response, NextFunction } from 'express';
+import Joi from 'joi';
 
-import { AppError } from "../common/errors/AppError";
-import {
-  IValidatedSchema,
-  IValidationSchema,
-  TRequestPart,
-} from "../common/types/types";
+import { AppError } from '../common/errors/AppError';
+import { IValidatedSchema, IValidationSchema, TRequestPart } from '../common/types/types';
 
 export const validateRequest = (schema: IValidationSchema) => {
   return (req: Request, res: Response, next: NextFunction) => {
@@ -33,9 +29,9 @@ export const validateRequest = (schema: IValidationSchema) => {
     });
 
     if (errors.length > 0) {
-      console.log("errors", errors);
-      const message = `Validation error: ${errors.join(", ")}`;
-      console.log("message", message);
+      console.log('errors', errors);
+      const message = `Validation error: ${errors.join(', ')}`;
+      console.log('message', message);
       return next(new AppError(message, 400));
     } else {
       req.validatedData = validatedData;

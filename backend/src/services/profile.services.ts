@@ -1,5 +1,5 @@
-import { User } from "@prisma/client"; // Import Role if needed
-import { prisma } from "../db/prisma.client";
+import { User } from '@prisma/client'; // Import Role if needed
+import { prisma } from '../db/prisma.client';
 
 export class ProfileService {
   async getUserDetail(userId: string): Promise<User | null> {

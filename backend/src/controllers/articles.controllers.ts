@@ -1,5 +1,5 @@
-import { Request, Response, NextFunction } from "express";
-import { ArticleService } from "../services/articles.services";
+import { Request, Response, NextFunction } from 'express';
+import { ArticleService } from '../services/articles.services';
 
 const articleService = new ArticleService();
 

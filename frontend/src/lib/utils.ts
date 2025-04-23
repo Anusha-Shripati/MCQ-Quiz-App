@@ -1,5 +1,5 @@
-import { clsx, type ClassValue } from "clsx";
-import { twMerge } from "tailwind-merge";
+import { clsx, type ClassValue } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -8,14 +8,13 @@ export function cn(...inputs: ClassValue[]) {
 export function getShadePerInterviewsCount(
   count: number,
   tailwindColor: string,
-  defaultColor: string = "gray",
-  theme: string = "light" // Default to "light" theme
+  defaultColor: string = 'gray',
+  theme: string = 'light' // Default to "light" theme
 ) {
-
   if (count <= 0) {
     return `bg-${defaultColor}-${
-      theme === "dark" ? "800" : "100"
-    } text-${defaultColor}-${theme === "dark" ? "400" : "700"}`;
+      theme === 'dark' ? '800' : '100'
+    } text-${defaultColor}-${theme === 'dark' ? '400' : '700'}`;
   }
 
   const lightModeShades = {
@@ -28,8 +27,7 @@ export function getShadePerInterviewsCount(
     text: [100, 200, 300, 400, 500], // Lighter for text in dark mode
   };
 
-  const { bg: bgShades, text: textShades } =
-    theme === "dark" ? darkModeShades : lightModeShades;
+  const { bg: bgShades, text: textShades } = theme === 'dark' ? darkModeShades : lightModeShades;
 
   const thresholds = [1, 3, 5, 10];
 
@@ -49,4 +47,3 @@ export const formatDate = (date: Date): string => {
   const day = String(date.getDate()).padStart(2, '0');
   return `${day}-${month}-${year}`;
 };
-

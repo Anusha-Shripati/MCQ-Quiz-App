@@ -1,5 +1,5 @@
-import { Card, CardHeader, CardContent } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Card, CardHeader, CardContent } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function Loading() {
   return (
@@ -33,17 +33,29 @@ export default function Loading() {
             <table className="w-full">
               <thead>
                 <tr>
-                  <th><Skeleton className="h-6 w-20" /></th>
-                  <th><Skeleton className="h-6 w-20" /></th>
-                  <th><Skeleton className="h-6 w-20" /></th>
+                  <th>
+                    <Skeleton className="h-6 w-20" />
+                  </th>
+                  <th>
+                    <Skeleton className="h-6 w-20" />
+                  </th>
+                  <th>
+                    <Skeleton className="h-6 w-20" />
+                  </th>
                 </tr>
               </thead>
-              <tbody>   
+              <tbody>
                 {[...Array(5)].map((_, index) => (
                   <tr key={index}>
-                    <td><Skeleton className="h-6 w-20" /></td>
-                    <td><Skeleton className="h-6 w-40" /></td>
-                    <td><Skeleton className="h-6 w-20" /></td>
+                    <td>
+                      <Skeleton className="h-6 w-20" />
+                    </td>
+                    <td>
+                      <Skeleton className="h-6 w-40" />
+                    </td>
+                    <td>
+                      <Skeleton className="h-6 w-20" />
+                    </td>
                   </tr>
                 ))}
               </tbody>

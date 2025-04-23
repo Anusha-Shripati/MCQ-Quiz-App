@@ -1,14 +1,14 @@
-"use client";
+'use client';
 
-import React, { useEffect, useState } from "react";
-import { CardTitle } from "../ui/card";
-import { Input } from "../ui/form/input";
-import { Button } from "../ui/form/button";
-import { useAuthStore } from "@/store/authStore";
-import UserForm from "./user-form";
+import React, { useEffect, useState } from 'react';
+import { CardTitle } from '../ui/card';
+import { Input } from '../ui/form/input';
+import { Button } from '../ui/form/button';
+import { useAuthStore } from '@/store/authStore';
+import UserForm from './user-form';
 
 function Header() {
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState('');
   const [open, setOpen] = useState(false);
   const { setUserFilter, userCount, permissions, userList } = useAuthStore();
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -21,7 +21,7 @@ function Header() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setUserFilter(searchTerm);
-      console.log(userList, "list");
+      console.log(userList, 'list');
     }, 1000);
 
     return () => clearTimeout(timer);
@@ -29,9 +29,7 @@ function Header() {
 
   return (
     <div className="flex justify-between w-full">
-      <CardTitle className="text-xl font-semibold">
-        All Users ({userCount || 0})
-      </CardTitle>
+      <CardTitle className="text-xl font-semibold">All Users ({userCount || 0})</CardTitle>
       <div className="flex space-x-4 items-center">
         <Input
           type="text"

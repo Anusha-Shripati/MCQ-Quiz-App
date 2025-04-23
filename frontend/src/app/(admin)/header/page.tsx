@@ -1,6 +1,6 @@
-import React from "react";
-import UserAvatar from "../../../components/common/user-avatar";
-import { ThemeToggle } from "../../../components/common/theme-toggle";
+import React from 'react';
+import UserAvatar from '../../../components/common/user-avatar';
+import { ThemeToggle } from '../../../components/common/theme-toggle';
 
 export const Header = () => {
   return (

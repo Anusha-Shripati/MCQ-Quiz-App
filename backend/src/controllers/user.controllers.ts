@@ -1,12 +1,8 @@
-import { Request, Response, NextFunction } from "express";
-import { UserService } from "../services/user.services";
-import { generateResponse } from "../utils/generateResponse";
-import {
-  createToken,
-  encryptStringCrypt,
-  matchPassword,
-} from "../middlewares/auth.middleware";
-import RoleService from "../services/role.services";
+import { Request, Response, NextFunction } from 'express';
+import { UserService } from '../services/user.services';
+import { generateResponse } from '../utils/generateResponse';
+import { createToken, encryptStringCrypt, matchPassword } from '../middlewares/auth.middleware';
+import RoleService from '../services/role.services';
 
 const userService = new UserService();
 const roleService = new RoleService();
@@ -25,24 +21,18 @@ export class UserController {
 
       const user = await userService.findUserByEmail(email);
       if (!user) {
-        return generateResponse(res, 400, {}, false, "User not found!");
+        return generateResponse(res, 400, {}, false, 'User not found!');
       }
 
       const isPasswordValid = await matchPassword(password, user.password);
       if (!isPasswordValid) {
-        return generateResponse(res, 400, {}, false, "Invalid password!");
+        return generateResponse(res, 400, {}, false, 'Invalid password!');
       }
 
       const role = await roleService.findRoleById(user.role_id);
       const token = createToken(user.id, user.email, role?.name, role?.id);
 
-      generateResponse(
-        res,
-        200,
-        { ...user, token },
-        true,
-        "Login Successfully!"
-      );
+      generateResponse(res, 200, { ...user, token }, true, 'Login Successfully!');
     } catch (error) {
       next(error);
     }
@@ -63,15 +53,9 @@ export class UserController {
             password: hashedPassword,
             deletedAt: null,
           });
-          return generateResponse(
-            res,
-            200,
-            updatedUser,
-            true,
-            "User created successfully!"
-          );
+          return generateResponse(res, 200, updatedUser, true, 'User created successfully!');
         } else {
-          return generateResponse(res, 400, {}, false, "User already exists");
+          return generateResponse(res, 400, {}, false, 'User already exists');
         }
       }
 
@@ -85,7 +69,7 @@ export class UserController {
         name: payload.name,
       });
 
-      generateResponse(res, 200, newUser, true, "User created successfully!");
+      generateResponse(res, 200, newUser, true, 'User created successfully!');
     } catch (error) {
       next(error);
     }
@@ -98,19 +82,13 @@ export class UserController {
 
       const user = await userService.findUserById(userId);
       if (!user) {
-        return generateResponse(res, 404, {}, false, "User not found!");
+        return generateResponse(res, 404, {}, false, 'User not found!');
       }
 
       if (payload.email && payload.email !== user.email) {
         const duplicateUser = await userService.findUserByEmail(payload.email);
         if (duplicateUser) {
-          return generateResponse(
-            res,
-            400,
-            {},
-            false,
-            "Email is already exists!"
-          );
+          return generateResponse(res, 400, {}, false, 'Email is already exists!');
         }
       }
       let hashPass = user.password;
@@ -125,7 +103,7 @@ export class UserController {
         password: hashPass,
       });
 
-      generateResponse(res, 200, newUser, true, "User updated successfully!");
+      generateResponse(res, 200, newUser, true, 'User updated successfully!');
     } catch (error) {
       next(error);
     }
@@ -138,7 +116,7 @@ export class UserController {
 
       const user = await userService.findUserById(userId);
       if (!user) {
-        return generateResponse(res, 404, {}, false, "User not found!");
+        return generateResponse(res, 404, {}, false, 'User not found!');
       }
 
       if (oldPassword) {
@@ -147,7 +125,7 @@ export class UserController {
         const isPasswordValid = await matchPassword(oldPassword, user.password);
 
         if (!isPasswordValid) {
-          return generateResponse(res, 400, {}, false, "Invalid old password!");
+          return generateResponse(res, 400, {}, false, 'Invalid old password!');
         }
       }
       let hashPass = user.password;
@@ -156,13 +134,7 @@ export class UserController {
       }
       const newUser = await userService.changePassword(user.id, hashPass);
 
-      generateResponse(
-        res,
-        200,
-        newUser,
-        true,
-        "Password updated successfully!"
-      );
+      generateResponse(res, 200, newUser, true, 'Password updated successfully!');
     } catch (error) {
       next(error);
     }
@@ -176,12 +148,12 @@ export class UserController {
 
       if (search) {
         filter.OR = [
-          { email: { contains: search as string, mode: "insensitive" } },
-          { name: { contains: search as string, mode: "insensitive" } }
+          { email: { contains: search as string, mode: 'insensitive' } },
+          { name: { contains: search as string, mode: 'insensitive' } },
         ];
       }
-      console.log({search});
-      console.log({filter});
+      console.log({ search });
+      console.log({ filter });
       const users = await userService.findManyUsers(filter);
 
       generateResponse(
@@ -189,7 +161,7 @@ export class UserController {
         200,
         { list: users, count: users.length },
         true,
-        "Users fetched successfully!"
+        'Users fetched successfully!'
       );
     } catch (error) {
       next(error);
@@ -202,10 +174,10 @@ export class UserController {
 
       const user = await userService.findUserById(userId);
       if (!user) {
-        generateResponse(res, 404, {}, false, "User not found");
+        generateResponse(res, 404, {}, false, 'User not found');
         return;
       }
-      generateResponse(res, 200, user, true, "User found");
+      generateResponse(res, 200, user, true, 'User found');
     } catch (error) {
       console.log(error);
       next(error);
@@ -217,16 +189,16 @@ export class UserController {
 
       const user = await userService.findUserById(userId);
       if (!user) {
-        generateResponse(res, 404, {}, false, "User not found");
+        generateResponse(res, 404, {}, false, 'User not found');
         return;
       }
 
-      if (user?.role?.name == "Super Admin") {
+      if (user?.role?.name == 'Super Admin') {
         generateResponse(res, 400, {}, true, "You can't delete super admin");
         return;
       }
       await userService.delete(userId);
-      generateResponse(res, 200, {}, true, "User deleted successfully");
+      generateResponse(res, 200, {}, true, 'User deleted successfully');
     } catch (error) {
       console.log(error);
       next(error);

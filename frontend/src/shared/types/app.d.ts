@@ -21,7 +21,7 @@ export type QuestionCategory = {
     medium: number;
     hard: number;
   };
-}
+};
 
 // export interface Question {
 //   id: number;
@@ -29,7 +29,7 @@ export type QuestionCategory = {
 //   question: string;
 //   options?: string[];
 //   correctOptions?: (string | number)[];
-//   correctAnswer?: string; 
+//   correctAnswer?: string;
 //   difficulty: "easy" | "medium" | "hard";
 //   answer?: string;
 //   code?: string;
@@ -42,14 +42,13 @@ export interface Question {
   correct_answer: string[]; // use string from API
   options: string[];
   time: string;
-  difficulty_level: "easy" | "medium" | "hard";
-  type:'multiple_select' |'video' |  'text' |  'mcq' | 'code_snippet';
+  difficulty_level: 'easy' | 'medium' | 'hard';
+  type: 'multiple_select' | 'video' | 'text' | 'mcq' | 'code_snippet';
   meta?: Record<string, string>;
   created_at?: string;
   updated_at?: string;
   deleted_at?: string | null;
 }
-
 
 export interface PaginationProps {
   currentPage: number;
@@ -57,14 +56,14 @@ export interface PaginationProps {
   onPageChange: (pageNumber: number) => void;
 }
 
-export interface TablePaginationProps{
-  currentPageStart:number;
-  currentPageEnd:number;
-  totalItems:number;
+export interface TablePaginationProps {
+  currentPageStart: number;
+  currentPageEnd: number;
+  totalItems: number;
   currentPage: number;
-  itemsPerPage:number;
-  onPageChange: (e:number) => void;
-  onPerPageChange:(e:string) => void;
-  className:string;
-  loading:boolean;
+  itemsPerPage: number;
+  onPageChange: (e: number) => void;
+  onPerPageChange: (e: string) => void;
+  className: string;
+  loading: boolean;
 }

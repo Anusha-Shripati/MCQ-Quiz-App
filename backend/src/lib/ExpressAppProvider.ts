@@ -1,18 +1,18 @@
-import dotenv from "dotenv";
+import dotenv from 'dotenv';
 dotenv.config();
 
-import express, { Express, Request, Response } from "express";
-import cors from "cors";
-import helmet from "helmet";
+import express, { Express, Request, Response } from 'express';
+import cors from 'cors';
+import helmet from 'helmet';
 
 // Local imports
-import { rateLimiter } from "../config/rateLimiter";
+import { rateLimiter } from '../config/rateLimiter';
 // import { serverAdapter } from "../config/bullboard";
-import { errorHandler } from "../middlewares/errorHandler.middleware";
-import { connectToDatabase } from "../db/prisma.client";
+import { errorHandler } from '../middlewares/errorHandler.middleware';
+import { connectToDatabase } from '../db/prisma.client';
 // import { registerCreateArticleWorkerEvents } from "../common/queue/articles.worker";
-import { logger } from "../config/logger";
-import golbalRouter from "../routes";
+import { logger } from '../config/logger';
+import golbalRouter from '../routes';
 
 class ExpressAppProvider {
   public app: Express;
@@ -36,9 +36,9 @@ class ExpressAppProvider {
   }
 
   private initializeRoutes(): void {
-    this.app.use("/api/v1", golbalRouter);
-    this.app.get("/healthcheck", (req: Request, res: Response) => {
-      res.status(200).json({ message: "Server is up and running" });
+    this.app.use('/api/v1', golbalRouter);
+    this.app.get('/healthcheck', (req: Request, res: Response) => {
+      res.status(200).json({ message: 'Server is up and running' });
     });
   }
 
@@ -47,11 +47,11 @@ class ExpressAppProvider {
   }
 
   private initializeSignalHandlers(): void {
-    process.on("SIGINT", () => {
+    process.on('SIGINT', () => {
       process.exit(0);
     });
 
-    process.on("SIGTERM", () => {
+    process.on('SIGTERM', () => {
       process.exit(0);
     });
   }
@@ -64,7 +64,7 @@ class ExpressAppProvider {
         logger.info(`Server is running on http://localhost:${this.port}`);
       });
     } catch (error) {
-      logger.error("Failed to start the server:", error);
+      logger.error('Failed to start the server:', error);
     }
   }
 

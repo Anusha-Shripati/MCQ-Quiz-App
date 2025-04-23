@@ -1,5 +1,5 @@
-import AssessmentHeader from "@/components/assessments/assessment-header";
-import AssessmentDetails from "@/components/assessments/assessment-details";
+import AssessmentHeader from '@/components/assessments/assessment-header';
+import AssessmentDetails from '@/components/assessments/assessment-details';
 
 export default function AssessmentPage() {
   return (
@@ -8,9 +8,7 @@ export default function AssessmentPage() {
       <div>
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-              Assessment
-            </h1>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Assessment</h1>
           </div>
           <AssessmentHeader />
         </div>

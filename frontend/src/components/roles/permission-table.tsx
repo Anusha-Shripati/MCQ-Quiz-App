@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 import {
   Table,
   TableBody,
@@ -6,17 +6,16 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Checkbox } from "@/components/ui/form/checkbox";
-import { Permissions } from "@/types/common.types";
+} from '@/components/ui/table';
+import { Checkbox } from '@/components/ui/form/checkbox';
+import { Permissions } from '@/types/common.types';
 
-type PermissionType = 'can_edit' | 'can_read'
+type PermissionType = 'can_edit' | 'can_read';
 
 const PermissionsTable: React.FC<{
   permissions: Permissions[];
   onCheckboxChange: (index: number, type: PermissionType, value: boolean) => void;
 }> = ({ permissions, onCheckboxChange }) => {
-
   return (
     <Table>
       <TableHeader>
@@ -28,9 +27,9 @@ const PermissionsTable: React.FC<{
       </TableHeader>
       <TableBody>
         {permissions.map((item, index) => (
-          <TableRow key={index} >
+          <TableRow key={index}>
             <TableCell>{item.module?.name}</TableCell>
-            {(["can_edit", "can_read"] as Array<PermissionType>).map((type) => (
+            {(['can_edit', 'can_read'] as Array<PermissionType>).map((type) => (
               <TableCell key={type} className="text-center">
                 <Checkbox
                   checked={!!item[type]}
@@ -43,7 +42,7 @@ const PermissionsTable: React.FC<{
         ))}
       </TableBody>
     </Table>
-  )
+  );
 };
 
 export default PermissionsTable;

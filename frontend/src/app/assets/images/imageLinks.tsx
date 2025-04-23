@@ -1,7 +1,7 @@
-import logicrays_logo from "./logicrays_logo.jpg";
-import logicrays_logo_bg from "./logicrays_logo_bg.png";
-import LogicRays_Technologies_logo_profile from "./LogicRays-Technologies-logo-profile.jpg";
-import main_logo from "./main-logo.webp";
+import logicrays_logo from './logicrays_logo.jpg';
+import logicrays_logo_bg from './logicrays_logo_bg.png';
+import LogicRays_Technologies_logo_profile from './LogicRays-Technologies-logo-profile.jpg';
+import main_logo from './main-logo.webp';
 
 const ImageLinks = {
   logicrays_logo: logicrays_logo.src,

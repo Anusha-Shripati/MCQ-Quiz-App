@@ -1,20 +1,20 @@
-"use client";
+'use client';
 
-import { useState, useRef, useCallback } from "react";
-import Link from "next/link";
-import { usePathname, useRouter as useNavRouter } from "next/navigation";
-import { FiHome, FiFileText, FiHelpCircle, FiUsers } from "react-icons/fi";
-import { Button } from "@/components/ui/form/button";
-import ImageLinks from "@/app/assets/images/imageLinks";
-import { FaUserAlt, FaUserSecret } from "react-icons/fa";
-import { useAuthStore } from "@/store/authStore";
-import useSWR from "swr";
-import { fetcher } from "@/lib/api";
-import { Module, Permissions } from "@/types/common.types";
+import { useState, useRef, useCallback } from 'react';
+import Link from 'next/link';
+import { usePathname, useRouter as useNavRouter } from 'next/navigation';
+import { FiHome, FiFileText, FiHelpCircle, FiUsers } from 'react-icons/fi';
+import { Button } from '@/components/ui/form/button';
+import ImageLinks from '@/app/assets/images/imageLinks';
+import { FaUserAlt, FaUserSecret } from 'react-icons/fa';
+import { useAuthStore } from '@/store/authStore';
+import useSWR from 'swr';
+import { fetcher } from '@/lib/api';
+import { Module, Permissions } from '@/types/common.types';
 // import { Avatar, AvatarImage } from "../ui/avatar";
-import { useRouter } from "next/navigation";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import Image from "next/image";
+import { useRouter } from 'next/navigation';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import Image from 'next/image';
 
 export default function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -30,7 +30,7 @@ export default function Sidebar() {
         const permissions = response.data?.role?.role_permissions?.reduce(
           (
             obj: Record<string, Permissions>,
-            pr: Omit<Permissions, "module"> & { module: Module }
+            pr: Omit<Permissions, 'module'> & { module: Module }
           ) => {
             obj[pr.module?.name] = {
               can_edit: pr.can_edit,
@@ -51,11 +51,9 @@ export default function Sidebar() {
     }
   };
 
-  const { data: permissions, isLoading } = useSWR(
-    `/user/${user?.id}`,
-    getPermission,
-    { refreshInterval: 30000 }
-  );
+  const { data: permissions, isLoading } = useSWR(`/user/${user?.id}`, getPermission, {
+    refreshInterval: 30000,
+  });
   const pathname = usePathname();
 
   const toggleSidebar = useCallback(() => {
@@ -66,7 +64,7 @@ export default function Sidebar() {
     <aside
       ref={sidebarRef}
       className={`${
-        isCollapsed ? "w-16" : "w-56"
+        isCollapsed ? 'w-16' : 'w-56'
       } bg-primary text-primary-foreground sticky top-0 left-0 text-white h-screen z-50  transition-all duration-300 relative`}
     >
       <div className="overflow-auto flex flex-row justify-center items-center h-full">
@@ -80,7 +78,7 @@ export default function Sidebar() {
                   className="cursor-pointer"
                   width={200}
                   height={200}
-                  onClick={() => router.push("/dashboard")}
+                  onClick={() => router.push('/dashboard')}
                 />
               </div>
             ) : (
@@ -91,7 +89,7 @@ export default function Sidebar() {
                   className="cursor-pointer"
                   width={170}
                   height={170}
-                  onClick={() => router.push("/dashboard")}
+                  onClick={() => router.push('/dashboard')}
                 />
               </div>
             )}
@@ -115,7 +113,7 @@ export default function Sidebar() {
                   icon={<FiHome size={30} />}
                   label="Dashboard"
                   isCollapsed={isCollapsed}
-                  isActive={pathname === "/dashboard"}
+                  isActive={pathname === '/dashboard'}
                 />
                 {permissions?.assessments?.can_read && (
                   <NavItem
@@ -123,7 +121,7 @@ export default function Sidebar() {
                     icon={<FiFileText size={30} />}
                     label="Assessment"
                     isCollapsed={isCollapsed}
-                    isActive={pathname === "/assessments"}
+                    isActive={pathname === '/assessments'}
                   />
                 )}
                 {permissions?.questions?.can_read && (
@@ -132,7 +130,7 @@ export default function Sidebar() {
                     icon={<FiHelpCircle size={30} />}
                     label="Questions"
                     isCollapsed={isCollapsed}
-                    isActive={pathname === "/questions"}
+                    isActive={pathname === '/questions'}
                   />
                 )}
                 {permissions?.candidates?.can_read && (
@@ -141,7 +139,7 @@ export default function Sidebar() {
                     icon={<FiUsers size={30} />}
                     label="Candidates"
                     isCollapsed={isCollapsed}
-                    isActive={pathname === "/candidates"}
+                    isActive={pathname === '/candidates'}
                   />
                 )}
                 {/* <NavItem
@@ -166,16 +164,16 @@ export default function Sidebar() {
                     icon={<FaUserAlt size={30} />}
                     label="Users"
                     isCollapsed={isCollapsed}
-                    isActive={pathname === "/users"}
+                    isActive={pathname === '/users'}
                   />
                 )}
-                {user?.role?.name == "Super Admin" && (
+                {user?.role?.name == 'Super Admin' && (
                   <NavItem
                     href="/roles"
                     icon={<FaUserSecret size={30} />}
                     label="Roles"
                     isCollapsed={isCollapsed}
-                    isActive={pathname === "/roles"}
+                    isActive={pathname === '/roles'}
                   />
                 )}
               </nav>
@@ -185,18 +183,14 @@ export default function Sidebar() {
         <div
           onClick={toggleSidebar}
           className={`absolute  bottom-4 -right-[11%] transform -translate-y-1/2 cursor-pointer ${
-            isCollapsed ? "translate-x-2" : "-translate-x-2"
+            isCollapsed ? 'translate-x-2' : '-translate-x-2'
           }`}
         >
           <Button
             className="bg-white text-gray-800 border border-gray-300 rounded-full shadow-md flex items-center justify-center"
             size="icon"
           >
-            {!isCollapsed ? (
-              <ChevronLeft size={16} />
-            ) : (
-              <ChevronRight size={16} />
-            )}
+            {!isCollapsed ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
           </Button>
         </div>
       </div>
@@ -228,10 +222,10 @@ function NavItem({
     <Link href={href} prefetch={true}>
       <Button
         onMouseEnter={handleMouseEnter}
-        className={`w-full text-base relative h-12 flex items-center ${isCollapsed ? "justify-center" : "justify-start"}  gap-4 p-3 rounded-lg transition-colors ${
+        className={`w-full text-base relative h-12 flex items-center ${isCollapsed ? 'justify-center' : 'justify-start'}  gap-4 p-3 rounded-lg transition-colors ${
           isActive
-            ? "bg-secondary text-secondary-foreground"
-            : "hover:bg-secondary hover:text-secondary-foreground"
+            ? 'bg-secondary text-secondary-foreground'
+            : 'hover:bg-secondary hover:text-secondary-foreground'
         }`}
       >
         <span className="h-5 w-5">{icon}</span>

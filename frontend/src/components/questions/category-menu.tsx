@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from '@/components/ui/dropdown-menu';
 import {
   Dialog,
   // DialogTrigger,
@@ -14,16 +14,16 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from "@/components/ui/dialog";
-import { Edit, Trash, MoreVertical } from "lucide-react";
-import { Button } from "../ui/form/button";
-import { QuestionCategory } from "@/shared/types/app";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import useSWRMutation from "swr/mutation";
-import { api } from "@/lib/api";
-import { toast } from "react-hot-toast";
-import { AxiosError } from "axios";
+} from '@/components/ui/dialog';
+import { Edit, Trash, MoreVertical } from 'lucide-react';
+import { Button } from '../ui/form/button';
+import { QuestionCategory } from '@/shared/types/app';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import useSWRMutation from 'swr/mutation';
+import { api } from '@/lib/api';
+import { toast } from 'react-hot-toast';
+import { AxiosError } from 'axios';
 
 async function deleteCategory(url: string) {
   const response = await api.delete(url);
@@ -47,14 +47,14 @@ const CategoryMenu = ({
   // const handleDeleteCategory = (category: QuestionCategory) => {
   //   console.log(category);
   // };
-  const { trigger } = useSWRMutation(`/technology/${category.id}`,deleteCategory);
+  const { trigger } = useSWRMutation(`/technology/${category.id}`, deleteCategory);
   const handleDeleteCategory = async () => {
     try {
       await trigger();
       handleDelete(category.id);
-    }catch (error: unknown) {
+    } catch (error: unknown) {
       const axiosError = error as AxiosError<{ message: string }>;
-      toast.error(axiosError.response?.data?.message || "Something went wrong.");
+      toast.error(axiosError.response?.data?.message || 'Something went wrong.');
     }
   };
   return (
@@ -98,8 +98,7 @@ const CategoryMenu = ({
               Are you sure?
             </DialogTitle>
             <DialogDescription className="text-sm text-gray-600 dark:text-gray-400">
-              This action cannot be undone. This will permanently delete the
-              category.
+              This action cannot be undone. This will permanently delete the category.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

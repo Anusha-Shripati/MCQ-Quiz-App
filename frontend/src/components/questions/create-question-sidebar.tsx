@@ -1,12 +1,12 @@
-import React, { useState, useCallback } from "react";
-import { Button } from "@/components/ui/form/button";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Trash2 } from "lucide-react";
-import { useSearchParams, usePathname } from "next/navigation";
-import clsx from "clsx";
-import { DeleteDialog } from "../common/delete-dialog";
-import { Question } from "@/shared/types/app";
+import React, { useState, useCallback } from 'react';
+import { Button } from '@/components/ui/form/button';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Trash2 } from 'lucide-react';
+import { useSearchParams, usePathname } from 'next/navigation';
+import clsx from 'clsx';
+import { DeleteDialog } from '../common/delete-dialog';
+import { Question } from '@/shared/types/app';
 
 interface QuestionSidebarProps {
   questions: Question[];
@@ -34,8 +34,8 @@ const QuestionSidebar: React.FC<QuestionSidebarProps> = ({
   const updateQueryParams = useCallback(
     (params: { ques?: string }) => {
       const newParams = new URLSearchParams(searchParams.toString());
-      if (params.ques) newParams.set("ques", params.ques);
-      window.history.pushState(null, "", `${pathname}?${newParams.toString()}`);
+      if (params.ques) newParams.set('ques', params.ques);
+      window.history.pushState(null, '', `${pathname}?${newParams.toString()}`);
     },
     [searchParams, pathname]
   );
@@ -88,18 +88,17 @@ const QuestionSidebar: React.FC<QuestionSidebarProps> = ({
               <li
                 key={index}
                 className={clsx(
-                  "p-2 sm:p-3 rounded-lg cursor-pointer flex justify-between items-center transition-all duration-200 ease-in-out border",
-                  q.id ? "" : "border-[#ffa500]",
+                  'p-2 sm:p-3 rounded-lg cursor-pointer flex justify-between items-center transition-all duration-200 ease-in-out border',
+                  q.id ? '' : 'border-[#ffa500]',
                   selectedQuestion === index
-                    ? "bg-blue-500 text-white hover:bg-blue-600 shadow-md"
-                    : "bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 shadow-sm"
+                    ? 'bg-blue-500 text-white hover:bg-blue-600 shadow-md'
+                    : 'bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 shadow-sm'
                 )}
                 onClick={() => handleQuestionChange(index)}
               >
                 <div className="flex flex-col gap-1 w-[calc(100%-2rem)]">
                   <span className="text-xs sm:text-sm font-medium truncate">
-                    {index + 1}.{" "}
-                    {q.question ? q.question : `Question ${index + 1}`}
+                    {index + 1}. {q.question ? q.question : `Question ${index + 1}`}
                   </span>
                   {!q.id && <small className="text-[10px] sm:text-xs">Not saved</small>}
                 </div>

@@ -9,10 +9,10 @@ const examRouter = express.Router();
 const examController = new ExamController();
 
 examRouter.get(
-    '/:id',
-    validateRequest(examSchema.get),
-    authenticateAndAuthorize('exams.can_read'),
-    asyncHandler(examController.getById)
+  '/:id',
+  validateRequest(examSchema.get),
+  authenticateAndAuthorize('exams.can_read'),
+  asyncHandler(examController.getById)
 );
 
-export default examRouter; 
+export default examRouter;

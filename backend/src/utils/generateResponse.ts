@@ -1,11 +1,11 @@
-import { Response } from "express";
+import { Response } from 'express';
 
 export const generateResponse = (
   res: Response,
   status: number,
   data: any,
   success: boolean = true,
-  message: string = "success"
+  message: string = 'success'
 ) => {
   return res.status(status).json({
     success: success,

@@ -1,12 +1,12 @@
-import express from "express";
-import { ArticleController } from "../controllers/articles.controllers";
-import { validateRequest } from "../middlewares/validation.middleware";
+import express from 'express';
+import { ArticleController } from '../controllers/articles.controllers';
+import { validateRequest } from '../middlewares/validation.middleware';
 // import {
 //   createArticleSchema,
 //   deleteArticleSchema,
 //   getArticleByIdSchema,
 // } from "../validationSchemas/articles.validations";
-import paginationMiddleware from "../middlewares/pagination.middleware";
+import paginationMiddleware from '../middlewares/pagination.middleware';
 
 const articleRouter = express.Router();
 const articleController = new ArticleController();

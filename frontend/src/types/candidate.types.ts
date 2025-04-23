@@ -1,24 +1,24 @@
 import { DateRange } from './common.types';
 
 export type CandidateFormData = {
-	id?: string;
-	name: string;
-	email: string;
-	technology: string;
-	experience: string;
-	assessment: string;
-	phone: string;
-	timeUnit: 'days' | 'hours';
-	startDate: Date | undefined;
-	endDate: Date | undefined;
-	timeValue: number | '';
+  id?: string;
+  name: string;
+  email: string;
+  technology: string;
+  experience: string;
+  assessment: string;
+  phone: string;
+  timeUnit: 'days' | 'hours';
+  startDate: Date | undefined;
+  endDate: Date | undefined;
+  timeValue: number | '';
 };
 
 export interface CandidateDetails {
-	totalPercentage: string;
-	categories: Record<string, string>;
-	createdBy: string;
-	createdOn: string;
+  totalPercentage: string;
+  categories: Record<string, string>;
+  createdBy: string;
+  createdOn: string;
 }
 
 interface ITimestamps {
@@ -113,45 +113,45 @@ export interface ICandidate extends ITimestamps {
 }
 
 export interface FiltersProps {
-	candidates?: ICandidate[];
+  candidates?: ICandidate[];
 }
 
 export interface TechnologyOption {
-	value: string;
-	label: string;
+  value: string;
+  label: string;
 }
 
 export interface StatusOption {
-	value: string;
-	label: string;
+  value: string;
+  label: string;
 }
 
 export interface AssessmentOption {
-	value: string;
-	label: string;
+  value: string;
+  label: string;
 }
 
 export interface CandidateFilter {
-	searchQuery: string;
-	technologyFilter: TechnologyOption[];
-	assessmentFilter: AssessmentOption[];
-	created?: {
-		range: DateRange | undefined;
-		days: string;
-	};
-	experience?: {
-		min: number | null;
-		max: number | null;
-		range: string;
-	};
+  searchQuery: string;
+  technologyFilter: TechnologyOption[];
+  assessmentFilter: AssessmentOption[];
+  created?: {
+    range: DateRange | undefined;
+    days: string;
+  };
+  experience?: {
+    min: number | null;
+    max: number | null;
+    range: string;
+  };
 }
 
 export interface CandidateResult {
-	id: string;
-	candidate_id: string;
-	assessment_id: string;
-	score: number;
-	created_at: string;
-	updated_at: string;
-	deleted_at: string | null;
+  id: string;
+  candidate_id: string;
+  assessment_id: string;
+  score: number;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
 }

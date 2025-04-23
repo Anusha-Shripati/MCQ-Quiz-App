@@ -1,12 +1,12 @@
-import { Input } from "@/components/ui/form/input";
+import { Input } from '@/components/ui/form/input';
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import Link from "next/link";
-import { Question } from "@/shared/types/app";
+} from '@/components/ui/dropdown-menu';
+import Link from 'next/link';
+import { Question } from '@/shared/types/app';
 
 interface FilterBarProps {
   totalQuestions: number;
@@ -14,7 +14,7 @@ interface FilterBarProps {
   onSearchChange: (value: string) => void;
   selectedDifficulties: Question['difficulty_level'][];
   onDifficultyChange: (difficulties: Question['difficulty_level'][]) => void;
-  technology:string
+  technology: string;
 }
 
 export const FilterBar = ({
@@ -23,9 +23,9 @@ export const FilterBar = ({
   onSearchChange,
   selectedDifficulties,
   onDifficultyChange,
-  technology
+  technology,
 }: FilterBarProps) => {
-  const difficulties:Question['difficulty_level'][] = ["easy", "medium", "hard"];
+  const difficulties: Question['difficulty_level'][] = ['easy', 'medium', 'hard'];
 
   return (
     <div className="flex flex-col mb-6 sm:flex-row items-start sm:items-center justify-between sm:space-x-6 space-y-4 sm:space-y-0">
@@ -42,32 +42,27 @@ export const FilterBar = ({
           <DropdownMenuTrigger
             className={`px-4 py-2 rounded-md border cursor-pointer 
                 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600
-                bg-gray-200 text-gray-800 border-gray-300`} >
+                bg-gray-200 text-gray-800 border-gray-300`}
+          >
             Select Difficulty
           </DropdownMenuTrigger>
-          <DropdownMenuContent
-            className="dark dark:bg-gray-700 dark:text-gray-200 bg-white text-gray-800"
-          >
+          <DropdownMenuContent className="dark dark:bg-gray-700 dark:text-gray-200 bg-white text-gray-800">
             <DropdownMenuCheckboxItem
               checked={selectedDifficulties.length === difficulties.length}
               onCheckedChange={() => {
                 onDifficultyChange(
-                  selectedDifficulties.length === difficulties.length
-                    ? []
-                    : difficulties
+                  selectedDifficulties.length === difficulties.length ? [] : difficulties
                 );
               }}
             >
               Select All
             </DropdownMenuCheckboxItem>
-            {difficulties.map((difficulty:Question['difficulty_level']) => (
+            {difficulties.map((difficulty: Question['difficulty_level']) => (
               <DropdownMenuCheckboxItem
                 key={difficulty}
                 checked={selectedDifficulties.includes(difficulty)}
                 onCheckedChange={() => {
-                  const updatedSelections = selectedDifficulties.includes(
-                    difficulty
-                  )
+                  const updatedSelections = selectedDifficulties.includes(difficulty)
                     ? selectedDifficulties.filter((item) => item !== difficulty)
                     : [...selectedDifficulties, difficulty];
                   onDifficultyChange(updatedSelections);

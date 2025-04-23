@@ -5,16 +5,11 @@ import { Button } from '@/components/ui/form/button';
 interface EmptyStateProps {
   title: string;
   description: string;
-  actionText?: string;  
+  actionText?: string;
   onAction?: () => void;
 }
 
-const EmptyState: React.FC<EmptyStateProps> = ({
-  title,
-  description,
-  actionText,
-  onAction,
-}) => {
+const EmptyState: React.FC<EmptyStateProps> = ({ title, description, actionText, onAction }) => {
   return (
     <div className="flex flex-col h-96 items-center justify-center p-8 text-center">
       <FileText className="h-12 w-12 text-gray-400 mb-4" /> {/* Example icon */}

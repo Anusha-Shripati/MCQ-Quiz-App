@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { Button } from "@/components/ui/form/button";
+import { Button } from '@/components/ui/form/button';
 
 interface PaginationControlsProps {
   currentPage: number;
@@ -13,7 +13,7 @@ export function PaginationControls({
   currentPage,
   totalItems,
   itemsPerPage,
-  onPageChange
+  onPageChange,
 }: PaginationControlsProps) {
   const totalPages = Math.ceil(totalItems / itemsPerPage);
 
@@ -39,7 +39,7 @@ export function PaginationControls({
       pages.push(
         <Button
           key={i}
-          variant={i === currentPage ? "default" : "outline"}
+          variant={i === currentPage ? 'default' : 'outline'}
           onClick={() => handlePageChange(i)}
           className="mx-1 min-w-[2rem]"
         >
@@ -78,11 +78,9 @@ export function PaginationControls({
         >
           Previous
         </Button>
-        
-        <div className="flex flex-wrap justify-center">
-          {renderPageNumbers()}
-        </div>
-        
+
+        <div className="flex flex-wrap justify-center">{renderPageNumbers()}</div>
+
         <Button
           variant="outline"
           onClick={() => handlePageChange(currentPage + 1)}

@@ -1,15 +1,15 @@
-"use client";
+'use client';
 
-import React, { useEffect, useState } from "react";
-import { Input } from "@/components/ui/form/input";
-import { Button } from "@/components/ui/form/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
-import { api } from "@/lib/api";
-import { toast } from "react-hot-toast";
-import { AxiosError } from "axios";
+import React, { useEffect, useState } from 'react';
+import { Input } from '@/components/ui/form/input';
+import { Button } from '@/components/ui/form/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
+import { api } from '@/lib/api';
+import { toast } from 'react-hot-toast';
+import { AxiosError } from 'axios';
 import useSWRMutation from 'swr/mutation';
-import { mutate } from "swr";
-import { useQuestionStore } from "@/store/questionStore";
+import { mutate } from 'swr';
+import { useQuestionStore } from '@/store/questionStore';
 
 // Define props type
 
@@ -20,10 +20,10 @@ async function createCategory(url: string, { arg }: { arg: { name: string } }) {
 
 const CreateCategory: React.FC = () => {
   const [open, setOpen] = useState(false);
-  const [categoryName, setCategoryName] = useState("");
-  const [searchTerm, setSearchTerm] = useState("");
+  const [categoryName, setCategoryName] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
 
-  const { setTechnologyFilter,technologyFilter } = useQuestionStore()
+  const { setTechnologyFilter, technologyFilter } = useQuestionStore();
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -43,14 +43,14 @@ const CreateCategory: React.FC = () => {
     try {
       const data = await trigger({ name: categoryName });
       if (data) {
-        setCategoryName("");
+        setCategoryName('');
         setOpen(false);
-        toast.success("Technology created successfully");
+        toast.success('Technology created successfully');
         mutate(`/technology/list?search=${technologyFilter}`);
       }
     } catch (error: unknown) {
       const axiosError = error as AxiosError<{ message: string }>;
-      toast.error(axiosError.response?.data?.message || "Something went wrong.");
+      toast.error(axiosError.response?.data?.message || 'Something went wrong.');
     }
   };
 

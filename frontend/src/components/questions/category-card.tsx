@@ -1,18 +1,18 @@
-"use client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import CategoryMenu from "./category-menu";
-import { useRouter } from "next/navigation";
-import { Eye, Plus } from "lucide-react";
-import { Button } from "../ui/form/button";
+'use client';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import CategoryMenu from './category-menu';
+import { useRouter } from 'next/navigation';
+import { Eye, Plus } from 'lucide-react';
+import { Button } from '../ui/form/button';
 // import Link from "next/link";
-import { QuestionCategory } from "@/shared/types/app";
+import { QuestionCategory } from '@/shared/types/app';
 
 export const CategoryCard = ({
   category,
   handleDelete,
 }: {
   category: QuestionCategory;
-  handleDelete: (id:string) => void;
+  handleDelete: (id: string) => void;
 }) => {
   const router = useRouter();
   const handleNavigate = () => {
@@ -23,14 +23,9 @@ export const CategoryCard = ({
     router.push(`/questions/create-question/${category.id}`);
   };
 
-  const handleNavigateDifficulty = (
-    event: React.MouseEvent,
-    difficulty: string
-  ) => {
+  const handleNavigateDifficulty = (event: React.MouseEvent, difficulty: string) => {
     event.stopPropagation();
-    router.push(
-      `/questions/category/${category.id}?difficulty=${difficulty}`
-    );
+    router.push(`/questions/category/${category.id}?difficulty=${difficulty}`);
   };
 
   return (
@@ -58,7 +53,7 @@ export const CategoryCard = ({
           <div className="flex justify-between items-center ">
             <div
               className="flex justify-center items-center gap-2 cursor-pointer"
-              onClick={(event) => handleNavigateDifficulty(event, "easy")}
+              onClick={(event) => handleNavigateDifficulty(event, 'easy')}
             >
               <span className="font-semibold text-green-600">●</span>
               <span className="font-medium">Easy</span>
@@ -68,7 +63,7 @@ export const CategoryCard = ({
           <div className="flex justify-between items-center">
             <div
               className="flex justify-center items-center gap-2 cursor-pointer"
-              onClick={(event) => handleNavigateDifficulty(event, "medium")}
+              onClick={(event) => handleNavigateDifficulty(event, 'medium')}
             >
               <span className="font-semibold text-orange-300">●</span>
               <span className="font-medium">Medium</span>
@@ -78,7 +73,7 @@ export const CategoryCard = ({
           <div className="flex justify-between items-center">
             <div
               className="flex justify-center items-center gap-2 cursor-pointer"
-              onClick={(event) => handleNavigateDifficulty(event, "hard")}
+              onClick={(event) => handleNavigateDifficulty(event, 'hard')}
             >
               <span className="font-semibold text-red-500">●</span>
               <span className="font-medium">Hard</span>
@@ -86,14 +81,13 @@ export const CategoryCard = ({
             <div>{category.difficultyCount.hard}</div>
           </div>
           <div className="flex justify-between items-center border-t pt-2 mt-2">
-            <span
-              className="font-medium hover:cursor-pointer"
-              onClick={handleNavigate}
-            >
+            <span className="font-medium hover:cursor-pointer" onClick={handleNavigate}>
               Total
             </span>
             <span className="font-extrabold">
-              {category.difficultyCount.easy + category.difficultyCount.medium + category.difficultyCount.hard}
+              {category.difficultyCount.easy +
+                category.difficultyCount.medium +
+                category.difficultyCount.hard}
             </span>
           </div>
           <div className="flex items-center justify-between">

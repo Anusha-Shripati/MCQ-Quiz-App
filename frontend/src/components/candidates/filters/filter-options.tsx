@@ -1,13 +1,13 @@
-import { Button } from "@/components/ui/form/button";
-import DateRangePicker from "../../ui/form/date-range-picker";
-import { ChevronDown, ChevronUp } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Button } from '@/components/ui/form/button';
+import DateRangePicker from '../../ui/form/date-range-picker';
+import { ChevronDown, ChevronUp } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
-import * as  Popover from "@radix-ui/react-popover";
-import { UseFormRegister, UseFormSetValue } from "react-hook-form";
-import {  useState } from "react";
-import { CandidateFilter } from "@/types/candidate.types";
-import { DateRange } from "@/types/common.types";
+import * as Popover from '@radix-ui/react-popover';
+import { UseFormRegister, UseFormSetValue } from 'react-hook-form';
+import { useState } from 'react';
+import { CandidateFilter } from '@/types/candidate.types';
+import { DateRange } from '@/types/common.types';
 
 interface FilterOptionsProps {
   formData: CandidateFilter;
@@ -19,40 +19,43 @@ export function FilterOptions({
   formData,
   setValue,
   // register,
-
 }: FilterOptionsProps) {
   // useEffect(() => {
   //   setValue('experience.range', '')
   // }, [formData?.experience?.min || formData?.experience?.max])
-  const [activeFilter, setActiveFilter] = useState("");
-
+  const [activeFilter, setActiveFilter] = useState('');
 
   const handleOpenFilter = (filterName: string) => {
-    setActiveFilter(activeFilter === filterName ? "" : filterName);
+    setActiveFilter(activeFilter === filterName ? '' : filterName);
   };
   const renderFilterContent = (filter: string) => {
-
     // const handleExpRange = (value: string) => {
     //   setValue('experience.min', null)
     //   setValue('experience.max', null)
     //   setValue('experience.range', value)
     // }
     const handelDateButton = (value: string) => {
-      setValue('created.days', value)
-      if(value == 'Last 7 Days'){
-        setValue('created.range', { from: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), to: new Date(Date.now()) })
-      }else if(value == 'Last 30 Days'){
-        setValue('created.range', { from: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), to: new Date(Date.now()) })
+      setValue('created.days', value);
+      if (value == 'Last 7 Days') {
+        setValue('created.range', {
+          from: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+          to: new Date(Date.now()),
+        });
+      } else if (value == 'Last 30 Days') {
+        setValue('created.range', {
+          from: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+          to: new Date(Date.now()),
+        });
       }
-    }
+    };
     const handleDateRange = (e: DateRange) => {
-      console.log("date ",e,)
+      console.log('date ', e);
       setValue('created.days', '');
-      setValue('created.range', e)
-    }
+      setValue('created.range', e);
+    };
 
     switch (filter) {
-      case "experience":
+      case 'experience':
         return (
           <div className="space-y-4 w-64">
             {/* <div className="flex items-center gap-4">
@@ -68,13 +71,30 @@ export function FilterOptions({
           </div>
         );
 
-      case "created":
+      case 'created':
         return (
           <div className="space-y-2">
-            <DateRangePicker onSelect={(e: DateRange | undefined) => { handleDateRange(e as DateRange) }} selected={formData.created?.range} />
+            <DateRangePicker
+              onSelect={(e: DateRange | undefined) => {
+                handleDateRange(e as DateRange);
+              }}
+              selected={formData.created?.range}
+            />
             <div className="flex gap-2 flex-wrap">
-              <Button variant={formData?.created?.days == 'Last 7 Days' ? 'default' : "outline"} onClick={() => handelDateButton('Last 7 Days')} className="text-sm">Last 7 Days</Button>
-              <Button variant={formData?.created?.days == 'Last 30 Days' ? 'default' : "outline"} onClick={() => handelDateButton('Last 30 Days')} className="text-sm">Last 30 Days</Button>
+              <Button
+                variant={formData?.created?.days == 'Last 7 Days' ? 'default' : 'outline'}
+                onClick={() => handelDateButton('Last 7 Days')}
+                className="text-sm"
+              >
+                Last 7 Days
+              </Button>
+              <Button
+                variant={formData?.created?.days == 'Last 30 Days' ? 'default' : 'outline'}
+                onClick={() => handelDateButton('Last 30 Days')}
+                className="text-sm"
+              >
+                Last 30 Days
+              </Button>
             </div>
           </div>
         );
@@ -84,18 +104,23 @@ export function FilterOptions({
   };
   return (
     <div className="flex gap-2 flex-wrap md:flex-nowrap shrink-0 z-10">
-      {["Created"].map((filter) => (
-        <Popover.Root key={filter} onOpenChange={() => { handleOpenFilter(filter.toLowerCase()) }}>
+      {['Created'].map((filter) => (
+        <Popover.Root
+          key={filter}
+          onOpenChange={() => {
+            handleOpenFilter(filter.toLowerCase());
+          }}
+        >
           <Popover.Trigger asChild>
             <div className="relative">
               <Button
                 variant="outline"
                 className={cn(
-                  "h-11 text-sm font-medium gap-2 whitespace-nowrap",
-                  "bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700",
-                  "hover:bg-gray-50 dark:hover:bg-gray-800",
-                  "transition-all duration-200",
-                  activeFilter === filter.toLowerCase() && "border-blue-500 dark:border-blue-400"
+                  'h-11 text-sm font-medium gap-2 whitespace-nowrap',
+                  'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700',
+                  'hover:bg-gray-50 dark:hover:bg-gray-800',
+                  'transition-all duration-200',
+                  activeFilter === filter.toLowerCase() && 'border-blue-500 dark:border-blue-400'
                 )}
               >
                 {filter}
@@ -105,17 +130,17 @@ export function FilterOptions({
                   <ChevronDown className="h-4 w-4" />
                 )}
               </Button>
-
             </div>
           </Popover.Trigger>
           <Popover.Portal>
-
             <Popover.Content className="z-10">
-              <div className={cn(
-                "mt-2 w-72 bg-white dark:bg-gray-900",
-                "border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg",
-                "p-4 transform origin-top",
-              )}>
+              <div
+                className={cn(
+                  'mt-2 w-72 bg-white dark:bg-gray-900',
+                  'border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg',
+                  'p-4 transform origin-top'
+                )}
+              >
                 {renderFilterContent(filter.toLowerCase())}
               </div>
             </Popover.Content>
@@ -124,4 +149,4 @@ export function FilterOptions({
       ))}
     </div>
   );
-} 
+}

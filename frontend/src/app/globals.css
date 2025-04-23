@@ -82,7 +82,6 @@
   --highlight-color: #374151; /* Dark mode highlight */
 }
 
-
 .react-select-container .react-select__control--is-focused {
   @apply ring-2 ring-ring ring-offset-2 ring-offset-background;
 }
@@ -111,11 +110,11 @@
   @apply hover:bg-destructive hover:text-destructive-foreground rounded-sm;
 }
 
-.center{
+.center {
   display: grid;
   place-content: center;
 }
-.dashboard-calander td button{
+.dashboard-calander td button {
   margin-top: 9px;
 }
 
@@ -135,10 +134,7 @@
   animation: progress-bar 1s ease-out;
 }
 
-
-
-.hide-scroller::-webkit-scrollbar
-{
-	width: 0px;
-	background-color: #F5F5F5;
+.hide-scroller::-webkit-scrollbar {
+  width: 0px;
+  background-color: #f5f5f5;
 }

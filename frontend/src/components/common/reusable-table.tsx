@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   Table,
   TableHeader,
@@ -8,8 +8,8 @@ import {
   TableHead,
   TableBody,
   TableCell,
-} from "@/components/ui/table";
-import { ChevronDown, ChevronUp } from "lucide-react"; // Add expand/collapse icons
+} from '@/components/ui/table';
+import { ChevronDown, ChevronUp } from 'lucide-react'; // Add expand/collapse icons
 
 // Define interfaces
 export interface Column<T> {
@@ -85,12 +85,9 @@ const ReusableTable = <T extends object>({
                 className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200"
               >
                 {columns.map((column) => {
-                  const getNestedValue = (
-                    obj: Record<string, unknown>,
-                    path: string
-                  ): unknown => {
+                  const getNestedValue = (obj: Record<string, unknown>, path: string): unknown => {
                     return path
-                      .split(".")
+                      .split('.')
                       .reduce<Record<
                         string,
                         unknown
@@ -98,18 +95,13 @@ const ReusableTable = <T extends object>({
                   };
 
                   const value =
-                    typeof column.key === "string" && column.key.includes(".")
-                      ? getNestedValue(
-                          row as Record<string, unknown>,
-                          column.key
-                        )
+                    typeof column.key === 'string' && column.key.includes('.')
+                      ? getNestedValue(row as Record<string, unknown>, column.key)
                       : row[column.key as keyof T];
 
                   return (
                     <TableCell key={column.key as string}>
-                      {column.render
-                        ? column.render(row)
-                        : (value as React.ReactNode)}
+                      {column.render ? column.render(row) : (value as React.ReactNode)}
                     </TableCell>
                   );
                 })}

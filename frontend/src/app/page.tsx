@@ -1,32 +1,26 @@
-"use client";
-import Link from "next/link";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { TypographyH1, TypographyH4 } from "@/styles/typography";
-import React, { useState } from "react";
-import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/form/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import toast from "react-hot-toast";
-import { useAuthStore } from "@/store/authStore";
-import { FormField } from "@/components/common/form-field";
-import { EyeIcon, EyeOffIcon } from "lucide-react";
+'use client';
+import Link from 'next/link';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import { TypographyH1, TypographyH4 } from '@/styles/typography';
+import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/form/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import toast from 'react-hot-toast';
+import { useAuthStore } from '@/store/authStore';
+import { FormField } from '@/components/common/form-field';
+import { EyeIcon, EyeOffIcon } from 'lucide-react';
 
 const loginSchema = z.object({
-  email: z.string().email("Invalid email address."),
-  password: z.string().min(6, "Password must be at least 6 characters."),
+  email: z.string().email('Invalid email address.'),
+  password: z.string().min(6, 'Password must be at least 6 characters.'),
 });
 
 const defaultValues = {
-  email: "superadmin@example.com",
-  password: "superadminpassword",
+  email: 'superadmin@example.com',
+  password: 'superadminpassword',
 };
 
 export default function Home() {
@@ -45,11 +39,11 @@ export default function Home() {
   const onSubmit = async (data: z.infer<typeof loginSchema>) => {
     try {
       await login({ email: data.email, password: data.password });
-      toast.success("Login successfully");
-      router.push("/dashboard");
+      toast.success('Login successfully');
+      router.push('/dashboard');
     } catch (err) {
       if (err instanceof Error) toast.error(err.message);
-      else toast.error("Something went wrong");
+      else toast.error('Something went wrong');
     }
   };
 
@@ -77,7 +71,7 @@ export default function Home() {
                   label="Email"
                   id="email"
                   placeholder="Enter your email"
-                  {...register("email")}
+                  {...register('email')}
                   className="h-10"
                   error={errors.email?.message}
                 />
@@ -86,9 +80,9 @@ export default function Home() {
                 <FormField
                   label="Password"
                   id="password"
-                  type={showPassword ? "text" : "password"}
+                  type={showPassword ? 'text' : 'password'}
                   placeholder="Enter your password"
-                  {...register("password")}
+                  {...register('password')}
                   className="h-10"
                   error={errors.password?.message}
                 />
@@ -97,21 +91,13 @@ export default function Home() {
                   onClick={togglePassword}
                   className="absolute right-3  text-primary dark:text-white top-[37px]  transform -translate-y-1/2 bg-transparent border-none shadow-none"
                 >
-                  {showPassword ? (
-                    <EyeOffIcon size={20}  />
-                  ) : (
-                    <EyeIcon size={20} />
-                  )}
+                  {showPassword ? <EyeOffIcon size={20} /> : <EyeIcon size={20} />}
                 </Button>
               </div>
             </div>
             <div className="mt-4">
-              <Button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full text-lg"
-              >
-                {isSubmitting ? "Signing in..." : "Sign In"}
+              <Button type="submit" disabled={isSubmitting} className="w-full text-lg">
+                {isSubmitting ? 'Signing in...' : 'Sign In'}
               </Button>
             </div>
           </form>
@@ -119,7 +105,7 @@ export default function Home() {
       </Card>
 
       <TypographyH4>
-        Don&apos;t have an account?{" "}
+        Don&apos;t have an account?{' '}
         <Link href="/register" className="text-blue-300 hover:underline">
           Contact Admin
         </Link>

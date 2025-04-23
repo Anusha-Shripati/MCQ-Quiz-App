@@ -1,7 +1,7 @@
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/form/button";
-import { Card } from "@/components/ui/card";
-import { Question } from "@/shared/types/app";
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/form/button';
+import { Card } from '@/components/ui/card';
+import { Question } from '@/shared/types/app';
 import {
   Dialog,
   // DialogTrigger,
@@ -10,47 +10,45 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from "@/components/ui/dialog";
-import {useState } from "react";
+} from '@/components/ui/dialog';
+import { useState } from 'react';
 
 // interface QuestionCardProps {
 //   question: Question;
 // }
 const questionType = {
-  mcq: { label: "Multiple Choice", color: "blue" },
-  code_snippet: { label: "Code Snippet", color: "purple" },
-  text: { label: "Fill in the blanks", color: "green" },
-  multiple_select: { label: "Multiple Select", color: "orange" },
-  video: { label: "Video", color: "red" },
+  mcq: { label: 'Multiple Choice', color: 'blue' },
+  code_snippet: { label: 'Code Snippet', color: 'purple' },
+  text: { label: 'Fill in the blanks', color: 'green' },
+  multiple_select: { label: 'Multiple Select', color: 'orange' },
+  video: { label: 'Video', color: 'red' },
 };
 
 const difficulties: Record<Question['difficulty_level'], { label: string; color: string }> = {
-
-  easy: { label: "Easy", color: "green" },
-  medium: { label: "Medium", color: "yellow" },
-  hard: { label: "Hard", color: "red" },
+  easy: { label: 'Easy', color: 'green' },
+  medium: { label: 'Medium', color: 'yellow' },
+  hard: { label: 'Hard', color: 'red' },
 };
 
 const badgeClass = {
-  blue: "bg-blue-100 text-blue-800",
-  purple: "bg-purple-100 text-purple-800",
-  green: "bg-green-100 text-green-800",
-  orange: "bg-orange-100 text-orange-800",
-  red: "bg-red-100 text-red-800",
-  yellow: "bg-yellow-100 text-yellow-800",
+  blue: 'bg-blue-100 text-blue-800',
+  purple: 'bg-purple-100 text-purple-800',
+  green: 'bg-green-100 text-green-800',
+  orange: 'bg-orange-100 text-orange-800',
+  red: 'bg-red-100 text-red-800',
+  yellow: 'bg-yellow-100 text-yellow-800',
 };
-
 
 export const QuestionCard = ({
   question,
   handleDelete,
   index,
-  handleEdit
+  handleEdit,
 }: {
   question: Required<Question>;
   index: number;
   handleDelete: (id: string) => void;
-  handleEdit: () => void
+  handleEdit: () => void;
 }) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   return (
@@ -70,10 +68,11 @@ export const QuestionCard = ({
           {question.options?.map((option, index) => (
             <li
               key={index}
-              className={`p-2 rounded-md text-sm md:text-base ${question?.correct_answer.includes(index.toString())
-                  ? "dark:bg-green-800 dark:text-green-100 bg-green-100 text-green-800"
-                  : "dark:bg-gray-800 dark:text-gray-400 bg-gray-100 text-gray-800"
-                }`}
+              className={`p-2 rounded-md text-sm md:text-base ${
+                question?.correct_answer.includes(index.toString())
+                  ? 'dark:bg-green-800 dark:text-green-100 bg-green-100 text-green-800'
+                  : 'dark:bg-gray-800 dark:text-gray-400 bg-gray-100 text-gray-800'
+              }`}
             >
               {String.fromCharCode(65 + index)}. {option}
             </li>
@@ -81,10 +80,11 @@ export const QuestionCard = ({
           {question.meta?.code && (
             <li
               key={index}
-              className={`p-2 rounded-md text-sm md:text-base ${question?.correct_answer.includes(index.toString())
-                  ? "dark:bg-green-800 dark:text-green-100 bg-green-100 text-green-800"
-                  : "dark:bg-gray-800 dark:text-gray-400 bg-gray-100 text-gray-800"
-                }`}
+              className={`p-2 rounded-md text-sm md:text-base ${
+                question?.correct_answer.includes(index.toString())
+                  ? 'dark:bg-green-800 dark:text-green-100 bg-green-100 text-green-800'
+                  : 'dark:bg-gray-800 dark:text-gray-400 bg-gray-100 text-gray-800'
+              }`}
             >
               {question.meta?.code}
             </li>
@@ -92,11 +92,7 @@ export const QuestionCard = ({
         </ul>
         <div className="flex justify-between items-center mt-4 text-sm">
           <div className="space-x-1">
-            <Button
-              variant="link"
-              className="text-blue-500 hover:underline"
-              onClick={handleEdit}
-            >
+            <Button variant="link" className="text-blue-500 hover:underline" onClick={handleEdit}>
               Edit
             </Button>
             <Button
@@ -121,8 +117,7 @@ export const QuestionCard = ({
                 Are you sure?
               </DialogTitle>
               <DialogDescription className="text-sm text-gray-600 dark:text-gray-400">
-                This action cannot be undone. This will permanently delete the
-                question.
+                This action cannot be undone. This will permanently delete the question.
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>

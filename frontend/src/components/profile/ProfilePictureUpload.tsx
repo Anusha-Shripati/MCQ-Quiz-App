@@ -1,17 +1,15 @@
-import { useState } from "react";
-import Image from "next/image";
-import { Camera, User2Icon } from "lucide-react";
-import { Input } from "../ui/form/input";
-import { Button } from "../ui/form/button";
-import { useProfileStore } from "@/store/profileStore";
+import { useState } from 'react';
+import Image from 'next/image';
+import { Camera, User2Icon } from 'lucide-react';
+import { Input } from '../ui/form/input';
+import { Button } from '../ui/form/button';
+import { useProfileStore } from '@/store/profileStore';
 
 const ProfilePictureUpload = () => {
   const [profilePicture, setProfilePicture] = useState<string | null>(null);
   const { isEditing, setIsEditing } = useProfileStore();
   // Handle file input change and update profile picture
-  const handleProfilePictureChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleProfilePictureChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       const reader = new FileReader();
@@ -63,7 +61,7 @@ const ProfilePictureUpload = () => {
         className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-600"
         variant="ghost"
       >
-        {isEditing ? "Cancel" : "Edit"}
+        {isEditing ? 'Cancel' : 'Edit'}
       </Button>
     </div>
   );

@@ -2,24 +2,23 @@
 
 import React, { useState } from 'react';
 import CodeEditor from '@/components/CodeEditor';
-import * as Select from "@radix-ui/react-select";
-import { ChevronDownIcon, ChevronUpIcon } from "@radix-ui/react-icons";
+import * as Select from '@radix-ui/react-select';
+import { ChevronDownIcon, ChevronUpIcon } from '@radix-ui/react-icons';
 import { FaPlay } from 'react-icons/fa';
 
 const EditorPage: React.FC = () => {
   const [code, setCode] = useState('// Write your code here');
   const [language, setLanguage] = useState('javascript');
   const [theme, setTheme] = useState('vs-dark');
-  const [output, setOutput] = useState<string>('');  
+  const [output, setOutput] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const handleLanguageChange = (value: string) => {
-    setLanguage(value); 
+    setLanguage(value);
   };
 
   const handleThemeChange = (value: string) => {
-    
-    setTheme(value); 
+    setTheme(value);
   };
 
   const handleCodeChange = (value: string | undefined) => {
@@ -27,7 +26,7 @@ const EditorPage: React.FC = () => {
   };
 
   const handleSubmit = async () => {
-    setIsLoading(true); 
+    setIsLoading(true);
     const response = await fetch('/api/code-execution', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -35,14 +34,13 @@ const EditorPage: React.FC = () => {
     });
     const result = await response.json();
     if (result.success) {
-        setOutput(result.output); 
-      } else {
-        setOutput(`Error: ${result.error || result.message}`); 
-      }
+      setOutput(result.output);
+    } else {
+      setOutput(`Error: ${result.error || result.message}`);
+    }
 
-    setIsLoading(false); 
+    setIsLoading(false);
   };
-  
 
   return (
     <div className="p-6 space-y-6 bg-gray-50 dark:bg-gray-900">
@@ -128,17 +126,12 @@ const EditorPage: React.FC = () => {
 
       {/* Code Editor */}
       <div className="mt-6">
-        <CodeEditor
-          language={language}
-          theme={theme}
-          value={code}
-          onChange={handleCodeChange}
-        />
+        <CodeEditor language={language} theme={theme} value={code} onChange={handleCodeChange} />
       </div>
 
       {/* Submit Code */}
       <div
-        onClick={!isLoading ? handleSubmit : undefined} 
+        onClick={!isLoading ? handleSubmit : undefined}
         className={`flex items-center justify-center w-16 h-16 rounded-full 
           ${isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 active:bg-blue-800'} 
           text-white shadow-md transition-all cursor-pointer`}
@@ -172,7 +165,7 @@ const EditorPage: React.FC = () => {
       {/* Output Section */}
       <div className="mt-6 p-6 border border-gray-300 rounded-lg bg-gray-100 dark:bg-gray-800">
         <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Output</h2>
-        <pre className="text-sm text-gray-800 dark:text-gray-100">{output}</pre> 
+        <pre className="text-sm text-gray-800 dark:text-gray-100">{output}</pre>
       </div>
     </div>
   );

@@ -1,17 +1,17 @@
-import { Input } from "@/components/ui/form/input";
+import { Input } from '@/components/ui/form/input';
 import {
   Select,
   SelectTrigger,
   SelectValue,
   SelectContent,
   SelectItem,
-} from "@/components/ui/form/select";
-import { forwardRef, useMemo } from "react";
+} from '@/components/ui/form/select';
+import { forwardRef, useMemo } from 'react';
 
 interface FormFieldProps {
   label?: string;
   id?: string;
-  type?: "text" | "email" | "tel" | "select" | "number" | "password";
+  type?: 'text' | 'email' | 'tel' | 'select' | 'number' | 'password';
   options?: SelectOption[] | (string | number)[];
   value?: string | number;
   error?: string | undefined;
@@ -24,15 +24,7 @@ interface FormFieldProps {
   min?: string | number | undefined;
   max?: string | number | undefined;
   parentClassName?: string;
-  inputMode?:
-    | "none"
-    | "text"
-    | "tel"
-    | "url"
-    | "email"
-    | "numeric"
-    | "decimal"
-    | "search";
+  inputMode?: 'none' | 'text' | 'tel' | 'url' | 'email' | 'numeric' | 'decimal' | 'search';
   pattern?: string;
   maxLength?: number;
 }
@@ -42,13 +34,15 @@ interface SelectOption {
   label: string | number;
 }
 
-export const FormField = forwardRef<HTMLInputElement, FormFieldProps>(({ parentClassName, ...props }: FormFieldProps, ref) => {
-  
-  const normalizedOptions: SelectOption[] = useMemo(()=> Array.isArray(props.options)
-    ? props.options.map(opt =>
-      typeof opt === "object" ? opt : { value: opt, label: opt }
-    )
-    : [],[props.options]);
+export const FormField = forwardRef<HTMLInputElement, FormFieldProps>(
+  ({ parentClassName, ...props }: FormFieldProps, ref) => {
+    const normalizedOptions: SelectOption[] = useMemo(
+      () =>
+        Array.isArray(props.options)
+          ? props.options.map((opt) => (typeof opt === 'object' ? opt : { value: opt, label: opt }))
+          : [],
+      [props.options]
+    );
 
     // const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     //   if (props.type === "tel" || props.inputMode === "numeric") {
@@ -73,17 +67,14 @@ export const FormField = forwardRef<HTMLInputElement, FormFieldProps>(({ parentC
     // };
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (props.type === "tel" || props.inputMode === "numeric") {
+      if (props.type === 'tel' || props.inputMode === 'numeric') {
         // Allow: backspace, delete, tab, escape, enter, decimal point, numbers
         if (
-          ["Backspace", "Delete", "Tab", "Escape", "Enter", ".", ","].includes(
-            e.key
-          ) ||
+          ['Backspace', 'Delete', 'Tab', 'Escape', 'Enter', '.', ','].includes(e.key) ||
           // Allow: Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
-          ((e.key === "a" || e.key === "c" || e.key === "v" || e.key === "x") &&
-            e.ctrlKey) ||
+          ((e.key === 'a' || e.key === 'c' || e.key === 'v' || e.key === 'x') && e.ctrlKey) ||
           // Allow: home, end, left, right
-          ["Home", "End", "ArrowLeft", "ArrowRight"].includes(e.key) ||
+          ['Home', 'End', 'ArrowLeft', 'ArrowRight'].includes(e.key) ||
           // Allow numbers
           (!isNaN(Number(e.key)) && e.key.length === 1)
         ) {
@@ -94,22 +85,12 @@ export const FormField = forwardRef<HTMLInputElement, FormFieldProps>(({ parentC
     };
 
     return (
-      <div className={parentClassName || ""}>
-        {props.label && (
-          <label className="block text-sm font-medium mb-1">
-            {props.label}
-          </label>
-        )}
-        {props.type === "select" ? (
-          <Select
-            value={String(props.value)}
-            onValueChange={props.onChange}
-            name={props.name}
-          >
+      <div className={parentClassName || ''}>
+        {props.label && <label className="block text-sm font-medium mb-1">{props.label}</label>}
+        {props.type === 'select' ? (
+          <Select value={String(props.value)} onValueChange={props.onChange} name={props.name}>
             <SelectTrigger className={props.className}>
-              <SelectValue
-                placeholder={`Select ${props.placeholder || props.label || ""}`}
-              />
+              <SelectValue placeholder={`Select ${props.placeholder || props.label || ''}`} />
             </SelectTrigger>
             <SelectContent>
               {normalizedOptions?.length > 0 ? (
@@ -128,16 +109,14 @@ export const FormField = forwardRef<HTMLInputElement, FormFieldProps>(({ parentC
         ) : (
           <Input
             {...props}
-            placeholder={`${props.placeholder || "Enter " + (props.label || "")} `}
+            placeholder={`${props.placeholder || 'Enter ' + (props.label || '')} `}
             ref={ref}
             onKeyDown={handleKeyDown}
           />
         )}
-        {props.error && (
-          <p className="text-red-500 text-sm mt-1">{props.error}</p>
-        )}
+        {props.error && <p className="text-red-500 text-sm mt-1">{props.error}</p>}
       </div>
     );
   }
 );
-FormField.displayName = "FormField";
+FormField.displayName = 'FormField';

@@ -9,37 +9,37 @@ const candidateRouter = express.Router();
 const candidateController = new CandidateController();
 
 candidateRouter.post(
-	'/create',
-	authenticateAndAuthorize('candidates.can_edit'),
-	validateRequest(candidateSchema.create),
-	asyncHandler(candidateController.create)
+  '/create',
+  authenticateAndAuthorize('candidates.can_edit'),
+  validateRequest(candidateSchema.create),
+  asyncHandler(candidateController.create)
 );
 
 candidateRouter.put(
-	'/:id',
-	authenticateAndAuthorize('candidates.can_edit'),
-	validateRequest(candidateSchema.update),
-	asyncHandler(candidateController.update)
+  '/:id',
+  authenticateAndAuthorize('candidates.can_edit'),
+  validateRequest(candidateSchema.update),
+  asyncHandler(candidateController.update)
 );
 
 candidateRouter.delete(
-	'/:id',
-	authenticateAndAuthorize('candidates.can_edit'),
-	validateRequest(candidateSchema.delete),
-	asyncHandler(candidateController.delete)
+  '/:id',
+  authenticateAndAuthorize('candidates.can_edit'),
+  validateRequest(candidateSchema.delete),
+  asyncHandler(candidateController.delete)
 );
 
 candidateRouter.get(
-	'/list',
-	authenticateAndAuthorize('candidates.can_read'),
-	asyncHandler(candidateController.get)
+  '/list',
+  authenticateAndAuthorize('candidates.can_read'),
+  asyncHandler(candidateController.get)
 );
 
 candidateRouter.get(
-	'/:id',
-	authenticateAndAuthorize('candidates.can_read'),
-	validateRequest(candidateSchema.get),
-	asyncHandler(candidateController.getCandidateById)
+  '/:id',
+  authenticateAndAuthorize('candidates.can_read'),
+  validateRequest(candidateSchema.get),
+  asyncHandler(candidateController.getCandidateById)
 );
 
 export default candidateRouter;

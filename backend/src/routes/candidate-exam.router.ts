@@ -9,46 +9,44 @@ import { candidateExamSchema } from '../validationSchemas/candidate-exam.validat
 
 const router = express.Router();
 const candidateExamService = new CandidateExamService();
-const candidateExamController = new CandidateExamController(
-	candidateExamService
-);
+const candidateExamController = new CandidateExamController(candidateExamService);
 
 router.post(
-	'/:examId/start',
-	authenticateCandidate,
+  '/:examId/start',
+  authenticateCandidate,
   validateRequest(candidateExamSchema.startExam),
-	asyncHandler(candidateExamController.startExam)
+  asyncHandler(candidateExamController.startExam)
 );
 
 router.get(
-	'/:examId/next-question',
-	authenticateCandidate,
-	asyncHandler(candidateExamController.getNextQuestion)
+  '/:examId/next-question',
+  authenticateCandidate,
+  asyncHandler(candidateExamController.getNextQuestion)
 );
 
 router.post(
-	'/:examId/questions/:questionId/answer',
-	authenticateCandidate,
-	asyncHandler(candidateExamController.submitAnswer)
+  '/:examId/questions/:questionId/answer',
+  authenticateCandidate,
+  asyncHandler(candidateExamController.submitAnswer)
 );
 
 router.post(
-	'/:examId/finish',
-	authenticateCandidate,
-	asyncHandler(candidateExamController.finishExam)
+  '/:examId/finish',
+  authenticateCandidate,
+  asyncHandler(candidateExamController.finishExam)
 );
 
 router.get(
-	'/:examId/status',
-	authenticateCandidate,
-	asyncHandler(candidateExamController.getExamStatus)
+  '/:examId/status',
+  authenticateCandidate,
+  asyncHandler(candidateExamController.getExamStatus)
 );
 
 router.get(
-	'/:examId',
-	authenticateCandidate,
+  '/:examId',
+  authenticateCandidate,
   validateRequest(candidateExamSchema.get),
-	asyncHandler(candidateExamController.getExam)
+  asyncHandler(candidateExamController.getExam)
 );
 
 export default router;

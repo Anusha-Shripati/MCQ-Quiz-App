@@ -1,7 +1,7 @@
 import React from 'react';
-import Select from "react-select";
-import { StatusOption } from "@/types/candidate.types";
-import { cn } from "@/lib/utils";
+import Select from 'react-select';
+import { StatusOption } from '@/types/candidate.types';
+import { cn } from '@/lib/utils';
 
 interface AssessmentFilterProps {
   value: StatusOption[];
@@ -12,7 +12,7 @@ interface AssessmentFilterProps {
 
 export function AssessmentFilter({ value, onChange, options, className }: AssessmentFilterProps) {
   return (
-    <div className={cn("w-full md:w-72 lg:w-80 shrink-0", className)}>
+    <div className={cn('w-full md:w-72 lg:w-80 shrink-0', className)}>
       <Select
         isMulti
         value={value}
@@ -52,7 +52,8 @@ export function AssessmentFilter({ value, onChange, options, className }: Assess
             background: 'hsl(var(--background))',
             border: '1px solid hsl(var(--border))',
             borderRadius: 'var(--radius)',
-            boxShadow: '0px 10px 38px -10px rgba(22, 23, 24, 0.35), 0px 10px 20px -15px rgba(22, 23, 24, 0.2)',
+            boxShadow:
+              '0px 10px 38px -10px rgba(22, 23, 24, 0.35), 0px 10px 20px -15px rgba(22, 23, 24, 0.2)',
             zIndex: 50,
             overflow: 'hidden',
             marginTop: '8px',
@@ -68,14 +69,15 @@ export function AssessmentFilter({ value, onChange, options, className }: Assess
             borderRadius: 'calc(var(--radius) - 4px)',
             cursor: 'pointer',
             fontSize: '14px',
-            background: state.isFocused 
-              ? 'hsl(var(--accent))' 
+            background: state.isFocused
+              ? 'hsl(var(--accent))'
               : state.isSelected
                 ? 'hsl(var(--accent))'
                 : 'transparent',
-            color: state.isFocused || state.isSelected
-              ? 'hsl(var(--accent-foreground))'
-              : 'hsl(var(--foreground))',
+            color:
+              state.isFocused || state.isSelected
+                ? 'hsl(var(--accent-foreground))'
+                : 'hsl(var(--foreground))',
             '&:hover': {
               background: 'hsl(var(--accent))',
               color: 'hsl(var(--accent-foreground))',

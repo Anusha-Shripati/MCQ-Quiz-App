@@ -1,5 +1,5 @@
 import { CandidateFilter } from '@/types/candidate.types'
-import { Candidate } from '@/types/candidate.types'
+import { ICandidate } from '@/types/candidate.types'
 import { StatusOption } from '@/types/common.types'
 import { create } from 'zustand'
 
@@ -10,9 +10,9 @@ export type CandidateAssessmentOptions = (StatusOption & { technologies?: { id: 
 interface CandidateStore {
     candidateFilter: CandidateFilter
     candidateCount: number
-    candidateList: Candidate[]
+    candidateList: ICandidate[]
     setCandidateFilter:(filter:CandidateFilter)=>void
-    setCandidateListData:(count:number, list: Candidate[])=>void
+    setCandidateListData:(count:number, list: ICandidate[])=>void
     assessmentOptions:CandidateAssessmentOptions
     technologyOptions:StatusOption[]
     setAssessmentOptions:(options:CandidateAssessmentOptions)=>void
@@ -43,7 +43,7 @@ export const useCandidateStore = create<CandidateStore>((set) => ({
 	setCandidateFilter: (filter: CandidateFilter) => {
 		set({ candidateFilter: filter })
 	},
-    setCandidateListData: (count: number, list: Candidate[]) => {
+    setCandidateListData: (count: number, list: ICandidate[]) => {
         set({ candidateList: list, candidateCount: count })
     },
 }))

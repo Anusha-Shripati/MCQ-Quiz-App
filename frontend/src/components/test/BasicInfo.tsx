@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/form/button';
 import { Input } from '@/components/ui/form/input';
-import { ICandidateData } from '@/types/candidate.types';
+import { ICandidate } from '@/types/candidate.types';
 import { Camera, FileText, Info, Mail, User, UserCircle } from 'lucide-react';
 import { memo, useEffect, useState } from 'react';
 
@@ -14,7 +14,7 @@ interface FormData {
 
 interface BasicInfoFormProps {
 	handleBasicInfoSubmit: () => void;
-	candidateData?: ICandidateData | null;
+	candidateData?: ICandidate | null;
 }
 
 // Subcomponents

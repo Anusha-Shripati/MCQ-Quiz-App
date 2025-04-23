@@ -79,7 +79,7 @@ export const api = {
 	},
 };
 
-export const candidateApi = {
+export const examApi = {
 	get: async (url: string, accessCode: string) => {
 		const config = { headers: { 'X-Access-Code': accessCode } };
 		const response = await candidateInstance.get(url, config);

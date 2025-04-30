@@ -217,7 +217,7 @@ function CandidateTable() {
         : '',
       startDate: new Date(candidate.exam?.start_time as string),
       endDate: new Date(candidate.exam?.end_time as string),
-      timeUnit: 'days',
+      timeUnit: "days",
       timeValue: dayjs(candidate.exam?.end_time as string).diff(
         dayjs(candidate.exam?.start_time as string),
         'days'

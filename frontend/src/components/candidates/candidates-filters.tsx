@@ -135,7 +135,9 @@ const Filters = () => {
 
         <AssessmentFilter
           value={formData.assessmentFilter}
-          onChange={(value: AssessmentOption[]) => setValue('assessmentFilter', value)}
+          onChange={(value: AssessmentOption[]) =>
+            setValue("assessmentFilter", value)
+          }
           options={assessmentOptions}
         />
 

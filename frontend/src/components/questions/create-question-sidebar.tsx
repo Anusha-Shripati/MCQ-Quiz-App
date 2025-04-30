@@ -42,6 +42,7 @@ const QuestionSidebar: React.FC<QuestionSidebarProps> = ({
 
   const handleQuestionChange = useCallback(
     (index: number) => {
+      console.log('Question changed to index:', index);
       setSelectedQuestion(index);
       updateQueryParams({ ques: (index + 1).toString() });
     },
@@ -88,7 +89,7 @@ const QuestionSidebar: React.FC<QuestionSidebarProps> = ({
               <li
                 key={index}
                 className={clsx(
-                  'p-2 sm:p-3 rounded-lg cursor-pointer flex justify-between items-center transition-all duration-200 ease-in-out border',
+                  'p-2 sm:p-3 rounded-lg cursor-pointer flex justify-between items-center transition-all duration-200 ease-in-out border max-w-[285px]',
                   q.id ? '' : 'border-[#ffa500]',
                   selectedQuestion === index
                     ? 'bg-blue-500 text-white hover:bg-blue-600 shadow-md'

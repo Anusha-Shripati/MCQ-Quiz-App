@@ -12,7 +12,6 @@ import { mutate } from 'swr';
 import { useQuestionStore } from '@/store/questionStore';
 
 // Define props type
-
 async function createCategory(url: string, { arg }: { arg: { name: string } }) {
   const response = await api.post(url, arg);
   return response.data;
@@ -37,7 +36,7 @@ const CreateCategory: React.FC = () => {
     const value = e.target.value.toLowerCase();
     setSearchTerm(value);
   };
-  const { trigger } = useSWRMutation('/technology/create', createCategory);
+  const { trigger } = useSWRMutation("/technology/create", createCategory);
 
   const handleCreateCategory = async () => {
     try {

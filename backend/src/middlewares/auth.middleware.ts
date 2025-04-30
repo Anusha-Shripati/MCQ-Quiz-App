@@ -153,7 +153,6 @@ export const createToken = (id: string, email: string, role_name = '', role_id =
     // expiresIn: process.env.ACCESS_EXPIRES || "30d",
     expiresIn: '7d',
   });
-
   return token;
 };
 

@@ -85,6 +85,7 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
       setQuestions(updatedQuestions);
       console.log(
         selectedQuestion,
+        updatedQuestions,
         updatedQuestions.length,
         'selectedQuestion,updatedQuestions.length'
       );

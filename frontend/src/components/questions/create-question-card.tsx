@@ -66,6 +66,9 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
   editQuestion,
 }) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [videoToVideo, setVideoToVideo] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [videoUrl, setVideoUrl] = useState('');
 
   const ensureFiveOptions = (options: string[] = []) => {
     while (options.length < 5) {
@@ -271,6 +274,22 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
           />
         </div>
 
+        {question.type === "video" ? (
+          <>
+            <input
+              type="checkbox"
+              name="Video to Video"
+              checked={videoToVideo}
+              className="mr-2 mb-4"
+              onChange={() => setVideoToVideo((prev) => !prev)}
+            />
+            Video to Video
+          </>
+        ) : (
+          ""
+        )}
+
+
         <FormField
           label="Question"
           placeholder="Enter your question"
@@ -282,6 +301,18 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
           }}
           className="mb-4"
         />
+
+{question.type === "video" && videoToVideo ? (
+  <FormField
+          label="Question URL"
+          placeholder="Enter video url"
+          onChange={(e) => {
+            setVideoUrl(e.target.value);
+          }}
+          className="mb-4"
+        />
+) : ""
+}
 
         {(question.type === 'mcq' || question.type === 'multiple_select') && (
           <div className="space-y-2">

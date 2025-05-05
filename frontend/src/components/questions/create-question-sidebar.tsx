@@ -67,7 +67,7 @@ const QuestionSidebar: React.FC<QuestionSidebarProps> = ({
   }, [questionToDelete, handleDeleteQuestion, closeDeleteModal]);
 
   return (
-    <Card className="w-full md:w-1/4 h-[calc(100vh-8rem)] flex flex-col overflow-hidden shadow-lg bg-black gap-2">
+    <Card className="w-full md:w-1/4 h-[calc(100vh-12rem)] flex flex-col overflow-hidden shadow-lg  gap-2">
       {/* Header */}
       <CardHeader className="border-b border-gray-200 dark:border-gray-700 p-2 sm:p-4 flex flex-row justify-between items-center">
         <CardTitle className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
@@ -82,14 +82,14 @@ const QuestionSidebar: React.FC<QuestionSidebarProps> = ({
       </CardHeader>
 
       {/* Scrollable List */}
-      <CardContent className="flex-1 p-0 overflow-hidden">
-        <ScrollArea className="h-full">
-          <ul className="space-y-1 sm:space-y-2 p-1 sm:p-2">
+      <CardContent className="flex-1 p-0 overflow-hidden pb-2">
+        <div className="h-full block max-h-[100%] overflow-auto">
+          <ul className="space-y-1 sm:space-y-2 p-1 sm:p-2 w-100">
             {questions?.map((q, index) => (
               <li
                 key={index}
                 className={clsx(
-                  'p-2 sm:p-3 rounded-lg cursor-pointer flex justify-between items-center transition-all duration-200 ease-in-out border max-w-[285px]',
+                  'p-2 sm:p-3 rounded-lg cursor-pointer flex justify-between items-center transition-all duration-200 ease-in-out border w-100',
                   q.id ? '' : 'border-[#ffa500]',
                   selectedQuestion === index
                     ? 'bg-blue-500 text-white hover:bg-blue-600 shadow-md'
@@ -117,7 +117,7 @@ const QuestionSidebar: React.FC<QuestionSidebarProps> = ({
               </li>
             ))}
           </ul>
-        </ScrollArea>
+        </div>
       </CardContent>
 
       {/* Delete Modal */}

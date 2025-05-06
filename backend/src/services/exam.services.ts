@@ -1,9 +1,5 @@
-import { PrismaClient, Difficulty } from '@prisma/client';
-import { Exam } from '@prisma/client';
-import { Prisma } from '@prisma/client';
-import { JsonValue } from '@prisma/client/runtime/library';
+import { Difficulty, Prisma, PrismaClient } from '@prisma/client';
 import { AppError } from '../common/errors/AppError';
-import jwt from 'jsonwebtoken';
 
 const prisma = new PrismaClient();
 
@@ -19,7 +15,7 @@ interface CreateExamData {
 export default class ExamService {
   async createExamQuestionsForAssessment(examId: string, assessmentId: string) {
     const assessment = await prisma.assessments.findUnique({
-      where: { id: assessmentId },
+      where: { id: assessmentId, deleted_at: null },
       include: {
         technologies: {
           include: {
@@ -33,25 +29,16 @@ export default class ExamService {
       throw new AppError('Assessment not found', 404);
     }
 
+    console.log('aseessment technologies', assessment.technologies);
     for (const tech of assessment.technologies) {
-      const easyQuestions = await this.getRandomQuestions(
-        tech.technology_id,
-        tech.technology.name,
-        'easy',
-        tech.easy
-      );
+      console.log('tech', tech);
+      const easyQuestions = await this.getRandomQuestions('easy', tech.easy, tech.technology_id);
       const mediumQuestions = await this.getRandomQuestions(
-        tech.technology_id,
-        tech.technology.name,
         'medium',
-        tech.medium
+        tech.medium,
+        tech.technology_id
       );
-      const hardQuestions = await this.getRandomQuestions(
-        tech.technology_id,
-        tech.technology.name,
-        'hard',
-        tech.hard
-      );
+      const hardQuestions = await this.getRandomQuestions('hard', tech.hard, tech.technology_id);
 
       const allQuestions = [...easyQuestions, ...mediumQuestions, ...hardQuestions];
 
@@ -211,12 +198,7 @@ export default class ExamService {
     }
   }
 
-  async getRandomQuestions(
-    technologyId: string,
-    technologyName: string,
-    difficulty: Difficulty,
-    count: number
-  ) {
+  async getRandomQuestions(difficulty: Difficulty, count: number, technologyId: string) {
     const questions = await prisma.questions.findMany({
       where: {
         technology_id: technologyId,
@@ -225,13 +207,9 @@ export default class ExamService {
     });
 
     if (questions.length < count) {
-      throw new AppError(
-        `Not enough ${difficulty} questions available for technology ${technologyName}`,
-        400
-      );
+      throw new AppError(`Not enough ${difficulty} questions available for this technology`, 400);
     }
 
-    // Shuffle and select random questions
     const shuffled = questions.sort(() => 0.5 - Math.random());
     return shuffled.slice(0, count);
   }
@@ -335,31 +313,9 @@ export default class ExamService {
       const { assessment } = exam;
       const { easy, medium, hard } = assessment;
 
-      // Function to get random questions for a specific difficulty
-      const getRandomQuestions = async (difficulty: Difficulty, count: number) => {
-        const questions = await prisma.questions.findMany({
-          where: {
-            technology_id: technologyId,
-            difficulty_level: difficulty,
-          },
-        });
-
-        if (questions.length < count) {
-          throw new AppError(
-            `Not enough ${difficulty} questions available for this technology`,
-            400
-          );
-        }
-
-        // Shuffle and select random questions
-        const shuffled = questions.sort(() => 0.5 - Math.random());
-        return shuffled.slice(0, count);
-      };
-
-      // Get questions for each difficulty level
-      const easyQuestions = await getRandomQuestions('easy', easy);
-      const mediumQuestions = await getRandomQuestions('medium', medium);
-      const hardQuestions = await getRandomQuestions('hard', hard);
+      const easyQuestions = await this.getRandomQuestions('easy', easy, technologyId);
+      const mediumQuestions = await this.getRandomQuestions('medium', medium, technologyId);
+      const hardQuestions = await this.getRandomQuestions('hard', hard, technologyId);
 
       // Combine all questions
       const allQuestions = [...easyQuestions, ...mediumQuestions, ...hardQuestions];

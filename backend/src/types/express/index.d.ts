@@ -9,6 +9,7 @@ declare global {
         role_id: string;
         role_name: string;
       };
+      file: Express.Multer.File;
       examCandidate?: ExamTokenPayload;
     }
   }

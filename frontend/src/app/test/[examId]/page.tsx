@@ -5,18 +5,17 @@ import { VideoRecordingScreen } from '@/components/test/VideoRecorder';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { examApi } from '@/lib/api';
-import { IExam } from '@/types/candidate.types';
+import { useExamStore } from '@/store/examStore';
+import { EXAM_STEP } from '@/types/exam.types';
 import { Loader2 } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 const QuizPage = () => {
   const params = useParams();
-  const [step, setStep] = useState('basicInfo'); // 'basicInfo' | 'videoRecording' | 'quiz'
-  const [exam, setExam] = useState<IExam | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [accessCode, setAccessCode] = useState<string | null>(null);
+  const { current_step, setCurrentStep, setAccessCode, setExam } = useExamStore();
 
   useEffect(() => {
     const fetchCandidate = async () => {
@@ -31,23 +30,21 @@ const QuizPage = () => {
 
         setAccessCode(code);
 
-        const response = await examApi.get(`/candidate-exam/${params.examId}`, code);
+        const data = await examApi.get(`/candidate-exam/${params.examId}`, code);
 
-        // if (!data.success) {
-        // 	setError(
-        // 		data.message || 'Access denied. Invalid or expired access code.'
-        // 	);
-        // 	// setIsLoading(false);
-        // 	return;
-        // }
+        if (!data.success) {
+          setError(data.message || 'Access denied. Invalid or expired access code.');
+          return;
+        }
 
-        console.log('response ', response);
-        setExam(response.data);
+        console.log('daataaaaa exam', data);
+
+        setExam(data.data);
 
         setError(null);
       } catch (err) {
-        setError('Failed to fetch candidate data');
         console.error('Error fetching candidate:', err);
+        setError('Failed to fetch candidate data');
       } finally {
         setLoading(false);
       }
@@ -58,13 +55,9 @@ const QuizPage = () => {
     }
   }, [params.examId]);
 
-  const handleNextStep = () => {
-    setStep('videoRecording');
-  };
-
   const handleRecordingComplete = (recordedChunks: Blob[]) => {
     console.log('Recording complete:', recordedChunks);
-    setStep('quiz');
+    setCurrentStep(EXAM_STEP.QUIZ);
   };
 
   if (loading) {
@@ -96,7 +89,7 @@ const QuizPage = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+      <div className="w-screen min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-indigo-50">
         <Card className="w-[90%] max-w-md p-6">
           <CardHeader>
             <CardTitle className="text-red-600">Access Denied</CardTitle>
@@ -117,13 +110,11 @@ const QuizPage = () => {
 
   return (
     <div className="w-screen min-h-screen bg-gray-50">
-      {step === 'basicInfo' && (
-        <BasicInfoForm handleBasicInfoSubmit={handleNextStep} candidateData={exam?.candidate} />
-      )}
-      {step === 'videoRecording' && (
+      {current_step === EXAM_STEP.BASIC_INFO && <BasicInfoForm />}
+      {current_step === EXAM_STEP.VIDEO_RECORDING && (
         <VideoRecordingScreen onRecordingComplete={handleRecordingComplete} />
       )}
-      {step === 'quiz' && <ProctoredQuiz accessCode={accessCode} />}
+      {current_step === EXAM_STEP.QUIZ && <ProctoredQuiz />}
     </div>
   );
 };

@@ -104,7 +104,7 @@ export const authenticateCandidate: RequestHandler = async (req, res, next) => {
       },
     });
 
-    if (!candidate || !candidate.exam || candidate.exam.is_completed) {
+    if (!candidate || !candidate.exam) {
       generateResponse(res, 404, {}, false, 'Invalid or expired access code');
       return;
     }

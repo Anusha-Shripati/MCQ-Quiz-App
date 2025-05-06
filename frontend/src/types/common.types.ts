@@ -46,3 +46,9 @@ export interface RoleData {
   name: string;
   role_permissions: Permissions[];
 }
+
+export interface ITimestamps {
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
+}

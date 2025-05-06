@@ -11,6 +11,7 @@ import adminRouter from './user.router';
 import candidateRouter from './candidates.router';
 import examRouter from './exam.router';
 import candidateExamRouter from './candidate-exam.router';
+import uploadRouter from './upload.router';
 
 const router = express.Router();
 
@@ -25,5 +26,6 @@ router.use('/question', questionRouter);
 router.use('/candidate', candidateRouter);
 router.use('/exam', examRouter);
 router.use('/candidate-exam', candidateExamRouter);
+router.use('/upload', uploadRouter);
 
 export default router;

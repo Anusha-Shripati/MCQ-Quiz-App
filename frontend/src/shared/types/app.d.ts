@@ -44,7 +44,7 @@ export interface Question {
   time: string;
   difficulty_level: 'easy' | 'medium' | 'hard';
   type: 'multiple_select' | 'video' | 'text' | 'mcq' | 'code_snippet';
-  meta?: Record<string, string>;
+  meta?: Record<string, unknown>;
   created_at?: string;
   updated_at?: string;
   deleted_at?: string | null;

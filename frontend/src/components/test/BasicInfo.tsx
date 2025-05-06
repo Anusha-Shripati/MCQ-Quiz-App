@@ -1,21 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/form/button';
 import { Input } from '@/components/ui/form/input';
-import { ICandidate } from '@/types/candidate.types';
+import { useExamStore } from '@/store/examStore';
+import { EXAM_STEP } from '@/types/exam.types';
 import { Camera, FileText, Info, Mail, User, UserCircle } from 'lucide-react';
-import { memo, useEffect, useState } from 'react';
-
-interface FormData {
-  userName: string;
-  email: string;
-  experienceYear: number | null;
-  jobProfile: string;
-}
-
-interface BasicInfoFormProps {
-  handleBasicInfoSubmit: () => void;
-  candidateData?: ICandidate | null;
-}
+import { memo } from 'react';
 
 // Subcomponents
 const InstructionCard = () => (
@@ -88,82 +77,73 @@ const FormInput = ({
   </div>
 );
 
-const BasicInfoForm: React.FC<BasicInfoFormProps> = memo(
-  ({ handleBasicInfoSubmit, candidateData }) => {
-    const [formData, setFormData] = useState<FormData>({
-      userName: '',
-      email: '',
-      experienceYear: null,
-      jobProfile: '',
-    });
+const BasicInfoForm: React.FC = memo(() => {
+  const { exam, setCurrentStep } = useExamStore();
 
-    useEffect(() => {
-      if (candidateData) {
-        setFormData({
-          userName: candidateData.name || '',
-          email: candidateData.email || '',
-          experienceYear: Number(candidateData.experience) || null,
-          jobProfile: candidateData.technology?.name || '',
-        });
-      }
-    }, [candidateData]);
+  console.log('examm', exam);
+  const handleBasicInfoSubmit = () => {
+    setCurrentStep(EXAM_STEP.VIDEO_RECORDING);
+  };
 
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
-        <div className="max-w-6xl w-full grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <InstructionCard />
+  return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
+      <div className="max-w-6xl w-full grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <InstructionCard />
 
-          <Card className="bg-white shadow-lg hover:shadow-xl transition-shadow duration-300 border-0">
-            <CardHeader className="space-y-1">
-              <div className="flex items-center gap-2 text-purple-600">
-                <User className="h-5 w-5" />
-                <CardTitle className="text-xl font-semibold">Candidate Information</CardTitle>
-              </div>
-              <p className="text-sm text-gray-500">Please verify your details before proceeding</p>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-6">
-                <FormInput
-                  label="Full Name"
-                  icon={<User className="h-4 w-4" />}
-                  value={formData.userName}
-                />
-                <FormInput
-                  label="Email Address"
-                  icon={<Mail className="h-4 w-4" />}
-                  value={formData.email}
-                  type="email"
-                />
-                <FormInput
-                  label="Years of Experience"
-                  icon={<UserCircle className="h-4 w-4" />}
-                  value={formData.experienceYear}
-                  type="number"
-                />
-                <FormInput
-                  label="Technology"
-                  icon={<FileText className="h-4 w-4" />}
-                  value={formData.jobProfile}
-                />
+        <Card className="bg-white shadow-lg hover:shadow-xl transition-shadow duration-300 border-0">
+          <CardHeader className="space-y-1">
+            <div className="flex items-center gap-2 text-purple-600">
+              <User className="h-5 w-5" />
+              <CardTitle className="text-xl font-semibold">Candidate Information</CardTitle>
+            </div>
+            <p className="text-sm text-gray-500">Please verify your details before proceeding</p>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-6">
+              <FormInput
+                label="Full Name"
+                icon={<User className="h-4 w-4" />}
+                value={exam?.candidate?.name as string}
+              />
+              <FormInput
+                label="Email Address"
+                icon={<Mail className="h-4 w-4" />}
+                value={exam?.candidate?.email as string}
+                type="email"
+              />
+              <FormInput
+                label="Years of Experience"
+                icon={<UserCircle className="h-4 w-4" />}
+                value={exam?.candidate?.experience as string}
+                type="number"
+              />
+              <FormInput
+                label="Technology"
+                icon={<FileText className="h-4 w-4" />}
+                value={
+                  exam?.assessment?.technologies
+                    ?.map((item) => item?.technology?.name)
+                    .join(',') as string
+                }
+              />
 
-                <div className="pt-4">
-                  <Button
-                    onClick={handleBasicInfoSubmit}
-                    className="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-lg
+              <div className="pt-4">
+                <Button
+                  onClick={handleBasicInfoSubmit}
+                  className="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-lg
 										shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
-                  >
-                    <Camera className="w-4 h-4 mr-2" />
-                    Proceed to Video Recording
-                  </Button>
-                </div>
+                >
+                  <Camera className="w-4 h-4 mr-2" />
+                  Proceed to Video Recording
+                </Button>
               </div>
-            </CardContent>
-          </Card>
-        </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
-    );
-  }
-);
+    </div>
+  );
+});
 
 BasicInfoForm.displayName = 'BasicInfoForm';
 

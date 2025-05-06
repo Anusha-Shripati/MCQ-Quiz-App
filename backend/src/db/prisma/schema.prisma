@@ -76,6 +76,9 @@ model Assessment_technology {
     hard          Int         @default(0)
     assessments   Assessments @relation(fields: [assessment_id], references: [id])
     technology    Technology  @relation(fields: [technology_id], references: [id])
+    created_at    DateTime    @default(now())
+    updated_at    DateTime    @updatedAt
+    deleted_at    DateTime?
 }
 
 model Technology {

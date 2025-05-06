@@ -780,7 +780,7 @@ const resetDB = async () => {
 };
 
 async function main() {
-  await resetDB();
+  // await resetDB();
 
   const hashedPassword = await bcrypt.hash(
     process.env.SUPER_ADMIN_PASSWORD || 'superadminpassword',
@@ -840,9 +840,9 @@ async function main() {
   await createTechnologies();
 
   // Seed questions for all technologies
-  await seedQuestions(mongodbQuestions, 'MongoDB');
-  await seedQuestions(javascriptQuestions, 'JavaScript');
-  await seedQuestions(pythonQuestions, 'Python');
+  // await seedQuestions(mongodbQuestions, 'MongoDB');
+  // await seedQuestions(javascriptQuestions, 'JavaScript');
+  // await seedQuestions(pythonQuestions, 'Python');
 
   // Create test candidates
   // await createTestCandidates();

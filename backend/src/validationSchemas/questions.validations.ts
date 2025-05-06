@@ -7,9 +7,15 @@ export const questionsSchema = {
         'string.empty': 'Technology is required',
         'string.uuid': 'Invalid Technology Id format',
       }),
-      question: Joi.string().required().messages({
-        'string.empty': 'Question is required',
-      }),
+      question: Joi.string()
+        .allow('')
+        .when('type', {
+          is: 'video',
+          then: Joi.optional(),
+          otherwise: Joi.required().messages({
+            'string.empty': 'Question is required',
+          }),
+        }),
       correct_answer: Joi.when('type', {
         is: 'code_snippet',
         then: Joi.any().optional(),
@@ -32,10 +38,20 @@ export const questionsSchema = {
           'string.empty': 'Type is required',
           'any.only': 'Type must be one of mcq, multiple_select, text, video',
         }),
-      meta: Joi.object().messages({
-        'object.base': 'Meta must be an object',
-      }),
-    }),
+      meta: Joi.object().unknown(true).default({}),
+    }).custom((value, helpers) => {
+      if (
+        value.type === 'video' &&
+        (!value.question?.trim() || value.question.trim() === '') &&
+        (!value.meta?.video_url || value.meta.video_url.trim() === '')
+      ) {
+        return helpers.error('any.custom', {
+          message: 'Either question or meta.video_url is required for video type',
+        });
+      }
+
+      return value;
+    }, 'Custom validation'),
   },
   update: {
     params: Joi.object({
@@ -49,9 +65,15 @@ export const questionsSchema = {
         'string.empty': 'Technology is required',
         'string.uuid': 'Invalid Technology Id format',
       }),
-      question: Joi.string().required().messages({
-        'string.empty': 'Question is required',
-      }),
+      question: Joi.string()
+        .allow('')
+        .when('type', {
+          is: 'video',
+          then: Joi.optional(),
+          otherwise: Joi.required().messages({
+            'string.empty': 'Question is required',
+          }),
+        }),
       correct_answer: Joi.when('type', {
         is: 'code_snippet',
         then: Joi.any().optional(),
@@ -74,10 +96,20 @@ export const questionsSchema = {
           'string.empty': 'Type is required',
           'any.only': 'Type must be one of mcq, multiple_select, text, video',
         }),
-      meta: Joi.object().messages({
-        'object.base': 'Meta must be an object',
-      }),
-    }),
+      meta: Joi.object().unknown(true).default({}),
+    }).custom((value, helpers) => {
+      if (
+        value.type === 'video' &&
+        (!value.question?.trim() || value.question.trim() === '') &&
+        (!value.meta?.video_url || value.meta.video_url.trim() === '')
+      ) {
+        return helpers.error('any.custom', {
+          message: 'Either question or meta.video_url is required for video type',
+        });
+      }
+
+      return value;
+    }, 'Custom validation for video type'),
   },
 
   delete: {

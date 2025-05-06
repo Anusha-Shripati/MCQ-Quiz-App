@@ -25,8 +25,6 @@ export default class CandidatesService {
           throw new AppError('Phone number already exists', 400);
         }
 
-        await examService.createExamQuestionsForAssessment(data.exam_id, data.assessment_id);
-
         const newCandidate = await prisma.candidate.create({
           data: {
             name: data.name,

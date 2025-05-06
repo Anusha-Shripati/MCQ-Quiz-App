@@ -77,7 +77,7 @@ export const QuestionCard = ({
               {String.fromCharCode(65 + index)}. {option}
             </li>
           ))}
-          {question.meta?.code && (
+          {question.meta?.code ? (
             <li
               key={index}
               className={`p-2 rounded-md text-sm md:text-base ${
@@ -86,8 +86,10 @@ export const QuestionCard = ({
                   : 'dark:bg-gray-800 dark:text-gray-400 bg-gray-100 text-gray-800'
               }`}
             >
-              {question.meta?.code}
+              {question.meta?.code as string}
             </li>
+          ) : (
+            ''
           )}
         </ul>
         <div className="flex justify-between items-center mt-4 text-sm">

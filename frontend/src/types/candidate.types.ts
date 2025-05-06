@@ -1,4 +1,5 @@
-import { DateRange } from './common.types';
+import { DateRange, ITimestamps } from './common.types';
+import { IExam } from './exam.types';
 
 export type CandidateFormData = {
   id?: string;
@@ -19,12 +20,6 @@ export interface CandidateDetails {
   categories: Record<string, string>;
   createdBy: string;
   createdOn: string;
-}
-
-interface ITimestamps {
-  created_at: string;
-  updated_at: string;
-  deleted_at: string | null;
 }
 
 export interface ITechnology {
@@ -53,37 +48,15 @@ export interface IAssessment extends ITimestamps {
   technologies?: IAssessmentTechnology[];
 }
 
-export interface IExam extends ITimestamps {
-  id: string;
-  user_id: string;
-  assessment_id: string;
-  end_time: string;
-  start_time: string;
-  status?: string;
-  is_completed: boolean;
-  meta: Record<string, unknown>;
-  candidate: ICandidate;
-  assessment: IAssessment;
-  exam_questions: IExamQuestion[];
-}
-
-export interface IExamQuestion extends ITimestamps {
-  id: string;
-  exam_id: string;
-  question_id: string;
-  question: IQuestion;
-}
-
 export interface IQuestion extends ITimestamps {
   id: string;
   technology_id: string;
   question: string;
-  correct_answer: string[];
   options: string[];
   time: string;
   difficulty_level: string;
   type: string;
-  meta?: Record<string, string>;
+  meta?: Record<string, unknown>;
 }
 
 export interface ICandidateMeta {

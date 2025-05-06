@@ -81,6 +81,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         loading: false,
         permissions: null,
       });
+      throw error;
     }
   },
   setPermissions: async (permissions: Record<string, Permissions> | null, user: User | null) => {

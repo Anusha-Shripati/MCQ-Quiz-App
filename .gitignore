@@ -15,6 +15,7 @@ node_modules
 /out/
 /dist
 /backend/dist
+/backend/uploads
 
 # production
 /build

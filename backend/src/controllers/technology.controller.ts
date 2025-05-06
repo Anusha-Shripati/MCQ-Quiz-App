@@ -62,20 +62,13 @@ export class TechnologyController {
     try {
       const { id } = req.params;
       const existingTechnology = await technologyService.getTechnologyById(id);
+
       if (!existingTechnology) {
         return generateResponse(res, 400, {}, false, 'Technology not found');
       }
 
-      if (existingTechnology?.questions?.length > 0) {
-        return generateResponse(
-          res,
-          400,
-          {},
-          false,
-          'There are questions associated with this technology'
-        );
-      }
       await technologyService.deleteTechnology(id);
+
       return generateResponse(res, 200, {}, true, 'Technology deleted successfully');
     } catch (error) {
       next(error);

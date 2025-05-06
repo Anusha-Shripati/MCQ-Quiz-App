@@ -22,7 +22,12 @@ export class CandidateExamService {
     }
 
     const exam = await prisma.exam.findUnique({
-      where: { id: examId },
+      where: {
+        id: examId,
+        assessment: {
+          deleted_at: null,
+        },
+      },
       include: {
         candidate: true,
         assessment: {

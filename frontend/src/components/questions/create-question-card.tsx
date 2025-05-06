@@ -1,22 +1,22 @@
-import React, { useMemo, useState } from 'react';
-import { Button } from '@/components/ui/form/button';
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
-import { Input } from '@/components/ui/form/input';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Dialog,
-  DialogTrigger,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
   DialogDescription,
   DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
 } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/form/button';
+import { Input } from '@/components/ui/form/input';
+import { api } from '@/lib/api';
 import { Question } from '@/shared/types/app';
-import { FormField } from '../common/form-field';
+import { AxiosError } from 'axios';
+import React, { useMemo, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import useSWRMutation from 'swr/mutation';
-import { api } from '@/lib/api';
-import { AxiosError } from 'axios';
+import { FormField } from '../common/form-field';
 
 interface QuestionCardProps {
   question: Question;
@@ -66,9 +66,6 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
   editQuestion,
 }) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [videoToVideo, setVideoToVideo] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [videoUrl, setVideoUrl] = useState('');
 
   const ensureFiveOptions = (options: string[] = []) => {
     while (options.length < 5) {
@@ -137,17 +134,19 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
 
     if (
       question.type === 'code_snippet' &&
-      (!question.meta?.code || question.meta.code.trim() === '')
+      (!question.meta?.code || (question.meta.code as string)?.trim() === '')
     ) {
-      toast.error('Please provide the code snippet.');
+      toast.error('Please provide the codePlease provide the video URL snippet.');
       valid = false;
     }
 
     if (
       question.type === 'video' &&
-      (!question.meta?.video_url || question.meta.video_url.trim() === '')
+      question.meta?.videoToVideo &&
+      (!question.question?.trim() || question.question.trim() === '') &&
+      (!question.meta?.video_url || (question.meta?.video_url as string)?.trim() === '')
     ) {
-      toast.error('Please provide the video URL.');
+      toast.error('Please provide either a question or a video URL.');
       valid = false;
     }
 
@@ -213,6 +212,43 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
     setQuestions(updatedQuestions);
   };
 
+  const handleQuestionURL = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const updatedQuestions = [...questions];
+    if (updatedQuestions[selectedQuestion].meta) {
+      updatedQuestions[selectedQuestion].meta.video_url = e.target.value;
+    }
+    setQuestions(updatedQuestions);
+  };
+
+  const handleVideoToVideo = () => {
+    const updatedQuestions = [...questions];
+
+    if (updatedQuestions[selectedQuestion].meta) {
+      let videoToVideo = updatedQuestions[selectedQuestion].meta.videoToVideo;
+
+      if (videoToVideo === undefined || videoToVideo === null || false) {
+        videoToVideo = true;
+      } else {
+        videoToVideo = false;
+      }
+
+      updatedQuestions[selectedQuestion].meta.videoToVideo = videoToVideo;
+      setQuestions(updatedQuestions);
+    }
+  };
+
+  // useEffect(() => {
+  //   if (!videoToVideo && questions && selectedQuestion && questions[selectedQuestion]) {
+  //     const updatedQuestions = [...questions];
+  //     if (updatedQuestions[selectedQuestion]?.meta?.video_url) {
+  //       delete updatedQuestions[selectedQuestion].meta.video_url;
+  //     }
+  //     setQuestions(updatedQuestions);
+  //   }
+  // }, [questions, selectedQuestion, videoToVideo]);
+
+  console.log('questionnn', question);
+
   return (
     <Card
       className={`h-[570px] flex flex-col 
@@ -274,21 +310,20 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
           />
         </div>
 
-        {question.type === "video" ? (
+        {question.type === 'video' ? (
           <>
             <input
               type="checkbox"
               name="Video to Video"
-              checked={videoToVideo}
+              checked={(question.meta?.videoToVideo || false) as boolean}
               className="mr-2 mb-4"
-              onChange={() => setVideoToVideo((prev) => !prev)}
+              onChange={() => handleVideoToVideo()}
             />
             Video to Video
           </>
         ) : (
-          ""
+          ''
         )}
-
 
         <FormField
           label="Question"
@@ -302,17 +337,17 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
           className="mb-4"
         />
 
-{question.type === "video" && videoToVideo ? (
-  <FormField
-          label="Question URL"
-          placeholder="Enter video url"
-          onChange={(e) => {
-            setVideoUrl(e.target.value);
-          }}
-          className="mb-4"
-        />
-) : ""
-}
+        {question.type === 'video' && question.meta?.videoToVideo ? (
+          <FormField
+            label="Question URL"
+            placeholder="Enter video url"
+            value={(question.meta?.video_url || '') as string}
+            onChange={handleQuestionURL}
+            className="mb-4"
+          />
+        ) : (
+          ''
+        )}
 
         {(question.type === 'mcq' || question.type === 'multiple_select') && (
           <div className="space-y-2">
@@ -378,7 +413,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
         {question.type === 'code_snippet' && (
           <textarea
             placeholder="Enter your code snippet"
-            value={question?.meta?.code || ''}
+            value={(question?.meta?.code || '') as string}
             onChange={handleCodeQuestions}
             className="w-full p-2 border rounded-md dark:bg-gray-700 dark:text-white"
             rows={10}

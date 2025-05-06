@@ -179,31 +179,18 @@ export default class CandidatesService {
 
     if (query.created) {
       try {
-        console.log('Received created query:', query.created);
         const dateRange = JSON.parse(query.created)?.range;
-        console.log('Parsed date range:', dateRange);
-
-        if (!dateRange) {
-          throw new AppError('Invalid date range format', 400);
+        if (dateRange) {
+          const fromDate = dateRange.from ? new Date(dateRange.from) : null;
+          const toDate = dateRange.to ? new Date(dateRange.to) : null;
+          if (fromDate && toDate && !isNaN(fromDate.getTime()) && !isNaN(toDate.getTime())) {
+            where.created_at = {
+              gte: fromDate,
+              lte: toDate,
+            };
+          }
         }
 
-        const fromDate = dateRange.from ? new Date(dateRange.from) : null;
-        const toDate = dateRange.to ? new Date(dateRange.to) : null;
-
-        console.log('Converted dates:', {
-          fromDate: fromDate,
-          toDate: toDate,
-        });
-
-        if (fromDate && toDate && !isNaN(fromDate.getTime()) && !isNaN(toDate.getTime())) {
-          where.created_at = {
-            gte: fromDate,
-            lte: toDate,
-          };
-          console.log('Final where clause for dates:', where.created_at);
-        } else {
-          console.log('Invalid dates:', { fromDate, toDate });
-        }
       } catch (error) {
         console.error('Invalid date range format:', error);
       }

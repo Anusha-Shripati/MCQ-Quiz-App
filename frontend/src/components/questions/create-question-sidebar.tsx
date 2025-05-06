@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/form/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { ScrollArea } from '@/components/ui/scroll-area';
+// import { ScrollArea } from '@/components/ui/scroll-area';
 import { Trash2 } from 'lucide-react';
 import { useSearchParams, usePathname } from 'next/navigation';
 import clsx from 'clsx';

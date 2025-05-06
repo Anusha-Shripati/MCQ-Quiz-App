@@ -5,7 +5,7 @@ import { ChevronDown, ChevronUp, Edit, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/form/button';
 import AssessmentEdit from './assessment-edit';
 import { toast } from 'react-hot-toast';
-import { Assessment, Technology, useAssessmentStore } from '@/store/assessmentStore';
+import { Assessment, AssessmentFilters, Technology, useAssessmentStore } from '@/store/assessmentStore';
 // import { LoadingSpinner } from "../ui/loading-spinner";
 import Error from '@/app/error';
 import useSWR, { mutate } from 'swr';
@@ -13,6 +13,8 @@ import Pagination from '../pagination';
 import { api, deleteData, isAxiosError } from '@/lib/api';
 import qs from 'query-string';
 import dayjs from 'dayjs';
+import { usePathname, useSearchParams } from 'next/navigation';
+import StatusWrapper from '../common/status-wrapper';
 // import StatusWrapper from "../common/status-wrapper";
 
 interface AssessmentItemProps {
@@ -178,8 +180,10 @@ export default function AssessmentDetails() {
   const [currentPageStart, setCurrentPageStart] = useState<number>(1);
   const [currentPageEnd, setCurrentPageEnd] = useState<number>(1);
   const [assessments, setAssessments] = useState<Required<Assessment>[]>([]);
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
 
-  const { setCurrentAssessment, clearCurrentAssessment, filters, currentAssessment } =
+  const { setCurrentAssessment, clearCurrentAssessment, filters, currentAssessment,setFilters } =
     useAssessmentStore();
 
   const queryObj = {
@@ -196,7 +200,7 @@ export default function AssessmentDetails() {
   const {
     data: assessmentsData,
     error,
-    // isLoading,
+    isLoading,
   } = useSWR(`/assessment/list?${cleanedQuery}`, api.get);
 
   useEffect(() => {
@@ -243,10 +247,6 @@ export default function AssessmentDetails() {
     }
   };
 
-  if (error) {
-    return <Error error={error} reset={() => window.location.reload()} />;
-  }
-
   const handlePageChange = (page: number) => {
     setCurrentPageStart((page - 1) * itemsPerPage + 1);
     setCurrentPageEnd(Math.min(page * itemsPerPage, assessments.length));
@@ -258,6 +258,40 @@ export default function AssessmentDetails() {
     setCurrentPageEnd(Math.min(Number(perPage) * currentPage, assessments.length));
     setCurrentPage(1);
   };
+
+
+    useEffect(() => {
+      const params = new URLSearchParams();
+  
+      params.set('page', currentPage.toString());
+      params.set('perPage', itemsPerPage.toString());
+
+      Object.entries(filters).forEach(([key, value]) => {
+        if(value){
+          params.set(key, typeof value =='object' ? JSON.stringify(value):value);
+        }
+        
+      });
+      
+      window.history.replaceState(null, '', `${pathname}?${params.toString()}`);
+    }, [currentPage, itemsPerPage, filters, pathname]);
+
+    useEffect(() => {
+      const params = new URLSearchParams(searchParams.toString());
+      
+      if (params.get('page')) setCurrentPage(Number(params.get('page')));
+      if (params.get('perPage')) setItemsPerPage(Number(params.get('perPage')));
+      
+      const filterParams = {
+        name:params.get('name') || '',
+        view:params.get('view') || '',
+        created_by:params.get('created_by') || '',
+        created_duation:params.get('created_duation') ?JSON.parse(params.get('created_duation')as string):undefined,
+      };
+      setFilters(filterParams as AssessmentFilters);
+    }, []);
+
+
   if (editing) {
     return currentAssessment ? (
       <AssessmentEdit assessment={currentAssessment} onSave={handleSave} onCancel={handleCancel} />
@@ -266,11 +300,11 @@ export default function AssessmentDetails() {
 
   return (
     <div className="p-4 bg-white dark:bg-[#334155] rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-200 hover:shadow-md">
-      {/* <StatusWrapper
-        error={"error"}
+      <StatusWrapper
+        error={error}
         loading={isLoading}
         className="min-h-[500px]"
-      > */}
+      >
       <Pagination
         className="flex-grow min-h-[500px]"
         currentPageStart={currentPageStart}
@@ -302,7 +336,7 @@ export default function AssessmentDetails() {
             ))}
         </div>
       </Pagination>
-      {/* </StatusWrapper> */}
+      </StatusWrapper>
     </div>
   );
 }

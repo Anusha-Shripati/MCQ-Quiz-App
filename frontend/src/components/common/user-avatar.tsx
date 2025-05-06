@@ -1,3 +1,5 @@
+"use client";
+
 import { Avatar, AvatarImage } from '@/components/ui/avatar';
 import { useAuthStore } from '@/store/authStore';
 import {

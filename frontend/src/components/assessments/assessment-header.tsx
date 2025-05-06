@@ -7,28 +7,39 @@ import { Controller, useForm } from 'react-hook-form';
 import { DateRange, User } from '@/types/common.types';
 import { AssessmentFilters, useAssessmentStore } from '@/store/assessmentStore';
 import DatePickerWithRange from '../ui/form/date-range-picker';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { FormField } from '../common/form-field';
 import useSWR from 'swr';
 import { fetcher } from '@/lib/api';
+import { cn } from '@/lib/utils';
 
 export default function AssessmentHeader() {
   const defaultValues: AssessmentFilters = {
     name: '',
     created_by: 'all',
-    created_duation: {
-      from: undefined,
-      to: undefined,
-    },
-    view: 'today',
+    created_duation: undefined,
+    view: '',
   };
 
   const { data: users } = useSWR('/user/list', fetcher);
-  const { setFilters } = useAssessmentStore();
+  const { setFilters, filters } = useAssessmentStore();
 
-  const { control, setValue, watch, register } = useForm<AssessmentFilters>({
+  const { control, setValue, watch, register, reset } = useForm<AssessmentFilters>({
     defaultValues,
   });
+
+
+  useEffect(() => {
+    reset({
+      name: filters.name || '',
+      created_by: filters.created_by || '',
+      created_duation: filters.created_duation || undefined,
+      view: filters.view || ''
+    })
+  }, [filters])
+
+
+
   const allFields = watch();
 
   const headerUsersOptions = useMemo(() => {
@@ -69,6 +80,26 @@ export default function AssessmentHeader() {
     setFilters(allFields);
   };
 
+    const isFilter = useMemo(() => {
+      return Object.keys(allFields).some((key: string) => {
+        const typedKey = key as keyof AssessmentFilters;
+        if (typedKey === 'created_duation') {
+          return allFields[typedKey]?.from !== undefined || allFields[typedKey]?.to !== undefined;
+        } 
+        else if (typedKey === 'created_by') {
+          return allFields[typedKey] !== 'all';
+        } 
+        else {
+          return !!allFields[typedKey];
+        }
+      });
+    }, [allFields]);
+
+    const clearAllFilters=()=>{
+      reset(defaultValues);
+      setFilters(defaultValues)
+    }
+
   return (
     <div className="flex flex-col md:flex-row items-center gap-6">
       <div className="flex flex-wrap items-center gap-3">
@@ -102,9 +133,8 @@ export default function AssessmentHeader() {
           <Button
             variant={allFields.view === 'today' ? 'secondary' : 'ghost'}
             size="sm"
-            className={`${
-              allFields.view === 'today' ? 'bg-gray-100 dark:bg-gray-700' : ''
-            } text-gray-900 dark:text-gray-300`}
+            className={`${allFields.view === 'today' ? 'bg-gray-100 dark:bg-gray-700' : ''
+              } text-gray-900 dark:text-gray-300`}
             onClick={() => handleViewChange('today')}
           >
             Today
@@ -112,9 +142,8 @@ export default function AssessmentHeader() {
           <Button
             variant={allFields.view === 'week' ? 'secondary' : 'ghost'}
             size="sm"
-            className={`${
-              allFields.view === 'week' ? 'bg-gray-100 dark:bg-gray-700' : ''
-            } text-gray-900 dark:text-gray-300`}
+            className={`${allFields.view === 'week' ? 'bg-gray-100 dark:bg-gray-700' : ''
+              } text-gray-900 dark:text-gray-300`}
             onClick={() => handleViewChange('week')}
           >
             Week
@@ -124,6 +153,19 @@ export default function AssessmentHeader() {
         <Button className="ml-2 cursor-pointer" onClick={handleFilterClick}>
           <ListFilterIcon size={30} />
         </Button>
+        {isFilter && (
+          <Button
+            variant="destructive"
+            onClick={clearAllFilters}
+            className={cn(
+              'h-10 px-4 text-sm font-medium whitespace-nowrap',
+              'bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700',
+              'focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800'
+            )}
+          >
+            Clear All
+          </Button>
+        )}
 
         <Link href="/assessments/create-assessment">
           <Button className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm">

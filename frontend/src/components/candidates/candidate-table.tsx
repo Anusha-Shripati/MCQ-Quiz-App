@@ -74,7 +74,6 @@ function CandidateTable() {
 
     if (params.get('page')) setCurrentPage(Number(params.get('page')));
     if (params.get('perPage')) setItemsPerPage(Number(params.get('perPage')));
-
     const filterParams = {
       searchQuery: params.get('searchQuery') || '',
       technologyFilter: params.get('technologyFilter')
@@ -89,17 +88,16 @@ function CandidateTable() {
             return found || { value: '', label };
           })
         : [],
-      created: params.get('created') ? JSON.parse(params.get('created') as string) : null,
+      created: params.get('created') ? JSON.parse(params.get('created') as string) : {},
     };
-
     setCandidateFilter(filterParams);
-  }, [searchParams, setCandidateFilter]);
+  }, [searchParams,technologyOptions,assessmentOptions]);
 
   const queryObj = useMemo(
     () => ({
       page: currentPage || 1,
       limit: itemsPerPage || 10,
-      ...candidateFilter,
+      // ...candidateFilter,
       search: candidateFilter.searchQuery,
       technologyFilter: candidateFilter.technologyFilter.map(
         (item: TechnologyOption) => item.value
@@ -107,7 +105,7 @@ function CandidateTable() {
       assessmentFilter: candidateFilter.assessmentFilter.map(
         (item: AssessmentOption) => item.value
       ),
-      created: candidateFilter.created ? JSON.stringify(candidateFilter.created) : undefined,
+      created: JSON.stringify({range: candidateFilter.created?.range ? candidateFilter.created?.range : undefined}),
     }),
     [currentPage, itemsPerPage, candidateFilter]
   );

@@ -33,6 +33,7 @@ const Filters = () => {
     setTechnologyOptions,
     assessmentOptions,
     technologyOptions,
+    candidateFilter
   } = useCandidateStore();
 
   useEffect(() => {
@@ -58,9 +59,9 @@ const Filters = () => {
   }, [technology]);
 
   const defaultValues: CandidateFilter = {
-    searchQuery: '',
-    technologyFilter: [],
-    assessmentFilter: [],
+    searchQuery:  '',
+    technologyFilter:  [],
+    assessmentFilter:  [],
     created: {
       days: '',
       range: undefined,
@@ -69,6 +70,7 @@ const Filters = () => {
   const { setValue, watch, reset, register } = useForm<CandidateFilter>({
     defaultValues,
   });
+
 
   const formData = watch();
 
@@ -85,37 +87,54 @@ const Filters = () => {
       })),
       created: formData.created?.range
         ? {
-            days: '',
-            range: {
-              from: formData.created.range.from
-                ? new Date(formData.created.range.from.setHours(0, 0, 0, 0))
-                : undefined,
-              to: formData.created.range.to
-                ? new Date(formData.created.range.to.setHours(23, 59, 59, 999))
-                : undefined,
-            },
-          }
+          days: formData.created?.days,
+          range: {
+            from: formData.created.range.from
+              ? new Date(formData.created.range.from.setHours(0, 0, 0, 0))
+              : undefined,
+            to: formData.created.range.to
+              ? new Date(formData.created.range.to.setHours(23, 59, 59, 999))
+              : undefined,
+          },
+        }
         : undefined,
     };
     setCandidateFilter(payload);
   };
 
+
   const clearAllFilters = () => {
-    reset();
+    reset(defaultValues)
+    setCandidateFilter(defaultValues)
   };
 
+
+  useEffect(() => {
+    reset({
+      searchQuery: candidateFilter.searchQuery || '',
+      technologyFilter: candidateFilter.technologyFilter || [],
+      assessmentFilter: candidateFilter.assessmentFilter || [],
+      created: {
+        days: candidateFilter.created?.days || '',
+        range: candidateFilter.created?.range || undefined,
+      }
+    })
+  }, [candidateFilter])
+
   const isFilter = useMemo(() => {
-    return Object.keys(watch()).some((key: string) => {
+    return Object.keys(formData).some((key: string) => {
       const typedKey = key as keyof CandidateFilter;
+
       if (typedKey === 'technologyFilter' || typedKey === 'assessmentFilter') {
-        return watch(typedKey).length > 0;
+        return formData[typedKey].length > 0;
       } else if (typedKey === 'created') {
-        return watch(typedKey)?.days !== '' || watch(typedKey)?.range !== undefined;
+        return formData[typedKey]?.days !== '' || formData[typedKey]?.range !== undefined;
       } else {
-        return watch(typedKey) !== '';
+        return formData[typedKey] !== '';
       }
     });
-  }, [watch]);
+  }, [formData]);
+
 
   return (
     <section className="w-full">
@@ -141,7 +160,7 @@ const Filters = () => {
           options={assessmentOptions}
         />
 
-        <FilterOptions formData={watch()} setValue={setValue} register={register} />
+        <FilterOptions formData={formData} setValue={setValue} register={register} />
         <Button className="ml-2 cursor-pointer" onClick={getData}>
           <ListFilterIcon size={30} />
         </Button>

@@ -4,7 +4,7 @@ import Sidebar from '@/components/common/sidebar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import AdminAuth from '@/components/common/admin-auth';
 import { SWRConfig } from 'swr';
-import { Header } from '@/app/(admin)/header/page';
+import  HeaderPage from '@/app/(admin)/header/page';
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   return (
@@ -12,7 +12,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       <AdminAuth>
         <Sidebar />
         <div className="flex flex-col w-full">
-          <Header />
+          <HeaderPage />
           <div
             className="flex-1 bg-secondary border overflow-y flex justify-center"
             style={{ height: 'calc(100vh - 10rem)' }}

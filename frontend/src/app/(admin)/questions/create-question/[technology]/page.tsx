@@ -174,7 +174,7 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
 
   return (
     // Main container
-    <StatusWrapper className="min-h-screen p-6 dark:bg-gray-900 " loading={isLoading} error={error}>
+    <StatusWrapper className="p-6 dark:bg-gray-900 " loading={isLoading} error={error}>
       {/* Header */}
       <div className="flex justify-start items-center mb-4">
         <Button variant="ghost" size="icon" onClick={handleBack}>

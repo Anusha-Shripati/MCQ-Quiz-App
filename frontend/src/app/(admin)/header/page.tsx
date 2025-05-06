@@ -2,7 +2,7 @@ import React from 'react';
 import UserAvatar from '../../../components/common/user-avatar';
 import { ThemeToggle } from '../../../components/common/theme-toggle';
 
-export const Header = () => {
+ const HeaderPage = () => {
   return (
     <div className="z-20 h-18 w-full sticky top-0 shadow-md">
       <div
@@ -14,3 +14,4 @@ export const Header = () => {
     </div>
   );
 };
+export default HeaderPage

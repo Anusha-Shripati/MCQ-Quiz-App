@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { ReactNode, Suspense } from 'react';
 import './globals.css';
 import { ThemeProvider } from '@/components/common/theme-provider';
 import { nunito } from '@/lib/fonts';
@@ -7,6 +7,7 @@ import { NavigationProgress } from '@/components/ui/navigation-progress';
 
 import { Toaster } from 'react-hot-toast';
 import AuthInitializer from '@/components/common/auth-initializer';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
@@ -15,18 +16,21 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <link rel="icon" type="image/png" href="/favicon.ico" />
       </head>
       <body className={`flex min-h-screen relative hide-scroller ${nunito.className}`}>
-        <AuthInitializer>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-            <NavigationProgress />
-            <TooltipProvider>{children}</TooltipProvider>
-            <Toaster position="top-right" />
-          </ThemeProvider>
-        </AuthInitializer>
+        <Suspense fallback={<LoadingSpinner/>}>
+          <AuthInitializer>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
+              disableTransitionOnChange
+            >
+              <NavigationProgress />
+              <TooltipProvider>{children}</TooltipProvider>
+              <Toaster position="top-right" />
+            </ThemeProvider>
+          </AuthInitializer>
+        </Suspense>
+
       </body>
     </html>
   );

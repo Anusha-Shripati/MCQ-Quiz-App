@@ -57,7 +57,7 @@ export const useAssessmentStore = create<AssessmentState>((set) => ({
     name: '',
     created_by: 'all',
     created_duation: undefined,
-    view: 'today',
+    view: '',
   },
   currentAssessment: null,
   isLoading: false,

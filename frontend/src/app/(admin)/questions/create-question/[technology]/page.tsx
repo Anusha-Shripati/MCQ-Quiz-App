@@ -8,46 +8,97 @@ import { useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { Question } from '@/shared/types/app';
-import useSWR from 'swr';
+import useSWR, { mutate } from 'swr';
 import { api } from '@/lib/api';
 // import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import StatusWrapper from '@/components/common/status-wrapper';
+import { FormField } from '@/components/common/form-field';
+import useSWRMutation from 'swr/mutation';
+import { isValidUUID } from '@/lib/utils';
+// import { isValidObjectId } from '@/lib/utils';
+
+
+
+async function create(url: string, { arg }: { arg: { name: string } }) {
+  const response = await api.post(url, arg);
+  return response;
+}
+async function update(url: string, { arg }: { arg: { name: string } }) {
+  const response = await api.put(url, arg);
+  return response;
+}
+
+
 const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }) => {
-  const [questions, setQuestions] = useState<Question[]>([]);
+  const [technologyId, setTechnologyId] = useState<string>(params.technology);
+
+  const [questions, setQuestions] = useState<Question[]>([
+    {
+      technology_id: technologyId,
+      question: '',
+      options: ['', '', '', '', '', ''],
+      correct_answer: [],
+      time: '',
+      difficulty_level: 'easy',
+      type: 'mcq',
+      meta: {},
+    },
+  ]);
   // const [showSidebar, setShowSidebar] = useState(false);
   const router = useRouter();
   const [selectedQuestion, setSelectedQuestion] = useState<number>(0);
-
+  const [name, setName] = useState<string>('');
+  const [isValidTechnology, setValidTechnology] = useState<boolean>(isValidUUID(params.technology));
   const { data, isLoading, error } = useSWR(
-    `/question/list?technology_id=${params.technology}`,
-    api.get
+    isValidTechnology ? `/question/list?technology_id=${technologyId}` : null,
+    api.get,
+    {
+      revalidateOnMount: true,
+      revalidateOnFocus: true,
+      revalidateIfStale: true,
+      dedupingInterval: 0,
+    }
   );
 
+
+
+  const { trigger, isMutating } = useSWRMutation(`/technology/create`, create);
+  const { trigger: updateTrigger, isMutating: updating } = useSWRMutation(
+    `/technology/${technologyId}`,
+    update
+  );
+
+  const handleTechnologySave = async () => {
+    if (isValidTechnology) {
+      const response = await updateTrigger({ name });
+
+      if (response.success) {
+        toast.success("Technology saved successfully!");
+        mutate((key) => typeof key === 'string' && key.startsWith('/technology/list'));
+
+      } else {
+        toast.error("Failed to save technology.");
+      }
+    } else {
+      const response = await trigger({ name });
+      if (response.success) {
+        toast.success("Technology created successfully!");
+        window.history.replaceState(null, '', `/questions/create-question/${response.data.id}`);
+        setTechnologyId(response.data.id);
+        setValidTechnology(true);
+        mutate((key) => typeof key === 'string' && key.startsWith('/technology/list'));
+      } else {
+        toast.error("Failed to create technology.");
+      }
+    }
+  }
   useEffect(() => {
+    setName(data?.data?.technology?.name || '');
     if (data?.data?.list?.length) {
       setQuestions(data?.data?.list);
       if (selectedQuestion > data?.data?.list.length) {
         setSelectedQuestion(data?.data?.list.length - 1);
       }
-    }
-
-    console.log(data?.data?.list, 'data?.data?.list');
-    console.log(questions, 'questions');
-    console.log(questions.length, 'questions.length');
-
-    if (!data?.data?.list?.length) {
-      setQuestions([
-        {
-          technology_id: params.technology,
-          question: '',
-          options: ['', '', '', '', '', ''],
-          correct_answer: [],
-          time: '',
-          difficulty_level: 'easy',
-          type: 'mcq',
-          meta: {},
-        },
-      ]);
     }
   }, [data]);
 
@@ -59,7 +110,6 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
   const handleReset = () => {
     setQuestions((prv) => {
       return prv.map((q, index) => {
-        console.log(q, 'q');
         if (index != selectedQuestion) return q;
         return {
           ...q,
@@ -83,13 +133,6 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
       }
       const updatedQuestions = questions.filter((_, i) => i !== index);
       setQuestions(updatedQuestions);
-      console.log(
-        selectedQuestion,
-        updatedQuestions,
-        updatedQuestions.length,
-        'selectedQuestion,updatedQuestions.length'
-      );
-      console.log(questions, 'questions');
 
       if (selectedQuestion >= updatedQuestions.length && updatedQuestions.length) {
         setSelectedQuestion(updatedQuestions.length - 1);
@@ -148,7 +191,7 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
 
   const handleAddQuestion = () => {
     const newQuestion: Question = {
-      technology_id: params.technology,
+      technology_id: technologyId,
       type: 'mcq',
       question: '',
       options: ['', '', '', '', '', ''],
@@ -162,15 +205,8 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
   };
 
   const handleBack = () => {
-    console.log('Back button clicked');
     router.push('/questions');
   };
-
-  useEffect(() => {
-    if (questions.length) {
-      // setShowSidebar(true)
-    }
-  }, [questions]);
 
   return (
     // Main container
@@ -180,14 +216,27 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
         <Button variant="ghost" size="icon" onClick={handleBack}>
           <ArrowLeft className="h-5 w-5" />
         </Button>{' '}
-        <div className="text-2xl font-bold text-gray-900 dark:text-white">
-          {data?.data?.technology?.name}
+        <div className="text-2xl font-bold text-gray-900 dark:text-white w-full flex items-end gap-2">
+          <div className='flex-grow'>
+            <FormField
+              id="name"
+              placeholder='Enter Technology Name'
+              className='bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-300 w-full'
+              value={name}
+              maxLength={50}
+              onChange={(e) => { setName(e.target.value) }}
+            />
+          </div>
+          <Button
+            className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
+            onClick={handleTechnologySave}
+            disabled={isMutating || updating}
+          >Save</Button>
         </div>
-        {/* <Button onClick={handleSave}>Save</Button> */}
       </div>
 
       {/* Remaining body */}
-      <div className="flex gap-6">
+     {isValidTechnology &&  <div className="flex gap-6">
         {/* Sidebar for questions no. list */}
         {questions.length ? (
           <QuestionSidebar
@@ -212,7 +261,7 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
                 onAction={() => {
                   // Example: Add a new question
                   const newQuestion: Question = {
-                    technology_id: params.technology,
+                    technology_id: technologyId,
                     question: '',
                     options: ['', '', '', '', '', ''],
                     correct_answer: [],
@@ -234,13 +283,15 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
                 handleDeleteQuestion={handleDeleteQuestion}
                 setQuestions={setQuestions}
                 handleReset={handleReset}
-                technologyId={params.technology}
+                technologyId={technologyId}
               />
               // ))
             )}
           </div>
         </div>
-      </div>
+        {/* {!isValidTechnology && <div className="absolute h-full w-full backdrop-blur-sm"></div>} */}
+
+      </div>}
     </StatusWrapper>
   );
 };

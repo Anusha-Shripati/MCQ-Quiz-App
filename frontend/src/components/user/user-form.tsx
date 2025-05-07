@@ -12,6 +12,8 @@ import { EyeIcon, EyeOffIcon } from 'lucide-react';
 import { Button } from '../ui/form/button';
 import { UserData } from '@/types/common.types';
 import useSWRMutation from 'swr/mutation';
+import RoleForm from '../roles/role-form';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 const userSchema = z
   .object({
@@ -68,7 +70,7 @@ function UserForm({ open, onClose, userData = null }: UserFormProps) {
     resolver: zodResolver(userSchema),
     defaultValues: defaultUser,
   });
-
+  const [openRoleForm, setOpenRole] = useState(false);
   const [passwordChange, setPasswordChange] = useState(false);
   const [showPassword, setShowPassword] = useState({ password: false, confirmPassword: false });
 
@@ -168,16 +170,26 @@ function UserForm({ open, onClose, userData = null }: UserFormProps) {
                 error={errors.email?.message}
               />
             </div>
-            <div className="space-y-2">
-              <FormField
-                onChange={(e) => setValue('role', e)}
-                type="select"
-                value={userFoms.role}
-                label="Role"
-                className="dark:bg-gray-700"
-                options={rolesOptions}
-                error={errors.role?.message}
-              />
+            <div className="space-y-2 ">
+              <div className='flex items-end gap-2'>
+                <div className='flex-grow'>
+                  <FormField
+                    onChange={(e) => setValue('role', e)}
+                    type="select"
+                    value={userFoms.role}
+                    label="Role"
+                    className="dark:bg-gray-700"
+                    options={rolesOptions}
+                  />
+                </div>
+
+                <Tooltip delayDuration={0}>
+                  <TooltipTrigger><Button variant='outline' type="button" onClick={() => setOpenRole(true)}>+</Button></TooltipTrigger>
+                  <TooltipContent className="bg-gray-800 text-white p-2 rounded shadow-lg">Create a new role</TooltipContent>
+                </Tooltip>
+              </div>
+              {errors.role?.message && <p className="text-red-500 text-sm mt-1">{errors.role?.message}</p>}
+
             </div>
             {userData && (
               <div className="space-y-2">
@@ -248,6 +260,8 @@ function UserForm({ open, onClose, userData = null }: UserFormProps) {
           </div>
         </form>
       </DialogContent>
+      <RoleForm open={openRoleForm} onClose={() => setOpenRole(false)} />
+
     </Dialog>
   );
 }

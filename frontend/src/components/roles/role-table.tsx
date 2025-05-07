@@ -19,7 +19,7 @@ import StatusWrapper from '../common/status-wrapper';
 
 function RoleTable() {
   const [role, setRole] = useState<RoleData | null>(null);
-  const { user } = useAuthStore();
+  const { user,paramsLoading } = useAuthStore();
   const [open, setOpen] = useState(false);
   const handleEditRole = (role: RoleData) => {
     setRole(role);
@@ -32,7 +32,7 @@ function RoleTable() {
     isLoading,
     error,
     mutate,
-  } = useSWR(`/role/list?search=${rolesFilter}`, fetcher);
+  } = useSWR(paramsLoading ? null : `/role/list?search=${rolesFilter}`, fetcher);
 
   useEffect(() => {
     setRolesListData(users?.data?.count || 0, users?.data?.list || []);

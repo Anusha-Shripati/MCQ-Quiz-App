@@ -7,12 +7,15 @@ import { Button } from '../ui/form/button';
 import RoleForm from './role-form';
 import { useRoleStore } from '@/store/roleStore';
 import { useAuthStore } from '@/store/authStore';
+import { usePathname } from 'next/navigation';
 
 function Header() {
   const [searchTerm, setSearchTerm] = useState('');
   const [open, setOpen] = useState(false);
   const { setRolesFilter, rolesCount } = useRoleStore();
   const { user } = useAuthStore();
+  const pathname = usePathname()
+  
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
   };
@@ -21,11 +24,25 @@ function Header() {
   };
   useEffect(() => {
     const timer = setTimeout(() => {
+      const params = new URLSearchParams();
+      if(searchTerm){
+        params.set('search', searchTerm);
+      }
       setRolesFilter(searchTerm);
+      window.history.replaceState(null, '', `${pathname}?${params.toString()}`);
     }, 1000);
 
     return () => clearTimeout(timer);
   }, [searchTerm, setRolesFilter]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const search = params.get('search');
+    if (search) {
+      setSearchTerm(search);
+      setRolesFilter(search);
+    }
+  }, []);
 
   return (
     <div className="flex justify-between w-full">

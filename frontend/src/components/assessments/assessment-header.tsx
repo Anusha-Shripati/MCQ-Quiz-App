@@ -119,7 +119,7 @@ export default function AssessmentHeader() {
               type="select"
               onChange={field.onChange}
               value={field.value}
-              placeholder="created_by"
+              placeholder="Created by"
               options={headerUsersOptions}
             />
           )}

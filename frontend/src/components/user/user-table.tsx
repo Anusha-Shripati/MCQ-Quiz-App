@@ -20,14 +20,14 @@ function UserTable() {
     setUser(user);
     setOpen(true);
   };
-  const { userFilter, setUserListData, userList, permissions } = useAuthStore();
+  const { userFilter, setUserListData, userList, permissions,paramsLoading } = useAuthStore();
 
   const {
     data: users,
     isLoading,
     error,
     mutate,
-  } = useSWR(`/user/list?search=${userFilter}`, fetcher);
+  } = useSWR(paramsLoading ? null : `/user/list?search=${userFilter}`, fetcher);
 
   useEffect(() => {
     setUserListData(users?.data?.count || 0, users?.data?.list || []);

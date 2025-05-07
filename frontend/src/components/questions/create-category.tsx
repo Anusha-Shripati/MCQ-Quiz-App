@@ -10,6 +10,7 @@ import { AxiosError } from 'axios';
 import useSWRMutation from 'swr/mutation';
 import { mutate } from 'swr';
 import { useQuestionStore } from '@/store/questionStore';
+import { usePathname } from 'next/navigation';
 
 // Define props type
 async function createCategory(url: string, { arg }: { arg: { name: string } }) {
@@ -21,16 +22,30 @@ const CreateCategory: React.FC = () => {
   const [open, setOpen] = useState(false);
   const [categoryName, setCategoryName] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+  const pathname = usePathname();
 
   const { setTechnologyFilter, technologyFilter } = useQuestionStore();
 
   useEffect(() => {
     const timer = setTimeout(() => {
+      const params = new URLSearchParams()
       setTechnologyFilter(searchTerm);
+      if(searchTerm){
+        params.set('search', searchTerm);
+      }
+      window.history.replaceState(null,'',`${pathname}?${params.toString()}`)
     }, 1000);
 
     return () => clearTimeout(timer);
   }, [searchTerm, setTechnologyFilter]);
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const search = params.get('search');
+    if (search) {
+      setSearchTerm(search);
+      setTechnologyFilter(search);
+    }
+  },[])
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.toLowerCase();

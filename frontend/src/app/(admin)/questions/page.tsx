@@ -9,13 +9,14 @@ import { api, isAxiosError } from '@/lib/api';
 import { useQuestionStore } from '@/store/questionStore';
 // import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import StatusWrapper from '@/components/common/status-wrapper';
+import { useAuthStore } from '@/store/authStore';
 
 export default function QuestionsPage() {
   const [categoriesArray, setCategoriesArray] = useState<QuestionCategory[]>([]);
 
   const { technologyFilter } = useQuestionStore();
-  const { data, isLoading, error } = useSWR(`/technology/list?search=${technologyFilter}`, api.get);
-
+  const { paramsLoading } = useAuthStore();
+  const { data, isLoading, error } = useSWR(paramsLoading ? null : `/technology/list?search=${technologyFilter}`, api.get);
   useEffect(() => {
     if (data) {
       setCategoriesArray(data.data.list);

@@ -30,6 +30,8 @@ interface AuthState {
   logout: () => void;
   setUserFilter: (filter: string) => void;
   permissions: Record<string, Permissions> | null;
+  paramsLoading: boolean;
+  setParamsLoading: (loading: boolean) => void;
   setPermissions: (
     permissions: Record<string, Permissions> | null,
     user: User | null
@@ -43,7 +45,11 @@ export const useAuthStore = create<AuthState>((set) => ({
   userFilter: '',
   userList: [],
   userCount: 0,
+  paramsLoading: true,
   permissions: null,
+  setParamsLoading: (loading: boolean) => {
+    set({ paramsLoading: loading });
+  },
   login: async ({ email, password }: { email: string; password: string }) => {
     set({ loading: true });
     try {

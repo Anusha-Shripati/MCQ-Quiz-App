@@ -426,7 +426,6 @@ function CandidateTable() {
         onPerPageChange={handlePerPageChange}
         currentPage={currentPage}
         onPageChange={handlePageChange}
-        loading={isLoading}
       >
         <div className="min-h-[500px]">
           <ReusableTable

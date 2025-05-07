@@ -6,11 +6,13 @@ import { Input } from '../ui/form/input';
 import { Button } from '../ui/form/button';
 import { useAuthStore } from '@/store/authStore';
 import UserForm from './user-form';
+import { usePathname } from 'next/navigation';
 
 function Header() {
   const [searchTerm, setSearchTerm] = useState('');
   const [open, setOpen] = useState(false);
-  const { setUserFilter, userCount, permissions, userList } = useAuthStore();
+  const { setUserFilter, userCount, permissions, setParamsLoading } = useAuthStore();
+  const pathname = usePathname();
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
   };
@@ -20,12 +22,25 @@ function Header() {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      setUserFilter(searchTerm);
-      console.log(userList, 'list');
+      const params = new URLSearchParams();
+      if(searchTerm){
+        params.set('search', searchTerm);
+      }
+        setUserFilter(searchTerm);
+    
+      window.history.replaceState(null, '', `${pathname}?${params.toString()}`);
     }, 1000);
 
     return () => clearTimeout(timer);
   }, [searchTerm, setUserFilter]);
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const search = params.get('search');
+    if (search) {
+      setSearchTerm(search);
+      setUserFilter(search);
+    }
+  }, []);
 
   return (
     <div className="flex justify-between w-full">

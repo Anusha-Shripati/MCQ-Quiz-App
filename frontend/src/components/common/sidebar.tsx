@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter as useNavRouter } from 'next/navigation';
 import { FiHome, FiFileText, FiHelpCircle, FiUsers } from 'react-icons/fi';
@@ -19,7 +19,7 @@ import Image from 'next/image';
 export default function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const sidebarRef = useRef<HTMLDivElement | null>(null);
-  const { setPermissions, user } = useAuthStore();
+  const { setPermissions, user,setParamsLoading } = useAuthStore();
 
   const router = useRouter();
 
@@ -55,6 +55,9 @@ export default function Sidebar() {
     refreshInterval: 30000,
   });
   const pathname = usePathname();
+  useEffect(() => {   
+    setParamsLoading(false);
+  },[pathname])
 
   const toggleSidebar = useCallback(() => {
     setIsCollapsed((prv) => !prv);

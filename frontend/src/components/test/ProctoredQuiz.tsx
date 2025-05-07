@@ -895,7 +895,9 @@ export default function ProctoredQuiz() {
                 </div>
               )} */}
 
-              <div className="pt-2">{renderQuestion(questions[currentQuestionIndex])}</div>
+              <div className="pt-2 text-black">
+                {renderQuestion(questions[currentQuestionIndex])}
+              </div>
             </div>
           </div>
 

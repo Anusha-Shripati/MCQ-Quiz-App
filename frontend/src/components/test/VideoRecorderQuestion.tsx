@@ -88,19 +88,28 @@ export const VideoRecorderQuestion: FC<VideoRecorderProps> = ({ handleAnswerChan
   return (
     <div className="space-y-4">
       {/* Question prompt */}
-      {question.question?.meta?.video_url ? (
-        <video controls className="w-full max-h-[400px] rounded-lg shadow">
-          <source src={question.question.meta.video_url} type="video/mp4" />
-        </video>
-      ) : (
-        <></>
-      )}
+      <div className="flex flex-row gap-2">
+        {question.question?.meta?.video_url ? (
+          <video controls className="w-3/4 max-h-[400px] rounded-lg shadow">
+            <source src={question.question.meta.video_url} type="video/mp4" />
+          </video>
+        ) : (
+          <></>
+        )}
 
-      {/* Live video preview */}
-      <video ref={videoRef} autoPlay muted className="w-[400px] h-[400px] border rounded" />
+        {/* Live video preview */}
+        <video ref={videoRef} autoPlay muted className="w-[400px] h-[375px] border rounded" />
+      </div>
 
       {/* Controls */}
-      <div className="flex gap-4 mt-2">
+      <div className="flex flex-row-reverse gap-4 mt-2">
+        <button
+          onClick={handleStop}
+          disabled={!isRecording}
+          className="bg-red-600 text-white px-4 mr-8 py-2 rounded disabled:opacity-50"
+        >
+          Stop Recording
+        </button>
         <button
           onClick={handleStart}
           disabled={isRecording}
@@ -108,17 +117,12 @@ export const VideoRecorderQuestion: FC<VideoRecorderProps> = ({ handleAnswerChan
         >
           Start Recording
         </button>
-        <button
-          onClick={handleStop}
-          disabled={!isRecording}
-          className="bg-red-600 text-white px-4 py-2 rounded disabled:opacity-50"
-        >
-          Stop Recording
-        </button>
       </div>
 
       {/* Countdown display */}
-      {isRecording && <p className="text-sm text-gray-700">Time left: {timeLeft}s</p>}
+      {isRecording && (
+        <p className="text-sm text-gray-700 flex flex-row-reverse">Time left: {timeLeft}s</p>
+      )}
 
       {/* Playback of recorded video */}
       {recordedVideoURL && (

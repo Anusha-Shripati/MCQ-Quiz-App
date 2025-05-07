@@ -9,6 +9,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { useRouter } from 'next/navigation';
+
 import { Button } from '@/components/ui/form/button';
 import { api, isAxiosError } from '@/lib/api';
 import { useCandidateStore } from '@/store/candidateStore';
@@ -21,6 +23,7 @@ import { mutate } from 'swr';
 import { z } from 'zod';
 import { DurationInput } from '../common/duration-input';
 import useSWRMutation from 'swr/mutation';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 type ErrorType = string | undefined;
 interface CandidateDialogProps {
@@ -99,7 +102,7 @@ export default function DialogForm({ candidate, open, setOpen }: CandidateDialog
     `/candidate/${candidate?.id}`,
     update
   );
-
+  const router = useRouter();
   const validateAndSubmit = async (values: CandidateFormData) => {
     try {
       let res;
@@ -166,6 +169,9 @@ export default function DialogForm({ candidate, open, setOpen }: CandidateDialog
       setValue('technology', assessment.technologies?.map((item) => item.name).join(', '));
     }
   };
+  const routeAssessment = () => {
+    router.push('/assessments');
+  }
 
   return (
     <Dialog
@@ -218,16 +224,29 @@ export default function DialogForm({ candidate, open, setOpen }: CandidateDialog
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <FormField
-                label="Assessment"
-                id="assessment"
-                type="select"
-                options={assessmentOptions}
-                value={formData.assessment}
-                onChange={handleAssessmentChange}
-                error={errors?.assessment?.message as ErrorType}
-                disabled={assessmentOptions.length === 0}
-              />
+              <div>
+                <div className="flex items-end gap-1">
+                  <div className='flex-grow'>
+                    <FormField
+                      label="Assessment"
+                      id="assessment"
+                      type="select"
+                      options={assessmentOptions}
+                      value={formData.assessment}
+                      onChange={handleAssessmentChange}
+                      disabled={assessmentOptions.length === 0}
+                    />
+                  </div>
+
+                  <Tooltip delayDuration={0}>
+                    <TooltipTrigger>
+                      <Button variant='outline' onClick={routeAssessment}> + </Button>
+                    </TooltipTrigger>
+                    <TooltipContent className="bg-gray-800 text-white p-2 rounded shadow-lg">Create a new assessment</TooltipContent>
+                  </Tooltip>
+                </div>
+                {errors?.assessment?.message && <p className="text-red-500 text-sm mt-1">{errors?.assessment?.message}</p>}
+              </div>
               <FormField
                 label="Experience"
                 id="experience"

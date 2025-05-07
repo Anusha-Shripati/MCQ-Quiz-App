@@ -13,6 +13,9 @@ import { ArrowRight } from 'lucide-react';
 import { FieldErrors, UseFormRegister, UseFormSetValue } from 'react-hook-form';
 import { AssessmentForm } from '@/types/assessment.types';
 import { FormField } from '@/components/common/form-field';
+import { useRouter } from 'next/navigation';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+
 
 interface OptionType {
   value: string;
@@ -49,6 +52,8 @@ const Step1: React.FC<Step1Props> = ({
       })) || [];
     setValue('technologies', selectedTechnology.length ? selectedTechnology : []);
   };
+
+  const router = useRouter()
   const handleDurationChange = (selectedOption: string) => {
     setValue('duration', parseInt(selectedOption) ?? 0);
   };
@@ -77,72 +82,80 @@ const Step1: React.FC<Step1Props> = ({
         </div>
 
         <div className="space-y-3">
-          <Label className="font-bold text-gray-900 dark:text-white">Select Technology</Label>
-          <Select
-            isMulti
-            value={formData.technologies
-              .filter((tech) => tech.id)
-              .map((tech) => ({ value: tech.id, label: tech.name }))}
-            onChange={handelChangeTechnology}
-            options={technologyOptions}
-            name="technology"
-            className="mb-4"
-            classNamePrefix="react-select"
-            placeholder="Search Technology"
-            styles={{
-              control: (base) => ({
-                ...base,
-                backgroundColor: 'var(--bg-color, white)',
-                borderColor: 'var(--border-color, #e5e7eb)',
-                color: 'var(--text-color, #111827)',
-              }),
-              menu: (base) => ({
-                ...base,
-                backgroundColor: 'var(--bg-color, white)',
-              }),
-              input: (base) => ({
-                ...base,
-                color: 'var(--text-color, #111827)',
-              }),
-              singleValue: (base) => ({
-                ...base,
-                color: 'var(--text-color, #111827)',
-              }),
-              option: (base, state) => ({
-                ...base,
-                backgroundColor: state.isFocused
-                  ? 'var(--highlight-color, #f3f4f6)'
-                  : 'var(--bg-color, white)',
-                color: 'var(--text-color, #111827)',
-                '&:hover': {
-                  backgroundColor: 'var(--highlight-color, #f3f4f6)',
-                },
-              }),
-              multiValue: (base) => ({
-                ...base,
-                backgroundColor: 'var(--highlight-color, #f3f4f6)',
-              }),
-              multiValueLabel: (base) => ({
-                ...base,
-                color: 'var(--text-color, #111827)',
-              }),
-              multiValueRemove: (base) => ({
-                ...base,
-                color: 'var(--text-color, #111827)',
-                ':hover': {
-                  backgroundColor: '#ef4444',
-                  color: 'white',
-                },
-              }),
-              placeholder: (base) => ({
-                ...base,
-                color: 'var(--placeholder-color, #6b7280)',
-              }),
-            }}
-          />
+          <div className='flex items-end gap-2  '>
+            <div className="flex-grow">
+              <Label className="font-bold text-gray-900 dark:text-white">Select Technology</Label>
+              <Select
+                isMulti
+                value={formData.technologies
+                  .filter((tech) => tech.id)
+                  .map((tech) => ({ value: tech.id, label: tech.name }))}
+                onChange={handelChangeTechnology}
+                options={technologyOptions}
+                name="technology"
+                classNamePrefix="react-select"
+                placeholder="Search Technology"
+                styles={{
+                  control: (base) => ({
+                    ...base,
+                    backgroundColor: 'var(--bg-color, white)',
+                    borderColor: 'var(--border-color, #e5e7eb)',
+                    color: 'var(--text-color, #111827)',
+                  }),
+                  menu: (base) => ({
+                    ...base,
+                    backgroundColor: 'var(--bg-color, white)',
+                  }),
+                  input: (base) => ({
+                    ...base,
+                    color: 'var(--text-color, #111827)',
+                  }),
+                  singleValue: (base) => ({
+                    ...base,
+                    color: 'var(--text-color, #111827)',
+                  }),
+                  option: (base, state) => ({
+                    ...base,
+                    backgroundColor: state.isFocused
+                      ? 'var(--highlight-color, #f3f4f6)'
+                      : 'var(--bg-color, white)',
+                    color: 'var(--text-color, #111827)',
+                    '&:hover': {
+                      backgroundColor: 'var(--highlight-color, #f3f4f6)',
+                    },
+                  }),
+                  multiValue: (base) => ({
+                    ...base,
+                    backgroundColor: 'var(--highlight-color, #f3f4f6)',
+                  }),
+                  multiValueLabel: (base) => ({
+                    ...base,
+                    color: 'var(--text-color, #111827)',
+                  }),
+                  multiValueRemove: (base) => ({
+                    ...base,
+                    color: 'var(--text-color, #111827)',
+                    ':hover': {
+                      backgroundColor: '#ef4444',
+                      color: 'white',
+                    },
+                  }),
+                  placeholder: (base) => ({
+                    ...base,
+                    color: 'var(--placeholder-color, #6b7280)',
+                  }),
+                }}
+              />
+            </div>
+            <Tooltip delayDuration={0}>
+              <TooltipTrigger><Button variant='outline' onClick={() => router.push('/questions/create-question/new')}>+</Button></TooltipTrigger>
+              <TooltipContent className="bg-gray-800 text-white p-2 rounded shadow-lg">Create a new technology</TooltipContent>
+            </Tooltip>
+          </div>
           {errors.technologies && (
             <p className="text-red-500 text-sm">{errors.technologies?.message}</p>
           )}
+
         </div>
 
         <div className="space-y-2">

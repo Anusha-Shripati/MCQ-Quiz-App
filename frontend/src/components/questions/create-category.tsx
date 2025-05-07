@@ -10,7 +10,7 @@ import { AxiosError } from 'axios';
 import useSWRMutation from 'swr/mutation';
 import { mutate } from 'swr';
 import { useQuestionStore } from '@/store/questionStore';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 
 // Define props type
 async function createCategory(url: string, { arg }: { arg: { name: string } }) {
@@ -23,7 +23,7 @@ const CreateCategory: React.FC = () => {
   const [categoryName, setCategoryName] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const pathname = usePathname();
-
+  const router = useRouter()
   const { setTechnologyFilter, technologyFilter } = useQuestionStore();
 
   useEffect(() => {
@@ -79,7 +79,8 @@ const CreateCategory: React.FC = () => {
         />
         <Button
           className="bg-blue-600 text-primary-foreground hover:bg-primary/90"
-          onClick={() => setOpen(true)}
+          // onClick={() => setOpen(true)}
+          onClick={() => router.push('/questions/create-question/new')}
         >
           Create Technology
         </Button>

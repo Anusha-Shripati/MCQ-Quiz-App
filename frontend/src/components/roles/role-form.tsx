@@ -100,6 +100,7 @@ function RoleForm({
         //   : permissionData,
       };
       setPermissionData(formData.role_permissions || []);
+      
       reset(formData);
     }
   }, [open]);
@@ -147,6 +148,14 @@ function RoleForm({
 
   const handleClose = () => {
     reset(defaultRole);
+    setPermissionData(
+      modules.data.list.map((item: Module) => ({
+        module: { id: item.id, name: item.name },
+        module_id: item.id,
+        can_edit: false,
+        can_read: false,
+      }))
+    );
     onClose();
   };
 

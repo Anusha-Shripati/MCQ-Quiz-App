@@ -14,7 +14,7 @@ export class TechnologyController {
           name,
           deleted_at: null,
         });
-        return generateResponse(res, 200, newTechnology, false, 'Technology created successfully');
+        return generateResponse(res, 200, newTechnology, true, 'Technology created successfully');
       }
       const newTechnology = await technologyService.createTechnology({ name });
       return generateResponse(res, 200, newTechnology, true, 'Technology created successfully');

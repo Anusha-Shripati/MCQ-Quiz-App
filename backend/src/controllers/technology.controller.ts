@@ -1,22 +1,23 @@
 import { Request, Response, NextFunction } from 'express';
 import { TechnologyService } from '../services/technology.services';
 import { generateResponse } from '../utils/generateResponse';
-import QuestionService from '../services/question.services';
-
 const technologyService = new TechnologyService();
 export class TechnologyController {
   create = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { name } = req.body;
-      const technology = await technologyService.getTechnologyByName(name);
-      if (technology) {
+      const trimName =name.trim()
+      const technology = await technologyService.getTechnologyByName(trimName);
+      if (technology && technology.deleted_at) {
         const newTechnology = await technologyService.updateTechnology(technology.id, {
-          name,
+          name:trimName,
           deleted_at: null,
         });
         return generateResponse(res, 200, newTechnology, true, 'Technology created successfully');
+      }else if (technology) {
+        return generateResponse(res, 400, {}, false, 'Technology name already exists');
       }
-      const newTechnology = await technologyService.createTechnology({ name });
+      const newTechnology = await technologyService.createTechnology({ name:trimName });
       return generateResponse(res, 200, newTechnology, true, 'Technology created successfully');
     } catch (error) {
       next(error);
@@ -39,19 +40,22 @@ export class TechnologyController {
     try {
       const { id } = req.params;
       const { name } = req.body;
+      const trimName =name.trim()
+
       const existingTechnology = await technologyService.getTechnologyById(id);
       if (!existingTechnology) {
         return generateResponse(res, 400, {}, false, 'Technology not found');
       }
-
-      if (existingTechnology.name !== name) {
-        const duplicateTechnology = await technologyService.getTechnologyByName(name);
-        if (duplicateTechnology) {
+      if (existingTechnology.name.trim() != trimName) {
+        const duplicateTechnology = await technologyService.getTechnologyByName(trimName);
+        if (duplicateTechnology && !duplicateTechnology.deleted_at) {
           return generateResponse(res, 400, {}, false, 'Technology name already exists');
+        }else if(duplicateTechnology){
+          await technologyService.deleteTechnology(duplicateTechnology.id)
         }
       }
       const updatedTechnology = await technologyService.updateTechnology(id, {
-        name,
+        name:trimName,
       });
       return generateResponse(res, 200, updatedTechnology, true, 'Technology updated successfully');
     } catch (error) {

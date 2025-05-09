@@ -181,7 +181,6 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
       toast.error(axiosError.response?.data?.message || 'Something went wrong.');
     }
 
-    console.log('Payload to be sent:', payload);
   };
 
   const handleCorrectOptionChange = (
@@ -246,8 +245,6 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
   //     setQuestions(updatedQuestions);
   //   }
   // }, [questions, selectedQuestion, videoToVideo]);
-
-  console.log('questionnn', question);
 
   return (
     <Card

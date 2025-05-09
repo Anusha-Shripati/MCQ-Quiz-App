@@ -54,13 +54,7 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
   const [isValidTechnology, setValidTechnology] = useState<boolean>(isValidUUID(params.technology));
   const { data, isLoading, error } = useSWR(
     isValidTechnology ? `/question/list?technology_id=${technologyId}` : null,
-    api.get,
-    {
-      revalidateOnMount: true,
-      revalidateOnFocus: true,
-      revalidateIfStale: true,
-      dedupingInterval: 0,
-    }
+    api.get
   );
 
 
@@ -87,7 +81,7 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
       try {
         const response = await updateTrigger({ name });
         toast.success(response.message || "Technology saved successfully!");
-        mutate((key) => typeof key === 'string' && key.startsWith('/technology/list'));
+        mutate((key:string) => typeof key === 'string' && key.startsWith('/technology/list'));
       } catch (error) {
         toast.error(isAxiosError(error) ? error.response?.data?.message || "Failed to save technology." : "Failed to save technology.");
       }
@@ -98,7 +92,7 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
         window.history.replaceState(null, '', `/questions/create-question/${response.data.id}`);
         setTechnologyId(response.data.id);
         setValidTechnology(true);
-        mutate((key) => typeof key === 'string' && key.startsWith('/technology/list'));
+        mutate((key:string) => typeof key === 'string' && key.startsWith('/technology/list'));
       } catch (error) {
         toast.error(isAxiosError(error) ? error.response?.data?.message || "Failed to create technology." : "Failed to create technology.");
       }
@@ -172,7 +166,6 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
         updatedQuestions[index].meta = { code: '' };
       }
     }
-
     setQuestions(updatedQuestions);
   };
 

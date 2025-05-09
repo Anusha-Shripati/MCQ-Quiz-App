@@ -154,7 +154,7 @@ const CategoryPage = () => {
           technology={technology as string}
         />
         <Pagination
-          className="flex-grow"
+          className="flex-grow h-full"
           currentPageStart={currentPageStart}
           currentPageEnd={currentPageEnd}
           totalItems={total}
@@ -164,7 +164,7 @@ const CategoryPage = () => {
           onPageChange={handlePageChange}
           loading={isLoading}
         >
-          <div className="w-full">
+          <div className="w-full min-h-[600px]">
             {questionsData.map((question: Required<Question>, index) => (
               <React.Fragment key={index}>
                 {selectedQuestion !== index && (

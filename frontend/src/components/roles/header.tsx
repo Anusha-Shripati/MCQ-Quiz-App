@@ -46,7 +46,7 @@ function Header() {
 
   return (
     <div className="flex justify-between w-full">
-      <CardTitle className="text-xl font-semibold">All Roles ({rolesCount || 0})</CardTitle>
+      <h2 className="text-2xl font-bold text-gray-900 dark:text-white">All Roles ({rolesCount || 0})</h2>
       <div className="flex space-x-4 items-center">
         <Input
           type="text"

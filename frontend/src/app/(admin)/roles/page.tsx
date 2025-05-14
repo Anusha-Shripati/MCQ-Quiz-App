@@ -5,10 +5,10 @@ import RoleTable from '@/components/roles/role-table';
 const UserTable = () => {
   return (
     <div className="p-6 ">
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+        <div className="mb-6">
           <Header />
-        </CardHeader>
+        </div>
+      <Card>
         <CardContent>
           <RoleTable />
         </CardContent>

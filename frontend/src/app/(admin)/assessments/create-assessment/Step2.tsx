@@ -127,8 +127,17 @@ const Step2: React.FC<Step2Props> = ({
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+        <div className="grid grid-cols-[2fr,1fr,1fr,1fr,auto] gap-4 items-center">
           <h3 className="text-lg font-medium dark:text-white">Total Questions</h3>
+          <div className="text-center font-medium text-gray-700 bg-green-100 rounded-full px-2 py-1">
+            Easy 
+          </div>
+          <div className="text-center font-medium text-gray-700 bg-blue-100 rounded-full px-2 py-1">
+            Medium 
+          </div>
+          <div className="text-center font-medium text-gray-700 bg-red-100 rounded-full px-2 py-1">
+            Hard 
+          </div>
           <Input
             type="number"
             {...register('targetQuestions')}

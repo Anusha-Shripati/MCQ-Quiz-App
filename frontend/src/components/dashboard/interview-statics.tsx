@@ -172,7 +172,7 @@ const InterviewStatics: React.FC = () => {
   };
 
   return (
-    <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+    <div style={{ maxWidth: '100%', margin: '0 auto' }}>
       {!isLoading && (
         <ReactECharts
           option={options}

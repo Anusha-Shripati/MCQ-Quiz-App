@@ -11,7 +11,6 @@ export default function Dashboard() {
   return (
     <>
       <div className="min-h-screen p-6 bg-gradient-to-b grid grid-cols-12 gap-5">
-        {/* Top Section */}
         <Card className="shadow-lg col-span-12 md:col-span-8 ">
           <InterviewStatics />
         </Card>

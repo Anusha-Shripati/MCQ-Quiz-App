@@ -14,15 +14,23 @@ export default class CandidatesService {
         const existingEmail = await tx.candidate.findUnique({
           where: { email: data.email },
         });
-        if (existingEmail) {
+        if (existingEmail && existingEmail.deleted_at === null) {
           throw new AppError('Email already exists', 400);
+        }else if(existingEmail && existingEmail.deleted_at !== null){
+          await prisma.candidate.delete({
+            where: { id: existingEmail.id },
+          });
         }
 
         const existingPhone = await tx.candidate.findUnique({
           where: { phone: data.phone },
         });
-        if (existingPhone) {
+        if (existingPhone && existingPhone.deleted_at === null) {
           throw new AppError('Phone number already exists', 400);
+        }else if(existingPhone && existingPhone.deleted_at !== null){
+          await prisma.candidate.delete({
+            where: { id: existingPhone.id },
+          });
         }
 
         const newCandidate = await prisma.candidate.create({
@@ -74,32 +82,30 @@ export default class CandidatesService {
       }
 
       if (data.email && data.email !== existingCandidate.email) {
-        const existingEmail = await prisma.candidate.findUnique({
-          where: { email: data.email },
-        });
-
-        if (existingEmail) {
-          throw new AppError('Email already exists', 400);
-        }
-      }
-
-      if (data.email && data.email !== existingCandidate.email) {
         const existingEmail = await tx.candidate.findUnique({
-          where: { email: data.email },
+          where: { email: data.email,deleted_at:null },
         });
 
-        if (existingEmail) {
+        if (existingEmail && existingEmail.deleted_at === null) {
           throw new AppError('Email already exists', 400);
+        }else if(existingEmail && existingEmail.deleted_at !== null){
+          await tx.candidate.delete({
+            where: { id: existingEmail.id },
+          });
         }
       }
 
       if (data.phone && data.phone !== existingCandidate.phone) {
         const existingPhone = await tx.candidate.findUnique({
-          where: { phone: data.phone },
+          where: { phone: data.phone,deleted_at:null },
         });
 
-        if (existingPhone) {
+        if (existingPhone && existingPhone.deleted_at === null) {
           throw new AppError('Phone number already exists', 400);
+        }else if(existingPhone && existingPhone.deleted_at !== null){
+          await tx.candidate.delete({
+            where: { id: existingPhone.id },
+          });
         }
       }
 
@@ -146,8 +152,9 @@ export default class CandidatesService {
   }
 
   async deleteCandidate(id: string) {
-    return await prisma.candidate.delete({
+    return await prisma.candidate.update({
       where: { id },
+      data: { deleted_at: new Date() },
     });
   }
 
@@ -158,7 +165,7 @@ export default class CandidatesService {
     search?: string;
     assessmentFilter?: string | string[];
   }) {
-    const where: Prisma.CandidateWhereInput = {};
+    const where: Prisma.CandidateWhereInput = {deleted_at:null};
 
     if (query.search) {
       where.OR = [

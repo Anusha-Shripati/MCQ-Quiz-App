@@ -33,7 +33,7 @@ const Filters = () => {
     setTechnologyOptions,
     assessmentOptions,
     technologyOptions,
-    candidateFilter
+    candidateFilter,
   } = useCandidateStore();
 
   useEffect(() => {
@@ -59,9 +59,9 @@ const Filters = () => {
   }, [technology]);
 
   const defaultValues: CandidateFilter = {
-    searchQuery:  '',
-    technologyFilter:  [],
-    assessmentFilter:  [],
+    searchQuery: '',
+    technologyFilter: [],
+    assessmentFilter: [],
     created: {
       days: '',
       range: undefined,
@@ -70,7 +70,6 @@ const Filters = () => {
   const { setValue, watch, reset, register } = useForm<CandidateFilter>({
     defaultValues,
   });
-
 
   const formData = watch();
 
@@ -87,27 +86,25 @@ const Filters = () => {
       })),
       created: formData.created?.range
         ? {
-          days: formData.created?.days,
-          range: {
-            from: formData.created.range.from
-              ? new Date(formData.created.range.from.setHours(0, 0, 0, 0))
-              : undefined,
-            to: formData.created.range.to
-              ? new Date(formData.created.range.to.setHours(23, 59, 59, 999))
-              : undefined,
-          },
-        }
+            days: formData.created?.days,
+            range: {
+              from: formData.created.range.from
+                ? new Date(formData.created.range.from.setHours(0, 0, 0, 0))
+                : undefined,
+              to: formData.created.range.to
+                ? new Date(formData.created.range.to.setHours(23, 59, 59, 999))
+                : undefined,
+            },
+          }
         : undefined,
     };
     setCandidateFilter(payload);
   };
 
-
   const clearAllFilters = () => {
-    reset(defaultValues)
-    setCandidateFilter(defaultValues)
+    reset(defaultValues);
+    setCandidateFilter(defaultValues);
   };
-
 
   useEffect(() => {
     reset({
@@ -117,9 +114,9 @@ const Filters = () => {
       created: {
         days: candidateFilter.created?.days || '',
         range: candidateFilter.created?.range || undefined,
-      }
-    })
-  }, [candidateFilter])
+      },
+    });
+  }, [candidateFilter]);
 
   const isFilter = useMemo(() => {
     return Object.keys(formData).some((key: string) => {
@@ -134,7 +131,6 @@ const Filters = () => {
       }
     });
   }, [formData]);
-
 
   return (
     <section className="w-full">
@@ -154,9 +150,7 @@ const Filters = () => {
 
         <AssessmentFilter
           value={formData.assessmentFilter}
-          onChange={(value: AssessmentOption[]) =>
-            setValue("assessmentFilter", value)
-          }
+          onChange={(value: AssessmentOption[]) => setValue('assessmentFilter', value)}
           options={assessmentOptions}
         />
 

@@ -27,12 +27,12 @@ export const DatePickerInput = ({ label, date, setDate, error }: DatePickerInput
             </div>
           </div>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0 z-50" align="start">
+        <PopoverContent className="w-auto p-0" align="start">
           <Calendar
             mode="single"
             selected={date}
             onSelect={setDate}
-            className="rounded-md border bg-white"
+            className="rounded-md border dark:bg-gray-900 bg-gray-50"
             initialFocus
           />
         </PopoverContent>

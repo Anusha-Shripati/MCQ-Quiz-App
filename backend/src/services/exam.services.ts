@@ -31,7 +31,6 @@ export default class ExamService {
 
     console.log('aseessment technologies', assessment.technologies);
     for (const tech of assessment.technologies) {
-      console.log('tech', tech);
       const easyQuestions = await this.getRandomQuestions('easy', tech.easy, tech.technology_id);
       const mediumQuestions = await this.getRandomQuestions(
         'medium',

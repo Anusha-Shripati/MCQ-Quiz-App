@@ -19,120 +19,62 @@ export function TechnologyFilter({ value, onChange, options, className }: Techno
         onChange={(newValue) => onChange(newValue as StatusOption[])}
         options={options}
         placeholder="Select technologies"
-        className="react-select-container"
         classNamePrefix="react-select"
-        tabIndex={-1}
         blurInputOnSelect={true}
-        unstyled
+        classNames={{
+          control: () => 'dark:bg-gray-900 border-gray-200 hover:border-gray-300 dark:hover:border-gray-600 dark:border-gray-700  placeholder-gray-500 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent',
+        }}
         styles={{
-          container: (base) => ({
+          control: (base) => ({
             ...base,
-            width: '100%',
-          }),
-          control: (base, state) => ({
-            ...base,
+            backgroundColor: 'var(--bg-color, white)',
+            color: 'var(--text-color, #111827)',
             minHeight: '2.75rem',
-            padding: '2px',
-            background: 'hsl(var(--background))',
-            border: '1px ridge',
-            borderColor: state.isFocused ? 'hsl(var(--ring))' : 'hsl(var(--input))',
-            borderRadius: 'calc(var(--radius) - 2px)',
-            boxShadow: state.isFocused ? '0 0 0 1px hsl(var(--ring))' : '0 0 0 0 transparent',
-            '&:hover': {
-              borderColor: 'hsl(var(--ring))',
-            },
-          }),
-          valueContainer: (base) => ({
-            ...base,
-            padding: '0 8px',
-            gap: '4px',
+            borderRadius: '0.5rem',
           }),
           menu: (base) => ({
             ...base,
-            background: 'hsl(var(--background))',
-            border: '1px solid hsl(var(--border))',
-            borderRadius: 'var(--radius)',
-            boxShadow:
-              '0px 10px 38px -10px rgba(22, 23, 24, 0.35), 0px 10px 20px -15px rgba(22, 23, 24, 0.2)',
+            backgroundColor: 'var(--bg-color, white)',
             zIndex: 50,
-            overflow: 'hidden',
-            marginTop: '8px',
+
           }),
-          menuList: (base) => ({
+          input: (base) => ({
             ...base,
-            padding: '4px',
+            color: 'var(--text-color, #111827)',
+          }),
+          singleValue: (base) => ({
+            ...base,
+            color: 'var(--text-color, #111827)',
           }),
           option: (base, state) => ({
             ...base,
-            position: 'relative',
-            padding: '8px 8px',
-            borderRadius: 'calc(var(--radius) - 4px)',
-            cursor: 'pointer',
-            fontSize: '14px',
-            background: state.isFocused
-              ? 'hsl(var(--accent))'
-              : state.isSelected
-                ? 'hsl(var(--accent))'
-                : 'transparent',
-            color:
-              state.isFocused || state.isSelected
-                ? 'hsl(var(--accent-foreground))'
-                : 'hsl(var(--foreground))',
+            backgroundColor: state.isFocused
+              ? 'var(--highlight-color, #f3f4f6)'
+              : 'var(--bg-color, white)',
+            color: 'var(--text-color, #111827)',
             '&:hover': {
-              background: 'hsl(var(--accent))',
-              color: 'hsl(var(--accent-foreground))',
+              backgroundColor: 'var(--highlight-color, #f3f4f6)',
             },
           }),
           multiValue: (base) => ({
             ...base,
-            background: 'hsl(var(--accent))',
-            borderRadius: 'calc(var(--radius) - 4px)',
-            padding: '0 1px',
+            backgroundColor: 'var(--highlight-color, #f3f4f6)',
           }),
           multiValueLabel: (base) => ({
             ...base,
-            fontSize: '14px',
-            color: 'hsl(var(--accent-foreground))',
-            padding: '2px 6px',
+            color: 'var(--text-color, #111827)',
           }),
           multiValueRemove: (base) => ({
             ...base,
-            borderRadius: 'calc(var(--radius) - 4px)',
-            color: 'hsl(var(--accent-foreground))',
+            color: 'var(--text-color, #111827)',
             ':hover': {
-              background: 'hsl(var(--destructive))',
-              color: 'hsl(var(--destructive-foreground))',
+              backgroundColor: '#ef4444',
+              color: 'white',
             },
-          }),
-          input: (base) => ({
-            ...base,
-            color: 'hsl(var(--foreground))',
-            margin: '0',
-            padding: '0',
           }),
           placeholder: (base) => ({
             ...base,
-            color: 'hsl(var(--muted-foreground))',
-          }),
-          indicatorSeparator: () => ({
-            display: 'none',
-          }),
-          dropdownIndicator: (base) => ({
-            ...base,
-            color: 'hsl(var(--foreground))',
-            opacity: '0.6',
-            '&:hover': {
-              opacity: '1',
-            },
-          }),
-          clearIndicator: (base) => ({
-            ...base,
-            color: 'hsl(var(--foreground))',
-            opacity: '0.6',
-            padding: '4px',
-            ':hover': {
-              opacity: '1',
-            },
+            color: 'var(--placeholder-color, #6b7280)',
           }),
         }}
       />

@@ -697,7 +697,6 @@ async function createTechnologies() {
     skipDuplicates: true,
   });
 
-  console.log('Technologies created successfully');
 }
 
 // async function createTestCandidates() {

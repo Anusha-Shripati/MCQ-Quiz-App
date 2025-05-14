@@ -242,7 +242,6 @@ function CandidateTable() {
         key: 'technology',
         header: 'Technology',
         render: (row) => {
-          console.log('row assessment technologies', row?.assessment);
           return row.assessment?.technologies
             ? row.assessment?.technologies?.map((item) => item?.technology?.name).join(',')
             : '-';

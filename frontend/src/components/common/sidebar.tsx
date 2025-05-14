@@ -24,7 +24,10 @@ export default function Sidebar() {
   const router = useRouter();
 
   const getPermission = async (url: string) => {
+    
     if (user?.id) {
+      try {
+        
       const response = await fetcher(url);
       if (response.success) {
         const permissions = response.data?.role?.role_permissions?.reduce(
@@ -35,7 +38,7 @@ export default function Sidebar() {
             obj[pr.module?.name] = {
               can_edit: pr.can_edit,
               can_read: pr.can_read,
-            };
+            };  
             return obj;
           },
           {}
@@ -44,10 +47,16 @@ export default function Sidebar() {
         document.cookie = `role=${response.data?.role?.name}; path=/;`;
         document.cookie = `permissions=${encodeURIComponent(JSON.stringify(permissions))}; path=/;`;
         return permissions;
-      } else {
-        setPermissions(null, null);
-        return null;
       }
+
+    } catch (error) {
+      setPermissions(null, null);
+      document.cookie = `role=; path=/;`;
+      document.cookie = `permissions=; path=/;`;
+      document.cookie = 'token=; path=/;';
+      router.push('/');
+      return null; 
+    }
     }
   };
 

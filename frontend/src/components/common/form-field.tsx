@@ -89,7 +89,7 @@ export const FormField = forwardRef<HTMLInputElement, FormFieldProps>(
         {props.label && <label className="block text-sm font-medium mb-1">{props.label}</label>}
         {props.type === 'select' ? (
           <Select value={String(props.value)} onValueChange={props.onChange} name={props.name}>
-            <SelectTrigger className={props.className}>
+            <SelectTrigger className={`${props.className} border-gray-200 hover:border-gray-200 dark:hover:border-gray-600 dark:border-gray-600  placeholder-gray-500 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent`}>
               <SelectValue placeholder={`Select ${props.placeholder || props.label || ''}`} />
             </SelectTrigger>
             <SelectContent>

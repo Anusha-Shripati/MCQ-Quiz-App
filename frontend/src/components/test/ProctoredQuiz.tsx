@@ -908,7 +908,8 @@ export default function ProctoredQuiz() {
                 <div className="flex justify-between text-sm text-gray-600 px-1">
                   <span className="font-medium">Quiz Progress</span>
                   <span>
-                    {Object.keys(answers).length} of {questions.length} questions answered
+                    {/* {Object.keys(answers).length} of {questions.length} questions answered */}
+                    {currentQuestionIndex + 1} of {questions.length} questions answered
                   </span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">

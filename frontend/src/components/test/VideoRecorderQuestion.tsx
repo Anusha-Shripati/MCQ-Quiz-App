@@ -43,14 +43,16 @@ export const VideoRecorderQuestion: FC<VideoRecorderProps> = ({ handleAnswerChan
       };
     };
 
-    startCamera();
+    if (isRecording) {
+      startCamera();
+    }
 
     return () => {
       if (videoRef.current?.srcObject) {
         (videoRef.current.srcObject as MediaStream).getTracks().forEach((track) => track.stop());
       }
     };
-  }, []);
+  }, [isRecording]);
 
   const handleStart = () => {
     setRecordedChunks([]);
@@ -76,6 +78,13 @@ export const VideoRecorderQuestion: FC<VideoRecorderProps> = ({ handleAnswerChan
 
   const handleStop = () => {
     mediaRecorder?.stop();
+
+    // Turn off the camera
+    if (videoRef.current?.srcObject) {
+      (videoRef.current.srcObject as MediaStream).getTracks().forEach((track) => track.stop());
+      videoRef.current.srcObject = null; // Clear the video source
+    }
+
     const blob = new Blob(recordedChunks, { type: 'video/webm' });
     const url = URL.createObjectURL(blob);
     setRecordedVideoURL(url);
@@ -88,41 +97,34 @@ export const VideoRecorderQuestion: FC<VideoRecorderProps> = ({ handleAnswerChan
   return (
     <div className="space-y-4">
       {/* Question prompt */}
-      <div className="flex flex-row gap-2">
-        {question.question?.meta?.video_url ? (
-          <video controls className="w-3/4 max-h-[400px] rounded-lg shadow">
-            <source src={question.question.meta.video_url} type="video/mp4" />
-          </video>
-        ) : (
-          <></>
-        )}
+      {question.question?.meta?.video_url ? (
+        <video controls className="w-full max-h-[400px] rounded-lg shadow">
+          <source src={question.question.meta.video_url} type="video/mp4" />
+        </video>
+      ) : (
+        <></>
+      )}
 
-        {/* Live video preview */}
-        <video ref={videoRef} autoPlay muted className="w-[400px] h-[375px] border rounded" />
+      <div className="flex justify-center items-center mb-4 gap-4">
+        <button
+          onClick={isRecording ? handleStop : handleStart}
+          className={`px-4 py-2 rounded text-white ${isRecording ? 'bg-red-600' : 'bg-green-600'}`}
+        >
+          {isRecording ? 'Stop Recording' : 'Start Recording'}
+        </button>
       </div>
+
+      {/* Live video preview */}
+      {isRecording ? (
+        <video ref={videoRef} autoPlay muted className="w-full h-full border rounded" />
+      ) : (
+        ''
+      )}
 
       {/* Controls */}
-      <div className="flex flex-row-reverse gap-4 mt-2">
-        <button
-          onClick={handleStop}
-          disabled={!isRecording}
-          className="bg-red-600 text-white px-4 mr-8 py-2 rounded disabled:opacity-50"
-        >
-          Stop Recording
-        </button>
-        <button
-          onClick={handleStart}
-          disabled={isRecording}
-          className="bg-green-600 text-white px-4 py-2 rounded disabled:opacity-50"
-        >
-          Start Recording
-        </button>
-      </div>
 
       {/* Countdown display */}
-      {isRecording && (
-        <p className="text-sm text-gray-700 flex flex-row-reverse">Time left: {timeLeft}s</p>
-      )}
+      {isRecording && <p className="text-sm text-gray-700">Time left: {timeLeft}s</p>}
 
       {/* Playback of recorded video */}
       {recordedVideoURL && (

@@ -335,13 +335,15 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
         />
 
         {question.type === 'video' && question.meta?.videoToVideo ? (
-          <FormField
-            label="Question URL"
-            placeholder="Enter video url"
-            value={(question.meta?.video_url || '') as string}
-            onChange={handleQuestionURL}
-            className="mb-4"
-          />
+          <>
+            <label className="block text-sm font-medium mb-1">Video link <small>( Enter embedded link )</small></label>
+            <textarea
+              placeholder="Enter video url"
+              value={(question.meta?.video_url || '') as string}
+              onChange={handleQuestionURL}
+              className="w-full p-2 border rounded-md dark:bg-gray-700 dark:text-white"
+            />
+          </>
         ) : (
           ''
         )}

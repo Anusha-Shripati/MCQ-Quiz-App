@@ -111,13 +111,10 @@ const CategoryPage = () => {
   const handleQuestionTypeChange = (value: Question['type'], index: number) => {
     const updatedQuestions = [...questionsData];
     updatedQuestions[index].type = value;
-
-    if (value === 'mcq' || value === 'multiple_select') {
-      updatedQuestions[index].options = ['', '', '', '', '', ''];
-      updatedQuestions[index].correct_answer = [];
-    } else if (value === 'text') {
-      updatedQuestions[index].correct_answer = [];
-    } else if (value === 'code_snippet') {
+    updatedQuestions[index].options = ['', '', '', '', '', ''];
+    updatedQuestions[index].correct_answer = [];
+    updatedQuestions[index].meta = {};
+    if (value === 'code_snippet') {
       updatedQuestions[index].correct_answer = [];
       if (updatedQuestions[index]?.meta?.code === undefined) {
         updatedQuestions[index].meta = { code: '' };

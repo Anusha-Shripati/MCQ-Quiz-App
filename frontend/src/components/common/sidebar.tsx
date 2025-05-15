@@ -50,6 +50,7 @@ export default function Sidebar() {
       }
 
     } catch (error) {
+      console.error('Error fetching permissions:', error);
       setPermissions(null, null);
       document.cookie = `role=; path=/;`;
       document.cookie = `permissions=; path=/;`;

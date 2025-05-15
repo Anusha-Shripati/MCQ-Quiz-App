@@ -7,7 +7,6 @@ import AssessmentEdit from './assessment-edit';
 import { toast } from 'react-hot-toast';
 import { Assessment, AssessmentFilters, Technology, useAssessmentStore } from '@/store/assessmentStore';
 // import { LoadingSpinner } from "../ui/loading-spinner";
-import Error from '@/app/error';
 import useSWR, { mutate } from 'swr';
 import Pagination from '../pagination';
 import { api, deleteData, isAxiosError } from '@/lib/api';

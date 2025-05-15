@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { CardTitle } from '../ui/card';
 import { Input } from '../ui/form/input';
 import { Button } from '../ui/form/button';
 import { useAuthStore } from '@/store/authStore';
@@ -11,7 +10,7 @@ import { usePathname } from 'next/navigation';
 function Header() {
   const [searchTerm, setSearchTerm] = useState('');
   const [open, setOpen] = useState(false);
-  const { setUserFilter, userCount, permissions, setParamsLoading } = useAuthStore();
+  const { setUserFilter, userCount, permissions } = useAuthStore();
   const pathname = usePathname();
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);

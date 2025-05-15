@@ -1,4 +1,4 @@
-import { Card, CardHeader, CardContent } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import Header from '@/components/user/header';
 import UserTable from '@/components/user/user-table';
 

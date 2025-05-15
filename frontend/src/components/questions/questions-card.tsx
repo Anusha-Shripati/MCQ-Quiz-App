@@ -51,6 +51,8 @@ export const QuestionCard = ({
   handleEdit: () => void;
 }) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  console.log(question);
+  
   return (
     <>
       <Card
@@ -88,6 +90,17 @@ export const QuestionCard = ({
             >
               {question.meta?.code as string}
             </li>
+          ) : (
+            ''
+          )}
+          
+          {question.meta?.videoToVideo ? (
+            <div
+              key={index}
+              className='w-full'
+              dangerouslySetInnerHTML={{ __html: question.meta?.video_url || '' }}
+            >
+            </div>
           ) : (
             ''
           )}

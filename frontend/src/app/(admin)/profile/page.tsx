@@ -161,7 +161,7 @@ export default function Profile() {
           {/* Tab Panels */}
           {activeTab === 'emailPassword' && (
             <div className="mt-4">
-              <ProfilePictureUpload />
+              <ProfilePictureUpload imageUrl={user?.image || ''} />
               <div className="space-y-4 mb-4 mt-4">
                 <form onSubmit={handleUserInfoSubmit(onSaveUserInfo)}>
                   <div className="pb-4 dark:border-gray-700">

@@ -4,6 +4,7 @@ import { validateRequest } from '../middlewares/validation.middleware';
 import { userSchema } from '../validationSchemas/user.validations';
 import { asyncHandler } from '../utils/asyncHandler';
 import { authenticateAndAuthorize } from '../middlewares/auth.middleware';
+import { upload } from '../utils/fileUpload';
 
 const userRouter = express.Router();
 const userController = new UserController();
@@ -37,6 +38,14 @@ userRouter.put(
   authenticateAndAuthorize('users.can_edit'),
   validateRequest(userSchema.changePassword),
   asyncHandler(userController.changePassword)
+);
+
+userRouter.put(
+  '/upload-image/:id',
+  authenticateAndAuthorize('users.can_edit'),
+  validateRequest(userSchema.uploadImage),
+  upload.single('file'),
+  asyncHandler(userController.uploadImage)
 );
 
 userRouter.delete(

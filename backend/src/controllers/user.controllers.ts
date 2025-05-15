@@ -3,10 +3,11 @@ import { UserService } from '../services/user.services';
 import { generateResponse } from '../utils/generateResponse';
 import { createToken, encryptStringCrypt, matchPassword } from '../middlewares/auth.middleware';
 import RoleService from '../services/role.services';
+import { UploadService } from '../services/upload.services';
 
 const userService = new UserService();
 const roleService = new RoleService();
-
+const uploadService = new UploadService();
 interface UserPayload {
   email: string;
   password: string;
@@ -204,4 +205,27 @@ export class UserController {
       next(error);
     }
   };
+  uploadImage = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const userId = req.params.id;
+      const user = await userService.findUserById(userId);
+      if (!user) {
+        generateResponse(res, 404, {}, false, 'User not found');
+        return;
+      }
+      if (!req.file) {
+        generateResponse(res, 400, {}, false, 'No file uploaded');
+        return;
+      }
+      const fileData = uploadService.processFile(req.file);
+      await userService.updateUser(userId, {
+        image: fileData.path,
+      });
+
+      generateResponse(res, 200, fileData, true, 'Image uploaded successfully');
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  }
 }

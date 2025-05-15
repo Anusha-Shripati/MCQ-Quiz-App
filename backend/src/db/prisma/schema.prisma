@@ -18,6 +18,7 @@ model User {
     updated_at  DateTime      @updatedAt
     deleted_at  DateTime?
     role        Roles         @relation(fields: [role_id], references: [id], name: "UserRole")
+    image       String?
     assessments Assessments[]
     exams       Exam[]
 

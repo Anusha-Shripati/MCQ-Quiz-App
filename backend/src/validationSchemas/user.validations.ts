@@ -1,5 +1,4 @@
 import Joi from 'joi';
-
 export const userSchema = {
   login: {
     body: Joi.object({
@@ -66,6 +65,19 @@ export const userSchema = {
     body: Joi.object({
       oldPassword: Joi.string().required(),
       newPassword: Joi.optional(),
+    }),
+  },
+  uploadImage: {
+    params: Joi.object({
+      id: Joi.string().uuid().required().messages({
+        'string.empty': 'User Id is required',
+        'string.uuid': 'Invalid User Id format',
+      }),
+    }),
+    files: Joi.object({
+      image: Joi.any().required().messages({
+        'any.required': 'Image file is required',
+      }),
     }),
   },
 };

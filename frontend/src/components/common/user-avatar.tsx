@@ -10,6 +10,7 @@ import {
 } from '../ui/dropdown-menu';
 import { LogOut, Settings } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 const UserAvatar = () => {
   const { user } = useAuthStore();
@@ -29,12 +30,15 @@ const UserAvatar = () => {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <div
-          className={`flex items-center rounded-sm cursor-pointer gap-3 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200`}
+          className={`flex items-center rounded-sm cursor-pointer gap-3`}
         >
-          <Avatar className="w-9 h-9 rounded-full">
-            <AvatarImage
-              src="https://avatars.githubusercontent.com/u/47379519?v=4"
+          <Avatar className="w-11 h-11 rounded-full">
+            <Image
+              src={`${user?.image || 'https://avatars.githubusercontent.com/u/47379519?v=4'}`}
               className="w-full h-full"
+              alt="User Avatar" 
+              width={96}
+              height={96}
             />
           </Avatar>
 

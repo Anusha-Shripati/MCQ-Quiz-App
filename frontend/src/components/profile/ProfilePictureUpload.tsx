@@ -1,22 +1,48 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { Camera, User2Icon } from 'lucide-react';
 import { Input } from '../ui/form/input';
 import { Button } from '../ui/form/button';
 import { useProfileStore } from '@/store/profileStore';
+import { api, isAxiosError } from '@/lib/api';
+import toast from 'react-hot-toast';
+import { useAuthStore } from '@/store/authStore';
 
-const ProfilePictureUpload = () => {
-  const [profilePicture, setProfilePicture] = useState<string | null>(null);
+const ProfilePictureUpload = ({imageUrl}: {imageUrl: string}) => {
+  const [profilePicture, setProfilePicture] = useState<string | null>(imageUrl);
+
+  useEffect(() => {
+    setProfilePicture(imageUrl);
+  },[imageUrl])
   const { isEditing, setIsEditing } = useProfileStore();
-  // Handle file input change and update profile picture
-  const handleProfilePictureChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const {user,setUser} = useAuthStore()
+
+  const handleProfilePictureChange = async(event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setProfilePicture(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+        const response = await api.put(`/user/upload-image/${user?.id}`, formData);
+        if (response.success ) {
+          setProfilePicture(response.data.path);
+          if(user){
+            setUser({
+              ...user,
+              image: response.data.path,
+            });
+          }
+          toast.success('Profile picture uploaded successfully!');
+        }
+
+      } catch (error) {
+        if(isAxiosError(error)) {
+          toast.error(error.response?.data?.message || 'Error uploading file');
+        } else {
+          toast.error('An unexpected error occurred');
+        }
+        console.error('Upload error:', error);
+      }
     }
   };
 

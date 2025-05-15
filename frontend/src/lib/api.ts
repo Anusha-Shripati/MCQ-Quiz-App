@@ -67,10 +67,7 @@ export const api = {
     return response.data;
   },
   post: async <T>(url: string, data: T) => {
-    console.log('url', url);
-    console.log('data', data);
     const response = await axios.post(url, data);
-    console.log('response', response);
     return response.data;
   },
   delete: async (url: string) => {

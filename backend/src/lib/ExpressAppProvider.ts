@@ -13,6 +13,7 @@ import { connectToDatabase } from '../db/prisma.client';
 // import { registerCreateArticleWorkerEvents } from "../common/queue/articles.worker";
 import { logger } from '../config/logger';
 import golbalRouter from '../routes';
+import path from 'path';
 
 class ExpressAppProvider {
   public app: Express;
@@ -32,6 +33,7 @@ class ExpressAppProvider {
     this.app.use(helmet());
     this.app.use(rateLimiter);
     this.app.use(express.json());
+    this.app.use('/uploads', express.static(path.join(__dirname, '../../uploads')));
     // this.app.use("/bullboard", serverAdapter.getRouter());
   }
 

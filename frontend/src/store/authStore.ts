@@ -7,6 +7,7 @@ interface User {
   name: string;
   email: string;
   password: string;
+  image?: string;
   role: {
     id: string;
     name: string;
@@ -36,6 +37,7 @@ interface AuthState {
     permissions: Record<string, Permissions> | null,
     user: User | null
   ) => Promise<void>;
+  setUser: (user: User | null) => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -49,6 +51,9 @@ export const useAuthStore = create<AuthState>((set) => ({
   permissions: null,
   setParamsLoading: (loading: boolean) => {
     set({ paramsLoading: loading });
+  },
+  setUser: (user: User | null) => {
+    set({ user });
   },
   login: async ({ email, password }: { email: string; password: string }) => {
     set({ loading: true });

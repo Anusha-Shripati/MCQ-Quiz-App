@@ -57,7 +57,7 @@ export class QuestionService {
     return prisma.questions.create({ data });
   }
   async deleteQuestion(questionId: string) {
-    return prisma.questions.deleteMany({
+    return prisma.questions.delete({
       where: {
         id: questionId,
       },

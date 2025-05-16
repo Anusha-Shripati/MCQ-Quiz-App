@@ -12,8 +12,9 @@ import { Textarea } from '../ui/form/textarea';
 import { VideoRecorderQuestion } from './VideoRecorderQuestion';
 import TestHeader from './TestHeader';
 import useSWR from 'swr';
-import { examApi } from '@/lib/api';
+import { examApi, isAxiosError } from '@/lib/api';
 import { Loader2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 // type Screenshot = {
 //   timestamp: number;
@@ -76,12 +77,12 @@ const PROHIBITED_COMBINATIONS = [
 ];
 
 export default function ProctoredQuiz() {
-  const [answers, setAnswers] = useState<Record<string, {question: IExamQuestion, answer: string | Blob | (string|number)[]}>>({});
+  const [answers, setAnswers] = useState<Record<string, { question: IExamQuestion, answer: string | Blob | (string | number)[] }>>({});
   const [timeLeft, setTimeLeft] = useState(0);
   const isSubmittingRef = useRef(false);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   // const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  // const router = useRouter();
+  const router = useRouter();
   // const [violations, setViolations] = useState<Violation[]>([]);
   // const [screenshots, setScreenshots] = useState<Screenshot[]>([]);
   // const [isFullScreen, setIsFullScreen] = useState(false);
@@ -100,7 +101,7 @@ export default function ProctoredQuiz() {
   });
   const pingIntervalRef = useRef<NodeJS.Timeout>();
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const { exam, accessCode,setExam } = useExamStore();
+  const { exam, accessCode, setExam } = useExamStore();
   const [questions, setQuestions] = useState<IExamQuestion[]>([]);
 
   const displayAlert = (message: string) => {
@@ -109,7 +110,7 @@ export default function ProctoredQuiz() {
     setTimeout(() => setShowAlert(false), QUIZ_CONFIG.alertTimeout);
   };
 
-  const {data: examData, isLoading: isExamLoading} = useSWR(`/candidate-exam/${exam?.id}`, (url: string) => examApi.get(url, accessCode))
+  const { data: examData, isLoading: isExamLoading } = useSWR(`/candidate-exam/${exam?.id}`, (url: string) => examApi.get(url, accessCode))
 
   useEffect(() => {
     if (examData) {
@@ -117,8 +118,35 @@ export default function ProctoredQuiz() {
       console.log('examData.data.exam', examData?.data?.exam_questions);
       setQuestions(examData.data?.exam_questions || []);
       setTimeLeft(examData.data?.assessment?.duration * 60);
+      checkExamStatus();
+
     }
   }, [examData]);
+
+  const checkExamStatus = async () => {
+    try {
+      const data = await examApi.get(`/candidate-exam/${exam?.id}/status`, accessCode)
+      if (data.data.status == 'pending') {
+        const startData = await examApi.get(`/candidate-exam/${exam?.id}/start`, accessCode)
+        const remainingTime = (examData.data?.assessment?.duration * 60) - (new Date().getTime() - new Date(startData.data.startTime).getTime()) / 1000;
+        setTimeLeft(remainingTime);
+        if (remainingTime <= 0) {
+          router.push('/thank-you');
+        }
+      } else if (data.data.status == 'completed') {
+        router.push('/thank-you');
+      } else if (data.data.status == 'in_progress') {
+        const remainingTime = (examData.data?.assessment?.duration * 60) - (new Date().getTime() - new Date(data.data.startTime).getTime()) / 1000;
+        setTimeLeft(remainingTime);
+        if (remainingTime <= 0) {
+          router.push('/thank-you');
+        }
+      }
+    } catch (error) {
+      console.log('error', error);
+      setAccessError(isAxiosError(error) ? error?.response?.data.message : 'Unknown error');
+    }
+  }
 
 
 
@@ -170,16 +198,16 @@ export default function ProctoredQuiz() {
         );
       case QuestionType.VIDEO:
         return (
-          <VideoRecorderQuestion handleAnswerChange={handleAnswerChange} question={question}  onRecordingComplete={() =>
+          <VideoRecorderQuestion handleAnswerChange={handleAnswerChange} question={question} onRecordingComplete={() =>
             setCurrentQuestionIndex((prev) => Math.min(questions.length - 1, prev + 1))
-          }/>
+          } />
         );
       case QuestionType.MULTIPLE_SELECT:
         return (
           <div className="space-y-4">
             {question.question.options?.map((option, idx) => {
               const currentAnswers = answers[question.id]
-                ? (answers[question.id]?.answer as (string|number)[])
+                ? (answers[question.id]?.answer as (string | number)[])
                 : [];
               console.log('currentAnswers', currentAnswers);
 
@@ -189,7 +217,7 @@ export default function ProctoredQuiz() {
                     id={`option-${question.id}-${idx}`}
                     checked={currentAnswers.includes(option)}
                     onCheckedChange={(checked) => {
-                      let newAnswers: (string|number)[];
+                      let newAnswers: (string | number)[];
                       if (!checked) {
                         newAnswers = currentAnswers.filter((a) => a !== option);
                       } else {
@@ -471,23 +499,23 @@ export default function ProctoredQuiz() {
   };
 
   // Quiz functions
-  const handleAnswerChange = useCallback((question: IExamQuestion, value: string | Blob | (string|number)[]) => {
+  const handleAnswerChange = useCallback((question: IExamQuestion, value: string | Blob | (string | number)[]) => {
     setAnswers((prev) => ({
       ...prev,
-      [question.id]: {question, answer: value},
+      [question.id]: { question, answer: value },
     }));
     localStorage.setItem(
       'quizAnswers',
       JSON.stringify({
         ...answers,
-        [question.id]: {question, answer: value},
+        [question.id]: { question, answer: value },
       })
     );
-  },[answers]);
+  }, [answers]);
 
   const submitQuiz = async () => {
     if (isSubmitting) return;
-      console.log('answers', answers);
+    console.log('answers', answers);
     try {
       // setIsSubmitting(true);
       // await takeScreenshot();
@@ -554,7 +582,7 @@ export default function ProctoredQuiz() {
       if (document.fullscreenElement) {
         await document.exitFullscreen();
       }
-      // router.push('/thank-you');  // use router if available
+      router.push('/thank-you');  // use router if available
     } catch (error) {
       console.error('Auto-submit failed:', error);
       isSubmittingRef.current = false;
@@ -755,11 +783,11 @@ export default function ProctoredQuiz() {
       <audio src="/alert.mp3" ref={audioRef} style={{ display: 'none' }} />
 
       <Card className="w-[95vw] max-w-[1200px] mx-auto min-h-[85vh] shadow-xl border-0 rounded-xl overflow-hidden bg-white/95 backdrop-blur-sm">
-      <TestHeader timeLeft={timeLeft} currentQuestionIndex={currentQuestionIndex} totalQuestion={questions.length || 0}  handleTimerEnd={handleTimerEnd}/>
-        
+        <TestHeader timeLeft={timeLeft} currentQuestionIndex={currentQuestionIndex} totalQuestion={questions.length || 0} handleTimerEnd={handleTimerEnd} />
+
 
         <CardContent className="p-4 md:p-8 space-y-6">
-        <AlertWrapper showAlert={showAlert} alertMessage={alertMessage} />
+          <AlertWrapper showAlert={showAlert} alertMessage={alertMessage} />
 
           {/* Question navigation pills */}
           <div className="flex flex-wrap gap-2 justify-center">
@@ -767,13 +795,12 @@ export default function ProctoredQuiz() {
               <button
                 key={q.id}
                 onClick={() => setCurrentQuestionIndex(index)}
-                className={`h-8 w-8 rounded-full flex items-center justify-center text-sm font-medium transition-all ${
-                  currentQuestionIndex === index
+                className={`h-8 w-8 rounded-full flex items-center justify-center text-sm font-medium transition-all ${currentQuestionIndex === index
                     ? 'bg-blue-600 text-white shadow-md'
                     : answers[q.id]
                       ? 'bg-green-100 text-green-800 border border-green-200'
                       : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
+                  }`}
                 aria-label={`Go to question ${index + 1}`}
               >
                 {index + 1}
@@ -781,7 +808,7 @@ export default function ProctoredQuiz() {
             ))}
           </div>
 
-         { questions.length > 0 && <div className="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-gray-200 transition-all hover:shadow-md">
+          {questions.length > 0 && <div className="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-gray-200 transition-all hover:shadow-md">
             <div className="space-y-6">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div className="flex items-center gap-3">

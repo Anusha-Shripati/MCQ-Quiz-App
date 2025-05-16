@@ -1,13 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { CardHeader, CardTitle } from '../ui/card'
 
-function TestHeader({ timeLeft, currentQuestionIndex, totalQuestion,handleTimerEnd }: { timeLeft: number, currentQuestionIndex: number, totalQuestion: number,handleTimerEnd:()=>void }) {
+function TestHeader({ timeLeft, currentQuestionIndex, totalQuestion, handleTimerEnd }: { timeLeft: number, currentQuestionIndex: number, totalQuestion: number, handleTimerEnd: () => void }) {
 
 
     const [seconds, setSeconds] = useState(0);
     const formatTime = (seconds: number): string => {
         const mins = Math.floor(seconds / 60);
-        const secs = seconds % 60;
+        const secs = Math.floor(seconds % 60);
         return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
     };
     useEffect(() => {
@@ -18,8 +18,8 @@ function TestHeader({ timeLeft, currentQuestionIndex, totalQuestion,handleTimerE
     useEffect(() => {
         const interval = setInterval(() => {
             setSeconds(prev => prev + 1);
-          }, 1000);
-          return () => clearInterval(interval);
+        }, 1000);
+        return () => clearInterval(interval);
     }, []);
 
     return (
@@ -56,7 +56,7 @@ function TestHeader({ timeLeft, currentQuestionIndex, totalQuestion,handleTimerE
                             />
                         </svg>
                         <span className="text-xl font-mono font-semibold tabular-nums">
-                            {formatTime(timeLeft-seconds)}
+                            {formatTime(timeLeft - seconds)}
                         </span>
                     </div>
                     <div className="flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-full border border-blue-200 shadow-sm">

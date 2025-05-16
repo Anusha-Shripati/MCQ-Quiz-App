@@ -8,7 +8,7 @@ import { examApi } from '@/lib/api';
 import { useExamStore } from '@/store/examStore';
 import { EXAM_STEP } from '@/types/exam.types';
 import { Loader2 } from 'lucide-react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 
@@ -60,7 +60,7 @@ const QuizPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { current_step, setCurrentStep, setAccessCode, setCandidate,candidate,setExam } = useExamStore();
-
+  const router = useRouter();
 
   const handleKeyDown = (e: KeyboardEvent) => {
     if (PROHIBITED_KEYS.includes(e.key)) {
@@ -147,8 +147,10 @@ const QuizPage = () => {
           setError(data.message || 'Access denied. Invalid or expired access code.');
           return;
         }
-
-        console.log('daataaaaa exam', data);
+        if(data.data.exam.status == 'completed'){
+          router.push('/thank-you');
+          return;
+        }
 
         setCandidate(data.data);
         setExam(data.data.exam);

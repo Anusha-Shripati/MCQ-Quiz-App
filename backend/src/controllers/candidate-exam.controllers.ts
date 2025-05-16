@@ -17,6 +17,17 @@ export class CandidateExamController {
       next(error);
     }
   };
+  getCandidate = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const candidateId = req.candidateInfo?.candidateId;
+      if (!candidateId) throw new Error('Candidate not authenticated');
+      const candidate = await this.candidateExamService.getCandidate(candidateId);
+
+      generateResponse(res, 200, candidate, true, 'Candidate retrieved successfully');
+    } catch (error) {
+      next(error);
+    }
+  };
 
   startExam = async (req: Request, res: Response, next: NextFunction) => {
     try {

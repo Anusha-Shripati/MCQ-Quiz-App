@@ -49,4 +49,10 @@ router.get(
   asyncHandler(candidateExamController.getExam)
 );
 
+router.get(
+  '/',
+  authenticateCandidate,
+  asyncHandler(candidateExamController.getCandidate)
+);
+
 export default router;

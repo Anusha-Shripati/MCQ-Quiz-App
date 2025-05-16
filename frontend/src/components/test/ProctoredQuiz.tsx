@@ -5,11 +5,15 @@ import { useExamStore } from '@/store/examStore';
 import { IExamQuestion, QuestionType } from '@/types/exam.types';
 // import html2canvas from 'html2canvas';
 // import { useRouter } from 'next/navigation';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Checkbox } from '../ui/form/checkbox';
 import { Radio, RadioGroup } from '../ui/form/radio';
 import { Textarea } from '../ui/form/textarea';
 import { VideoRecorderQuestion } from './VideoRecorderQuestion';
+import TestHeader from './TestHeader';
+import useSWR from 'swr';
+import { examApi } from '@/lib/api';
+import { Loader2 } from 'lucide-react';
 
 // type Screenshot = {
 //   timestamp: number;
@@ -72,9 +76,8 @@ const PROHIBITED_COMBINATIONS = [
 ];
 
 export default function ProctoredQuiz() {
-  const [answers, setAnswers] = useState<Record<string, string | Blob>>({});
+  const [answers, setAnswers] = useState<Record<string, {question: IExamQuestion, answer: string | Blob | (string|number)[]}>>({});
   const [timeLeft, setTimeLeft] = useState(0);
-  const timeLeftRef = useRef(timeLeft);
   const isSubmittingRef = useRef(false);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   // const intervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -97,7 +100,7 @@ export default function ProctoredQuiz() {
   });
   const pingIntervalRef = useRef<NodeJS.Timeout>();
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const { exam, accessCode } = useExamStore();
+  const { exam, accessCode,setExam } = useExamStore();
   const [questions, setQuestions] = useState<IExamQuestion[]>([]);
 
   const displayAlert = (message: string) => {
@@ -105,6 +108,19 @@ export default function ProctoredQuiz() {
     setShowAlert(true);
     setTimeout(() => setShowAlert(false), QUIZ_CONFIG.alertTimeout);
   };
+
+  const {data: examData, isLoading: isExamLoading} = useSWR(`/candidate-exam/${exam?.id}`, (url: string) => examApi.get(url, accessCode))
+
+  useEffect(() => {
+    if (examData) {
+      setExam(examData.data);
+      console.log('examData.data.exam', examData?.data?.exam_questions);
+      setQuestions(examData.data?.exam_questions || []);
+      setTimeLeft(examData.data?.assessment?.duration * 60);
+    }
+  }, [examData]);
+
+
 
   const takeScreenshot = async () => {
     if (!containerRef.current || document.hidden) {
@@ -135,8 +151,8 @@ export default function ProctoredQuiz() {
       case QuestionType.MCQ:
         return (
           <RadioGroup
-            value={answers[question.id] as string}
-            onValueChange={(value) => handleAnswerChange(question.id, value)}
+            value={answers[question.id]?.answer as string}
+            onValueChange={(value) => handleAnswerChange(question, value)}
             className="space-y-4"
           >
             {question.question.options?.map((option, idx) => (
@@ -154,31 +170,32 @@ export default function ProctoredQuiz() {
         );
       case QuestionType.VIDEO:
         return (
-          <VideoRecorderQuestion handleAnswerChange={handleAnswerChange} question={question} />
+          <VideoRecorderQuestion handleAnswerChange={handleAnswerChange} question={question}  onRecordingComplete={() =>
+            setCurrentQuestionIndex((prev) => Math.min(questions.length - 1, prev + 1))
+          }/>
         );
       case QuestionType.MULTIPLE_SELECT:
         return (
           <div className="space-y-4">
             {question.question.options?.map((option, idx) => {
-              console.log('answersss', answers);
               const currentAnswers = answers[question.id]
-                ? (answers[question.id] as string).split(',')
+                ? (answers[question.id]?.answer as (string|number)[])
                 : [];
-              const isChecked = currentAnswers.includes(option);
+              console.log('currentAnswers', currentAnswers);
 
               return (
                 <div key={idx} className="flex items-center space-x-3">
                   <Checkbox
                     id={`option-${question.id}-${idx}`}
-                    checked={isChecked}
-                    onChange={() => {
-                      let newAnswers: string[];
-                      if (isChecked) {
+                    checked={currentAnswers.includes(option)}
+                    onCheckedChange={(checked) => {
+                      let newAnswers: (string|number)[];
+                      if (!checked) {
                         newAnswers = currentAnswers.filter((a) => a !== option);
                       } else {
                         newAnswers = [...currentAnswers, option];
                       }
-                      handleAnswerChange(question.id, newAnswers.join(','));
+                      handleAnswerChange(question, newAnswers);
                     }}
                   />
                   <label
@@ -196,8 +213,8 @@ export default function ProctoredQuiz() {
       case QuestionType.TEXT:
         return (
           <Textarea
-            value={(answers[question.id] as string) || ''}
-            onChange={(e) => handleAnswerChange(question.id, e.target.value)}
+            value={(answers[question.id]?.answer as string) || ''}
+            onChange={(e) => handleAnswerChange(question, e.target.value)}
             placeholder="Type your answer here..."
             className="min-h-[120px] text-lg"
           />
@@ -207,8 +224,8 @@ export default function ProctoredQuiz() {
         return (
           <div className="space-y-2">
             <Textarea
-              value={(answers[question.id] as string) || ''}
-              onChange={(e) => handleAnswerChange(question.id, e.target.value)}
+              value={(answers[question.id]?.answer as string) || ''}
+              onChange={(e) => handleAnswerChange(question, e.target.value)}
               placeholder="Write your code here..."
               className="min-h-[200px] font-mono text-black text-base"
             />
@@ -233,6 +250,8 @@ export default function ProctoredQuiz() {
         return 'Text Answer';
       case QuestionType.CODE_SNIPPET:
         return 'Code Answer';
+      case QuestionType.VIDEO:
+        return 'Video Answer';
       default:
         return 'Question';
     }
@@ -452,23 +471,23 @@ export default function ProctoredQuiz() {
   };
 
   // Quiz functions
-  const handleAnswerChange = (questionId: string, value: string | Blob) => {
+  const handleAnswerChange = useCallback((question: IExamQuestion, value: string | Blob | (string|number)[]) => {
     setAnswers((prev) => ({
       ...prev,
-      [questionId]: value,
+      [question.id]: {question, answer: value},
     }));
     localStorage.setItem(
       'quizAnswers',
       JSON.stringify({
         ...answers,
-        [questionId]: value,
+        [question.id]: {question, answer: value},
       })
     );
-  };
+  },[answers]);
 
   const submitQuiz = async () => {
     if (isSubmitting) return;
-
+      console.log('answers', answers);
     try {
       // setIsSubmitting(true);
       // await takeScreenshot();
@@ -542,22 +561,6 @@ export default function ProctoredQuiz() {
     }
   };
 
-  const formatTime = (seconds: number): string => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  };
-
-  useEffect(() => {
-    timeLeftRef.current = timeLeft;
-  }, [timeLeft]);
-
-  useEffect(() => {
-    if (exam) {
-      setTimeLeft(exam?.assessment?.duration * 60);
-      setQuestions(exam?.exam_questions);
-    }
-  }, [exam]);
 
   useEffect(() => {
     const validateAccess = async () => {
@@ -602,6 +605,7 @@ export default function ProctoredQuiz() {
 
   // Effects
   useEffect(() => {
+
     // Request full screen immediately
     requestFullScreen();
 
@@ -688,28 +692,6 @@ export default function ProctoredQuiz() {
     };
   }, []);
 
-  useEffect(() => {
-    if (isSubmitting) return;
-
-    let interval: NodeJS.Timeout | null = null;
-
-    if (timeLeft > 0) {
-      interval = setInterval(() => {
-        setTimeLeft((prevTime) => {
-          const newTime = prevTime - 1;
-          return newTime;
-        });
-      }, 1000);
-    } else if (timeLeft <= 0) {
-      handleTimerEnd();
-    }
-
-    return () => {
-      if (interval) {
-        clearInterval(interval);
-      }
-    };
-  }, [timeLeft, isSubmitting]);
 
   useEffect(() => {
     const currentState = localStorage.getItem('currentQuizState');
@@ -756,7 +738,14 @@ export default function ProctoredQuiz() {
   }
 
   console.log('Quiz rendered');
-
+  if (isExamLoading) {
+    return (
+      <div className="w-screen min-h-screen bg-gray-50 flex flex-col items-center justify-center gap-4">
+        <Loader2 className="w-8 h-8 text-purple-600 animate-spin" />
+        <p className="text-gray-600 animate-pulse">Loading your test environment...</p>
+      </div>
+    );
+  }
   return (
     <div
       ref={containerRef}
@@ -766,86 +755,11 @@ export default function ProctoredQuiz() {
       <audio src="/alert.mp3" ref={audioRef} style={{ display: 'none' }} />
 
       <Card className="w-[95vw] max-w-[1200px] mx-auto min-h-[85vh] shadow-xl border-0 rounded-xl overflow-hidden bg-white/95 backdrop-blur-sm">
-        <CardHeader className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-10 shadow-sm px-6 py-5">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="flex items-center gap-3">
-              <div className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 text-white"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z" />
-                </svg>
-              </div>
-              <CardTitle className="text-2xl font-bold text-blue-800 tracking-tight">
-                Proctored Exam
-              </CardTitle>
-            </div>
-
-            <div className="flex flex-col sm:flex-row items-center gap-4">
-              <div className="flex items-center gap-2 bg-red-50 text-red-700 px-4 py-2 rounded-full border border-red-200 shadow-sm">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                <span className="text-xl font-mono font-semibold tabular-nums">
-                  {formatTime(timeLeft)}
-                </span>
-              </div>
-              <div className="flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-full border border-blue-200 shadow-sm">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-4 w-4"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10 2a1 1 0 00-1 1v1a1 1 0 002 0V3a1 1 0 00-1-1zM4 4h3a3 3 0 006 0h3a2 2 0 012 2v9a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2zm2.5 7a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm2.45 4a2.5 2.5 0 10-4.9 0h4.9zM12 9a1 1 0 100 2h3a1 1 0 100-2h-3zm-1 4a1 1 0 011-1h2a1 1 0 110 2h-2a1 1 0 01-1-1z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                <span className="font-medium">
-                  Q{currentQuestionIndex + 1} of {questions.length}
-                </span>
-              </div>
-            </div>
-          </div>
-        </CardHeader>
+      <TestHeader timeLeft={timeLeft} currentQuestionIndex={currentQuestionIndex} totalQuestion={questions.length || 0}  handleTimerEnd={handleTimerEnd}/>
+        
 
         <CardContent className="p-4 md:p-8 space-y-6">
-          {showAlert && (
-            <Alert
-              variant="destructive"
-              className="border-l-4 border-l-red-700 slide-in-from-top-5 duration-300"
-            >
-              <div className="flex items-center gap-2">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                <AlertDescription className="font-medium">{alertMessage}</AlertDescription>
-              </div>
-            </Alert>
-          )}
+        <AlertWrapper showAlert={showAlert} alertMessage={alertMessage} />
 
           {/* Question navigation pills */}
           <div className="flex flex-wrap gap-2 justify-center">
@@ -867,8 +781,7 @@ export default function ProctoredQuiz() {
             ))}
           </div>
 
-          {/* Main question card */}
-          <div className="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-gray-200 transition-all hover:shadow-md">
+         { questions.length > 0 && <div className="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-gray-200 transition-all hover:shadow-md">
             <div className="space-y-6">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div className="flex items-center gap-3">
@@ -887,19 +800,11 @@ export default function ProctoredQuiz() {
                 {questions[currentQuestionIndex].question.question}
               </h2>
 
-              {/* {questions[currentQuestionIndex].question.question && (
-                <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
-                  <p className="text-blue-800">
-                    {questions[currentQuestionIndex].question.question}
-                  </p>
-                </div>
-              )} */}
-
               <div className="pt-2 text-black">
                 {renderQuestion(questions[currentQuestionIndex])}
               </div>
             </div>
-          </div>
+          </div>}
 
           {/* Progress and navigation */}
           <div className="flex flex-col md:flex-row gap-6">
@@ -1224,3 +1129,32 @@ export default function ProctoredQuiz() {
     // </div>
   );
 }
+
+
+
+const AlertWrapper = ({ showAlert, alertMessage }: { showAlert: boolean; alertMessage: string }) => {
+  if (!showAlert) return null;
+
+  return (
+    <Alert
+      variant="destructive"
+      className="border-l-4 border-l-red-700 slide-in-from-top-5 duration-300"
+    >
+      <div className="flex items-center gap-2">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-5 w-5"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+        >
+          <path
+            fillRule="evenodd"
+            d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+            clipRule="evenodd"
+          />
+        </svg>
+        <AlertDescription className="font-medium">{alertMessage}</AlertDescription>
+      </div>
+    </Alert>
+  );
+};

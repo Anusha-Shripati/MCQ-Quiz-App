@@ -78,9 +78,9 @@ const FormInput = ({
 );
 
 const BasicInfoForm: React.FC = memo(() => {
-  const { exam, setCurrentStep } = useExamStore();
+  const { candidate, setCurrentStep } = useExamStore();
 
-  console.log('examm', exam);
+  console.log('examm', candidate);
   const handleBasicInfoSubmit = () => {
     setCurrentStep(EXAM_STEP.VIDEO_RECORDING);
   };
@@ -103,26 +103,26 @@ const BasicInfoForm: React.FC = memo(() => {
               <FormInput
                 label="Full Name"
                 icon={<User className="h-4 w-4" />}
-                value={exam?.candidate?.name as string}
+                value={candidate?.name as string}
               />
               <FormInput
                 label="Email Address"
                 icon={<Mail className="h-4 w-4" />}
-                value={exam?.candidate?.email as string}
+                value={candidate?.email as string}
                 type="email"
               />
               <FormInput
                 label="Years of Experience"
                 icon={<UserCircle className="h-4 w-4" />}
-                value={exam?.candidate?.experience as string}
+                value={candidate?.experience as string}
                 type="number"
               />
               <FormInput
                 label="Technology"
                 icon={<FileText className="h-4 w-4" />}
                 value={
-                  exam?.assessment?.technologies
-                    ?.map((item) => item?.technology?.name)
+                  candidate?.assessment?.technologies
+                    ?.map((item:any) => item?.technology?.name)
                     .join(',') as string
                 }
               />

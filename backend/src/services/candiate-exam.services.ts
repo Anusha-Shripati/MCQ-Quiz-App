@@ -2,10 +2,18 @@ import { AppError } from '../common/errors/AppError';
 import { prisma } from '../db/prisma.client';
 
 export class CandidateExamService {
-  async validateCandidateAccess(candidateId: string) {
+  async getCandidate(candidateId: string) {
     const candidate = await prisma.candidate.findUnique({
       where: { id: candidateId },
-      include: { exam: true },
+      include: { exam: true,  assessment: {
+        include: {
+          technologies: {
+            include: {
+              technology: true,
+            },
+          },
+        },
+      }, },
     });
 
     if (!candidate) throw new AppError('Candidate not found', 404);
@@ -15,7 +23,7 @@ export class CandidateExamService {
   }
 
   async getExam(examId: string, candidateId: string) {
-    const candidate = await this.validateCandidateAccess(candidateId);
+    const candidate = await this.getCandidate(candidateId);
 
     if (candidate.exam_id !== examId) {
       throw new AppError('Candidate does not have access to this exam', 403);
@@ -51,7 +59,7 @@ export class CandidateExamService {
   }
 
   async startExam(examId: string, candidateId: string) {
-    const candidate = await this.validateCandidateAccess(candidateId);
+    const candidate = await this.getCandidate(candidateId);
 
     if (candidate.exam.status !== 'pending') {
       throw new AppError(
@@ -93,7 +101,7 @@ export class CandidateExamService {
   }
 
   async getNextQuestion(examId: string, candidateId: string, currentQuestionId?: string) {
-    await this.validateCandidateAccess(candidateId);
+    await this.getCandidate(candidateId);
 
     const whereClause: any = { exam_id: examId };
     if (currentQuestionId) {
@@ -127,7 +135,7 @@ export class CandidateExamService {
   // 	questionId: string,
   // 	answer: string
   // ) {
-  // 	await this.validateCandidateAccess(candidateId);
+  // 	await this.getCandidate(candidateId);
 
   // 	// Check if question exists in exam
   // 	const examQuestion = await prisma.exam_questions.findUnique({
@@ -156,7 +164,7 @@ export class CandidateExamService {
   // }
 
   // async finishExam(examId: string, candidateId: string) {
-  // 	const candidate = await this.validateCandidateAccess(candidateId, examId);
+  // 	const candidate = await this.getCandidate(candidateId, examId);
 
   // 	if (candidate.exam.status === 'completed') {
   // 		throw new AppError('Exam already completed', 400);
@@ -209,7 +217,7 @@ export class CandidateExamService {
   // }
 
   async getExamStatus(examId: string, candidateId: string) {
-    const candidate = await this.validateCandidateAccess(candidateId);
+    const candidate = await this.getCandidate(candidateId);
 
     const answeredQuestions = await prisma.answers.count({
       where: {

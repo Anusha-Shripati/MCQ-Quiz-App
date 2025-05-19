@@ -62,7 +62,7 @@ export const QuestionCard = ({
           <Badge
             className={`dark:bg-gray-600 dark:text-gray-200 bg-gray-200 text-gray-800" py-1 px-3`}
           >
-            {questionType[question.type]?.label || 'Unknown'}
+            {questionType[question.type as keyof typeof questionType]?.label || 'Unknown'}
           </Badge>
         </div>
         <ul className="space-y-2">

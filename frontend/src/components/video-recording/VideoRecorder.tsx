@@ -57,7 +57,10 @@ const VideoRecorder = ({ onRecordingComplete, maxTime, videoKey = 'video', video
         }
     }, []);
 
-
+    useEffect(() => {
+            setRecordedVideo(videoLink || '');
+            setStatus(videoLink ? 'preview' : 'idle');
+    }, [videoLink]);
     const init = async () => {
         
         if (videoLink) {

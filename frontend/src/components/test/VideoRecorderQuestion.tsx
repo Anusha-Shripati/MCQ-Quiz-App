@@ -1,17 +1,19 @@
-import React, { FC ,useImperativeHandle, useRef, useState } from 'react';
+import React, { FC ,useEffect,useImperativeHandle, useRef, useState } from 'react';
 import VideoRecorder  from '../video-recording/VideoRecorder';
 import { IExamQuestion } from '@/types/exam.types';
 interface VideoRecorderProps {
-  handleAnswerChange: (question: IExamQuestion, blob: Blob) => void;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   question: any;
   answers: Record<string, { question: IExamQuestion, answer: string | Blob | (string | number)[] }>;
   onRecordingComplete: (blob: Blob,url:string) => void;
 }
 
-export const VideoRecorderQuestion: FC<VideoRecorderProps> = React.memo(({ handleAnswerChange, question,answers,onRecordingComplete }) => {
+export const VideoRecorderQuestion: FC<VideoRecorderProps> = React.memo(({ question,answers,onRecordingComplete }) => {
   const [iframeHTML] = useState(() => question.question?.meta?.video_url || '');
-  const videoUrl = answers[question.question_id]?.answer as string;
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  useEffect(() => {
+    setVideoUrl(answers[question.question_id]?.answer as string);
+  }, [answers]);
   
   return (
     <>
@@ -22,7 +24,6 @@ export const VideoRecorderQuestion: FC<VideoRecorderProps> = React.memo(({ handl
           <source src={iframeHTML} type="video/mp4" />
         </video>
       )}
-      
       <VideoRecorder 
         onRecordingComplete={(chunks,url) => {
           const blob = new Blob(chunks, { type: 'video/webm' });

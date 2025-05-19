@@ -43,7 +43,7 @@ export interface Question {
   options: string[];
   time: string;
   difficulty_level: 'easy' | 'medium' | 'hard';
-  type: 'multiple_select' | 'video' | 'text' | 'mcq' | 'code_snippet';
+  type: 'multiple_select' | 'video' | 'text' | 'mcq' | 'code_snippet' | 'code_editor';
   meta?: Record<string, unknown>;
   created_at?: string;
   updated_at?: string;

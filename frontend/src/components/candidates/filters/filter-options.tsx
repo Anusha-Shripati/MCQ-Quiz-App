@@ -49,7 +49,6 @@ export function FilterOptions({
       }
     };
     const handleDateRange = (e: DateRange) => {
-      console.log('date ', e);
       setValue('created.days', '');
       setValue('created.range', e);
     };

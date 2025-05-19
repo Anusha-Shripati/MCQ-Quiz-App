@@ -29,7 +29,6 @@ export default class ExamService {
       throw new AppError('Assessment not found', 404);
     }
 
-    console.log('aseessment technologies', assessment.technologies);
     for (const tech of assessment.technologies) {
       const easyQuestions = await this.getRandomQuestions('easy', tech.easy, tech.technology_id);
       const mediumQuestions = await this.getRandomQuestions(

@@ -42,6 +42,7 @@ export enum QuestionType {
   TEXT = 'text',
   CODE_SNIPPET = 'code_snippet',
   VIDEO = 'video',
+  CODE_EDITOR = 'code_editor',
 }
 
 export interface IExamQuestion {

@@ -3,8 +3,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/form/button';
 import { useExamStore } from '@/store/examStore';
 import { IExamQuestion, QuestionType } from '@/types/exam.types';
-// import html2canvas from 'html2canvas';
-// import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Checkbox } from '../ui/form/checkbox';
 import { Radio, RadioGroup } from '../ui/form/radio';
@@ -15,6 +13,9 @@ import useSWR from 'swr';
 import { examApi, isAxiosError } from '@/lib/api';
 import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import useSWRMutation from 'swr/mutation';
+import { data } from '@/shared/constants/data';
+import EditorPage from '@/app/(admin)/editor/page';
 
 // type Screenshot = {
 //   timestamp: number;
@@ -110,12 +111,34 @@ export default function ProctoredQuiz() {
     setTimeout(() => setShowAlert(false), QUIZ_CONFIG.alertTimeout);
   };
 
-  const { data: examData, isLoading: isExamLoading } = useSWR(`/candidate-exam/${exam?.id}`, (url: string) => examApi.get(url, accessCode))
+  const { data: examData, isLoading: isExamLoading } = useSWR(`/candidate-exam/${exam?.id}`, (url: string) => examApi.get(url, accessCode),{
+    revalidateOnFocus: true,
+    revalidateOnMount: true,
+    revalidateOnReconnect: true,
+    revalidateIfStale: true,
+  })
+
+  const { isMutating, error, trigger } = useSWRMutation<{ success: boolean; message?: string }, any, string, FormData | { question_id: string; user_answer: (string | number | Blob)[] }>(
+    `/candidate-exam/${exam?.id}/submit-answer`,
+    (url: string, { arg }) => examApi.post(url, arg, accessCode)
+  )
+  const { isMutating:isSubmiting, error:submitError, trigger:submitTrigger } = useSWRMutation(`/candidate-exam/${exam?.id}/finish`, (url: string) => examApi.get(url,accessCode))
+
 
   useEffect(() => {
     if (examData) {
-      setExam(examData.data);
-      console.log('examData.data.exam', examData?.data?.exam_questions);
+      setExam(examData.data);      
+      const obj: Record<string, { question: IExamQuestion, answer: string | Blob | (string | number)[] }> = {}
+      examData.data?.answers?.forEach((a:any)=>{
+        const question = examData.data?.exam_questions.find((q:IExamQuestion)=>q.question_id == a.question_id)
+        
+        obj[a.question_id as string]={
+          question:question.question,
+          answer:question.question.type == QuestionType.MULTIPLE_SELECT ? a.user_answer : a.user_answer[0]
+        }
+      })
+      setAnswers(obj)
+      localStorage.setItem('quizAnswers', JSON.stringify(obj))
       setQuestions(examData.data?.exam_questions || []);
       setTimeLeft(examData.data?.assessment?.duration * 60);
       checkExamStatus();
@@ -125,6 +148,8 @@ export default function ProctoredQuiz() {
 
   const checkExamStatus = async () => {
     try {
+      setIsLoading(true);
+
       const data = await examApi.get(`/candidate-exam/${exam?.id}/status`, accessCode)
       if (data.data.status == 'pending') {
         const startData = await examApi.get(`/candidate-exam/${exam?.id}/start`, accessCode)
@@ -142,6 +167,7 @@ export default function ProctoredQuiz() {
           router.push('/thank-you');
         }
       }
+      setIsLoading(false);
     } catch (error) {
       console.log('error', error);
       setAccessError(isAxiosError(error) ? error?.response?.data.message : 'Unknown error');
@@ -179,15 +205,15 @@ export default function ProctoredQuiz() {
       case QuestionType.MCQ:
         return (
           <RadioGroup
-            value={answers[question.id]?.answer as string}
+            value={answers[question.question_id]?.answer as string}
             onValueChange={(value) => handleAnswerChange(question, value)}
             className="space-y-4"
           >
             {question.question.options?.map((option, idx) => (
               <div key={idx} className="flex items-center space-x-3">
-                <Radio value={option} id={`option-${question.id}-${idx}`} />
+                <Radio value={option} id={`option-${question.question_id}-${idx}`} />
                 <label
-                  htmlFor={`option-${question.id}-${idx}`}
+                  htmlFor={`option-${question.question_id}-${idx}`}
                   className="text-lg text-gray-800 cursor-pointer"
                 >
                   {option}
@@ -198,26 +224,24 @@ export default function ProctoredQuiz() {
         );
       case QuestionType.VIDEO:
         return (
-          <VideoRecorderQuestion handleAnswerChange={handleAnswerChange} question={question} onRecordingComplete={() =>
-            setCurrentQuestionIndex((prev) => Math.min(questions.length - 1, prev + 1))
-          } />
+          <VideoRecorderQuestion handleAnswerChange={handleAnswerChange} question={question} answers={answers} onRecordingComplete={(blob,url) => handleNextQuestion(blob,url)} />
         );
       case QuestionType.MULTIPLE_SELECT:
         return (
           <div className="space-y-4">
             {question.question.options?.map((option, idx) => {
-              const currentAnswers = answers[question.id]
-                ? (answers[question.id]?.answer as (string | number)[])
+              const currentAnswers = answers[question.question_id]
+                ? (answers[question.question_id]?.answer as (string | number)[])
                 : [];
-              console.log('currentAnswers', currentAnswers);
 
               return (
                 <div key={idx} className="flex items-center space-x-3">
                   <Checkbox
-                    id={`option-${question.id}-${idx}`}
+                    id={`option-${question.question_id}-${idx}`}
                     checked={currentAnswers.includes(option)}
                     onCheckedChange={(checked) => {
                       let newAnswers: (string | number)[];
+                      
                       if (!checked) {
                         newAnswers = currentAnswers.filter((a) => a !== option);
                       } else {
@@ -227,7 +251,7 @@ export default function ProctoredQuiz() {
                     }}
                   />
                   <label
-                    htmlFor={`option-${question.id}-${idx}`}
+                    htmlFor={`option-${question.question_id}-${idx}`}
                     className="text-lg text-gray-800 cursor-pointer"
                   >
                     {option}
@@ -241,7 +265,7 @@ export default function ProctoredQuiz() {
       case QuestionType.TEXT:
         return (
           <Textarea
-            value={(answers[question.id]?.answer as string) || ''}
+            value={(answers[question.question_id]?.answer as string) || ''}
             onChange={(e) => handleAnswerChange(question, e.target.value)}
             placeholder="Type your answer here..."
             className="min-h-[120px] text-lg"
@@ -252,11 +276,24 @@ export default function ProctoredQuiz() {
         return (
           <div className="space-y-2">
             <Textarea
-              value={(answers[question.id]?.answer as string) || ''}
+              value={(answers[question.question_id]?.answer as string) || ''}
               onChange={(e) => handleAnswerChange(question, e.target.value)}
               placeholder="Write your code here..."
               className="min-h-[200px] font-mono text-black text-base"
             />
+            <div className="text-sm text-gray-500">
+              Tip: Use proper indentation and comments where necessary
+            </div>
+          </div>
+        );
+
+      case QuestionType.CODE_EDITOR:
+        return (
+          <div className="space-y-2">
+            <EditorPage 
+              onChange={(value) => handleAnswerChange(question, value)}
+              value={(answers[question.question_id]?.answer as string) || ''}
+              />
             <div className="text-sm text-gray-500">
               Tip: Use proper indentation and comments where necessary
             </div>
@@ -276,8 +313,10 @@ export default function ProctoredQuiz() {
         return 'Multiple Select';
       case QuestionType.TEXT:
         return 'Text Answer';
-      case QuestionType.CODE_SNIPPET:
-        return 'Code Answer';
+        case QuestionType.CODE_SNIPPET:
+          return 'Code Answer';
+      case QuestionType.CODE_EDITOR:
+        return 'Code Editor';
       case QuestionType.VIDEO:
         return 'Video Answer';
       default:
@@ -305,38 +344,6 @@ export default function ProctoredQuiz() {
       console.error('Fullscreen error:', error);
       // Don't add violation here since it might be a permissions issue
     }
-  };
-
-  const handleAutoSubmit = async () => {
-    // try {
-    //   if (isSubmitting) return;
-    //   setIsSubmitting(true);
-    //   // Take final screenshot
-    //   await takeScreenshot();
-    //   // Wait for state updates
-    //   await new Promise(resolve => setTimeout(resolve, 1000));
-    //   // Create final state snapshot with current state
-    //   const finalState = {
-    //     answers: { ...answers },
-    //     violations: [...violations],
-    //     screenshots: [...screenshots],
-    //     timeLeft: 0,
-    //     autoSubmitted: true
-    //   };
-    //   console.log('Auto submitting quiz data:', finalState);
-    //   // Cleanup
-    //   if (screenshotIntervalRef.current) {
-    //     clearInterval(screenshotIntervalRef.current);
-    //   }
-    //   localStorage.clear();
-    //   if (document.fullscreenElement) {
-    //     await document.exitFullscreen();
-    //   }
-    //   // router.push('/thank-you');
-    // } catch (error) {
-    //   console.error('Auto-submit failed:', error);
-    //   setIsSubmitting(false);
-    // }
   };
 
   const addViolation = (violation: Omit<Violation, 'timestamp'>) => {
@@ -385,7 +392,7 @@ export default function ProctoredQuiz() {
       }
 
       if (tabSwitchCount >= 2) {
-        handleAutoSubmit();
+        // handleAutoSubmit();
       }
     }
   };
@@ -493,7 +500,7 @@ export default function ProctoredQuiz() {
       }
 
       if (tabSwitchCount >= 2) {
-        handleAutoSubmit();
+        // handleAutoSubmit();
       }
     }
   };
@@ -502,22 +509,24 @@ export default function ProctoredQuiz() {
   const handleAnswerChange = useCallback((question: IExamQuestion, value: string | Blob | (string | number)[]) => {
     setAnswers((prev) => ({
       ...prev,
-      [question.id]: { question, answer: value },
+      [question.question_id]: { question, answer: value },
     }));
     localStorage.setItem(
       'quizAnswers',
       JSON.stringify({
         ...answers,
-        [question.id]: { question, answer: value },
+        [question.question_id]: { question, answer: value },
       })
     );
   }, [answers]);
 
   const submitQuiz = async () => {
     if (isSubmitting) return;
-    console.log('answers', answers);
     try {
-      // setIsSubmitting(true);
+      await handleNextQuestion();
+      setIsSubmitting(true);
+      
+      await submitTrigger();
       // await takeScreenshot();
       // // Get access code from URL for submission or use the provided accessCode
       // let quizAccessCode = accessCode || '';
@@ -552,11 +561,12 @@ export default function ProctoredQuiz() {
       // if (document.fullscreenElement) {
       //   await document.exitFullscreen();
       // }
-      // router.push('/thank-you');
+      router.push('/thank-you');
     } catch (error) {
       console.error('Error submitting quiz:', error);
       setIsSubmitting(false);
-      alert('There was an error submitting your quiz. Please try again.');
+      setShowAlert(true)
+      setAlertMessage(isAxiosError(error) ? error.response?.data.message : 'An error occurred')
     }
   };
 
@@ -565,22 +575,9 @@ export default function ProctoredQuiz() {
     isSubmittingRef.current = true;
 
     try {
-      // await takeScreenshot();  // uncomment if used
-      const finalState = {
-        // answers,
-        // violations,
-        // screenshots,
-        timeLeft: 0,
-        autoSubmitted: true,
-      };
-      console.log('Timer ended, submitting:', finalState);
-
-      // Cleanup
-      // if (screenshotIntervalRef.current) clearInterval(screenshotIntervalRef.current);
-      // localStorage.clear();
-
       if (document.fullscreenElement) {
         await document.exitFullscreen();
+        await submitTrigger();
       }
       router.push('/thank-you');  // use router if available
     } catch (error) {
@@ -590,46 +587,46 @@ export default function ProctoredQuiz() {
   };
 
 
-  useEffect(() => {
-    const validateAccess = async () => {
-      try {
-        setIsLoading(true);
+  // useEffect(() => {
+  //   const validateAccess = async () => {
+  //     try {
+  //       setIsLoading(true);
 
-        let quizAccessCode = accessCode || '';
+  //       let quizAccessCode = accessCode || '';
 
-        if (!quizAccessCode) {
-          const urlParts = window.location.pathname.split('/');
-          quizAccessCode = urlParts[urlParts.length - 1];
-        }
+  //       if (!quizAccessCode) {
+  //         const urlParts = window.location.pathname.split('/');
+  //         quizAccessCode = urlParts[urlParts.length - 1];
+  //       }
 
-        if (!quizAccessCode) {
-          setAccessError('Invalid exam access. Missing access code.');
-          setIsLoading(false);
-          return;
-        }
+  //       if (!quizAccessCode) {
+  //         setAccessError('Invalid exam access. Missing access code.');
+  //         setIsLoading(false);
+  //         return;
+  //       }
 
-        // Set exam data and questions
-        // const examData = data.data;
+  //       // Set exam data and questions
+  //       // const examData = data.data;
 
-        // // Update time limit based on exam data
-        // if (examData.end_time) {
-        // 	const endTime = new Date(examData.end_time).getTime();
-        // 	const now = new Date().getTime();
-        // 	const remainingTime = Math.max(0, Math.floor((endTime - now) / 1000));
-        // 	setTimeLeft(remainingTime);
-        // }
+  //       // // Update time limit based on exam data
+  //       // if (examData.end_time) {
+  //       // 	const endTime = new Date(examData.end_time).getTime();
+  //       // 	const now = new Date().getTime();
+  //       // 	const remainingTime = Math.max(0, Math.floor((endTime - now) / 1000));
+  //       // 	setTimeLeft(remainingTime);
+  //       // }
 
-        // If all is good, initialize the exam
-        setIsLoading(false);
-      } catch (error) {
-        console.error('Error validating exam access:', error);
-        setAccessError('Error accessing exam. Please try again or contact support.');
-        setIsLoading(false);
-      }
-    };
+  //       // If all is good, initialize the exam
+  //       setIsLoading(false);
+  //     } catch (error) {
+  //       console.error('Error validating exam access:', error);
+  //       setAccessError('Error accessing exam. Please try again or contact support.');
+  //       setIsLoading(false);
+  //     }
+  //   };
 
-    validateAccess();
-  }, [accessCode]);
+  //   validateAccess();
+  // }, [accessCode]);
 
   // Effects
   useEffect(() => {
@@ -683,11 +680,6 @@ export default function ProctoredQuiz() {
     // Load saved progress
     const savedAnswers = localStorage.getItem('quizAnswers');
     // const savedTime = localStorage.getItem('quizTimeLeft');
-
-    if (savedAnswers) {
-      setAnswers(JSON.parse(savedAnswers));
-    }
-
     // if (savedTime) {
     //   setTimeLeft(parseInt(savedTime, 10));
     // }
@@ -721,15 +713,48 @@ export default function ProctoredQuiz() {
   }, []);
 
 
-  useEffect(() => {
-    const currentState = localStorage.getItem('currentQuizState');
-    if (currentState) {
-      const parsedState = JSON.parse(currentState);
-      setAnswers(parsedState.answers);
-      // setViolations(parsedState.violations);
-      // setScreenshots(parsedState.screenshots);
+  const handleNextQuestion = async (blob?: Blob,url?:string) => {
+    let success = false;
+    const ans = answers[questions[currentQuestionIndex].question_id].answer
+    
+    try {
+      if (questions[currentQuestionIndex].question.type === QuestionType.VIDEO) {
+        if(url == ans){
+          setCurrentQuestionIndex((prev) => Math.min(questions.length - 1, prev + 1))
+          return
+        }
+        const formData = new FormData();
+        formData.append('questionId', questions[currentQuestionIndex].question_id);
+        formData.append('file', blob as Blob);
+        const data = await trigger(formData)
+        if (data.success) {
+          success = true;
+        }
+      } else {
+        const payload = {
+          question_id: questions[currentQuestionIndex].question_id,
+          user_answer: Array.isArray(ans) ? ans : [ans]
+        }
+        const data = await trigger(payload)
+        if (data.success) {
+          success = true;
+        }
+      }
+      if (success) {
+        if (currentQuestionIndex < questions.length - 1) {
+          setCurrentQuestionIndex((prev) => Math.min(questions.length - 1, prev + 1))
+        } else {
+          setShowAlert(true)
+          setAlertMessage((data as unknown as { success: boolean; message?: string })?.message || 'An error occurred')
+        }
+      }
+
+    } catch (error) {
+
+      setShowAlert(true)
+      setAlertMessage(isAxiosError(error) ? error.response?.data.message : 'An error occurred')
     }
-  }, []);
+  }
 
   if (isLoading) {
     return (
@@ -765,8 +790,7 @@ export default function ProctoredQuiz() {
     );
   }
 
-  console.log('Quiz rendered');
-  if (isExamLoading) {
+  if (isExamLoading || isMutating || isSubmiting) {
     return (
       <div className="w-screen min-h-screen bg-gray-50 flex flex-col items-center justify-center gap-4">
         <Loader2 className="w-8 h-8 text-purple-600 animate-spin" />
@@ -796,10 +820,10 @@ export default function ProctoredQuiz() {
                 key={q.id}
                 onClick={() => setCurrentQuestionIndex(index)}
                 className={`h-8 w-8 rounded-full flex items-center justify-center text-sm font-medium transition-all ${currentQuestionIndex === index
-                    ? 'bg-blue-600 text-white shadow-md'
-                    : answers[q.id]
-                      ? 'bg-green-100 text-green-800 border border-green-200'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  ? 'bg-blue-600 text-white shadow-md'
+                  : answers[q.id]
+                    ? 'bg-green-100 text-green-800 border border-green-200'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                   }`}
                 aria-label={`Go to question ${index + 1}`}
               >
@@ -879,9 +903,7 @@ export default function ProctoredQuiz() {
             </Button>
 
             <Button
-              onClick={() =>
-                setCurrentQuestionIndex((prev) => Math.min(questions.length - 1, prev + 1))
-              }
+              onClick={() => handleNextQuestion()}
               disabled={currentQuestionIndex === questions.length - 1}
               variant="outline"
               className="px-6 py-2 flex items-center gap-2 rounded-full transition-all"

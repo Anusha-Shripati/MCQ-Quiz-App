@@ -66,7 +66,6 @@ export const useAssessmentStore = create<AssessmentState>((set) => ({
     set({ isLoading: true });
     try {
       const response = await api.get('/assessment/list');
-      console.log('assessments', response.data);
       set({ assessments: response.data.data, isLoading: false, error: null });
     } catch (error) {
       if (isAxiosError(error)) {

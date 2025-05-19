@@ -6,12 +6,15 @@ import { authenticateCandidate } from '../middlewares/auth.middleware';
 import { prisma } from '../db/prisma.client';
 import { CandidateExamService } from '../services/candiate-exam.services';
 import { candidateExamSchema } from '../validationSchemas/candidate-exam.validations';
+import { upload } from '../utils/fileUpload';
+import { UploadService } from '../services/upload.services';
 
 const router = express.Router();
 const candidateExamService = new CandidateExamService();
-const candidateExamController = new CandidateExamController(candidateExamService);
+const uploadService = new UploadService();
+const candidateExamController = new CandidateExamController(candidateExamService, uploadService);
 
-router.post(
+router.get(
   '/:examId/start',
   authenticateCandidate,
   validateRequest(candidateExamSchema.startExam),
@@ -25,12 +28,13 @@ router.get(
 );
 
 router.post(
-  '/:examId/questions/:questionId/answer',
+  '/:examId/submit-answer',
   authenticateCandidate,
+  upload.single('file'),
   asyncHandler(candidateExamController.submitAnswer)
 );
 
-router.post(
+router.get(
   '/:examId/finish',
   authenticateCandidate,
   asyncHandler(candidateExamController.finishExam)

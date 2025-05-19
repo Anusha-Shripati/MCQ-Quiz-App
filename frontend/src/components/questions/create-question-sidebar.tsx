@@ -42,7 +42,6 @@ const QuestionSidebar: React.FC<QuestionSidebarProps> = ({
 
   const handleQuestionChange = useCallback(
     (index: number) => {
-      console.log('Question changed to index:', index);
       setSelectedQuestion(index);
       updateQueryParams({ ques: (index + 1).toString() });
     },

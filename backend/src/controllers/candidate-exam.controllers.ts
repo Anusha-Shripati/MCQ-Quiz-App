@@ -1,9 +1,13 @@
 import { Request, Response, NextFunction } from 'express';
 import { CandidateExamService } from '../services/candiate-exam.services';
 import { generateResponse } from '../utils/generateResponse';
+import { UploadService } from '../services/upload.services';
 
 export class CandidateExamController {
-  constructor(private candidateExamService: CandidateExamService) {}
+  constructor(
+    private candidateExamService: CandidateExamService,
+    private uploadService: UploadService
+  ) {}
 
   getExam = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -20,8 +24,9 @@ export class CandidateExamController {
   getCandidate = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const candidateId = req.candidateInfo?.candidateId;
+      const examId = req.candidateInfo?.examId;
       if (!candidateId) throw new Error('Candidate not authenticated');
-      const candidate = await this.candidateExamService.getCandidate(candidateId);
+      const candidate = await this.candidateExamService.getCandidate(candidateId,examId);
 
       generateResponse(res, 200, candidate, true, 'Candidate retrieved successfully');
     } catch (error) {
@@ -79,22 +84,20 @@ export class CandidateExamController {
 
   submitAnswer = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { examId, questionId } = req.params;
-      const { answer } = req.body;
-      const candidateId = req.candidateInfo?.candidateId;
+      const candidate_id = req.candidateInfo?.candidateId;
+      const exam_id  = req.candidateInfo?.examId as string;
+      let file;
+      
+      if (req.file) {
+          file = this.uploadService.processFile(req.file);
+          req.body.user_answer = [file.path];
+        }
+      if (!candidate_id) throw new Error('Candidate not authenticated');
 
-      if (!candidateId) throw new Error('Candidate not authenticated');
-
-      // const nextQuestion = await this.candidateExamService.submitAnswer(
-      //   examId,
-      //   candidateId,
-      //   questionId,
-      //   answer
-      // );
+      await this.candidateExamService.submitAnswer(exam_id, candidate_id, { ...req.body, file });
 
       const response = {
         message: 'Answer submitted successfully',
-        // nextQuestion
       };
 
       generateResponse(res, 200, response, true, response.message);
@@ -110,10 +113,7 @@ export class CandidateExamController {
 
       if (!candidateId) throw new Error('Candidate not authenticated');
 
-      // const result = await this.candidateExamService.finishExam(
-      // 	examId,
-      // 	candidateId
-      // );
+      await this.candidateExamService.finishExam(examId);
 
       generateResponse(res, 200, {}, true, 'Exam completed successfully');
     } catch (error) {

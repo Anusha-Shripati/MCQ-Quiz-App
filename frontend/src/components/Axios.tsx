@@ -21,8 +21,6 @@ instance.interceptors.request.use(
 instance.interceptors.response.use(
   (res) => res,
   (err) => {
-    console.log(err.response?.status, 'err.response?.status');
-
     if (err.response?.status === 401) {
       if (typeof window !== 'undefined') {
         localStorage.clear();

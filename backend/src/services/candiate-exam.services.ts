@@ -2,18 +2,28 @@ import { AppError } from '../common/errors/AppError';
 import { prisma } from '../db/prisma.client';
 
 export class CandidateExamService {
-  async getCandidate(candidateId: string) {
+  async getCandidate(candidateId: string, examId?: string) {
+    
     const candidate = await prisma.candidate.findUnique({
       where: { id: candidateId },
-      include: { exam: true,  assessment: {
-        include: {
-          technologies: {
-            include: {
-              technology: true,
+      include: {
+        exam: true, 
+        assessment: {
+          include: {
+            technologies: {
+              include: {
+                technology: true,
+              },
             },
           },
         },
-      }, },
+        answers:{
+          where: {
+            ...(examId ? { exam_id: examId } : {}),
+            question_name: "introduction"
+          },
+        },
+      },
     });
 
     if (!candidate) throw new AppError('Candidate not found', 404);
@@ -46,6 +56,13 @@ export class CandidateExamService {
               },
             },
           },
+        },
+        answers: {
+          where:{
+            question_id:{
+              not:null
+            }
+          }
         },
         exam_questions: {
           include: { question: true },
@@ -94,10 +111,7 @@ export class CandidateExamService {
       },
     });
 
-    return {
-      exam: updatedExam,
-      firstQuestion: updatedExam.exam_questions[0].question,
-    };
+    return updatedExam
   }
 
   async getNextQuestion(examId: string, candidateId: string, currentQuestionId?: string) {
@@ -129,39 +143,55 @@ export class CandidateExamService {
     return unansweredQuestions[0].question;
   }
 
-  // async submitAnswer(
-  // 	examId: string,
-  // 	candidateId: string,
-  // 	questionId: string,
-  // 	answer: string
-  // ) {
-  // 	await this.getCandidate(candidateId);
+  async submitAnswer(
+    exam_id: string,
+    candidate_id: string,
+    data: { question_id?: string; user_answer: string[], question_name: string },
+  ) {
+    await this.getCandidate(candidate_id);
 
-  // 	// Check if question exists in exam
-  // 	const examQuestion = await prisma.exam_questions.findUnique({
-  // 		where: {
-  // 			exam_id_question_id: {
-  // 				exam_id: examId,
-  // 				question_id: questionId,
-  // 			},
-  // 		},
-  // 	});
+    if (data.question_id) {
+      const examQuestion = await prisma.exam_questions.findFirst({
+        where: {
+          exam_id: exam_id,
+          question_id: data.question_id,
+        },
+      });
+      if (!examQuestion) {
+        throw new AppError('Question not found in this exam', 404);
+      }
 
-  // 	if (!examQuestion) {
-  // 		throw new AppError('Question not found in this exam', 404);
-  // 	}
+    }
+    
+    const ans = await prisma.answers.findFirst({
+      where: {
+        exam_id: exam_id,
+        question_id: data.question_id,
+        candidate_id: candidate_id,
+        question_name: data.question_name,
+      },
+    });
+    if (ans) {
+      await prisma.answers.update({
+        where: { id: ans.id },
+        data: {
+          user_answer: data.user_answer,
+          question_name: data.question_name,
+        },
+      });
+      return;
+    }
 
-  // 	await prisma.answers.create({
-  // 		data: {
-  // 			exam_id: examId,
-  // 			question_id: questionId,
-  // 			user_answer: answer,
-  // 		},
-  // 	});
-
-  // 	// Get next question
-  // 	return this.getNextQuestion(examId, candidateId, questionId);
-  // }
+    await prisma.answers.create({
+      data: {
+        exam_id: exam_id,
+        question_id: data.question_id || null,
+        candidate_id: candidate_id,
+        user_answer: data.user_answer,
+        question_name: data.question_name || null,
+      },
+    });
+  }
 
   // async finishExam(examId: string, candidateId: string) {
   // 	const candidate = await this.getCandidate(candidateId, examId);
@@ -238,5 +268,11 @@ export class CandidateExamService {
       progress: `${answeredQuestions}/${totalQuestions}`,
       isCompleted: candidate.exam.is_completed,
     };
+  }
+  async finishExam(examId: string) {
+    await prisma.exam.update({
+      where: { id: examId },
+      data: { status: 'completed' },
+    });
   }
 }

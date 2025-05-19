@@ -2,12 +2,10 @@
 
 import React, { useState } from 'react';
 import CodeEditor from '@/components/CodeEditor';
-import * as Select from '@radix-ui/react-select';
-import { ChevronDownIcon, ChevronUpIcon } from '@radix-ui/react-icons';
 import { FaPlay } from 'react-icons/fa';
+import { FormField } from '@/components/common/form-field';
 
-const EditorPage: React.FC = () => {
-  const [code, setCode] = useState('// Write your code here');
+const EditorPage: React.FC<{onChange: (value: string) => void, value: string}> = ({onChange, value}) => {
   const [language, setLanguage] = useState('javascript');
   const [theme, setTheme] = useState('vs-dark');
   const [output, setOutput] = useState<string>('');
@@ -22,7 +20,7 @@ const EditorPage: React.FC = () => {
   };
 
   const handleCodeChange = (value: string | undefined) => {
-    setCode(value || '');
+    onChange(value || '')
   };
 
   const handleSubmit = async () => {
@@ -30,7 +28,7 @@ const EditorPage: React.FC = () => {
     const response = await fetch('/api/code-execution', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ language, code }),
+      body: JSON.stringify({ language, code:value }),
     });
     const result = await response.json();
     if (result.success) {
@@ -43,90 +41,45 @@ const EditorPage: React.FC = () => {
   };
 
   return (
-    <div className="p-6 space-y-6 bg-gray-50 dark:bg-gray-900">
-      <h1 className="text-3xl font-bold  text-gray-900 dark:text-white">Code Editor</h1>
+    <div className="p-0 space-y-6 dark:bg-gray-900">
+      {/* <h1 className="text-3xl font-bold  text-gray-900 dark:text-white">Code Editor</h1> */}
 
       <div className="flex gap-6 ">
         {/* Language Selector */}
-        <Select.Root onValueChange={handleLanguageChange}>
-          <Select.Trigger
-            className="flex items-center justify-between px-6 py-3 border rounded-lg bg-white dark:bg-gray-800 shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            aria-label="Language"
-          >
-            <Select.Value placeholder="Select Language" />
-            <Select.Icon>
-              <ChevronDownIcon className="w-5 h-5 text-gray-500 dark:text-gray-300" />
-            </Select.Icon>
-          </Select.Trigger>
-          <Select.Content className="overflow-hidden bg-white dark:bg-gray-800 rounded-lg shadow-md relative z-10">
-            <Select.ScrollUpButton className="flex items-center justify-center h-8 text-gray-500">
-              <ChevronUpIcon />
-            </Select.ScrollUpButton>
-            <Select.Viewport>
-              <Select.Item
-                value="javascript"
-                className="px-6 py-3 rounded cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600"
-              >
-                <Select.ItemText>JavaScript</Select.ItemText>
-              </Select.Item>
-              <Select.Item
-                value="python"
-                className="px-6 py-3 rounded cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600"
-              >
-                <Select.ItemText>Python</Select.ItemText>
-              </Select.Item>
-              <Select.Item
-                value="php"
-                className="px-6 py-3 rounded cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600"
-              >
-                <Select.ItemText>Php</Select.ItemText>
-              </Select.Item>
-            </Select.Viewport>
-            <Select.ScrollDownButton className="flex items-center justify-center h-8 text-gray-500">
-              <ChevronDownIcon />
-            </Select.ScrollDownButton>
-          </Select.Content>
-        </Select.Root>
+        <FormField
+            label="Language"
+            type="select"
+            parentClassName="w-full"
+            className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-300"
+            value={language}
+            onChange={handleLanguageChange}
+            placeholder="Language"
+            options={[
+              { value: 'javascript', label: 'JavaScript' },
+              { value: 'python', label: 'Python' },
+              { value: 'php', label: 'PHP' },
+            ]}
+          />
 
         {/* Theme Selector */}
-        <Select.Root onValueChange={handleThemeChange}>
-          <Select.Trigger
-            className="flex items-center justify-between px-6 py-3 border rounded-lg bg-white dark:bg-gray-800 shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            aria-label="Theme"
-          >
-            <Select.Value placeholder="Select Theme" />
-            <Select.Icon>
-              <ChevronDownIcon className="w-5 h-5 text-gray-500 dark:text-gray-300" />
-            </Select.Icon>
-          </Select.Trigger>
-          <Select.Content className="overflow-hidden bg-white dark:bg-gray-800 rounded-lg shadow-md relative z-10">
-            <Select.ScrollUpButton className="flex items-center justify-center h-8 text-gray-500">
-              <ChevronUpIcon />
-            </Select.ScrollUpButton>
-            <Select.Viewport>
-              <Select.Item
-                value="vs-dark"
-                className="px-6 py-3 rounded cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600"
-              >
-                <Select.ItemText>Dark</Select.ItemText>
-              </Select.Item>
-              <Select.Item
-                value="light"
-                className="px-6 py-3 rounded cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600"
-              >
-                <Select.ItemText>Light</Select.ItemText>
-              </Select.Item>
-            </Select.Viewport>
-            <Select.ScrollDownButton className="flex items-center justify-center h-8 text-gray-500">
-              <ChevronDownIcon />
-            </Select.ScrollDownButton>
-          </Select.Content>
-        </Select.Root>
+        <FormField
+            label="Theme"
+            type="select"
+            parentClassName="w-full"
+            className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-300"
+            value={theme}
+            onChange={handleThemeChange}
+            placeholder="Theme"
+            options={[
+              { value: 'vs-dark', label: 'Dark' },
+              { value: 'light', label: 'Light' },
+            ]}
+          />
       </div>
 
       {/* Code Editor */}
       <div className="mt-6">
-        <CodeEditor language={language} theme={theme} value={code} onChange={handleCodeChange} />
+        <CodeEditor language={language} theme={theme} value={value} onChange={handleCodeChange} />
       </div>
 
       {/* Submit Code */}

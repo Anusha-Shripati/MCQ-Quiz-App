@@ -98,6 +98,7 @@ export const authenticateCandidate: RequestHandler = async (req, res, next) => {
           path: ['accessCode'],
           equals: code,
         },
+        deleted_at: null,
       },
       include: {
         exam: true,

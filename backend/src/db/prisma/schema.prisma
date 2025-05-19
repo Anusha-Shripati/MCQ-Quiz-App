@@ -171,20 +171,21 @@ model Results {
 }
 
 model Answers {
-    id           String   @id @default(uuid())
-    exam_id      String
-    candidate_id String
-    question_id  String
-    result_id    String?
-    user_answer  String
-    is_correct   Boolean?
-    created_at   DateTime @default(now())
-    updated_at   DateTime @updatedAt
+    id            String   @id @default(uuid())
+    exam_id       String
+    candidate_id  String
+    question_id   String?
+    result_id     String?
+    user_answer   String[]
+    is_correct    Boolean?
+    question_name String?
+    created_at    DateTime @default(now())
+    updated_at    DateTime @updatedAt
 
-    exam      Exam      @relation(fields: [exam_id], references: [id])
-    candidate Candidate @relation(fields: [candidate_id], references: [id])
-    question  Questions @relation(fields: [question_id], references: [id])
-    result    Results?  @relation(fields: [result_id], references: [id])
+    exam      Exam       @relation(fields: [exam_id], references: [id])
+    candidate Candidate  @relation(fields: [candidate_id], references: [id])
+    question  Questions? @relation(fields: [question_id], references: [id])
+    result    Results?   @relation(fields: [result_id], references: [id])
 }
 
 // model Assessments_technology{
@@ -253,4 +254,5 @@ enum Question_type {
     text
     mcq
     code_snippet
+    code_editor
 }

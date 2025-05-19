@@ -109,12 +109,14 @@ const CategoryPage = () => {
   );
 
   const handleQuestionTypeChange = (value: Question['type'], index: number) => {
+    
     const updatedQuestions = [...questionsData];
     updatedQuestions[index].type = value;
     updatedQuestions[index].options = ['', '', '', '', '', ''];
     updatedQuestions[index].correct_answer = [];
     updatedQuestions[index].meta = {};
-    if (value === 'code_snippet') {
+    if (value === 'code_snippet' || value === 'code_editor') {
+
       updatedQuestions[index].correct_answer = [];
       if (updatedQuestions[index]?.meta?.code === undefined) {
         updatedQuestions[index].meta = { code: '' };

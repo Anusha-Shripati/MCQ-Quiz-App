@@ -5,11 +5,14 @@ interface VideoRecorderProps {
   handleAnswerChange: (question: IExamQuestion, blob: Blob) => void;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   question: any;
-  onRecordingComplete: () => void;
+  answers: Record<string, { question: IExamQuestion, answer: string | Blob | (string | number)[] }>;
+  onRecordingComplete: (blob: Blob,url:string) => void;
 }
 
-export const VideoRecorderQuestion: FC<VideoRecorderProps> = React.memo(({ handleAnswerChange, question,onRecordingComplete }) => {
+export const VideoRecorderQuestion: FC<VideoRecorderProps> = React.memo(({ handleAnswerChange, question,answers,onRecordingComplete }) => {
   const [iframeHTML] = useState(() => question.question?.meta?.video_url || '');
+  const videoUrl = answers[question.question_id]?.answer as string;
+  
   return (
     <>
         {iframeHTML.includes('iframe') ? (
@@ -19,15 +22,15 @@ export const VideoRecorderQuestion: FC<VideoRecorderProps> = React.memo(({ handl
           <source src={iframeHTML} type="video/mp4" />
         </video>
       )}
-
+      
       <VideoRecorder 
-        onRecordingComplete={(chunks) => {
+        onRecordingComplete={(chunks,url) => {
           const blob = new Blob(chunks, { type: 'video/webm' });
-          handleAnswerChange(question, blob);
-          onRecordingComplete();
+          onRecordingComplete(blob,url);
         }} 
         maxTime={120} 
         videoKey={question.id}
+        videoLink={videoUrl}
       />
 
     </>

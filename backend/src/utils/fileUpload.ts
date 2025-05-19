@@ -42,7 +42,7 @@ else{
             cb(null, uploadPath);
         },
         filename: (req: Express.Request, file: Express.Multer.File, cb) => {
-            const ext = path.extname(file.originalname);
+            const ext = path.extname(file.originalname) || `.${file.mimetype.split('/')[1]}`;
             const baseName = path.basename(file.originalname, ext);
             cb(null, `${baseName}-${Date.now()}${ext}`);
         },

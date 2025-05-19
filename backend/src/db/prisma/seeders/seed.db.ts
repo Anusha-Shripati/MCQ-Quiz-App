@@ -658,7 +658,6 @@ const pythonQuestions = [
 ];
 
 async function seedQuestions(questions: any[], technologyName: string) {
-  console.log(`Seeding ${technologyName} questions...`);
   for (const question of questions) {
     await prisma.questions.create({
       data: {
@@ -673,11 +672,9 @@ async function seedQuestions(questions: any[], technologyName: string) {
       },
     });
   }
-  console.log(`${technologyName} questions seeded successfully`);
 }
 
 async function createTechnologies() {
-  console.log('Creating technologies...');
 
   await prisma.technology.createMany({
     data: [

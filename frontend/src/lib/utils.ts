@@ -55,9 +55,9 @@ export const isValidUUID=(id:string): boolean =>{
  * Opens the IndexedDB database for storing videos.
  * @returns {Promise<IDBDatabase>} A promise that resolves to the database instance.
  */
-function openVideoDB(): Promise<IDBDatabase> {
+function openVideoDB(examId:string): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open('VideoDB', 1);
+    const request = indexedDB.open(examId, 1);
 
     request.onupgradeneeded = (event) => {
       const db = (event.target as IDBOpenDBRequest).result;
@@ -76,9 +76,9 @@ function openVideoDB(): Promise<IDBDatabase> {
   });
 }
 
-export async function saveVideoToIndexedDB(blob: Blob, key = 'recordedVideo'): Promise<void> {
+export async function saveVideoToIndexedDB(blob: Blob, key = 'recordedVideo',examId:string): Promise<void> {
   try {
-    const db = await openVideoDB();
+    const db = await openVideoDB(examId);
     const tx = db.transaction('videos', 'readwrite');
     const store = tx.objectStore('videos');
     store.put(blob, key); // Save the blob with the specified key
@@ -100,9 +100,10 @@ export async function saveVideoToIndexedDB(blob: Blob, key = 'recordedVideo'): P
   }
 }
 
-export async function loadVideoFromIndexedDB(key = 'recordedVideo'): Promise<Blob | null> {
+export async function loadVideoFromIndexedDB(key = 'recordedVideo',examId:string): Promise<Blob | null> {
   try {
-    const db = await openVideoDB();
+    
+    const db = await openVideoDB(examId);
     return new Promise((resolve, reject) => {
       const tx = db.transaction('videos', 'readonly');
       const store = tx.objectStore('videos');

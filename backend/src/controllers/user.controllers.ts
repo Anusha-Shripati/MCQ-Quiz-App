@@ -121,7 +121,6 @@ export class UserController {
       }
 
       if (oldPassword) {
-        console.log(user.password);
 
         const isPasswordValid = await matchPassword(oldPassword, user.password);
 
@@ -153,8 +152,6 @@ export class UserController {
           { name: { contains: search as string, mode: 'insensitive' } },
         ];
       }
-      console.log({ search });
-      console.log({ filter });
       const users = await userService.findManyUsers(filter);
 
       generateResponse(

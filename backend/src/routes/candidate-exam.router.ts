@@ -40,6 +40,12 @@ router.get(
   asyncHandler(candidateExamController.finishExam)
 );
 
+router.post(
+  '/:examId/submit-violation',
+  authenticateCandidate,
+  asyncHandler(candidateExamController.submitViolation)
+);
+
 router.get(
   '/:examId/status',
   authenticateCandidate,

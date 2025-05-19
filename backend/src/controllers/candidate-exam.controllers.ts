@@ -135,4 +135,19 @@ export class CandidateExamController {
       next(error);
     }
   };
+
+  submitViolation = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { examId } = req.params;
+      const candidateId = req.candidateInfo?.candidateId;
+
+      if (!candidateId) throw new Error('Candidate not authenticated');
+
+      await this.candidateExamService.submitViolation(examId, req.body); 
+
+      generateResponse(res, 200, {}, true, 'Violation submitted successfully');
+    } catch (error) {
+      next(error);
+    }
+  };
 }

@@ -30,7 +30,7 @@ type Violation = {
 
 const QUIZ_CONFIG = {
   screenshotInterval: 20000,
-  maxViolations: 3,
+  maxViolations: 1000000,
   alertTimeout: 5000,
 };
 
@@ -84,7 +84,7 @@ export default function ProctoredQuiz() {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   // const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const router = useRouter();
-  // const [violations, setViolations] = useState<Violation[]>([]);
+  const violations = useRef<Violation[]>([]);
   // const [screenshots, setScreenshots] = useState<Screenshot[]>([]);
   // const [isFullScreen, setIsFullScreen] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
@@ -153,7 +153,7 @@ export default function ProctoredQuiz() {
       const data = await examApi.get(`/candidate-exam/${exam?.id}/status`, accessCode)
       if (data.data.status == 'pending') {
         const startData = await examApi.get(`/candidate-exam/${exam?.id}/start`, accessCode)
-        const remainingTime = (examData.data?.assessment?.duration * 60) - (new Date().getTime() - new Date(startData.data.startTime).getTime()) / 1000;
+        const remainingTime = (examData.data?.assessment?.duration * 60) - (new Date().getTime() - new Date(startData.data.start_time).getTime()) / 1000;
         setTimeLeft(remainingTime);
         if (remainingTime <= 0) {
           router.push('/thank-you');
@@ -161,7 +161,7 @@ export default function ProctoredQuiz() {
       } else if (data.data.status == 'completed') {
         router.push('/thank-you');
       } else if (data.data.status == 'in_progress') {
-        const remainingTime = (examData.data?.assessment?.duration * 60) - (new Date().getTime() - new Date(data.data.startTime).getTime()) / 1000;
+        const remainingTime = (examData.data?.assessment?.duration * 60) - (new Date().getTime() - new Date(data.data.start_time).getTime()) / 1000;
         setTimeLeft(remainingTime);
         if (remainingTime <= 0) {
           router.push('/thank-you');
@@ -346,27 +346,48 @@ export default function ProctoredQuiz() {
     }
   };
 
+  const submitViolation = async () => {
+    console.log(violations,'violations');
+    if (violations.current.length === 0) return;
+    try {
+      await examApi.post(`/candidate-exam/${exam?.id}/submit-violation`,{
+        violations: violations.current  ,
+      },accessCode);
+      violations.current = []; // Clear violations after successful submission
+    } catch (error) {
+      console.error('Error submitting violations:', error);
+    }
+  }
+
   const addViolation = (violation: Omit<Violation, 'timestamp'>) => {
-    // const newViolation: Violation = {
-    //   ...violation,
-    //   timestamp: Date.now(),
-    // };
-
-    // setViolations((prev) => {
-    //   const updated = [...prev, newViolation];
-    //   if (updated.length >= QUIZ_CONFIG.maxViolations) {
-    //     handleAutoSubmit();
-    //   }
-    //   return updated;
-    // });
-
-    displayAlert(`Warning: ${violation.type}`);
+    const newViolation: Violation = {
+      ...violation,
+      timestamp: Date.now(),
+    };
+    
+    violations.current = [...violations.current, newViolation];
+    
+      if (violations.current.length >= QUIZ_CONFIG.maxViolations) {
+        submitQuiz();
+      }
+      console.log("Updated Violations:", violations.current);
+    
+      displayAlert(`Warning: ${violation.type}`);
+    
   };
 
   // Event handlers
   const handleVisibilityChange = () => {
     if (document.hidden) {
-      setTabSwitchCount((prev) => prev + 1);
+      setTabSwitchCount((prev) => {
+        const newCount = prev + 1;
+        if (newCount > 2000000) {
+          console.log('Tab switch limit reached, submitting quiz...');
+          submitQuiz();
+        }
+        return newCount;
+      });
+      
       addViolation({
         type: 'TAB_SWITCH',
         details: 'User switched tabs or minimized window',
@@ -374,7 +395,7 @@ export default function ProctoredQuiz() {
       takeScreenshot();
 
       // Show specific alert for tab switching
-      displayAlert('WARNING: Tab switching detected! This violation has been recorded.');
+      displayAlert(`WARNING: Tab switching detected! This is violation ${tabSwitchCount + 1} of 2.`);
 
       // Play audio alert to notify user
       if (audioRef.current) {
@@ -389,10 +410,6 @@ export default function ProctoredQuiz() {
         window.moveBy(-1, 0);
       } catch (e) {
         console.error('Could not force focus:', e);
-      }
-
-      if (tabSwitchCount >= 2) {
-        // handleAutoSubmit();
       }
     }
   };
@@ -487,7 +504,14 @@ export default function ProctoredQuiz() {
 
   const handleWindowFocus = () => {
     if (!document.hasFocus()) {
-      setTabSwitchCount((prev) => prev + 1);
+      setTabSwitchCount((prev) => {
+        const newCount = prev + 1;
+        if (newCount > 2000000) {
+          submitQuiz();
+        }
+        return newCount;
+      });
+      
       addViolation({
         type: 'WINDOW_FOCUS_LOST',
         details: 'User switched to another window',
@@ -497,10 +521,6 @@ export default function ProctoredQuiz() {
       // Play audio alert
       if (audioRef.current) {
         audioRef.current.play().catch((e) => console.error('Error playing audio:', e));
-      }
-
-      if (tabSwitchCount >= 2) {
-        // handleAutoSubmit();
       }
     }
   };
@@ -630,7 +650,6 @@ export default function ProctoredQuiz() {
 
   // Effects
   useEffect(() => {
-
     // Request full screen immediately
     requestFullScreen();
 
@@ -685,7 +704,9 @@ export default function ProctoredQuiz() {
     // }
 
     // Take initial screenshot
-    takeScreenshot();
+    setTimeout(()=>{
+      takeScreenshot();
+    },2000)
 
     // Store original window size
     originalWindowSize.current = {
@@ -693,8 +714,17 @@ export default function ProctoredQuiz() {
       height: window.innerHeight,
     };
 
+    // Add useEffect for violation submission
+    const interval = setInterval(() => {
+      console.log(violations.current)
+      if (violations.current.length > 0) {
+        submitViolation();
+      }
+    }, 1000);
+
     // Cleanup
     return () => {
+      clearInterval(interval)
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       document.removeEventListener('keydown', handleKeyDown, true);
       window.removeEventListener('resize', handleResize);
@@ -723,8 +753,8 @@ export default function ProctoredQuiz() {
 
   const handleNextQuestion = async (blob?: Blob,url?:string) => {
     let success = false;
-    const ans = answers[questions[currentQuestionIndex].question_id].answer
-    
+    const ans = questions[currentQuestionIndex] && answers[questions[currentQuestionIndex].question_id] ? answers[questions[currentQuestionIndex].question_id].answer : ''
+    if(!ans) return
     try {
       if (questions[currentQuestionIndex].question.type === QuestionType.VIDEO) {
         if(url == ans){
@@ -763,6 +793,16 @@ export default function ProctoredQuiz() {
       setAlertMessage(isAxiosError(error) ? error.response?.data.message : 'An error occurred')
     }
   }
+
+  // Add useEffect to monitor tabSwitchCount changes
+  useEffect(() => {
+    console.log('Tab switch count changed:', tabSwitchCount);
+  }, [tabSwitchCount]);
+
+  // Reset tab switch count when component mounts
+  useEffect(() => {
+    setTabSwitchCount(0);
+  }, []);
 
   if (isLoading) {
     return (
@@ -811,6 +851,8 @@ export default function ProctoredQuiz() {
       ref={containerRef}
       className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 p-4 md:p-8"
     >
+          <AlertWrapper showAlert={showAlert} alertMessage={alertMessage} onClose={()=>setShowAlert(false)} />
+
       {/* Hidden audio element for alert sounds */}
       <audio src="/alert.mp3" ref={audioRef} style={{ display: 'none' }} />
 
@@ -819,7 +861,6 @@ export default function ProctoredQuiz() {
 
 
         <CardContent className="p-4 md:p-8 space-y-6">
-          <AlertWrapper showAlert={showAlert} alertMessage={alertMessage} />
 
           {/* Question navigation pills */}
           <div className="flex flex-wrap gap-2 justify-center">
@@ -959,262 +1000,53 @@ export default function ProctoredQuiz() {
         </CardContent>
       </Card>
     </div>
-    // <div
-    //   ref={containerRef}
-    //   className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 p-4 md:p-8"
-    // >
-    //   {/* Hidden audio element for alert sounds */}
-    //   <audio src="/alert.mp3" ref={audioRef} style={{ display: 'none' }} />
-
-    //   <Card className="w-[95vw] max-w-[1200px] mx-auto min-h-[85vh] shadow-xl border-0 rounded-xl overflow-hidden bg-white/95 backdrop-blur-sm">
-    //     <CardHeader className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-10 shadow-sm px-6 py-5">
-    //       <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-    //         <div className="flex items-center gap-3">
-    //           <div className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center">
-    //             <svg
-    //               xmlns="http://www.w3.org/2000/svg"
-    //               className="h-5 w-5 text-white"
-    //               viewBox="0 0 20 20"
-    //               fill="currentColor"
-    //             >
-    //               <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z" />
-    //             </svg>
-    //           </div>
-    //           <CardTitle className="text-2xl font-bold text-blue-800 tracking-tight">
-    //             Proctored Exam
-    //           </CardTitle>
-    //         </div>
-
-    //         <div className="flex flex-col sm:flex-row items-center gap-4">
-    //           <div className="flex items-center gap-2 bg-red-50 text-red-700 px-4 py-2 rounded-full border border-red-200 shadow-sm">
-    //             <svg
-    //               xmlns="http://www.w3.org/2000/svg"
-    //               className="h-5 w-5"
-    //               viewBox="0 0 20 20"
-    //               fill="currentColor"
-    //             >
-    //               <path
-    //                 fillRule="evenodd"
-    //                 d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
-    //                 clipRule="evenodd"
-    //               />
-    //             </svg>
-    //             <span className="text-xl font-mono font-semibold tabular-nums">
-    //               {formatTime(timeLeft)}
-    //             </span>
-    //           </div>
-    //           <div className="flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-full border border-blue-200 shadow-sm">
-    //             <svg
-    //               xmlns="http://www.w3.org/2000/svg"
-    //               className="h-4 w-4"
-    //               viewBox="0 0 20 20"
-    //               fill="currentColor"
-    //             >
-    //               <path
-    //                 fillRule="evenodd"
-    //                 d="M10 2a1 1 0 00-1 1v1a1 1 0 002 0V3a1 1 0 00-1-1zM4 4h3a3 3 0 006 0h3a2 2 0 012 2v9a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2zm2.5 7a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm2.45 4a2.5 2.5 0 10-4.9 0h4.9zM12 9a1 1 0 100 2h3a1 1 0 100-2h-3zm-1 4a1 1 0 011-1h2a1 1 0 110 2h-2a1 1 0 01-1-1z"
-    //                 clipRule="evenodd"
-    //               />
-    //             </svg>
-    //             <span className="font-medium">
-    //               Q{currentQuestionIndex + 1} of {questions.length}
-    //             </span>
-    //           </div>
-    //         </div>
-    //       </div>
-    //     </CardHeader>
-
-    //     <CardContent className="p-4 md:p-8 space-y-6">
-    //       {showAlert && (
-    //         <Alert
-    //           variant="destructive"
-    //           className="border-l-4 border-l-red-700 slide-in-from-top-5 duration-300"
-    //         >
-    //           <div className="flex items-center gap-2">
-    //             <svg
-    //               xmlns="http://www.w3.org/2000/svg"
-    //               className="h-5 w-5"
-    //               viewBox="0 0 20 20"
-    //               fill="currentColor"
-    //             >
-    //               <path
-    //                 fillRule="evenodd"
-    //                 d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
-    //                 clipRule="evenodd"
-    //               />
-    //             </svg>
-    //             <AlertDescription className="font-medium">{alertMessage}</AlertDescription>
-    //           </div>
-    //         </Alert>
-    //       )}
-
-    //       {/* Quick navigation pills */}
-    //       <div className="flex flex-wrap gap-2 justify-center">
-    //         {questions?.map((q, index) => (
-    //           <button
-    //             key={q.id}
-    //             onClick={() => setCurrentQuestionIndex(index)}
-    //             className={`h-8 w-8 rounded-full flex items-center justify-center text-sm font-medium transition-all ${
-    //               currentQuestionIndex === index
-    //                 ? 'bg-blue-600 text-white shadow-md'
-    //                 : answers[q.id]
-    //                   ? 'bg-green-100 text-green-800 border border-green-200'
-    //                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-    //             }`}
-    //             aria-label={`Go to question ${index + 1}`}
-    //           >
-    //             {index + 1}
-    //           </button>
-    //         ))}
-    //       </div>
-
-    //       <div className="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-gray-200 transition-all hover:shadow-md">
-    //         <div className="space-y-6">
-    //           <span className="text-xs font-semibold bg-blue-100 text-blue-800 px-3 py-1 rounded-full">
-    //             Question {currentQuestionIndex + 1}
-    //           </span>
-
-    //           <h2 className="text-xl md:text-2xl font-semibold text-gray-800 leading-relaxed">
-    //             {questions[currentQuestionIndex].question.question}
-    //           </h2>
-
-    //           <div className="pt-4">
-    //             <div className="flex justify-between mb-2">
-    //               {/* <label className="block text-sm font-medium text-gray-600">Your Answer:</label>
-    //               <span className="text-sm text-gray-500">
-    //                 {answers[questions[currentQuestionIndex]]?.length || 0} characters
-    //               </span> */}
-    //             </div>
-    //             {/* <Input
-    //               type="text"
-    //               value={answers[questions[currentQuestionIndex].id] || ''}
-    //               onChange={(e) =>
-    //                 handleAnswerChange(questions[currentQuestionIndex].id, e.target.value)
-    //               }
-    //               placeholder="Type your answer here..."
-    //               className="w-full p-4 text-lg rounded-lg border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50 transition-all"
-    //             /> */}
-    //           </div>
-    //         </div>
-    //       </div>
-
-    //       {/* Progress indicator */}
-    //       <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
-    //         <div className="flex flex-col space-y-2">
-    //           <div className="flex justify-between text-sm text-gray-600 px-1">
-    //             <span className="font-medium">Quiz Progress</span>
-    //             <span>
-    //               {Object.keys(answers).length} of {questions.length} questions answered
-    //             </span>
-    //           </div>
-    //           <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
-    //             <div
-    //               className="bg-blue-600 h-2.5 rounded-full transition-all duration-500 ease-in-out"
-    //               style={{
-    //                 width: `${(Object.keys(answers).length / questions.length) * 100}%`,
-    //               }}
-    //             ></div>
-    //           </div>
-    //         </div>
-    //       </div>
-
-    //       <div className="flex flex-col sm:flex-row justify-between items-center pt-3 gap-4">
-    //         <div className="flex gap-3 order-2 sm:order-1 w-full sm:w-auto">
-    //           <Button
-    //             onClick={() => setCurrentQuestionIndex((prev) => Math.max(0, prev - 1))}
-    //             disabled={currentQuestionIndex === 0}
-    //             variant="outline"
-    //             className="px-6 py-2 flex items-center gap-2 rounded-full transition-all"
-    //           >
-    //             <svg
-    //               xmlns="http://www.w3.org/2000/svg"
-    //               className="h-4 w-4"
-    //               viewBox="0 0 20 20"
-    //               fill="currentColor"
-    //             >
-    //               <path
-    //                 fillRule="evenodd"
-    //                 d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
-    //                 clipRule="evenodd"
-    //               />
-    //             </svg>
-    //             Previous
-    //           </Button>
-
-    //           <Button
-    //             onClick={() =>
-    //               setCurrentQuestionIndex((prev) => Math.min(questions.length - 1, prev + 1))
-    //             }
-    //             disabled={currentQuestionIndex === questions.length - 1}
-    //             variant="outline"
-    //             className="px-6 py-2 flex items-center gap-2 rounded-full transition-all"
-    //           >
-    //             Next
-    //             <svg
-    //               xmlns="http://www.w3.org/2000/svg"
-    //               className="h-4 w-4"
-    //               viewBox="0 0 20 20"
-    //               fill="currentColor"
-    //             >
-    //               <path
-    //                 fillRule="evenodd"
-    //                 d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-    //                 clipRule="evenodd"
-    //               />
-    //             </svg>
-    //           </Button>
-    //         </div>
-
-    //         <Button
-    //           onClick={() => submitQuiz()}
-    //           className="px-6 py-2.5 bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 text-white font-medium rounded-full shadow-sm hover:shadow transition-all flex items-center gap-2 order-1 sm:order-2 w-full sm:w-auto"
-    //         >
-    //           Submit Quiz
-    //           <svg
-    //             xmlns="http://www.w3.org/2000/svg"
-    //             className="h-5 w-5"
-    //             viewBox="0 0 20 20"
-    //             fill="currentColor"
-    //           >
-    //             <path
-    //               fillRule="evenodd"
-    //               d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-    //               clipRule="evenodd"
-    //             />
-    //           </svg>
-    //         </Button>
-    //       </div>
-    //     </CardContent>
-    //   </Card>
-    // </div>
   );
+  
 }
-
-
-
-const AlertWrapper = ({ showAlert, alertMessage }: { showAlert: boolean; alertMessage: string }) => {
+const AlertWrapper = ({ showAlert, alertMessage,onClose }: { showAlert: boolean; alertMessage: string,onClose:()=>void }) => {
   if (!showAlert) return null;
 
   return (
-    <Alert
-      variant="destructive"
-      className="border-l-4 border-l-red-700 slide-in-from-top-5 duration-300"
-    >
-      <div className="flex items-center gap-2">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-5 w-5"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-        >
-          <path
-            fillRule="evenodd"
-            d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
-            clipRule="evenodd"
-          />
-        </svg>
-        <AlertDescription className="font-medium">{alertMessage}</AlertDescription>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+      <div className="animate-in slide-in-from-bottom-4 duration-300 bg-white rounded-lg shadow-2xl max-w-md w-full mx-4 overflow-hidden">
+        <div className="p-6">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="flex-shrink-0">
+              <div className="h-10 w-10 rounded-full bg-red-100 flex items-center justify-center">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-6 w-6 text-red-600"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </div>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">Warning</h3>
+              <p className="text-sm text-gray-500">Please review the following message</p>
+            </div>
+          </div>
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <p className="text-red-700 font-medium">{alertMessage}</p>
+          </div>
+          <div className="mt-6 flex justify-end">
+            <button
+              onClick={() => onClose()}
+              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200"
+            >
+              Dismiss
+            </button>
+          </div>
+        </div>
       </div>
-    </Alert>
+    </div>
   );
 };
+
+

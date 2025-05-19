@@ -29,7 +29,7 @@ const VideoPreview = ({ videoUrl,onError }: { videoUrl: string,onError: (err: an
             if (isPlaying && !isDragging) {
                 setShowControls(false);
             }
-        }, 3000);
+        }, 1000);
     };
 
     useEffect(() => {

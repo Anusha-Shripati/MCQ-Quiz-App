@@ -1,6 +1,18 @@
 import { AppError } from '../common/errors/AppError';
 import { prisma } from '../db/prisma.client';
 
+
+interface Violation {
+  type: string;
+  timestamp: number;
+  details: string;
+}
+
+interface ExamMeta {
+  violations?: Violation[];
+  [key: string]: any;
+}
+
 export class CandidateExamService {
   async getCandidate(candidateId: string, examId?: string) {
     
@@ -263,8 +275,8 @@ export class CandidateExamService {
     return {
       examId,
       status: candidate.exam.status,
-      startTime: candidate.exam.start_time,
-      endTime: candidate.exam.end_time,
+      start_time: candidate.exam.start_time,
+      end_time: candidate.exam.end_time,
       progress: `${answeredQuestions}/${totalQuestions}`,
       isCompleted: candidate.exam.is_completed,
     };
@@ -272,7 +284,26 @@ export class CandidateExamService {
   async finishExam(examId: string) {
     await prisma.exam.update({
       where: { id: examId },
-      data: { status: 'completed' },
+      data: { status: 'completed', end_time: new Date(),is_completed: true },
+    });
+  }
+
+  async submitViolation(examId: string, data: { violations: Violation[] }) {
+    const exam = await prisma.exam.findUnique({
+      where: { id: examId },
+      select: { meta: true },
+    });
+    const updatedMeta: ExamMeta = {
+      ...(exam?.meta as ExamMeta || {}),
+      violations: [...((exam?.meta as ExamMeta)?.violations || []), ...data.violations],
+    };
+
+    if (!exam) throw new AppError('Exam not found', 404);
+    await prisma.exam.update({
+      where: { id: examId },
+      data: {
+        meta: updatedMeta,
+      },
     });
   }
 }

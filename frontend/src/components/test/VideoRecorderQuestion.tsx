@@ -24,7 +24,6 @@ export const VideoRecorderQuestion: FC<VideoRecorderProps> = React.memo(({ quest
           <source src={iframeHTML} type="video/mp4" />
         </video>
       )}
-      {videoUrl}
       <VideoRecorder 
         onRecordingComplete={(chunks,url) => {
           const blob = new Blob(chunks, { type: 'video/webm' });

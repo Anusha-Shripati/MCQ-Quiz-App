@@ -80,7 +80,6 @@ const FormInput = ({
 const BasicInfoForm: React.FC = memo(() => {
   const { candidate, setCurrentStep } = useExamStore();
 
-  console.log('examm', candidate);
   const handleBasicInfoSubmit = () => {
     setCurrentStep(EXAM_STEP.VIDEO_RECORDING);
   };

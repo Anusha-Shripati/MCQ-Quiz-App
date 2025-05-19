@@ -17,6 +17,10 @@ export default class CandidatesService {
         if (existingEmail && existingEmail.deleted_at === null) {
           throw new AppError('Email already exists', 400);
         }else if(existingEmail && existingEmail.deleted_at !== null){
+          
+          await prisma.answers.deleteMany({
+            where: { candidate_id: existingEmail.id },
+          });
           await prisma.candidate.delete({
             where: { id: existingEmail.id },
           });
@@ -28,6 +32,9 @@ export default class CandidatesService {
         if (existingPhone && existingPhone.deleted_at === null) {
           throw new AppError('Phone number already exists', 400);
         }else if(existingPhone && existingPhone.deleted_at !== null){
+          await prisma.answers.deleteMany({
+            where: { candidate_id: existingPhone.id },
+          });
           await prisma.candidate.delete({
             where: { id: existingPhone.id },
           });
@@ -55,7 +62,6 @@ export default class CandidatesService {
 
       return result;
     } catch (error) {
-      console.log('error', error);
       if (error instanceof AppError) {
         throw error;
       }

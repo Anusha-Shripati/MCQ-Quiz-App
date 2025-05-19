@@ -51,7 +51,6 @@ export const QuestionCard = ({
   handleEdit: () => void;
 }) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  console.log(question);
   
   return (
     <>

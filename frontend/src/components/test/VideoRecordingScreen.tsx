@@ -3,17 +3,47 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Camera,
+  Loader2,
 } from 'lucide-react';
-import  VideoRecorder from '../video-recording/VideoRecorder';
+import VideoRecorder from '../video-recording/VideoRecorder';
+import { examApi } from '@/lib/api';
+import { useExamStore } from '@/store/examStore';
+import useSWRMutation from 'swr/mutation';
 
 // Types
 interface VideoRecorderProps {
   onRecordingComplete: (chunks: Blob[]) => void;
+  videoLink?: string;
 }
 
 
 // Main Component
-export const VideoRecordingScreen = ({ onRecordingComplete }: VideoRecorderProps) => {
+export const VideoRecordingScreen = ({ onRecordingComplete, videoLink }: VideoRecorderProps) => {
+  const { exam, accessCode } = useExamStore();
+
+
+  const { isMutating, error, trigger } = useSWRMutation(`/candidate-exam/${exam?.id}/submit-answer`, (url: string, { arg }: { arg: FormData }) => examApi.post(url, arg, accessCode))
+
+  const onContinue = async (recordedChunks: Blob[],videoUrl:string) => {
+
+    if(videoUrl == videoLink){
+      onRecordingComplete(recordedChunks);
+      return;
+    }
+
+    const videoBlob = new Blob(recordedChunks, { type: 'video/webm' });
+    const formData = new FormData();
+    formData.append('file', videoBlob);
+    formData.append('question_name', 'introduction');
+
+    const data = await trigger(formData);
+    if (data.success) {
+      onRecordingComplete(recordedChunks);
+    } else {
+      console.error('Error uploading video:', error);
+    }
+
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
@@ -59,7 +89,14 @@ export const VideoRecordingScreen = ({ onRecordingComplete }: VideoRecorderProps
             <p className="text-sm text-gray-500">Please introduce yourself and your experience</p>
           </CardHeader>
           <CardContent className="pt-6">
-            <VideoRecorder videoKey='introduction' onRecordingComplete={onRecordingComplete} maxTime={90} />
+            {isMutating && <Loader2 className="h-10 w-10 text-blue-500 animate-spin mb-2" />}
+
+            <VideoRecorder videoKey='introduction' onRecordingComplete={onContinue} maxTime={90} videoLink={videoLink}/>
+            {error && (
+              <div className="mt-4 text-red-600">
+                <p>Error: {error.message}</p>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

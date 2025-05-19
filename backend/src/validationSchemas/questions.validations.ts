@@ -32,11 +32,11 @@ export const questionsSchema = {
         'any.only': 'Level must be one of easy, medium, hard',
       }),
       type: Joi.string()
-        .valid('mcq', 'multiple_select', 'text', 'video', 'code_snippet')
+        .valid('mcq', 'multiple_select', 'text', 'video', 'code_snippet', 'code_editor')
         .required()
         .messages({
           'string.empty': 'Type is required',
-          'any.only': 'Type must be one of mcq, multiple_select, text, video',
+          'any.only': 'Type must be one of mcq, multiple_select, text, video, code_snippet, code_editor',
         }),
       meta: Joi.object().unknown(true).default({}),
     }).custom((value, helpers) => {
@@ -90,11 +90,11 @@ export const questionsSchema = {
         'any.only': 'Level must be one of easy, medium, hard',
       }),
       type: Joi.string()
-        .valid('mcq', 'multiple_select', 'text', 'video', 'code_snippet')
+        .valid('mcq', 'multiple_select', 'text', 'video', 'code_snippet', 'code_editor')
         .required()
         .messages({
           'string.empty': 'Type is required',
-          'any.only': 'Type must be one of mcq, multiple_select, text, video',
+          'any.only': 'Type must be one of mcq, multiple_select, text, video, code_snippet, code_editor',
         }),
       meta: Joi.object().unknown(true).default({}),
     }).custom((value, helpers) => {

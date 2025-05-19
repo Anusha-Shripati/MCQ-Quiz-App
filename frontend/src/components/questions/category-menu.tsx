@@ -41,7 +41,6 @@ const CategoryMenu = ({
 
   const handleEditCategory = (category: string) => {
     router.push(`/questions/create-question/${category}`);
-    console.log(category);
   };
 
   // const handleDeleteCategory = (category: QuestionCategory) => {

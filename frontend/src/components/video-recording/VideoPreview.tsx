@@ -1,8 +1,7 @@
 import { Loader2, Maximize2, Pause, Play, Volume2, VolumeX } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-const VideoPreview = ({ videoUrl }: { videoUrl: string }) => {
-    console.log('VideoPreview rendered');
+const VideoPreview = ({ videoUrl,onError }: { videoUrl: string,onError: (err: any) => void }) => {
     const videoRef = useRef<HTMLVideoElement>(null);
     const progressRef = useRef<HTMLDivElement>(null);
     const progressContainerRef = useRef<HTMLDivElement>(null);
@@ -45,7 +44,6 @@ const VideoPreview = ({ videoUrl }: { videoUrl: string }) => {
     useEffect(() => {
         const video = videoRef.current;
         if (!video) return;
-        console.log('video', video.currentTime);
         const handleTimeUpdate = () => setCurrentTime(video.currentTime);
         const handleDurationChange = () => {
             if (video.duration && !isNaN(video.duration) && isFinite(video.duration)) {
@@ -79,7 +77,7 @@ const VideoPreview = ({ videoUrl }: { videoUrl: string }) => {
         video.addEventListener('click', handleVideoClick);
 
         // Auto-play the video when loaded
-        video.play().catch((err: any) => console.error('Auto-play failed:', err));
+        video.play().catch((err: any) => onError(err));
         setIsPlaying(true);
 
         return () => {
@@ -316,7 +314,7 @@ const VideoPreview = ({ videoUrl }: { videoUrl: string }) => {
 
             {/* Video Controls Overlay - shown on hover/activity */}
             <div
-                className={`absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/80 via-black/40 to-transparent transition-opacity duration-300 ${showControls ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                className={` absolute inset-0 flex  flex-col justify-end bg-gradient-to-t from-black/80 via-black/40 to-transparent transition-opacity duration-300 ${showControls ? 'opacity-100' : 'opacity-0 pointer-events-none'
                     }`}
             >
                 {/* Enhanced Progress Bar */}
@@ -365,8 +363,8 @@ const VideoPreview = ({ videoUrl }: { videoUrl: string }) => {
                             {/* Handle for seeking */}
                             <div
                                 className={`absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full shadow-md transform -translate-x-1/2 transition-transform ${showTimeTooltip || isDragging
-                                        ? 'scale-100'
-                                        : 'scale-0 group-hover/progress:scale-100'
+                                    ? 'scale-100'
+                                    : 'scale-0 group-hover/progress:scale-100'
                                     }`}
                             >
                                 <div className="absolute inset-1 bg-purple-600 rounded-full"></div>
@@ -488,8 +486,8 @@ const VideoPreview = ({ videoUrl }: { videoUrl: string }) => {
                                             key={speed}
                                             onClick={() => changePlaybackSpeed(speed)}
                                             className={`block w-full text-left px-4 py-2 text-sm ${playbackSpeed === speed
-                                                    ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white'
-                                                    : 'text-white hover:bg-white/10'
+                                                ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white'
+                                                : 'text-white hover:bg-white/10'
                                                 }`}
                                         >
                                             {speed}x

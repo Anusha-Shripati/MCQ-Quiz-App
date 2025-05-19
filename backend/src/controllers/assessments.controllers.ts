@@ -76,7 +76,6 @@ export class AssessmentController {
         hard,
         created_by: req.user?.id,
       });
-      console.log('req body', req.body);
 
       await assessmentService.assignTechnologiesToAssessment(
         newAssessment.id,
@@ -85,7 +84,6 @@ export class AssessmentController {
 
       const assessment = await assessmentService.getAssessmentById(newAssessment.id);
 
-      console.log('new Assessment', assessment);
 
       return generateResponse(res, 200, newAssessment, true, 'Assessment created successfully');
     } catch (error) {

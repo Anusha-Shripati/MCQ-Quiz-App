@@ -10,6 +10,7 @@ import { EXAM_STEP } from '@/types/exam.types';
 import { Loader2 } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import useSWR from 'swr';
 
 
 const PROHIBITED_KEYS = [
@@ -61,6 +62,9 @@ const QuizPage = () => {
   const [error, setError] = useState<string | null>(null);
   const { current_step, setCurrentStep, setAccessCode, setCandidate,candidate,setExam } = useExamStore();
   const router = useRouter();
+
+  const [videoLink, setVideoLink] = useState<string | null>(null);
+
 
   const handleKeyDown = (e: KeyboardEvent) => {
     if (PROHIBITED_KEYS.includes(e.key)) {
@@ -151,7 +155,8 @@ const QuizPage = () => {
           router.push('/thank-you');
           return;
         }
-
+        const videoLink = data.data?.answers?.find((a: { question_name: string }) => a.question_name === 'introduction')?.user_answer[0] || null;
+        setVideoLink(videoLink);
         setCandidate(data.data);
         setExam(data.data.exam);
 
@@ -169,8 +174,7 @@ const QuizPage = () => {
     }
   }, [params.examId]);
 
-  const handleRecordingComplete = (recordedChunks: Blob[]) => {
-    localStorage.setItem('intoduction', JSON.stringify(recordedChunks));
+  const handleRecordingComplete = () => {
     setCurrentStep(EXAM_STEP.QUIZ);
   };
 
@@ -226,7 +230,7 @@ const QuizPage = () => {
     <div className="w-screen min-h-screen bg-gray-50">
       {current_step === EXAM_STEP.BASIC_INFO && <BasicInfoForm />}
       {current_step === EXAM_STEP.VIDEO_RECORDING && (
-        <VideoRecordingScreen onRecordingComplete={handleRecordingComplete} />
+        <VideoRecordingScreen onRecordingComplete={handleRecordingComplete} videoLink={videoLink || undefined} />
       )}
       {current_step === EXAM_STEP.QUIZ && candidate && <ProctoredQuiz />}
     </div>

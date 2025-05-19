@@ -81,6 +81,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
         { value: 'mcq', label: 'Radio Select' },
         { value: 'text', label: 'Fill in the Blanks' },
         { value: 'code_snippet', label: 'Code Snippet' },
+        { value: 'code_editor', label: 'Code Editor' }, 
         { value: 'video', label: 'Video' },
       ] as { value: Question['type']; label: string }[],
     []
@@ -409,7 +410,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
           />
         )}
 
-        {question.type === 'code_snippet' && (
+        {(question.type === 'code_snippet' || question.type === 'code_editor') && (
           <textarea
             placeholder="Enter your code snippet"
             value={(question?.meta?.code || '') as string}

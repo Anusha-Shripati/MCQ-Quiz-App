@@ -29,11 +29,33 @@ class ExpressAppProvider {
   }
 
   private initializeMiddlewares(): void {
-    this.app.use(cors());
-    this.app.use(helmet());
+    // Configure CORS
+    this.app.use(cors({
+      origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'x-access-code'],
+      credentials: true,
+      exposedHeaders: ['Content-Range', 'X-Content-Range']
+    }));
+
+    // Configure Helmet with video streaming permissions
+    this.app.use(helmet({
+      crossOriginResourcePolicy: { policy: "cross-origin" },
+      crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" }
+    }));
+
     this.app.use(rateLimiter);
     this.app.use(express.json());
-    this.app.use('/uploads', express.static(path.join(__dirname, '../../uploads')));
+    
+    // Configure static file serving with proper headers
+    this.app.use('/uploads', express.static(path.join(__dirname, '../../uploads'), {
+      setHeaders: (res, path) => {
+        res.set('Cross-Origin-Resource-Policy', 'cross-origin');
+        res.set('Access-Control-Allow-Origin', process.env.FRONTEND_URL || 'http://localhost:3000');
+        res.set('Access-Control-Allow-Credentials', 'true');
+        res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-access-code');
+      }
+    }));
     // this.app.use("/bullboard", serverAdapter.getRouter());
   }
 

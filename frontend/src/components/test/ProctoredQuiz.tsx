@@ -118,11 +118,11 @@ export default function ProctoredQuiz() {
     revalidateIfStale: true,
   })
 
-  const { isMutating, error, trigger } = useSWRMutation<{ success: boolean; message?: string }, any, string, FormData | { question_id: string; user_answer: (string | number | Blob)[] }>(
+  const { isMutating,  trigger } = useSWRMutation<{ success: boolean; message?: string }, any, string, FormData | { question_id: string; user_answer: (string | number | Blob)[] }>(
     `/candidate-exam/${exam?.id}/submit-answer`,
     (url: string, { arg }) => examApi.post(url, arg, accessCode)
   )
-  const { isMutating:isSubmiting, error:submitError, trigger:submitTrigger } = useSWRMutation(`/candidate-exam/${exam?.id}/finish`, (url: string) => examApi.get(url,accessCode))
+  const { isMutating:isSubmiting, trigger:submitTrigger } = useSWRMutation(`/candidate-exam/${exam?.id}/finish`, (url: string) => examApi.get(url,accessCode))
 
 
   useEffect(() => {
@@ -224,7 +224,7 @@ export default function ProctoredQuiz() {
         );
       case QuestionType.VIDEO:
         return (
-          <VideoRecorderQuestion handleAnswerChange={handleAnswerChange} question={question} answers={answers} onRecordingComplete={(blob,url) => handleNextQuestion(blob,url)} />
+          <VideoRecorderQuestion question={question} answers={answers} onRecordingComplete={(blob,url) => handleNextQuestion(blob,url)} />
         );
       case QuestionType.MULTIPLE_SELECT:
         return (
@@ -712,6 +712,14 @@ export default function ProctoredQuiz() {
     };
   }, []);
 
+  const handleReset = () => {
+    const current_question = questions[currentQuestionIndex]
+    setAnswers((prev) => ({
+      ...prev,
+      [current_question.question_id]: { question: current_question, answer: '' },
+    }));
+    
+  }
 
   const handleNextQuestion = async (blob?: Blob,url?:string) => {
     let success = false;
@@ -845,6 +853,9 @@ export default function ProctoredQuiz() {
                     )}
                   </span>
                 </div>
+                <div>
+                  <Button variant="default" size='lg' onClick={handleReset}>Reset</Button>
+                </div>
               </div>
 
               <h2 className="text-xl md:text-2xl font-semibold text-gray-800 leading-relaxed">
@@ -908,7 +919,7 @@ export default function ProctoredQuiz() {
               variant="outline"
               className="px-6 py-2 flex items-center gap-2 rounded-full transition-all"
             >
-              Next
+              Save & Next
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-4 w-4"

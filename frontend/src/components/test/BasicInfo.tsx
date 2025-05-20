@@ -121,7 +121,7 @@ const BasicInfoForm: React.FC = memo(() => {
                 icon={<FileText className="h-4 w-4" />}
                 value={
                   candidate?.assessment?.technologies
-                    ?.map((item:any) => item?.technology?.name)
+                    ?.map((item:{technology:{name:string}}) => item?.technology?.name)
                     .join(',') as string
                 }
               />

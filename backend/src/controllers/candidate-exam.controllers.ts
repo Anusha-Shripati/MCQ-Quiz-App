@@ -89,15 +89,15 @@ export class CandidateExamController {
       let file;
       
       if (req.file) {
-          file = this.uploadService.processFile(req.file);
+          file = await this.uploadService.processFile(req.file);
           req.body.user_answer = [file.path];
         }
       if (!candidate_id) throw new Error('Candidate not authenticated');
 
-      await this.candidateExamService.submitAnswer(exam_id, candidate_id, { ...req.body, file });
-
+      const answer = await this.candidateExamService.submitAnswer(exam_id, candidate_id, { ...req.body, file });
       const response = {
         message: 'Answer submitted successfully',
+        answer
       };
 
       generateResponse(res, 200, response, true, response.message);
@@ -146,6 +146,21 @@ export class CandidateExamController {
       await this.candidateExamService.submitViolation(examId, req.body); 
 
       generateResponse(res, 200, {}, true, 'Violation submitted successfully');
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  saveScreenshot = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { examId } = req.params;
+      const candidateId = req.candidateInfo?.candidateId;
+
+      if (!candidateId) throw new Error('Candidate not authenticated');
+
+      const screenshot = await this.candidateExamService.saveScreenshot(examId, req.file as Express.Multer.File, req.body.timestamp);
+
+      generateResponse(res, 200, screenshot, true, 'Screenshot saved successfully');
     } catch (error) {
       next(error);
     }

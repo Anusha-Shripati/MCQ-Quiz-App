@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect,  useState } from 'react'
 import { CardHeader, CardTitle } from '../ui/card'
 
 function TestHeader({ timeLeft, currentQuestionIndex, totalQuestion, handleTimerEnd }: { timeLeft: number, currentQuestionIndex: number, totalQuestion: number, handleTimerEnd: () => void }) {
@@ -8,7 +8,7 @@ function TestHeader({ timeLeft, currentQuestionIndex, totalQuestion, handleTimer
     const formatTime = (seconds: number): string => {
         const mins = Math.floor(seconds / 60);
         const secs = Math.floor(seconds % 60);
-        if(mins == 0 && secs == 0){
+        if(mins <= 0 && secs <= 0){
             return 'Time Up!';
         }
         return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;

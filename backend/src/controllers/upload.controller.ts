@@ -13,7 +13,7 @@ export class UploadController {
         return;
       }
 
-      const fileData = uploadService.processFile(req.file);
+      const fileData = await uploadService.processFile(req.file);
       generateResponse(res, 200, fileData, true, 'File uploaded successfully');
       return;
     } catch (error) {

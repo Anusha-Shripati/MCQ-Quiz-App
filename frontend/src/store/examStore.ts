@@ -1,4 +1,4 @@
-import { CandidateFormData } from '@/types/candidate.types';
+import { CandidateData } from '@/types/candidate.types';
 import { StatusOption } from '@/types/common.types';
 import { EXAM_STEP, IExam } from '@/types/exam.types';
 import { create } from 'zustand';
@@ -13,13 +13,13 @@ interface ExamStore {
   current_step: EXAM_STEP;
   accessCode: string;
   exam: IExam | null;
-  candidate: any | null;
+  candidate: CandidateData | null;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
   setAccessCode: (code: string) => void;
   setExam: (exam: IExam | null) => void;
   setCurrentStep: (step: EXAM_STEP) => void;
-  setCandidate: (candidate: CandidateFormData | null) => void;
+  setCandidate: (candidate: CandidateData | null) => void;
 }
 
 export const useExamStore = create<ExamStore>((set) => ({
@@ -30,7 +30,7 @@ export const useExamStore = create<ExamStore>((set) => ({
   accessCode: '',
   current_step: EXAM_STEP.BASIC_INFO,
 
-  setCandidate: (candidate: CandidateFormData | null) => {
+  setCandidate: (candidate: CandidateData | null) => {
     set({ candidate });
   },
 

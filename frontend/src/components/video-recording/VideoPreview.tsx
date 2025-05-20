@@ -1,6 +1,6 @@
 import { Loader2, Maximize2, Pause, Play, Volume2, VolumeX } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
-
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const VideoPreview = ({ videoUrl,onError }: { videoUrl: string,onError: (err: any) => void }) => {
     const videoRef = useRef<HTMLVideoElement>(null);
     const progressRef = useRef<HTMLDivElement>(null);
@@ -77,6 +77,7 @@ const VideoPreview = ({ videoUrl,onError }: { videoUrl: string,onError: (err: an
         video.addEventListener('click', handleVideoClick);
 
         // Auto-play the video when loaded
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         video.play().catch((err: any) => onError(err));
         setIsPlaying(true);
 

@@ -13,8 +13,9 @@ interface VideoRecorderProps {
     maxTime: number;
     videoKey: string;
     videoLink?: string | null;
+    onRecordingStop?: (blob: Blob | null,url:string) => void;
 }
-const VideoRecorder = ({ onRecordingComplete, maxTime, videoKey = 'video', videoLink }: VideoRecorderProps) => {
+const VideoRecorder = ({ onRecordingComplete, maxTime, videoKey = 'video', videoLink, onRecordingStop }: VideoRecorderProps) => {
     const videoRef = useRef<HTMLVideoElement | null>(null);
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const streamRef = useRef<MediaStream | null>(null);
@@ -39,15 +40,15 @@ const VideoRecorder = ({ onRecordingComplete, maxTime, videoKey = 'video', video
                 video: true,
                 audio: true,
             });
+            console.log('start camera');
+            
             streamRef.current = stream;
 
             if (videoRef.current) {
                 videoRef.current.srcObject = stream;
-                videoRef.current.play().catch((err) => {
+                await videoRef.current.play().catch((err) => {
                     console.error('Error playing video:', err);
                 });
-            } else {
-                console.error('Video ref is null, cannot set srcObject');
             }
 
             setIsStreamReady(true);
@@ -57,29 +58,54 @@ const VideoRecorder = ({ onRecordingComplete, maxTime, videoKey = 'video', video
         }
     }, []);
 
-    useEffect(() => {
-            setRecordedVideo(videoLink || '');
-            setStatus(videoLink ? 'preview' : 'idle');
-    }, [videoLink]);
+    const controllerRef = useRef<AbortController | null>(null);
+
     const init = async () => {
-        
+        controllerRef.current?.abort();
+
+        const controller = new AbortController();
+        controllerRef.current = controller;
+
+        const signal = controller.signal;
+
         if (videoLink) {
             setRecordedVideo(videoLink);
+            onRecordingStop && onRecordingStop(null, videoLink);
             setStatus('preview');
+            if (videoRef.current) {
+                videoRef.current.pause();
+            }
+            stopCamera();
+
             return;
         }
-        await loadVideoFromIndexedDB(videoKey, exam?.id as string).then((video) => {
-            if (video) {
-                setRecordedVideo(URL.createObjectURL(video));
-                setStatus('preview');
-            } else {
-                startCamera();
-            }
-        })
+
+        try {
+            await loadVideoFromIndexedDB(videoKey, exam?.id as string,signal).then((video) => {
+                if (video) {
+                    const videoUrl = URL.createObjectURL(video);
+                    setRecordedVideo(videoUrl);
+                    stopCamera();
+                    setStatus('preview');
+                } else {
+                    startCamera();
+                }
+            });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (error :any) {
+            console.log(error?.message);
+        }
     }
+
     useEffect(() => {
         init();
-    }, []);
+        return () => {
+            // Cleanup URLs when component unmounts
+            if (recordedVideo && recordedVideo.startsWith('blob:')) {
+                URL.revokeObjectURL(recordedVideo);
+            }
+        };
+    }, [videoLink]);
 
     const startRecording = useCallback(async () => {
         if (!streamRef.current || !isStreamReady) {
@@ -128,13 +154,14 @@ const VideoRecorder = ({ onRecordingComplete, maxTime, videoKey = 'video', video
             // Handle recording stop event
             mediaRecorder.onstop = () => {
                 setRecordedChunks(chunks);
-
                 // Create blob and URL for preview
                 const blob = new Blob(chunks, { type: 'video/webm' });
                 saveVideoToIndexedDB(blob, videoKey, exam?.id as string);
                 const videoUrl = URL.createObjectURL(blob);
+                if(onRecordingStop) {
+                    onRecordingStop(blob,videoUrl);
+                }
                 setRecordedVideo(videoUrl);
-
                 // Change status to preview
                 setStatus('preview');
             };
@@ -233,6 +260,8 @@ const VideoRecorder = ({ onRecordingComplete, maxTime, videoKey = 'video', video
 
         // Re-start camera if it was stopped
         if (!isStreamReady) {
+            console.log('restart camera in resetRecording');
+
             startCamera();
         }
     }, [recordedVideo, isStreamReady, startCamera]);
@@ -270,12 +299,30 @@ const VideoRecorder = ({ onRecordingComplete, maxTime, videoKey = 'video', video
             }
         };
     }, [status, isStreamReady]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const onError = (err: any) => {
-        console.log('onError', err);
+        console.log(err);
         setStatus('idle');
-        startCamera();
-        setRecordedVideo(null);
+        
+        // Cleanup existing video URL
+        if (recordedVideo && recordedVideo.startsWith('blob:')) {
+            URL.revokeObjectURL(recordedVideo);
+        }
+        
+        // Stop any existing recording
+        if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+            mediaRecorderRef.current.stop();
+        }
+        
+
         setRecordedChunks([]);
+        setRecordedVideo(null);
+        
+        // Restart camera after a short dela
+        setTimeout(() => {
+            console.log('restart camera in onError');
+            startCamera();
+        }, 1000);
     }
     return (
         <div className="space-y-4 max-w-4xl mx-auto p-6">
@@ -318,7 +365,6 @@ const VideoRecorder = ({ onRecordingComplete, maxTime, videoKey = 'video', video
                             )}
                         </>
                     )}
-
                     {status === 'preview' && recordedVideo && <VideoPreview videoUrl={recordedVideo} onError={onError} />}
 
                     {status === 'recording' && (

@@ -58,6 +58,12 @@ router.get(
   validateRequest(candidateExamSchema.get),
   asyncHandler(candidateExamController.getExam)
 );
+router.post(
+  '/:examId/screenshot',
+  authenticateCandidate,
+  upload.single('file'),
+  asyncHandler(candidateExamController.saveScreenshot)
+);
 
 router.get(
   '/',

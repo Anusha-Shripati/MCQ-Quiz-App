@@ -1,38 +1,19 @@
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/form/button';
 import { useExamStore } from '@/store/examStore';
-import { IExamQuestion, QuestionType } from '@/types/exam.types';
+import { Answer, IExamQuestion, QuestionType, Violation } from '@/types/exam.types';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Checkbox } from '../ui/form/checkbox';
-import { Radio, RadioGroup } from '../ui/form/radio';
-import { Textarea } from '../ui/form/textarea';
-import { VideoRecorderQuestion } from './VideoRecorderQuestion';
 import TestHeader from './TestHeader';
 import useSWR from 'swr';
 import { examApi, isAxiosError } from '@/lib/api';
-import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import useSWRMutation from 'swr/mutation';
-import { data } from '@/shared/constants/data';
-import EditorPage from '@/app/(admin)/editor/page';
+import AlertWrapper from './AlertWrapper';
+import TestLoading from './TestLoading';
+import TestError from './TestError';
+import Question from './Question';
 
-// type Screenshot = {
-//   timestamp: number;
-//   image: string;
-// };
 
-type Violation = {
-  type: string;
-  timestamp: number;
-  details?: string;
-};
-
-const QUIZ_CONFIG = {
-  screenshotInterval: 20000,
-  maxViolations: 1000000,
-  alertTimeout: 5000,
-};
 
 const PROHIBITED_KEYS = [
   'Escape',
@@ -46,7 +27,7 @@ const PROHIBITED_KEYS = [
   'F8',
   'F9',
   'F10',
-  'F11',
+  // 'F11',
   'F12',
   'PrintScreen',
   'ScrollLock',
@@ -76,16 +57,19 @@ const PROHIBITED_COMBINATIONS = [
   { key: 'h', modifier: 'ctrlKey' }, // Ctrl+H (history)
   { key: 'Tab', modifier: 'shiftKey' }, // Shift+Tab
 ];
+const QUIZ_CONFIG = {
+  screenshotInterval: 20000,
+  maxViolations: 12,
+  alertTimeout: 5000,
+};
 
 export default function ProctoredQuiz() {
-  const [answers, setAnswers] = useState<Record<string, { question: IExamQuestion, answer: string | Blob | (string | number)[] }>>({});
+  const [answers, setAnswers] = useState<Record<string, { question: IExamQuestion, answer: Answer }>>({});
   const [timeLeft, setTimeLeft] = useState(0);
   const isSubmittingRef = useRef(false);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  // const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const router = useRouter();
   const violations = useRef<Violation[]>([]);
-  // const [screenshots, setScreenshots] = useState<Screenshot[]>([]);
   // const [isFullScreen, setIsFullScreen] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
@@ -93,9 +77,17 @@ export default function ProctoredQuiz() {
   const [tabSwitchCount, setTabSwitchCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [accessError, setAccessError] = useState<string | null>(null);
-
+  const [recordingBlob, setRecordingBlob] = useState<Blob | null>(null);
+  const [recordingUrl, setRecordingUrl] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const screenshotIntervalRef = useRef<NodeJS.Timeout>();
+
+
+
+  
+  // const [, captureElement] = useScreenshot();
+
+
   const originalWindowSize = useRef({
     width: window.innerWidth,
     height: window.innerHeight,
@@ -111,199 +103,136 @@ export default function ProctoredQuiz() {
     setTimeout(() => setShowAlert(false), QUIZ_CONFIG.alertTimeout);
   };
 
-  const { data: examData, isLoading: isExamLoading } = useSWR(`/candidate-exam/${exam?.id}`, (url: string) => examApi.get(url, accessCode),{
+  const { data: examData, isLoading: isExamLoading } = useSWR(`/candidate-exam/${exam?.id}`, (url: string) => examApi.get(url, accessCode), {
     revalidateOnFocus: true,
     revalidateOnMount: true,
     revalidateOnReconnect: true,
     revalidateIfStale: true,
   })
-
-  const { isMutating,  trigger } = useSWRMutation<{ success: boolean; message?: string }, any, string, FormData | { question_id: string; user_answer: (string | number | Blob)[] }>(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { isMutating, trigger } = useSWRMutation<{ success: boolean; message?: string; data?: { answer: { user_answer: (string | number)[] } } }, any, string, FormData | { question_id: string; user_answer: (string | number)[] }>(
     `/candidate-exam/${exam?.id}/submit-answer`,
     (url: string, { arg }) => examApi.post(url, arg, accessCode)
   )
-  const { isMutating:isSubmiting, trigger:submitTrigger } = useSWRMutation(`/candidate-exam/${exam?.id}/finish`, (url: string) => examApi.get(url,accessCode))
+  const { isMutating: isSubmiting, trigger: submitTrigger } = useSWRMutation(`/candidate-exam/${exam?.id}/finish`, (url: string) => examApi.get(url, accessCode))
 
 
+  // const dataURLtoBlob = (dataURL: string) => {
+  //   const arr = dataURL.split(',');
+  //   const mimeMatch = arr[0].match(/:(.*?);/);
+  //   const mime = mimeMatch ? mimeMatch[1] : '';
+  //   const bstr = atob(arr[1]);
+  //   let n = bstr.length;
+  //   const u8arr = new Uint8Array(n);
+  
+  //   while (n--) {
+  //     u8arr[n] = bstr.charCodeAt(n);
+  //   }
+  
+  //   return new Blob([u8arr], { type: mime });
+  // }
   useEffect(() => {
-    if (examData) {
-      setExam(examData.data);      
-      const obj: Record<string, { question: IExamQuestion, answer: string | Blob | (string | number)[] }> = {}
-      examData.data?.answers?.forEach((a:any)=>{
-        const question = examData.data?.exam_questions.find((q:IExamQuestion)=>q.question_id == a.question_id)
-        
-        obj[a.question_id as string]={
-          question:question.question,
-          answer:question.question.type == QuestionType.MULTIPLE_SELECT ? a.user_answer : a.user_answer[0]
-        }
-      })
-      setAnswers(obj)
-      localStorage.setItem('quizAnswers', JSON.stringify(obj))
-      setQuestions(examData.data?.exam_questions || []);
-      setTimeLeft(examData.data?.assessment?.duration * 60);
-      checkExamStatus();
-
-    }
+    if (!examData) return;
+  
+    const { data } = examData;
+    setExam(data);
+  
+    const answersMap: Record<string, { question: IExamQuestion, answer: Answer }> = {};
+  
+    data.answers?.forEach((a: {question_id:string, user_answer:string | string[]}) => {
+      const questionObj = data.exam_questions.find((q: IExamQuestion) => q.question_id === a.question_id);
+      if (!questionObj) return;
+  
+      
+      answersMap[a.question_id] = {
+        question: questionObj.question,
+        answer: questionObj.question.type === QuestionType.MULTIPLE_SELECT
+          ? a.user_answer
+          : a.user_answer[0]
+      };
+    });
+  
+    setAnswers(answersMap);
+    localStorage.setItem('quizAnswers', JSON.stringify(answersMap));
+    setQuestions(data.exam_questions || []);
+    setTimeLeft(data.assessment?.duration * 60 || 0);
+    checkExamStatus();
   }, [examData]);
-
+  
   const checkExamStatus = async () => {
+    if (!exam?.id || !accessCode || !examData?.data?.assessment?.duration) return;
+  
     try {
       setIsLoading(true);
-
-      const data = await examApi.get(`/candidate-exam/${exam?.id}/status`, accessCode)
-      if (data.data.status == 'pending') {
-        const startData = await examApi.get(`/candidate-exam/${exam?.id}/start`, accessCode)
-        const remainingTime = (examData.data?.assessment?.duration * 60) - (new Date().getTime() - new Date(startData.data.start_time).getTime()) / 1000;
-        setTimeLeft(remainingTime);
-        if (remainingTime <= 0) {
-          router.push('/thank-you');
-        }
-      } else if (data.data.status == 'completed') {
+  
+      const { data: statusData } = await examApi.get(`/candidate-exam/${exam.id}/status`, accessCode);
+      const status = statusData.status;
+  
+      let startTime: string | null = null;
+  
+      if (status === 'pending') {
+        const { data: startData } = await examApi.get(`/candidate-exam/${exam.id}/start`, accessCode);
+        startTime = startData.start_time;
+      } else if (status === 'in_progress') {
+        startTime = statusData.start_time;
+      }
+  
+      if (status === 'completed') {
         router.push('/thank-you');
-      } else if (data.data.status == 'in_progress') {
-        const remainingTime = (examData.data?.assessment?.duration * 60) - (new Date().getTime() - new Date(data.data.start_time).getTime()) / 1000;
+        return;
+      }
+  
+      if (startTime) {
+        const now = Date.now();
+        const startedAt = new Date(startTime).getTime();
+        const examDurationInSeconds = examData.data.assessment.duration * 60;
+        const remainingTime = examDurationInSeconds - (now - startedAt) / 1000;
+  
         setTimeLeft(remainingTime);
+  
         if (remainingTime <= 0) {
           router.push('/thank-you');
         }
       }
-      setIsLoading(false);
     } catch (error) {
-      console.log('error', error);
-      setAccessError(isAxiosError(error) ? error?.response?.data.message : 'Unknown error');
+      console.error('checkExamStatus error:', error);
+      setAccessError(isAxiosError(error) ? error.response?.data.message : 'Unknown error occurred');
+    } finally {
+      setIsLoading(false);
     }
+  };
+  
+
+  // const takeScreenshot = async () => {
+  //   if (!containerRef.current || document.hidden) {
+  //     addViolation({
+  //       type: 'HIDDEN_SCREENSHOT',
+  //       details: 'Window was hidden during screenshot',
+  //     });
+  //     return;
+  //   }
+
+  //   try {
+  //     const image = await captureElement(containerRef.current);
+  //     const blob = dataURLtoBlob(image);
+  //     const formData = new FormData();
+  //     formData.append('file', blob, 'screenshot.png');
+  //     formData.append('timestamp', Date.now().toString());
+  //     await examApi.post(`/candidate-exam/${exam?.id}/screenshot`, formData, accessCode);
+  //   } catch (error) {
+  //     console.log(error);
+  //     addViolation({
+  //       type: 'SCREENSHOT_FAILED',
+  //       details: error instanceof Error ? error.message : 'Unknown error',
+  //     });
+  //   }
+  // };
+
+  const handleStopRecording = (blob: Blob | null, url: string) => {
+    setRecordingBlob(blob);
+    setRecordingUrl(url);
   }
 
-
-
-  const takeScreenshot = async () => {
-    if (!containerRef.current || document.hidden) {
-      addViolation({
-        type: 'HIDDEN_SCREENSHOT',
-        details: 'Window was hidden during screenshot',
-      });
-      return;
-    }
-
-    try {
-      // const canvas = await html2canvas(containerRef.current, {
-      //   allowTaint: true,
-      //   useCORS: true,
-      // });
-      // const image = canvas.toDataURL('image/jpeg', 0.5);
-      // setScreenshots((prev) => [...prev, { timestamp: Date.now(), image }]);
-    } catch (error) {
-      addViolation({
-        type: 'SCREENSHOT_FAILED',
-        details: error instanceof Error ? error.message : 'Unknown error',
-      });
-    }
-  };
-
-  const renderQuestion = (question: IExamQuestion) => {
-    switch (question.question.type) {
-      case QuestionType.MCQ:
-        return (
-          <RadioGroup
-            value={answers[question.question_id]?.answer as string}
-            onValueChange={(value) => handleAnswerChange(question, value)}
-            className="space-y-4"
-          >
-            {question.question.options?.map((option, idx) => (
-              <div key={idx} className="flex items-center space-x-3">
-                <Radio value={option} id={`option-${question.question_id}-${idx}`} />
-                <label
-                  htmlFor={`option-${question.question_id}-${idx}`}
-                  className="text-lg text-gray-800 cursor-pointer"
-                >
-                  {option}
-                </label>
-              </div>
-            ))}
-          </RadioGroup>
-        );
-      case QuestionType.VIDEO:
-        return (
-          <VideoRecorderQuestion question={question} answers={answers} onRecordingComplete={(blob,url) => handleNextQuestion(blob,url)} />
-        );
-      case QuestionType.MULTIPLE_SELECT:
-        return (
-          <div className="space-y-4">
-            {question.question.options?.map((option, idx) => {
-              const currentAnswers = answers[question.question_id]
-                ? (answers[question.question_id]?.answer as (string | number)[])
-                : [];
-
-              return (
-                <div key={idx} className="flex items-center space-x-3">
-                  <Checkbox
-                    id={`option-${question.question_id}-${idx}`}
-                    checked={currentAnswers.includes(option)}
-                    onCheckedChange={(checked) => {
-                      let newAnswers: (string | number)[];
-                      
-                      if (!checked) {
-                        newAnswers = currentAnswers.filter((a) => a !== option);
-                      } else {
-                        newAnswers = [...currentAnswers, option];
-                      }
-                      handleAnswerChange(question, newAnswers);
-                    }}
-                  />
-                  <label
-                    htmlFor={`option-${question.question_id}-${idx}`}
-                    className="text-lg text-gray-800 cursor-pointer"
-                  >
-                    {option}
-                  </label>
-                </div>
-              );
-            })}
-          </div>
-        );
-
-      case QuestionType.TEXT:
-        return (
-          <Textarea
-            value={(answers[question.question_id]?.answer as string) || ''}
-            onChange={(e) => handleAnswerChange(question, e.target.value)}
-            placeholder="Type your answer here..."
-            className="min-h-[120px] text-lg"
-          />
-        );
-
-      case QuestionType.CODE_SNIPPET:
-        return (
-          <div className="space-y-2">
-            <Textarea
-              value={(answers[question.question_id]?.answer as string) || ''}
-              onChange={(e) => handleAnswerChange(question, e.target.value)}
-              placeholder="Write your code here..."
-              className="min-h-[200px] font-mono text-black text-base"
-            />
-            <div className="text-sm text-gray-500">
-              Tip: Use proper indentation and comments where necessary
-            </div>
-          </div>
-        );
-
-      case QuestionType.CODE_EDITOR:
-        return (
-          <div className="space-y-2">
-            <EditorPage 
-              onChange={(value) => handleAnswerChange(question, value)}
-              value={(answers[question.question_id]?.answer as string) || ''}
-              />
-            <div className="text-sm text-gray-500">
-              Tip: Use proper indentation and comments where necessary
-            </div>
-          </div>
-        );
-
-      default:
-        return <div className="text-red-500">Unsupported question type</div>;
-    }
-  };
 
   const getQuestionTypeLabel = (type: QuestionType) => {
     switch (type) {
@@ -313,8 +242,8 @@ export default function ProctoredQuiz() {
         return 'Multiple Select';
       case QuestionType.TEXT:
         return 'Text Answer';
-        case QuestionType.CODE_SNIPPET:
-          return 'Code Answer';
+      case QuestionType.CODE_SNIPPET:
+        return 'Code Answer';
       case QuestionType.CODE_EDITOR:
         return 'Code Editor';
       case QuestionType.VIDEO:
@@ -324,35 +253,32 @@ export default function ProctoredQuiz() {
     }
   };
 
-  const requestFullScreen = async () => {
-    if (!containerRef.current) return;
+  // const requestFullScreen = async () => {
 
-    try {
-      // Only request if not already in fullscreen
-      if (!document.fullscreenElement) {
-        // Wait for user interaction before requesting fullscreen
-        await containerRef.current.requestFullscreen();
-        // setIsFullScreen(true);
+  //   if (!containerRef.current) return;
 
-        // Update original window size after entering fullscreen
-        originalWindowSize.current = {
-          width: window.innerWidth,
-          height: window.innerHeight,
-        };
-      }
-    } catch (error) {
-      console.error('Fullscreen error:', error);
-      // Don't add violation here since it might be a permissions issue
-    }
-  };
+  //   try {
+
+  //     // Only request if not already in fullscreen
+  //     if (!document.fullscreenElement) {
+  //       // Wait for user interaction before requesting fullscreen
+  //       containerRef.current.classList.add('h-screen');
+  //       containerRef.current.classList.add('overflow-auto');
+  //       await containerRef.current.requestFullscreen();
+  //       setIsFullScreen(true);
+  //     }
+  //   } catch (error) {
+  //     console.error('Fullscreen error:', error);
+  //     // Don't add violation here since it might be a permissions issue
+  //   }
+  // };
 
   const submitViolation = async () => {
-    console.log(violations,'violations');
     if (violations.current.length === 0) return;
     try {
-      await examApi.post(`/candidate-exam/${exam?.id}/submit-violation`,{
-        violations: violations.current  ,
-      },accessCode);
+      await examApi.post(`/candidate-exam/${exam?.id}/submit-violation`, {
+        violations: violations.current,
+      }, accessCode);
       violations.current = []; // Clear violations after successful submission
     } catch (error) {
       console.error('Error submitting violations:', error);
@@ -364,16 +290,14 @@ export default function ProctoredQuiz() {
       ...violation,
       timestamp: Date.now(),
     };
-    
+
     violations.current = [...violations.current, newViolation];
-    
-      if (violations.current.length >= QUIZ_CONFIG.maxViolations) {
-        submitQuiz();
-      }
-      console.log("Updated Violations:", violations.current);
-    
-      displayAlert(`Warning: ${violation.type}`);
-    
+
+    if (violations.current.length >= QUIZ_CONFIG.maxViolations) {
+      submitQuiz();
+    }
+    displayAlert(`Warning: ${violation.details}`);
+
   };
 
   // Event handlers
@@ -381,25 +305,24 @@ export default function ProctoredQuiz() {
     if (document.hidden) {
       setTabSwitchCount((prev) => {
         const newCount = prev + 1;
-        if (newCount > 2000000) {
-          console.log('Tab switch limit reached, submitting quiz...');
+        if (newCount > 5) {
           submitQuiz();
         }
         return newCount;
       });
-      
+
       addViolation({
         type: 'TAB_SWITCH',
         details: 'User switched tabs or minimized window',
       });
-      takeScreenshot();
+      // takeScreenshot();
 
       // Show specific alert for tab switching
       displayAlert(`WARNING: Tab switching detected! This is violation ${tabSwitchCount + 1} of 2.`);
 
       // Play audio alert to notify user
       if (audioRef.current) {
-        audioRef.current.play().catch((e) => console.error('Error playing audio:', e));
+        audioRef.current.play()
       }
 
       // Force window to regain focus using a combination of methods
@@ -415,6 +338,13 @@ export default function ProctoredQuiz() {
   };
 
   const handleKeyDown = (e: KeyboardEvent) => {
+    // Allow F11 for fullscreen
+    if (e.key === 'F11') {
+      e.preventDefault();
+      // requestFullScreen();
+      return;
+    }
+
     if (PROHIBITED_KEYS.includes(e.key)) {
       e.preventDefault();
       addViolation({
@@ -478,6 +408,14 @@ export default function ProctoredQuiz() {
       });
       return;
     }
+    if (e.ctrlKey && e.shiftKey && e.key === 'I') {
+      e.preventDefault();
+      addViolation({
+        type: 'INSPECT_ELEMENT',
+        details: `Attempted to inspect element`,
+      });
+      return;
+    }
   };
 
   const handleResize = () => {
@@ -498,7 +436,7 @@ export default function ProctoredQuiz() {
         type: 'FULLSCREEN_EXIT',
         details: 'Exited full screen mode',
       });
-      requestFullScreen();
+      // requestFullScreen();
     }
   };
 
@@ -506,21 +444,21 @@ export default function ProctoredQuiz() {
     if (!document.hasFocus()) {
       setTabSwitchCount((prev) => {
         const newCount = prev + 1;
-        if (newCount > 2000000) {
+        if (newCount > 5) {
           submitQuiz();
         }
         return newCount;
       });
-      
+
       addViolation({
         type: 'WINDOW_FOCUS_LOST',
         details: 'User switched to another window',
       });
-      takeScreenshot();
+      // takeScreenshot();
 
       // Play audio alert
       if (audioRef.current) {
-        audioRef.current.play().catch((e) => console.error('Error playing audio:', e));
+        audioRef.current.play()
       }
     }
   };
@@ -545,7 +483,7 @@ export default function ProctoredQuiz() {
     try {
       await handleNextQuestion();
       setIsSubmitting(true);
-      
+
       await submitTrigger();
       // await takeScreenshot();
       // // Get access code from URL for submission or use the provided accessCode
@@ -596,9 +534,10 @@ export default function ProctoredQuiz() {
 
     try {
       if (document.fullscreenElement) {
+        console.log('exiting fullscreen');
         await document.exitFullscreen();
-        await submitTrigger();
       }
+      await submitTrigger();
       router.push('/thank-you');  // use router if available
     } catch (error) {
       console.error('Auto-submit failed:', error);
@@ -606,141 +545,102 @@ export default function ProctoredQuiz() {
     }
   };
 
-
-  // useEffect(() => {
-  //   const validateAccess = async () => {
-  //     try {
-  //       setIsLoading(true);
-
-  //       let quizAccessCode = accessCode || '';
-
-  //       if (!quizAccessCode) {
-  //         const urlParts = window.location.pathname.split('/');
-  //         quizAccessCode = urlParts[urlParts.length - 1];
-  //       }
-
-  //       if (!quizAccessCode) {
-  //         setAccessError('Invalid exam access. Missing access code.');
-  //         setIsLoading(false);
-  //         return;
-  //       }
-
-  //       // Set exam data and questions
-  //       // const examData = data.data;
-
-  //       // // Update time limit based on exam data
-  //       // if (examData.end_time) {
-  //       // 	const endTime = new Date(examData.end_time).getTime();
-  //       // 	const now = new Date().getTime();
-  //       // 	const remainingTime = Math.max(0, Math.floor((endTime - now) / 1000));
-  //       // 	setTimeLeft(remainingTime);
-  //       // }
-
-  //       // If all is good, initialize the exam
-  //       setIsLoading(false);
-  //     } catch (error) {
-  //       console.error('Error validating exam access:', error);
-  //       setAccessError('Error accessing exam. Please try again or contact support.');
-  //       setIsLoading(false);
-  //     }
-  //   };
-
-  //   validateAccess();
-  // }, [accessCode]);
-
+  const detectMultipleScreens = () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if ((window.screen as any).isExtended){
+      addViolation({
+        type: 'MULTIPLE_SCREENS',
+        details: 'Multiple screens detected',
+      });
+    }
+  }
   // Effects
   useEffect(() => {
-    // Request full screen immediately
-    requestFullScreen();
 
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    document.addEventListener('keydown', handleKeyDown, true);
-    window.addEventListener('resize', handleResize);
-    document.addEventListener('fullscreenchange', handleFullScreenChange);
-    window.addEventListener('focus', handleWindowFocus);
-    window.addEventListener('blur', handleWindowFocus);
 
-    window.addEventListener('beforeunload', (e) => {
-      // Cancel the event
-      e.preventDefault();
-      // Chrome requires returnValue to be set
-      e.returnValue = '';
 
-      // Record violation if user tries to close/refresh tab
-      addViolation({
-        type: 'TAB_CLOSE_ATTEMPT',
-        details: 'User attempted to close or refresh the tab',
-      });
+    // Request fullscreen after 1 second
+    const fullscreenTimeout = setTimeout(() => {
+      // requestFullScreen();
+    }, 1000);
+  
+    // Initial screenshot after 2 seconds
+    const initialScreenshotTimeout = setTimeout(() => {
+      // takeScreenshot();
+    }, 2000);
+  
+    // Interval to auto-submit violations
+    const violationInterval = setInterval(() => {
+      if (violations.current.length > 0) submitViolation();
+    }, 10000);
 
-      // Display alert message
-      displayAlert('WARNING: Attempting to close or refresh the tab is not allowed!');
-
-      // Return value for older browsers
-      return '';
-    });
-
-    // Disable right-click context menu
-    document.addEventListener(
-      'contextmenu',
-      (e) => {
-        e.preventDefault();
-        addViolation({
-          type: 'CONTEXT_MENU',
-          details: 'Attempted to open context menu',
-        });
-        return false;
-      },
-      true
-    );
-
-    // Start taking screenshots
-    screenshotIntervalRef.current = setInterval(takeScreenshot, QUIZ_CONFIG.screenshotInterval);
-
-    // Load saved progress
-    const savedAnswers = localStorage.getItem('quizAnswers');
-    // const savedTime = localStorage.getItem('quizTimeLeft');
-    // if (savedTime) {
-    //   setTimeLeft(parseInt(savedTime, 10));
-    // }
-
-    // Take initial screenshot
-    setTimeout(()=>{
-      takeScreenshot();
-    },2000)
-
+    detectMultipleScreens();
+    const screenInterval = setInterval(() => {
+      detectMultipleScreens();
+    }, 10000);
+  
+    // screenshotIntervalRef.current = setInterval(takeScreenshot, QUIZ_CONFIG.screenshotInterval);
+  
     // Store original window size
     originalWindowSize.current = {
       width: window.innerWidth,
       height: window.innerHeight,
     };
-
-    // Add useEffect for violation submission
-    const interval = setInterval(() => {
-      console.log(violations.current)
-      if (violations.current.length > 0) {
-        submitViolation();
-      }
-    }, 1000);
-
+    setTabSwitchCount(0);
+  
+    // Handlers
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = '';
+  
+      addViolation({
+        type: 'TAB_CLOSE_ATTEMPT',
+        details: 'User attempted to close or refresh the tab',
+      });
+  
+      displayAlert('WARNING: Attempting to close or refresh the tab is not allowed!');
+    };
+  
+    const handleContextMenu = (e: MouseEvent) => {
+      e.preventDefault();
+      addViolation({
+        type: 'CONTEXT_MENU',
+        details: 'Attempted to open context menu',
+      });
+    };
+  
+    // Add listeners
+    window.addEventListener('resize', handleResize);
+    window.addEventListener('focus', handleWindowFocus);
+    window.addEventListener('blur', handleWindowFocus);
+    window.addEventListener('beforeunload', handleBeforeUnload);
+  
+    document.addEventListener('fullscreenchange', handleFullScreenChange);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    document.addEventListener('keydown', handleKeyDown, true);
+    document.addEventListener('contextmenu', handleContextMenu, true);
+  
     // Cleanup
     return () => {
-      clearInterval(interval)
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      document.removeEventListener('keydown', handleKeyDown, true);
+      clearTimeout(fullscreenTimeout);
+      clearTimeout(initialScreenshotTimeout);
+      clearInterval(violationInterval);
+      clearInterval(screenInterval);
+      if (screenshotIntervalRef.current) clearInterval(screenshotIntervalRef.current);
+      if (pingIntervalRef.current) clearInterval(pingIntervalRef.current);
+  
       window.removeEventListener('resize', handleResize);
-      document.removeEventListener('fullscreenchange', handleFullScreenChange);
       window.removeEventListener('focus', handleWindowFocus);
       window.removeEventListener('blur', handleWindowFocus);
-      window.removeEventListener('beforeunload', (e) => e.preventDefault());
-      document.removeEventListener('contextmenu', (e) => e.preventDefault(), true);
-      if (screenshotIntervalRef.current) {
-        clearInterval(screenshotIntervalRef.current);
-      }
-      if (pingIntervalRef.current) {
-        clearInterval(pingIntervalRef.current);
-      }
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+  
+      document.removeEventListener('fullscreenchange', handleFullScreenChange);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      document.removeEventListener('keydown', handleKeyDown, true);
+      document.removeEventListener('contextmenu', handleContextMenu, true);
     };
   }, []);
+  
 
   const handleReset = () => {
     const current_question = questions[currentQuestionIndex]
@@ -748,102 +648,77 @@ export default function ProctoredQuiz() {
       ...prev,
       [current_question.question_id]: { question: current_question, answer: '' },
     }));
-    
-  }
 
-  const handleNextQuestion = async (blob?: Blob,url?:string) => {
-    let success = false;
-    const ans = questions[currentQuestionIndex] && answers[questions[currentQuestionIndex].question_id] ? answers[questions[currentQuestionIndex].question_id].answer : ''
-    if(!ans) return
+  }
+  const handleNextQuestion = async () => {
+    const current = questions[currentQuestionIndex];
+    const questionId = current.question_id;
+    const questionType = current.question.type;
+    const existingAnswer = answers[questionId]?.answer;
+  
+    if (!existingAnswer && questionType !== QuestionType.VIDEO) return;
+  
     try {
-      if (questions[currentQuestionIndex].question.type === QuestionType.VIDEO) {
-        if(url == ans){
-          setCurrentQuestionIndex((prev) => Math.min(questions.length - 1, prev + 1))
-          return
+      let success = false;
+  
+      if (questionType === QuestionType.VIDEO) {
+        if (recordingUrl === existingAnswer) {
+          goToNextQuestion();
+          return;
         }
+  
         const formData = new FormData();
-        formData.append('questionId', questions[currentQuestionIndex].question_id);
-        formData.append('file', blob as Blob);
-        const data = await trigger(formData)
-        if (data.success) {
+        formData.append('question_id', questionId);
+        formData.append('file', recordingBlob as Blob);
+  
+        const response = await trigger(formData);
+        if (response.success) {
+          const userAnswer = response.data?.answer?.user_answer?.[0] as string;
+  
+          setAnswers((prev) => ({
+            ...prev,
+            [questionId]: {
+              question: current,
+              answer: userAnswer,
+            },
+          }));
           success = true;
         }
       } else {
         const payload = {
-          question_id: questions[currentQuestionIndex].question_id,
-          user_answer: Array.isArray(ans) ? ans : [ans]
-        }
-        const data = await trigger(payload)
-        if (data.success) {
-          success = true;
-        }
+          question_id: questionId,
+          user_answer: (Array.isArray(existingAnswer) ? existingAnswer : [existingAnswer]) as (string | number)[],
+        };
+  
+        const response = await trigger(payload);
+        if (response.success) success = true;
       }
+  
       if (success) {
-        if (currentQuestionIndex < questions.length - 1) {
-          setCurrentQuestionIndex((prev) => Math.min(questions.length - 1, prev + 1))
-        } else {
-          setShowAlert(true)
-          setAlertMessage((data as unknown as { success: boolean; message?: string })?.message || 'An error occurred')
-        }
+        goToNextQuestion();
       }
-
+  
     } catch (error) {
-
-      setShowAlert(true)
-      setAlertMessage(isAxiosError(error) ? error.response?.data.message : 'An error occurred')
+      setShowAlert(true);
+      setAlertMessage(isAxiosError(error)
+        ? error.response?.data.message
+        : 'An error occurred');
     }
-  }
-
-  // Add useEffect to monitor tabSwitchCount changes
-  useEffect(() => {
-    console.log('Tab switch count changed:', tabSwitchCount);
-  }, [tabSwitchCount]);
-
-  // Reset tab switch count when component mounts
-  useEffect(() => {
-    setTabSwitchCount(0);
-  }, []);
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-indigo-50">
-        <Card className="w-[90%] max-w-md p-6">
-          <CardContent className="flex flex-col items-center justify-center py-10">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-700 mb-4"></div>
-            <p className="text-gray-600">Loading exam...</p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
+  };
+  
+  const goToNextQuestion = () => {
+    setCurrentQuestionIndex((prev) => Math.min(prev + 1, questions.length - 1));
+  };
+  
   if (accessError) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-indigo-50">
-        <Card className="w-[90%] max-w-md p-6">
-          <CardHeader>
-            <CardTitle className="text-red-600">Access Denied</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Alert variant="destructive">
-              <AlertDescription>{accessError}</AlertDescription>
-            </Alert>
-            <p className="mt-4 text-gray-600">
-              If you believe this is an error, please contact your exam administrator or request a
-              new exam link.
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+      <TestError accessError={accessError} errorTitle="Access Denied" />
     );
   }
 
-  if (isExamLoading || isMutating || isSubmiting) {
+  if (isExamLoading || isMutating || isSubmiting || isLoading) {
     return (
-      <div className="w-screen min-h-screen bg-gray-50 flex flex-col items-center justify-center gap-4">
-        <Loader2 className="w-8 h-8 text-purple-600 animate-spin" />
-        <p className="text-gray-600 animate-pulse">Loading your test environment...</p>
-      </div>
+      <TestLoading />
     );
   }
   return (
@@ -851,9 +726,8 @@ export default function ProctoredQuiz() {
       ref={containerRef}
       className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 p-4 md:p-8"
     >
-          <AlertWrapper showAlert={showAlert} alertMessage={alertMessage} onClose={()=>setShowAlert(false)} />
+      <AlertWrapper showAlert={showAlert} alertMessage={alertMessage} onClose={() => setShowAlert(false)} />
 
-      {/* Hidden audio element for alert sounds */}
       <audio src="/alert.mp3" ref={audioRef} style={{ display: 'none' }} />
 
       <Card className="w-[95vw] max-w-[1200px] mx-auto min-h-[85vh] shadow-xl border-0 rounded-xl overflow-hidden bg-white/95 backdrop-blur-sm">
@@ -862,7 +736,6 @@ export default function ProctoredQuiz() {
 
         <CardContent className="p-4 md:p-8 space-y-6">
 
-          {/* Question navigation pills */}
           <div className="flex flex-wrap gap-2 justify-center">
             {questions?.map((q, index) => (
               <button
@@ -870,7 +743,7 @@ export default function ProctoredQuiz() {
                 onClick={() => setCurrentQuestionIndex(index)}
                 className={`h-8 w-8 rounded-full flex items-center justify-center text-sm font-medium transition-all ${currentQuestionIndex === index
                   ? 'bg-blue-600 text-white shadow-md'
-                  : answers[q.id]
+                  : answers[q.question_id]
                     ? 'bg-green-100 text-green-800 border border-green-200'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                   }`}
@@ -904,7 +777,7 @@ export default function ProctoredQuiz() {
               </h2>
 
               <div className="pt-2 text-black">
-                {renderQuestion(questions[currentQuestionIndex])}
+                <Question question={questions[currentQuestionIndex]} answers={answers} handleAnswerChange={handleAnswerChange} handleStopRecording={handleStopRecording} handleNextQuestion={handleNextQuestion} />
               </div>
             </div>
           </div>}
@@ -956,11 +829,11 @@ export default function ProctoredQuiz() {
 
             <Button
               onClick={() => handleNextQuestion()}
-              disabled={currentQuestionIndex === questions.length - 1}
+              disabled={(answers[questions[currentQuestionIndex].question_id]?.answer ? false : true)}
               variant="outline"
               className="px-6 py-2 flex items-center gap-2 rounded-full transition-all"
             >
-              Save & Next
+              Save {currentQuestionIndex == questions.length - 1 ? '' : ' & Next'}
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-4 w-4"
@@ -1001,52 +874,158 @@ export default function ProctoredQuiz() {
       </Card>
     </div>
   );
-  
+
 }
-const AlertWrapper = ({ showAlert, alertMessage,onClose }: { showAlert: boolean; alertMessage: string,onClose:()=>void }) => {
-  if (!showAlert) return null;
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="animate-in slide-in-from-bottom-4 duration-300 bg-white rounded-lg shadow-2xl max-w-md w-full mx-4 overflow-hidden">
-        <div className="p-6">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="flex-shrink-0">
-              <div className="h-10 w-10 rounded-full bg-red-100 flex items-center justify-center">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6 text-red-600"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </div>
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900">Warning</h3>
-              <p className="text-sm text-gray-500">Please review the following message</p>
-            </div>
-          </div>
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-            <p className="text-red-700 font-medium">{alertMessage}</p>
-          </div>
-          <div className="mt-6 flex justify-end">
-            <button
-              onClick={() => onClose()}
-              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200"
-            >
-              Dismiss
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 
+
+
+
+
+
+  // useEffect(() => {
+  //   const validateAccess = async () => {
+  //     try {
+  //       setIsLoading(true);
+
+  //       let quizAccessCode = accessCode || '';
+
+  //       if (!quizAccessCode) {
+  //         const urlParts = window.location.pathname.split('/');
+  //         quizAccessCode = urlParts[urlParts.length - 1];
+  //       }
+
+  //       if (!quizAccessCode) {
+  //         setAccessError('Invalid exam access. Missing access code.');
+  //         setIsLoading(false);
+  //         return;
+  //       }
+
+  //       // Set exam data and questions
+  //       // const examData = data.data;
+
+  //       // // Update time limit based on exam data
+  //       // if (examData.end_time) {
+  //       // 	const endTime = new Date(examData.end_time).getTime();
+  //       // 	const now = new Date().getTime();
+  //       // 	const remainingTime = Math.max(0, Math.floor((endTime - now) / 1000));
+  //       // 	setTimeLeft(remainingTime);
+  //       // }
+
+  //       // If all is good, initialize the exam
+  //       setIsLoading(false);
+  //     } catch (error) {
+  //       console.error('Error validating exam access:', error);
+  //       setAccessError('Error accessing exam. Please try again or contact support.');
+  //       setIsLoading(false);
+  //     }
+  //   };
+
+  //   validateAccess();
+  // }, [accessCode]);
+
+
+  // const renderQuestion = (question: IExamQuestion) => {
+  //   switch (question.question.type) {
+  //     case QuestionType.MCQ:
+  //       return (
+  //         <RadioGroup
+  //           value={answers[question.question_id]?.answer as string}
+  //           onValueChange={(value) => handleAnswerChange(question, value)}
+  //           className="space-y-4"
+  //         >
+  //           {question.question.options?.map((option, idx) => (
+  //             <div key={idx} className="flex items-center space-x-3">
+  //               <Radio value={option} id={`option-${question.question_id}-${idx}`} />
+  //               <label
+  //                 htmlFor={`option-${question.question_id}-${idx}`}
+  //                 className="text-lg text-gray-800 cursor-pointer"
+  //               >
+  //                 {option}
+  //               </label>
+  //             </div>
+  //           ))}
+  //         </RadioGroup>
+  //       );
+  //     case QuestionType.VIDEO:
+  //       return (
+  //         <VideoRecorderQuestion question={question} answers={answers} onRecordingStop={(blob, url) => handleStopRecording(blob, url)} onRecordingComplete={() => handleNextQuestion()} />
+  //       );
+  //     case QuestionType.MULTIPLE_SELECT:
+  //       return (
+  //         <div className="space-y-4">
+  //           {question.question.options?.map((option, idx) => {
+  //             const currentAnswers = answers[question.question_id]
+  //               ? (answers[question.question_id]?.answer as (string | number)[])
+  //               : [];
+
+  //             return (
+  //               <div key={idx} className="flex items-center space-x-3">
+  //                 <Checkbox
+  //                   id={`option-${question.question_id}-${idx}`}
+  //                   checked={currentAnswers.includes(option)}
+  //                   onCheckedChange={(checked) => {
+  //                     let newAnswers: (string | number)[];
+
+  //                     if (!checked) {
+  //                       newAnswers = currentAnswers.filter((a) => a !== option);
+  //                     } else {
+  //                       newAnswers = [...currentAnswers, option];
+  //                     }
+  //                     handleAnswerChange(question, newAnswers);
+  //                   }}
+  //                 />
+  //                 <label
+  //                   htmlFor={`option-${question.question_id}-${idx}`}
+  //                   className="text-lg text-gray-800 cursor-pointer"
+  //                 >
+  //                   {option}
+  //                 </label>
+  //               </div>
+  //             );
+  //           })}
+  //         </div>
+  //       );
+
+  //     case QuestionType.TEXT:
+  //       return (
+  //         <Textarea
+  //           value={(answers[question.question_id]?.answer as string) || ''}
+  //           onChange={(e) => handleAnswerChange(question, e.target.value)}
+  //           placeholder="Type your answer here..."
+  //           className="min-h-[120px] text-lg"
+  //         />
+  //       );
+
+  //     case QuestionType.CODE_SNIPPET:
+  //       return (
+  //         <div className="space-y-2">
+  //           <Textarea
+  //             value={(answers[question.question_id]?.answer as string) || ''}
+  //             onChange={(e) => handleAnswerChange(question, e.target.value)}
+  //             placeholder="Write your code here..."
+  //             className="min-h-[200px] font-mono text-black text-base"
+  //           />
+  //           <div className="text-sm text-gray-500">
+  //             Tip: Use proper indentation and comments where necessary
+  //           </div>
+  //         </div>
+  //       );
+
+  //     case QuestionType.CODE_EDITOR:
+  //       return (
+  //         <div className="space-y-2">
+  //           <EditorPage
+  //             onChange={(value) => handleAnswerChange(question, value)}
+  //             value={(answers[question.question_id]?.answer as string) || ''}
+  //           />
+  //           <div className="text-sm text-gray-500">
+  //             Tip: Use proper indentation and comments where necessary
+  //           </div>
+  //         </div>
+  //       );
+
+  //     default:
+  //       return <div className="text-red-500">Unsupported question type</div>;
+  //   }
+  // };

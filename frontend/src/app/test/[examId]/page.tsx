@@ -1,59 +1,16 @@
 'use client';
 import { BasicInfoForm } from '@/components/test/BasicInfo';
 import ProctoredQuiz from '@/components/test/ProctoredQuiz';
+import TestError from '@/components/test/TestError';
+import TestLoading from '@/components/test/TestLoading';
 import { VideoRecordingScreen } from '@/components/test/VideoRecordingScreen';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { examApi } from '@/lib/api';
+import { BROWSER_KEY, PROHIBITED_COMBINATIONS, PROHIBITED_KEYS } from '@/shared/constants/data';
 import { useExamStore } from '@/store/examStore';
 import { EXAM_STEP } from '@/types/exam.types';
-import { Loader2 } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
-
-const PROHIBITED_KEYS = [
-  'Escape',
-  'F1',
-  'F2',
-  'F3',
-  'F4',
-  'F5',
-  'F6',
-  'F7',
-  'F8',
-  'F9',
-  'F10',
-  'F11',
-  'F12',
-  'PrintScreen',
-  'ScrollLock',
-  'Pause',
-  'Insert',
-  'Home',
-  'PageUp',
-  'Delete',
-  'End',
-  'PageDown',
-];
-
-const PROHIBITED_COMBINATIONS = [
-  { key: 'Tab', modifier: 'altKey' }, // Alt+Tab
-  { key: 'Tab', modifier: 'ctrlKey' }, // Ctrl+Tab
-  { key: 'w', modifier: 'ctrlKey' }, // Ctrl+W (close tab)
-  { key: 't', modifier: 'ctrlKey' }, // Ctrl+T (new tab)
-  { key: 'n', modifier: 'ctrlKey' }, // Ctrl+N (new window)
-  // { key: 'r', modifier: 'ctrlKey' }, // Ctrl+R (refresh)
-  { key: 'l', modifier: 'ctrlKey' }, // Ctrl+L (address bar)
-  { key: 'f', modifier: 'ctrlKey' }, // Ctrl+F (find)
-  { key: 'c', modifier: 'ctrlKey' }, // Ctrl+C (copy)
-  { key: 'v', modifier: 'ctrlKey' }, // Ctrl+V (paste)
-  { key: 'p', modifier: 'ctrlKey' }, // Ctrl+P (print)
-  { key: 'q', modifier: 'ctrlKey' }, // Ctrl+Q (quit)
-  { key: 'j', modifier: 'ctrlKey' }, // Ctrl+J (downloads)
-  { key: 'h', modifier: 'ctrlKey' }, // Ctrl+H (history)
-  { key: 'Tab', modifier: 'shiftKey' }, // Shift+Tab
-];
 
 const QuizPage = () => {
   const params = useParams();
@@ -86,26 +43,7 @@ const QuizPage = () => {
 
     // Prevent browser shortcuts
     if (
-      (e.ctrlKey || e.metaKey) &&
-      (e.key === 'w' || // close tab
-        e.key === 't' || // new tab
-        e.key === 'n' || // new window
-        e.key === 'r' || // refresh
-        e.key === 'l' || // address bar
-        e.key === 'f' || // find
-        e.key === 'p' || // print
-        e.key === 'o' || // open file
-        e.key === 's' || // save
-        e.key === 'a' || // select all
-        e.key === 'c' || // copy
-        e.key === 'v' || // paste
-        e.key === 'x' || // cut
-        e.key === 'y' || // redo
-        e.key === 'z' || // undo
-        e.key === '+' || // zoom in
-        e.key === '-' || // zoom out
-        e.key === '0') // reset zoom
-    ) {
+      (e.ctrlKey || e.metaKey) && BROWSER_KEY.includes(e.key)) {
       e.preventDefault();
 
       return;
@@ -179,49 +117,13 @@ const QuizPage = () => {
 
   if (loading) {
     return (
-      <div className="w-screen min-h-screen bg-gray-50 flex flex-col items-center justify-center gap-4">
-        <Loader2 className="w-8 h-8 text-purple-600 animate-spin" />
-        <p className="text-gray-600 animate-pulse">Loading your test environment...</p>
-      </div>
+      <TestLoading/>
     );
   }
 
-  // if (error) {
-  // 	return (
-  // 		<div className='min-h-screen bg-gray-50 flex items-center justify-center'>
-  // 			<Card className='max-w-md w-full bg-white shadow-lg border-red-100'>
-  // 				<CardContent className='pt-6'>
-  // 					<div className='text-center space-y-4'>
-  // 						<div className='w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mx-auto'>
-  // 							<Camera className='h-6 w-6 text-red-600' />
-  // 						</div>
-  // 						<CardTitle className='text-red-600'>Error Loading Test</CardTitle>
-  // 						<p className='text-gray-600'>{error}</p>
-  // 					</div>
-  // 				</CardContent>
-  // 			</Card>
-  // 		</div>
-  // 	);
-  // }
-
   if (error) {
     return (
-      <div className="w-screen min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-indigo-50">
-        <Card className="w-[90%] max-w-md p-6">
-          <CardHeader>
-            <CardTitle className="text-red-600">Access Denied</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Alert variant="destructive">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-            <p className="mt-4 text-gray-600">
-              If you believe this is an error, please contact your exam administrator or request a
-              new exam link.
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+      <TestError errorTitle='Access Denied' accessError={error}/>
     );
   }
 

@@ -1175,6 +1175,72 @@ export const userOptions: StatusOption[] = [
 //   },
 // ];
 
+export const QUIZ_CONFIG = {
+  screenshotInterval: 20000,
+  maxViolations: 12,
+  alertTimeout: 5000,
+};
+export const PROHIBITED_COMBINATIONS = [
+  { key: 'Tab', modifier: 'altKey' }, // Alt+Tab
+  { key: 'Tab', modifier: 'ctrlKey' }, // Ctrl+Tab
+  { key: 'w', modifier: 'ctrlKey' }, // Ctrl+W (close tab)
+  { key: 't', modifier: 'ctrlKey' }, // Ctrl+T (new tab)
+  { key: 'n', modifier: 'ctrlKey' }, // Ctrl+N (new window)
+  // { key: 'r', modifier: 'ctrlKey' }, // Ctrl+R (refresh)
+  { key: 'l', modifier: 'ctrlKey' }, // Ctrl+L (address bar)
+  { key: 'f', modifier: 'ctrlKey' }, // Ctrl+F (find)
+  { key: 'c', modifier: 'ctrlKey' }, // Ctrl+C (copy)
+  { key: 'v', modifier: 'ctrlKey' }, // Ctrl+V (paste)
+  { key: 'p', modifier: 'ctrlKey' }, // Ctrl+P (print)
+  { key: 'q', modifier: 'ctrlKey' }, // Ctrl+Q (quit)
+  { key: 'j', modifier: 'ctrlKey' }, // Ctrl+J (downloads)
+  { key: 'h', modifier: 'ctrlKey' }, // Ctrl+H (history)
+  { key: 'Tab', modifier: 'shiftKey' }, // Shift+Tab
+];
+export const PROHIBITED_KEYS = [
+  'Escape',
+  'F1',
+  'F2',
+  'F3',
+  'F4',
+  'F5',
+  'F6',
+  'F7',
+  'F8',
+  'F9',
+  'F10',
+  // 'F11',
+  'F12',
+  'PrintScreen',
+  'ScrollLock',
+  'Pause',
+  'Insert',
+  'Home',
+  'PageUp',
+  'Delete',
+  'End',
+  'PageDown',
+];
+export const BROWSER_KEY = [
+  'w',
+  't',
+  'n',
+  'r',
+  'l',
+  'f',
+  'p',
+  'o',
+  's',
+  'a',
+  'c',
+  'v',
+  'x',
+  'y',
+  'z',
+  '+',
+  '-',
+  '0'
+];
 export const modules: string[] = ['assessments', 'candidates', 'questions', 'users'];
 
 export const commonRoutes: string[] = ['dashboard', 'profile', ''];

@@ -4,65 +4,21 @@ import { useExamStore } from '@/store/examStore';
 import { Answer, IExamQuestion, QuestionType, Violation } from '@/types/exam.types';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import TestHeader from './TestHeader';
-// import useSWR from 'swr';
+import useSWR from 'swr';
 import { examApi, isAxiosError } from '@/lib/api';
 import { useRouter } from 'next/navigation';
-// import useSWRMutation from 'swr/mutation';
+import useSWRMutation from 'swr/mutation';
 import AlertWrapper from './AlertWrapper';
 import TestLoading from './TestLoading';
 import TestError from './TestError';
 import Question from './Question';
-import { Check, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Check, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
+import { PROHIBITED_COMBINATIONS, PROHIBITED_KEYS, QUIZ_CONFIG } from '@/shared/constants/data';
 
 
 
-const PROHIBITED_KEYS = [
-  'Escape',
-  'F1',
-  'F2',
-  'F3',
-  'F4',
-  'F5',
-  'F6',
-  'F7',
-  'F8',
-  'F9',
-  'F10',
-  // 'F11',
-  'F12',
-  'PrintScreen',
-  'ScrollLock',
-  'Pause',
-  'Insert',
-  'Home',
-  'PageUp',
-  'Delete',
-  'End',
-  'PageDown',
-];
 
-const PROHIBITED_COMBINATIONS = [
-  { key: 'Tab', modifier: 'altKey' }, // Alt+Tab
-  { key: 'Tab', modifier: 'ctrlKey' }, // Ctrl+Tab
-  { key: 'w', modifier: 'ctrlKey' }, // Ctrl+W (close tab)
-  { key: 't', modifier: 'ctrlKey' }, // Ctrl+T (new tab)
-  { key: 'n', modifier: 'ctrlKey' }, // Ctrl+N (new window)
-  // { key: 'r', modifier: 'ctrlKey' }, // Ctrl+R (refresh)
-  { key: 'l', modifier: 'ctrlKey' }, // Ctrl+L (address bar)
-  { key: 'f', modifier: 'ctrlKey' }, // Ctrl+F (find)
-  { key: 'c', modifier: 'ctrlKey' }, // Ctrl+C (copy)
-  { key: 'v', modifier: 'ctrlKey' }, // Ctrl+V (paste)
-  { key: 'p', modifier: 'ctrlKey' }, // Ctrl+P (print)
-  { key: 'q', modifier: 'ctrlKey' }, // Ctrl+Q (quit)
-  { key: 'j', modifier: 'ctrlKey' }, // Ctrl+J (downloads)
-  { key: 'h', modifier: 'ctrlKey' }, // Ctrl+H (history)
-  { key: 'Tab', modifier: 'shiftKey' }, // Shift+Tab
-];
-const QUIZ_CONFIG = {
-  screenshotInterval: 20000,
-  maxViolations: 12,
-  alertTimeout: 5000,
-};
+
 
 export default function ProctoredQuiz() {
   const [answers, setAnswers] = useState<Record<string, { question: IExamQuestion, answer: Answer }>>({});
@@ -75,7 +31,7 @@ export default function ProctoredQuiz() {
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [tabSwitchCount, setTabSwitchCount] = useState(0);
+  const [, setTabSwitchCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [accessError, setAccessError] = useState<string | null>(null);
   const [recordingBlob, setRecordingBlob] = useState<Blob | null>(null);
@@ -108,58 +64,39 @@ export default function ProctoredQuiz() {
     alertTimeoutRef.current = setTimeout(() => setShowAlert(false), QUIZ_CONFIG.alertTimeout);
   };
 
-  const getExamData = async () => {
-    try {
-      if (!exam?.id || !accessCode) return;
-      setIsLoading(true);
-      const { data } = await examApi.get(`/candidate-exam/${exam.id}`, accessCode);
-      setExam(data);
-      const answersMap: Record<string, { question: IExamQuestion, answer: Answer }> = {};
-
-      data.answers?.forEach((a: { question_id: string, user_answer: string | string[] }) => {
-        const questionObj = data.exam_questions.find((q: IExamQuestion) => q.question_id === a.question_id);
-        if (!questionObj) return;
-
-
-        answersMap[a.question_id] = {
-          question: questionObj.question,
-          answer: questionObj.question.type === QuestionType.MULTIPLE_SELECT
-            ? a.user_answer
-            : a.user_answer[0]
-        };
-      });
-
-      setAnswers(answersMap);
-      setQuestions(data.exam_questions || []);
-      setTimeLeft(data.assessment?.duration * 60 || 0);
-      checkExamStatus();
-      setIsLoading(false);
-      if(Array.isArray(data?.meta?.violations)){
-        const count = data?.meta?.violations.filter((item:Violation)=> item.type == 'WINDOW_FOCUS_LOST').length
-        const currentCount = violations.current.filter((item:Violation)=> item.type == 'WINDOW_FOCUS_LOST').length
-        setTabSwitchCount(count + currentCount)
-      }
-
-    } catch (error) {
-      setIsLoading(false);
-      console.error('Error fetching exam data:', error);
-      setAccessError(isAxiosError(error) ? error.response?.data.message : 'Unknown error occurred');
-    }
-  }
-  // const { data: examData, isLoading: isExamLoading } = useSWR(`/candidate-exam/${exam?.id}`, (url: string) => examApi.get(url, accessCode), {
-  //   revalidateOnFocus: true,
-  //   revalidateOnMount: true,
-  //   revalidateOnReconnect: true,
-  //   revalidateIfStale: true,
-  // })
+  const { data: examData, isLoading: isExamLoading } = useSWR(`/candidate-exam/${exam?.id}`, (url: string) => examApi.get(url, accessCode), {
+    revalidateOnFocus: true,
+    revalidateOnMount: true,
+    revalidateOnReconnect: true,
+    revalidateIfStale: true,
+  })
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  // const { isMutating, trigger } = useSWRMutation<{ success: boolean; message?: string; data?: { answer: { user_answer: (string | number)[] } } }, any, string, FormData | { question_id: string; user_answer: (string | number)[] }>(
-  //   `/candidate-exam/${exam?.id}/submit-answer`,
-  //   (url: string, { arg }) => examApi.post(url, arg, accessCode)
-  // )
-  // const { isMutating: isSubmiting, trigger: submitTrigger } = useSWRMutation(`/candidate-exam/${exam?.id}/finish`, (url: string) => examApi.get(url, accessCode))
+  const { isMutating, trigger } = useSWRMutation<{ success: boolean; message?: string; data?: { answer: { user_answer: (string | number)[] } } }, any, string, FormData | { question_id: string; user_answer: (string | number)[] }>(
+    `/candidate-exam/${exam?.id}/submit-answer`,
+    (url: string, { arg }) => examApi.post(url, arg, accessCode)
+  )
+  const { isMutating: isSubmiting, trigger: submitTrigger } = useSWRMutation(`/candidate-exam/${exam?.id}/finish`, (url: string) => examApi.get(url, accessCode))
 
+  useEffect(() => {
+    if (examData) {
+      setExam(examData.data);
+      const obj: Record<string, { question: IExamQuestion, answer: string | Blob | (string | number)[] }> = {}
+      examData.data?.answers?.forEach((a: any) => {
+        const question = examData.data?.exam_questions.find((q: IExamQuestion) => q.question_id == a.question_id)
+
+        obj[a.question_id as string] = {
+          question: question.question,
+          answer: question.question.type == QuestionType.MULTIPLE_SELECT ? a.user_answer : a.user_answer[0]
+        }
+      })
+      setAnswers(obj)
+      localStorage.setItem('quizAnswers', JSON.stringify(obj))
+      setQuestions(examData.data?.exam_questions || []);
+      setTimeLeft(examData.data?.assessment?.duration * 60);
+      checkExamStatus();
+    }
+  }, [examData]);
 
   // const dataURLtoBlob = (dataURL: string) => {
   //   const arr = dataURL.split(',');
@@ -177,7 +114,7 @@ export default function ProctoredQuiz() {
   // }
 
   const checkExamStatus = async () => {
-    if (!exam?.id || !accessCode || !exam?.assessment?.duration) return;
+    if (!exam?.id || !accessCode || !examData.data?.assessment?.duration) return;
 
     try {
       setIsLoading(true);
@@ -202,7 +139,7 @@ export default function ProctoredQuiz() {
       if (startTime) {
         const now = Date.now();
         const startedAt = new Date(startTime).getTime();
-        const examDurationInSeconds = exam.assessment.duration * 60;
+        const examDurationInSeconds = examData.data.assessment.duration * 60;
         const remainingTime = examDurationInSeconds - (now - startedAt) / 1000;
 
         setTimeLeft(remainingTime);
@@ -329,11 +266,11 @@ export default function ProctoredQuiz() {
   //         type: 'TAB_SWITCH',
   //         details: 'User switched tabs or minimized window',
   //       });
-        
+
   //       displayAlert(`WARNING: Tab switching detected! This is violation ${newCount} of 5.`);
   //       return newCount;
 
-      
+
   //   });
 
   //     // Play audio alert to notify user
@@ -495,8 +432,7 @@ export default function ProctoredQuiz() {
     try {
       await handleNextQuestion();
       setIsSubmitting(true);
-
-      await examApi.post(`/candidate-exam/${exam?.id}/finish`, {}, accessCode);
+      await submitTrigger()
       // await takeScreenshot();
       // // Get access code from URL for submission or use the provided accessCode
       // let quizAccessCode = accessCode || '';
@@ -548,7 +484,7 @@ export default function ProctoredQuiz() {
       if (document.fullscreenElement) {
         await document.exitFullscreen();
       }
-      await examApi.post(`/candidate-exam/${exam?.id}/finish`, {}, accessCode);
+      await submitTrigger()
       router.push('/thank-you');  // use router if available
     } catch (error) {
       console.error('Auto-submit failed:', error);
@@ -567,8 +503,6 @@ export default function ProctoredQuiz() {
   }
   // Effects
   useEffect(() => {
-
-    getExamData();
 
     // Request fullscreen after 1 second
     const fullscreenTimeout = setTimeout(() => {
@@ -624,12 +558,12 @@ export default function ProctoredQuiz() {
     window.addEventListener('focus', handleWindowFocus);
     window.addEventListener('blur', handleWindowFocus);
     window.addEventListener('beforeunload', handleBeforeUnload);
-    
-    
+
+
     const fullscreenEventTimeout = setTimeout(() => {
       document.addEventListener('fullscreenchange', handleFullScreenChange);
       window.addEventListener('resize', handleResize);
-   }, 3000); 
+    }, 3000);
     // document.addEventListener('visibilitychange', handleVisibilityChange);
     document.addEventListener('keydown', handleKeyDown, true);
     document.addEventListener('contextmenu', handleContextMenu, true);
@@ -688,8 +622,7 @@ export default function ProctoredQuiz() {
         const formData = new FormData();
         formData.append('question_id', questionId);
         formData.append('file', recordingBlob as Blob);
-        setIsLoading(true);
-        const response = await examApi.post(`/candidate-exam/${exam?.id}/submit-answer`, formData, accessCode);
+        const response = await trigger(formData)
         if (response.success) {
 
           const userAnswer = response.data?.answer?.user_answer?.[0] as string;
@@ -703,17 +636,14 @@ export default function ProctoredQuiz() {
           }));
           success = true;
         }
-        setIsLoading(false);
       } else {
         const payload = {
           question_id: questionId,
           user_answer: (Array.isArray(existingAnswer) ? existingAnswer : [existingAnswer]) as (string | number)[],
         };
-        setIsLoading(true);
-        // success=true
-        const response = await examApi.post(`/candidate-exam/${exam?.id}/submit-answer`, payload, accessCode);
+        const response = await trigger(payload)
+
         if (response.success) success = true;
-        setIsLoading(false);
       }
 
       if (success) {
@@ -721,7 +651,6 @@ export default function ProctoredQuiz() {
       }
 
     } catch (error) {
-      setIsLoading(false);
       setShowAlert(true);
       setAlertMessage(isAxiosError(error)
         ? error.response?.data.message
@@ -733,134 +662,153 @@ export default function ProctoredQuiz() {
     setCurrentQuestionIndex((prev) => Math.min(prev + 1, questions.length - 1));
   };
 
-  if (accessError) {
-    return (
-      <TestError accessError={accessError} errorTitle="Access Denied" />
-    );
-  }
+  // if (accessError) {
+  //   return (
+  //   );
+  // }
 
-  if (isLoading) {
-    return (
-      <TestLoading />
-    );
-  }
+  // if (isLoading|| isExamLoading || isMutating || isSubmiting ) {
+  //   return (
+  //   );
+  // }
   return (
     <div
       ref={containerRef}
       className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 p-4 md:p-8"
     >
-      <AlertWrapper showAlert={showAlert} alertMessage={alertMessage} onClose={() => setShowAlert(false)} />
+      {accessError ? (
+        <TestError accessError={accessError} errorTitle="Access Denied" />
+      ) : (isLoading || isExamLoading) ? (
+        <TestLoading />
+      ) : (
+        <>
 
-      <audio src="/alert.mp3" ref={audioRef} style={{ display: 'none' }} />
+          <AlertWrapper showAlert={showAlert} alertMessage={alertMessage} onClose={() => setShowAlert(false)} />
 
-      <Card className="w-[95vw] max-w-[1200px] mx-auto min-h-[85vh] shadow-xl border-0 rounded-xl overflow-hidden bg-white/95 backdrop-blur-sm">
-        <TestHeader timeLeft={timeLeft} currentQuestionIndex={currentQuestionIndex} totalQuestion={questions.length || 0} handleTimerEnd={handleTimerEnd} />
+          <audio src="/alert.mp3" ref={audioRef} style={{ display: 'none' }} />
 
-        <CardContent className="p-4 md:p-8 space-y-6">
+          <Card className="w-[95vw] max-w-[1200px] mx-auto min-h-[85vh] shadow-xl border-0 rounded-xl overflow-hidden bg-white/95 backdrop-blur-sm">
+            <TestHeader timeLeft={timeLeft} currentQuestionIndex={currentQuestionIndex} totalQuestion={questions.length || 0} handleTimerEnd={handleTimerEnd} />
 
-          <div className="flex flex-wrap gap-2 justify-center">
-            {questions?.map((q, index) => (
-              <button
-                key={q.id}
-                onClick={() => setCurrentQuestionIndex(index)}
-                className={`h-8 w-8 rounded-full flex items-center justify-center text-sm font-medium transition-all ${currentQuestionIndex === index
-                  ? 'bg-blue-600 text-white shadow-md'
-                  : answers[q.question_id]
-                    ? 'bg-green-100 text-green-800 border border-green-200'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                  }`}
-                aria-label={`Go to question ${index + 1}`}
-              >
-                {index + 1}
-              </button>
-            ))}
-          </div>
+            <CardContent className="p-4 md:p-8 space-y-6">
 
-          {questions.length > 0 && <div className="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-gray-200 transition-all hover:shadow-md">
-            <div className="space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <span className="text-xs font-semibold bg-blue-100 text-blue-800 px-3 py-1 rounded-full">
-                    Question {currentQuestionIndex + 1}
-                  </span>
-                  <span className="text-xs font-semibold bg-purple-100 text-purple-800 px-3 py-1 rounded-full">
-                    {getQuestionTypeLabel(
-                      questions[currentQuestionIndex].question.type as QuestionType
-                    )}
-                  </span>
+              <div className="flex flex-wrap gap-2 justify-center">
+                {questions?.map((q, index) => (
+                  <button
+                    key={q.id}
+                    onClick={() => setCurrentQuestionIndex(index)}
+                    className={`h-8 w-8 rounded-full flex items-center justify-center text-sm font-medium transition-all ${currentQuestionIndex === index
+                      ? 'bg-blue-600 text-white shadow-md'
+                      : answers[q.question_id]
+                        ? 'bg-green-100 text-green-800 border border-green-200'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      }`}
+                    aria-label={`Go to question ${index + 1}`}
+                  >
+                    {index + 1}
+                  </button>
+                ))}
+              </div>
+
+              {questions.length > 0 && <div className="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-gray-200 transition-all hover:shadow-md">
+                <div className="space-y-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <span className="text-xs font-semibold bg-blue-100 text-blue-800 px-3 py-1 rounded-full">
+                        Question {currentQuestionIndex + 1}
+                      </span>
+                      <span className="text-xs font-semibold bg-purple-100 text-purple-800 px-3 py-1 rounded-full">
+                        {getQuestionTypeLabel(
+                          questions[currentQuestionIndex].question.type as QuestionType
+                        )}
+                      </span>
+                    </div>
+                    <div>
+                      <Button variant="default" size='lg' onClick={handleReset}>Reset</Button>
+                    </div>
+                  </div>
+
+                  <h2 className="text-xl md:text-2xl font-semibold text-gray-800 leading-relaxed">
+                    {questions[currentQuestionIndex].question.question}
+                  </h2>
+
+                  <div className="pt-2 text-black">
+                    <Question question={questions[currentQuestionIndex]} answers={answers} handleAnswerChange={handleAnswerChange} handleStopRecording={handleStopRecording} handleNextQuestion={handleNextQuestion} />
+                  </div>
                 </div>
-                <div>
-                  <Button variant="default" size='lg' onClick={handleReset}>Reset</Button>
+              </div>}
+
+              {/* Progress and navigation */}
+              <div className="flex flex-col md:flex-row gap-6">
+                <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex-1">
+                  <div className="flex flex-col space-y-2">
+                    <div className="flex justify-between text-sm text-gray-600 px-1">
+                      <span className="font-medium">Quiz Progress</span>
+                      <span>
+                        {/* {Object.keys(answers).length} of {questions.length} questions answered */}
+                        {currentQuestionIndex + 1} of {questions.length} questions answered
+                      </span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
+                      <div
+                        className="bg-blue-600 h-2.5 rounded-full transition-all duration-500 ease-in-out"
+                        style={{
+                          width: `${(Object.keys(answers).length / questions.length) * 100}%`,
+                        }}
+                      ></div>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <h2 className="text-xl md:text-2xl font-semibold text-gray-800 leading-relaxed">
-                {questions[currentQuestionIndex].question.question}
-              </h2>
+              <div className="flex gap-3">
+                <Button
+                  onClick={() => setCurrentQuestionIndex((prev) => Math.max(0, prev - 1))}
+                  disabled={currentQuestionIndex === 0}
+                  variant="outline"
+                  className="px-6 py-2 flex items-center gap-2 rounded-full transition-all"
+                >
+                  <ChevronLeft />
+                  Previous
+                </Button>
 
-              <div className="pt-2 text-black">
-                <Question question={questions[currentQuestionIndex]} answers={answers} handleAnswerChange={handleAnswerChange} handleStopRecording={handleStopRecording} handleNextQuestion={handleNextQuestion} />
+                <Button
+                  onClick={() => handleNextQuestion()}
+                  disabled={(answers[questions[currentQuestionIndex].question_id]?.answer ? false : true) || (isMutating || isSubmiting)}
+                  variant="outline"
+                  className="px-6 py-2 flex items-center gap-2 rounded-full transition-all"
+                >
+                  {(isMutating || isSubmiting) ? <div className="flex flex-col items-center justify-center gap-4">
+                    <Loader2 className="w-8 h-8 text-purple-600 animate-spin" />
+                  </div>
+                    : <>
+                      Save {currentQuestionIndex == questions.length - 1 ? '' : ' & Next'}
+                      <ChevronRight />
+                    </>
+                  }
+                </Button>
               </div>
-            </div>
-          </div>}
 
-          {/* Progress and navigation */}
-          <div className="flex flex-col md:flex-row gap-6">
-            <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex-1">
-              <div className="flex flex-col space-y-2">
-                <div className="flex justify-between text-sm text-gray-600 px-1">
-                  <span className="font-medium">Quiz Progress</span>
-                  <span>
-                    {/* {Object.keys(answers).length} of {questions.length} questions answered */}
-                    {currentQuestionIndex + 1} of {questions.length} questions answered
-                  </span>
+              <div className="flex justify-center pt-2">
+                <Button
+                  onClick={() => submitQuiz()}
+                  disabled={Object.keys(answers).length !== questions.length || isSubmitting}
+                  className="px-8 py-3 bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 text-white font-medium rounded-full shadow-sm hover:shadow transition-all flex items-center gap-2"
+                >{(isMutating || isSubmiting) ? <div className="flex flex-col items-center justify-center gap-4">
+                  <Loader2 className="w-8 h-8 text-white animate-spin" />
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
-                  <div
-                    className="bg-blue-600 h-2.5 rounded-full transition-all duration-500 ease-in-out"
-                    style={{
-                      width: `${(Object.keys(answers).length / questions.length) * 100}%`,
-                    }}
-                  ></div>
-                </div>
+                  : <>
+                    Submit Quiz
+                    <Check />
+                  </>
+                  }
+
+                </Button>
               </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
+        </>)}
 
-          <div className="flex gap-3">
-            <Button
-              onClick={() => setCurrentQuestionIndex((prev) => Math.max(0, prev - 1))}
-              disabled={currentQuestionIndex === 0}
-              variant="outline"
-              className="px-6 py-2 flex items-center gap-2 rounded-full transition-all"
-            >
-              <ChevronLeft />
-              Previous
-            </Button>
-
-            <Button
-              onClick={() => handleNextQuestion()}
-              disabled={(answers[questions[currentQuestionIndex].question_id]?.answer ? false : true)}
-              variant="outline"
-              className="px-6 py-2 flex items-center gap-2 rounded-full transition-all"
-            >
-              Save {currentQuestionIndex == questions.length - 1 ? '' : ' & Next'}
-              <ChevronRight />
-            </Button>
-          </div>
-
-          <div className="flex justify-center pt-2">
-            <Button
-              onClick={() => submitQuiz()}
-              disabled={Object.keys(answers).length !== questions.length || isSubmitting}
-              className="px-8 py-3 bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 text-white font-medium rounded-full shadow-sm hover:shadow transition-all flex items-center gap-2"
-            >
-              Submit Quiz
-              <Check />
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 

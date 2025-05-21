@@ -80,7 +80,7 @@ export const VideoRecordingScreen = ({ onRecordingComplete, videoLink }: VideoRe
         </Card>
 
         {/* Video Recorder Card */}
-        <Card className="bg-white shadow-lg hover:shadow-xl transition-shadow duration-300 border-0">
+        <Card className="bg-white shadow-lg hover:shadow-xl transition-shadow duration-300 border-0 flex flex-col">
           <CardHeader className="space-y-1 border-b pb-6">
             <div className="flex items-center gap-2 text-purple-600">
               <Camera className="h-5 w-5" />
@@ -88,10 +88,9 @@ export const VideoRecordingScreen = ({ onRecordingComplete, videoLink }: VideoRe
             </div>
             <p className="text-sm text-gray-500">Please introduce yourself and your experience</p>
           </CardHeader>
-          <CardContent className="pt-6">
-            {isMutating && <Loader2 className="h-10 w-10 text-blue-500 animate-spin mb-2" />}
+          <CardContent className="pt-6 flex justify-center items-center flex-grow">
 
-            <VideoRecorder videoKey='introduction' onRecordingComplete={onContinue} maxTime={90} videoLink={videoLink}/>
+            <VideoRecorder videoKey='introduction' onRecordingComplete={onContinue} maxTime={90} videoLink={videoLink} isLoading={isMutating}/>
             {error && (
               <div className="mt-4 text-red-600">
                 <p>Error: {error.message}</p>

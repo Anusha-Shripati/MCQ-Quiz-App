@@ -13,10 +13,11 @@ interface QuestionProps {
     handleAnswerChange: (question: IExamQuestion, answer: Answer) => void;
     handleStopRecording: (blob: Blob | null, url: string) => void;
     handleNextQuestion: () => void;
+    isLoading:boolean
 }
 
 
-function Question({ question, answers, handleAnswerChange, handleStopRecording, handleNextQuestion }: QuestionProps) {
+function Question({ question, answers, handleAnswerChange, handleStopRecording, handleNextQuestion,isLoading }: QuestionProps) {
     switch (question.question.type) {
         case QuestionType.MCQ:
             return (
@@ -40,7 +41,7 @@ function Question({ question, answers, handleAnswerChange, handleStopRecording, 
             );
         case QuestionType.VIDEO:
             return (
-                <VideoRecorderQuestion question={question} answers={answers} onRecordingStop={(blob, url) => handleStopRecording(blob, url)} onRecordingComplete={() => handleNextQuestion()} />
+                <VideoRecorderQuestion isLoading={isLoading} question={question} answers={answers} onRecordingStop={(blob, url) => handleStopRecording(blob, url)} onRecordingComplete={() => handleNextQuestion()} />
             );
         case QuestionType.MULTIPLE_SELECT:
             return (

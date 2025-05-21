@@ -2,13 +2,13 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 import { S3Client } from '@aws-sdk/client-s3';
-
+import ffmpeg from 'fluent-ffmpeg';
 import multerS3 from 'multer-s3';
 import { v4 as uuidv4 } from 'uuid';
 
 const storageMode = process.env.STORAGE_MODE || 'local';
 
-let storage: multer.StorageEngine;
+let storage: multer.StorageEngine; 
 
 if (storageMode === 's3') {
 
@@ -30,7 +30,7 @@ if (storageMode === 's3') {
         },
     });
 }
-else{
+else {
 
     const uploadPath = path.join(__dirname, '../../uploads');
     if (!fs.existsSync(uploadPath)) {
@@ -68,3 +68,30 @@ export const upload = multer({
         fileSize: 100 * 1024 * 1024, // 100MB max
     },
 });
+
+
+
+export const convertWebmToMp4 = (inputPath: string): Promise<string> => {
+    return new Promise((resolve, reject) => {
+        const ext = path.extname(inputPath);
+        if (ext == '.webm') {
+            
+            const outputPath = inputPath.replace(ext, '.mp4');
+            
+            ffmpeg(inputPath)
+            .output(outputPath)
+            .on('end', () => {
+                console.log('✅ Conversion complete:', outputPath);
+                resolve(path.basename(outputPath));
+            })
+            .on('error', (err: any) => {
+                console.error('❌ FFmpeg error:', err.message);
+                reject(err);
+            })
+            .run();
+        }
+        else {
+            resolve(inputPath);
+        }
+    });
+};

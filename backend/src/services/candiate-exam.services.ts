@@ -184,17 +184,16 @@ export class CandidateExamService {
       },
     });
     if (ans) {
-      await prisma.answers.update({
+      return await prisma.answers.update({
         where: { id: ans.id },
         data: {
           user_answer: data.user_answer,
           question_name: data.question_name,
         },
       });
-      return;
     }
 
-    await prisma.answers.create({
+    return await prisma.answers.create({
       data: {
         exam_id: exam_id,
         question_id: data.question_id || null,
@@ -299,6 +298,24 @@ export class CandidateExamService {
     };
 
     if (!exam) throw new AppError('Exam not found', 404);
+    await prisma.exam.update({
+      where: { id: examId },
+      data: {
+        meta: updatedMeta,
+      },
+    });
+  }
+
+  async saveScreenshot(examId: string, file: Express.Multer.File,timestamp:number) {
+    const exam = await prisma.exam.findUnique({
+      where: { id: examId },
+      select: { meta: true },
+    });
+    if (!exam) throw new AppError('Exam not found', 404);
+    const updatedMeta: ExamMeta = {
+      ...(exam?.meta as ExamMeta || {}),
+      screenshots :[...(exam?.meta as ExamMeta)?.screenshots || [],{timestamp:timestamp,image:file.path}]
+    };
     await prisma.exam.update({
       where: { id: examId },
       data: {

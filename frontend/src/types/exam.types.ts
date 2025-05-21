@@ -53,3 +53,12 @@ export interface IExamQuestion {
   created_at: string;
   updated_at: string;
 }
+
+export type Answer = string | Blob | (string | number)[];
+
+
+export type Violation = {
+  type: string;
+  timestamp: number;
+  details?: string;
+};

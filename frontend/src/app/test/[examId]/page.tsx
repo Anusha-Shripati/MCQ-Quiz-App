@@ -10,7 +10,6 @@ import { EXAM_STEP } from '@/types/exam.types';
 import { Loader2 } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import useSWR from 'swr';
 
 
 const PROHIBITED_KEYS = [

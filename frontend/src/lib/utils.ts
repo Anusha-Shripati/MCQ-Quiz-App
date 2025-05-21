@@ -100,11 +100,19 @@ export async function saveVideoToIndexedDB(blob: Blob, key = 'recordedVideo',exa
   }
 }
 
-export async function loadVideoFromIndexedDB(key = 'recordedVideo',examId:string): Promise<Blob | null> {
+export async function loadVideoFromIndexedDB(key = 'recordedVideo',examId:string,signal?: AbortSignal): Promise<Blob | null> {
   try {
-    
     const db = await openVideoDB(examId);
     return new Promise((resolve, reject) => {
+
+    if (signal?.aborted) return reject(new DOMException('Aborted', 'AbortError'));
+
+      signal?.addEventListener('abort', () => {
+        request.onerror = null;
+        request.onsuccess = null;
+        reject(new DOMException('Aborted', 'AbortError'));
+      });
+
       const tx = db.transaction('videos', 'readonly');
       const store = tx.objectStore('videos');
       const request = store.get(key);

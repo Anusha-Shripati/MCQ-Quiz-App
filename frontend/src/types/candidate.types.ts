@@ -15,6 +15,33 @@ export type CandidateFormData = {
   timeValue: number | '';
 };
 
+export interface CandidateData {
+  id?: string;
+  name: string;
+  email: string;
+  experience: string;
+  assessment: {
+    id: string;
+    name: string;
+    technologies: {
+      id: string;
+      technology:{
+        id: string;
+        name: string;
+      }
+    }[];
+  };
+  technology: {
+    id: string;
+    name: string;
+  };
+  phone: string;
+  timeUnit: 'days' | 'hours';
+  startDate: Date | undefined;
+  endDate: Date | undefined;
+  timeValue: number | '';
+}
+
 export interface CandidateDetails {
   totalPercentage: string;
   categories: Record<string, string>;

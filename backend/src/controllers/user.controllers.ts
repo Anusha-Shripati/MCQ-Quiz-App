@@ -214,7 +214,7 @@ export class UserController {
         generateResponse(res, 400, {}, false, 'No file uploaded');
         return;
       }
-      const fileData = uploadService.processFile(req.file);
+      const fileData =await  uploadService.processFile(req.file);
       await userService.updateUser(userId, {
         image: fileData.path,
       });

@@ -1180,6 +1180,11 @@ export const QUIZ_CONFIG = {
   maxViolations: 12,
   alertTimeout: 5000,
 };
+
+export const SNAPSHOT = {
+    screenshot:"screenshot",
+    camera:"camera"
+};
 export const PROHIBITED_COMBINATIONS = [
   { key: 'Tab', modifier: 'altKey' }, // Alt+Tab
   { key: 'Tab', modifier: 'ctrlKey' }, // Ctrl+Tab

@@ -59,10 +59,10 @@ router.get(
   asyncHandler(candidateExamController.getExam)
 );
 router.post(
-  '/:examId/screenshot',
+  '/:examId/snapshot',
   authenticateCandidate,
   upload.single('file'),
-  asyncHandler(candidateExamController.saveScreenshot)
+  asyncHandler(candidateExamController.saveSnapshot)
 );
 
 router.get(

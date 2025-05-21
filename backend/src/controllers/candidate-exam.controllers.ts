@@ -151,14 +151,14 @@ export class CandidateExamController {
     }
   };
 
-  saveScreenshot = async (req: Request, res: Response, next: NextFunction) => {
+  saveSnapshot = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { examId } = req.params;
       const candidateId = req.candidateInfo?.candidateId;
 
       if (!candidateId) throw new Error('Candidate not authenticated');
 
-      const screenshot = await this.candidateExamService.saveScreenshot(examId, req.file as Express.Multer.File, req.body.timestamp);
+      const screenshot = await this.candidateExamService.saveSnapshot(examId, req.file as Express.Multer.File, req.body);
 
       generateResponse(res, 200, screenshot, true, 'Screenshot saved successfully');
     } catch (error) {

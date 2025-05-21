@@ -1,5 +1,6 @@
 import { AppError } from '../common/errors/AppError';
 import { prisma } from '../db/prisma.client';
+import { UploadService } from './upload.services';
 
 
 interface Violation {
@@ -14,6 +15,10 @@ interface ExamMeta {
 }
 
 export class CandidateExamService {
+  private uploadService;
+  constructor(){
+    this.uploadService = new UploadService()
+  }
   async getCandidate(candidateId: string, examId?: string) {
     
     const candidate = await prisma.candidate.findUnique({
@@ -306,16 +311,26 @@ export class CandidateExamService {
     });
   }
 
-  async saveScreenshot(examId: string, file: Express.Multer.File,timestamp:number) {
+  async saveSnapshot(examId: string, file: Express.Multer.File, {timestamp,type}:{timestamp:number,type:'screenshot' |'camera'}) {
     const exam = await prisma.exam.findUnique({
       where: { id: examId },
       select: { meta: true },
     });
     if (!exam) throw new AppError('Exam not found', 404);
-    const updatedMeta: ExamMeta = {
-      ...(exam?.meta as ExamMeta || {}),
-      screenshots :[...(exam?.meta as ExamMeta)?.screenshots || [],{timestamp:timestamp,image:file.path}]
-    };
+    let updatedMeta:ExamMeta;
+    const uploadedFile = await this.uploadService.processFile(file)
+    
+    if(type == 'screenshot'){
+      updatedMeta = {
+        ...(exam?.meta as ExamMeta || {}),
+        screenshots :[...(exam?.meta as ExamMeta)?.screenshots || [],{timestamp:timestamp,image:uploadedFile.path}]
+      };
+    }else{
+      updatedMeta = {
+        ...(exam?.meta as ExamMeta || {}),
+        camera :[...(exam?.meta as ExamMeta)?.screenshots || [],{timestamp:timestamp,image:uploadedFile.path}]
+      };
+    }
     await prisma.exam.update({
       where: { id: examId },
       data: {

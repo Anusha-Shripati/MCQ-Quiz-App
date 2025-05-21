@@ -710,7 +710,7 @@ export default function ProctoredQuiz() {
           user_answer: (Array.isArray(existingAnswer) ? existingAnswer : [existingAnswer]) as (string | number)[],
         };
         setIsLoading(true);
-        success=true
+        // success=true
         const response = await examApi.post(`/candidate-exam/${exam?.id}/submit-answer`, payload, accessCode);
         if (response.success) success = true;
         setIsLoading(false);

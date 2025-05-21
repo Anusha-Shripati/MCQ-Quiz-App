@@ -8,9 +8,9 @@ import useSWR from 'swr';
 import { examApi, isAxiosError } from '@/lib/api';
 import { useRouter } from 'next/navigation';
 import useSWRMutation from 'swr/mutation';
-import AlertWrapper from './AlertWrapper';
-import TestLoading from './TestLoading';
-import TestError from './TestError';
+import AlertWrapper from './error/AlertWrapper';
+import TestLoading from './loading/TestLoading';
+import TestError from './error/TestError';
 import Question from './Question';
 import { Check, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { BROWSER_KEY, PROHIBITED_COMBINATIONS, PROHIBITED_KEYS, QUIZ_CONFIG } from '@/shared/constants/data';
@@ -719,7 +719,7 @@ export default function ProctoredQuiz() {
                   </h2>
 
                   <div className="pt-2 text-black">
-                    <Question question={questions[currentQuestionIndex]} answers={answers} handleAnswerChange={handleAnswerChange} handleStopRecording={handleStopRecording} handleNextQuestion={handleNextQuestion} />
+                    <Question question={questions[currentQuestionIndex]} answers={answers} isLoading={isMutating || isSubmiting} handleAnswerChange={handleAnswerChange} handleStopRecording={handleStopRecording} handleNextQuestion={handleNextQuestion} />
                   </div>
                 </div>
               </div>}

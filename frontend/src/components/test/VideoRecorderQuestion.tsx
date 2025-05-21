@@ -7,9 +7,10 @@ interface VideoRecorderProps {
   answers: Record<string, { question: IExamQuestion, answer: string | Blob | (string | number)[] }>;
   onRecordingComplete: (blob: Blob,url:string) => void;
   onRecordingStop?: (blob: Blob | null,url:string) => void;
+  isLoading:boolean
 }
 
-export const VideoRecorderQuestion: FC<VideoRecorderProps> = React.memo(({ question,answers,onRecordingComplete,onRecordingStop }) => {
+export const VideoRecorderQuestion: FC<VideoRecorderProps> = React.memo(({ question,answers,onRecordingComplete,onRecordingStop,isLoading}) => {
   const [iframeHTML] = useState(() => question.question?.meta?.video_url || '');
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   useEffect(() => {
@@ -34,6 +35,7 @@ export const VideoRecorderQuestion: FC<VideoRecorderProps> = React.memo(({ quest
         videoKey={question.id}
         videoLink={videoUrl}
         onRecordingStop={(blob,url) => onRecordingStop && onRecordingStop(blob,url)}
+        isLoading={isLoading}
       />
 
     </>

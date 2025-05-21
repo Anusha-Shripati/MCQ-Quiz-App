@@ -1,9 +1,9 @@
 'use client';
 import { BasicInfoForm } from '@/components/test/BasicInfo';
 import ProctoredQuiz from '@/components/test/ProctoredQuiz';
-import TestError from '@/components/test/TestError';
-import TestLoading from '@/components/test/TestLoading';
-import TestWarning from '@/components/test/TestWarning';
+import TestError from '@/components/test/error/TestError';
+import TestLoading from '@/components/test/loading/TestLoading';
+import TestWarning from '@/components/test/error/TestWarning';
 import { VideoRecordingScreen } from '@/components/test/VideoRecordingScreen';
 import { examApi } from '@/lib/api';
 import { dataURLtoBlob } from '@/lib/utils';

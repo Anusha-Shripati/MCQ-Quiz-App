@@ -1,7 +1,7 @@
-import { Loader2, Maximize2, Pause, Play, Volume2, VolumeX } from "lucide-react";
+import { Loader2, Maximize2, Minimize2, Pause, Play, SkipBack, SkipForward, Volume, Volume1, Volume2, VolumeX } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const VideoPreview = ({ videoUrl,onError }: { videoUrl: string,onError: (err: any) => void }) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const VideoPreview = ({ videoUrl, onError }: { videoUrl: string, onError: (err: any) => void }) => {
     const videoRef = useRef<HTMLVideoElement>(null);
     const progressRef = useRef<HTMLDivElement>(null);
     const progressContainerRef = useRef<HTMLDivElement>(null);
@@ -190,20 +190,7 @@ const VideoPreview = ({ videoUrl,onError }: { videoUrl: string,onError: (err: an
             return <VolumeX className="w-5 h-5" />;
         } else if (volume < 0.5) {
             return (
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                >
-                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-                    <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-                </svg>
+                <Volume1 size={20} strokeWidth={2} />
             );
         } else {
             return <Volume2 className="w-5 h-5" />;
@@ -390,20 +377,7 @@ const VideoPreview = ({ videoUrl,onError }: { videoUrl: string,onError: (err: an
                                 onClick={skipBackward}
                                 title="Back 5 seconds"
                             >
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width="20"
-                                    height="20"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                >
-                                    <polygon points="19 20 9 12 19 4 19 20"></polygon>
-                                    <line x1="5" y1="19" x2="5" y2="5"></line>
-                                </svg>
+                                <SkipBack />
                             </button>
 
                             <button
@@ -419,20 +393,7 @@ const VideoPreview = ({ videoUrl,onError }: { videoUrl: string,onError: (err: an
                                 onClick={skipForward}
                                 title="Forward 5 seconds"
                             >
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width="20"
-                                    height="20"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                >
-                                    <polygon points="5 4 15 12 5 20 5 4"></polygon>
-                                    <line x1="19" y1="5" x2="19" y2="19"></line>
-                                </svg>
+                                <SkipForward />
                             </button>
                         </div>
 
@@ -507,19 +468,7 @@ const VideoPreview = ({ videoUrl,onError }: { videoUrl: string,onError: (err: an
                             title={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
                         >
                             {isFullscreen ? (
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width="20"
-                                    height="20"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                >
-                                    <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"></path>
-                                </svg>
+                                <Minimize2 className="w-5 h-5" />
                             ) : (
                                 <Maximize2 className="w-5 h-5" />
                             )}

@@ -1,3 +1,4 @@
+import { CheckCircle } from 'lucide-react';
 import { FC } from 'react';
 
 const ThankYouPage: FC = () => (
@@ -10,20 +11,7 @@ const ThankYouPage: FC = () => (
     <div className="relative bg-white/70 backdrop-blur-xl border border-white/40 shadow-2xl rounded-3xl p-12 max-w-lg w-full text-center transition-transform duration-500 hover:scale-105">
       {/* Decorative Icon */}
       <div className="flex justify-center mb-8">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-20 w-20 text-green-500 drop-shadow-lg"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M9 12l2 2 4-4m0 0a9 9 0 11-6.364-2.636A9 9 0 0112 21z"
-          />
-        </svg>
+       <CheckCircle className="w-16 h-16 text-green-500 animate-bounce" />
       </div>
       {/* Heading */}
       <h1 className="text-5xl font-extrabold text-gray-800 mb-4 drop-shadow">Thank You!</h1>

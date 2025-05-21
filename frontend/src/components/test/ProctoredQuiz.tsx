@@ -4,14 +4,15 @@ import { useExamStore } from '@/store/examStore';
 import { Answer, IExamQuestion, QuestionType, Violation } from '@/types/exam.types';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import TestHeader from './TestHeader';
-import useSWR from 'swr';
+// import useSWR from 'swr';
 import { examApi, isAxiosError } from '@/lib/api';
 import { useRouter } from 'next/navigation';
-import useSWRMutation from 'swr/mutation';
+// import useSWRMutation from 'swr/mutation';
 import AlertWrapper from './AlertWrapper';
 import TestLoading from './TestLoading';
 import TestError from './TestError';
 import Question from './Question';
+import { Check, ChevronLeft, ChevronRight } from 'lucide-react';
 
 
 
@@ -81,10 +82,10 @@ export default function ProctoredQuiz() {
   const [recordingUrl, setRecordingUrl] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const screenshotIntervalRef = useRef<NodeJS.Timeout>();
+  const fullscreenElementRef = useRef<Element | null>(null);
 
 
 
-  
   // const [, captureElement] = useScreenshot();
 
 
@@ -96,25 +97,68 @@ export default function ProctoredQuiz() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const { exam, accessCode, setExam } = useExamStore();
   const [questions, setQuestions] = useState<IExamQuestion[]>([]);
+  const alertTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const displayAlert = (message: string) => {
     setAlertMessage(message);
     setShowAlert(true);
-    setTimeout(() => setShowAlert(false), QUIZ_CONFIG.alertTimeout);
+    if (alertTimeoutRef.current) {
+      clearTimeout(alertTimeoutRef.current);
+    }
+    alertTimeoutRef.current = setTimeout(() => setShowAlert(false), QUIZ_CONFIG.alertTimeout);
   };
 
-  const { data: examData, isLoading: isExamLoading } = useSWR(`/candidate-exam/${exam?.id}`, (url: string) => examApi.get(url, accessCode), {
-    revalidateOnFocus: true,
-    revalidateOnMount: true,
-    revalidateOnReconnect: true,
-    revalidateIfStale: true,
-  })
+  const getExamData = async () => {
+    try {
+      if (!exam?.id || !accessCode) return;
+      setIsLoading(true);
+      const { data } = await examApi.get(`/candidate-exam/${exam.id}`, accessCode);
+      setExam(data);
+      const answersMap: Record<string, { question: IExamQuestion, answer: Answer }> = {};
+
+      data.answers?.forEach((a: { question_id: string, user_answer: string | string[] }) => {
+        const questionObj = data.exam_questions.find((q: IExamQuestion) => q.question_id === a.question_id);
+        if (!questionObj) return;
+
+
+        answersMap[a.question_id] = {
+          question: questionObj.question,
+          answer: questionObj.question.type === QuestionType.MULTIPLE_SELECT
+            ? a.user_answer
+            : a.user_answer[0]
+        };
+      });
+
+      setAnswers(answersMap);
+      setQuestions(data.exam_questions || []);
+      setTimeLeft(data.assessment?.duration * 60 || 0);
+      checkExamStatus();
+      setIsLoading(false);
+      if(Array.isArray(data?.meta?.violations)){
+        const count = data?.meta?.violations.filter((item:Violation)=> item.type == 'WINDOW_FOCUS_LOST').length
+        const currentCount = violations.current.filter((item:Violation)=> item.type == 'WINDOW_FOCUS_LOST').length
+        setTabSwitchCount(count + currentCount)
+      }
+
+    } catch (error) {
+      setIsLoading(false);
+      console.error('Error fetching exam data:', error);
+      setAccessError(isAxiosError(error) ? error.response?.data.message : 'Unknown error occurred');
+    }
+  }
+  // const { data: examData, isLoading: isExamLoading } = useSWR(`/candidate-exam/${exam?.id}`, (url: string) => examApi.get(url, accessCode), {
+  //   revalidateOnFocus: true,
+  //   revalidateOnMount: true,
+  //   revalidateOnReconnect: true,
+  //   revalidateIfStale: true,
+  // })
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { isMutating, trigger } = useSWRMutation<{ success: boolean; message?: string; data?: { answer: { user_answer: (string | number)[] } } }, any, string, FormData | { question_id: string; user_answer: (string | number)[] }>(
-    `/candidate-exam/${exam?.id}/submit-answer`,
-    (url: string, { arg }) => examApi.post(url, arg, accessCode)
-  )
-  const { isMutating: isSubmiting, trigger: submitTrigger } = useSWRMutation(`/candidate-exam/${exam?.id}/finish`, (url: string) => examApi.get(url, accessCode))
+  // const { isMutating, trigger } = useSWRMutation<{ success: boolean; message?: string; data?: { answer: { user_answer: (string | number)[] } } }, any, string, FormData | { question_id: string; user_answer: (string | number)[] }>(
+  //   `/candidate-exam/${exam?.id}/submit-answer`,
+  //   (url: string, { arg }) => examApi.post(url, arg, accessCode)
+  // )
+  // const { isMutating: isSubmiting, trigger: submitTrigger } = useSWRMutation(`/candidate-exam/${exam?.id}/finish`, (url: string) => examApi.get(url, accessCode))
 
 
   // const dataURLtoBlob = (dataURL: string) => {
@@ -124,72 +168,45 @@ export default function ProctoredQuiz() {
   //   const bstr = atob(arr[1]);
   //   let n = bstr.length;
   //   const u8arr = new Uint8Array(n);
-  
+
   //   while (n--) {
   //     u8arr[n] = bstr.charCodeAt(n);
   //   }
-  
+
   //   return new Blob([u8arr], { type: mime });
   // }
-  useEffect(() => {
-    if (!examData) return;
-  
-    const { data } = examData;
-    setExam(data);
-  
-    const answersMap: Record<string, { question: IExamQuestion, answer: Answer }> = {};
-  
-    data.answers?.forEach((a: {question_id:string, user_answer:string | string[]}) => {
-      const questionObj = data.exam_questions.find((q: IExamQuestion) => q.question_id === a.question_id);
-      if (!questionObj) return;
-  
-      
-      answersMap[a.question_id] = {
-        question: questionObj.question,
-        answer: questionObj.question.type === QuestionType.MULTIPLE_SELECT
-          ? a.user_answer
-          : a.user_answer[0]
-      };
-    });
-  
-    setAnswers(answersMap);
-    localStorage.setItem('quizAnswers', JSON.stringify(answersMap));
-    setQuestions(data.exam_questions || []);
-    setTimeLeft(data.assessment?.duration * 60 || 0);
-    checkExamStatus();
-  }, [examData]);
-  
+
   const checkExamStatus = async () => {
-    if (!exam?.id || !accessCode || !examData?.data?.assessment?.duration) return;
-  
+    if (!exam?.id || !accessCode || !exam?.assessment?.duration) return;
+
     try {
       setIsLoading(true);
-  
+
       const { data: statusData } = await examApi.get(`/candidate-exam/${exam.id}/status`, accessCode);
       const status = statusData.status;
-  
+
       let startTime: string | null = null;
-  
+
       if (status === 'pending') {
         const { data: startData } = await examApi.get(`/candidate-exam/${exam.id}/start`, accessCode);
         startTime = startData.start_time;
       } else if (status === 'in_progress') {
         startTime = statusData.start_time;
       }
-  
+
       if (status === 'completed') {
         router.push('/thank-you');
         return;
       }
-  
+
       if (startTime) {
         const now = Date.now();
         const startedAt = new Date(startTime).getTime();
-        const examDurationInSeconds = examData.data.assessment.duration * 60;
+        const examDurationInSeconds = exam.assessment.duration * 60;
         const remainingTime = examDurationInSeconds - (now - startedAt) / 1000;
-  
+
         setTimeLeft(remainingTime);
-  
+
         if (remainingTime <= 0) {
           router.push('/thank-you');
         }
@@ -201,7 +218,7 @@ export default function ProctoredQuiz() {
       setIsLoading(false);
     }
   };
-  
+
 
   // const takeScreenshot = async () => {
   //   if (!containerRef.current || document.hidden) {
@@ -253,25 +270,25 @@ export default function ProctoredQuiz() {
     }
   };
 
-  // const requestFullScreen = async () => {
+  const requestFullScreen = async () => {
 
-  //   if (!containerRef.current) return;
+    if (!containerRef.current) return;
 
-  //   try {
+    try {
 
-  //     // Only request if not already in fullscreen
-  //     if (!document.fullscreenElement) {
-  //       // Wait for user interaction before requesting fullscreen
-  //       containerRef.current.classList.add('h-screen');
-  //       containerRef.current.classList.add('overflow-auto');
-  //       await containerRef.current.requestFullscreen();
-  //       setIsFullScreen(true);
-  //     }
-  //   } catch (error) {
-  //     console.error('Fullscreen error:', error);
-  //     // Don't add violation here since it might be a permissions issue
-  //   }
-  // };
+      // Only request if not already in fullscreen
+      if (!document.fullscreenElement) {
+        // Wait for user interaction before requesting fullscreen
+        containerRef.current.classList.add('h-screen');
+        containerRef.current.classList.add('overflow-auto');
+        await containerRef.current.requestFullscreen();
+        // setIsFullScreen(true);
+      }
+    } catch (error) {
+      console.error('Fullscreen error:', error);
+      // Don't add violation here since it might be a permissions issue
+    }
+  };
 
   const submitViolation = async () => {
     if (violations.current.length === 0) return;
@@ -294,54 +311,53 @@ export default function ProctoredQuiz() {
     violations.current = [...violations.current, newViolation];
 
     if (violations.current.length >= QUIZ_CONFIG.maxViolations) {
-      submitQuiz();
+      // submitQuiz();
     }
     displayAlert(`Warning: ${violation.details}`);
 
   };
 
   // Event handlers
-  const handleVisibilityChange = () => {
-    if (document.hidden) {
-      setTabSwitchCount((prev) => {
-        const newCount = prev + 1;
-        if (newCount > 5) {
-          submitQuiz();
-        }
-        return newCount;
-      });
+  // const handleVisibilityChange = useCallback(() => {
+  //   if (document.hidden) {
+  //     setTabSwitchCount((prev) => {
+  //       const newCount = prev + 1;
+  //       if (newCount > 5) {
+  //         // submitQuiz();
+  //       }
+  //       addViolation({
+  //         type: 'TAB_SWITCH',
+  //         details: 'User switched tabs or minimized window',
+  //       });
+        
+  //       displayAlert(`WARNING: Tab switching detected! This is violation ${newCount} of 5.`);
+  //       return newCount;
 
-      addViolation({
-        type: 'TAB_SWITCH',
-        details: 'User switched tabs or minimized window',
-      });
-      // takeScreenshot();
+      
+  //   });
 
-      // Show specific alert for tab switching
-      displayAlert(`WARNING: Tab switching detected! This is violation ${tabSwitchCount + 1} of 2.`);
+  //     // Play audio alert to notify user
+  //     if (audioRef.current) {
+  //       audioRef.current.play()
+  //     }
 
-      // Play audio alert to notify user
-      if (audioRef.current) {
-        audioRef.current.play()
-      }
-
-      // Force window to regain focus using a combination of methods
-      try {
-        window.focus();
-        // Attempt to create a subtle window movement to regain focus
-        window.moveBy(1, 0);
-        window.moveBy(-1, 0);
-      } catch (e) {
-        console.error('Could not force focus:', e);
-      }
-    }
-  };
+  //     // Force window to regain focus using a combination of methods
+  //     try {
+  //       window.focus();
+  //       // Attempt to create a subtle window movement to regain focus
+  //       window.moveBy(1, 0);
+  //       window.moveBy(-1, 0);
+  //     } catch (e) {
+  //       console.error('Could not force focus:', e);
+  //     }
+  //   }
+  // },[tabSwitchCount]);
 
   const handleKeyDown = (e: KeyboardEvent) => {
     // Allow F11 for fullscreen
     if (e.key === 'F11') {
       e.preventDefault();
-      // requestFullScreen();
+      requestFullScreen();
       return;
     }
 
@@ -422,7 +438,7 @@ export default function ProctoredQuiz() {
     if (!document.fullscreenElement) return;
     const { width, height } = originalWindowSize.current;
 
-    if (Math.abs(window.innerWidth - width) > 20 || Math.abs(window.innerHeight - height) > 20) {
+    if ((Math.abs(window.innerWidth - width) > 20 || Math.abs(window.innerHeight - height) > 20) && fullscreenElementRef.current?.tagName !== 'VIDEO') {
       addViolation({
         type: 'WINDOW_RESIZE',
         details: 'Detected significant window size change',
@@ -431,13 +447,14 @@ export default function ProctoredQuiz() {
   };
 
   const handleFullScreenChange = () => {
-    if (!document.fullscreenElement) {
+    if (!document.fullscreenElement && fullscreenElementRef.current?.tagName !== 'VIDEO') {
       addViolation({
         type: 'FULLSCREEN_EXIT',
         details: 'Exited full screen mode',
       });
-      // requestFullScreen();
     }
+    fullscreenElementRef.current = document.fullscreenElement;
+
   };
 
   const handleWindowFocus = () => {
@@ -445,8 +462,9 @@ export default function ProctoredQuiz() {
       setTabSwitchCount((prev) => {
         const newCount = prev + 1;
         if (newCount > 5) {
-          submitQuiz();
+          // submitQuiz();
         }
+        displayAlert(`WARNING: Tab switching detected! This is violation ${newCount} of 5.`);
         return newCount;
       });
 
@@ -454,6 +472,7 @@ export default function ProctoredQuiz() {
         type: 'WINDOW_FOCUS_LOST',
         details: 'User switched to another window',
       });
+
       // takeScreenshot();
 
       // Play audio alert
@@ -469,13 +488,6 @@ export default function ProctoredQuiz() {
       ...prev,
       [question.question_id]: { question, answer: value },
     }));
-    localStorage.setItem(
-      'quizAnswers',
-      JSON.stringify({
-        ...answers,
-        [question.question_id]: { question, answer: value },
-      })
-    );
   }, [answers]);
 
   const submitQuiz = async () => {
@@ -484,7 +496,7 @@ export default function ProctoredQuiz() {
       await handleNextQuestion();
       setIsSubmitting(true);
 
-      await submitTrigger();
+      await examApi.post(`/candidate-exam/${exam?.id}/finish`, {}, accessCode);
       // await takeScreenshot();
       // // Get access code from URL for submission or use the provided accessCode
       // let quizAccessCode = accessCode || '';
@@ -534,10 +546,9 @@ export default function ProctoredQuiz() {
 
     try {
       if (document.fullscreenElement) {
-        console.log('exiting fullscreen');
         await document.exitFullscreen();
       }
-      await submitTrigger();
+      await examApi.post(`/candidate-exam/${exam?.id}/finish`, {}, accessCode);
       router.push('/thank-you');  // use router if available
     } catch (error) {
       console.error('Auto-submit failed:', error);
@@ -547,7 +558,7 @@ export default function ProctoredQuiz() {
 
   const detectMultipleScreens = () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    if ((window.screen as any).isExtended){
+    if ((window.screen as any).isExtended) {
       addViolation({
         type: 'MULTIPLE_SCREENS',
         details: 'Multiple screens detected',
@@ -557,18 +568,18 @@ export default function ProctoredQuiz() {
   // Effects
   useEffect(() => {
 
-
+    getExamData();
 
     // Request fullscreen after 1 second
     const fullscreenTimeout = setTimeout(() => {
-      // requestFullScreen();
+      requestFullScreen();
     }, 1000);
-  
+
     // Initial screenshot after 2 seconds
     const initialScreenshotTimeout = setTimeout(() => {
       // takeScreenshot();
     }, 2000);
-  
+
     // Interval to auto-submit violations
     const violationInterval = setInterval(() => {
       if (violations.current.length > 0) submitViolation();
@@ -578,29 +589,29 @@ export default function ProctoredQuiz() {
     const screenInterval = setInterval(() => {
       detectMultipleScreens();
     }, 10000);
-  
+
     // screenshotIntervalRef.current = setInterval(takeScreenshot, QUIZ_CONFIG.screenshotInterval);
-  
+
     // Store original window size
     originalWindowSize.current = {
       width: window.innerWidth,
       height: window.innerHeight,
     };
     setTabSwitchCount(0);
-  
+
     // Handlers
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       e.preventDefault();
       e.returnValue = '';
-  
+
       addViolation({
         type: 'TAB_CLOSE_ATTEMPT',
         details: 'User attempted to close or refresh the tab',
       });
-  
+
       displayAlert('WARNING: Attempting to close or refresh the tab is not allowed!');
     };
-  
+
     const handleContextMenu = (e: MouseEvent) => {
       e.preventDefault();
       addViolation({
@@ -608,39 +619,43 @@ export default function ProctoredQuiz() {
         details: 'Attempted to open context menu',
       });
     };
-  
+
     // Add listeners
-    window.addEventListener('resize', handleResize);
     window.addEventListener('focus', handleWindowFocus);
     window.addEventListener('blur', handleWindowFocus);
     window.addEventListener('beforeunload', handleBeforeUnload);
-  
-    document.addEventListener('fullscreenchange', handleFullScreenChange);
-    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    
+    const fullscreenEventTimeout = setTimeout(() => {
+      document.addEventListener('fullscreenchange', handleFullScreenChange);
+      window.addEventListener('resize', handleResize);
+   }, 3000); 
+    // document.addEventListener('visibilitychange', handleVisibilityChange);
     document.addEventListener('keydown', handleKeyDown, true);
     document.addEventListener('contextmenu', handleContextMenu, true);
-  
+
     // Cleanup
     return () => {
       clearTimeout(fullscreenTimeout);
+      clearTimeout(fullscreenEventTimeout);
       clearTimeout(initialScreenshotTimeout);
       clearInterval(violationInterval);
       clearInterval(screenInterval);
       if (screenshotIntervalRef.current) clearInterval(screenshotIntervalRef.current);
       if (pingIntervalRef.current) clearInterval(pingIntervalRef.current);
-  
+
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('focus', handleWindowFocus);
       window.removeEventListener('blur', handleWindowFocus);
       window.removeEventListener('beforeunload', handleBeforeUnload);
-  
+
       document.removeEventListener('fullscreenchange', handleFullScreenChange);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      // document.removeEventListener('visibilitychange', handleVisibilityChange);
       document.removeEventListener('keydown', handleKeyDown, true);
       document.removeEventListener('contextmenu', handleContextMenu, true);
     };
   }, []);
-  
+
 
   const handleReset = () => {
     const current_question = questions[currentQuestionIndex]
@@ -651,30 +666,34 @@ export default function ProctoredQuiz() {
 
   }
   const handleNextQuestion = async () => {
+
+    if (!questions.length) return;
+
     const current = questions[currentQuestionIndex];
     const questionId = current.question_id;
     const questionType = current.question.type;
     const existingAnswer = answers[questionId]?.answer;
-  
+
     if (!existingAnswer && questionType !== QuestionType.VIDEO) return;
-  
+
     try {
       let success = false;
-  
+
       if (questionType === QuestionType.VIDEO) {
         if (recordingUrl === existingAnswer) {
           goToNextQuestion();
           return;
         }
-  
+
         const formData = new FormData();
         formData.append('question_id', questionId);
         formData.append('file', recordingBlob as Blob);
-  
-        const response = await trigger(formData);
+        setIsLoading(true);
+        const response = await examApi.post(`/candidate-exam/${exam?.id}/submit-answer`, formData, accessCode);
         if (response.success) {
+
           const userAnswer = response.data?.answer?.user_answer?.[0] as string;
-  
+
           setAnswers((prev) => ({
             ...prev,
             [questionId]: {
@@ -684,39 +703,43 @@ export default function ProctoredQuiz() {
           }));
           success = true;
         }
+        setIsLoading(false);
       } else {
         const payload = {
           question_id: questionId,
           user_answer: (Array.isArray(existingAnswer) ? existingAnswer : [existingAnswer]) as (string | number)[],
         };
-  
-        const response = await trigger(payload);
+        setIsLoading(true);
+        success=true
+        const response = await examApi.post(`/candidate-exam/${exam?.id}/submit-answer`, payload, accessCode);
         if (response.success) success = true;
+        setIsLoading(false);
       }
-  
+
       if (success) {
         goToNextQuestion();
       }
-  
+
     } catch (error) {
+      setIsLoading(false);
       setShowAlert(true);
       setAlertMessage(isAxiosError(error)
         ? error.response?.data.message
         : 'An error occurred');
     }
   };
-  
+
   const goToNextQuestion = () => {
     setCurrentQuestionIndex((prev) => Math.min(prev + 1, questions.length - 1));
   };
-  
+
   if (accessError) {
     return (
       <TestError accessError={accessError} errorTitle="Access Denied" />
     );
   }
 
-  if (isExamLoading || isMutating || isSubmiting || isLoading) {
+  if (isLoading) {
     return (
       <TestLoading />
     );
@@ -732,7 +755,6 @@ export default function ProctoredQuiz() {
 
       <Card className="w-[95vw] max-w-[1200px] mx-auto min-h-[85vh] shadow-xl border-0 rounded-xl overflow-hidden bg-white/95 backdrop-blur-sm">
         <TestHeader timeLeft={timeLeft} currentQuestionIndex={currentQuestionIndex} totalQuestion={questions.length || 0} handleTimerEnd={handleTimerEnd} />
-
 
         <CardContent className="p-4 md:p-8 space-y-6">
 
@@ -812,18 +834,7 @@ export default function ProctoredQuiz() {
               variant="outline"
               className="px-6 py-2 flex items-center gap-2 rounded-full transition-all"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-4 w-4"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
-                  clipRule="evenodd"
-                />
-              </svg>
+              <ChevronLeft />
               Previous
             </Button>
 
@@ -834,18 +845,7 @@ export default function ProctoredQuiz() {
               className="px-6 py-2 flex items-center gap-2 rounded-full transition-all"
             >
               Save {currentQuestionIndex == questions.length - 1 ? '' : ' & Next'}
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-4 w-4"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                  clipRule="evenodd"
-                />
-              </svg>
+              <ChevronRight />
             </Button>
           </div>
 
@@ -856,18 +856,7 @@ export default function ProctoredQuiz() {
               className="px-8 py-3 bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 text-white font-medium rounded-full shadow-sm hover:shadow transition-all flex items-center gap-2"
             >
               Submit Quiz
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                  clipRule="evenodd"
-                />
-              </svg>
+              <Check />
             </Button>
           </div>
         </CardContent>
@@ -883,149 +872,149 @@ export default function ProctoredQuiz() {
 
 
 
-  // useEffect(() => {
-  //   const validateAccess = async () => {
-  //     try {
-  //       setIsLoading(true);
+// useEffect(() => {
+//   const validateAccess = async () => {
+//     try {
+//       setIsLoading(true);
 
-  //       let quizAccessCode = accessCode || '';
+//       let quizAccessCode = accessCode || '';
 
-  //       if (!quizAccessCode) {
-  //         const urlParts = window.location.pathname.split('/');
-  //         quizAccessCode = urlParts[urlParts.length - 1];
-  //       }
+//       if (!quizAccessCode) {
+//         const urlParts = window.location.pathname.split('/');
+//         quizAccessCode = urlParts[urlParts.length - 1];
+//       }
 
-  //       if (!quizAccessCode) {
-  //         setAccessError('Invalid exam access. Missing access code.');
-  //         setIsLoading(false);
-  //         return;
-  //       }
+//       if (!quizAccessCode) {
+//         setAccessError('Invalid exam access. Missing access code.');
+//         setIsLoading(false);
+//         return;
+//       }
 
-  //       // Set exam data and questions
-  //       // const examData = data.data;
+//       // Set exam data and questions
+//       // const examData = data.data;
 
-  //       // // Update time limit based on exam data
-  //       // if (examData.end_time) {
-  //       // 	const endTime = new Date(examData.end_time).getTime();
-  //       // 	const now = new Date().getTime();
-  //       // 	const remainingTime = Math.max(0, Math.floor((endTime - now) / 1000));
-  //       // 	setTimeLeft(remainingTime);
-  //       // }
+//       // // Update time limit based on exam data
+//       // if (examData.end_time) {
+//       // 	const endTime = new Date(examData.end_time).getTime();
+//       // 	const now = new Date().getTime();
+//       // 	const remainingTime = Math.max(0, Math.floor((endTime - now) / 1000));
+//       // 	setTimeLeft(remainingTime);
+//       // }
 
-  //       // If all is good, initialize the exam
-  //       setIsLoading(false);
-  //     } catch (error) {
-  //       console.error('Error validating exam access:', error);
-  //       setAccessError('Error accessing exam. Please try again or contact support.');
-  //       setIsLoading(false);
-  //     }
-  //   };
+//       // If all is good, initialize the exam
+//       setIsLoading(false);
+//     } catch (error) {
+//       console.error('Error validating exam access:', error);
+//       setAccessError('Error accessing exam. Please try again or contact support.');
+//       setIsLoading(false);
+//     }
+//   };
 
-  //   validateAccess();
-  // }, [accessCode]);
+//   validateAccess();
+// }, [accessCode]);
 
 
-  // const renderQuestion = (question: IExamQuestion) => {
-  //   switch (question.question.type) {
-  //     case QuestionType.MCQ:
-  //       return (
-  //         <RadioGroup
-  //           value={answers[question.question_id]?.answer as string}
-  //           onValueChange={(value) => handleAnswerChange(question, value)}
-  //           className="space-y-4"
-  //         >
-  //           {question.question.options?.map((option, idx) => (
-  //             <div key={idx} className="flex items-center space-x-3">
-  //               <Radio value={option} id={`option-${question.question_id}-${idx}`} />
-  //               <label
-  //                 htmlFor={`option-${question.question_id}-${idx}`}
-  //                 className="text-lg text-gray-800 cursor-pointer"
-  //               >
-  //                 {option}
-  //               </label>
-  //             </div>
-  //           ))}
-  //         </RadioGroup>
-  //       );
-  //     case QuestionType.VIDEO:
-  //       return (
-  //         <VideoRecorderQuestion question={question} answers={answers} onRecordingStop={(blob, url) => handleStopRecording(blob, url)} onRecordingComplete={() => handleNextQuestion()} />
-  //       );
-  //     case QuestionType.MULTIPLE_SELECT:
-  //       return (
-  //         <div className="space-y-4">
-  //           {question.question.options?.map((option, idx) => {
-  //             const currentAnswers = answers[question.question_id]
-  //               ? (answers[question.question_id]?.answer as (string | number)[])
-  //               : [];
+// const renderQuestion = (question: IExamQuestion) => {
+//   switch (question.question.type) {
+//     case QuestionType.MCQ:
+//       return (
+//         <RadioGroup
+//           value={answers[question.question_id]?.answer as string}
+//           onValueChange={(value) => handleAnswerChange(question, value)}
+//           className="space-y-4"
+//         >
+//           {question.question.options?.map((option, idx) => (
+//             <div key={idx} className="flex items-center space-x-3">
+//               <Radio value={option} id={`option-${question.question_id}-${idx}`} />
+//               <label
+//                 htmlFor={`option-${question.question_id}-${idx}`}
+//                 className="text-lg text-gray-800 cursor-pointer"
+//               >
+//                 {option}
+//               </label>
+//             </div>
+//           ))}
+//         </RadioGroup>
+//       );
+//     case QuestionType.VIDEO:
+//       return (
+//         <VideoRecorderQuestion question={question} answers={answers} onRecordingStop={(blob, url) => handleStopRecording(blob, url)} onRecordingComplete={() => handleNextQuestion()} />
+//       );
+//     case QuestionType.MULTIPLE_SELECT:
+//       return (
+//         <div className="space-y-4">
+//           {question.question.options?.map((option, idx) => {
+//             const currentAnswers = answers[question.question_id]
+//               ? (answers[question.question_id]?.answer as (string | number)[])
+//               : [];
 
-  //             return (
-  //               <div key={idx} className="flex items-center space-x-3">
-  //                 <Checkbox
-  //                   id={`option-${question.question_id}-${idx}`}
-  //                   checked={currentAnswers.includes(option)}
-  //                   onCheckedChange={(checked) => {
-  //                     let newAnswers: (string | number)[];
+//             return (
+//               <div key={idx} className="flex items-center space-x-3">
+//                 <Checkbox
+//                   id={`option-${question.question_id}-${idx}`}
+//                   checked={currentAnswers.includes(option)}
+//                   onCheckedChange={(checked) => {
+//                     let newAnswers: (string | number)[];
 
-  //                     if (!checked) {
-  //                       newAnswers = currentAnswers.filter((a) => a !== option);
-  //                     } else {
-  //                       newAnswers = [...currentAnswers, option];
-  //                     }
-  //                     handleAnswerChange(question, newAnswers);
-  //                   }}
-  //                 />
-  //                 <label
-  //                   htmlFor={`option-${question.question_id}-${idx}`}
-  //                   className="text-lg text-gray-800 cursor-pointer"
-  //                 >
-  //                   {option}
-  //                 </label>
-  //               </div>
-  //             );
-  //           })}
-  //         </div>
-  //       );
+//                     if (!checked) {
+//                       newAnswers = currentAnswers.filter((a) => a !== option);
+//                     } else {
+//                       newAnswers = [...currentAnswers, option];
+//                     }
+//                     handleAnswerChange(question, newAnswers);
+//                   }}
+//                 />
+//                 <label
+//                   htmlFor={`option-${question.question_id}-${idx}`}
+//                   className="text-lg text-gray-800 cursor-pointer"
+//                 >
+//                   {option}
+//                 </label>
+//               </div>
+//             );
+//           })}
+//         </div>
+//       );
 
-  //     case QuestionType.TEXT:
-  //       return (
-  //         <Textarea
-  //           value={(answers[question.question_id]?.answer as string) || ''}
-  //           onChange={(e) => handleAnswerChange(question, e.target.value)}
-  //           placeholder="Type your answer here..."
-  //           className="min-h-[120px] text-lg"
-  //         />
-  //       );
+//     case QuestionType.TEXT:
+//       return (
+//         <Textarea
+//           value={(answers[question.question_id]?.answer as string) || ''}
+//           onChange={(e) => handleAnswerChange(question, e.target.value)}
+//           placeholder="Type your answer here..."
+//           className="min-h-[120px] text-lg"
+//         />
+//       );
 
-  //     case QuestionType.CODE_SNIPPET:
-  //       return (
-  //         <div className="space-y-2">
-  //           <Textarea
-  //             value={(answers[question.question_id]?.answer as string) || ''}
-  //             onChange={(e) => handleAnswerChange(question, e.target.value)}
-  //             placeholder="Write your code here..."
-  //             className="min-h-[200px] font-mono text-black text-base"
-  //           />
-  //           <div className="text-sm text-gray-500">
-  //             Tip: Use proper indentation and comments where necessary
-  //           </div>
-  //         </div>
-  //       );
+//     case QuestionType.CODE_SNIPPET:
+//       return (
+//         <div className="space-y-2">
+//           <Textarea
+//             value={(answers[question.question_id]?.answer as string) || ''}
+//             onChange={(e) => handleAnswerChange(question, e.target.value)}
+//             placeholder="Write your code here..."
+//             className="min-h-[200px] font-mono text-black text-base"
+//           />
+//           <div className="text-sm text-gray-500">
+//             Tip: Use proper indentation and comments where necessary
+//           </div>
+//         </div>
+//       );
 
-  //     case QuestionType.CODE_EDITOR:
-  //       return (
-  //         <div className="space-y-2">
-  //           <EditorPage
-  //             onChange={(value) => handleAnswerChange(question, value)}
-  //             value={(answers[question.question_id]?.answer as string) || ''}
-  //           />
-  //           <div className="text-sm text-gray-500">
-  //             Tip: Use proper indentation and comments where necessary
-  //           </div>
-  //         </div>
-  //       );
+//     case QuestionType.CODE_EDITOR:
+//       return (
+//         <div className="space-y-2">
+//           <EditorPage
+//             onChange={(value) => handleAnswerChange(question, value)}
+//             value={(answers[question.question_id]?.answer as string) || ''}
+//           />
+//           <div className="text-sm text-gray-500">
+//             Tip: Use proper indentation and comments where necessary
+//           </div>
+//         </div>
+//       );
 
-  //     default:
-  //       return <div className="text-red-500">Unsupported question type</div>;
-  //   }
-  // };
+//     default:
+//       return <div className="text-red-500">Unsupported question type</div>;
+//   }
+// };

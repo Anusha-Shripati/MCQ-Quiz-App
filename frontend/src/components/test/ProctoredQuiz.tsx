@@ -13,7 +13,7 @@ import TestLoading from './TestLoading';
 import TestError from './TestError';
 import Question from './Question';
 import { Check, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
-import { PROHIBITED_COMBINATIONS, PROHIBITED_KEYS, QUIZ_CONFIG } from '@/shared/constants/data';
+import { BROWSER_KEY, PROHIBITED_COMBINATIONS, PROHIBITED_KEYS, QUIZ_CONFIG } from '@/shared/constants/data';
 
 
 
@@ -292,6 +292,7 @@ export default function ProctoredQuiz() {
 
   const handleKeyDown = (e: KeyboardEvent) => {
     // Allow F11 for fullscreen
+    
     if (e.key === 'F11') {
       e.preventDefault();
       requestFullScreen();
@@ -323,27 +324,12 @@ export default function ProctoredQuiz() {
     }
 
     // Prevent browser shortcuts
+    console.log(e);
+    
+    console.log(BROWSER_KEY.includes(e.key));
+    
     if (
-      (e.ctrlKey || e.metaKey) &&
-      (e.key === 'w' || // close tab
-        e.key === 't' || // new tab
-        e.key === 'n' || // new window
-        e.key === 'r' || // refresh
-        e.key === 'l' || // address bar
-        e.key === 'f' || // find
-        e.key === 'p' || // print
-        e.key === 'o' || // open file
-        e.key === 's' || // save
-        e.key === 'a' || // select all
-        e.key === 'c' || // copy
-        e.key === 'v' || // paste
-        e.key === 'x' || // cut
-        e.key === 'y' || // redo
-        e.key === 'z' || // undo
-        e.key === '+' || // zoom in
-        e.key === '-' || // zoom out
-        e.key === '0') // reset zoom
-    ) {
+      (e.ctrlKey || e.metaKey) && BROWSER_KEY.includes(e.key)) {
       e.preventDefault();
       addViolation({
         type: 'BROWSER_SHORTCUT',
@@ -372,7 +358,7 @@ export default function ProctoredQuiz() {
   };
 
   const handleResize = () => {
-    if (!document.fullscreenElement) return;
+
     const { width, height } = originalWindowSize.current;
 
     if ((Math.abs(window.innerWidth - width) > 20 || Math.abs(window.innerHeight - height) > 20) && fullscreenElementRef.current?.tagName !== 'VIDEO') {

@@ -302,8 +302,7 @@ const VideoPreview = ({ videoUrl, onError }: { videoUrl: string, onError: (err: 
 
             {/* Video Controls Overlay - shown on hover/activity */}
             <div
-                className={` absolute inset-0 flex  flex-col justify-end bg-gradient-to-t from-black/80 via-black/40 to-transparent transition-opacity duration-300 ${showControls ? 'opacity-100' : 'opacity-0 pointer-events-none'
-                    }`}
+                className={` absolute inset-0 flex  flex-col justify-end bg-gradient-to-t from-black/80 via-black/40 to-transparent transition-opacity duration-300 opacity-0 hover:opacity-100`}
             >
                 {/* Enhanced Progress Bar */}
                 <div

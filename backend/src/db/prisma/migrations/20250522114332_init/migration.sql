@@ -8,7 +8,7 @@ CREATE TYPE "ExamStatus" AS ENUM ('pending', 'in_progress', 'completed');
 CREATE TYPE "Difficulty" AS ENUM ('easy', 'medium', 'hard');
 
 -- CreateEnum
-CREATE TYPE "Question_type" AS ENUM ('multiple_select', 'video', 'text', 'mcq', 'code_snippet');
+CREATE TYPE "Question_type" AS ENUM ('multiple_select', 'video', 'text', 'mcq', 'code_snippet', 'code_editor');
 
 -- CreateTable
 CREATE TABLE "users" (
@@ -163,7 +163,6 @@ CREATE TABLE "Results" (
     "exam_id" TEXT NOT NULL,
     "candidate_id" TEXT NOT NULL,
     "score" DOUBLE PRECISION NOT NULL,
-    "submitted_at" TIMESTAMP(3),
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
     "deleted_at" TIMESTAMP(3),
@@ -176,12 +175,14 @@ CREATE TABLE "Answers" (
     "id" TEXT NOT NULL,
     "exam_id" TEXT NOT NULL,
     "candidate_id" TEXT NOT NULL,
-    "question_id" TEXT NOT NULL,
+    "question_id" TEXT,
     "result_id" TEXT,
-    "user_answer" TEXT NOT NULL,
+    "user_answer" TEXT[],
     "is_correct" BOOLEAN,
+    "question_name" TEXT,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
+    "score" DOUBLE PRECISION NOT NULL DEFAULT 0,
 
     CONSTRAINT "Answers_pkey" PRIMARY KEY ("id")
 );
@@ -265,7 +266,7 @@ ALTER TABLE "Answers" ADD CONSTRAINT "Answers_exam_id_fkey" FOREIGN KEY ("exam_i
 ALTER TABLE "Answers" ADD CONSTRAINT "Answers_candidate_id_fkey" FOREIGN KEY ("candidate_id") REFERENCES "Candidate"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Answers" ADD CONSTRAINT "Answers_question_id_fkey" FOREIGN KEY ("question_id") REFERENCES "Questions"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Answers" ADD CONSTRAINT "Answers_question_id_fkey" FOREIGN KEY ("question_id") REFERENCES "Questions"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Answers" ADD CONSTRAINT "Answers_result_id_fkey" FOREIGN KEY ("result_id") REFERENCES "Results"("id") ON DELETE SET NULL ON UPDATE CASCADE;

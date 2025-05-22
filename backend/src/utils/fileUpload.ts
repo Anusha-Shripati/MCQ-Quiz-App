@@ -5,13 +5,14 @@ import { S3Client } from '@aws-sdk/client-s3';
 import ffmpeg from 'fluent-ffmpeg';
 import multerS3 from 'multer-s3';
 import { v4 as uuidv4 } from 'uuid';
+import { Request } from 'express';
 
 const storageMode = process.env.STORAGE_MODE || 'local';
 
 let storage: multer.StorageEngine; 
+type ExamFileUploadRequest = Request<{ examId?: string }, any, any, { fileType?: string }>;
 
 if (storageMode === 's3') {
-
     const s3 = new S3Client({
         credentials: {
             accessKeyId: process.env.AWS_ACCESS_KEY_ID as string,
@@ -24,9 +25,12 @@ if (storageMode === 's3') {
         s3,
         bucket: process.env.AWS_BUCKET_NAME as string,
         acl: 'public-read',
-        key: (req, file, cb) => {
+        key: (req:ExamFileUploadRequest, file, cb) => {
+            let folderPath = '';
+            if(req.params.examId) folderPath+=`/${req.params.examId}`;
+            if(req.query.fileType) folderPath+=`/${req.query.fileType}`;
             const filename = `${uuidv4()}-${file.originalname.replace(/\s+/g, '-')}`;
-            cb(null, filename);
+            cb(null, `${folderPath?folderPath+'/':""}${filename}`);
         },
     });
 }
@@ -87,7 +91,6 @@ export const convertWebmToMp4 = (inputPath: string): Promise<string> => {
             ffmpeg(inputPath)
             .output(outputPath)
             .on('end', () => {
-                console.log('✅ Conversion complete:', outputPath);
                 resolve(outputPath.split('/uploads/')[1]);
             })
             .on('error', (err: any) => {

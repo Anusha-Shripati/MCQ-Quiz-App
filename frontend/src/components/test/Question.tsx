@@ -28,7 +28,7 @@ function Question({ question, answers, handleAnswerChange, handleStopRecording, 
                 >
                     {question.question.options?.map((option, idx) => (
                         <div key={idx} className="flex items-center space-x-3">
-                            <Radio value={option} id={`option-${question.question_id}-${idx}`} />
+                            <Radio value={`${idx}`} id={`option-${question.question_id}-${idx}`} />
                             <label
                                 htmlFor={`option-${question.question_id}-${idx}`}
                                 className="text-lg text-gray-800 cursor-pointer"
@@ -55,14 +55,14 @@ function Question({ question, answers, handleAnswerChange, handleStopRecording, 
                             <div key={idx} className="flex items-center space-x-3">
                                 <Checkbox
                                     id={`option-${question.question_id}-${idx}`}
-                                    checked={currentAnswers.includes(option)}
+                                    checked={currentAnswers.includes(idx.toString())}
                                     onCheckedChange={(checked) => {
                                         let newAnswers: (string | number)[];
 
                                         if (!checked) {
-                                            newAnswers = currentAnswers.filter((a) => a !== option);
+                                            newAnswers = currentAnswers.filter((a) => a !== idx.toString());
                                         } else {
-                                            newAnswers = [...currentAnswers, option];
+                                            newAnswers = [...currentAnswers, idx.toString()];
                                         }
                                         handleAnswerChange(question, newAnswers);
                                     }}

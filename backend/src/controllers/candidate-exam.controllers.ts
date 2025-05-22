@@ -157,10 +157,10 @@ export class CandidateExamController {
       const candidateId = req.candidateInfo?.candidateId;
 
       if (!candidateId) throw new Error('Candidate not authenticated');
+      
+      const snapshot = await this.candidateExamService.saveSnapshot(examId, req.file as Express.Multer.File, {...req.body,...req.query});
 
-      const screenshot = await this.candidateExamService.saveSnapshot(examId, req.file as Express.Multer.File, req.body);
-
-      generateResponse(res, 200, screenshot, true, 'Screenshot saved successfully');
+      generateResponse(res, 200, snapshot, true, 'snapshot saved successfully');
     } catch (error) {
       next(error);
     }

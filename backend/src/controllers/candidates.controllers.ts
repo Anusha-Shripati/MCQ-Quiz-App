@@ -47,6 +47,8 @@ export class CandidateController {
     try {
       const { id } = req.params;
       const candidateData: UpdateCandidate = req.body;
+      const user = req.user;
+
 
       const existingCandidate = await candidateService.getCandidateById(id);
 
@@ -54,6 +56,13 @@ export class CandidateController {
         return generateResponse(res, 404, {}, false, 'Candidate not found!');
       }
 
+      await examService.updateExam(existingCandidate.exam_id,{
+        user_id: user.id,
+        assessment_id: candidateData.assessment_id as string,
+        meta: candidateData.meta || {},
+        start_time: candidateData.start_date || new Date(),
+        end_time: candidateData.end_date || new Date(),
+      });
       const updatedCandidate = await candidateService.updateCandidate(id, candidateData);
 
       return generateResponse(res, 200, updatedCandidate, true, 'Candidate updated successfully');

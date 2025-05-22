@@ -1,4 +1,4 @@
-import { Prisma, PrismaClient } from '@prisma/client';
+import { Candidate, Prisma, PrismaClient } from '@prisma/client';
 import jwt from 'jsonwebtoken';
 import { AppError } from '../common/errors/AppError';
 import { CreateCandidate, UpdateCandidate } from '../types/candidate.types';
@@ -16,8 +16,8 @@ export default class CandidatesService {
         });
         if (existingEmail && existingEmail.deleted_at === null) {
           throw new AppError('Email already exists', 400);
-        }else if(existingEmail && existingEmail.deleted_at !== null){
-          
+        } else if (existingEmail && existingEmail.deleted_at !== null) {
+
           await prisma.answers.deleteMany({
             where: { candidate_id: existingEmail.id },
           });
@@ -31,7 +31,7 @@ export default class CandidatesService {
         });
         if (existingPhone && existingPhone.deleted_at === null) {
           throw new AppError('Phone number already exists', 400);
-        }else if(existingPhone && existingPhone.deleted_at !== null){
+        } else if (existingPhone && existingPhone.deleted_at !== null) {
           await prisma.answers.deleteMany({
             where: { candidate_id: existingPhone.id },
           });
@@ -52,12 +52,14 @@ export default class CandidatesService {
           },
           include: {
             assessment: true,
+            exam: true
           },
         });
+        const meta = await this.generateCandiateAccessToken(data.exam_id, newCandidate);
 
-        await this.generateCandiateAccessToken(data.exam_id, newCandidate.id);
+        const upadtedCandidate = await prisma.candidate.update({ where: { id: newCandidate.id },data: { meta } })
 
-        return newCandidate;
+        return upadtedCandidate;
       });
 
       return result;
@@ -70,91 +72,104 @@ export default class CandidatesService {
   }
 
   async updateCandidate(id: string, data: UpdateCandidate) {
-    const result = await prisma.$transaction(async (tx) => {
-      const existingCandidate = await tx.candidate.findUnique({
-        where: { id },
-        include: {
-          assessment: true,
-          exam: {
-            include: {
-              exam_questions: true,
+    try {
+
+      const result = await prisma.$transaction(async (tx) => {
+        const existingCandidate = await tx.candidate.findUnique({
+          where: { id },
+          include: {
+            assessment: true,
+            exam: {
+              include: {
+                exam_questions: true,
+              },
             },
           },
-        },
-      });
-
-      if (!existingCandidate) {
-        throw new AppError('Candidate not found', 404);
-      }
-
-      if (data.email && data.email !== existingCandidate.email) {
-        const existingEmail = await tx.candidate.findUnique({
-          where: { email: data.email,deleted_at:null },
         });
 
-        if (existingEmail && existingEmail.deleted_at === null) {
-          throw new AppError('Email already exists', 400);
-        }else if(existingEmail && existingEmail.deleted_at !== null){
-          await tx.candidate.delete({
-            where: { id: existingEmail.id },
+        if (!existingCandidate) {
+          throw new AppError('Candidate not found', 404);
+        }
+
+        if (data.email && data.email !== existingCandidate.email) {
+          const existingEmail = await tx.candidate.findUnique({
+            where: { email: data.email, deleted_at: null },
           });
+
+          if (existingEmail && existingEmail.deleted_at === null) {
+            throw new AppError('Email already exists', 400);
+          } else if (existingEmail && existingEmail.deleted_at !== null) {
+            await tx.candidate.delete({
+              where: { id: existingEmail.id },
+            });
+          }
         }
-      }
 
-      if (data.phone && data.phone !== existingCandidate.phone) {
-        const existingPhone = await tx.candidate.findUnique({
-          where: { phone: data.phone,deleted_at:null },
-        });
-
-        if (existingPhone && existingPhone.deleted_at === null) {
-          throw new AppError('Phone number already exists', 400);
-        }else if(existingPhone && existingPhone.deleted_at !== null){
-          await tx.candidate.delete({
-            where: { id: existingPhone.id },
+        if (data.phone && data.phone !== existingCandidate.phone) {
+          const existingPhone = await tx.candidate.findUnique({
+            where: { phone: data.phone, deleted_at: null },
           });
-        }
-      }
 
-      if (data.assessment_id && data.assessment_id !== existingCandidate.assessment_id) {
-        if (!existingCandidate.exam) {
-          throw new AppError('Exam not found for candidate', 404);
-        }
-
-        if (existingCandidate.exam.is_completed) {
-          throw new AppError('Exam is completed. Cannot change assessment', 400);
+          if (existingPhone && existingPhone.deleted_at === null) {
+            throw new AppError('Phone number already exists', 400);
+          } else if (existingPhone && existingPhone.deleted_at !== null) {
+            await tx.candidate.delete({
+              where: { id: existingPhone.id },
+            });
+          }
         }
 
-        await tx.exam_questions.deleteMany({
-          where: { exam_id: existingCandidate.exam.id },
-        });
+        if (data.assessment_id && data.assessment_id !== existingCandidate.assessment_id) {
+          if (!existingCandidate.exam) {
+            throw new AppError('Exam not found for candidate', 404);
+          }
 
-        await examService.createExamQuestionsForAssessment(
-          existingCandidate.exam.id,
-          data.assessment_id
-        );
-      }
+          if (existingCandidate.exam.is_completed) {
+            throw new AppError('Exam is completed. Cannot change assessment', 400);
+          }
 
-      return await tx.candidate.update({
-        where: { id },
-        data: {
-          name: data.name,
-          email: data.email,
-          phone: data.phone,
-          experience: data.experience,
-          assessment_id: data.assessment_id,
-          meta: data.meta as Prisma.JsonObject,
-        },
-        include: {
-          assessment: true,
-          exam: {
-            include: {
-              exam_questions: true,
+          await tx.exam_questions.deleteMany({
+            where: { exam_id: existingCandidate.exam.id },
+          });
+
+          await examService.createExamQuestionsForAssessment(
+            existingCandidate.exam.id,
+            data.assessment_id
+          );
+        }
+        const meta = await this.generateCandiateAccessToken(existingCandidate.exam.id, { ...existingCandidate, ...data });
+
+        const newCandidate = await tx.candidate.update({
+          where: { id },
+          data: {
+            name: data.name,
+            email: data.email,
+            phone: data.phone,
+            experience: data.experience,
+            assessment_id: data.assessment_id,
+            meta: meta as Prisma.JsonObject,
+          },
+          include: {
+            assessment: true,
+            exam: {
+              include: {
+                exam_questions: true,
+              },
             },
           },
-        },
+        });
+
+
+        return newCandidate
       });
-    });
-    return result;
+      return result;
+
+    } catch (error) {
+      if (error instanceof AppError) {
+        throw error;
+      }
+      throw new AppError('Failed to create candidate. Please try again later.', 500);
+    }
   }
 
   async deleteCandidate(id: string) {
@@ -171,7 +186,7 @@ export default class CandidatesService {
     search?: string;
     assessmentFilter?: string | string[];
   }) {
-    const where: Prisma.CandidateWhereInput = {deleted_at:null};
+    const where: Prisma.CandidateWhereInput = { deleted_at: null };
 
     if (query.search) {
       where.OR = [
@@ -276,17 +291,9 @@ export default class CandidatesService {
     });
   }
 
-  private async generateCandiateAccessToken(examId: string, candidateId: string) {
+  private async generateCandiateAccessToken(examId: string, candidate: any) {
     try {
-      const candidate = await prisma.candidate.findFirst({
-        where: {
-          id: candidateId,
-          exam_id: examId,
-        },
-        include: {
-          exam: true,
-        },
-      });
+
 
       if (!candidate) {
         throw new AppError('Candidate not found', 404);
@@ -308,7 +315,7 @@ export default class CandidatesService {
       const token = jwt.sign(
         {
           examId,
-          candidateId,
+          candidateId: candidate.id,
         },
         process.env.ACCESS_SECRET || 'exam-secret-key',
         { expiresIn: expiresInSeconds }
@@ -316,26 +323,16 @@ export default class CandidatesService {
 
       const examLink = `${process.env.FRONTEND_URL}/test/${examId}?code=${code}`;
 
-      await prisma.candidate.update({
-        where: { id: candidateId },
-        data: {
-          meta: {
-            ...((candidate.meta as object) || {}),
-            accessCode: code,
-            accessToken: token,
-            examLink: examLink,
-            tokenCreatedAt: now.toISOString(),
-            tokenExpiresAt: examEndTime.toISOString(),
-          },
-        },
-      });
-
-      return {
-        code,
-        token,
-        examLink,
-        expiresAt: examEndTime.toISOString(),
+      const updatedMeta = {
+        ...(candidate.meta || {}),
+        accessCode: code,
+        accessToken: token,
+        examLink: examLink,
+        tokenCreatedAt: now.toISOString(),
+        tokenExpiresAt: examEndTime.toISOString(),
       };
+
+      return updatedMeta;
     } catch (error) {
       if (error instanceof AppError) {
         throw error;

@@ -5,7 +5,7 @@ import { convertWebmToMp4 } from '../utils/fileUpload';
 export class UploadService {
   
   async processFile(file: Express.Multer.File): Promise<UploadedFile> {
-    let filePath =  path.basename(file.path);
+    let filePath = file.path.split('/uploads/')[1];
     if(path.extname(file.path) == '.webm'){
       filePath = await convertWebmToMp4(file.path);
     }

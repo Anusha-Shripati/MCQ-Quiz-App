@@ -29,7 +29,7 @@ const VideoRecorder = ({ onRecordingComplete, maxTime, videoKey = 'video', video
     const [recordedChunks, setRecordedChunks] = useState<Blob[]>([]);
     const [isStreamReady, setIsStreamReady] = useState(false);
     const animationFrameRef = useRef<number | null>(null);
-    const { exam } = useExamStore();
+    const { exam,cameraStreamRef } = useExamStore();
 
 
 
@@ -37,16 +37,16 @@ const VideoRecorder = ({ onRecordingComplete, maxTime, videoKey = 'video', video
         setIsStreamReady(false);
 
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({
-                video: true,
-                audio: true,
-            });
-            console.log('start camera');
+            // const stream = await navigator.mediaDevices.getUserMedia({
+            //     video: true,
+            //     audio: true,
+            // });
+            // console.log('start camera');
             
-            streamRef.current = stream;
+            streamRef.current = cameraStreamRef;
 
             if (videoRef.current) {
-                videoRef.current.srcObject = stream;
+                videoRef.current.srcObject = streamRef.current;
                 await videoRef.current.play().catch((err) => {
                     console.error('Error playing video:', err);
                 });
@@ -198,12 +198,12 @@ const VideoRecorder = ({ onRecordingComplete, maxTime, videoKey = 'video', video
 
     const stopCamera = useCallback(() => {
 
-        if (streamRef.current) {
-            streamRef.current.getTracks().forEach((track) => {
-                track.stop();
-            });
-            streamRef.current = null;
-        }
+        // if (streamRef.current) {
+        //     streamRef.current.getTracks().forEach((track) => {
+        //         track.stop();
+        //     });
+        //     streamRef.current = null;
+        // }
 
         if (videoRef.current) {
             videoRef.current.srcObject = null;

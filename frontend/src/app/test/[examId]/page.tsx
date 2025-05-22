@@ -12,24 +12,24 @@ import { useExamStore } from '@/store/examStore';
 import { EXAM_STEP } from '@/types/exam.types';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
-import useSWR from 'swr';
 
 
 const QuizPage = () => {
   const params = useParams();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { current_step, setCurrentStep, setAccessCode, setCandidate,candidate,setExam,accessCode } = useExamStore();
+  const { current_step, setCurrentStep, setAccessCode, setCandidate, candidate, setExam, setCameraStream,cameraStreamRef } = useExamStore();
   const router = useRouter();
 
   const [videoLink, setVideoLink] = useState<string | null>(null);
 
   const screenStrean = useRef<MediaStream | null>(null);
-  const screenSnapshotRef = useRef<HTMLVideoElement|null>(null)
-  const cameraSnapshotRef = useRef<HTMLVideoElement|null>(null)
-  const canvas = useRef<HTMLCanvasElement | null>(null)
+  const screenSnapshotRef = useRef<HTMLVideoElement | null>(null)
+  const cameraSnapshotRef = useRef<HTMLVideoElement | null>(null)
+  const cameraCanvas = useRef<HTMLCanvasElement | null>(null)
+  const screenCanvas = useRef<HTMLCanvasElement | null>(null)
   const interval = useRef<NodeJS.Timeout | null>(null)
-  const [screenPermission,setScreenPermission] =useState(true)
+  const [permission, setPermission] = useState<{ camera: boolean, screen: boolean }>({ camera: false, screen: true })
 
   const handleKeyDown = (e: KeyboardEvent) => {
     if (PROHIBITED_KEYS.includes(e.key)) {
@@ -44,7 +44,7 @@ const QuizPage = () => {
         e[combo.modifier as keyof KeyboardEvent]
       ) {
         e.preventDefault();
-        
+
         return;
       }
     }
@@ -82,7 +82,7 @@ const QuizPage = () => {
           setError(data.message || 'Access denied. Invalid or expired access code.');
           return;
         }
-        if(data.data.exam.status == 'completed'){
+        if (data.data.exam.status == 'completed') {
           router.push('/thank-you');
           return;
         }
@@ -109,76 +109,111 @@ const QuizPage = () => {
     setCurrentStep(EXAM_STEP.QUIZ);
   };
 
-  const startRecording = async()=>{
+  const startScreenRecording = async () => {
     try {
-      
-      screenStrean.current = await navigator.mediaDevices.getDisplayMedia({
-        video:true,
-        audio:false
-      })
 
+      screenStrean.current = await navigator.mediaDevices.getDisplayMedia({
+        video: true,
+        audio: false
+      })
+      setPermission((prv) => ({ ...prv, screen: true }))
       const track = screenStrean.current.getVideoTracks()[0];
       const settings = track.getSettings();
-      track.onended=()=>{
+      track.onended = () => {
         stopRecording()
-        setScreenPermission(false)
+        setPermission((prv) => ({ ...prv, screen: false }))
       }
-      if (settings.displaySurface !== 'monitor') {
+      if (settings.displaySurface == 'monitor') {
+        setPermission((prv) => ({ ...prv, screen: true }))
+      } else {
         screenStrean.current.getTracks().forEach((track) => track.stop());
-        setScreenPermission(false) 
         return;
       }
-        setScreenPermission(true)
-        if(screenSnapshotRef.current){
-          screenSnapshotRef.current.srcObject = screenStrean.current;
-          await screenSnapshotRef.current.play();
-        }
-
-      } catch (error) {
-        console.log(error);
-        setScreenPermission(false) 
+      if (screenSnapshotRef.current) {
+        screenSnapshotRef.current.srcObject = screenStrean.current;
+        await screenSnapshotRef.current.play();
       }
+    } catch (error) {
+      setPermission((prv) => ({ ...prv, screen: false }))
+    }
+  }
+  const startCamera = async () => {
+    try {
+      let cameraStream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: true
+      })
+      const videoTrack = cameraStream.getVideoTracks()[0]
+      videoTrack.onended = () => {
+        setPermission((prv) => ({ ...prv, camera: false }))
+      }
+      setCameraStream(cameraStream);
+
+      setPermission((prv) => ({ ...prv, camera: true }))
+      console.log(cameraStream, cameraSnapshotRef.current);
+
+      if (cameraSnapshotRef.current) {
+        cameraSnapshotRef.current.srcObject = cameraStream;
+        console.log(cameraStream, cameraSnapshotRef.current);
+        await cameraSnapshotRef.current.play();
+      }
+
+    } catch (error) {
+      setPermission((prv) => ({ ...prv, camera: false }))
+    }
   }
 
-  const takeScreenshot =async ()=>{
-    if(!screenSnapshotRef.current || !canvas.current) return 
-    
-    canvas.current.width = screenSnapshotRef.current.videoWidth;
-    canvas.current.height = screenSnapshotRef.current.videoHeight;
+  const takeScreenshot = async (ref: HTMLVideoElement, canvas: HTMLCanvasElement, type: string) => {
+    if (!ref || !canvas) return
 
-    const ctx = canvas.current.getContext('2d');
-    ctx?.drawImage(screenSnapshotRef.current, 0, 0, canvas.current.width, canvas.current.height);
-    const imageDataURL = canvas.current.toDataURL('image/jpeg', 0.8);
+    canvas.width = ref.videoWidth;
+    canvas.height = ref.videoHeight;
+
+    const ctx =  canvas.getContext('2d');
+    ctx?.drawImage(ref, 0, 0, canvas.width, canvas.height);
+    const imageDataURL =  canvas.toDataURL('image/jpeg', 0.8);
     const blob = dataURLtoBlob(imageDataURL)
 
     const formData = new FormData()
-    formData.append('file',blob)
-    formData.append('timestamp',Date.now().toString())
-    formData.append('type',SNAPSHOT.screenshot)
-    
-    try { 
+    formData.append('file', blob)
+    formData.append('timestamp', Date.now().toString())
+
+    try {
       const urlParams = new URLSearchParams(window.location.search);
       const code = urlParams.get('code');
-      await examApi.post(`/candidate-exam/${params.examId}/snapshot`,formData,code as string)
+      await examApi.post(`/candidate-exam/${params.examId}/snapshot?fileType=${type}`, formData, code as string)
     } catch (error) {
-      console.log(error);
+      // console.log(error);
     }
   }
-  
-  const stopRecording = async()=>{
-    screenStrean.current?.getTracks().forEach((track)=>{
+
+  const stopRecording = async () => {
+    screenStrean.current?.getTracks().forEach((track) => {
+      track.stop()
+    })
+    cameraStreamRef?.getTracks().forEach((track) => {
       track.stop()
     })
   }
 
-  const init=async ()=>{
-    await startRecording();
-    interval.current = setInterval(()=>{
-      const randomDelayMs = Math.floor(Math.random() * 61) * 100;
-      setTimeout(()=>{
-        takeScreenshot()
-      },randomDelayMs)
-    },60*100)
+  const init = async () => {
+    await Promise.allSettled([startScreenRecording(), startCamera()])
+    const intervalTime = 60 * 1000
+    interval.current = setInterval(() => {
+      const randomDelayMsScreen = Math.floor(Math.random() * 61) * 1000;
+      const randomDelayMsCamera = Math.floor(Math.random() * 61) * 1000;
+      setTimeout(() => {
+        if (screenSnapshotRef.current !== null && screenCanvas.current !== null) {
+          takeScreenshot(screenSnapshotRef.current as HTMLVideoElement, screenCanvas.current as HTMLCanvasElement, SNAPSHOT.screenshot)
+        }
+      }, randomDelayMsScreen)
+      setTimeout(() => {
+        if (cameraSnapshotRef.current !== null && cameraCanvas.current !== null) {
+          takeScreenshot(cameraSnapshotRef.current as HTMLVideoElement, cameraCanvas.current as HTMLCanvasElement, SNAPSHOT.camera)
+        }
+      }, randomDelayMsCamera)
+    }, intervalTime)
+
   }
 
   //======================================= Important for screenshots ===================================================
@@ -192,39 +227,38 @@ const QuizPage = () => {
       },
       true
     );
-    // init()
+    init()
 
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
-      // interval.current && clearInterval(interval.current)
-      // stopRecording()
+      interval.current && clearInterval(interval.current)
+      stopRecording()
     };
   }, []);
-
-  if (loading) {
-    return (
-      <TestLoading/>
-    );
-  }
-
-  if (error) {
-    return (
-      <TestError errorTitle='Access Denied' accessError={error}/>
-    );
-  }
-  if(!screenPermission){
-    return <TestWarning text={<>In the screen sharing popup, select <strong>"Entire Screen"</strong> and then click <strong>"Share"</strong>. You can refresh this page </>} title='Entire Screen'/>
-  }
   return (
     <div className="w-screen min-h-screen bg-gray-50">
-      {current_step === EXAM_STEP.BASIC_INFO && <BasicInfoForm />}
-      {current_step === EXAM_STEP.VIDEO_RECORDING && (
-        <VideoRecordingScreen onRecordingComplete={handleRecordingComplete} videoLink={videoLink || undefined} />
-      )}
-      {current_step === EXAM_STEP.QUIZ && candidate && <ProctoredQuiz />}
+      {
+        loading ? <TestLoading />
+          : error ? <TestError errorTitle='Access Denied' accessError={error} />
+            : (!permission.camera || !permission.screen) ? <TestWarning text={
+              <ul>
+                {!permission.screen && <li>In the screen sharing popup, select <strong>"Entire Screen"</strong> and then click <strong>"Share"</strong>. You can refresh this page </li>}
+                {!permission.camera && <li>Make sure camera is on</li>}
+              </ul>
+            } title='Permissions' />
+              : <>
+                {current_step === EXAM_STEP.BASIC_INFO && <BasicInfoForm />}
+                {current_step === EXAM_STEP.VIDEO_RECORDING && (
+                  <VideoRecordingScreen onRecordingComplete={handleRecordingComplete} videoLink={videoLink || undefined} />
+                )}
+                {current_step === EXAM_STEP.QUIZ && candidate && <ProctoredQuiz />}
+              </>
+      }
+
       <video ref={screenSnapshotRef} className='hidden'></video>
       <video ref={cameraSnapshotRef} className='hidden'></video>
-      <canvas ref={canvas} className='hidden'></canvas>
+      <canvas ref={cameraCanvas} className='hidden'></canvas>
+      <canvas ref={screenCanvas} className='hidden'></canvas>
     </div>
   );
 };

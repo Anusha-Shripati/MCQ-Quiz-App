@@ -20,6 +20,8 @@ interface ExamStore {
   setExam: (exam: IExam | null) => void;
   setCurrentStep: (step: EXAM_STEP) => void;
   setCandidate: (candidate: CandidateData | null) => void;
+  cameraStreamRef: MediaStream | null,
+  setCameraStream :(stream:MediaStream)=>void
 }
 
 export const useExamStore = create<ExamStore>((set) => ({
@@ -28,8 +30,11 @@ export const useExamStore = create<ExamStore>((set) => ({
   exam: null,
   candidate: null,
   accessCode: '',
+  cameraStreamRef:null,
   current_step: EXAM_STEP.BASIC_INFO,
-
+  setCameraStream:(stream:MediaStream)=>{
+    set({cameraStreamRef:stream})
+  },
   setCandidate: (candidate: CandidateData | null) => {
     set({ candidate });
   },

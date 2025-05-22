@@ -24,12 +24,12 @@ function TestWarning({ title, text }: { title: string; text: any }) {
                 {/* Content */}
                 <div>
                     <h3 className="text-3xl font-bold mb-2 tracking-wide text-red-700 drop-shadow">Attention Required</h3>
-                    <p className="text-xl leading-relaxed">
+                    <div className="text-xl leading-relaxed">
                         <span className="font-semibold text-red-700">{title}</span>
                         <span className="text-red-500">.</span>
                         <br />
-                        <span className="font-normal text-gray-700">{text}</span>
-                    </p>
+                        <div className="font-normal text-gray-700">{text}</div>
+                    </div>
                 </div>
             </div>
         </div>

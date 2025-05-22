@@ -311,7 +311,7 @@ export class CandidateExamService {
     });
   }
 
-  async saveSnapshot(examId: string, file: Express.Multer.File, {timestamp,type}:{timestamp:number,type:'screenshot' |'camera'}) {
+  async saveSnapshot(examId: string, file: Express.Multer.File, {timestamp,fileType}:{timestamp:number,fileType:'screenshot' |'camera'}) {
     const exam = await prisma.exam.findUnique({
       where: { id: examId },
       select: { meta: true },
@@ -320,7 +320,7 @@ export class CandidateExamService {
     let updatedMeta:ExamMeta;
     const uploadedFile = await this.uploadService.processFile(file)
     
-    if(type == 'screenshot'){
+    if(fileType == 'screenshot'){
       updatedMeta = {
         ...(exam?.meta as ExamMeta || {}),
         screenshots :[...(exam?.meta as ExamMeta)?.screenshots || [],{timestamp:timestamp,image:uploadedFile.path}]
@@ -337,5 +337,6 @@ export class CandidateExamService {
         meta: updatedMeta,
       },
     });
+    return uploadedFile
   }
 }

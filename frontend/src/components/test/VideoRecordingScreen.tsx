@@ -88,7 +88,7 @@ export const VideoRecordingScreen = ({ onRecordingComplete, videoLink }: VideoRe
             </div>
             <p className="text-sm text-gray-500">Please introduce yourself and your experience</p>
           </CardHeader>
-          <CardContent className="pt-6 flex justify-center items-center flex-grow">
+          <CardContent className="pt-6">
 
             <VideoRecorder videoKey='introduction' onRecordingComplete={onContinue} maxTime={90} videoLink={videoLink} isLoading={isMutating}/>
             {error && (

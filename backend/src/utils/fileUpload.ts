@@ -39,7 +39,13 @@ else {
 
     storage = multer.diskStorage({
         destination: (req, file, cb) => {
-            cb(null, uploadPath);
+            let path = uploadPath;
+            if(req.params.examId) path+=`/${req.params.examId}`;
+            if(req.query.fileType) path+=`/${req.query.fileType}`;
+            if (!fs.existsSync(path)) {
+                fs.mkdirSync(path, { recursive: true });
+            }
+            cb(null, path);
         },
         filename: (req: Express.Request, file: Express.Multer.File, cb) => {
             const ext = path.extname(file.originalname) || `.${file.mimetype.split('/')[1]}`;
@@ -82,7 +88,7 @@ export const convertWebmToMp4 = (inputPath: string): Promise<string> => {
             .output(outputPath)
             .on('end', () => {
                 console.log('✅ Conversion complete:', outputPath);
-                resolve(path.basename(outputPath));
+                resolve(outputPath.split('/uploads/')[1]);
             })
             .on('error', (err: any) => {
                 console.error('❌ FFmpeg error:', err.message);

@@ -15,7 +15,7 @@ import StatusWrapper from '@/components/common/status-wrapper';
 import { FormField } from '@/components/common/form-field';
 import useSWRMutation from 'swr/mutation';
 import { isValidUUID } from '@/lib/utils';
-import { Dialog,  DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/form/input';
 import { isAxiosError } from 'axios';
 // import { isValidObjectId } from '@/lib/utils';
@@ -81,7 +81,7 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
       try {
         const response = await updateTrigger({ name });
         toast.success(response.message || "Technology saved successfully!");
-        mutate((key:string) => typeof key === 'string' && key.startsWith('/technology/list'));
+        mutate((key: string) => typeof key === 'string' && key.startsWith('/technology/list'));
       } catch (error) {
         toast.error(isAxiosError(error) ? error.response?.data?.message || "Failed to save technology." : "Failed to save technology.");
       }
@@ -92,7 +92,7 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
         window.history.replaceState(null, '', `/questions/create-question/${response.data.id}`);
         setTechnologyId(response.data.id);
         setValidTechnology(true);
-        mutate((key:string) => typeof key === 'string' && key.startsWith('/technology/list'));
+        mutate((key: string) => typeof key === 'string' && key.startsWith('/technology/list'));
       } catch (error) {
         toast.error(isAxiosError(error) ? error.response?.data?.message || "Failed to create technology." : "Failed to create technology.");
       }
@@ -302,7 +302,7 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
                 />
               ) : (
                 // questions.map((q, index) => (
-                <QuestionCard
+                questions[selectedQuestion] && <QuestionCard
                   question={questions[selectedQuestion]}
                   selectedQuestion={selectedQuestion}
                   questions={questions}

@@ -86,6 +86,7 @@ const VideoRecorder = ({ onRecordingComplete, maxTime, videoKey = 'video', video
                 if (video) {
                     const videoUrl = URL.createObjectURL(video);
                     setRecordedVideo(videoUrl);
+                    onRecordingStop && onRecordingStop(video, videoUrl);
                     stopCamera();
                     setStatus('preview');
                 } else {
@@ -261,8 +262,6 @@ const VideoRecorder = ({ onRecordingComplete, maxTime, videoKey = 'video', video
 
         // Re-start camera if it was stopped
         if (!isStreamReady) {
-            console.log('restart camera in resetRecording');
-
             startCamera();
         }
     }, [recordedVideo, isStreamReady, startCamera]);
@@ -321,7 +320,6 @@ const VideoRecorder = ({ onRecordingComplete, maxTime, videoKey = 'video', video
         
         // Restart camera after a short dela
         setTimeout(() => {
-            console.log('restart camera in onError');
             startCamera();
         }, 1000);
     }

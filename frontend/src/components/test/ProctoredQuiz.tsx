@@ -324,9 +324,6 @@ export default function ProctoredQuiz() {
     }
 
     // Prevent browser shortcuts
-    console.log(e);
-    
-    console.log(BROWSER_KEY.includes(e.key));
     
     if (
       (e.ctrlKey || e.metaKey) && BROWSER_KEY.includes(e.key)) {

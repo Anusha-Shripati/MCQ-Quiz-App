@@ -113,7 +113,7 @@ export class CandidateExamController {
 
       if (!candidateId) throw new Error('Candidate not authenticated');
 
-      await this.candidateExamService.finishExam(examId);
+      await this.candidateExamService.finishExam(examId,candidateId);
 
       generateResponse(res, 200, {}, true, 'Exam completed successfully');
     } catch (error) {

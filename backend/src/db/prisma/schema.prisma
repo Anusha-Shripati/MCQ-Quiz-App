@@ -161,7 +161,6 @@ model Results {
     exam_id      String    @unique
     candidate_id String
     score        Float
-    submitted_at DateTime?
     created_at   DateTime  @default(now())
     updated_at   DateTime  @updatedAt
     deleted_at   DateTime?
@@ -181,6 +180,7 @@ model Answers {
     question_name String?
     created_at    DateTime @default(now())
     updated_at    DateTime @updatedAt
+    score         Float    @default(0)
 
     exam      Exam       @relation(fields: [exam_id], references: [id])
     candidate Candidate  @relation(fields: [candidate_id], references: [id])

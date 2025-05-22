@@ -150,11 +150,9 @@ const QuizPage = () => {
       setCameraStream(cameraStream);
 
       setPermission((prv) => ({ ...prv, camera: true }))
-      console.log(cameraStream, cameraSnapshotRef.current);
 
       if (cameraSnapshotRef.current) {
         cameraSnapshotRef.current.srcObject = cameraStream;
-        console.log(cameraStream, cameraSnapshotRef.current);
         await cameraSnapshotRef.current.play();
       }
 
@@ -198,10 +196,10 @@ const QuizPage = () => {
 
   const init = async () => {
     await Promise.allSettled([startScreenRecording(), startCamera()])
-    const intervalTime = 60 * 1000
+    const intervalTime = 60 * 100
     interval.current = setInterval(() => {
-      const randomDelayMsScreen = Math.floor(Math.random() * 61) * 1000;
-      const randomDelayMsCamera = Math.floor(Math.random() * 61) * 1000;
+      const randomDelayMsScreen = Math.floor(Math.random() * 61) * 100;
+      const randomDelayMsCamera = Math.floor(Math.random() * 61) * 100;
       setTimeout(() => {
         if (screenSnapshotRef.current !== null && screenCanvas.current !== null) {
           takeScreenshot(screenSnapshotRef.current as HTMLVideoElement, screenCanvas.current as HTMLCanvasElement, SNAPSHOT.screenshot)

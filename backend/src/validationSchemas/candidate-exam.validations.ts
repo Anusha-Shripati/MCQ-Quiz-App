@@ -53,4 +53,18 @@ export const candidateExamSchema = {
       }),
     }),
   },
+  resetAnswer: {
+    params: Joi.object({
+      examId: Joi.string().uuid().required().messages({
+        'string.empty': 'ExamId Id is required',
+        'string.uuid': 'Invalid Question Id format',
+      }),
+    }),
+    body: Joi.object({
+      answer_id: Joi.string().uuid().required().messages({
+        'string.empty': 'ExamId Id is required',
+        'string.uuid': 'Invalid Question Id format',
+      }),
+    }),
+  },
 };

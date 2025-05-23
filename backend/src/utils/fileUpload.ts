@@ -49,6 +49,7 @@ else {
             if (!fs.existsSync(path)) {
                 fs.mkdirSync(path, { recursive: true });
             }
+            console.log(path)
             cb(null, path);
         },
         filename: (req: Express.Request, file: Express.Multer.File, cb) => {

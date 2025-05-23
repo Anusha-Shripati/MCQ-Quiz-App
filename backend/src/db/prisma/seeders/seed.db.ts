@@ -1,6 +1,8 @@
 import { PrismaClient, Difficulty, Question_type } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import dotenv from 'dotenv';
+import CandidatesService from '../../../services/candidates.services';
+import ExamService from '../../../services/exam.services';
 const prisma = new PrismaClient();
 
 dotenv.config();
@@ -16,7 +18,7 @@ const mongodbQuestions = [
   {
     technology_id: TECHNOLOGY_IDS.MONGODB,
     question: 'What is the primary purpose of MongoDB?',
-    correct_answer: ['Document-based NoSQL database'],
+    correct_answer: ['0'],
     options: [
       'Document-based NoSQL database',
       'Relational database',
@@ -31,7 +33,7 @@ const mongodbQuestions = [
   {
     technology_id: TECHNOLOGY_IDS.MONGODB,
     question: 'Which command is used to create a new database in MongoDB?',
-    correct_answer: ['use database_name'],
+    correct_answer: ['1'],
     options: [
       'create database_name',
       'use database_name',
@@ -46,7 +48,7 @@ const mongodbQuestions = [
   {
     technology_id: TECHNOLOGY_IDS.MONGODB,
     question: 'What is a document in MongoDB?',
-    correct_answer: ['A record in a collection'],
+    correct_answer: ['0'],
     options: [
       'A record in a collection',
       'A table in a database',
@@ -61,7 +63,7 @@ const mongodbQuestions = [
   {
     technology_id: TECHNOLOGY_IDS.MONGODB,
     question: 'Which of the following is a valid MongoDB data type?',
-    correct_answer: ['ObjectId'],
+    correct_answer: ['0'],
     options: ['ObjectId', 'DateTime', 'TimeStamp', 'DateString'],
     time: '2',
     difficulty_level: Difficulty.easy,
@@ -71,7 +73,7 @@ const mongodbQuestions = [
   {
     technology_id: TECHNOLOGY_IDS.MONGODB,
     question: 'What is the default port number for MongoDB?',
-    correct_answer: ['27017'],
+    correct_answer: ['0'],
     options: ['27017', '3306', '5432', '6379'],
     time: '2',
     difficulty_level: Difficulty.easy,
@@ -81,7 +83,7 @@ const mongodbQuestions = [
   {
     technology_id: TECHNOLOGY_IDS.MONGODB,
     question: 'Which operator is used to update multiple documents in MongoDB?',
-    correct_answer: ['updateMany()'],
+    correct_answer: ['0'],
     options: ['updateMany()', 'updateAll()', 'update()', 'modifyMany()'],
     time: '2',
     difficulty_level: Difficulty.medium,
@@ -91,7 +93,7 @@ const mongodbQuestions = [
   {
     technology_id: TECHNOLOGY_IDS.MONGODB,
     question: "What is the purpose of MongoDB's aggregation framework?",
-    correct_answer: ['To process data records and return computed results'],
+    correct_answer: ['0'],
     options: [
       'To process data records and return computed results',
       'To create database backups',
@@ -106,7 +108,7 @@ const mongodbQuestions = [
   {
     technology_id: TECHNOLOGY_IDS.MONGODB,
     question: 'Which index type in MongoDB is used for text search?',
-    correct_answer: ['Text Index'],
+    correct_answer: ['0'],
     options: ['Text Index', 'Hash Index', 'BTree Index', 'Full Text Index'],
     time: '2',
     difficulty_level: Difficulty.medium,
@@ -116,7 +118,7 @@ const mongodbQuestions = [
   {
     technology_id: TECHNOLOGY_IDS.MONGODB,
     question: "What is the purpose of MongoDB's $lookup operator?",
-    correct_answer: ['To perform a left outer join'],
+    correct_answer: ['0'],
     options: [
       'To perform a left outer join',
       'To create a new collection',
@@ -131,7 +133,7 @@ const mongodbQuestions = [
   {
     technology_id: TECHNOLOGY_IDS.MONGODB,
     question: 'Which MongoDB feature is used for horizontal scaling?',
-    correct_answer: ['Sharding'],
+    correct_answer: ['0'],
     options: ['Sharding', 'Replication', 'Indexing', 'Aggregation'],
     time: '2',
     difficulty_level: Difficulty.medium,
@@ -141,7 +143,7 @@ const mongodbQuestions = [
   {
     technology_id: TECHNOLOGY_IDS.MONGODB,
     question: "What is the purpose of MongoDB's $graphLookup operator?",
-    correct_answer: ['To perform recursive searches on documents'],
+    correct_answer: ['0'],
     options: [
       'To perform recursive searches on documents',
       'To create graph visualizations',
@@ -156,7 +158,7 @@ const mongodbQuestions = [
   {
     technology_id: TECHNOLOGY_IDS.MONGODB,
     question: 'Which MongoDB feature is used to ensure data consistency across multiple nodes?',
-    correct_answer: ['Write Concern'],
+    correct_answer: ['0'],
     options: ['Write Concern', 'Read Preference', 'Sharding', 'Indexing'],
     time: '2',
     difficulty_level: Difficulty.hard,
@@ -166,7 +168,7 @@ const mongodbQuestions = [
   {
     technology_id: TECHNOLOGY_IDS.MONGODB,
     question: "What is the purpose of MongoDB's $facet operator?",
-    correct_answer: ['To create multi-faceted aggregations'],
+    correct_answer: ['0'],
     options: [
       'To create multi-faceted aggregations',
       'To perform text searches',
@@ -181,7 +183,7 @@ const mongodbQuestions = [
   {
     technology_id: TECHNOLOGY_IDS.MONGODB,
     question: 'Which MongoDB feature is used to handle time-series data efficiently?',
-    correct_answer: ['Time Series Collections'],
+    correct_answer: ['0'],
     options: [
       'Time Series Collections',
       'Capped Collections',
@@ -196,7 +198,7 @@ const mongodbQuestions = [
   {
     technology_id: TECHNOLOGY_IDS.MONGODB,
     question: "What is the purpose of MongoDB's $redact operator?",
-    correct_answer: ['To restrict document content based on conditions'],
+    correct_answer: ['0'],
     options: [
       'To restrict document content based on conditions',
       'To perform data encryption',
@@ -215,7 +217,7 @@ const javascriptQuestions = [
   {
     technology_id: TECHNOLOGY_IDS.JAVASCRIPT,
     question: 'What is JavaScript primarily used for?',
-    correct_answer: ['Adding interactivity to web pages'],
+    correct_answer: ['0'],
     options: [
       'Adding interactivity to web pages',
       'Styling web pages',
@@ -230,7 +232,7 @@ const javascriptQuestions = [
   {
     technology_id: TECHNOLOGY_IDS.JAVASCRIPT,
     question: 'Which keyword is used to declare a variable in JavaScript?',
-    correct_answer: ['let'],
+    correct_answer: ['0'],
     options: ['let', 'var', 'const', 'All of the above'],
     time: '2',
     difficulty_level: Difficulty.easy,
@@ -240,7 +242,7 @@ const javascriptQuestions = [
   {
     technology_id: TECHNOLOGY_IDS.JAVASCRIPT,
     question: 'What does DOM stand for in JavaScript?',
-    correct_answer: ['Document Object Model'],
+    correct_answer: ['0'],
     options: [
       'Document Object Model',
       'Data Object Model',
@@ -255,7 +257,7 @@ const javascriptQuestions = [
   {
     technology_id: TECHNOLOGY_IDS.JAVASCRIPT,
     question: 'Which operator is used for strict equality in JavaScript?',
-    correct_answer: ['==='],
+    correct_answer: ['0'],
     options: ['===', '==', '=', '!=='],
     time: '2',
     difficulty_level: Difficulty.easy,
@@ -265,7 +267,7 @@ const javascriptQuestions = [
   {
     technology_id: TECHNOLOGY_IDS.JAVASCRIPT,
     question: "What is the result of '2' + 2 in JavaScript?",
-    correct_answer: ["'22'"],
+    correct_answer: ["0"],
     options: ["'22'", '4', 'NaN', 'Error'],
     time: '2',
     difficulty_level: Difficulty.easy,
@@ -275,7 +277,7 @@ const javascriptQuestions = [
   {
     technology_id: TECHNOLOGY_IDS.JAVASCRIPT,
     question: 'What is a closure in JavaScript?',
-    correct_answer: ["A function with access to its outer function's scope"],
+    correct_answer: ["0"],
     options: [
       "A function with access to its outer function's scope",
       'A way to close a program',
@@ -290,7 +292,7 @@ const javascriptQuestions = [
   {
     technology_id: TECHNOLOGY_IDS.JAVASCRIPT,
     question: "What does the 'this' keyword refer to in JavaScript?",
-    correct_answer: ['The object it belongs to'],
+    correct_answer: ['0'],
     options: [
       'The object it belongs to',
       'The current function',
@@ -305,7 +307,7 @@ const javascriptQuestions = [
   {
     technology_id: TECHNOLOGY_IDS.JAVASCRIPT,
     question: "What is the purpose of the 'bind' method in JavaScript?",
-    correct_answer: ["To create a new function with a specific 'this' value"],
+    correct_answer: ["0"],
     options: [
       "To create a new function with a specific 'this' value",
       'To bind two objects together',
@@ -320,7 +322,7 @@ const javascriptQuestions = [
   {
     technology_id: TECHNOLOGY_IDS.JAVASCRIPT,
     question: 'What is a promise in JavaScript?',
-    correct_answer: ['An object representing the eventual completion of an asynchronous operation'],
+    correct_answer: ['0'],
     options: [
       "To create a new function with a specific 'this' value",
       'To bind two objects together',
@@ -335,7 +337,7 @@ const javascriptQuestions = [
   {
     technology_id: TECHNOLOGY_IDS.JAVASCRIPT,
     question: 'What is a promise in JavaScript?',
-    correct_answer: ['An object representing the eventual completion of an asynchronous operation'],
+    correct_answer: ['0'],
     options: [
       'An object representing the eventual completion of an asynchronous operation',
       'A type of variable',
@@ -350,7 +352,7 @@ const javascriptQuestions = [
   {
     technology_id: TECHNOLOGY_IDS.JAVASCRIPT,
     question: "What is the purpose of the 'async/await' syntax in JavaScript?",
-    correct_answer: ['To write asynchronous code that looks synchronous'],
+    correct_answer: ['0'],
     options: [
       'To write asynchronous code that looks synchronous',
       'To declare synchronous functions',
@@ -365,7 +367,7 @@ const javascriptQuestions = [
   {
     technology_id: TECHNOLOGY_IDS.JAVASCRIPT,
     question: 'What is the event loop in JavaScript?',
-    correct_answer: ['The mechanism that handles asynchronous callbacks'],
+    correct_answer: ['0'],
     options: [
       'The mechanism that handles asynchronous callbacks',
       'A type of for loop',
@@ -380,7 +382,7 @@ const javascriptQuestions = [
   {
     technology_id: TECHNOLOGY_IDS.JAVASCRIPT,
     question: 'What is the Temporal Dead Zone in JavaScript?',
-    correct_answer: ['The area where variables are inaccessible before declaration'],
+    correct_answer: ['0'],
     options: [
       'The area where variables are inaccessible before declaration',
       'A memory management technique',
@@ -396,7 +398,7 @@ const javascriptQuestions = [
     technology_id: TECHNOLOGY_IDS.JAVASCRIPT,
     question: "What is the difference between 'null' and 'undefined' in JavaScript?",
     correct_answer: [
-      "'null' is an assigned value representing no value, while 'undefined' means a variable has been declared but not assigned",
+      "0",
     ],
     options: [
       "'null' is an assigned value representing no value, while 'undefined' means a variable has been declared but not assigned",
@@ -412,7 +414,7 @@ const javascriptQuestions = [
   {
     technology_id: TECHNOLOGY_IDS.JAVASCRIPT,
     question: 'What is the purpose of the Symbol data type in JavaScript?',
-    correct_answer: ["To create unique identifiers that won't collide with other properties"],
+    correct_answer: ["0"],
     options: [
       "To create unique identifiers that won't collide with other properties",
       'To represent special characters',
@@ -427,7 +429,7 @@ const javascriptQuestions = [
   {
     technology_id: TECHNOLOGY_IDS.JAVASCRIPT,
     question: 'What is a generator function in JavaScript?',
-    correct_answer: ['A function that can be paused and resumed'],
+    correct_answer: ['0'],
     options: [
       'A function that can be paused and resumed',
       'A function that generates random numbers',
@@ -446,7 +448,7 @@ const pythonQuestions = [
   {
     technology_id: TECHNOLOGY_IDS.PYTHON,
     question: 'What is Python primarily used for?',
-    correct_answer: ['General-purpose programming'],
+    correct_answer: ['0'],
     options: [
       'General-purpose programming',
       'Only web development',
@@ -461,7 +463,7 @@ const pythonQuestions = [
   {
     technology_id: TECHNOLOGY_IDS.PYTHON,
     question: 'Which of the following is the correct way to create a list in Python?',
-    correct_answer: ['my_list = [1, 2, 3]'],
+    correct_answer: ['0'],
     options: [
       'my_list = [1, 2, 3]',
       'my_list = (1, 2, 3)',
@@ -476,7 +478,7 @@ const pythonQuestions = [
   {
     technology_id: TECHNOLOGY_IDS.PYTHON,
     question: "What is the output of 'Hello' + 'World' in Python?",
-    correct_answer: ["'HelloWorld'"],
+    correct_answer: ["0"],
     options: ["'HelloWorld'", "'Hello World'", 'Error', "'Hello' + 'World'"],
     time: '2',
     difficulty_level: Difficulty.easy,
@@ -486,7 +488,7 @@ const pythonQuestions = [
   {
     technology_id: TECHNOLOGY_IDS.PYTHON,
     question: 'Which keyword is used to define a function in Python?',
-    correct_answer: ['def'],
+    correct_answer: ['0'],
     options: ['def', 'function', 'func', 'define'],
     time: '2',
     difficulty_level: Difficulty.easy,
@@ -496,7 +498,7 @@ const pythonQuestions = [
   {
     technology_id: TECHNOLOGY_IDS.PYTHON,
     question: 'What is the correct way to start a for loop in Python?',
-    correct_answer: ['for x in range(5):'],
+    correct_answer: ['0'],
     options: ['for x in range(5):', 'for (x = 0; x < 5; x++)', 'for x in 5', 'loop x from 1 to 5'],
     time: '2',
     difficulty_level: Difficulty.easy,
@@ -506,7 +508,7 @@ const pythonQuestions = [
   {
     technology_id: TECHNOLOGY_IDS.PYTHON,
     question: 'What is a lambda function in Python?',
-    correct_answer: ['An anonymous function defined with the lambda keyword'],
+    correct_answer: ['0'],
     options: [
       'An anonymous function defined with the lambda keyword',
       'A function that takes no arguments',
@@ -521,7 +523,7 @@ const pythonQuestions = [
   {
     technology_id: TECHNOLOGY_IDS.PYTHON,
     question: 'What is the purpose of the __init__ method in Python?',
-    correct_answer: ["To initialize an object's attributes when it's created"],
+    correct_answer: ["0"],
     options: [
       "To initialize an object's attributes when it's created",
       'To indicate the start of a program',
@@ -536,7 +538,7 @@ const pythonQuestions = [
   {
     technology_id: TECHNOLOGY_IDS.PYTHON,
     question: 'What is the difference between a list and a tuple in Python?',
-    correct_answer: ['Lists are mutable, tuples are immutable'],
+    correct_answer: ['0'],
     options: [
       'Lists are mutable, tuples are immutable',
       'Tuples are mutable, lists are immutable',
@@ -551,7 +553,7 @@ const pythonQuestions = [
   {
     technology_id: TECHNOLOGY_IDS.PYTHON,
     question: "What does the 'with' statement do in Python?",
-    correct_answer: ['Simplifies exception handling for resources that need to be cleaned up'],
+    correct_answer: ['0'],
     options: [
       'Simplifies exception handling for resources that need to be cleaned up',
       'Creates a new context for variables',
@@ -566,7 +568,7 @@ const pythonQuestions = [
   {
     technology_id: TECHNOLOGY_IDS.PYTHON,
     question: 'What is a decorator in Python?',
-    correct_answer: ['A function that takes another function and extends its behavior'],
+    correct_answer: ['0'],
     options: [
       'A function that takes another function and extends its behavior',
       'A special comment that changes how code runs',
@@ -581,7 +583,7 @@ const pythonQuestions = [
   {
     technology_id: TECHNOLOGY_IDS.PYTHON,
     question: 'What is the Global Interpreter Lock (GIL) in Python?',
-    correct_answer: ['A mutex that allows only one thread to execute Python bytecode at a time'],
+    correct_answer: ['0'],
     options: [
       'A mutex that allows only one thread to execute Python bytecode at a time',
       'A security feature that prevents unauthorized code execution',
@@ -596,7 +598,7 @@ const pythonQuestions = [
   {
     technology_id: TECHNOLOGY_IDS.PYTHON,
     question: 'What is metaclass in Python?',
-    correct_answer: ['The class of a class that defines how a class behaves'],
+    correct_answer: ['0'],
     options: [
       'The class of a class that defines how a class behaves',
       'A class that contains other classes',
@@ -611,7 +613,7 @@ const pythonQuestions = [
   {
     technology_id: TECHNOLOGY_IDS.PYTHON,
     question: 'What is method resolution order (MRO) in Python?',
-    correct_answer: ['The order in which Python searches for methods in a hierarchy of classes'],
+    correct_answer: ['0'],
     options: [
       'The order in which Python searches for methods in a hierarchy of classes',
       'The sequence in which methods are called',
@@ -626,7 +628,7 @@ const pythonQuestions = [
   {
     technology_id: TECHNOLOGY_IDS.PYTHON,
     question: 'What is the purpose of __slots__ in Python?',
-    correct_answer: ['To explicitly declare data members and prevent the creation of __dict__'],
+    correct_answer: ['0'],
     options: [
       'To explicitly declare data members and prevent the creation of __dict__',
       'To create read-only attributes',
@@ -642,7 +644,7 @@ const pythonQuestions = [
     technology_id: TECHNOLOGY_IDS.PYTHON,
     question: 'What is a descriptor in Python?',
     correct_answer: [
-      'An object attribute with binding behavior, accessed via get/set/delete methods',
+      '0',
     ],
     options: [
       'An object attribute with binding behavior, accessed via get/set/delete methods',
@@ -696,64 +698,79 @@ async function createTechnologies() {
 
 }
 
-// async function createTestCandidates() {
-//   console.log("Creating test candidates...");
+async function createTestCandidates() {
+  console.log("Creating test candidates...");
 
-//   // Get superadmin user ID
-//   const superadmin = await prisma.user.findFirst({
-//     where: { email: "superadmin@example.com" },
-//   });
+  // Get superadmin user ID
+  const superadmin = await prisma.user.findFirst({
+    where: { email: "superadmin@example.com" },
+  });
 
-//   if (!superadmin) {
-//     throw new Error("Superadmin user not found");
-//   }
+  if (!superadmin) {
+    throw new Error("Superadmin user not found");
+  }
 
-//   // Create assessments for each candidate
-//   const assessments = await Promise.all(
-//     Array.from({ length: 30 }, async (_, i) => {
-//       const assessment = await prisma.assessments.create({
-//         data: {
-//           name: `Test Assessment ${i + 1}`,
-//           created_by: superadmin.id,
-//           easy: 5,
-//           medium: 3,
-//           hard: 2,
-//           duration: 60,
-//         },
-//       });
+  // Create assessments for each candidate
+  const assessments = await Promise.all(
+    Array.from({ length: 5 }, async (_, i) => {
+      const assessment = await prisma.assessments.create({
+        data: {
+          name: `Test Assessment ${i + 1}`,
+          created_by: superadmin.id,
+          easy: 5,
+          medium: 3,
+          hard: 2,
+          duration: 60,
+        },
+      });
 
-//       // Assign technology to assessment
-//       await prisma.assessment_technology.create({
-//         data: {
-//           assessment_id: assessment.id,
-//           technology_id: TECHNOLOGY_IDS.MONGODB,
-//           easy: 5,
-//           medium: 3,
-//           hard: 2,
-//         },
-//       });
+      // Assign technology to assessment
+      await prisma.assessment_technology.create({
+        data: {
+          assessment_id: assessment.id,
+          technology_id: TECHNOLOGY_IDS.MONGODB,
+          easy: 5,
+          medium: 3,
+          hard: 2,
+        },
+      });
 
-//       return assessment;
-//     })
-//   );
+      return assessment;
+    })
+  );
+  const candidateService  =new CandidatesService()
+  const examService  =new ExamService()
+  // Create candidates with their unique assessments
+  const candidates = assessments.map(async(assessment, i) => {
+    const candiadte = {
+      name: `test2_${i + 1}`,
+      email: `test${i + 1}@gmail.com`,
+      phone: `12345678${i}${i + 2}`,
+      technology_id: TECHNOLOGY_IDS.MONGODB,
+      experience: "6",
+      assessment_id: assessment.id,
+      meta:{},
+      start_date:new Date(),
+      end_date:new Date(new Date().setDate(new Date().getDate() + 10)),
+      exam_id:""
+    }
+    const newExam = await examService.createExam({
+      user_id: superadmin.id,
+      assessment_id: candiadte.assessment_id,
+      meta: candiadte.meta || {},
+      start_time: candiadte.start_date || new Date(),
+     // ...existing code...
+      end_time: new Date(new Date().setDate(new Date().getDate() + 10)),
+      // ...existing code...
+    });
+    candiadte.exam_id = newExam?.id || ''
+    await candidateService.createCandidate(candiadte)
+    
+  });
 
-//   // Create candidates with their unique assessments
-//   // const candidates = assessments.map((assessment, i) => ({
-//   //   name: `test2_${i + 1}`,
-//   //   email: `test${i + 1}@gmail.com`,
-//   //   phone: `12345678${i}${i + 2}`,
-//   //   technology_id: TECHNOLOGY_IDS.MONGODB,
-//   //   experience: "6",
-//   //   assessment_id: assessment.id,
-//   // }));
-
-//   // await prisma.candidate.createMany({
-//   //   data: candidates,
-//   //   skipDuplicates: true,
-//   // });
-
-//   console.log("Test candidates and their assessments created successfully");
-// }
+  
+  console.log("Test candidates and their assessments created successfully");
+}
 
 const resetDB = async () => {
   await prisma.$executeRawUnsafe(`
@@ -776,7 +793,7 @@ const resetDB = async () => {
 };
 
 async function main() {
-  // await resetDB();
+  await resetDB();
 
   const hashedPassword = await bcrypt.hash(
     process.env.SUPER_ADMIN_PASSWORD || 'superadminpassword',
@@ -836,12 +853,12 @@ async function main() {
   await createTechnologies();
 
   // Seed questions for all technologies
-  // await seedQuestions(mongodbQuestions, 'MongoDB');
-  // await seedQuestions(javascriptQuestions, 'JavaScript');
-  // await seedQuestions(pythonQuestions, 'Python');
+  await seedQuestions(mongodbQuestions, 'MongoDB');
+  await seedQuestions(javascriptQuestions, 'JavaScript');
+  await seedQuestions(pythonQuestions, 'Python');
 
   // Create test candidates
-  // await createTestCandidates();
+  await createTestCandidates();
 }
 
 main()

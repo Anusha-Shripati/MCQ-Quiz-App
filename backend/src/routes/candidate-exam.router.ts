@@ -33,6 +33,13 @@ router.post(
   upload.single('file'),
   asyncHandler(candidateExamController.submitAnswer)
 );
+router.post(
+  '/:examId/reset-answer',
+  authenticateCandidate,
+  validateRequest(candidateExamSchema.resetAnswer),
+
+  asyncHandler(candidateExamController.resetAnswer)
+);
 
 router.get(
   '/:examId/finish',

@@ -105,6 +105,23 @@ export class CandidateExamController {
       next(error);
     }
   };
+  resetAnswer = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const candidate_id = req.candidateInfo?.candidateId;
+      const {answer_id} = req.body
+      if (!candidate_id) throw new Error('Candidate not authenticated');
+
+      const answer = await this.candidateExamService.resetAnswer(answer_id);
+      const response = {
+        message: 'Answer reset successfully',
+        answer
+      };
+
+      generateResponse(res, 200, response, true, response.message);
+    } catch (error) {
+      next(error);
+    }
+  };
 
   finishExam = async (req: Request, res: Response, next: NextFunction) => {
     try {

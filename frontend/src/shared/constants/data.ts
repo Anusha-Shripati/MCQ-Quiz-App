@@ -1247,6 +1247,19 @@ export const BROWSER_KEY = [
   '0'
 ];
 export const modules: string[] = ['assessments', 'candidates', 'questions', 'users'];
+export const questionType: { [key: string]: string } = {
+  'multiple_select': 'Multiple Choice',
+  'mcq': 'Radio Select',
+  'code_snippet': 'Code Snippet',
+  'code_editor': 'Code Editor',
+  'video': 'Video',
+  'text': 'Text',
+};
+export const questionDifficulty: { [key: string]: string } = {
+  'easy': 'Easy',
+  'medium': 'Medium',
+  'hard': 'Hard',
+};
 
 export const commonRoutes: string[] = ['dashboard', 'profile', ''];
 

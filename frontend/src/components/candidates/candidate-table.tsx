@@ -23,6 +23,8 @@ import toast from 'react-hot-toast';
 import { FiCopy, FiMail } from 'react-icons/fi';
 import useSWR, { mutate } from 'swr';
 import StatusWrapper from '../common/status-wrapper';
+import { ExamMetaTech } from '@/types/exam.types';
+import Link from 'next/link';
 
 function CandidateTable() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -78,20 +80,20 @@ function CandidateTable() {
       searchQuery: params.get('searchQuery') || '',
       technologyFilter: params.get('technologyFilter')
         ? JSON.parse(params.get('technologyFilter') as string).map((label: string) => {
-            const found = technologyOptions.find((opt) => opt.label === label);
-            return found || { value: '', label };
-          })
+          const found = technologyOptions.find((opt) => opt.label === label);
+          return found || { value: '', label };
+        })
         : [],
       assessmentFilter: params.get('assessmentFilter')
         ? JSON.parse(params.get('assessmentFilter') as string).map((label: string) => {
-            const found = assessmentOptions.find((opt) => opt.label === label);
-            return found || { value: '', label };
-          })
+          const found = assessmentOptions.find((opt) => opt.label === label);
+          return found || { value: '', label };
+        })
         : [],
       created: params.get('created') ? JSON.parse(params.get('created') as string) : {},
     };
     setCandidateFilter(filterParams);
-  }, [searchParams,technologyOptions,assessmentOptions]);
+  }, [searchParams, technologyOptions, assessmentOptions]);
 
   const queryObj = useMemo(
     () => ({
@@ -105,7 +107,7 @@ function CandidateTable() {
       assessmentFilter: candidateFilter.assessmentFilter.map(
         (item: AssessmentOption) => item.value
       ),
-      created: JSON.stringify({range: candidateFilter.created?.range ? candidateFilter.created?.range : undefined}),
+      created: JSON.stringify({ range: candidateFilter.created?.range ? candidateFilter.created?.range : undefined }),
     }),
     [currentPage, itemsPerPage, candidateFilter]
   );
@@ -165,7 +167,7 @@ function CandidateTable() {
     // Calculate the difference in hours
     const duration = Math.abs(end.getTime() - start.getTime()) / (1000 * 60 * 60);
 
-    return `${duration} hours`; // e.g., "3 hours"
+    return `${duration.toFixed(2)} hours`; // e.g., "3 hours"
   };
 
   const handleDelete = async (id: string) => {
@@ -210,8 +212,8 @@ function CandidateTable() {
       assessment: candidate.assessment?.id as string,
       technology: candidate.assessment?.technologies
         ? (candidate.assessment?.technologies
-            .map((item) => item?.technology?.name)
-            .join(', ') as string)
+          .map((item) => item?.technology?.name)
+          .join(', ') as string)
         : '',
       startDate: new Date(candidate.exam?.start_time as string),
       endDate: new Date(candidate.exam?.end_time as string),
@@ -243,7 +245,7 @@ function CandidateTable() {
         header: 'Technology',
         render: (row) => {
           return row.assessment?.technologies
-            ? row.assessment?.technologies?.map((item) => item?.technology?.name).join(',')
+            ? row.assessment?.technologies?.map((item) => item?.technology?.name).join(', ')
             : '-';
         },
       },
@@ -265,6 +267,30 @@ function CandidateTable() {
         header: 'Created',
         render: (row) => format(new Date(row.created_at), 'MMM dd, yyyy hh:mm a'),
       },
+      {
+        key: 'status',
+        header: 'Status',
+        render: (row) => {
+          const statusMap = {
+            completed: 'bg-green-100 text-green-800',
+            in_progress: 'bg-yellow-100 text-yellow-800',
+            pending: 'bg-gray-100 text-gray-800',
+          };
+
+          const status = row.exam?.status as 'completed' | 'in_progress' | 'pending';
+
+
+          const badgeClass = statusMap[status] || 'bg-gray-100 text-gray-800';
+
+          return (
+            <span className={`px-3 py-1 text-sm font-medium rounded-full ${badgeClass}`}>
+              {status?.replace('_', ' ') || 'Unknown'} {row?.result?.length ? `(${row?.result[0]?.percentage?.toFixed(2)})`:""} %
+
+            </span>
+          );
+        }
+      },
+
       {
         key: 'actions',
         header: 'Share',
@@ -321,6 +347,11 @@ function CandidateTable() {
     ],
     []
   );
+  const getTechnology = (id: string) => {
+    const technology = technologyOptions.find((item) => item.value == id)
+    if (technology) return technology.label
+    return '-'
+  }
 
   const expandableRow: ExpandableRow<ICandidate> = {
     render: (row: ICandidate) => (
@@ -330,13 +361,13 @@ function CandidateTable() {
           {/* Result Section */}
           <div>
             <p className="text-sm text-gray-500 dark:text-gray-300">Result</p>
-            <div className="flex items-center gap-2">
-              {/* <p className="text-lg font-semibold text-blue-500">
-                {row?.details?.totalPercentage}
-              </p>
-              <a href="#" className="text-sm text-blue-500 hover:underline">
+            <div className="flex gap-2 flex-col">
+              {row.result.length>0 &&<p className="text-lg font-semibold text-blue-500">
+                {row?.result?.length ? row?.result[0]?.percentage?.toFixed(2) : "-"} %
+              </p>}
+              {row.result.length>0 && <Link href={`/result/${row.result[0]?.id}`} className="text-sm text-blue-500 hover:underline">
                 View Answer
-              </a> */}
+              </Link>}
             </div>
           </div>
 
@@ -364,12 +395,12 @@ function CandidateTable() {
           {/* Created Section */}
           <div>
             <p className="text-sm text-gray-500 dark:text-gray-300">Created</p>
-            {/* <p className="text-lg font-medium text-gray-700 dark:text-gray-300">
-              {row?.details?.createdBy}
+            <p className="text-lg font-medium text-gray-700 dark:text-gray-300">
+              {row?.exam?.user?.name}
             </p>
             <p className="text-sm text-gray-500 dark:text-gray-300">
-              {row?.details?.createdOn}
-            </p> */}
+              {row?.created_at ? dayjs(row?.created_at).format('DD/MM/YYYY h:m A') : "-"}
+            </p>
           </div>
         </div>
 
@@ -380,32 +411,37 @@ function CandidateTable() {
               <tr className="dark:bg-gray-500 dark:text-white">
                 <th className="border border-gray-300 px-4 py-2 text-left">Total Percentage</th>
                 {/* Dynamically render category headers */}
-                {/* {Object.keys(row?.details?.categories ?? {}).map((category) => (
-                    <th
-                      key={category}
-                      className="border border-gray-300 px-4 py-2 text-left"
-                    >
-                      {category}
-                    </th>
-                  ))} */}
+                {row?.exam?.meta?.tech_score?.map((technology: ExamMetaTech) => (
+                  <th
+                    key={technology.technology_id}
+                    className="border border-gray-300 px-4 py-2 text-left"
+                  >
+                    {getTechnology(technology.technology_id)}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
               <tr>
-                {/* <td className="border border-gray-300 px-4 py-2">
-                  {row?.details?.totalPercentage}
-                </td> */}
+                <td className="border border-gray-300 px-4 py-2">
+                  {row?.result?.length ? row?.result[0]?.percentage?.toFixed(2) : "-"} %
+                  <small> (&nbsp;
+                    {row?.result?.length ? row?.result[0]?.score?.toFixed(1) : "-"} /&nbsp;
+                    {row?.result?.length ? row?.result[0]?.total : "-"}
+                    &nbsp;) </small>
+                </td>
                 {/* Dynamically render category percentages */}
-                {/* {Object.values(row?.details?.categories ?? {}).map(
-                  (percentage, index) => (
-                    <td
-                      key={index}
-                      className="border border-gray-300 px-4 py-2"
-                    >
-                      {percentage as string}
-                    </td>
-                  )
-                )} */}
+                {row?.exam?.meta?.tech_score?.map((technology: ExamMetaTech) => (
+                  <th
+                    key={technology.technology_id}
+                    className="border border-gray-300 px-4 py-2 text-left"
+                  >
+                    {technology.percentage?.toFixed(2)} %
+                    <small> (&nbsp;
+                      {technology.score.toFixed(1) } / {technology.total}
+                      &nbsp;) </small>
+                  </th>
+                ))}
               </tr>
             </tbody>
           </table>

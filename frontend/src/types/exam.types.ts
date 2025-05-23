@@ -13,6 +13,10 @@ export interface IExam extends ITimestamps {
   candidate: ICandidate;
   assessment: IAssessment;
   exam_questions: IExamQuestion[];
+  user:{
+    id:string,
+    name:string
+  }
 }
 
 export interface IExamQuestion extends ITimestamps {
@@ -27,6 +31,7 @@ export interface IExamMeta {
   accessToken: string;
   tokenCreatedAt: string;
   tokenExpiresAt: string;
+  tech_score:ExamMetaTech[];
   [key: string]: unknown;
 }
 
@@ -56,13 +61,39 @@ export interface IExamQuestion {
 
 export type Answer = string | Blob | (string | number)[];
 
-
 export type Violation = {
   type: string;
   timestamp: number;
   details?: string;
 };
-
+export interface ExamMetaTech{ technology_id: string, score: number, total: number, percentage: number }
 export interface LocalAnswer { question: IExamQuestion,answer_id:string, answer: string | Blob | (string | number)[] }
 export interface SubmitAnsPayload  { question_id: string; user_answer: (string | number)[] }
 export interface SubmitAnsReponse{ success: boolean; message?: string; data?: { answer: { user_answer: (string | number)[], id: string } } }
+export interface AnswerData{
+  id:string,
+  user_answer:string[],
+  weight:number;
+  score:number;
+  question_id:string|null;
+  question:{
+    correct_answer:string[],
+    difficulty_level:'easy'| 'medium' |'hard';
+    options:string[],
+    question:string,
+    technology:{
+      id:string,
+      name:string
+    },
+    type:QuestionType;
+  }
+  question_name:string,
+}
+
+export interface Result{
+  answers:AnswerData,
+  exam:IExam,
+  percentage:number
+  score:number,
+  total:number
+}

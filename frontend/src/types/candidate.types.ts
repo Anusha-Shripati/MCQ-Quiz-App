@@ -96,6 +96,7 @@ export interface ICandidateMeta {
 }
 
 export interface ICandidate extends ITimestamps {
+  result: any;
   id?: string;
   assessment_id: string;
   exam_id: string;

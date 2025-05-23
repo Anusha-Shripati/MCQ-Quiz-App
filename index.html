@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Exam Review - Enhanced Layout</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #f3f4f6, #e0e7ff);
+    }
+    /* Smooth shadow and scale on hover for cards */
+    .card-hover:hover {
+      box-shadow: 0 10px 25px rgba(99, 102, 241, 0.25);
+      transform: translateY(-3px);
+      transition: all 0.3s ease;
+    }
+    .snapshot-hover:hover {
+      box-shadow: 0 8px 15px rgba(99, 102, 241, 0.2);
+      transform: scale(1.05);
+      transition: all 0.3s ease;
+      z-index: 10;
+      position: relative;
+    }
+    /* Scrollbar styling */
+    .scrollbar-thin::-webkit-scrollbar {
+      width: 6px;
+    }
+    .scrollbar-thin::-webkit-scrollbar-thumb {
+      background-color: #6366f1;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body class="text-gray-800">
+
+  <header class="bg-white backdrop-blur-md bg-opacity-70 sticky top-0 z-40 shadow-md">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between px-6 py-5">
+      <h1 class="text-4xl font-extrabold text-indigo-700 tracking-tight">Exam Review</h1>
+      <div class="mt-3 md:mt-0 text-gray-600 text-sm font-medium tracking-wide">
+        Reviewed by <span class="text-indigo-600">Teacher Name</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-6 py-10 grid grid-cols-1 md:grid-cols-[3fr_1fr] gap-12 min-h-screen">
+
+    <!-- Left: Candidate Info + Video + Questions -->
+    <section class="space-y-12">
+
+      <!-- Candidate Info + Video -->
+      <div class="bg-white rounded-xl shadow-md p-8 flex flex-col md:flex-row items-center md:items-start gap-10">
+        <div class="flex-1 space-y-4">
+          <h2 class="text-3xl font-semibold text-indigo-700 border-b-4 border-indigo-400 pb-2 mb-6">Candidate Info</h2>
+          <div class="grid grid-cols-2 gap-x-8 gap-y-4 text-gray-700 text-base leading-relaxed">
+            <div><span class="font-semibold">Name:</span> Jane Doe</div>
+            <div><span class="font-semibold">Email:</span> jane.doe@example.com</div>
+            <div><span class="font-semibold">Experience:</span> 4 years</div>
+            <div><span class="font-semibold">Technology:</span> JavaScript, React</div>
+            <div><span class="font-semibold">Exam Date:</span> 2025-05-22</div>
+          </div>
+        </div>
+
+        <div class="w-full md:w-96 rounded-xl overflow-hidden shadow-lg ring-2 ring-indigo-300 ring-opacity-50">
+          <video controls class="w-full h-auto bg-black rounded-xl" preload="metadata">
+            <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+        </div>
+      </div>
+
+      <!-- Exam Questions -->
+      <section class="space-y-10">
+
+        <!-- Question Card Template -->
+        <article class="bg-white p-8 rounded-xl shadow-md card-hover border-l-8 border-indigo-600">
+          <header class="text-indigo-700 text-sm font-bold uppercase mb-4 tracking-wider">MCQ (Single Answer)</header>
+          <h3 class="text-2xl font-semibold mb-6 leading-snug">1. What is the capital of France?</h3>
+          <div class="space-y-3 text-lg text-gray-900">
+            <div class="flex justify-between bg-green-100 text-green-900 px-6 py-3 rounded-lg font-semibold shadow-inner">
+              <span>A) Paris</span><span>✔</span>
+            </div>
+            <div class="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">B) Rome</div>
+            <div class="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">C) Madrid</div>
+            <div class="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">D) Berlin</div>
+          </div>
+        </article>
+
+        <article class="bg-white p-8 rounded-xl shadow-md card-hover border-l-8 border-yellow-500">
+          <header class="text-yellow-700 text-sm font-bold uppercase mb-4 tracking-wider">MCQ (Multiple Answers)</header>
+          <h3 class="text-2xl font-semibold mb-6 leading-snug">2. Which of the following are programming languages?</h3>
+          <div class="space-y-3 text-lg text-gray-900">
+            <div class="flex justify-between bg-green-100 text-green-900 px-6 py-3 rounded-lg font-semibold shadow-inner">
+              <span>A) Python</span><span>✔</span>
+            </div>
+            <div class="flex justify-between bg-green-100 text-green-900 px-6 py-3 rounded-lg font-semibold shadow-inner">
+              <span>B) JavaScript</span><span>✔</span>
+            </div>
+            <div class="flex justify-between bg-red-100 text-red-700 px-6 py-3 rounded-lg font-semibold shadow-inner">
+              <span>C) HTML</span><span>✘</span>
+            </div>
+            <div class="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">D) SQL</div>
+          </div>
+        </article>
+
+        <article class="bg-white p-8 rounded-xl shadow-md card-hover border-l-8 border-green-600">
+          <header class="text-green-700 text-sm font-bold uppercase mb-4 tracking-wider">Written Answer</header>
+          <h3 class="text-2xl font-semibold mb-6 leading-snug">3. Explain what a database is.</h3>
+          <p class="text-gray-800 text-lg leading-relaxed tracking-wide max-w-3xl">
+            A database is an organized collection of data that is stored and accessed electronically. It helps efficiently manage, update, and retrieve data.
+          </p>
+        </article>
+
+        <article class="bg-white p-8 rounded-xl shadow-md card-hover border-l-8 border-purple-600">
+          <header class="text-purple-700 text-sm font-bold uppercase mb-4 tracking-wider">Code Snippet Answer</header>
+          <h3 class="text-2xl font-semibold mb-6 leading-snug">4. Write a function to reverse a string in JavaScript.</h3>
+          <pre class="bg-gray-900 text-white rounded-lg p-6 overflow-x-auto text-base font-mono shadow-inner max-w-3xl"><code>
+function reverseString(str) {
+  return str.split('').reverse().join('');
+}
+          </code></pre>
+        </article>
+
+      </section>
+    </section>
+
+    <!-- Right Sidebar: Screenshots & Snapshots -->
+    <aside class="space-y-10 sticky top-28 self-start">
+
+      <div class="bg-white p-6 rounded-xl shadow-md border-l-8 border-blue-600 max-w-sm">
+        <h3 class="text-xl font-semibold text-blue-700 mb-6 border-b border-blue-300 pb-2 tracking-wide">Screenshots</h3>
+        <div class="space-y-6 max-h-[420px] overflow-y-auto scrollbar-thin pr-2">
+          <!-- Example screenshot item -->
+          <div class="flex items-center gap-4 snapshot-hover cursor-pointer rounded-lg p-2">
+            <img src="https://via.placeholder.com/80x50?text=Shot+1" alt="Screenshot 1" class="rounded-lg object-cover w-24 h-14 ring-2 ring-indigo-300" />
+            <div>
+              <p class="text-md font-semibold text-gray-800">Screenshot 1</p>
+              <p class="text-xs text-gray-500 tracking-wide">Timestamp: 00:15:24</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-4 snapshot-hover cursor-pointer rounded-lg p-2">
+            <img src="https://via.placeholder.com/80x50?text=Shot+2" alt="Screenshot 2" class="rounded-lg object-cover w-24 h-14 ring-2 ring-indigo-300" />
+            <div>
+              <p class="text-md font-semibold text-gray-800">Screenshot 2</p>
+              <p class="text-xs text-gray-500 tracking-wide">Timestamp: 00:27:12</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-4 snapshot-hover cursor-pointer rounded-lg p-2">
+            <img src="https://via.placeholder.com/80x50?text=Shot+3" alt="Screenshot 3" class="rounded-lg object-cover w-24 h-14 ring-2 ring-indigo-300" />
+            <div>
+              <p class="text-md font-semibold text-gray-800">Screenshot 3</p>
+              <p class="text-xs text-gray-500 tracking-wide">Timestamp: 00:42:08</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white p-6 rounded-xl shadow-md border-l-8 border-pink-600 max-w-sm">
+        <h3 class="text-xl font-semibold text-pink-700 mb-6 border-b border-pink-300 pb-2 tracking-wide">Snapshots</h3>
+        <div class="space-y-6 max-h-[420px] overflow-y-auto scrollbar-thin pr-2">
+          <!-- Example snapshot items -->
+          <div class="flex items-center gap-4 snapshot-hover cursor-pointer rounded-full p-1 bg-pink-100 ring-4 ring-pink-300">
+            <img src="https://randomuser.me/api/portraits/women/68.jpg" alt="Snapshot 1" class="rounded-full w-14 h-14 object-cover" />
+            <div>
+              <p class="text-md font-semibold text-gray-900">Jane Doe</p>
+              <p class="text-xs text-gray-600">Captured at 00:15:25</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-4 snapshot-hover cursor-pointer rounded-full p-1 bg-pink-100 ring-4 ring-pink-300">
+            <img src="https://randomuser.me/api/portraits/men/52.jpg" alt="Snapshot 2" class="rounded-full w-14 h-14 object-cover" />
+            <div>
+              <p class="text-md font-semibold text-gray-900">John Smith</p>
+              <p class="text-xs text-gray-600">Captured at 00:30:42</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-4 snapshot-hover cursor-pointer rounded-full p-1 bg-pink-100 ring-4 ring-pink-300">
+            <img src="https://randomuser.me/api/portraits/women/45.jpg" alt="Snapshot 3" class="rounded-full w-14 h-14 object-cover" />
+            <div>
+              <p class="text-md font-semibold text-gray-900">Alice Johnson</p>
+              <p class="text-xs text-gray-600">Captured at 00:41:10</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </aside>
+  </main>
+</body>
+</html>

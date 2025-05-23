@@ -29,7 +29,7 @@ const QuizPage = () => {
   const cameraCanvas = useRef<HTMLCanvasElement | null>(null)
   const screenCanvas = useRef<HTMLCanvasElement | null>(null)
   const interval = useRef<NodeJS.Timeout | null>(null)
-  const [permission, setPermission] = useState<{ camera: boolean, screen: boolean }>({ camera: false, screen: true })
+  const [permission, setPermission] = useState<{ camera: boolean, screen: boolean }>({ camera: true, screen: true })
 
   const handleKeyDown = (e: KeyboardEvent) => {
     if (PROHIBITED_KEYS.includes(e.key)) {
@@ -85,13 +85,17 @@ const QuizPage = () => {
         router.push('/thank-you');
         return;
       }
+      
       const videoLink = data.data?.answers?.find((a: { question_name: string }) => a.question_name === 'introduction')?.user_answer[0] || null;
       setVideoLink(videoLink);
       setCandidate(data.data);
       setExam(data.data.exam);
-
+      setLoading(false);
       setError(null);
+      return true
     } catch (err) {
+      setLoading(false);
+
       console.error('Error fetching candidate:', err);
       setError('Failed to fetch candidate data');
       screenStrean.current?.getTracks().forEach((track) => {
@@ -101,8 +105,6 @@ const QuizPage = () => {
         track.stop()
       })
       throw new Error('Failed to fetch candidate data')
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -197,7 +199,8 @@ const QuizPage = () => {
 
   const init = async () => {
     try {
-      await fetchCandidate();
+      const success =await fetchCandidate();
+      if(!success) return
       await Promise.allSettled([startScreenRecording(), startCamera()])
       const intervalTime = 60 * 1000
       interval.current = setInterval(() => {
@@ -243,8 +246,8 @@ const QuizPage = () => {
   return (
     <div className="w-screen min-h-screen bg-gray-50">
       {
-        loading ? <TestLoading />
-          : error ? <TestError errorTitle='Access Denied' accessError={error} />
+        error ? <TestError errorTitle='Access Denied' accessError={error} />
+          : loading || !candidate ? <TestLoading />
             : (!permission.camera || !permission.screen) ? <TestWarning text={
               <ul>
                 {!permission.screen && <li>In the screen sharing popup, select <strong>"Entire Screen"</strong> and then click <strong>"Share"</strong>. You can refresh this page </li>}

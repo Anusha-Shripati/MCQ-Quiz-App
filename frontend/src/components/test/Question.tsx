@@ -22,7 +22,7 @@ function Question({ question, answers, handleAnswerChange, handleStopRecording, 
         case QuestionType.MCQ:
             return (
                 <RadioGroup
-                    value={answers[question.question_id]?.answer as string}
+                    value={answers[question.question_id]?.answer as string||''}
                     onValueChange={(value) => handleAnswerChange(question, value)}
                     className="space-y-4"
                 >
@@ -32,7 +32,7 @@ function Question({ question, answers, handleAnswerChange, handleStopRecording, 
                             <label
                                 htmlFor={`option-${question.question_id}-${idx}`}
                                 className="text-lg text-gray-800 cursor-pointer"
-                            >
+                                >
                                 {option}
                             </label>
                         </div>
@@ -41,7 +41,8 @@ function Question({ question, answers, handleAnswerChange, handleStopRecording, 
             );
         case QuestionType.VIDEO:
             return (
-                <VideoRecorderQuestion isLoading={isLoading} question={question} answers={answers} onRecordingStop={(blob, url) => handleStopRecording(blob, url)} onRecordingComplete={() => handleNextQuestion()} />
+                <VideoRecorderQuestion isLoading={isLoading} question={question} answers={answers} onRecordingStop={(blob, url) => { console.log(blob);
+                 return handleStopRecording(blob, url)}} onRecordingComplete={() => handleNextQuestion()} />
             );
         case QuestionType.MULTIPLE_SELECT:
             return (

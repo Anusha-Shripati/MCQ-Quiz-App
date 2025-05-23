@@ -18,7 +18,7 @@ const QuizPage = () => {
   const params = useParams();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { current_step, setCurrentStep, setAccessCode, setCandidate, candidate, setExam, setCameraStream,cameraStreamRef } = useExamStore();
+  const { current_step, setCurrentStep, setAccessCode, setCandidate, candidate, setExam, setCameraStream, cameraStreamRef } = useExamStore();
   const router = useRouter();
 
   const [videoLink, setVideoLink] = useState<string | null>(null);
@@ -63,47 +63,48 @@ const QuizPage = () => {
       return;
     }
   };
-  useEffect(() => {
-    const fetchCandidate = async () => {
-      try {
-        setLoading(true);
-        const urlParams = new URLSearchParams(window.location.search);
-        const code = urlParams.get('code');
+  const fetchCandidate = async () => {
+    try {
+      setLoading(true);
+      const urlParams = new URLSearchParams(window.location.search);
+      const code = urlParams.get('code');
 
-        if (!code) {
-          throw new Error('Access code not found');
-        }
-
-        setAccessCode(code);
-
-        const data = await examApi.get(`/candidate-exam`, code);
-
-        if (!data.success) {
-          setError(data.message || 'Access denied. Invalid or expired access code.');
-          return;
-        }
-        if (data.data.exam.status == 'completed') {
-          router.push('/thank-you');
-          return;
-        }
-        const videoLink = data.data?.answers?.find((a: { question_name: string }) => a.question_name === 'introduction')?.user_answer[0] || null;
-        setVideoLink(videoLink);
-        setCandidate(data.data);
-        setExam(data.data.exam);
-
-        setError(null);
-      } catch (err) {
-        console.error('Error fetching candidate:', err);
-        setError('Failed to fetch candidate data');
-      } finally {
-        setLoading(false);
+      if (!code) {
+        throw new Error('Access code not found');
       }
-    };
 
-    if (params.examId) {
-      fetchCandidate();
+      setAccessCode(code);
+
+      const data = await examApi.get(`/candidate-exam`, code);
+
+      if (!data.success) {
+        setError(data.message || 'Access denied. Invalid or expired access code.');
+        return;
+      }
+      if (data.data.exam.status == 'completed') {
+        router.push('/thank-you');
+        return;
+      }
+      const videoLink = data.data?.answers?.find((a: { question_name: string }) => a.question_name === 'introduction')?.user_answer[0] || null;
+      setVideoLink(videoLink);
+      setCandidate(data.data);
+      setExam(data.data.exam);
+
+      setError(null);
+    } catch (err) {
+      console.error('Error fetching candidate:', err);
+      setError('Failed to fetch candidate data');
+      screenStrean.current?.getTracks().forEach((track) => {
+        track.stop()
+      })
+      cameraStreamRef?.getTracks().forEach((track) => {
+        track.stop()
+      })
+      throw new Error('Failed to fetch candidate data')
+    } finally {
+      setLoading(false);
     }
-  }, [params.examId]);
+  };
 
   const handleRecordingComplete = () => {
     setCurrentStep(EXAM_STEP.QUIZ);
@@ -167,9 +168,9 @@ const QuizPage = () => {
     canvas.width = ref.videoWidth;
     canvas.height = ref.videoHeight;
 
-    const ctx =  canvas.getContext('2d');
+    const ctx = canvas.getContext('2d');
     ctx?.drawImage(ref, 0, 0, canvas.width, canvas.height);
-    const imageDataURL =  canvas.toDataURL('image/jpeg', 0.8);
+    const imageDataURL = canvas.toDataURL('image/jpeg', 0.8);
     const blob = dataURLtoBlob(imageDataURL)
 
     const formData = new FormData()
@@ -195,22 +196,28 @@ const QuizPage = () => {
   }
 
   const init = async () => {
-    await Promise.allSettled([startScreenRecording(), startCamera()])
-    const intervalTime = 60 * 100
-    interval.current = setInterval(() => {
-      const randomDelayMsScreen = Math.floor(Math.random() * 61) * 100;
-      const randomDelayMsCamera = Math.floor(Math.random() * 61) * 100;
-      setTimeout(() => {
-        if (screenSnapshotRef.current !== null && screenCanvas.current !== null) {
-          takeScreenshot(screenSnapshotRef.current as HTMLVideoElement, screenCanvas.current as HTMLCanvasElement, SNAPSHOT.screenshot)
-        }
-      }, randomDelayMsScreen)
-      setTimeout(() => {
-        if (cameraSnapshotRef.current !== null && cameraCanvas.current !== null) {
-          takeScreenshot(cameraSnapshotRef.current as HTMLVideoElement, cameraCanvas.current as HTMLCanvasElement, SNAPSHOT.camera)
-        }
-      }, randomDelayMsCamera)
-    }, intervalTime)
+    try {
+      await fetchCandidate();
+      await Promise.allSettled([startScreenRecording(), startCamera()])
+      const intervalTime = 60 * 1000
+      interval.current = setInterval(() => {
+        const randomDelayMsScreen = Math.floor(Math.random() * 61) * 1000;
+        const randomDelayMsCamera = Math.floor(Math.random() * 61) * 1000;
+        setTimeout(() => {
+          if (screenSnapshotRef.current !== null && screenCanvas.current !== null) {
+            takeScreenshot(screenSnapshotRef.current as HTMLVideoElement, screenCanvas.current as HTMLCanvasElement, SNAPSHOT.screenshot)
+          }
+        }, randomDelayMsScreen)
+        setTimeout(() => {
+          if (cameraSnapshotRef.current !== null && cameraCanvas.current !== null) {
+            takeScreenshot(cameraSnapshotRef.current as HTMLVideoElement, cameraCanvas.current as HTMLCanvasElement, SNAPSHOT.camera)
+          }
+        }, randomDelayMsCamera)
+      }, intervalTime)
+
+    } catch (error) {
+
+    }
 
   }
 

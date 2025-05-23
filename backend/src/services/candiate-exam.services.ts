@@ -94,6 +94,7 @@ export class CandidateExamService {
             }
           },
           select: {
+            id:true,
             question_id: true,
             question_name: true,
             user_answer: true,
@@ -196,7 +197,6 @@ export class CandidateExamService {
     candidate_id: string,
     data: { question_id?: string; user_answer: string[], question_name: string },
   ) {
-    await this.getCandidate(candidate_id);
     let score = 0;
     if (data.question_id) {
       const examQuestion = await prisma.exam_questions.findFirst({
@@ -241,7 +241,7 @@ export class CandidateExamService {
 
 
     if (ans) {
-      return await prisma.answers.update({
+      const newAns= await prisma.answers.update({
         where: { id: ans.id },
         data: {
           user_answer: data.user_answer,
@@ -249,9 +249,13 @@ export class CandidateExamService {
           score: score > 0 ? score : 0
         },
       });
+      return {
+        id:newAns.id,
+        user_answer:newAns.user_answer
+      }
     }
 
-    return await prisma.answers.create({
+     const newAns=await prisma.answers.create({
       data: {
         exam_id: exam_id,
         question_id: data.question_id || null,
@@ -261,6 +265,22 @@ export class CandidateExamService {
         score: score > 0 ? score : 0
       },
     });
+    return {
+      id:newAns.id,
+      user_answer:newAns.user_answer
+
+    }
+  }
+
+  async resetAnswer(
+   answer_id?: string,
+  ) {
+     await prisma.answers.delete({
+      where: {
+        id:answer_id
+      },
+    });
+    return null
   }
 
   // async finishExam(examId: string, candidateId: string) {
@@ -441,3 +461,4 @@ export class CandidateExamService {
     return uploadedFile
   }
 }
+

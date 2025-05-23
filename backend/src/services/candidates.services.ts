@@ -56,14 +56,19 @@ export default class CandidatesService {
           },
         });
         const meta = await this.generateCandiateAccessToken(data.exam_id, newCandidate);
-
+        
         const upadtedCandidate = await prisma.candidate.update({ where: { id: newCandidate.id },data: { meta } })
 
         return upadtedCandidate;
+      },{
+        timeout:10000,
+        maxWait:100000
       });
 
       return result;
     } catch (error) {
+      console.log(error);
+      
       if (error instanceof AppError) {
         throw error;
       }
@@ -161,6 +166,9 @@ export default class CandidatesService {
 
 
         return newCandidate
+      },{
+        timeout:10000,
+        maxWait:100000
       });
       return result;
 

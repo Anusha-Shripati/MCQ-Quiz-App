@@ -62,3 +62,7 @@ export type Violation = {
   timestamp: number;
   details?: string;
 };
+
+export interface LocalAnswer { question: IExamQuestion,answer_id:string, answer: string | Blob | (string | number)[] }
+export interface SubmitAnsPayload  { question_id: string; user_answer: (string | number)[] }
+export interface SubmitAnsReponse{ success: boolean; message?: string; data?: { answer: { user_answer: (string | number)[], id: string } } }

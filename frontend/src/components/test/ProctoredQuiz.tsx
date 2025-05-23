@@ -1,7 +1,7 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/form/button';
 import { useExamStore } from '@/store/examStore';
-import { Answer, IExamQuestion, QuestionType, Violation } from '@/types/exam.types';
+import { Answer, IExamQuestion, LocalAnswer, QuestionType, SubmitAnsPayload, SubmitAnsReponse, Violation } from '@/types/exam.types';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import TestHeader from './TestHeader';
 import useSWR from 'swr';
@@ -21,7 +21,7 @@ import { BROWSER_KEY, PROHIBITED_COMBINATIONS, PROHIBITED_KEYS, QUIZ_CONFIG } fr
 
 
 export default function ProctoredQuiz() {
-  const [answers, setAnswers] = useState<Record<string, { question: IExamQuestion, answer: Answer }>>({});
+  const [answers, setAnswers] = useState<Record<string, { question: IExamQuestion, answer: Answer, answer_id?: string }>>({});
   const [timeLeft, setTimeLeft] = useState(0);
   const isSubmittingRef = useRef(false);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -72,22 +72,24 @@ export default function ProctoredQuiz() {
   })
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { isMutating, trigger } = useSWRMutation<{ success: boolean; message?: string; data?: { answer: { user_answer: (string | number)[] } } }, any, string, FormData | { question_id: string; user_answer: (string | number)[] }>(
+  const { isMutating, trigger } = useSWRMutation<SubmitAnsReponse, any, string, FormData |SubmitAnsPayload>(
     `/candidate-exam/${exam?.id}/submit-answer`,
     (url: string, { arg }) => examApi.post(url, arg, accessCode)
   )
   const { isMutating: isSubmiting, trigger: submitTrigger } = useSWRMutation(`/candidate-exam/${exam?.id}/finish`, (url: string) => examApi.get(url, accessCode))
+  const { isMutating: isReseting, trigger: resetTrigger } = useSWRMutation(`/candidate-exam/${exam?.id}/reset-answer`, (url: string, { arg }: { arg: { answer_id: string } }) => examApi.post(url, arg, accessCode))
 
   useEffect(() => {
     if (examData) {
       setExam(examData.data);
-      const obj: Record<string, { question: IExamQuestion, answer: string | Blob | (string | number)[] }> = {}
+      const obj: Record<string, LocalAnswer> = {}
       examData.data?.answers?.forEach((a: any) => {
         const question = examData.data?.exam_questions.find((q: IExamQuestion) => q.question_id == a.question_id)
 
         obj[a.question_id as string] = {
           question: question.question,
-          answer: question.question.type == QuestionType.MULTIPLE_SELECT ? a.user_answer : a.user_answer[0]
+          answer: question.question.type == QuestionType.MULTIPLE_SELECT ? a.user_answer : a.user_answer[0],
+          answer_id:a.id
         }
       })
       setAnswers(obj)
@@ -292,7 +294,7 @@ export default function ProctoredQuiz() {
 
   const handleKeyDown = (e: KeyboardEvent) => {
     // Allow F11 for fullscreen
-    
+    if(process.env.MODE == 'development') return
     if (e.key === 'F11') {
       e.preventDefault();
       requestFullScreen();
@@ -324,7 +326,7 @@ export default function ProctoredQuiz() {
     }
 
     // Prevent browser shortcuts
-    
+
     if (
       (e.ctrlKey || e.metaKey) && BROWSER_KEY.includes(e.key)) {
       e.preventDefault();
@@ -486,6 +488,7 @@ export default function ProctoredQuiz() {
   }
   // Effects
   useEffect(() => {
+    if(process.env.MODE == 'development') return
 
     // Request fullscreen after 1 second
     const fullscreenTimeout = setTimeout(() => {
@@ -574,12 +577,21 @@ export default function ProctoredQuiz() {
   }, []);
 
 
-  const handleReset = () => {
+  const handleReset = async () => {
     const current_question = questions[currentQuestionIndex]
-    setAnswers((prev) => ({
-      ...prev,
-      [current_question.question_id]: { question: current_question, answer: '' },
-    }));
+    try {
+      const answerId = answers[current_question.question_id]?.answer_id;
+      if (typeof answerId === 'string') {
+        await resetTrigger({ answer_id: answerId });
+      }
+    } catch (error) {
+
+    }
+    setAnswers((prv) => {
+      delete prv[current_question.question_id];
+      return prv
+    })
+
 
   }
   const handleNextQuestion = async () => {
@@ -615,6 +627,7 @@ export default function ProctoredQuiz() {
             [questionId]: {
               question: current,
               answer: userAnswer,
+              answer_id: response.data?.answer?.id
             },
           }));
           success = true;
@@ -625,6 +638,12 @@ export default function ProctoredQuiz() {
           user_answer: (Array.isArray(existingAnswer) ? existingAnswer : [existingAnswer]) as (string | number)[],
         };
         const response = await trigger(payload)
+
+        setAnswers((prev) => ({
+          ...prev,
+          [questionId]: { ...prev[questionId], answer_id: response.data?.answer?.id },
+        }));
+        success = true;
 
         if (response.success) success = true;
       }
@@ -707,7 +726,15 @@ export default function ProctoredQuiz() {
                       </span>
                     </div>
                     <div>
-                      <Button variant="default" size='lg' onClick={handleReset}>Reset</Button>
+                      <Button variant="default" size='lg' onClick={handleReset} disabled={isReseting} className='w-24'>
+                        {(isReseting) ? <div className="flex flex-col items-center justify-center gap-4">
+                          <Loader2 className="w-8 h-8 animate-spin" />
+                        </div>
+                          : <>
+                            Reset
+                          </>
+                        }
+                      </Button>
                     </div>
                   </div>
 
@@ -759,7 +786,7 @@ export default function ProctoredQuiz() {
                   onClick={() => handleNextQuestion()}
                   disabled={(answers[questions[currentQuestionIndex].question_id]?.answer ? false : true) || (isMutating || isSubmiting)}
                   variant="outline"
-                  className="px-6 py-2 flex items-center gap-2 rounded-full transition-all"
+                  className="px-6 py-2 flex items-center gap-2 rounded-full transition-all w-40"
                 >
                   {(isMutating || isSubmiting) ? <div className="flex flex-col items-center justify-center gap-4">
                     <Loader2 className="w-8 h-8 text-purple-600 animate-spin" />
@@ -776,7 +803,7 @@ export default function ProctoredQuiz() {
                 <Button
                   onClick={() => submitQuiz()}
                   disabled={Object.keys(answers).length !== questions.length || isSubmitting}
-                  className="px-8 py-3 bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 text-white font-medium rounded-full shadow-sm hover:shadow transition-all flex items-center gap-2"
+                  className="px-8 py-3 bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 text-white font-medium rounded-full shadow-sm hover:shadow transition-all flex items-center gap-2 w-40"
                 >{(isMutating || isSubmiting) ? <div className="flex flex-col items-center justify-center gap-4">
                   <Loader2 className="w-8 h-8 text-white animate-spin" />
                 </div>

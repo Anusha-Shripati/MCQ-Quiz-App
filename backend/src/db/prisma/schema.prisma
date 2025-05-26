@@ -157,16 +157,19 @@ model Exam_questions {
 }
 
 model Results {
-    id           String    @id @default(uuid())
-    exam_id      String    @unique
+    id           String @id @default(uuid())
+    exam_id      String @unique
     candidate_id String
-    score        Float
-    created_at   DateTime  @default(now())
-    updated_at   DateTime  @updatedAt
-    deleted_at   DateTime?
-    exam         Exam      @relation(fields: [exam_id], references: [id])
-    candidate    Candidate @relation(fields: [candidate_id], references: [id])
-    answers      Answers[]
+    score        Float  @default(0)
+    total        Float  @default(0)
+    percentage   Float  @default(0)
+
+    created_at DateTime  @default(now())
+    updated_at DateTime  @updatedAt
+    deleted_at DateTime?
+    exam       Exam      @relation(fields: [exam_id], references: [id])
+    candidate  Candidate @relation(fields: [candidate_id], references: [id])
+    answers    Answers[]
 }
 
 model Answers {
@@ -181,6 +184,7 @@ model Answers {
     created_at    DateTime @default(now())
     updated_at    DateTime @updatedAt
     score         Float    @default(0)
+    weight        Float    @default(0)
 
     exam      Exam       @relation(fields: [exam_id], references: [id])
     candidate Candidate  @relation(fields: [candidate_id], references: [id])

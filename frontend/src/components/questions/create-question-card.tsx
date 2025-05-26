@@ -222,11 +222,12 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
 
   const handleVideoToVideo = () => {
     const updatedQuestions = [...questions];
-
+    console.log(updatedQuestions[selectedQuestion].meta);
+    
     if (updatedQuestions[selectedQuestion].meta) {
       let videoToVideo = updatedQuestions[selectedQuestion].meta.videoToVideo;
 
-      if (videoToVideo === undefined || videoToVideo === null || false) {
+      if (videoToVideo === undefined || videoToVideo === null || videoToVideo === false) {
         videoToVideo = true;
       } else {
         videoToVideo = false;

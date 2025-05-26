@@ -12,6 +12,7 @@ import candidateRouter from './candidates.router';
 import examRouter from './exam.router';
 import candidateExamRouter from './candidate-exam.router';
 import uploadRouter from './upload.router';
+import resultRouter from './result.router';
 
 const router = express.Router();
 
@@ -27,5 +28,6 @@ router.use('/candidate', candidateRouter);
 router.use('/exam', examRouter);
 router.use('/candidate-exam', candidateExamRouter);
 router.use('/upload', uploadRouter);
+router.use('/result', resultRouter);
 
 export default router;

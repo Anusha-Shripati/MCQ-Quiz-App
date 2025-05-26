@@ -256,7 +256,29 @@ export default class CandidatesService {
             },
           },
         },
-        exam: true,
+        exam:{
+          select:{
+            id:true,
+            user:{
+              select:{
+                id:true,
+                name:true,
+              }
+            },
+            meta:true,
+            start_time:true,
+            end_time:true,
+            status:true
+          }
+        },
+        result:{
+          select:{
+            id:true,
+            score:true,
+            percentage:true,
+            total:true
+          }
+        }
       },
       orderBy: {
         created_at: 'desc',

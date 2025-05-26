@@ -15,8 +15,9 @@ interface VideoRecorderProps {
     videoLink?: string | null;
     onRecordingStop?: (blob: Blob | null,url:string) => void;
     isLoading:boolean
+    showControls?:boolean
 }
-const VideoRecorder = ({ onRecordingComplete, maxTime, videoKey = 'video', videoLink, onRecordingStop,isLoading }: VideoRecorderProps) => {
+const VideoRecorder = ({ onRecordingComplete, maxTime, videoKey = 'video', videoLink, onRecordingStop,isLoading,showControls=true }: VideoRecorderProps) => {
     const videoRef = useRef<HTMLVideoElement | null>(null);
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const streamRef = useRef<MediaStream | null>(null);
@@ -377,14 +378,14 @@ const VideoRecorder = ({ onRecordingComplete, maxTime, videoKey = 'video', video
                 </div>
             </div>
 
-            <VideoControls
+           {showControls && <VideoControls
                 status={status}
                 onStart={startRecording}
                 onStop={stopRecording}
                 onReset={resetRecording}
                 onContinue={() => onRecordingComplete(recordedChunks, recordedVideo as string)}
                 isLoading={isLoading}
-            />
+            />}
         </div>
     );
 };

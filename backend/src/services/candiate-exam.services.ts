@@ -477,7 +477,7 @@ export class CandidateExamService {
     } else {
       updatedMeta = {
         ...(exam?.meta as ExamMeta || {}),
-        camera: [...(exam?.meta as ExamMeta)?.screenshots || [], { timestamp: timestamp, image: uploadedFile.path }]
+        camera: [...(exam?.meta as ExamMeta)?.camera || [], { timestamp: timestamp, image: uploadedFile.path }]
       };
     }
     await prisma.exam.update({

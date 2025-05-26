@@ -378,7 +378,7 @@ const VideoRecorder = ({ onRecordingComplete, maxTime, videoKey = 'video', video
                 </div>
             </div>
 
-           {!showControls && <VideoControls
+           {showControls && <VideoControls
                 status={status}
                 onStart={startRecording}
                 onStop={stopRecording}

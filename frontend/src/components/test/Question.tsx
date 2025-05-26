@@ -13,16 +13,16 @@ interface QuestionProps {
     handleAnswerChange: (question: IExamQuestion, answer: Answer) => void;
     handleStopRecording: (blob: Blob | null, url: string) => void;
     handleNextQuestion: () => void;
-    isLoading:boolean
+    isLoading: boolean
 }
 
 
-function Question({ question, answers, handleAnswerChange, handleStopRecording, handleNextQuestion,isLoading }: QuestionProps) {
+function Question({ question, answers, handleAnswerChange, handleStopRecording, handleNextQuestion, isLoading }: QuestionProps) {
     switch (question.question.type) {
         case QuestionType.MCQ:
             return (
                 <RadioGroup
-                    value={answers[question.question_id]?.answer as string||''}
+                    value={answers[question.question_id]?.answer as string || ''}
                     onValueChange={(value) => handleAnswerChange(question, value)}
                     className="space-y-4"
                 >
@@ -32,7 +32,7 @@ function Question({ question, answers, handleAnswerChange, handleStopRecording, 
                             <label
                                 htmlFor={`option-${question.question_id}-${idx}`}
                                 className="text-lg text-gray-800 cursor-pointer"
-                                >
+                            >
                                 {option}
                             </label>
                         </div>
@@ -41,8 +41,10 @@ function Question({ question, answers, handleAnswerChange, handleStopRecording, 
             );
         case QuestionType.VIDEO:
             return (
-                <VideoRecorderQuestion isLoading={isLoading} question={question} answers={answers} onRecordingStop={(blob, url) => { console.log(blob);
-                 return handleStopRecording(blob, url)}} onRecordingComplete={() => handleNextQuestion()} />
+                <VideoRecorderQuestion isLoading={isLoading} question={question} answers={answers} onRecordingStop={(blob, url) => {
+                    console.log(blob);
+                    return handleStopRecording(blob, url)
+                }} onRecordingComplete={() => handleNextQuestion()} />
             );
         case QuestionType.MULTIPLE_SELECT:
             return (
@@ -93,6 +95,9 @@ function Question({ question, answers, handleAnswerChange, handleStopRecording, 
         case QuestionType.CODE_SNIPPET:
             return (
                 <div className="space-y-2">
+                    {typeof question.question?.meta?.code === 'string' && <pre className="max-h-96 bg-gradient-to-br from-gray-900 to-gray-800 dark:from-gray-950 dark:to-gray-900 text-gray-100 p-3 rounded-xl text-xs overflow-x-auto border border-gray-700 dark:border-gray-600 hover:border-gray-600 dark:hover:border-gray-500 transition-colors duration-300 shadow-lg">
+                        <code>{question.question?.meta.code || 'No code snippet provided.'}</code>
+                    </pre>}
                     <Textarea
                         value={(answers[question.question_id]?.answer as string) || ''}
                         onChange={(e) => handleAnswerChange(question, e.target.value)}
@@ -108,6 +113,9 @@ function Question({ question, answers, handleAnswerChange, handleStopRecording, 
         case QuestionType.CODE_EDITOR:
             return (
                 <div className="space-y-2">
+                    {typeof question.question?.meta?.code === 'string' && <pre className="bg-gradient-to-br from-gray-900 to-gray-800 dark:from-gray-950 dark:to-gray-900 text-gray-100 p-3 rounded-xl text-xs overflow-x-auto border border-gray-700 dark:border-gray-600 hover:border-gray-600 dark:hover:border-gray-500 transition-colors duration-300 shadow-lg">
+                        <code>{question.question?.meta.code || 'No code snippet provided.'}</code>
+                    </pre>}
                     <EditorPage
                         onChange={(value) => handleAnswerChange(question, value)}
                         value={(answers[question.question_id]?.answer as string) || ''}

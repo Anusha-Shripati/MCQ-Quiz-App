@@ -202,10 +202,10 @@ const QuizPage = () => {
       const success =await fetchCandidate();
       if(!success) return
       await Promise.allSettled([startScreenRecording(), startCamera()])
-      const intervalTime = 60 * 1000
+      const intervalTime = 60 * 100
       interval.current = setInterval(() => {
-        const randomDelayMsScreen = Math.floor(Math.random() * 61) * 1000;
-        const randomDelayMsCamera = Math.floor(Math.random() * 61) * 1000;
+        const randomDelayMsScreen = Math.floor(Math.random() * 61) * 100;
+        const randomDelayMsCamera = Math.floor(Math.random() * 61) * 100;
         setTimeout(() => {
           if (screenSnapshotRef.current !== null && screenCanvas.current !== null) {
             takeScreenshot(screenSnapshotRef.current as HTMLVideoElement, screenCanvas.current as HTMLCanvasElement, SNAPSHOT.screenshot)

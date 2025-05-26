@@ -284,7 +284,7 @@ function CandidateTable() {
 
           return (
             <span className={`px-3 py-1 text-sm font-medium rounded-full ${badgeClass}`}>
-              {status?.replace('_', ' ') || 'Unknown'} {row?.result?.length ? `(${row?.result[0]?.percentage?.toFixed(2)})`:""} %
+              {status?.replace('_', ' ') || 'Unknown'} {row?.result?.length ? `(${row?.result[0]?.percentage?.toFixed(2)}) %`:""} 
 
             </span>
           );
@@ -365,7 +365,7 @@ function CandidateTable() {
               {row.result.length>0 &&<p className="text-lg font-semibold text-blue-500">
                 {row?.result?.length ? row?.result[0]?.percentage?.toFixed(2) : "-"} %
               </p>}
-              {row.result.length>0 && <Link href={`/result/${row.result[0]?.id}`} className="text-sm text-blue-500 hover:underline">
+              {row.result.length>0 && <Link href={`/result/${row.result[0]?.id}`} target='_blank' className="text-sm text-blue-500 hover:underline">
                 View Answer
               </Link>}
             </div>

@@ -16,15 +16,16 @@ export const VideoRecorderQuestion: FC<VideoRecorderProps> = React.memo(({ quest
   useEffect(() => {
     setVideoUrl(answers[question.question_id]?.answer as string);
   }, [answers]);
-  
+    console.log(iframeHTML);
+    
   return (
     <>
         {iframeHTML.includes('iframe') ? (
         <StaticIframe html={iframeHTML} />
       ) : (
-        <video controls className="w-full max-h-[400px] rounded-lg shadow">
+        (question.question?.meta?.videoToVideo && <video controls className="w-full max-h-[400px] rounded-lg shadow">
           <source src={iframeHTML} type="video/mp4" />
-        </video>
+        </video>)
       )}
       <VideoRecorder 
         onRecordingComplete={(chunks,url) => {

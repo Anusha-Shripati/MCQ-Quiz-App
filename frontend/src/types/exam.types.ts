@@ -25,13 +25,19 @@ export interface IExamQuestion extends ITimestamps {
   question_id: string;
   question: IQuestion;
 }
+export interface SnapShot{
+  image:string,
+  timestamp:number
+}
 export interface IExamMeta {
   examLink: string;
   accessCode: string;
   accessToken: string;
   tokenCreatedAt: string;
   tokenExpiresAt: string;
-  tech_score:ExamMetaTech[];
+  tech_score?:ExamMetaTech[];
+  screenshots?:SnapShot[];
+  camera?:SnapShot[];
   [key: string]: unknown;
 }
 
@@ -85,6 +91,11 @@ export interface AnswerData{
       id:string,
       name:string
     },
+    meta?:{
+      code?:string,
+      video_url?:string,
+      videoToVideo?:boolean,
+    }
     type:QuestionType;
   }
   question_name:string,

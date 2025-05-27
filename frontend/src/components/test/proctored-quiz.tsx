@@ -521,7 +521,8 @@ export default function ProctoredQuiz() {
             },
           }));
           success = true;
-        }
+        } 
+        
       } else {
         const payload = {
           question_id: questionId,

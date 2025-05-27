@@ -1,7 +1,6 @@
 import React, { useCallback, useState } from 'react'
 import { Content, List, Tabs, Trigger } from '../ui/form/tabs'
 import { SnapShot } from '@/types/exam.types'
-import Image from 'next/image'
 import dayjs from 'dayjs'
 
 import "react-responsive-carousel/lib/styles/carousel.min.css";
@@ -49,11 +48,11 @@ function Snapshots(props: SnapshotsProps) {
                             Camera snapshots
                         </Trigger>
                     </List>
-                    {snapshots.map((item: keyof SnapshotsProps | string) => {
-                        return <Content value={item}>
+                    {snapshots.map((item: keyof SnapshotsProps | string, index: number) => {
+                        return <Content value={item} key={index}>
                             <div className='flex gap-2 flex-wrap justify-start'>
                                 {props[item as keyof SnapshotsProps].map((img: SnapShot, index) => {
-                                    return <div className="flex flex-col cursor-pointer transition-transform" onClick={() => toggle(item, index)}>
+                                    return <div className="flex flex-col cursor-pointer transition-transform"  key={index} onClick={() => toggle(item, index)}>
                                         <div className="overflow-hidden rounded-lg mb-2">
                                             <img
                                                 src={img.image}

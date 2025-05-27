@@ -1,5 +1,5 @@
 import { DateRange, ITimestamps } from './common.types';
-import { IExam } from './exam.types';
+import { IExam, Result } from './exam.types';
 
 export type CandidateFormData = {
   id?: string;
@@ -96,7 +96,8 @@ export interface ICandidateMeta {
 }
 
 export interface ICandidate extends ITimestamps {
-  result: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  result: Result[];
   id?: string;
   assessment_id: string;
   exam_id: string;

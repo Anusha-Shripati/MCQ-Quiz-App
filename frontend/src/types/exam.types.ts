@@ -122,4 +122,4 @@ export interface ResultFilter {
   days?:string;
   experienceFrom: null | string |number,
   experienceTo: null | string |number,
-};
+}

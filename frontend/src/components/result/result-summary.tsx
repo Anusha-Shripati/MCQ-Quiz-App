@@ -17,7 +17,7 @@ const ResultSummary: React.FC<ResultSummaryProps> = ({ score, total, percentage,
         dedupingInterval: 60000,
         staleWhileRevalidate: true,
     });
-    const [techListWithScores, setTechListWithScores] = React.useState<any[]>([]);
+    const [techListWithScores, setTechListWithScores] = React.useState<{ technology_id: string; score: number; total: number; percentage: number;  name: string  }[]>([]);
     useEffect(() => {
         if (technology) {
             const score = technologies.map((tech) => {

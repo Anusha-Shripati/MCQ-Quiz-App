@@ -142,12 +142,14 @@ const QuizPage = () => {
         await screenSnapshotRef.current.play();
       }
     } catch (error) {
+      console.log(error);
+      
       setPermission((prv) => ({ ...prv, screen: false }))
     }
   }
   const startCamera = async () => {
     try {
-      let cameraStream = await navigator.mediaDevices.getUserMedia({
+      const cameraStream = await navigator.mediaDevices.getUserMedia({
         video: true,
         audio: true
       })
@@ -166,6 +168,10 @@ const QuizPage = () => {
       }
 
     } catch (error) {
+      console.log(error);
+      
+      setError('Failed to start camera');
+
       setPermission((prv) => ({ ...prv, camera: false }))
     }
   }
@@ -190,7 +196,7 @@ const QuizPage = () => {
       const code = urlParams.get('code');
       await examApi.post(`/candidate-exam/${params.examId}/snapshot?fileType=${type}`, formData, code as string)
     } catch (error) {
-      // console.log(error);
+      console.error('Error taking screenshot:', error);
     }
   }
 
@@ -257,7 +263,7 @@ const QuizPage = () => {
           : loading || !candidate ? <TestLoading />
             : (!permission.camera || !permission.screen) ? <TestWarning text={
               <ul>
-                {!permission.screen && <li>In the screen sharing popup, select <strong>"Entire Screen"</strong> and then click <strong>"Share"</strong>. You can refresh this page </li>}
+                {!permission.screen && <li>In the screen sharing popup, select <strong>Entire Screen</strong> and then click <strong>Share</strong>. You can refresh this page </li>}
                 {!permission.camera && <li>Make sure camera is on</li>}
               </ul>
             } title='Permissions' />

@@ -92,7 +92,7 @@ function Answer() {
                   )}
                   <div className="w-full aspect-video max-w-xl mb-4 relative">
                     {introduction.user_answer?.[0] ? (
-                      <VideoPreview videoUrl={introduction.user_answer[0]} onError={() => { }} />
+                      <VideoPreview videoUrl={introduction.user_answer[0]}  />
                     ) : (
                       <div className="flex flex-col items-center justify-center h-full bg-gray-100 dark:bg-gray-700 rounded">
                         <svg className="w-16 h-16 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -103,6 +103,7 @@ function Answer() {
                     )}
                   </div>
                   <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
+                    {/* eslint-disable-next-line react/no-unescaped-entities */}
                     This video was recorded as part of the candidate's introduction.
                   </p>
                 </div>

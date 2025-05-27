@@ -3,13 +3,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Camera,
-  Loader2,
 } from 'lucide-react';
 import VideoRecorder from '../video-recording/VideoRecorder';
 import { examApi } from '@/lib/api';
 import { useExamStore } from '@/store/examStore';
 import useSWRMutation from 'swr/mutation';
-import { useRef, useState } from 'react';
+import {  useState } from 'react';
 
 // Types
 interface VideoRecorderProps {

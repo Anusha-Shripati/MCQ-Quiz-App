@@ -180,7 +180,7 @@ const QuestionReview: React.FC<QuestionReviewProps> = ({ answers }) => {
                       <div className="relative">
 
                         <p className="text-xs text-purple-600 dark:text-purple-300 mb-1">Candidate Answer</p>
-                        <VideoPreview videoUrl={ans.user_answer[0]} onError={() => console.error('Video load error')}/>
+                        <VideoPreview videoUrl={ans.user_answer[0]} />
                       </div>
                     </div>
                   )

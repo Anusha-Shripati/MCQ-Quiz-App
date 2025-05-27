@@ -121,7 +121,7 @@ CREATE TABLE "Candidate" (
     "exam_id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "email" TEXT NOT NULL,
-    "experience" TEXT NOT NULL,
+    "experience" DOUBLE PRECISION NOT NULL DEFAULT 0,
     "phone" TEXT NOT NULL,
     "meta" JSONB,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -162,7 +162,9 @@ CREATE TABLE "Results" (
     "id" TEXT NOT NULL,
     "exam_id" TEXT NOT NULL,
     "candidate_id" TEXT NOT NULL,
-    "score" DOUBLE PRECISION NOT NULL,
+    "score" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "total" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "percentage" DOUBLE PRECISION NOT NULL DEFAULT 0,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
     "deleted_at" TIMESTAMP(3),
@@ -183,6 +185,7 @@ CREATE TABLE "Answers" (
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
     "score" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "weight" DOUBLE PRECISION NOT NULL DEFAULT 0,
 
     CONSTRAINT "Answers_pkey" PRIMARY KEY ("id")
 );

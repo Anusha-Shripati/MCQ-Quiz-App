@@ -13,4 +13,13 @@ export class ResultController {
             next(error);
         }
     };
+    list = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const params = req.query;
+            const resultData = await resultService.list(params);
+            return generateResponse(res, 200, resultData, true, 'Results fetched successfully');
+        } catch (error) {
+            next(error);
+        }
+    }
 }

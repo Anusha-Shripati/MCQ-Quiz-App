@@ -13,51 +13,51 @@ import { fetcher } from '@/lib/api';
 import { Module, Permissions } from '@/types/common.types';
 // import { Avatar, AvatarImage } from "../ui/avatar";
 import { useRouter } from 'next/navigation';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Layers } from 'lucide-react';
 import Image from 'next/image';
 
 export default function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const sidebarRef = useRef<HTMLDivElement | null>(null);
-  const { setPermissions, user,setParamsLoading } = useAuthStore();
+  const { setPermissions, user, setParamsLoading } = useAuthStore();
 
   const router = useRouter();
 
   const getPermission = async (url: string) => {
-    
+
     if (user?.id) {
       try {
-        
-      const response = await fetcher(url);
-      if (response.success) {
-        const permissions = response.data?.role?.role_permissions?.reduce(
-          (
-            obj: Record<string, Permissions>,
-            pr: Omit<Permissions, 'module'> & { module: Module }
-          ) => {
-            obj[pr.module?.name] = {
-              can_edit: pr.can_edit,
-              can_read: pr.can_read,
-            };  
-            return obj;
-          },
-          {}
-        );
-        setPermissions(permissions, response.data);
-        document.cookie = `role=${response.data?.role?.name}; path=/;`;
-        document.cookie = `permissions=${encodeURIComponent(JSON.stringify(permissions))}; path=/;`;
-        return permissions;
-      }
 
-    } catch (error) {
-      console.error('Error fetching permissions:', error);
-      setPermissions(null, null);
-      document.cookie = `role=; path=/;`;
-      document.cookie = `permissions=; path=/;`;
-      document.cookie = 'token=; path=/;';
-      router.push('/');
-      return null; 
-    }
+        const response = await fetcher(url);
+        if (response.success) {
+          const permissions = response.data?.role?.role_permissions?.reduce(
+            (
+              obj: Record<string, Permissions>,
+              pr: Omit<Permissions, 'module'> & { module: Module }
+            ) => {
+              obj[pr.module?.name] = {
+                can_edit: pr.can_edit,
+                can_read: pr.can_read,
+              };
+              return obj;
+            },
+            {}
+          );
+          setPermissions(permissions, response.data);
+          document.cookie = `role=${response.data?.role?.name}; path=/;`;
+          document.cookie = `permissions=${encodeURIComponent(JSON.stringify(permissions))}; path=/;`;
+          return permissions;
+        }
+
+      } catch (error) {
+        console.error('Error fetching permissions:', error);
+        setPermissions(null, null);
+        document.cookie = `role=; path=/;`;
+        document.cookie = `permissions=; path=/;`;
+        document.cookie = 'token=; path=/;';
+        router.push('/');
+        return null;
+      }
     }
   };
 
@@ -65,9 +65,9 @@ export default function Sidebar() {
     refreshInterval: 30000,
   });
   const pathname = usePathname();
-  useEffect(() => {   
+  useEffect(() => {
     setParamsLoading(false);
-  },[pathname])
+  }, [pathname])
 
   const toggleSidebar = useCallback(() => {
     setIsCollapsed((prv) => !prv);
@@ -76,9 +76,8 @@ export default function Sidebar() {
   return (
     <aside
       ref={sidebarRef}
-      className={`${
-        isCollapsed ? 'w-16' : 'w-56'
-      } bg-primary text-primary-foreground sticky top-0 left-0 text-white h-screen z-50  transition-all duration-300 relative`}
+      className={`${isCollapsed ? 'w-16' : 'w-56'
+        } bg-primary text-primary-foreground sticky top-0 left-0 text-white h-screen z-50  transition-all duration-300 relative`}
     >
       <div className="overflow-auto flex flex-row justify-center items-center h-full">
         <div className="w-[calc(100%-20px)] space-y-4 h-full">
@@ -171,6 +170,15 @@ export default function Sidebar() {
                     <div className="flex-grow border-t border-gray-400"></div>
                   </div>
                 )} */}
+                {permissions?.results?.can_read && (
+                  <NavItem
+                    href="/results"
+                    icon={<Layers size={30} />}
+                    label="Results"
+                    isCollapsed={isCollapsed}
+                    isActive={pathname === '/results'}
+                  />
+                )}
                 {permissions?.users?.can_read && (
                   <NavItem
                     href="/users"
@@ -195,9 +203,8 @@ export default function Sidebar() {
         </div>
         <div
           onClick={toggleSidebar}
-          className={`absolute  bottom-4 -right-[11%] transform -translate-y-1/2 cursor-pointer ${
-            isCollapsed ? 'translate-x-2' : '-translate-x-2'
-          }`}
+          className={`absolute  bottom-4 -right-[11%] transform -translate-y-1/2 cursor-pointer ${isCollapsed ? 'translate-x-2' : '-translate-x-2'
+            }`}
         >
           <Button
             className="bg-white text-gray-800 border border-gray-300 rounded-full shadow-md flex items-center justify-center"
@@ -235,11 +242,10 @@ function NavItem({
     <Link href={href} prefetch={true}>
       <Button
         onMouseEnter={handleMouseEnter}
-        className={`w-full text-base relative h-12 flex items-center ${isCollapsed ? 'justify-center' : 'justify-start'}  gap-4 p-3 rounded-lg transition-colors ${
-          isActive
+        className={`w-full text-base relative h-12 flex items-center ${isCollapsed ? 'justify-center' : 'justify-start'}  gap-4 p-3 rounded-lg transition-colors ${isActive
             ? 'bg-secondary text-secondary-foreground'
             : 'hover:bg-secondary hover:text-secondary-foreground'
-        }`}
+          }`}
       >
         <span className="h-5 w-5">{icon}</span>
         {!isCollapsed && <span>{label}</span>}

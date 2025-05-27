@@ -30,7 +30,7 @@ const QuestionReview: React.FC<QuestionReviewProps> = ({ answers }) => {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-3 mb-4">
-        <div className="w-2 h-8 bg-gradient-to-b from-gray-500 to-gray-500 rounded-full shadow-sm"></div>
+        <div className="w-2 h-8 bg-gradient-to-b from-blue-500 to-indigo-500 rounded-full shadow-sm"></div>
         <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Question Review</h2>
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">

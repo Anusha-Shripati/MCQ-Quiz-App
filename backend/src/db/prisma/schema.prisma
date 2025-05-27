@@ -116,7 +116,7 @@ model Candidate {
     exam_id       String      @unique
     name          String
     email         String      @unique
-    experience    String
+    experience    Float       @default(0)
     phone         String      @unique
     meta          Json?
     created_at    DateTime    @default(now())

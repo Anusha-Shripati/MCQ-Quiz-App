@@ -699,7 +699,6 @@ async function createTechnologies() {
 }
 
 async function createTestCandidates() {
-  console.log("Creating test candidates...");
 
   // Get superadmin user ID
   const superadmin = await prisma.user.findFirst({
@@ -814,7 +813,7 @@ async function main() {
   }
 
   // Check if modules exist, if not create them
-  const moduleNames = ['candidates', 'questions', 'assessments', 'users'];
+  const moduleNames = ['candidates', 'questions', 'assessments', 'users','results'];
   for (const name of moduleNames) {
     const existingModule = await prisma.modules.findFirst({
       where: { name },

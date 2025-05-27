@@ -116,7 +116,9 @@ const QuizPage = () => {
     try {
 
       screenStrean.current = await navigator.mediaDevices.getDisplayMedia({
-        video: true,
+        video: {
+          displaySurface: 'monitor',
+        },
         audio: false
       })
       setPermission((prv) => ({ ...prv, screen: true }))
@@ -126,9 +128,12 @@ const QuizPage = () => {
         stopRecording()
         setPermission((prv) => ({ ...prv, screen: false }))
       }
+      console.log(settings.displaySurface, 'displaySurface');
+      
       if (settings.displaySurface == 'monitor') {
         setPermission((prv) => ({ ...prv, screen: true }))
       } else {
+        setPermission((prv) => ({ ...prv, screen: false }))
         screenStrean.current.getTracks().forEach((track) => track.stop());
         return;
       }
@@ -202,17 +207,17 @@ const QuizPage = () => {
       const success =await fetchCandidate();
       if(!success) return
       await Promise.allSettled([startScreenRecording(), startCamera()])
-      const intervalTime = 60 * 100
+      const intervalTime = 60 * 1000
       interval.current = setInterval(() => {
-        const randomDelayMsScreen = Math.floor(Math.random() * 61) * 100;
-        const randomDelayMsCamera = Math.floor(Math.random() * 61) * 100;
+        const randomDelayMsScreen = Math.floor(Math.random() * 61) * 1000;
+        const randomDelayMsCamera = Math.floor(Math.random() * 61) * 1000;
         setTimeout(() => {
-          if (screenSnapshotRef.current !== null && screenCanvas.current !== null) {
+          if (screenSnapshotRef.current !== null && screenCanvas.current !== null && permission.screen) {
             takeScreenshot(screenSnapshotRef.current as HTMLVideoElement, screenCanvas.current as HTMLCanvasElement, SNAPSHOT.screenshot)
           }
         }, randomDelayMsScreen)
         setTimeout(() => {
-          if (cameraSnapshotRef.current !== null && cameraCanvas.current !== null) {
+          if (cameraSnapshotRef.current !== null && cameraCanvas.current !== null && permission.camera) {
             takeScreenshot(cameraSnapshotRef.current as HTMLVideoElement, cameraCanvas.current as HTMLCanvasElement, SNAPSHOT.camera)
           }
         }, randomDelayMsCamera)

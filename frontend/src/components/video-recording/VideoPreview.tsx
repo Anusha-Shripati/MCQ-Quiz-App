@@ -1,7 +1,7 @@
-import { Loader2, Maximize2, Minimize2, Pause, Play, SkipBack, SkipForward, Volume, Volume1, Volume2, VolumeX } from "lucide-react";
+import { Loader2, Maximize2, Minimize2, Pause, Play, SkipBack, SkipForward,  Volume1, Volume2, VolumeX } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const VideoPreview = ({ videoUrl, onError }: { videoUrl: string, onError: (err: any) => void }) => {
+const VideoPreview = ({ videoUrl, onError }: { videoUrl: string, onError?: (err: any) => void }) => {
     const videoRef = useRef<HTMLVideoElement>(null);
     const progressRef = useRef<HTMLDivElement>(null);
     const progressContainerRef = useRef<HTMLDivElement>(null);
@@ -78,7 +78,7 @@ const VideoPreview = ({ videoUrl, onError }: { videoUrl: string, onError: (err: 
 
         // Auto-play the video when loaded
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        // video.play().catch((err: any) => onError(err));
+        // video.play().catch((err: any) => onError?.(err));
         // setIsPlaying(true);
 
         return () => {
@@ -99,7 +99,7 @@ const VideoPreview = ({ videoUrl, onError }: { videoUrl: string, onError: (err: 
             if (isPlaying) {
                 videoRef.current.pause();
             } else {
-                videoRef.current.play();
+                videoRef.current.play().catch((err: unknown) => onError?.(err));
             }
             setIsPlaying(!isPlaying);
             resetControlsTimeout();

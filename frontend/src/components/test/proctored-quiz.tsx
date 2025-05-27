@@ -83,7 +83,7 @@ export default function ProctoredQuiz() {
     if (examData) {
       setExam(examData.data);
       const obj: Record<string, LocalAnswer> = {}
-      examData.data?.answers?.forEach((a: any) => {
+      examData.data?.answers?.forEach((a: {question_id:string,user_answer:string[],id:string}) => {
         const question = examData.data?.exam_questions.find((q: IExamQuestion) => q.question_id == a.question_id)
 
         obj[a.question_id as string] = {
@@ -475,7 +475,11 @@ export default function ProctoredQuiz() {
         await resetTrigger({ answer_id: answerId });
       }
     } catch (error) {
-
+      setShowAlert(true);
+      setAlertMessage(isAxiosError(error)
+        ? error.response?.data.message
+        : 'An error occurred while resetting the answer');
+      return;
     }
     setAnswers((prv) => {
       delete prv[current_question.question_id];

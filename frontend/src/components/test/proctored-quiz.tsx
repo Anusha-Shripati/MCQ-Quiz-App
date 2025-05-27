@@ -2,16 +2,16 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/form/button';
 import { useExamStore } from '@/store/examStore';
 import { Answer, IExamQuestion, LocalAnswer, QuestionType, SubmitAnsPayload, SubmitAnsReponse, Violation } from '@/types/exam.types';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import TestHeader from './TestHeader';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import TestHeader from './test-header';
 import useSWR from 'swr';
 import { examApi, isAxiosError } from '@/lib/api';
 import { useRouter } from 'next/navigation';
 import useSWRMutation from 'swr/mutation';
-import AlertWrapper from './error/AlertWrapper';
-import TestLoading from './loading/TestLoading';
-import TestError from './error/TestError';
-import Question from './Question';
+import AlertWrapper from './error/alert-wrapper';
+import TestLoading from './loading/test-loading';
+import TestError from './error/test-error';
+import Question from './question';
 import { Check, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { BROWSER_KEY, PROHIBITED_COMBINATIONS, PROHIBITED_KEYS, QUIZ_CONFIG } from '@/shared/constants/data';
 
@@ -72,7 +72,7 @@ export default function ProctoredQuiz() {
   })
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { isMutating, trigger } = useSWRMutation<SubmitAnsReponse, any, string, FormData |SubmitAnsPayload>(
+  const { isMutating, trigger } = useSWRMutation<SubmitAnsReponse, any, string, FormData | SubmitAnsPayload>(
     `/candidate-exam/${exam?.id}/submit-answer`,
     (url: string, { arg }) => examApi.post(url, arg, accessCode)
   )
@@ -89,7 +89,7 @@ export default function ProctoredQuiz() {
         obj[a.question_id as string] = {
           question: question.question,
           answer: question.question.type == QuestionType.MULTIPLE_SELECT ? a.user_answer : a.user_answer[0],
-          answer_id:a.id
+          answer_id: a.id
         }
       })
       setAnswers(obj)
@@ -99,21 +99,6 @@ export default function ProctoredQuiz() {
       checkExamStatus();
     }
   }, [examData]);
-
-  // const dataURLtoBlob = (dataURL: string) => {
-  //   const arr = dataURL.split(',');
-  //   const mimeMatch = arr[0].match(/:(.*?);/);
-  //   const mime = mimeMatch ? mimeMatch[1] : '';
-  //   const bstr = atob(arr[1]);
-  //   let n = bstr.length;
-  //   const u8arr = new Uint8Array(n);
-
-  //   while (n--) {
-  //     u8arr[n] = bstr.charCodeAt(n);
-  //   }
-
-  //   return new Blob([u8arr], { type: mime });
-  // }
 
   const checkExamStatus = async () => {
     if (!exam?.id || !accessCode || !examData.data?.assessment?.duration) return;
@@ -157,32 +142,6 @@ export default function ProctoredQuiz() {
       setIsLoading(false);
     }
   };
-
-
-  // const takeScreenshot = async () => {
-  //   if (!containerRef.current || document.hidden) {
-  //     addViolation({
-  //       type: 'HIDDEN_SCREENSHOT',
-  //       details: 'Window was hidden during screenshot',
-  //     });
-  //     return;
-  //   }
-
-  //   try {
-  //     const image = await captureElement(containerRef.current);
-  //     const blob = dataURLtoBlob(image);
-  //     const formData = new FormData();
-  //     formData.append('file', blob, 'screenshot.png');
-  //     formData.append('timestamp', Date.now().toString());
-  //     await examApi.post(`/candidate-exam/${exam?.id}/screenshot`, formData, accessCode);
-  //   } catch (error) {
-  //     console.log(error);
-  //     addViolation({
-  //       type: 'SCREENSHOT_FAILED',
-  //       details: error instanceof Error ? error.message : 'Unknown error',
-  //     });
-  //   }
-  // };
 
   const handleStopRecording = (blob: Blob | null, url: string) => {
     setRecordingBlob(blob);
@@ -256,45 +215,9 @@ export default function ProctoredQuiz() {
 
   };
 
-  // Event handlers
-  // const handleVisibilityChange = useCallback(() => {
-  //   if (document.hidden) {
-  //     setTabSwitchCount((prev) => {
-  //       const newCount = prev + 1;
-  //       if (newCount > 5) {
-  //         // submitQuiz();
-  //       }
-  //       addViolation({
-  //         type: 'TAB_SWITCH',
-  //         details: 'User switched tabs or minimized window',
-  //       });
-
-  //       displayAlert(`WARNING: Tab switching detected! This is violation ${newCount} of 5.`);
-  //       return newCount;
-
-
-  //   });
-
-  //     // Play audio alert to notify user
-  //     if (audioRef.current) {
-  //       audioRef.current.play()
-  //     }
-
-  //     // Force window to regain focus using a combination of methods
-  //     try {
-  //       window.focus();
-  //       // Attempt to create a subtle window movement to regain focus
-  //       window.moveBy(1, 0);
-  //       window.moveBy(-1, 0);
-  //     } catch (e) {
-  //       console.error('Could not force focus:', e);
-  //     }
-  //   }
-  // },[tabSwitchCount]);
-
   const handleKeyDown = (e: KeyboardEvent) => {
     // Allow F11 for fullscreen
-    if(process.env.MODE == 'development') return
+    if (process.env.MODE == 'development') return
     if (e.key === 'F11') {
       e.preventDefault();
       requestFullScreen();
@@ -418,40 +341,7 @@ export default function ProctoredQuiz() {
       await handleNextQuestion();
       setIsSubmitting(true);
       await submitTrigger()
-      // await takeScreenshot();
-      // // Get access code from URL for submission or use the provided accessCode
-      // let quizAccessCode = accessCode || '';
-      // // If not provided as prop, try to get from URL
-      // if (!quizAccessCode) {
-      //   const urlParts = window.location.pathname.split('/');
-      //   quizAccessCode = urlParts[urlParts.length - 1];
-      // }
-      // Convert answers to the format expected by the API
-      // const formattedAnswers = Object.entries(answers).map(
-      // 	([questionId, answer]) => ({
-      // 		questionId,
-      // 		answer,
-      // 	})
-      // );
-      // Create submission data
-      // const submissionData = {
-      // 	answers: formattedAnswers,
-      // 	violations,
-      // 	screenshots,
-      // };
-      // Submit exam using the access code and candidateApi
-      // const result = await candidateApi.submitExam(quizAccessCode, submissionData);
-      // if (!result.success) {
-      // 	throw new Error(result.message || 'Failed to submit exam');
-      // }
-      // Cleanup
-      // if (screenshotIntervalRef.current) {
-      //   clearInterval(screenshotIntervalRef.current);
-      // }
-      // localStorage.clear();
-      // if (document.fullscreenElement) {
-      //   await document.exitFullscreen();
-      // }
+
       router.push('/thank-you');
     } catch (error) {
       console.error('Error submitting quiz:', error);
@@ -488,7 +378,7 @@ export default function ProctoredQuiz() {
   }
   // Effects
   useEffect(() => {
-    if(process.env.MODE == 'development') return
+    if (process.env.MODE == 'development') return
 
     // Request fullscreen after 1 second
     const fullscreenTimeout = setTimeout(() => {
@@ -673,6 +563,26 @@ export default function ProctoredQuiz() {
   //   return (
   //   );
   // }
+  const visibleButtons = () => {
+    const total = questions.length;
+    const current = currentQuestionIndex;
+
+    const buttons = new Set<number>();
+
+    [0, 1, 2].forEach(i => i < total && buttons.add(i));
+
+    [total - 3, total - 2, total - 1].forEach(i => i >= 0 && i < total && buttons.add(i));
+
+    // Current ±2
+    for (let i = current - 2; i <= current + 2; i++) {
+      if (i >= 0 && i < total) buttons.add(i);
+    }
+
+    return Array.from(buttons).sort((a, b) => a - b);
+  };
+
+  const buttonIndexes = visibleButtons();
+
   return (
     <div
       ref={containerRef}
@@ -694,22 +604,31 @@ export default function ProctoredQuiz() {
 
             <CardContent className="p-4 md:p-8 space-y-6">
 
-              <div className="flex flex-wrap gap-2 justify-center">
-                {questions?.map((q, index) => (
-                  <button
-                    key={q.id}
-                    onClick={() => setCurrentQuestionIndex(index)}
-                    className={`h-8 w-8 rounded-full flex items-center justify-center text-sm font-medium transition-all ${currentQuestionIndex === index
-                      ? 'bg-blue-600 text-white shadow-md'
-                      : answers[q.question_id]
-                        ? 'bg-green-100 text-green-800 border border-green-200'
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                      }`}
-                    aria-label={`Go to question ${index + 1}`}
-                  >
-                    {index + 1}
-                  </button>
-                ))}
+              <div className="flex flex-wrap gap-2 justify-center items-center">
+                {buttonIndexes.map((index, i) => {
+                
+                  const prev = buttonIndexes[i - 1];
+                  const isGap = i > 0 && index - prev > 1;
+
+                  return (
+                    <React.Fragment key={index}>
+                      {isGap && <span className="px-2">...</span>}
+                      <button
+                        onClick={() => setCurrentQuestionIndex(index)}
+                        className={`h-8 w-8 rounded-full flex items-center justify-center text-sm font-medium transition-all
+                          ${currentQuestionIndex === index
+                            ? 'bg-blue-600 text-white shadow-md'
+                            : answers[questions[index].question_id]
+                              ? 'bg-green-100 text-green-800 border border-green-200'
+                              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                          }`}
+                        aria-label={`Go to question ${index + 1}`}
+                      >
+                        {index + 1}
+                      </button>
+                    </React.Fragment>
+                  );
+                })}
               </div>
 
               {questions.length > 0 && <div className="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-gray-200 transition-all hover:shadow-md">
@@ -827,152 +746,3 @@ export default function ProctoredQuiz() {
 
 
 
-
-
-
-// useEffect(() => {
-//   const validateAccess = async () => {
-//     try {
-//       setIsLoading(true);
-
-//       let quizAccessCode = accessCode || '';
-
-//       if (!quizAccessCode) {
-//         const urlParts = window.location.pathname.split('/');
-//         quizAccessCode = urlParts[urlParts.length - 1];
-//       }
-
-//       if (!quizAccessCode) {
-//         setAccessError('Invalid exam access. Missing access code.');
-//         setIsLoading(false);
-//         return;
-//       }
-
-//       // Set exam data and questions
-//       // const examData = data.data;
-
-//       // // Update time limit based on exam data
-//       // if (examData.end_time) {
-//       // 	const endTime = new Date(examData.end_time).getTime();
-//       // 	const now = new Date().getTime();
-//       // 	const remainingTime = Math.max(0, Math.floor((endTime - now) / 1000));
-//       // 	setTimeLeft(remainingTime);
-//       // }
-
-//       // If all is good, initialize the exam
-//       setIsLoading(false);
-//     } catch (error) {
-//       console.error('Error validating exam access:', error);
-//       setAccessError('Error accessing exam. Please try again or contact support.');
-//       setIsLoading(false);
-//     }
-//   };
-
-//   validateAccess();
-// }, [accessCode]);
-
-
-// const renderQuestion = (question: IExamQuestion) => {
-//   switch (question.question.type) {
-//     case QuestionType.MCQ:
-//       return (
-//         <RadioGroup
-//           value={answers[question.question_id]?.answer as string}
-//           onValueChange={(value) => handleAnswerChange(question, value)}
-//           className="space-y-4"
-//         >
-//           {question.question.options?.map((option, idx) => (
-//             <div key={idx} className="flex items-center space-x-3">
-//               <Radio value={option} id={`option-${question.question_id}-${idx}`} />
-//               <label
-//                 htmlFor={`option-${question.question_id}-${idx}`}
-//                 className="text-lg text-gray-800 cursor-pointer"
-//               >
-//                 {option}
-//               </label>
-//             </div>
-//           ))}
-//         </RadioGroup>
-//       );
-//     case QuestionType.VIDEO:
-//       return (
-//         <VideoRecorderQuestion question={question} answers={answers} onRecordingStop={(blob, url) => handleStopRecording(blob, url)} onRecordingComplete={() => handleNextQuestion()} />
-//       );
-//     case QuestionType.MULTIPLE_SELECT:
-//       return (
-//         <div className="space-y-4">
-//           {question.question.options?.map((option, idx) => {
-//             const currentAnswers = answers[question.question_id]
-//               ? (answers[question.question_id]?.answer as (string | number)[])
-//               : [];
-
-//             return (
-//               <div key={idx} className="flex items-center space-x-3">
-//                 <Checkbox
-//                   id={`option-${question.question_id}-${idx}`}
-//                   checked={currentAnswers.includes(option)}
-//                   onCheckedChange={(checked) => {
-//                     let newAnswers: (string | number)[];
-
-//                     if (!checked) {
-//                       newAnswers = currentAnswers.filter((a) => a !== option);
-//                     } else {
-//                       newAnswers = [...currentAnswers, option];
-//                     }
-//                     handleAnswerChange(question, newAnswers);
-//                   }}
-//                 />
-//                 <label
-//                   htmlFor={`option-${question.question_id}-${idx}`}
-//                   className="text-lg text-gray-800 cursor-pointer"
-//                 >
-//                   {option}
-//                 </label>
-//               </div>
-//             );
-//           })}
-//         </div>
-//       );
-
-//     case QuestionType.TEXT:
-//       return (
-//         <Textarea
-//           value={(answers[question.question_id]?.answer as string) || ''}
-//           onChange={(e) => handleAnswerChange(question, e.target.value)}
-//           placeholder="Type your answer here..."
-//           className="min-h-[120px] text-lg"
-//         />
-//       );
-
-//     case QuestionType.CODE_SNIPPET:
-//       return (
-//         <div className="space-y-2">
-//           <Textarea
-//             value={(answers[question.question_id]?.answer as string) || ''}
-//             onChange={(e) => handleAnswerChange(question, e.target.value)}
-//             placeholder="Write your code here..."
-//             className="min-h-[200px] font-mono text-black text-base"
-//           />
-//           <div className="text-sm text-gray-500">
-//             Tip: Use proper indentation and comments where necessary
-//           </div>
-//         </div>
-//       );
-
-//     case QuestionType.CODE_EDITOR:
-//       return (
-//         <div className="space-y-2">
-//           <EditorPage
-//             onChange={(value) => handleAnswerChange(question, value)}
-//             value={(answers[question.question_id]?.answer as string) || ''}
-//           />
-//           <div className="text-sm text-gray-500">
-//             Tip: Use proper indentation and comments where necessary
-//           </div>
-//         </div>
-//       );
-
-//     default:
-//       return <div className="text-red-500">Unsupported question type</div>;
-//   }
-// };

@@ -2,7 +2,7 @@ import { Answer, IExamQuestion, QuestionType } from '@/types/exam.types';
 import { Radio } from '../ui/form/radio';
 import { RadioGroup } from '../ui/form/radio';
 import React from 'react'
-import { VideoRecorderQuestion } from './VideoRecorderQuestion';
+import { VideoRecorderQuestion } from './video-recorder-question';
 import { Textarea } from '../ui/form/textarea';
 import EditorPage from '@/components/editor/page';
 import { Checkbox } from '../ui/form/checkbox';

@@ -29,7 +29,7 @@ const VideoPreview = ({ videoUrl, onError }: { videoUrl: string, onError: (err: 
             if (isPlaying && !isDragging) {
                 setShowControls(false);
             }
-        }, 1000);
+        }, 500);
     };
 
     useEffect(() => {
@@ -78,8 +78,8 @@ const VideoPreview = ({ videoUrl, onError }: { videoUrl: string, onError: (err: 
 
         // Auto-play the video when loaded
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        video.play().catch((err: any) => onError(err));
-        setIsPlaying(true);
+        // video.play().catch((err: any) => onError(err));
+        // setIsPlaying(true);
 
         return () => {
             video.removeEventListener('timeupdate', handleTimeUpdate);

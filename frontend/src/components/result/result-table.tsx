@@ -37,44 +37,28 @@ function ResultTable() {
   useEffect(() => {
     const params = new URLSearchParams();
 
-    params.set('page', currentPage.toString());
     params.set('perPage', itemsPerPage.toString());
+    params.set('page', currentPage.toString());
 
-    if (resultFilter.search) {
-      params.set('search', resultFilter.search);
-    }
-
+    
     if (resultFilter.technologyFilter.length > 0) {
       const techLabels = resultFilter.technologyFilter.map((item) => item.label);
       params.set('technologyFilter', JSON.stringify(techLabels));
     }
-
+    
     if (resultFilter.assessmentFilter.length > 0) {
       const assessmentLabels = resultFilter.assessmentFilter.map((item) => item.label);
       params.set('assessmentFilter', JSON.stringify(assessmentLabels));
     }
-
-    if (resultFilter.startDate) {
-      params.set('startDate', JSON.stringify(resultFilter.startDate));
-    }
-    if (resultFilter.endDate) {
-      params.set('endDate', JSON.stringify(resultFilter.endDate));
-    }
-    if (resultFilter.days) {
-      params.set('days', JSON.stringify(resultFilter.days));
-    }
-    if (resultFilter.percentageFrom) {
-      params.set('percentageFrom', JSON.stringify(resultFilter.percentageFrom));
-    }
-    if (resultFilter.percentageTo) {
-      params.set('percentageTo', JSON.stringify(resultFilter.percentageTo));
-    }
-    if (resultFilter.experienceTo) {
-      params.set('experienceTo', JSON.stringify(resultFilter.experienceTo));
-    }
-    if (resultFilter.experienceFrom) {
-      params.set('experienceFrom', JSON.stringify(resultFilter.experienceFrom));
-    }
+    
+    if (resultFilter.search) params.set('search', resultFilter.search)
+    if (resultFilter.startDate) params.set('startDate', JSON.stringify(resultFilter.startDate));
+    if (resultFilter.endDate) params.set('endDate', JSON.stringify(resultFilter.endDate));
+    if (resultFilter.days) params.set('days', JSON.stringify(resultFilter.days));
+    if (resultFilter.percentageFrom) params.set('percentageFrom', JSON.stringify(resultFilter.percentageFrom));
+    if (resultFilter.percentageTo) params.set('percentageTo', JSON.stringify(resultFilter.percentageTo));
+    if (resultFilter.experienceTo) params.set('experienceTo', JSON.stringify(resultFilter.experienceTo));
+    if (resultFilter.experienceFrom) params.set('experienceFrom', JSON.stringify(resultFilter.experienceFrom));
 
     window.history.replaceState(null, '', `${pathname}?${params.toString()}`);
   }, [currentPage, itemsPerPage, resultFilter, pathname]);

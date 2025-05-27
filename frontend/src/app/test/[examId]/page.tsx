@@ -1,10 +1,10 @@
 'use client';
-import { BasicInfoForm } from '@/components/test/BasicInfo';
-import ProctoredQuiz from '@/components/test/ProctoredQuiz';
-import TestError from '@/components/test/error/TestError';
-import TestLoading from '@/components/test/loading/TestLoading';
-import TestWarning from '@/components/test/error/TestWarning';
-import { VideoRecordingScreen } from '@/components/test/VideoRecordingScreen';
+import { BasicInfoForm } from '@/components/test/basic-info';
+import ProctoredQuiz from '@/components/test/proctored-quiz';
+import TestError from '@/components/test/error/test-error';
+import TestLoading from '@/components/test/loading/test-loading';
+import TestWarning from '@/components/test/error/test-warning';
+import { VideoRecordingScreen } from '@/components/test/video-recording-screen';
 import { examApi } from '@/lib/api';
 import { dataURLtoBlob } from '@/lib/utils';
 import { BROWSER_KEY, PROHIBITED_COMBINATIONS, PROHIBITED_KEYS, SNAPSHOT } from '@/shared/constants/data';
@@ -85,7 +85,7 @@ const QuizPage = () => {
         router.push('/thank-you');
         return;
       }
-      
+
       const videoLink = data.data?.answers?.find((a: { question_name: string }) => a.question_name === 'introduction')?.user_answer[0] || null;
       setVideoLink(videoLink);
       setCandidate(data.data);
@@ -129,7 +129,7 @@ const QuizPage = () => {
         setPermission((prv) => ({ ...prv, screen: false }))
       }
       console.log(settings.displaySurface, 'displaySurface');
-      
+
       if (settings.displaySurface == 'monitor') {
         setPermission((prv) => ({ ...prv, screen: true }))
       } else {
@@ -161,6 +161,7 @@ const QuizPage = () => {
 
       if (cameraSnapshotRef.current) {
         cameraSnapshotRef.current.srcObject = cameraStream;
+        cameraSnapshotRef.current.muted = true; // Mute the camera stream to avoid feedback
         await cameraSnapshotRef.current.play();
       }
 
@@ -204,8 +205,8 @@ const QuizPage = () => {
 
   const init = async () => {
     try {
-      const success =await fetchCandidate();
-      if(!success) return
+      const success = await fetchCandidate();
+      if (!success) return
       await Promise.allSettled([startScreenRecording(), startCamera()])
       const intervalTime = 60 * 1000
       interval.current = setInterval(() => {
@@ -224,7 +225,8 @@ const QuizPage = () => {
       }, intervalTime)
 
     } catch (error) {
-
+      console.log(error);
+      
     }
 
   }

@@ -1,47 +1,37 @@
 'use client';
-import DialogForm from '@/components/candidates/dialog-form';
 import type { Column, ExpandableRow } from '@/components/common/reusable-table';
 import ReusableTable from '@/components/common/reusable-table';
 import Pagination from '@/components/pagination';
-import { Button } from '@/components/ui/form/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { api, deleteData, isAxiosError } from '@/lib/api';
-import { useCandidateStore } from '@/store/candidateStore';
-import type {
-  AssessmentOption,
-  CandidateFormData,
-  ICandidate,
-  TechnologyOption,
-} from '@/types/candidate.types';
+import { api } from '@/lib/api';
+import { StatusOption } from '@/types/common.types';
 import { format } from 'date-fns';
 import dayjs from 'dayjs';
-import { Edit, Trash2 } from 'lucide-react';
+import { Eye } from 'lucide-react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import qs from 'query-string';
 import { useEffect, useMemo, useState } from 'react';
-import toast from 'react-hot-toast';
-import { FiCopy, FiMail } from 'react-icons/fi';
-import useSWR, { mutate } from 'swr';
+import useSWR from 'swr';
 import StatusWrapper from '../common/status-wrapper';
-import { ExamMetaTech } from '@/types/exam.types';
+import { ExamMetaTech, Result } from '@/types/exam.types';
 import Link from 'next/link';
+import { useResultStore } from '@/store/resultStore';
 
-function CandidateTable() {
+function ResultTable() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const searchParams = useSearchParams();
-  const [selectedCandidate, setSelectedCandidate] = useState<null | CandidateFormData>(null);
-  const [open, setOpen] = useState(false);
   const {
-    candidateFilter,
-    setCandidateFilter,
-    setCandidateListData,
-    candidateCount,
-    candidateList,
+    resultFilter,
+    setResultFilter,
+    setResultListData,
+    resultCount,
+    resultList,
     technologyOptions,
     assessmentOptions,
-  } = useCandidateStore();
-  const totalItems = candidateCount;
+  } = useResultStore();
+
+  const totalItems = resultCount;
   const pathname = usePathname();
 
   useEffect(() => {
@@ -50,26 +40,44 @@ function CandidateTable() {
     params.set('page', currentPage.toString());
     params.set('perPage', itemsPerPage.toString());
 
-    if (candidateFilter.searchQuery) {
-      params.set('searchQuery', candidateFilter.searchQuery);
+    if (resultFilter.search) {
+      params.set('search', resultFilter.search);
     }
 
-    if (candidateFilter.technologyFilter.length > 0) {
-      const techLabels = candidateFilter.technologyFilter.map((item) => item.label);
+    if (resultFilter.technologyFilter.length > 0) {
+      const techLabels = resultFilter.technologyFilter.map((item) => item.label);
       params.set('technologyFilter', JSON.stringify(techLabels));
     }
 
-    if (candidateFilter.assessmentFilter.length > 0) {
-      const assessmentLabels = candidateFilter.assessmentFilter.map((item) => item.label);
+    if (resultFilter.assessmentFilter.length > 0) {
+      const assessmentLabels = resultFilter.assessmentFilter.map((item) => item.label);
       params.set('assessmentFilter', JSON.stringify(assessmentLabels));
     }
 
-    if (candidateFilter.created) {
-      params.set('created', JSON.stringify(candidateFilter.created));
+    if (resultFilter.startDate) {
+      params.set('startDate', JSON.stringify(resultFilter.startDate));
+    }
+    if (resultFilter.endDate) {
+      params.set('endDate', JSON.stringify(resultFilter.endDate));
+    }
+    if (resultFilter.days) {
+      params.set('days', JSON.stringify(resultFilter.days));
+    }
+    if (resultFilter.percentageFrom) {
+      params.set('percentageFrom', JSON.stringify(resultFilter.percentageFrom));
+    }
+    if (resultFilter.percentageTo) {
+      params.set('percentageTo', JSON.stringify(resultFilter.percentageTo));
+    }
+    if (resultFilter.experienceTo) {
+      params.set('experienceTo', JSON.stringify(resultFilter.experienceTo));
+    }
+    if (resultFilter.experienceFrom) {
+      params.set('experienceFrom', JSON.stringify(resultFilter.experienceFrom));
     }
 
     window.history.replaceState(null, '', `${pathname}?${params.toString()}`);
-  }, [currentPage, itemsPerPage, candidateFilter, pathname]);
+  }, [currentPage, itemsPerPage, resultFilter, pathname]);
 
   useEffect(() => {
     const params = new URLSearchParams(searchParams.toString());
@@ -77,7 +85,7 @@ function CandidateTable() {
     if (params.get('page')) setCurrentPage(Number(params.get('page')));
     if (params.get('perPage')) setItemsPerPage(Number(params.get('perPage')));
     const filterParams = {
-      searchQuery: params.get('searchQuery') || '',
+      search: params.get('search') || '',
       technologyFilter: params.get('technologyFilter')
         ? JSON.parse(params.get('technologyFilter') as string).map((label: string) => {
           const found = technologyOptions.find((opt) => opt.label === label);
@@ -90,26 +98,36 @@ function CandidateTable() {
           return found || { value: '', label };
         })
         : [],
-      created: params.get('created') ? JSON.parse(params.get('created') as string) : {},
+      startDate: params.get('startDate') ? JSON.parse(params.get('startDate') as string) : '',
+      endDate: params.get('endDate') ? JSON.parse(params.get('endDate') as string) : '',
+      percentageFrom: params.get('percentageFrom') ? Number(JSON.parse(params.get('percentageFrom') as string)) : null,
+      percentageTo: params.get('percentageTo') ? Number(JSON.parse(params.get('percentageTo') as string)) : null,
+      experienceFrom: params.get('experienceFrom') ? Number(JSON.parse(params.get('experienceFrom') as string)) : null,
+      experienceTo: params.get('experienceTo') ? Number(JSON.parse(params.get('experienceTo') as string)) : null,
+      days: params.get('days') ? JSON.parse(params.get('days') as string) : '',
     };
-    setCandidateFilter(filterParams);
+    setResultFilter(filterParams);
   }, [searchParams, technologyOptions, assessmentOptions]);
 
   const queryObj = useMemo(
     () => ({
       page: currentPage || 1,
       limit: itemsPerPage || 10,
-      // ...candidateFilter,
-      search: candidateFilter.searchQuery,
-      technologyFilter: candidateFilter.technologyFilter.map(
-        (item: TechnologyOption) => item.value
+      search: resultFilter.search,
+      technology_ids: resultFilter.technologyFilter.map(
+        (item: StatusOption) => item.value
       ),
-      assessmentFilter: candidateFilter.assessmentFilter.map(
-        (item: AssessmentOption) => item.value
+      assessment_ids: resultFilter.assessmentFilter.map(
+        (item: StatusOption) => item.value
       ),
-      created: JSON.stringify({ range: candidateFilter.created?.range ? candidateFilter.created?.range : undefined }),
+      ...(resultFilter.startDate && { startDate: dayjs(resultFilter.startDate).toISOString() }),
+      ...(resultFilter.endDate && { endDate: dayjs(resultFilter.endDate).toISOString() }),
+      ...(resultFilter.percentageFrom && { percentageFrom: resultFilter.percentageFrom }),
+      ...(resultFilter.percentageTo && { percentageTo: resultFilter.percentageTo }),
+      ...(resultFilter.experienceFrom && { experienceFrom: resultFilter.experienceFrom }),
+      ...(resultFilter.experienceTo && { experienceTo: resultFilter.experienceTo }),
     }),
-    [currentPage, itemsPerPage, candidateFilter]
+    [currentPage, itemsPerPage, resultFilter]
   );
 
   const cleanedQuery = useMemo(
@@ -126,13 +144,13 @@ function CandidateTable() {
     data: candidateData,
     error,
     isLoading,
-  } = useSWR(`/candidate/list?${cleanedQuery}`, api.get);
+  } = useSWR(`/result/list?${cleanedQuery}`, api.get);
 
   useEffect(() => {
     if (candidateData?.data?.list) {
-      setCandidateListData(candidateData?.data?.total, candidateData?.data?.list);
+      setResultListData(candidateData?.data?.total, candidateData?.data?.list);
     }
-  }, [candidateData, setCandidateListData]);
+  }, [candidateData, setResultListData]);
 
   const handlePerPageChange = (value: string) => {
     setItemsPerPage(Number(value));
@@ -157,8 +175,8 @@ function CandidateTable() {
 
   // Get current page items
   const currentItems = useMemo(() => {
-    return candidateList;
-  }, [candidateList]);
+    return resultList;
+  }, [resultList]);
 
   const formatTestDuration = (startDate: string, endDate: string): string => {
     const start = new Date(startDate);
@@ -168,24 +186,6 @@ function CandidateTable() {
     const duration = Math.abs(end.getTime() - start.getTime()) / (1000 * 60 * 60);
 
     return `${duration.toFixed(2)} hours`; // e.g., "3 hours"
-  };
-
-  const handleDelete = async (id: string) => {
-    if (window.confirm('Are you sure you want to delete this user?')) {
-      try {
-        const res = await deleteData(`/candidate/${id}`);
-        if (res.success) {
-          toast.success('Candidate deleted successfully');
-        }
-        await mutate((key) => typeof key === 'string' && key.startsWith('/candidate/list'));
-      } catch (error) {
-        if (isAxiosError(error)) {
-          toast.error(error.response.data.message || 'An unexpected error occurred');
-        } else {
-          toast.error('An unexpected error occurred');
-        }
-      }
-    }
   };
 
   const formatTestDateRange = (startDate: string, endDate: string): string => {
@@ -206,29 +206,8 @@ function CandidateTable() {
 
     return `${startTime}–${endTime}`; // e.g., "09:00 AM–12:00 PM"
   };
-  const handleEdit = (candidate: ICandidate) => {
-    const obj: CandidateFormData = {
-      ...candidate,
-      assessment: candidate.assessment?.id as string,
-      technology: candidate.assessment?.technologies
-        ? (candidate.assessment?.technologies
-          .map((item) => item?.technology?.name)
-          .join(', ') as string)
-        : '',
-      startDate: new Date(candidate.exam?.start_time as string),
-      endDate: new Date(candidate.exam?.end_time as string),
-      timeUnit: "days",
-      timeValue: dayjs(candidate.exam?.end_time as string).diff(
-        dayjs(candidate.exam?.start_time as string),
-        'days'
-      ),
-    };
 
-    setSelectedCandidate(obj);
-    setOpen(true);
-  };
-
-  const columns = useMemo<Array<Column<ICandidate>>>(
+  const columns = useMemo<Array<Column<Result>>>(
     () => [
       {
         key: 'exam.start_time',
@@ -238,53 +217,38 @@ function CandidateTable() {
             ? format(new Date(row.exam.start_time), 'MMM dd, yyyy hh:mm a')
             : '-',
       },
-      { key: 'name', header: 'Name' },
-      { key: 'email', header: 'Email' },
+      { key: 'name', header: 'Name', render: (row) => row.exam?.candidate?.name || '-' },
+      { key: 'email', header: 'Email', render: (row) => row.exam?.candidate?.email || '-', },
       {
         key: 'technology',
         header: 'Technology',
         render: (row) => {
-          return row.assessment?.technologies
-            ? row.assessment?.technologies?.map((item) => item?.technology?.name).join(', ')
+          return row?.exam?.assessment?.technologies
+            ? row?.exam?.assessment?.technologies?.map((item) => item?.technology?.name).join(', ')
             : '-';
         },
       },
-      { key: 'experience', header: 'Exp.' },
-      { key: 'assessment.name', header: 'Assessment' },
-      // {
-      //   key: "results",
-      //   header: "Result",
-      //   render: (row) => (
-      //     <span
-      //       className={`font-semibold ${row.results === "Pass" ? "text-green-600" : "text-red-600"}`}
-      //     >
-      //       {row.results}
-      //     </span>
-      //   ),
-      // },
+      { key: 'experience', header: 'Exp. (Year)', render: (row) => row.exam?.candidate?.experience || '-' },
+      { key: 'assessment.name', header: 'Assessment', render: (row) => row.exam?.assessment?.name || '-' },
       {
         key: 'created_at',
-        header: 'Created',
-        render: (row) => format(new Date(row.created_at), 'MMM dd, yyyy hh:mm a'),
+        header: 'Created At',
+        render: (row) => format(new Date(row.exam?.created_at), 'MMM dd, yyyy hh:mm a'),
       },
       {
-        key: 'status',
-        header: 'Status',
+        key: 'percentage',
+        header: 'Percentage',
         render: (row) => {
           const statusMap = {
-            completed: 'bg-green-100 text-green-800',
-            in_progress: 'bg-yellow-100 text-yellow-800',
-            pending: 'bg-gray-100 text-gray-800',
+            pass: 'bg-green-100 text-green-800',
+            failed: 'bg-red-100 text-red-800',
           };
 
-          const status = row.exam?.status as 'completed' | 'in_progress' | 'pending';
-
-
-          const badgeClass = statusMap[status] || 'bg-gray-100 text-gray-800';
+          const badgeClass = row?.percentage >= 60 ? statusMap.pass : statusMap.failed;
 
           return (
             <span className={`px-3 py-1 text-sm font-medium rounded-full ${badgeClass}`}>
-              {status?.replace('_', ' ') || 'Unknown'} {row?.result?.length ? `(${row?.result[0]?.percentage?.toFixed(2)}) %`:""} 
+              {row?.percentage?.toFixed(2)} %
 
             </span>
           );
@@ -293,55 +257,16 @@ function CandidateTable() {
 
       {
         key: 'actions',
-        header: 'Share',
-        render: (candidate: ICandidate) => (
-          <div className="flex items-center gap-2">
-            <Button
-              onClick={async (e) => {
-                e.stopPropagation();
-                try {
-                  navigator.clipboard.writeText(candidate.meta.examLink as string);
-                  const expiresAt = new Date(candidate.meta.tokenExpiresAt as string);
-                  const formattedExpiration = expiresAt.toLocaleString();
+        header: 'Detailed',
+        render: (result: Result) => (
 
-                  toast.success(`Exam link copied! Valid until ${formattedExpiration}`);
-                } catch (error) {
-                  console.error('Error getting exam link:', error);
-                  toast.error('Failed to get exam link');
-                }
-              }}
-              variant="ghost"
-              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all duration-200"
-              title="Copy exam access link"
-            >
-              <FiCopy className="h-5 w-5 text-gray-700 dark:text-gray-300" />
-            </Button>
-            <Button
-              onClick={(e) => {
-                e.stopPropagation();
-                window.location.href = 'mailto:candidate@example.com';
-              }}
-              variant="ghost"
-              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all duration-200"
-            >
-              <FiMail className="h-5 w-5 text-gray-700 dark:text-gray-300" />
-            </Button>
-            <Button
-              onClick={() => handleEdit(candidate)}
-              variant="ghost"
-              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all duration-200"
-            >
-              <Edit className="h-4 w-4 text-gray-600 dark:text-gray-300" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="hover:bg-red-50 hover:text-red-600"
-              onClick={() => handleDelete(candidate.id as string)}
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </div>
+          <Link
+            href={`/results/${result.id}`}
+            className="p-2  rounded-lg transition-all duration-200"
+            target='_blank'
+          >
+            <Eye className="h-4 w-4 text-gray-600 dark:text-gray-300" />
+          </Link>
         ),
       },
     ],
@@ -353,8 +278,8 @@ function CandidateTable() {
     return '-'
   }
 
-  const expandableRow: ExpandableRow<ICandidate> = {
-    render: (row: ICandidate) => (
+  const expandableRow: ExpandableRow<Result> = {
+    render: (row: Result) => (
       <div className="border border-gray-200  p-4 space-y-6 rounded-lg transition-all duration-300 ease-in-out transform origin-top animate-in fade-in zoom-in-95">
         {/* Row Layout */}
         <div className="flex items-center justify-between">
@@ -362,12 +287,12 @@ function CandidateTable() {
           <div>
             <p className="text-sm text-gray-500 dark:text-gray-300">Result</p>
             <div className="flex gap-2 flex-col">
-              {row.result.length>0 &&<p className="text-lg font-semibold text-blue-500">
-                {row?.result?.length ? row?.result[0]?.percentage?.toFixed(2) : "-"} %
-              </p>}
-              {row.result.length>0 && <Link href={`/results/${row.result[0]?.id}`} target='_blank' className="text-sm text-blue-500 hover:underline">
+              <p className="text-lg font-semibold text-blue-500">
+                {row?.percentage?.toFixed(2) || "-"} %
+              </p>
+              <Link href={`/results/${row.id}`} target='_blank' className="text-sm text-blue-500 hover:underline">
                 View Answer
-              </Link>}
+              </Link>
             </div>
           </div>
 
@@ -399,7 +324,7 @@ function CandidateTable() {
               {row?.exam?.user?.name}
             </p>
             <p className="text-sm text-gray-500 dark:text-gray-300">
-              {row?.created_at ? dayjs(row?.created_at).format('DD/MM/YYYY h:m A') : "-"}
+              {row?.exam?.created_at ? dayjs(row?.exam?.created_at).format('DD/MM/YYYY h:m A') : "-"}
             </p>
           </div>
         </div>
@@ -424,10 +349,10 @@ function CandidateTable() {
             <tbody>
               <tr>
                 <td className="border border-gray-300 px-4 py-2">
-                  {row?.result?.length ? row?.result[0]?.percentage?.toFixed(2) : "-"} %
+                  {row?.percentage?.toFixed(2)} %
                   <small> (&nbsp;
-                    {row?.result?.length ? row?.result[0]?.score?.toFixed(1) : "-"} /&nbsp;
-                    {row?.result?.length ? row?.result[0]?.total : "-"}
+                    {row?.score?.toFixed(1)} /&nbsp;
+                    {row?.total}
                     &nbsp;) </small>
                 </td>
                 {/* Dynamically render category percentages */}
@@ -438,7 +363,7 @@ function CandidateTable() {
                   >
                     {technology.percentage?.toFixed(2)} %
                     <small> (&nbsp;
-                      {technology.score.toFixed(1) } / {technology.total}
+                      {technology.score.toFixed(1)} / {technology.total}
                       &nbsp;) </small>
                   </th>
                 ))}
@@ -472,9 +397,8 @@ function CandidateTable() {
           />
         </div>
       </Pagination>
-      <DialogForm candidate={selectedCandidate} open={open} setOpen={setOpen} />
     </StatusWrapper>
   );
 }
 
-export default CandidateTable;
+export default ResultTable;

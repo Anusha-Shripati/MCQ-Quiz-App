@@ -6,7 +6,6 @@ import ffmpeg from 'fluent-ffmpeg';
 import multerS3 from 'multer-s3';
 import { v4 as uuidv4 } from 'uuid';
 import { Request } from 'express';
-
 const storageMode = process.env.STORAGE_MODE || 'local';
 
 let storage: multer.StorageEngine; 
@@ -92,6 +91,7 @@ export const convertWebmToMp4 = (inputPath: string): Promise<string> => {
             ffmpeg(inputPath)
             .output(outputPath)
             .on('end', () => {
+                
                 resolve(outputPath.split('/uploads/')[1]);
             })
             .on('error', (err: any) => {

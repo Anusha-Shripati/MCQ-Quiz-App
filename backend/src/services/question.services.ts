@@ -20,9 +20,6 @@ export class QuestionService {
     difficulty_level?: string;
     search?: string;
   }) {
-    const page = filters.page ? Number(filters.page) : undefined;
-    const limit = filters.page ? Number(filters.limit) : undefined;
-
     const query: Prisma.QuestionsWhereInput = {
       deleted_at: null,
       technology_id: filters.technology_id ? filters.technology_id : undefined,

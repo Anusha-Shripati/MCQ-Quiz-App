@@ -3,9 +3,19 @@ import { resultSchema } from '../validationSchemas/result.validations';
 import { validateRequest } from '../middlewares/validation.middleware';
 import { ResultController } from '../controllers/result.controllers';
 import { asyncHandler } from '../utils/asyncHandler';
+import { authenticateAndAuthorize } from '../middlewares/auth.middleware';
 
 const resultRouter = express.Router();
 const resultController = new ResultController()
-resultRouter.get("/:id", validateRequest(resultSchema.get), asyncHandler(resultController.get));
+
+resultRouter.get("/list",
+    authenticateAndAuthorize('results.can_read'),
+    asyncHandler(resultController.list));
+    
+resultRouter.get("/:id",
+    authenticateAndAuthorize('results.can_read'),
+    validateRequest(resultSchema.get),
+    asyncHandler(resultController.get));
+
 
 export default resultRouter;

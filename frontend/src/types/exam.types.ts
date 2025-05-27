@@ -1,4 +1,4 @@
-import { ITimestamps } from './common.types';
+import { ITimestamps, StatusOption } from './common.types';
 import { IAssessment, ICandidate, IQuestion } from './candidate.types';
 
 export interface IExam extends ITimestamps {
@@ -107,4 +107,19 @@ export interface Result{
   percentage:number
   score:number,
   total:number
+  id:string
 }
+
+
+export interface ResultFilter {
+  search: string;
+  assessmentFilter: StatusOption[];
+  technologyFilter: StatusOption[];
+  startDate: Date | undefined |string;
+  endDate: Date | undefined |string;
+  percentageFrom: number|string |null;
+  percentageTo: number|string |null;
+  days?:string;
+  experienceFrom: null | string |number,
+  experienceTo: null | string |number,
+};

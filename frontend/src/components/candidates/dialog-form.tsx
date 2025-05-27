@@ -158,7 +158,7 @@ export default function DialogForm({ candidate, open, setOpen }: CandidateDialog
 
   useEffect(() => {
     if (open) {
-      reset(candidate || formFields);
+      reset(candidate ? { ...candidate, experience: candidate.experience ? candidate.experience.toString() : "" } : formFields);
     }
   }, [open, candidate, reset]);
 

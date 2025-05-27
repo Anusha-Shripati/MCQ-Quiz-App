@@ -18,10 +18,10 @@ export default class CandidatesService {
           throw new AppError('Email already exists', 400);
         } else if (existingEmail && existingEmail.deleted_at !== null) {
 
-          await prisma.answers.deleteMany({
+          await tx.answers.deleteMany({
             where: { candidate_id: existingEmail.id },
           });
-          await prisma.candidate.delete({
+          await tx.candidate.delete({
             where: { id: existingEmail.id },
           });
         }
@@ -32,20 +32,20 @@ export default class CandidatesService {
         if (existingPhone && existingPhone.deleted_at === null) {
           throw new AppError('Phone number already exists', 400);
         } else if (existingPhone && existingPhone.deleted_at !== null) {
-          await prisma.answers.deleteMany({
+          await tx.answers.deleteMany({
             where: { candidate_id: existingPhone.id },
           });
-          await prisma.candidate.delete({
+          await tx.candidate.delete({
             where: { id: existingPhone.id },
           });
         }
 
-        const newCandidate = await prisma.candidate.create({
+        const newCandidate = await tx.candidate.create({
           data: {
             name: data.name,
             email: data.email,
             phone: data.phone,
-            experience: data.experience,
+            experience: data.experience ? parseFloat(data.experience) : 0,
             assessment_id: data.assessment_id,
             exam_id: data.exam_id,
             meta: data.meta as Prisma.JsonObject,
@@ -57,7 +57,7 @@ export default class CandidatesService {
         });
         const meta = await this.generateCandiateAccessToken(data.exam_id, newCandidate);
         
-        const upadtedCandidate = await prisma.candidate.update({ where: { id: newCandidate.id },data: { meta } })
+        const upadtedCandidate = await tx.candidate.update({ where: { id: newCandidate.id },data: { meta } })
 
         return upadtedCandidate;
       },{
@@ -150,7 +150,7 @@ export default class CandidatesService {
             name: data.name,
             email: data.email,
             phone: data.phone,
-            experience: data.experience,
+            experience: data.experience ? parseFloat(data.experience) : 0,
             assessment_id: data.assessment_id,
             meta: meta as Prisma.JsonObject,
           },

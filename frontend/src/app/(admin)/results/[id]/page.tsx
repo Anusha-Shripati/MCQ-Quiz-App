@@ -10,10 +10,10 @@ import { useParams } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import useSWR from 'swr'
 
-import CandidateInfo from '@/components/result/CandidateInfo'
-import ResultSummary from '@/components/result/ResultSummary'
-import QuestionReview from '@/components/result/QuestionReview'
-import Snapshots from '@/components/result/Snapshots'
+import CandidateInfo from '@/components/result/candidate-info'
+import ResultSummary from '@/components/result/result-summary'
+import QuestionReview from '@/components/result/question-review'
+import Snapshots from '@/components/result/snapshots'
 import { Content, List, Tabs, Trigger } from '@/components/ui/form/tabs'
 
 
@@ -44,11 +44,10 @@ function Answer() {
       <div className="max-w-7xl mx-auto">
         <StatusWrapper loading={isLoading} error={error} className="w-full">
 
-          <CandidateInfo 
+          <CandidateInfo
             candidate={candidate}
             assessment={assessment}
             exam={exam}
-            introduction={introduction}
           />
 
           {result && (
@@ -84,14 +83,36 @@ function Answer() {
 
             <Content value="introduction">
               {introduction ? (
-                <div className='flex justify-center items-center flex-col bg-white dark:bg-gray-800 p-6 rounded-xl shadow '>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">Introduction Video</h3>
-                  <div className="w-[700px]">
-                    <VideoPreview videoUrl={introduction.user_answer?.[0] || ''} onError={() => {}} />
+                <div className="flex flex-col items-center bg-white dark:bg-gray-800 p-8 rounded-xl shadow-md w-full max-w-2xl mx-auto">
+                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Introduction Video</h3>
+                  {candidate?.name && (
+                    <p className="text-gray-600 dark:text-gray-300 mb-4 text-center">
+                      Candidate: <span className="font-medium">{candidate.name}</span>
+                    </p>
+                  )}
+                  <div className="w-full aspect-video max-w-xl mb-4 relative">
+                    {introduction.user_answer?.[0] ? (
+                      <VideoPreview videoUrl={introduction.user_answer[0]} onError={() => { }} />
+                    ) : (
+                      <div className="flex flex-col items-center justify-center h-full bg-gray-100 dark:bg-gray-700 rounded">
+                        <svg className="w-16 h-16 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M4 6v12a2 2 0 002 2h8a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2z" />
+                        </svg>
+                        <span className="text-gray-500 dark:text-gray-400">Video not available</span>
+                      </div>
+                    )}
                   </div>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
+                    This video was recorded as part of the candidate's introduction.
+                  </p>
                 </div>
               ) : (
-                <p className="text-gray-500 dark:text-gray-400">No introduction available.</p>
+                <div className="flex flex-col items-center justify-center bg-white dark:bg-gray-800 p-8 rounded-xl shadow-md w-full max-w-2xl mx-auto">
+                  <svg className="w-16 h-16 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M4 6v12a2 2 0 002 2h8a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2z" />
+                  </svg>
+                  <p className="text-gray-500 dark:text-gray-400">No introduction available.</p>
+                </div>
               )}
             </Content>
 
@@ -100,7 +121,7 @@ function Answer() {
             </Content>
 
             <Content value="snapshots">
-              <Snapshots camera={exam?.meta?.camera || []} screenshots={exam?.meta?.screenshots || []}/>
+              <Snapshots camera={exam?.meta?.camera || []} screenshots={exam?.meta?.screenshots || []} />
             </Content>
           </Tabs>
         </StatusWrapper>

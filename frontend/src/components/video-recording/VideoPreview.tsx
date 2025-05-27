@@ -286,7 +286,7 @@ const VideoPreview = ({ videoUrl, onError }: { videoUrl: string, onError: (err: 
             {/* Video Title Bar - only shown when controls are visible */}
             {showControls && (
                 <div className="absolute top-0 left-0 right-0 bg-gradient-to-b from-black/70 to-transparent px-4 py-3 opacity-100 transition-opacity duration-300">
-                    <h3 className="text-white font-medium">Your Recording</h3>
+                    <h3 className="text-white font-medium">Recording</h3>
                 </div>
             )}
 

@@ -10,6 +10,7 @@ import useSWR from 'swr';
 import { scores } from '@/shared/constants/data';
 import ReusableTable from '../common/reusable-table';
 
+
 interface ScoreData {
   date: string;
   name: string;
@@ -29,14 +30,14 @@ function InterviewScore() {
       setScoreData(data.data);
     }
   }, [data]);
-  const hanldeSetFilter = (name: string, value: string) => {
+  const handleSetFilter = (name: string, value: string) => {
     setFilters((prev) => {
       return {
         ...prev,
         [name]: value,
       };
     });
-  };
+  };  
   const columns = [
     { key: 'date', header: 'Date', render: (row: ScoreData) => row.date },
     {
@@ -62,19 +63,25 @@ function InterviewScore() {
         </div>
       ),
     },
+    
   ];
   return (
     <Card className="col-span-12 md:col-span-6 row-span-2">
       <CardHeader>
-        <div className="flex items-center justify-between space-x-3">
+        <div className="flex items-center justify-between space-x-1">
           <div className="space-y-1">
             <CardTitle>Interview Scores</CardTitle>
             <CardDescription className="text-xs text-gray-600">
               Performance of candidates.
             </CardDescription>
           </div>
-
-          <LanguageScoreSelect setFilters={hanldeSetFilter} scores={scores} filters={filters} />
+          <div className="flex items-center space-x-2">
+          <LanguageScoreSelect setFilters={handleSetFilter} scores={scores} filters={filters} />
+          {/* <Button onClick={handleClearFilter}
+            className="flex items-center space-x-2 border-none shadow-none bg-current dark:bg-inherit" >
+           <IoCloseSharp size={16} className='text-red-500'/>
+           </Button> */}
+          </div>
         </div>
       </CardHeader>
       <CardContent>

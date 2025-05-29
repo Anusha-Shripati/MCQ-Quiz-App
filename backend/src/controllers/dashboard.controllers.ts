@@ -44,13 +44,28 @@ export class DashboardController {
 
   interviewScroreData = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const questionData = await dashboardService.interviewScroreData();
+      const { language, score } = req.query as { language: string; score: string };
+      const questionData = await dashboardService.interviewScoreData({ language, score });
       return generateResponse(
         res,
         200,
         questionData,
         true,
         'Interview score data retrieved successfully'
+      );
+    } catch (error) {
+      next(error);
+    }
+  };
+  calendarData = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const interviewData = await dashboardService.calendarData();
+      return generateResponse(
+        res,
+        200,
+        interviewData,
+        true,
+        'Calendar data retrieved successfully'
       );
     } catch (error) {
       next(error);

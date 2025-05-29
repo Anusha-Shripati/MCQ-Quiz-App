@@ -16,7 +16,8 @@ export interface IExam extends ITimestamps {
   user:{
     id:string,
     name:string
-  }
+  },
+  results:Result
 }
 
 export interface IExamQuestion extends ITimestamps {

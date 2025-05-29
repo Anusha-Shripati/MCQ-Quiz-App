@@ -200,6 +200,8 @@ export default function AssessmentDetails() {
     data: assessmentsData,
     error,
     isLoading,
+    mutate:assessmentMutate,
+    isValidating
   } = useSWR(`/assessment/list?${cleanedQuery}`, api.get);
 
   useEffect(() => {
@@ -235,7 +237,7 @@ export default function AssessmentDetails() {
         if (res.success) {
           toast.success('Assessment deleted successfully');
         }
-        mutate((key) => typeof key === 'string' && key.startsWith('/assessment/list'));
+        mutate((key:string) => typeof key === 'string' && key.startsWith('/assessment/list'));
       } catch (error) {
         if (isAxiosError(error)) {
           toast.error(error.response.data.message || 'An unexpected error occurred');
@@ -301,7 +303,8 @@ export default function AssessmentDetails() {
     <div className="p-4 bg-white dark:bg-[#334155] rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-200 hover:shadow-md">
       <StatusWrapper
         error={error}
-        loading={isLoading}
+        loading={isLoading || isValidating}
+        reset={assessmentMutate}
         className="min-h-[500px]"
       >
       <Pagination

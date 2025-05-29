@@ -126,6 +126,8 @@ function CandidateTable() {
     data: candidateData,
     error,
     isLoading,
+    isValidating,
+    mutate:tableMutate
   } = useSWR(`/candidate/list?${cleanedQuery}`, api.get);
 
   useEffect(() => {
@@ -177,7 +179,7 @@ function CandidateTable() {
         if (res.success) {
           toast.success('Candidate deleted successfully');
         }
-        await mutate((key) => typeof key === 'string' && key.startsWith('/candidate/list'));
+        await mutate((key:string) => typeof key === 'string' && key.startsWith('/candidate/list'));
       } catch (error) {
         if (isAxiosError(error)) {
           toast.error(error.response.data.message || 'An unexpected error occurred');
@@ -451,7 +453,7 @@ function CandidateTable() {
   };
 
   return (
-    <StatusWrapper loading={isLoading} className="min-h-[500px]" error={error}>
+    <StatusWrapper loading={isLoading || isValidating} className="min-h-[500px]" error={error} reset={tableMutate}>
       <Pagination
         className="flex-grow"
         currentPageStart={currentPageStart}

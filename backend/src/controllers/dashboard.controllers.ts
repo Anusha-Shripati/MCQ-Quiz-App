@@ -52,7 +52,7 @@ export class DashboardController {
   interviewScroreData = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { language, min, max, page, limit } = req.query as unknown as InterviewScroreDataQuery;
-      const questionData = await dashboardService.interviewScoreData({ language, min, max,page, limit });
+      const questionData = await dashboardService.interviewScoreData({ language, min, max, page, limit });
       return generateResponse(
         res,
         200,
@@ -66,7 +66,8 @@ export class DashboardController {
   };
   calendarData = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const interviewData = await dashboardService.calendarData();
+      const { month, year } = req.query
+      const interviewData = await dashboardService.calendarData(month as string, year as string);
       return generateResponse(
         res,
         200,

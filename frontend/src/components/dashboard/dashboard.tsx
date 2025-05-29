@@ -1,5 +1,5 @@
 import { Card } from '@/components/ui/card';
-import Calendar from '@/components/dashboard/calendar-card';
+import CalendarCard from './calender/calendar-card';
 import InterviewStatics from '@/components/dashboard/interview-statics';
 import Questions from '@/components/dashboard/questions';
 import InterviewCount from './interview-count';
@@ -15,7 +15,7 @@ export default function Dashboard() {
           <InterviewStatics />
         </Card>
         <Card className="shadow-lg col-span-12 md:col-span-4">
-          <Calendar />
+          <CalendarCard />
         </Card>
         <InterviewCount />
         <InterviewScore />

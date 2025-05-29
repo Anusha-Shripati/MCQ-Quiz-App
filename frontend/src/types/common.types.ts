@@ -52,3 +52,13 @@ export interface ITimestamps {
   updated_at: string;
   deleted_at: string | null;
 }
+
+export interface CalendarEvent {
+  [date: string]:
+  {
+    color: string,
+    meta?: {
+      [key: string]: number | string | null
+    }
+  }[]
+}

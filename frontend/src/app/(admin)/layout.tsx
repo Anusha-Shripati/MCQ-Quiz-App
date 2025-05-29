@@ -18,8 +18,8 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             style={{ height: 'calc(100vh - 10rem)' }}
           >
             {/* <ScrollArea className="px-6 w-full xl:max-w-[1600px]"> */}
-            <ScrollArea className="px-6 w-full">
-              <SWRConfig value={{ dedupingInterval: 10000 }}>{children}</SWRConfig>
+            <ScrollArea  className="px-6 w-full">
+              <SWRConfig value={{ dedupingInterval: 10000,revalidateOnFocus:false }}>{children}</SWRConfig>
             </ScrollArea>
           </div>
         </div>

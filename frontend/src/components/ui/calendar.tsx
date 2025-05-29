@@ -2,14 +2,17 @@
 
 import * as React from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { DayPicker } from 'react-day-picker';
+import { DayPicker, DayProps } from 'react-day-picker';
 
 import { cn } from '@/lib/utils';
-import { buttonVariants } from '@/components/ui/form/button';
+import {  buttonVariants } from '@/components/ui/form/button';
+import { CalendarEvent } from '@/types/common.types';
 
 export type CalendarProps = React.ComponentProps<typeof DayPicker>;
 
-function Calendar({ className, classNames, showOutsideDays = true, ...props }: CalendarProps) {
+function Calendar({ className, events, classNames, showOutsideDays = true, renderEvents,...props }: CalendarProps & { events?: CalendarEvent,renderEvents?:(e:DayProps)=>React.ReactNode }) {
+  const eventsMap = React.useMemo(() => events || {}, [events]);
+
   return (
     <div className="w-full h-full flex flex-col">
       <DayPicker
@@ -32,7 +35,7 @@ function Calendar({ className, classNames, showOutsideDays = true, ...props }: C
           head_cell: 'text-muted-foreground rounded-md w-full font-normal text-[0.8rem]',
           row: 'flex w-full mt-2',
           cell: cn(
-            'relative p-0 text-center text-sm w-full h-full flex items-center justify-center focus-within:z-20',
+            'relative p-0 text-center text-sm w-full h-full flex items-center justify-center focus-within:z-20 w-full',
             props.mode === 'range'
               ? '[&:has(>.day-range-end)]:rounded-r-md [&:has(>.day-range-start)]:rounded-l-md first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md'
               : '[&:has([aria-selected])]:rounded-md'
@@ -60,6 +63,15 @@ function Calendar({ className, classNames, showOutsideDays = true, ...props }: C
           IconRight: ({ className, ...props }) => (
             <ChevronRight className={cn('h-4 w-4', className)} {...props} />
           ),
+          ...(events && renderEvents
+            ? {
+              Day: (props: DayProps) => (
+                <div className="h-20 w-full flex items-center justify-center">
+                  {renderEvents(props)}
+                </div>
+              ),
+            }
+            : {}),
         }}
         {...props}
       />

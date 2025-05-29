@@ -16,7 +16,7 @@ interface GraphData {
 export default function Questions() {
   const chartRef = useRef<HTMLDivElement>(null);
   const { theme } = useTheme();
-  const { data: questionsData, isLoading, error } = useSWR('/dashboard/get-questions-data', api.get);
+  const { data: questionsData, isLoading, error,isValidating,mutate } = useSWR('/dashboard/get-questions-data', api.get );
 
   const totalCount = useMemo(
     () => questionsData?.data?.reduce((sum: number, item: GraphData) => sum + item._count, 0) || 0,
@@ -94,15 +94,15 @@ export default function Questions() {
     <>
       <div className="p-4 rounded-md h-full min-h-[500px]">
         <h2 className="font-semibold mb-4 top-0 z-5">Questions Data</h2>
-        <StatusWrapper loading={isLoading } error={error} className='h-full'>
-          {graphData.length > 0 && (
+        <StatusWrapper loading={isLoading || isValidating } error={error} reset={mutate} className='h-full'>
+          {!isLoading && graphData.length > 0 && (
             <div
               ref={chartRef}
               style={{ width: '100%', height: '400px' }}
               className="rounded-md  mb-4"
             ></div>
           )}
-          {graphData.length == 0 && (
+          {!isLoading && graphData.length == 0 && (
             <div className="w-full h-[400px] flex items-center justify-center">
               There is no data available
             </div>

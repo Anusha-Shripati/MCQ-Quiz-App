@@ -13,7 +13,7 @@ interface InterviewData {
 }
 const InterviewStatics: React.FC = () => {
   const { theme } = useTheme();
-  const { data, isLoading, error } = useSWR('/dashboard/get-interview-data', api.get);
+  const { data, isLoading, error,mutate,isValidating } = useSWR('/dashboard/get-interview-data', api.get);
   const [interviewData, setInterviewData] = React.useState<InterviewData>({
     pass: [],
     failed: [],
@@ -174,7 +174,7 @@ const InterviewStatics: React.FC = () => {
 
   return (
     <div className='max-w-full h-full m-auto'>
-      <StatusWrapper loading={isLoading } error={error} className='w-full h-full'>
+      <StatusWrapper loading={isLoading || isValidating } error={error} reset={mutate} className='w-full h-full'>
         <ReactECharts
           option={options}
           style={{ height: '450px', width: '100%' }}

@@ -11,7 +11,7 @@ interface InterviewCountData {
 }
 
 function InterviewCount() {
-  const { data, isLoading, error } = useSWR('/dashboard/get-interview-count', api.get);
+  const { data, isLoading, error ,mutate,isValidating} = useSWR('/dashboard/get-interview-count', api.get);
 
   const [interviewData, setInterviewData] = useState<InterviewCountData[]>([
     { label: 'Last Month', value: 0, color: 'blue' },
@@ -38,7 +38,7 @@ function InterviewCount() {
           key={index}
           className="flex flex-col items-center p-4 bg-card text-card-foreground shadow-md rounded-lg"
         >
-          <StatusWrapper loading={isLoading } error={error} className='min-h-[100px]'>
+          <StatusWrapper loading={isLoading || isValidating} reset={mutate} error={error} className='min-h-[100px]'>
             <div
               className={`w-20 h-20 rounded-full flex items-center justify-center ${stat.color === 'blue'
                 ? 'bg-blue-100'

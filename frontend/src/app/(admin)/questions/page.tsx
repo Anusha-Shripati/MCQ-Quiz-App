@@ -16,7 +16,7 @@ export default function QuestionsPage() {
 
   const { technologyFilter } = useQuestionStore();
   const { paramsLoading } = useAuthStore();
-  const { data, isLoading, error } = useSWR(paramsLoading ? null : `/technology/list?search=${technologyFilter}`, api.get);
+  const { data, isLoading, error ,mutate:questionMutate,isValidating } = useSWR(paramsLoading ? null : `/technology/list?search=${technologyFilter}`, api.get);
   useEffect(() => {
     if (data) {
       setCategoriesArray(data.data.list);
@@ -50,7 +50,7 @@ export default function QuestionsPage() {
       </div>
 
       {/* Categories Grid */}
-      <StatusWrapper className="w-full min-h-[600px]" loading={isLoading} error={error}>
+      <StatusWrapper className="w-full min-h-[600px]" loading={isLoading || isValidating} error={error}  reset={questionMutate}>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-in fade-in duration-300">
           {categoriesArray.length > 0 ? (
             categoriesArray.map((list: QuestionCategory) => (

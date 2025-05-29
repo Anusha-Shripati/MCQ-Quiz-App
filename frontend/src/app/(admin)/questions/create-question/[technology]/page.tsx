@@ -52,7 +52,7 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
   const [selectedQuestion, setSelectedQuestion] = useState<number>(0);
   const [name, setName] = useState<string>('');
   const [isValidTechnology, setValidTechnology] = useState<boolean>(isValidUUID(params.technology));
-  const { data, isLoading, error } = useSWR(
+  const { data, isLoading, error,isValidating,mutate:questionMutate } = useSWR(
     isValidTechnology ? `/question/list?technology_id=${technologyId}` : null,
     api.get
   );
@@ -216,7 +216,7 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
 
   return (
     // Main container
-    <StatusWrapper className="p-6 dark:bg-gray-900 h-screen" loading={isLoading} error={error}>
+    <StatusWrapper className="p-6 dark:bg-gray-900 h-screen" loading={isLoading || isValidating} reset={questionMutate} error={error}>
       <Dialog open={!isValidTechnology} >
         <DialogContent>
           <DialogHeader>

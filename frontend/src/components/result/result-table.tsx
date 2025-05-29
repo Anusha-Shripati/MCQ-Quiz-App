@@ -128,6 +128,8 @@ function ResultTable() {
     data: candidateData,
     error,
     isLoading,
+    isValidating,
+    mutate
   } = useSWR(`/result/list?${cleanedQuery}`, api.get);
 
   useEffect(() => {
@@ -360,7 +362,7 @@ function ResultTable() {
   };
 
   return (
-    <StatusWrapper loading={isLoading} className="min-h-[500px]" error={error}>
+    <StatusWrapper loading={isLoading || isValidating} reset={mutate} className="min-h-[500px]" error={error}>
       <Pagination
         className="flex-grow"
         currentPageStart={currentPageStart}

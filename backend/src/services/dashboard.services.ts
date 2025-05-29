@@ -2,12 +2,13 @@ import { Result } from '../common/types/types';
 import { prisma } from '../db/prisma.client';
 import {
   categorizeExamDate,
-  convertToISTISOString,
   formatInterviewResults,
   getDateBoundaries,
   generateLast7Months,
 } from '../utils/dateUtils';
+import dayjs from 'dayjs'
 
+import utc from 'dayjs/plugin/utc';
 export class DashboardService {
   async getQuestionData() {
     const questionData = await prisma.questions.groupBy({
@@ -117,7 +118,6 @@ export class DashboardService {
         some: { technology_id: language }
       };
     }
-
     const results = await prisma.results.findMany({
       where: whereClause,
       select: {
@@ -154,26 +154,53 @@ export class DashboardService {
     return { total: count, page: parsedPage, limit: parsedLimit, list: formatInterviewResults(results as unknown as Result[]) }
   }
 
-  async calendarData() {
+  async calendarData(month: string, year: string) {
+
+    dayjs.extend(utc);
+    const startDate = dayjs().set('year', Number(year)).set('month', Number(month)).set('date', 1).startOf('day');
+    const endDate = startDate.endOf('month');
+    
     const exams = await prisma.exam.findMany({
-      select: { start_time: true },
+      where: {
+        start_time: {
+          gte: startDate.toISOString(),
+          lte: endDate.toISOString()
+        },
+      },
+      select: {
+        start_time: true,
+        end_time: true,
+        is_completed:true,
+        status:true,
+        candidate: {
+          select: {
+            name: true,
+            experience: true
+          }
+        },
+        assessment: {
+          select: {
+            name: true,
+            technologies: {
+              select: {
+                technology: {
+                  select: {
+                    name: true
+                  }
+                }
+              }
+            }
+          },
+        },
+        results: {
+          select: {
+            id: true,
+            percentage: true
+          }
+        }
+      }
     });
+    return exams
 
-    const dateMap = new Map<string, number>();
-
-    exams.forEach(exam => {
-      const istDateStr = convertToISTISOString(exam.start_time);
-      const date = istDateStr.split('T')[0];
-
-      dateMap.set(date, (dateMap.get(date) || 0) + 1);
-    });
-
-    return Array.from(dateMap.entries()).map(([date, count]) => ({
-      date,
-      count,
-      exams: Array(count).fill(null).map(() => ({
-        start_time: convertToISTISOString(new Date(date)),
-      })),
-    }));
   }
 }

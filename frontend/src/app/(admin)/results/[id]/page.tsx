@@ -25,7 +25,7 @@ function Answer() {
   const [assessment, setAssessment] = useState<Assessment | null>(null)
   const [answers, setAnswers] = useState<AnswerData[] | null>([])
   const [result, setResult] = useState<Result | null>(null)
-  const { data, isLoading, error } = useSWR(`/result/${id}`, api.get)
+  const { data, isLoading, error,isValidating,mutate } = useSWR(`/result/${id}`, api.get)
   const [introduction, setIntroduction] = useState<AnswerData | null>(null)
 
   useEffect(() => {
@@ -42,7 +42,7 @@ function Answer() {
   return (
     <div className="min-h-screen dark:bg-gray-900 py-6 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        <StatusWrapper loading={isLoading} error={error} className="w-full">
+        <StatusWrapper loading={isLoading || isValidating} error={error} reset={mutate} className="w-full">
 
           <CandidateInfo
             candidate={candidate}

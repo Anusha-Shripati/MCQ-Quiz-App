@@ -27,6 +27,7 @@ function UserTable() {
     isLoading,
     error,
     mutate,
+    isValidating
   } = useSWR(paramsLoading ? null : `/user/list?search=${userFilter}`, fetcher);
 
   useEffect(() => {
@@ -75,7 +76,7 @@ function UserTable() {
     },
   ];
   return (
-    <StatusWrapper className="min-h-[500px]" error={error} loading={isLoading}>
+    <StatusWrapper className="min-h-[500px]" error={error } loading={isLoading ||isValidating} reset={mutate}>
       <ReusableTable columns={columns} rows={userList} rowKey="id" />
       <UserForm open={open} userData={user} onClose={() => setOpen(false)} />
     </StatusWrapper>

@@ -32,6 +32,7 @@ function RoleTable() {
     isLoading,
     error,
     mutate,
+    isValidating
   } = useSWR(paramsLoading ? null : `/role/list?search=${rolesFilter}`, fetcher);
 
   useEffect(() => {
@@ -99,7 +100,7 @@ function RoleTable() {
     },
   ];
   return (
-    <StatusWrapper loading={isLoading} error={error} className="min-h-[500px]">
+    <StatusWrapper loading={isLoading || isValidating} error={error} className="min-h-[500px]" reset={mutate}>
       <ReusableTable columns={columns} rows={rolesList} rowKey="id" />
       <RoleForm open={open} roleData={role} onClose={() => setOpen(false)} />
     </StatusWrapper>

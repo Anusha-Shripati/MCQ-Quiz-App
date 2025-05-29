@@ -36,7 +36,7 @@ function InterviewScore() {
     return `/dashboard/get-interview-score?${params.toString()}`;
   }, [filters, page, limit]);
 
-  const { data, isLoading, error } = useSWR(
+  const { data, isLoading, error,mutate,isValidating } = useSWR(
     query,
     api.get
   );
@@ -85,7 +85,7 @@ function InterviewScore() {
 
   return (
     <Card className="col-span-12 md:col-span-6 row-span-2">
-      <StatusWrapper loading={isLoading} error={error} className='w-full h-full flex flex-col'>
+      <StatusWrapper loading={isLoading || isValidating} reset={mutate} error={error} className='w-full h-full flex flex-col'>
         <CardHeader>
           <div className="flex items-center justify-between space-x-1">
             <div className="space-y-1">

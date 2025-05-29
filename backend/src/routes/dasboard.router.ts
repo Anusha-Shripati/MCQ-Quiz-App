@@ -26,5 +26,10 @@ dashboardRouter.get(
   authenticateAndAuthorize(undefined, 'Super Admin'),
   asyncHandler(dashboardController.interviewScroreData)
 );
+dashboardRouter.get(
+  '/get-calendar-data',
+  authenticateAndAuthorize(undefined, 'Super Admin'),
+  asyncHandler(dashboardController.calendarData)
+);
 
 export default dashboardRouter;

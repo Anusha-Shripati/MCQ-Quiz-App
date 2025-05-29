@@ -88,7 +88,7 @@ export const questionsData = [
   { value: 300, name: 'Java' },
 ];
 export const languages = ['React', 'JS', 'Go', 'Python', 'Ruby'];
-export const scores = ['10', '20', '30', '40', '50', '60', '70'];
+export const scores = ['10', '20', '30', '40', '50', '60', '70', '80', '90', '100'];
 export const categories = [
   { name: 'ReactJS', easy: 20, medium: 30, hard: 50 },
   { name: 'NodeJS', easy: 20, medium: 30, hard: 50 },

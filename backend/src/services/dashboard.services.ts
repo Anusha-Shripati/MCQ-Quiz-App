@@ -1,4 +1,11 @@
 import { prisma } from '../db/prisma.client';
+import {
+  categorizeExamDate,
+  convertToISTISOString,
+  formatInterviewResults,
+  getDateBoundaries,
+  generateLast7Months,
+} from '../utils/dateUtils';
 
 export class DashboardService {
   async getQuestionData() {
@@ -6,77 +13,163 @@ export class DashboardService {
       by: ['technology_id'],
       _count: true,
     });
-    const technologyIds = [...new Set(questionData.map((q) => q.technology_id))];
 
+    if (questionData.length === 0) return [];
+
+    const technologyIds = questionData.map((q) => q.technology_id);
     const technologies = await prisma.technology.findMany({
+      where: { id: { in: technologyIds } },
+      select: { id: true, name: true },
+    });
+
+    const techMap = new Map(technologies.map(tech => [tech.id, tech.name]));
+
+    return questionData.map((group) => ({
+      ...group,
+      name: techMap.get(group.technology_id) || 'Unknown',
+    }));
+  }
+
+  async getInterviewData() {
+    const results = await prisma.results.findMany({
+      select: {
+        percentage: true,
+        exam: {
+          select: {
+            start_time: true,
+            is_completed: true,
+          },
+        },
+      },
       where: {
-        id: { in: technologyIds },
+        exam: { is_completed: true },
       },
     });
-    const finalResult = questionData.map((group) => {
-      const tech = technologies.find((t) => t.id === group.technology_id);
-      return {
-        ...group,
-        name: tech ? tech.name : 'Unknown',
-      };
+
+    const last7Months = generateLast7Months();
+    const monthlyData = new Map(
+      last7Months.map(month => [month.key, { pass: 0, failed: 0, month: month.name }])
+    );
+
+    results.forEach(result => {
+      const examDate = result.exam.start_time;
+      const key = `${examDate.getFullYear()}-${examDate.getMonth()}`;
+      
+      if (monthlyData.has(key)) {
+        const data = monthlyData.get(key)!;
+        if (result.percentage >= 60) {
+          data.pass++;
+        } else {
+          data.failed++;
+        }
+      }
     });
 
-    return finalResult;
-  }
-  async getInterviewData() {
+    const sortedData = Array.from(monthlyData.values());
+
     return {
-      months: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
-      pass: [120, 180, 160, 200, 190, 230, 280],
-      failed: [30, 50, 60, 40, 70, 80, 100],
+      months: sortedData.map(item => item.month),
+      pass: sortedData.map(item => item.pass),
+      failed: sortedData.map(item => item.failed),
     };
   }
 
   async getInterviewCount() {
-    return {
-      lastMonth: 89,
-      upcoming: 12,
-      today: 5,
-    };
+    const exams = await prisma.exam.findMany({
+      select: { start_time: true },
+    });
+
+    const boundaries = getDateBoundaries();
+    const counts = { lastMonth: 0, today: 0, upcoming: 0 };
+
+    exams.forEach(({ start_time }) => {
+      const category = categorizeExamDate(start_time, boundaries);
+      if (category && category in counts) {
+        counts[category as keyof typeof counts]++;
+      }
+    });
+
+    return counts;
   }
 
-  async interviewScroreData() {
-    return [
-      {
-        date: '18-Nov-24',
-        name: 'Darshit',
-        email: 'rohan@mail.com',
-        phone: '9625002500',
-        role: 'MERN',
-        experience: '3+',
-        description: 'MERN 3 years exp.',
-        duration: '40min',
-        status: 'Not Started',
-        score: '80%',
+  async interviewScoreData(filters: { language: string; score: string }) {
+    const { language, score } = filters;
+
+    const whereClause: any = {
+      exam: {
+        assessment: {}
+      }
+    };
+
+    if (score?.trim()) {
+      const scoreNum = parseFloat(score);
+      if (!isNaN(scoreNum)) {
+        whereClause.percentage = {
+          gte: scoreNum - 5,
+          lte: scoreNum + 5,
+        };
+      }
+    }
+
+    if (language?.trim()) {
+      whereClause.exam.assessment.technologies = {
+        some: { technology_id: language }
+      };
+    }
+
+    const results = await prisma.results.findMany({
+      where: whereClause,
+      select: {
+        percentage: true,
+        candidate: {
+          select: {
+            name: true,
+            email: true,
+          },
+        },
+        exam: {
+          select: {
+            start_time: true,
+            assessment: {
+              select: {
+                name: true,
+                technologies: {
+                  select: {
+                    technology: {
+                      select: { name: true },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
       },
-      {
-        date: '18-Nov-24',
-        name: 'Megh Patel',
-        email: 'viraj@mail.com',
-        phone: '9625002500',
-        role: 'MERN',
-        experience: '3+',
-        description: 'MERN 3 years exp.',
-        duration: '40min',
-        status: 'Not Started',
-        score: '40%',
-      },
-      {
-        date: '18-Nov-24',
-        name: 'Viraj Singh',
-        email: 'viraj@mail.com',
-        phone: '9625002500',
-        role: 'MERN',
-        experience: '3+',
-        description: 'MERN 3 years exp.',
-        duration: '40min',
-        status: 'Not Started',
-        score: '60%',
-      },
-    ];
+    });
+
+    return formatInterviewResults(results as any[]);
+  }
+
+  async calendarData() {
+    const exams = await prisma.exam.findMany({
+      select: { start_time: true },
+    });
+
+    const dateMap = new Map<string, number>();
+
+    exams.forEach(exam => {
+      const istDateStr = convertToISTISOString(exam.start_time);
+      const date = istDateStr.split('T')[0];
+      
+      dateMap.set(date, (dateMap.get(date) || 0) + 1);
+    });
+
+    return Array.from(dateMap.entries()).map(([date, count]) => ({
+      date,
+      count,
+      exams: Array(count).fill(null).map(() => ({
+        start_time: convertToISTISOString(new Date(date)),
+      })),
+    }));
   }
 }

@@ -36,9 +36,9 @@ function InterviewCount() {
       {interviewData.map((stat, index) => (
         <div
           key={index}
-          className="flex flex-col items-center p-4 bg-card text-card-foreground shadow-md rounded-lg"
+          className=" p-4 bg-card text-card-foreground shadow-md rounded-lg"
         >
-          <StatusWrapper loading={isLoading || isValidating} reset={mutate} error={error} className='min-h-[100px]'>
+          <StatusWrapper loading={isLoading || isValidating} reset={mutate} error={error} className='min-h-[100px] flex flex-col items-center'>
             <div
               className={`w-20 h-20 rounded-full flex items-center justify-center ${stat.color === 'blue'
                 ? 'bg-blue-100'

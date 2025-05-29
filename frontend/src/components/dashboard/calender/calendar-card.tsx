@@ -39,6 +39,7 @@ export default function CalendarCard() {
         const eventMeta = {
           percentage: results?.percentage?.toFixed(1),
           name: item.candidate?.name,
+          experience:item.candidate?.experience,
           assessment: item.assessment?.name,
           title: is_completed ? (pass ? 'Passed' : 'Failed') : 'Pending',
           email: item.candidate?.email,

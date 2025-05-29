@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useEffect, useMemo, useRef } from 'react';
-import * as echarts from 'echarts';
+import React, { useEffect, useMemo, useState } from 'react';
+import ReactECharts from 'echarts-for-react';
 import { useTheme } from 'next-themes';
 import useSWR from 'swr';
 import { api } from '@/lib/api';
@@ -14,10 +14,9 @@ interface GraphData {
 }
 
 export default function Questions() {
-  const chartRef = useRef<HTMLDivElement>(null);
   const { theme } = useTheme();
-  const { data: questionsData, isLoading, error,isValidating,mutate } = useSWR('/dashboard/get-questions-data', api.get );
-
+  const { data: questionsData, isLoading, error, isValidating, mutate } = useSWR('/dashboard/get-questions-data', api.get);
+  const [options, setOptions] = useState({})
   const totalCount = useMemo(
     () => questionsData?.data?.reduce((sum: number, item: GraphData) => sum + item._count, 0) || 0,
     [questionsData]
@@ -32,77 +31,69 @@ export default function Questions() {
   }, [questionsData]);
 
   useEffect(() => {
-    if (chartRef.current) {
-      const myChart = echarts.init(chartRef.current);
 
-      const option = {
-        tooltip: {
-          trigger: 'item',
+    setOptions({
+      tooltip: {
+        trigger: 'item',
+      },
+      legend: {
+        top: 'center',
+        left: 'left',
+        orient: 'vertical',
+        textStyle: {
+          fontSize: 16,
+          color: theme === 'light' ? '#333' : '#fff',
         },
-        legend: {
-          top: 'center',
-          left: 'left',
-          orient: 'vertical',
-          textStyle: {
-            fontSize: 16,
+      },
+
+      series: [
+        {
+          name: 'Questions count',
+          type: 'pie',
+          radius: ['50%', '80%'],
+          avoidLabelOverlap: false,
+          label: {
+            show: true,
+            position: 'center',
+            fontSize: 20,
+            fontWeight: 'bold',
             color: theme === 'light' ? '#333' : '#fff',
+            formatter: `{total|${totalCount}}\n{small|Total Questions}`,
+            rich: {
+              total: { fontSize: 24, fontWeight: 'bold', color: '#333' },
+              small: { fontSize: 14, color: '#666' },
+            },
           },
-        },
-
-        series: [
-          {
-            name: 'Questions count',
-            type: 'pie',
-            radius: ['50%', '80%'],
-            avoidLabelOverlap: false,
+          emphasis: {
             label: {
               show: true,
-              position: 'center',
               fontSize: 20,
               fontWeight: 'bold',
-              color: theme === 'light' ? '#333' : '#fff',
-              formatter: `{total|${totalCount}}\n{small|Total Questions}`,
-              rich: {
-                total: { fontSize: 24, fontWeight: 'bold', color: '#333' },
-                small: { fontSize: 14, color: '#666' },
-              },
             },
-            emphasis: {
-              label: {
-                show: true,
-                fontSize: 20,
-                fontWeight: 'bold',
-              },
-            },
-            labelLine: {
-              show: true,
-            },
-            data: graphData,
           },
-        ],
-      };
-
-      myChart.setOption(option);
-
-      return () => {
-        myChart.dispose();
-      };
-    }
+          labelLine: {
+            show: true,
+          },
+          data: graphData,
+        },
+      ],
+    });
   }, [theme, graphData]);
 
   return (
     <>
       <div className="p-4 rounded-md h-full min-h-[500px]">
         <h2 className="font-semibold mb-4 top-0 z-5">Questions Data</h2>
-        <StatusWrapper loading={isLoading || isValidating } error={error} reset={mutate} className='h-full'>
-          {!isLoading && graphData.length > 0 && (
-            <div
-              ref={chartRef}
-              style={{ width: '100%', height: '400px' }}
-              className="rounded-md  mb-4"
-            ></div>
-          )}
-          {!isLoading && graphData.length == 0 && (
+        <StatusWrapper loading={isLoading || isValidating} error={error} reset={mutate} className='h-full'>
+          {graphData.length > 0 && (
+            <ReactECharts
+              option={options}
+              style={{ height: '450px', width: '100%' }}
+              notMerge={true}
+              lazyUpdate={true}
+            />)
+          }
+          {graphData.length == 0 && (
             <div className="w-full h-[400px] flex items-center justify-center">
               There is no data available
             </div>

@@ -5,6 +5,7 @@ import * as echarts from 'echarts';
 import { useTheme } from 'next-themes';
 import useSWR from 'swr';
 import { api } from '@/lib/api';
+import StatusWrapper from '../common/status-wrapper';
 
 interface GraphData {
   _count: number;
@@ -15,7 +16,7 @@ interface GraphData {
 export default function Questions() {
   const chartRef = useRef<HTMLDivElement>(null);
   const { theme } = useTheme();
-  const { data: questionsData, isLoading } = useSWR('/dashboard/get-questions-data', api.get);
+  const { data: questionsData, isLoading, error } = useSWR('/dashboard/get-questions-data', api.get);
 
   const totalCount = useMemo(
     () => questionsData?.data?.reduce((sum: number, item: GraphData) => sum + item._count, 0) || 0,
@@ -91,20 +92,22 @@ export default function Questions() {
 
   return (
     <>
-      <div className="p-4 rounded-md h-full">
+      <div className="p-4 rounded-md h-full min-h-[500px]">
         <h2 className="font-semibold mb-4 top-0 z-5">Questions Data</h2>
-        {!isLoading && graphData.length > 0 && (
-          <div
-            ref={chartRef}
-            style={{ width: '100%', height: '400px' }}
-            className="rounded-md  mb-4"
-          ></div>
-        )}
-        {!isLoading && graphData.length == 0 && (
-          <div className="w-full h-[400px] flex items-center justify-center">
-            There is no data available
-          </div>
-        )}
+        <StatusWrapper loading={isLoading } error={error} className='h-full'>
+          {graphData.length > 0 && (
+            <div
+              ref={chartRef}
+              style={{ width: '100%', height: '400px' }}
+              className="rounded-md  mb-4"
+            ></div>
+          )}
+          {graphData.length == 0 && (
+            <div className="w-full h-[400px] flex items-center justify-center">
+              There is no data available
+            </div>
+          )}
+        </StatusWrapper>
       </div>
     </>
   );

@@ -64,6 +64,6 @@ export interface TablePaginationProps {
   itemsPerPage: number;
   onPageChange: (e: number) => void;
   onPerPageChange: (e: string) => void;
-  className: string;
+  className?: string;
   loading?: boolean;
 }

@@ -4,6 +4,7 @@ import ReactECharts from 'echarts-for-react';
 import { useTheme } from 'next-themes';
 import useSWR from 'swr';
 import { api } from '@/lib/api';
+import StatusWrapper from '../common/status-wrapper';
 
 interface InterviewData {
   pass: number[];
@@ -12,7 +13,7 @@ interface InterviewData {
 }
 const InterviewStatics: React.FC = () => {
   const { theme } = useTheme();
-  const { data, isLoading } = useSWR('/dashboard/get-interview-data', api.get);
+  const { data, isLoading, error } = useSWR('/dashboard/get-interview-data', api.get);
   const [interviewData, setInterviewData] = React.useState<InterviewData>({
     pass: [],
     failed: [],
@@ -172,15 +173,15 @@ const InterviewStatics: React.FC = () => {
   };
 
   return (
-    <div style={{ maxWidth: '100%', margin: '0 auto' }}>
-      {!isLoading && (
+    <div className='max-w-full h-full m-auto'>
+      <StatusWrapper loading={isLoading } error={error} className='w-full h-full'>
         <ReactECharts
           option={options}
           style={{ height: '450px', width: '100%' }}
           notMerge={true}
           lazyUpdate={true}
         />
-      )}
+      </StatusWrapper>
     </div>
   );
 };

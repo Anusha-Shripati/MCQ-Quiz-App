@@ -3,7 +3,7 @@ import { LoadingSpinner } from '../ui/loading-spinner';
 import Error from '@/app/error';
 
 function StatusWrapper(
-  props: React.PropsWithChildren<{ error?: string | null; loading?: boolean; className?: string }>
+  props: React.PropsWithChildren<{ error?: string | null; loading?: boolean; className?: string, reset?: () => void }>
 ) {
   const { error, loading } = props;
   if (loading) {
@@ -13,7 +13,7 @@ function StatusWrapper(
     return (
       <Error
         error={error}
-        reset={() => window.location.reload()}
+        reset={() => props.reset?.() ||  window.location.reload()}
         className={`${props.className || ''}`}
       />
     );

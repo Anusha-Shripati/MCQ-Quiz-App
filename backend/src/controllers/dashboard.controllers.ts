@@ -3,6 +3,13 @@ import { generateResponse } from '../utils/generateResponse';
 import { DashboardService } from '../services/dashboard.services';
 
 const dashboardService = new DashboardService();
+interface InterviewScroreDataQuery {
+  language: string,
+  min: string,
+  max: string,
+  page: string,
+  limit: string
+}
 export class DashboardController {
   questionData = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -44,8 +51,8 @@ export class DashboardController {
 
   interviewScroreData = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { language, score } = req.query as { language: string; score: string };
-      const questionData = await dashboardService.interviewScoreData({ language, score });
+      const { language, min, max, page, limit } = req.query as unknown as InterviewScroreDataQuery;
+      const questionData = await dashboardService.interviewScoreData({ language, min, max,page, limit });
       return generateResponse(
         res,
         200,

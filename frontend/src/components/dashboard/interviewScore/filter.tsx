@@ -1,24 +1,24 @@
 'use client';
-import { useMemo } from 'react';
+import { ReactElement, useMemo, useRef } from 'react';
 
-import { FormField } from '../common/form-field';
+import { FormField } from '../../common/form-field';
 import useSWR from 'swr';
 import { api } from '@/lib/api';
-import { Button } from '../ui/form/button';
+import { Button } from '../../ui/form/button';
 import { IoCloseSharp } from 'react-icons/io5';
 
 interface LanguageScoreSelect {
   setFilters: (name: string, value: string) => void;
-  scores: string[];
   filters: {
     language: string;
-    score: string;
+    min: null | number;
+    max: null | number;
   };
 }
 
-export default function LanguageScoreSelect({ setFilters, scores, filters }: LanguageScoreSelect) {
+export default function LanguageScoreSelect({ setFilters,  filters }: LanguageScoreSelect) {
   const { data: technologies } = useSWR('technology/list', api.get);
-
+  const deboundeRef = useRef<NodeJS.Timeout | null>(null)
   const technologyOptions = useMemo(
     () =>
       technologies?.data?.list.map((tech: { name: string; id: string }) => ({
@@ -30,10 +30,12 @@ export default function LanguageScoreSelect({ setFilters, scores, filters }: Lan
   const handleClearLanguageFilter = () => {
     setFilters('language', '');
   };
-
-  const handleClearScoreFilter = () => {
-    setFilters('score', '');
-  };
+  const handleValue = (e:React.ChangeEvent<HTMLInputElement>, name: string) => {
+    if (deboundeRef.current) clearTimeout(deboundeRef.current)
+    setTimeout(() => {
+      setFilters(name, e.target.value)
+    }, 1000)
+  }
 
   return (
     <div className="flex gap-4">
@@ -55,19 +57,19 @@ export default function LanguageScoreSelect({ setFilters, scores, filters }: Lan
       </div>
       <div className="flex items-center gap-2">
         <FormField
-          value={filters.score}
-          onChange={(value) => setFilters('score', value)}
-          type="select"
-          options={scores}
+          onChange={(e) => handleValue(e, 'min')}
+          type="text"
+          parentClassName='max-w-24'
+          placeholder='Min score'
+        /> to
+        <FormField
+          onChange={(e) => handleValue(e, 'max')}
+          type="text"
+          parentClassName='max-w-24'
+          placeholder='Max score'
         />
-        {filters.score && (
-          <Button
-            onClick={handleClearScoreFilter}
-            className="p-1 border-none shadow-none bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800"
-          >
-            <IoCloseSharp size={16} className="text-red-500" />
-          </Button>
-        )}
+
+
       </div>
     </div>
   );

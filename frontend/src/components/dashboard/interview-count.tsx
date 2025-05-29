@@ -2,6 +2,7 @@
 import { api } from '@/lib/api';
 import { useEffect, useState } from 'react';
 import useSWR from 'swr';
+import StatusWrapper from '../common/status-wrapper';
 
 interface InterviewCountData {
   label: string;
@@ -10,7 +11,7 @@ interface InterviewCountData {
 }
 
 function InterviewCount() {
-  const { data } = useSWR('/dashboard/get-interview-count', api.get);
+  const { data, isLoading, error } = useSWR('/dashboard/get-interview-count', api.get);
 
   const [interviewData, setInterviewData] = useState<InterviewCountData[]>([
     { label: 'Last Month', value: 0, color: 'blue' },
@@ -37,29 +38,30 @@ function InterviewCount() {
           key={index}
           className="flex flex-col items-center p-4 bg-card text-card-foreground shadow-md rounded-lg"
         >
-          <div
-            className={`w-20 h-20 rounded-full flex items-center justify-center ${
-              stat.color === 'blue'
+          <StatusWrapper loading={isLoading } error={error} className='min-h-[100px]'>
+            <div
+              className={`w-20 h-20 rounded-full flex items-center justify-center ${stat.color === 'blue'
                 ? 'bg-blue-100'
                 : stat.color === 'green'
                   ? 'bg-green-100'
                   : 'bg-yellow-100'
-            }`}
-          >
-            <span
-              className={`text-xl font-bold ${
-                stat.color === 'blue'
+                }`}
+            >
+              <span
+                className={`text-xl font-bold ${stat.color === 'blue'
                   ? 'text-blue-600'
                   : stat.color === 'green'
                     ? 'text-green-600'
                     : 'text-yellow-600'
-              }`}
-            >
-              {stat.value}
-            </span>
-          </div>
-          <span className="text-sm  mt-2">{stat.label}</span>
+                  }`}
+              >
+                {stat.value}
+              </span>
+            </div>
+            <span className="text-sm  mt-2">{stat.label}</span>
+          </StatusWrapper>
         </div>
+
       ))}
     </div>
   );

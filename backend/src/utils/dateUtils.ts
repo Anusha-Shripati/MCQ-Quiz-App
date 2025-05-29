@@ -1,29 +1,6 @@
-interface Candidate {
-  name: string;
-  email: string;
-}
+import { Result } from "../common/types/types";
 
-interface Technology {
-  technology: {
-    name: string;
-  };
-}
 
-interface Assessment {
-  name: string;
-  technologies: Technology[];
-}
-
-interface Exam {
-  start_time: string;
-  assessment: Assessment;
-}
-
-interface Result {
-  percentage: number;
-  candidate: Candidate;
-  exam: Exam;
-}
 export const getDateBoundaries=(now: Date = new Date()) =>{
   const startOfToday = new Date(now);
   startOfToday.setHours(0, 0, 0, 0);

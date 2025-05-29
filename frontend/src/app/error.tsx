@@ -21,7 +21,7 @@ export default function Error({
     <div
       className={`flex h-full flex-col items-center justify-center gap-4 w-full ${className || ''}`}
     >
-      <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
+      <h2 className="text-center text-2xl font-semibold text-gray-900 dark:text-gray-100">
         Something went wrong!
       </h2>
       <Button variant="default" onClick={reset}>

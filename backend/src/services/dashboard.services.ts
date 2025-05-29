@@ -1,3 +1,4 @@
+import { Result } from '../common/types/types';
 import { prisma } from '../db/prisma.client';
 import {
   categorizeExamDate,
@@ -54,7 +55,7 @@ export class DashboardService {
     results.forEach(result => {
       const examDate = result.exam.start_time;
       const key = `${examDate.getFullYear()}-${examDate.getMonth()}`;
-      
+
       if (monthlyData.has(key)) {
         const data = monthlyData.get(key)!;
         if (result.percentage >= 60) {
@@ -92,25 +93,25 @@ export class DashboardService {
     return counts;
   }
 
-  async interviewScoreData(filters: { language: string; score: string }) {
-    const { language, score } = filters;
-
+  async interviewScoreData(filters: { language: string; min: string, max: string, page: string, limit: string }) {
+    const { language, min, max, page, limit } = filters;
+    const parsedPage = page ? parseInt(page) : 1
+    const parsedLimit = page ? parseInt(limit) : 1
     const whereClause: any = {
       exam: {
         assessment: {}
       }
     };
 
-    if (score?.trim()) {
-      const scoreNum = parseFloat(score);
-      if (!isNaN(scoreNum)) {
-        whereClause.percentage = {
-          gte: scoreNum - 5,
-          lte: scoreNum + 5,
-        };
+    if (min)
+      whereClause.percentage = {
+        gte: parseFloat(min)
       }
-    }
 
+    if (max)
+      whereClause.percentage = {
+        lte: parseFloat(max)
+      }
     if (language?.trim()) {
       whereClause.exam.assessment.technologies = {
         some: { technology_id: language }
@@ -145,9 +146,12 @@ export class DashboardService {
           },
         },
       },
+      skip: (parsedPage - 1) * parsedLimit,
+      take: parsedLimit
     });
+    const count = await prisma.results.count({ where: whereClause })
 
-    return formatInterviewResults(results as any[]);
+    return { total: count, page: parsedPage, limit: parsedLimit, list: formatInterviewResults(results as unknown as Result[]) }
   }
 
   async calendarData() {
@@ -160,7 +164,7 @@ export class DashboardService {
     exams.forEach(exam => {
       const istDateStr = convertToISTISOString(exam.start_time);
       const date = istDateStr.split('T')[0];
-      
+
       dateMap.set(date, (dateMap.get(date) || 0) + 1);
     });
 

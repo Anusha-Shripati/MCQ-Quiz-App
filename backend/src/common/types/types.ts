@@ -17,3 +17,32 @@ export interface IPagination {
   limit: number;
   offset: number;
 }
+
+
+export interface Result {
+  percentage: number;
+  candidate: Candidate;
+  exam: Exam;
+}
+
+export interface Exam {
+  start_time: string;
+  assessment: Assessment;
+}
+
+export interface Candidate {
+  name: string;
+  email: string;
+}
+
+export interface Technology {
+  technology: {
+    name: string;
+  };
+}
+
+export interface Assessment {
+  name: string;
+  technologies: Technology[];
+}
+

@@ -15,6 +15,7 @@ import ResultSummary from '@/components/result/result-summary'
 import QuestionReview from '@/components/result/question-review'
 import Snapshots from '@/components/result/snapshots'
 import { Content, List, Tabs, Trigger } from '@/components/ui/form/tabs'
+import { resultEndpoint } from '@/lib/endpoint'
 
 
 function Answer() {
@@ -25,7 +26,7 @@ function Answer() {
   const [assessment, setAssessment] = useState<Assessment | null>(null)
   const [answers, setAnswers] = useState<AnswerData[] | null>([])
   const [result, setResult] = useState<Result | null>(null)
-  const { data, isLoading, error,isValidating,mutate } = useSWR(`/result/${id}`, api.get)
+  const { data, isLoading, error,isValidating,mutate } = useSWR(`${resultEndpoint.RESULT_BY_ID}/${id}`, api.get)
   const [introduction, setIntroduction] = useState<AnswerData | null>(null)
 
   useEffect(() => {

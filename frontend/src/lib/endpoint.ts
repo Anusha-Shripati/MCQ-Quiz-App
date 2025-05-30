@@ -19,7 +19,10 @@ export const technologyEndpoint={
 export const userEndpoint={
     LIST:"/user/list",
     CREATE:"/user/create",
-    UPLOAD_IMAGE:"/user/upload-image"
+    UPLOAD_IMAGE:"/user/upload-image",
+    USER_BY_ID:"/user",
+    CHANGE_PASSWORD:"/user/change-password",
+    LOGIN:'/user/login'
 }
 export const candidateEndpoint={
     LIST:"/candidate/list",
@@ -39,6 +42,8 @@ export const roleEndpoint={
 export const resultEndpoint={
     LIST:"/result/list",
     CREATE:"/question/create",
+    RESULT_BY_ID:"/question",
+
 }
 export const moduleEndpoint={
     LIST:"/module/list",

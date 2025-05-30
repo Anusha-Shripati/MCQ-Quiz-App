@@ -11,6 +11,7 @@ import { api, isAxiosError } from '@/lib/api';
 import toast from 'react-hot-toast';
 import { EyeIcon, EyeOffIcon } from 'lucide-react';
 import { useProfileStore } from '@/store/profileStore';
+import { userEndpoint } from '@/lib/endpoint';
 
 const userInfoSchema = z.object({
   userName: z.string().min(1, 'User Name is required'),
@@ -75,7 +76,7 @@ export default function Profile() {
   const onSaveUserInfo = async (data: { userName: string; email: string }) => {
     try {
       if (user?.id) {
-        const res = await api.put(`/user/${user?.id}`, {
+        const res = await api.put(`${userEndpoint.USER_BY_ID}/${user?.id}`, {
           name: data.userName,
           email: data.email,
         });
@@ -107,7 +108,7 @@ export default function Profile() {
   }) => {
     try {
       if (user?.id) {
-        const res = await api.put(`/user/change-password/${user?.id}`, {
+        const res = await api.put(`${userEndpoint.CHANGE_PASSWORD}/${user?.id}`, {
           oldPassword: data.oldPassword,
           newPassword: data.newPassword,
         });

@@ -1,4 +1,5 @@
 import { api } from '@/lib/api';
+import { assessmentEndpoint } from '@/lib/endpoint';
 import { DateRange } from '@/types/common.types';
 import { isAxiosError } from 'axios';
 import { create } from 'zustand';
@@ -65,7 +66,7 @@ export const useAssessmentStore = create<AssessmentState>((set) => ({
   fetchAssessments: async () => {
     set({ isLoading: true });
     try {
-      const response = await api.get('/assessment/list');
+      const response = await api.get(assessmentEndpoint.LIST);
       set({ assessments: response.data.data, isLoading: false, error: null });
     } catch (error) {
       if (isAxiosError(error)) {

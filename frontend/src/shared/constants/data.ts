@@ -88,7 +88,7 @@ export const questionsData = [
   { value: 300, name: 'Java' },
 ];
 export const languages = ['React', 'JS', 'Go', 'Python', 'Ruby'];
-export const scores = ['10', '20', '30', '40', '50', '60', '70', '80', '90', '100'];
+export const scores = ['1-10', '11-20', '21-30', '31-40', '41-50', '51-60', '61-70', '71-80', '81-90', '91-100'];
 export const categories = [
   { name: 'ReactJS', easy: 20, medium: 30, hard: 50 },
   { name: 'NodeJS', easy: 20, medium: 30, hard: 50 },
@@ -1269,3 +1269,5 @@ interface Exam {
   task: string;
   candidate: string;
 }
+
+export const RESULTS_TITLE = "Double Click to show detailed result.";

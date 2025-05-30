@@ -20,6 +20,7 @@ export interface IPagination {
 
 
 export interface Result {
+  id: string;
   percentage: number;
   candidate: Candidate;
   exam: Exam;

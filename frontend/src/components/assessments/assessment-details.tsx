@@ -14,6 +14,7 @@ import qs from 'query-string';
 import dayjs from 'dayjs';
 import { usePathname, useSearchParams } from 'next/navigation';
 import StatusWrapper from '../common/status-wrapper';
+import { assessmentEndpoint } from '@/lib/endpoint';
 // import StatusWrapper from "../common/status-wrapper";
 
 interface AssessmentItemProps {
@@ -202,7 +203,7 @@ export default function AssessmentDetails() {
     isLoading,
     mutate:assessmentMutate,
     isValidating
-  } = useSWR(`/assessment/list?${cleanedQuery}`, api.get);
+  } = useSWR(`${assessmentEndpoint.LIST}?${cleanedQuery}`, api.get);
 
   useEffect(() => {
     if (assessmentsData) {

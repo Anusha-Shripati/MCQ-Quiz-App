@@ -14,6 +14,7 @@ import TestError from './error/test-error';
 import Question from './question';
 import { Check, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { BROWSER_KEY, PROHIBITED_COMBINATIONS, PROHIBITED_KEYS, QUIZ_CONFIG } from '@/shared/constants/data';
+import { examEndpoint } from '@/lib/endpoint';
 
 
 
@@ -64,7 +65,7 @@ export default function ProctoredQuiz() {
     alertTimeoutRef.current = setTimeout(() => setShowAlert(false), QUIZ_CONFIG.alertTimeout);
   };
 
-  const { data: examData, isLoading: isExamLoading } = useSWR(`/candidate-exam/${exam?.id}`, (url: string) => examApi.get(url, accessCode), {
+  const { data: examData, isLoading: isExamLoading } = useSWR(`${examEndpoint.BY_ID}/${exam?.id}`, (url: string) => examApi.get(url, accessCode), {
     revalidateOnFocus: true,
     revalidateOnMount: true,
     revalidateOnReconnect: true,
@@ -73,11 +74,11 @@ export default function ProctoredQuiz() {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { isMutating, trigger } = useSWRMutation<SubmitAnsReponse, any, string, FormData | SubmitAnsPayload>(
-    `/candidate-exam/${exam?.id}/submit-answer`,
+    `${examEndpoint.CANDIDATE_EXAM}/${exam?.id}/submit-answer`,
     (url: string, { arg }) => examApi.post(url, arg, accessCode)
   )
-  const { isMutating: isSubmiting, trigger: submitTrigger } = useSWRMutation(`/candidate-exam/${exam?.id}/finish`, (url: string) => examApi.get(url, accessCode))
-  const { isMutating: isReseting, trigger: resetTrigger } = useSWRMutation(`/candidate-exam/${exam?.id}/reset-answer`, (url: string, { arg }: { arg: { answer_id: string } }) => examApi.post(url, arg, accessCode))
+  const { isMutating: isSubmiting, trigger: submitTrigger } = useSWRMutation(`${examEndpoint.CANDIDATE_EXAM}/${exam?.id}/finish`, (url: string) => examApi.get(url, accessCode))
+  const { isMutating: isReseting, trigger: resetTrigger } = useSWRMutation(`${examEndpoint.CANDIDATE_EXAM}/${exam?.id}/reset-answer`, (url: string, { arg }: { arg: { answer_id: string } }) => examApi.post(url, arg, accessCode))
 
   useEffect(() => {
     if (examData) {

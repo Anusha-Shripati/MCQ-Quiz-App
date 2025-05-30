@@ -24,6 +24,7 @@ import useSWRMutation from 'swr/mutation';
 import { api } from '@/lib/api';
 import { toast } from 'react-hot-toast';
 import { AxiosError } from 'axios';
+import { technologyEndpoint } from '@/lib/endpoint';
 
 async function deleteCategory(url: string) {
   const response = await api.delete(url);
@@ -46,7 +47,7 @@ const CategoryMenu = ({
   // const handleDeleteCategory = (category: QuestionCategory) => {
   //   console.log(category);
   // };
-  const { trigger } = useSWRMutation(`/technology/${category.id}`, deleteCategory);
+  const { trigger } = useSWRMutation(`${technologyEndpoint.TECHNOLOGY_BY_ID}/${category.id}`, deleteCategory);
   const handleDeleteCategory = async () => {
     try {
       await trigger();

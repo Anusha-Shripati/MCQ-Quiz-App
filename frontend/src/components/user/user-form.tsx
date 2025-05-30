@@ -14,6 +14,7 @@ import { UserData } from '@/types/common.types';
 import useSWRMutation from 'swr/mutation';
 import RoleForm from '../roles/role-form';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { roleEndpoint, userEndpoint } from '@/lib/endpoint';
 
 const userSchema = z
   .object({
@@ -79,9 +80,9 @@ function UserForm({ open, onClose, userData = null }: UserFormProps) {
 
   const userFoms = watch();
 
-  const { data: roles } = useSWR('/role/list', api.get);
+  const { data: roles } = useSWR(roleEndpoint.LIST, api.get);
 
-  const { trigger, isMutating } = useSWRMutation(`/user/create`, create);
+  const { trigger, isMutating } = useSWRMutation(userEndpoint.CREATE, create);
   const { trigger: updateTrigger, isMutating: updating } = useSWRMutation(
     `/user/${userData?.id}`,
     update

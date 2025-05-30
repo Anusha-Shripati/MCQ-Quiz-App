@@ -6,6 +6,7 @@ import { useTheme } from 'next-themes';
 import useSWR from 'swr';
 import { api } from '@/lib/api';
 import StatusWrapper from '../common/status-wrapper';
+import { dashboardEndpoint } from '@/lib/endpoint';
 
 interface GraphData {
   _count: number;
@@ -15,7 +16,7 @@ interface GraphData {
 
 export default function Questions() {
   const { theme } = useTheme();
-  const { data: questionsData, isLoading, error, isValidating, mutate } = useSWR('/dashboard/get-questions-data', api.get);
+  const { data: questionsData, isLoading, error, isValidating, mutate } = useSWR(dashboardEndpoint.QUESTIONS_DATA, api.get);
   const [options, setOptions] = useState({})
   const totalCount = useMemo(
     () => questionsData?.data?.reduce((sum: number, item: GraphData) => sum + item._count, 0) || 0,

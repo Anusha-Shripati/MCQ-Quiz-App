@@ -12,6 +12,7 @@ import UserForm from './user-form';
 import { useAuthStore } from '@/store/authStore';
 import ReusableTable from '../common/reusable-table';
 import StatusWrapper from '../common/status-wrapper';
+import { userEndpoint } from '@/lib/endpoint';
 
 function UserTable() {
   const [user, setUser] = useState<UserData | null>(null);
@@ -28,7 +29,7 @@ function UserTable() {
     error,
     mutate,
     isValidating
-  } = useSWR(paramsLoading ? null : `/user/list?search=${userFilter}`, fetcher);
+  } = useSWR(paramsLoading ? null : `${userEndpoint.LIST}?search=${userFilter}`, fetcher);
 
   useEffect(() => {
     setUserListData(users?.data?.count || 0, users?.data?.list || []);
@@ -41,7 +42,7 @@ function UserTable() {
         if (res.success) {
           toast.success('User deleted successfully');
         }
-        mutate(`/user/list?search=${userFilter}`);
+        mutate(`${userEndpoint.LIST}?search=${userFilter}`);
       } catch (error) {
         if (isAxiosError(error)) {
           toast.error(error.response.data.message || 'An unexpected error occurred');

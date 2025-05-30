@@ -13,15 +13,16 @@ import useSWR from 'swr';
 import { useResultStore } from '@/store/resultStore';
 import { ResultFilter } from '@/types/exam.types';
 import { PercentageFilter } from './percentage-options';
+import { assessmentEndpoint, technologyEndpoint } from '@/lib/endpoint';
 
 const Filters = () => {
-  const { data: assessments } = useSWR('/assessment/all', api.get, {
+  const { data: assessments } = useSWR(assessmentEndpoint.ALL, api.get, {
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
     dedupingInterval: 60000,
     staleWhileRevalidate: true,
   });
-  const { data: technology } = useSWR('/technology/list', api.get, {
+  const { data: technology } = useSWR(technologyEndpoint.LIST, api.get, {
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
     dedupingInterval: 60000,

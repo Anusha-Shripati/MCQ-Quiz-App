@@ -10,6 +10,7 @@ import { api, isAxiosError } from '@/lib/api';
 import { FormField } from '../common/form-field';
 import { Label } from '../ui/form/label';
 import useSWRMutation from 'swr/mutation';
+import { assessmentEndpoint, technologyEndpoint } from '@/lib/endpoint';
 
 interface Option {
   value: string;
@@ -41,9 +42,9 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
   >([]);
   const [technologyOptions, setTechnologyOptions] = useState<Option[]>([]);
 
-  const { data: technologyData } = useSWR('/technology/list', api.get);
+  const { data: technologyData } = useSWR(technologyEndpoint.LIST, api.get);
 
-  const { trigger, isMutating } = useSWRMutation(`/assessment/${assessment.id}`, update);
+  const { trigger, isMutating } = useSWRMutation(`${assessmentEndpoint.ASSESSMENT_BY_ID}/${assessment.id}`, update);
 
   useEffect(() => {
     if (technologyData) {

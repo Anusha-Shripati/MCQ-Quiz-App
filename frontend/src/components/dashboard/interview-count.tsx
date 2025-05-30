@@ -3,6 +3,7 @@ import { api } from '@/lib/api';
 import { useEffect, useState } from 'react';
 import useSWR from 'swr';
 import StatusWrapper from '../common/status-wrapper';
+import { dashboardEndpoint } from '@/lib/endpoint';
 
 interface InterviewCountData {
   label: string;
@@ -11,7 +12,7 @@ interface InterviewCountData {
 }
 
 function InterviewCount() {
-  const { data, isLoading, error ,mutate,isValidating} = useSWR('/dashboard/get-interview-count', api.get);
+  const { data, isLoading, error ,mutate,isValidating} = useSWR(dashboardEndpoint.INTERVIEW_COUNT, api.get);
 
   const [interviewData, setInterviewData] = useState<InterviewCountData[]>([
     { label: 'Last Month', value: 0, color: 'blue' },

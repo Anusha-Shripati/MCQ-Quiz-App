@@ -24,6 +24,7 @@ import { z } from 'zod';
 import { DurationInput } from '../common/duration-input';
 import useSWRMutation from 'swr/mutation';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { candidateEndpoint } from '@/lib/endpoint';
 
 type ErrorType = string | undefined;
 interface CandidateDialogProps {
@@ -97,9 +98,9 @@ export default function DialogForm({ candidate, open, setOpen }: CandidateDialog
   const formData = watch();
   const { assessmentOptions, technologyOptions } = useCandidateStore();
 
-  const { trigger, isMutating } = useSWRMutation(`/candidate/create`, create);
+  const { trigger, isMutating } = useSWRMutation(candidateEndpoint.CREATE, create);
   const { trigger: updateTrigger, isMutating: updating } = useSWRMutation(
-    `/candidate/${candidate?.id}`,
+    `${candidateEndpoint.CANDIDATE_BY_ID}/${candidate?.id}`,
     update
   );
   const router = useRouter();

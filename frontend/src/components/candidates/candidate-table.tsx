@@ -25,6 +25,7 @@ import useSWR, { mutate } from 'swr';
 import StatusWrapper from '../common/status-wrapper';
 import { ExamMetaTech } from '@/types/exam.types';
 import Link from 'next/link';
+import { candidateEndpoint } from '@/lib/endpoint';
 
 function CandidateTable() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -128,7 +129,7 @@ function CandidateTable() {
     isLoading,
     isValidating,
     mutate:tableMutate
-  } = useSWR(`/candidate/list?${cleanedQuery}`, api.get);
+  } = useSWR(`${candidateEndpoint.LIST}?${cleanedQuery}`, api.get);
 
   useEffect(() => {
     if (candidateData?.data?.list) {

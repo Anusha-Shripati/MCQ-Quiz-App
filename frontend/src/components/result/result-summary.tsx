@@ -1,4 +1,5 @@
 import { api } from "@/lib/api";
+import { technologyEndpoint } from "@/lib/endpoint";
 import { Layers } from "lucide-react";
 import React, { useEffect } from "react";
 import useSWR from "swr";
@@ -11,7 +12,7 @@ interface ResultSummaryProps {
 }
 
 const ResultSummary: React.FC<ResultSummaryProps> = ({ score, total, percentage, technologies }) => {
-    const { data: technology, isLoading } = useSWR('/technology/list', api.get, {
+    const { data: technology, isLoading } = useSWR(technologyEndpoint.LIST, api.get, {
         revalidateOnFocus: false,
         revalidateOnReconnect: false,
         dedupingInterval: 60000,

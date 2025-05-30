@@ -122,6 +122,7 @@ export class DashboardService {
       where: whereClause,
       select: {
         percentage: true,
+        id: true,
         candidate: {
           select: {
             name: true,

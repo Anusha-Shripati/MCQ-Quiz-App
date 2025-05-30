@@ -90,7 +90,7 @@ const QuestionReview: React.FC<QuestionReviewProps> = ({ answers }) => {
                           isCorrect
                             ? 'border-green-500 dark:border-green-400 bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/50'
                             : isSelected
-                            ? 'border-yellow-500 dark:border-yellow-400 bg-yellow-50 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 hover:bg-yellow-100 dark:hover:bg-yellow-900/50'
+                            ? 'border-red-500 dark:border-red-400 bg-red-50 dark:bg-yellow-900/30 text-red-700 dark:text-red-500 hover:bg-yellow-100 dark:hover:bg-yellow-900/50'
                             : 'border-gray-200 dark:border-gray-700 hover:border-purple-200 dark:hover:border-purple-700 hover:bg-purple-50/50 dark:hover:bg-purple-900/30'
                         }`}
                       >

@@ -10,15 +10,18 @@ import useSWR from 'swr';
 import ReusableTable from '../../common/reusable-table';
 import StatusWrapper from '@/components/common/status-wrapper';
 import Pagination from '@/components/pagination';
-
+import { useRouter } from 'next/navigation';
+import { RESULTS_TITLE } from '@/shared/constants/data';
 
 interface ScoreData {
+  id: string;
   date: string;
   name: string;
   score: string;
 }
 
 function InterviewScore() {
+  const router = useRouter();
   const [scoreData, setScoreData] = useState<ScoreData[]>([]);
   const [filters, setFilters] = useState<{ language: string, min: null | number, max: null | number }>({ language: '', min: null, max: null });
   const [page, setPage] = useState<number>(1)
@@ -55,6 +58,10 @@ function InterviewScore() {
       };
     });
   };
+
+  const handleNavigation = (row: ScoreData) => {
+    router.push(`/results/${row.id}`);
+  }
   const columns = [
     { key: 'date', header: 'Date', render: (row: ScoreData) => row.date },
     {
@@ -80,7 +87,6 @@ function InterviewScore() {
         </div>
       ),
     },
-
   ];
 
   return (
@@ -110,7 +116,7 @@ function InterviewScore() {
             itemsPerPage={limit}
             className='h-full'
           >
-            <ReusableTable columns={columns} rows={scoreData} rowKey="name" className='max-h-[500px]' />
+            <ReusableTable columns={columns} rows={scoreData} onRowClick={handleNavigation} title={RESULTS_TITLE}rowKey="name" className='max-h-[500px]' />
           </Pagination>
         </CardContent>
       </StatusWrapper>

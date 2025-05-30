@@ -1,6 +1,5 @@
 import { Result } from "../common/types/types";
 
-
 export const getDateBoundaries=(now: Date = new Date()) =>{
   const startOfToday = new Date(now);
   startOfToday.setHours(0, 0, 0, 0);
@@ -61,6 +60,7 @@ export const formatInterviewResults = (results: Result[]) => {
       .join(', ');
 
     return {
+      id: result.id,
       date: formatToISTDate(result.exam.start_time),
       name: result.candidate.name,
       email: result.candidate.email,

@@ -30,6 +30,7 @@ export interface TableProps<T> {
   onRowClick?: (row: T) => void;
   className?: string;
   rowKey: keyof T;
+  title?: string;
 }
 
 const ReusableTable = <T extends object>({
@@ -38,6 +39,7 @@ const ReusableTable = <T extends object>({
   expandableRow,
   onRowClick,
   className,
+  title,
 }: TableProps<T>) => {
   const [expandedRow, setExpandedRow] = useState<number | null>(null);
 
@@ -79,9 +81,13 @@ const ReusableTable = <T extends object>({
           {rows.map((row, rowIndex) => (
             <React.Fragment key={rowIndex}>
               <TableRow
-                onClick={() => {
+                title={title}
+                onDoubleClick={() => {
                   onRowClick?.(row);
                 }}
+                // onClick={() => {
+                //   onRowClick?.(row);
+                // }}
                 className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200"
               >
                 {columns.map((column) => {

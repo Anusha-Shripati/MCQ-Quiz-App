@@ -12,6 +12,7 @@ import { useExamStore } from '@/store/examStore';
 import { EXAM_STEP } from '@/types/exam.types';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
+import { examEndpoint } from '@/lib/endpoint';
 
 
 const QuizPage = () => {
@@ -75,7 +76,7 @@ const QuizPage = () => {
 
       setAccessCode(code);
 
-      const data = await examApi.get(`/candidate-exam`, code);
+      const data = await examApi.get(examEndpoint.CANDIDATE_EXAM, code);
 
       if (!data.success) {
         setError(data.message || 'Access denied. Invalid or expired access code.');
@@ -194,7 +195,7 @@ const QuizPage = () => {
     try {
       const urlParams = new URLSearchParams(window.location.search);
       const code = urlParams.get('code');
-      await examApi.post(`/candidate-exam/${params.examId}/snapshot?fileType=${type}`, formData, code as string)
+      await examApi.post(`${examEndpoint.CANDIDATE_EXAM}/${params.examId}/snapshot?fileType=${type}`, formData, code as string)
     } catch (error) {
       console.error('Error taking screenshot:', error);
     }

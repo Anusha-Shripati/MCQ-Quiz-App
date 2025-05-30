@@ -10,13 +10,14 @@ import { useQuestionStore } from '@/store/questionStore';
 // import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import StatusWrapper from '@/components/common/status-wrapper';
 import { useAuthStore } from '@/store/authStore';
+import { technologyEndpoint } from '@/lib/endpoint';
 
 export default function QuestionsPage() {
   const [categoriesArray, setCategoriesArray] = useState<QuestionCategory[]>([]);
 
   const { technologyFilter } = useQuestionStore();
   const { paramsLoading } = useAuthStore();
-  const { data, isLoading, error ,mutate:questionMutate,isValidating } = useSWR(paramsLoading ? null : `/technology/list?search=${technologyFilter}`, api.get);
+  const { data, isLoading, error ,mutate:questionMutate,isValidating } = useSWR(paramsLoading ? null : `${technologyEndpoint.LIST}?search=${technologyFilter}`, api.get);
   useEffect(() => {
     if (data) {
       setCategoriesArray(data.data.list);
@@ -26,7 +27,7 @@ export default function QuestionsPage() {
   const handleDelete = async (techId: string) => {
     // if (window.confirm("Are you sure you want to delete this Technology?")) {
     try {
-      const res = await api.delete(`/technology/${techId}`);
+      const res = await api.delete(`${technologyEndpoint.TECHNOLOGY_BY_ID}/${techId}`);
       if (res.success) {
         toast.success('Technology deleted successfully');
       }

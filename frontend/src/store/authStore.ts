@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { Module, Permissions, UserData } from '@/types/common.types';
 import { api, isAxiosError } from '@/lib/api';
+import { userEndpoint } from '@/lib/endpoint';
 
 interface User {
   id?: string;
@@ -58,7 +59,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   login: async ({ email, password }: { email: string; password: string }) => {
     set({ loading: true });
     try {
-      const response = await api.post('/user/login', { email, password });
+      const response = await api.post(userEndpoint.LOGIN, { email, password });
       if (response.success) {
         const permissions = response.data?.role?.role_permissions?.reduce(
           (

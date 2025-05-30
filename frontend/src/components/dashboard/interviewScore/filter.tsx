@@ -6,6 +6,7 @@ import useSWR from 'swr';
 import { api } from '@/lib/api';
 import { Button } from '../../ui/form/button';
 import { IoCloseSharp } from 'react-icons/io5';
+import { technologyEndpoint } from '@/lib/endpoint';
 
 interface LanguageScoreSelect {
   setFilters: (name: string, value: string) => void;
@@ -17,7 +18,7 @@ interface LanguageScoreSelect {
 }
 
 export default function LanguageScoreSelect({ setFilters,  filters }: LanguageScoreSelect) {
-  const { data: technologies } = useSWR('technology/list', api.get);
+  const { data: technologies } = useSWR(technologyEndpoint.LIST, api.get);
   const deboundeRef = useRef<NodeJS.Timeout | null>(null)
   const technologyOptions = useMemo(
     () =>

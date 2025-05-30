@@ -179,15 +179,7 @@ export default class ExamService {
 
       await this.createExamQuestionsForAssessment(exam.id, data.assessment_id);
 
-      return await prisma.exam.findUnique({
-        where: { id: exam.id },
-        include: {
-          user: true,
-          assessment: true,
-          results: true,
-          answers: true,
-        },
-      });
+      return exam;
     } catch (error) {
       if (error instanceof AppError) {
         throw error;

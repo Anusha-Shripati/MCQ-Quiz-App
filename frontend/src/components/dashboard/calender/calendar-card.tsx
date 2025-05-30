@@ -10,6 +10,7 @@ import { Button } from '../../ui/form/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../../ui/tooltip';
 import { DayProps } from 'react-day-picker';
 import EventTooltip from './event-tooltip';
+import { dashboardEndpoint } from '@/lib/endpoint';
 
 type CalendarDate = Date | undefined | DateRange;
 
@@ -23,7 +24,7 @@ export default function CalendarCard() {
     const params = new URLSearchParams();
     params.set('year', String(year));
     params.set('month', String(month));
-    return '/dashboard/get-calendar-data?' + params.toString();
+    return `${dashboardEndpoint.CALENDAR_DATA}?` + params.toString();
   }, [month, year]);
 
   const { data } = useSWR(query, api.get);

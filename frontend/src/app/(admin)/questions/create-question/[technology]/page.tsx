@@ -18,6 +18,7 @@ import { isValidUUID } from '@/lib/utils';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/form/input';
 import { isAxiosError } from 'axios';
+import { questionEndpoint, technologyEndpoint } from '@/lib/endpoint';
 // import { isValidObjectId } from '@/lib/utils';
 
 
@@ -53,15 +54,15 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
   const [name, setName] = useState<string>('');
   const [isValidTechnology, setValidTechnology] = useState<boolean>(isValidUUID(params.technology));
   const { data, isLoading, error,isValidating,mutate:questionMutate } = useSWR(
-    isValidTechnology ? `/question/list?technology_id=${technologyId}` : null,
+    isValidTechnology ? `${questionEndpoint.LIST}?technology_id=${technologyId}` : null,
     api.get
   );
 
 
 
-  const { trigger, isMutating } = useSWRMutation(`/technology/create`, create);
+  const { trigger, isMutating } = useSWRMutation(`${technologyEndpoint.CREATE}`, create);
   const { trigger: updateTrigger, isMutating: updating } = useSWRMutation(
-    `/technology/${technologyId}`,
+    `${technologyEndpoint.TECHNOLOGY_BY_ID}/${technologyId}`,
     update
   );
 
@@ -135,7 +136,7 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
   const handleDeleteQuestion = async (question: Question, index: number) => {
     try {
       if (question.id) {
-        await api.delete(`/question/${question.id}`);
+        await api.delete(`${questionEndpoint.QUESTION_BY_ID}/${question.id}`);
       }
       const updatedQuestions = questions.filter((_, i) => i !== index);
       setQuestions(updatedQuestions);

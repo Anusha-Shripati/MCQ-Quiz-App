@@ -11,7 +11,6 @@ import { CalendarEvent } from '@/types/common.types';
 export type CalendarProps = React.ComponentProps<typeof DayPicker>;
 
 function Calendar({ className, events, classNames, showOutsideDays = true, renderEvents,...props }: CalendarProps & { events?: CalendarEvent,renderEvents?:(e:DayProps)=>React.ReactNode }) {
-  const eventsMap = React.useMemo(() => events || {}, [events]);
 
   return (
     <div className="w-full h-full flex flex-col">
@@ -66,7 +65,7 @@ function Calendar({ className, events, classNames, showOutsideDays = true, rende
           ...(events && renderEvents
             ? {
               Day: (props: DayProps) => (
-                <div className="h-20 w-full flex items-center justify-center">
+                <div className="h-16 w-full flex items-center justify-center">
                   {renderEvents(props)}
                 </div>
               ),

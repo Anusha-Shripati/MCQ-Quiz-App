@@ -11,6 +11,7 @@ import { Button } from '../ui/form/button';
 import PermissionsTable from './permission-table';
 import { Module, Permissions, RoleData } from '@/types/common.types';
 import useSWRMutation from 'swr/mutation';
+import { moduleEndpoint, roleEndpoint } from '@/lib/endpoint';
 const permissionSchema = z.object({
   can_read: z.boolean(),
   can_edit: z.boolean(),
@@ -66,9 +67,9 @@ function RoleForm({
     });
   };
 
-  const { data: modules } = useSWR('/module/list', api.get);
+  const { data: modules } = useSWR(moduleEndpoint.LIST, api.get);
 
-  const { trigger, isMutating } = useSWRMutation(`/role/create`, create);
+  const { trigger, isMutating } = useSWRMutation(roleEndpoint.CREATE, create);
   const { trigger: updateTrigger, isMutating: updating } = useSWRMutation(
     `/role/${roleData?.id}`,
     update

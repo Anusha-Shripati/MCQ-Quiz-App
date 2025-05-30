@@ -17,6 +17,7 @@ import React, { useMemo, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import useSWRMutation from 'swr/mutation';
 import { FormField } from '../common/form-field';
+import { questionEndpoint } from '@/lib/endpoint';
 
 interface QuestionCardProps {
   question: Question;
@@ -97,9 +98,9 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
     []
   );
 
-  const { trigger, isMutating } = useSWRMutation(`/question/create`, createQuestion);
+  const { trigger, isMutating } = useSWRMutation(questionEndpoint.CREATE, createQuestion);
   const { trigger: update, isMutating: updating } = useSWRMutation(
-    `/question/${question?.id}`,
+    `${questionEndpoint.QUESTION_BY_ID}/${question?.id}`,
     updateQuestion
   );
 

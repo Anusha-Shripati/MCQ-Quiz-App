@@ -17,7 +17,7 @@ declare global {
         candidateId: string;
         examId: string;
         name: string;
-        email: string;
+        email: string;  
       };
     }
   }

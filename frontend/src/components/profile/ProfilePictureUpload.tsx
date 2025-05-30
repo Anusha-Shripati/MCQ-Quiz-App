@@ -7,6 +7,7 @@ import { useProfileStore } from '@/store/profileStore';
 import { api, isAxiosError } from '@/lib/api';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '@/store/authStore';
+import { userEndpoint } from '@/lib/endpoint';
 
 const ProfilePictureUpload = ({imageUrl}: {imageUrl: string}) => {
   const [profilePicture, setProfilePicture] = useState<string | null>(imageUrl);
@@ -23,7 +24,7 @@ const ProfilePictureUpload = ({imageUrl}: {imageUrl: string}) => {
       try {
         const formData = new FormData();
         formData.append('file', file);
-        const response = await api.put(`/user/upload-image/${user?.id}`, formData);
+        const response = await api.put(`${userEndpoint.UPLOAD_IMAGE}/${user?.id}`, formData);
         if (response.success ) {
           setProfilePicture(response.data.path);
           if(user){

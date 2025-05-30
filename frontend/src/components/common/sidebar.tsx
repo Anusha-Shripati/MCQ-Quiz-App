@@ -125,7 +125,7 @@ export default function Sidebar() {
                   icon={<FiHome size={30} />}
                   label="Dashboard"
                   isCollapsed={isCollapsed}
-                  isActive={pathname === '/dashboard'}
+                  isActive={pathname.includes('dashboard')}
                 />
                 {permissions?.assessments?.can_read && (
                   <NavItem
@@ -133,7 +133,8 @@ export default function Sidebar() {
                     icon={<FiFileText size={30} />}
                     label="Assessment"
                     isCollapsed={isCollapsed}
-                    isActive={pathname === '/assessments'}
+                    isActive={pathname.includes('assessments')}
+
                   />
                 )}
                 {permissions?.questions?.can_read && (
@@ -142,7 +143,8 @@ export default function Sidebar() {
                     icon={<FiHelpCircle size={30} />}
                     label="Questions"
                     isCollapsed={isCollapsed}
-                    isActive={pathname === '/questions'}
+                    isActive={pathname.includes('questions')}
+
                   />
                 )}
                 {permissions?.candidates?.can_read && (
@@ -151,7 +153,7 @@ export default function Sidebar() {
                     icon={<FiUsers size={30} />}
                     label="Candidates"
                     isCollapsed={isCollapsed}
-                    isActive={pathname === '/candidates'}
+                    isActive={pathname.includes('candidates')}
                   />
                 )}
                 {/* <NavItem
@@ -176,7 +178,7 @@ export default function Sidebar() {
                     icon={<Layers size={30} />}
                     label="Results"
                     isCollapsed={isCollapsed}
-                    isActive={pathname === '/results'}
+                    isActive={pathname.includes('results')}
                   />
                 )}
                 {permissions?.users?.can_read && (
@@ -185,7 +187,7 @@ export default function Sidebar() {
                     icon={<FaUserAlt size={30} />}
                     label="Users"
                     isCollapsed={isCollapsed}
-                    isActive={pathname === '/users'}
+                    isActive={pathname.includes('users')}
                   />
                 )}
                 {user?.role?.name == 'Super Admin' && (
@@ -194,7 +196,7 @@ export default function Sidebar() {
                     icon={<FaUserSecret size={30} />}
                     label="Roles"
                     isCollapsed={isCollapsed}
-                    isActive={pathname === '/roles'}
+                    isActive={pathname.includes('roles')}
                   />
                 )}
               </nav>

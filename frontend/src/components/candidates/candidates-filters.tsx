@@ -12,16 +12,17 @@ import { useCandidateStore } from '@/store/candidateStore';
 import { ListFilterIcon } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import useSWR from 'swr';
+import { assessmentEndpoint, technologyEndpoint } from '@/lib/endpoint';
 
 const Filters = () => {
-  const { data: assessments } = useSWR('/assessment/all', api.get, {
+  const { data: assessments } = useSWR(assessmentEndpoint.ALL, api.get, {
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
     dedupingInterval: 60000,
     staleWhileRevalidate: true,
   });
   console.log('assessments', assessments);
-  const { data: technology } = useSWR('/technology/list', api.get, {
+  const { data: technology } = useSWR(technologyEndpoint.LIST, api.get, {
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
     dedupingInterval: 60000,

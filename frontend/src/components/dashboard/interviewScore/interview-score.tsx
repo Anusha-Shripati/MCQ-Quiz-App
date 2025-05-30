@@ -3,7 +3,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../ui/card';
 import LanguageScoreSelect from './filter';
-import { Avatar, AvatarFallback, AvatarImage } from '../../ui/avatar';
 import { Progress } from '../../ui/progress';
 import { api } from '@/lib/api';
 import useSWR from 'swr';
@@ -12,6 +11,7 @@ import StatusWrapper from '@/components/common/status-wrapper';
 import Pagination from '@/components/pagination';
 import { useRouter } from 'next/navigation';
 import { RESULTS_TITLE } from '@/shared/constants/data';
+import { dashboardEndpoint } from '@/lib/endpoint';
 
 interface ScoreData {
   id: string;
@@ -36,7 +36,7 @@ function InterviewScore() {
     if (filters.max !== null) params.set('max', String(filters.max));
     if (page) params.set('page', String(page));
     if (limit) params.set('limit', String(limit));
-    return `/dashboard/get-interview-score?${params.toString()}`;
+    return `${dashboardEndpoint.INTERVIEW_SCORE}?${params.toString()}`;
   }, [filters, page, limit]);
 
   const { data, isLoading, error,mutate,isValidating } = useSWR(
@@ -69,10 +69,6 @@ function InterviewScore() {
       header: 'Name',
       render: (row: ScoreData) => (
         <div className="flex items-center space-x-2">
-          <Avatar>
-            <AvatarImage src="https://github.com/shadcn.png" />
-            <AvatarFallback>{row.name}</AvatarFallback>
-          </Avatar>
           <span>{row.name}</span>
         </div>
       ),

@@ -11,6 +11,7 @@ import useSWRMutation from 'swr/mutation';
 import { mutate } from 'swr';
 import { useQuestionStore } from '@/store/questionStore';
 import { usePathname, useRouter } from 'next/navigation';
+import { technologyEndpoint } from '@/lib/endpoint';
 
 // Define props type
 async function createCategory(url: string, { arg }: { arg: { name: string } }) {
@@ -51,7 +52,7 @@ const CreateCategory: React.FC = () => {
     const value = e.target.value.toLowerCase();
     setSearchTerm(value);
   };
-  const { trigger } = useSWRMutation("/technology/create", createCategory);
+  const { trigger } = useSWRMutation(technologyEndpoint.CREATE, createCategory);
 
   const handleCreateCategory = async () => {
     try {

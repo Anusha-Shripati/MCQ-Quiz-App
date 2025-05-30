@@ -12,6 +12,7 @@ import { FormField } from '../common/form-field';
 import useSWR from 'swr';
 import { fetcher } from '@/lib/api';
 import { cn } from '@/lib/utils';
+import { userEndpoint } from '@/lib/endpoint';
 
 export default function AssessmentHeader() {
   const defaultValues: AssessmentFilters = {
@@ -21,7 +22,7 @@ export default function AssessmentHeader() {
     view: '',
   };
 
-  const { data: users } = useSWR('/user/list', fetcher);
+  const { data: users } = useSWR(userEndpoint.LIST, fetcher);
   const { setFilters, filters } = useAssessmentStore();
 
   const { control, setValue, watch, register, reset } = useForm<AssessmentFilters>({

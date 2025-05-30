@@ -9,6 +9,7 @@ import { examApi } from '@/lib/api';
 import { useExamStore } from '@/store/examStore';
 import useSWRMutation from 'swr/mutation';
 import {  useState } from 'react';
+import { examEndpoint } from '@/lib/endpoint';
 
 // Types
 interface VideoRecorderProps {
@@ -22,7 +23,7 @@ export const VideoRecordingScreen = ({ onRecordingComplete, videoLink }: VideoRe
   const { exam, accessCode } = useExamStore();
     const [recordingBlob, setRecordingBlob] = useState<Blob | null>(null);
     const [recordingUrl, setRecordingUrl] = useState<string | null>(null);
-  const { isMutating, error, trigger } = useSWRMutation(`/candidate-exam/${exam?.id}/submit-answer`, (url: string, { arg }: { arg: FormData }) => examApi.post(url, arg, accessCode))
+  const { isMutating, error, trigger } = useSWRMutation(`${examEndpoint.CANDIDATE_EXAM}/${exam?.id}/submit-answer`, (url: string, { arg }: { arg: FormData }) => examApi.post(url, arg, accessCode))
 
   const onContinue = async () => {
 

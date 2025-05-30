@@ -16,6 +16,7 @@ import { useRoleStore } from '@/store/roleStore';
 import { Badge } from '../ui/badge';
 import { useAuthStore } from '@/store/authStore';
 import StatusWrapper from '../common/status-wrapper';
+import { roleEndpoint } from '@/lib/endpoint';
 
 function RoleTable() {
   const [role, setRole] = useState<RoleData | null>(null);
@@ -33,7 +34,7 @@ function RoleTable() {
     error,
     mutate,
     isValidating
-  } = useSWR(paramsLoading ? null : `/role/list?search=${rolesFilter}`, fetcher);
+  } = useSWR(paramsLoading ? null : `${roleEndpoint.LIST}?search=${rolesFilter}`, fetcher);
 
   useEffect(() => {
     setRolesListData(users?.data?.count || 0, users?.data?.list || []);
@@ -46,7 +47,7 @@ function RoleTable() {
         if (res.success) {
           toast.success('Role deleted successfully');
         }
-        mutate(`/role/list?search=${rolesFilter}`);
+        mutate(`${roleEndpoint.LIST}?search=${rolesFilter}`);
       } catch (error) {
         if (isAxiosError(error)) {
           toast.error(error.response.data.message || 'An unexpected error occurred');

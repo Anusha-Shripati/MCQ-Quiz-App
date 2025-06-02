@@ -7,7 +7,7 @@ import TestWarning from '@/components/test/error/test-warning';
 import { VideoRecordingScreen } from '@/components/test/video-recording-screen';
 import { examApi } from '@/lib/api';
 import { dataURLtoBlob } from '@/lib/utils';
-import { BROWSER_KEY, PROHIBITED_COMBINATIONS, PROHIBITED_KEYS, SNAPSHOT } from '@/shared/constants/data';
+import { BROWSER_KEY, PROHIBITED_COMBINATIONS, PROHIBITED_KEYS, QUIZ_CONFIG, SNAPSHOT } from '@/shared/constants/data';
 import { useExamStore } from '@/store/examStore';
 import { EXAM_STEP } from '@/types/exam.types';
 import { useParams, useRouter } from 'next/navigation';
@@ -129,7 +129,6 @@ const QuizPage = () => {
         stopRecording()
         setPermission((prv) => ({ ...prv, screen: false }))
       }
-      console.log(settings.displaySurface, 'displaySurface');
 
       if (settings.displaySurface == 'monitor') {
         setPermission((prv) => ({ ...prv, screen: true }))
@@ -215,7 +214,9 @@ const QuizPage = () => {
       const success = await fetchCandidate();
       if (!success) return
       await Promise.allSettled([startScreenRecording(), startCamera()])
-      const intervalTime = 60 * 1000
+      takeScreenshot(screenSnapshotRef.current as HTMLVideoElement, screenCanvas.current as HTMLCanvasElement, SNAPSHOT.screenshot)
+      takeScreenshot(cameraSnapshotRef.current as HTMLVideoElement, cameraCanvas.current as HTMLCanvasElement, SNAPSHOT.camera)
+
       interval.current = setInterval(() => {
         const randomDelayMsScreen = Math.floor(Math.random() * 61) * 1000;
         const randomDelayMsCamera = Math.floor(Math.random() * 61) * 1000;
@@ -229,7 +230,7 @@ const QuizPage = () => {
             takeScreenshot(cameraSnapshotRef.current as HTMLVideoElement, cameraCanvas.current as HTMLCanvasElement, SNAPSHOT.camera)
           }
         }, randomDelayMsCamera)
-      }, intervalTime)
+      }, QUIZ_CONFIG.screenshotInterval)
 
     } catch (error) {
       console.log(error);

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname, useRouter as useNavRouter } from 'next/navigation';
 import { FiHome, FiFileText, FiHelpCircle, FiUsers } from 'react-icons/fi';
 import { Button } from '@/components/ui/form/button';
-import ImageLinks from '@/app/assets/images/imageLinks';
+import ImageLinks from '@/app/assets/images/image-links';
 import { FaUserAlt, FaUserSecret } from 'react-icons/fa';
 import { useAuthStore } from '@/store/authStore';
 import useSWR from 'swr';

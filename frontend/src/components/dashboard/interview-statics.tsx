@@ -14,6 +14,7 @@ interface InterviewData {
 }
 const InterviewStatics: React.FC = () => {
   const { theme } = useTheme();
+  
   const { data, isLoading, error,mutate,isValidating } = useSWR(dashboardEndpoint.INTERVIEW_DATA, api.get);
   const [interviewData, setInterviewData] = React.useState<InterviewData>({
     pass: [],
@@ -50,7 +51,7 @@ const InterviewStatics: React.FC = () => {
       borderColor: '#ccc',
       borderWidth: 1,
       textStyle: {
-        color: theme === 'light' ? '#fff' : '#000',
+        color: '#fff',
       },
     },
     legend: {

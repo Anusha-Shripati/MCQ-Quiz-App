@@ -1176,14 +1176,14 @@ export const userOptions: StatusOption[] = [
 // ];
 
 export const QUIZ_CONFIG = {
-  screenshotInterval: 20000,
+  screenshotInterval: 60 * 1000,
   maxViolations: 12,
   alertTimeout: 5000,
 };
 
 export const SNAPSHOT = {
-    screenshot:"screenshot",
-    camera:"camera"
+  screenshot: "screenshot",
+  camera: "camera"
 };
 export const PROHIBITED_COMBINATIONS = [
   { key: 'Tab', modifier: 'altKey' }, // Alt+Tab

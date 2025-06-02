@@ -114,10 +114,6 @@
   display: grid;
   place-content: center;
 }
-.dashboard-calander td button {
-  margin-top: 9px;
-}
-
 @keyframes progress-bar {
   0% {
     width: 0%;

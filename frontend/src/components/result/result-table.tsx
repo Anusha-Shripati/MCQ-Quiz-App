@@ -17,6 +17,7 @@ import { ExamMetaTech, Result } from '@/types/exam.types';
 import Link from 'next/link';
 import { useResultStore } from '@/store/resultStore';
 import { resultEndpoint } from '@/lib/endpoint';
+import { roundOff } from '@/lib/utils';
 
 function ResultTable() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -41,17 +42,17 @@ function ResultTable() {
     params.set('perPage', itemsPerPage.toString());
     params.set('page', currentPage.toString());
 
-    
+
     if (resultFilter.technologyFilter.length > 0) {
       const techLabels = resultFilter.technologyFilter.map((item) => item.label);
       params.set('technologyFilter', JSON.stringify(techLabels));
     }
-    
+
     if (resultFilter.assessmentFilter.length > 0) {
       const assessmentLabels = resultFilter.assessmentFilter.map((item) => item.label);
       params.set('assessmentFilter', JSON.stringify(assessmentLabels));
     }
-    
+
     if (resultFilter.search) params.set('search', resultFilter.search)
     if (resultFilter.startDate) params.set('startDate', JSON.stringify(resultFilter.startDate));
     if (resultFilter.endDate) params.set('endDate', JSON.stringify(resultFilter.endDate));
@@ -169,12 +170,13 @@ function ResultTable() {
     const start = new Date(startDate);
     const end = new Date(endDate);
 
-    // Calculate the difference in hours
-    const duration = Math.abs(end.getTime() - start.getTime()) / (1000 * 60 * 60);
+    const diffMs = Math.abs(end.getTime() - start.getTime());
 
-    return `${duration.toFixed(2)} hours`; // e.g., "3 hours"
-  };
+    const hours = roundOff(diffMs / (1000 * 60 * 60), 0);
+    const minutes = roundOff((diffMs % (1000 * 60 * 60)) / (1000 * 60), 0)
 
+    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')} hours`;
+  }
   const formatTestDateRange = (startDate: string, endDate: string): string => {
     const start = new Date(startDate);
     const end = new Date(endDate);

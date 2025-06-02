@@ -53,17 +53,14 @@ const QuestionSidebar: React.FC<QuestionSidebarProps> = ({
     setIsDeleteModalOpen(true);
   }, []);
 
-  const closeDeleteModal = useCallback(() => {
-    setIsDeleteModalOpen(false);
-    setQuestionToDelete(null);
-  }, []);
-
   const confirmDelete = useCallback(() => {
     if (questionToDelete !== null) {
+
       handleDeleteQuestion(questionToDelete.question, questionToDelete.index);
     }
-    closeDeleteModal();
-  }, [questionToDelete, handleDeleteQuestion, closeDeleteModal]);
+    setQuestionToDelete(null);
+
+  }, [questionToDelete, handleDeleteQuestion]);
 
   return (
     <Card className="w-full md:w-1/4 h-[calc(100vh-12rem)] flex flex-col overflow-hidden shadow-lg  gap-2">
@@ -122,7 +119,7 @@ const QuestionSidebar: React.FC<QuestionSidebarProps> = ({
       {/* Delete Modal */}
       <DeleteDialog
         isOpen={isDeleteModalOpen}
-        onClose={closeDeleteModal}
+        setOpen={setIsDeleteModalOpen}
         onDelete={confirmDelete}
       />
     </Card>

@@ -5,6 +5,7 @@ import dayjs from 'dayjs'
 
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 import { Carousel } from 'react-responsive-carousel';
+import Image from 'next/image';
 
 interface SnapshotsProps {
     camera: SnapShot[],
@@ -54,7 +55,7 @@ function Snapshots(props: SnapshotsProps) {
                                 {props[item as keyof SnapshotsProps].map((img: SnapShot, index) => {
                                     return <div className="flex flex-col cursor-pointer transition-transform"  key={index} onClick={() => toggle(item, index)}>
                                         <div className="overflow-hidden rounded-lg mb-2">
-                                            <img
+                                            <Image
                                                 src={img.image}
                                                 alt="Snapshot"
                                                 height={180}
@@ -95,7 +96,7 @@ function Snapshots(props: SnapshotsProps) {
                         >
                             {props[selected as keyof SnapshotsProps].map((img, idx) => (
                                 <div key={idx} className="flex flex-col items-center">
-                                    <img
+                                    <Image
                                         src={img.image}
                                         alt="Snapshot"
                                         className="max-h-[70vh] object-contain rounded-lg shadow-lg"

@@ -15,6 +15,7 @@ import dayjs from 'dayjs';
 import { usePathname, useSearchParams } from 'next/navigation';
 import StatusWrapper from '../common/status-wrapper';
 import { assessmentEndpoint } from '@/lib/endpoint';
+import { DeleteDialog } from '../common/delete-dialog';
 // import StatusWrapper from "../common/status-wrapper";
 
 interface AssessmentItemProps {
@@ -44,6 +45,9 @@ function AssessmentItem({
   handleDelete,
 }: AssessmentItemProps) {
   const initial = { easy: 0, medium: 0, hard: 0 };
+  const [deleteId, setDeleteId] = useState<string | null>(null)
+  const [deleteOpen, setDeleteOpen] = useState<boolean>(false)
+
   const totalQuestions =
     technologies?.reduce(
       (total, tech) => ({
@@ -71,8 +75,13 @@ function AssessmentItem({
     },
     [assessmentId]
   );
+  const onDelete = (assessmentId: string) => {
+    setDeleteId(assessmentId)
+    setDeleteOpen(true)
+  }
   return (
     <div className="border-b">
+      <DeleteDialog onDelete={() => handleDelete(deleteId as string)} setOpen={setDeleteOpen} isOpen={deleteOpen}  />
       <div className="p-5 flex items-center justify-between">
         <div className="flex-1">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{title}</h3>
@@ -101,7 +110,7 @@ function AssessmentItem({
             variant="ghost"
             size="icon"
             className="hover:bg-red-50 hover:text-red-600"
-            onClick={() => handleDelete(assessmentId)}
+            onClick={() => onDelete(assessmentId)}
           >
             <Trash2 className="h-4 w-4" />
           </Button>
@@ -183,7 +192,7 @@ export default function AssessmentDetails() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
 
-  const { setCurrentAssessment, clearCurrentAssessment, filters, currentAssessment,setFilters } =
+  const { setCurrentAssessment, clearCurrentAssessment, filters, currentAssessment, setFilters } =
     useAssessmentStore();
 
   const queryObj = {
@@ -201,7 +210,7 @@ export default function AssessmentDetails() {
     data: assessmentsData,
     error,
     isLoading,
-    mutate:assessmentMutate,
+    mutate: assessmentMutate,
     isValidating
   } = useSWR(`${assessmentEndpoint.LIST}?${cleanedQuery}`, api.get);
 
@@ -232,19 +241,17 @@ export default function AssessmentDetails() {
   };
 
   const handleDelete = async (id: string) => {
-    if (window.confirm('Are you sure you want to delete this user?')) {
-      try {
-        const res = await deleteData(`/assessment/${id}`);
-        if (res.success) {
-          toast.success('Assessment deleted successfully');
-        }
-        mutate((key:string) => typeof key === 'string' && key.startsWith('/assessment/list'));
-      } catch (error) {
-        if (isAxiosError(error)) {
-          toast.error(error.response.data.message || 'An unexpected error occurred');
-        } else {
-          toast.error('An unexpected error occurred');
-        }
+    try {
+      const res = await deleteData(`/assessment/${id}`);
+      if (res.success) {
+        toast.success('Assessment deleted successfully');
+      }
+      mutate((key: string) => typeof key === 'string' && key.startsWith('/assessment/list'));
+    } catch (error) {
+      if (isAxiosError(error)) {
+        toast.error(error.response.data.message || 'An unexpected error occurred');
+      } else {
+        toast.error('An unexpected error occurred');
       }
     }
   };
@@ -262,36 +269,36 @@ export default function AssessmentDetails() {
   };
 
 
-    useEffect(() => {
-      const params = new URLSearchParams();
-  
-      params.set('page', currentPage.toString());
-      params.set('perPage', itemsPerPage.toString());
+  useEffect(() => {
+    const params = new URLSearchParams();
 
-      Object.entries(filters).forEach(([key, value]) => {
-        if(value){
-          params.set(key, typeof value =='object' ? JSON.stringify(value):value);
-        }
-        
-      });
-      
-      window.history.replaceState(null, '', `${pathname}?${params.toString()}`);
-    }, [currentPage, itemsPerPage, filters, pathname]);
+    params.set('page', currentPage.toString());
+    params.set('perPage', itemsPerPage.toString());
 
-    useEffect(() => {
-      const params = new URLSearchParams(searchParams.toString());
-      
-      if (params.get('page')) setCurrentPage(Number(params.get('page')));
-      if (params.get('perPage')) setItemsPerPage(Number(params.get('perPage')));
-      
-      const filterParams = {
-        name:params.get('name') || '',
-        view:params.get('view') || '',
-        created_by:params.get('created_by') || '',
-        created_duation:params.get('created_duation') ?JSON.parse(params.get('created_duation')as string):undefined,
-      };
-      setFilters(filterParams as AssessmentFilters);
-    }, []);
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value) {
+        params.set(key, typeof value == 'object' ? JSON.stringify(value) : value);
+      }
+
+    });
+
+    window.history.replaceState(null, '', `${pathname}?${params.toString()}`);
+  }, [currentPage, itemsPerPage, filters, pathname]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams.toString());
+
+    if (params.get('page')) setCurrentPage(Number(params.get('page')));
+    if (params.get('perPage')) setItemsPerPage(Number(params.get('perPage')));
+
+    const filterParams = {
+      name: params.get('name') || '',
+      view: params.get('view') || '',
+      created_by: params.get('created_by') || '',
+      created_duation: params.get('created_duation') ? JSON.parse(params.get('created_duation') as string) : undefined,
+    };
+    setFilters(filterParams as AssessmentFilters);
+  }, []);
 
 
   if (editing) {
@@ -308,37 +315,37 @@ export default function AssessmentDetails() {
         reset={assessmentMutate}
         className="min-h-[500px]"
       >
-      <Pagination
-        className="flex-grow min-h-[500px]"
-        currentPageStart={currentPageStart}
-        currentPageEnd={currentPageEnd}
-        totalItems={assessmentsData?.data?.total || 0}
-        itemsPerPage={itemsPerPage}
-        onPerPageChange={handlePerPageChange}
-        currentPage={currentPage}
-        onPageChange={handlePageChange}
-        loading={false}
-      >
-        <div className="h-[550px] overflow-auto">
-          {!error &&
-            assessments &&
-            assessments.map((assessment: Required<Assessment>) => (
-              <AssessmentItem
-                key={assessment.id}
-                assessmentId={assessment.id}
-                title={assessment.name}
-                createdBy={assessment.created_by_user?.name || ''}
-                createdDate={assessment.created_at}
-                duration={assessment.duration}
-                technologies={assessment.technologies}
-                isExpanded={expandedId === assessment.id}
-                onToggle={() => setExpandedId(expandedId === assessment.id ? '' : assessment.id)}
-                handleEdit={() => handleEdit(assessment)}
-                handleDelete={handleDelete}
-              />
-            ))}
-        </div>
-      </Pagination>
+        <Pagination
+          className="flex-grow min-h-[500px]"
+          currentPageStart={currentPageStart}
+          currentPageEnd={currentPageEnd}
+          totalItems={assessmentsData?.data?.total || 0}
+          itemsPerPage={itemsPerPage}
+          onPerPageChange={handlePerPageChange}
+          currentPage={currentPage}
+          onPageChange={handlePageChange}
+          loading={false}
+        >
+          <div className="h-[550px] overflow-auto">
+            {!error &&
+              assessments &&
+              assessments.map((assessment: Required<Assessment>) => (
+                <AssessmentItem
+                  key={assessment.id}
+                  assessmentId={assessment.id}
+                  title={assessment.name}
+                  createdBy={assessment.created_by_user?.name || ''}
+                  createdDate={assessment.created_at}
+                  duration={assessment.duration}
+                  technologies={assessment.technologies}
+                  isExpanded={expandedId === assessment.id}
+                  onToggle={() => setExpandedId(expandedId === assessment.id ? '' : assessment.id)}
+                  handleEdit={() => handleEdit(assessment)}
+                  handleDelete={handleDelete}
+                />
+              ))}
+          </div>
+        </Pagination>
       </StatusWrapper>
     </div>
   );

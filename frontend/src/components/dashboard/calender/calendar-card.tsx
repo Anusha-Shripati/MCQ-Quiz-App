@@ -79,9 +79,9 @@ export default function CalendarCard() {
         return (
           <div className="group w-full h-full">
             <Tooltip delayDuration={0}>
-              <TooltipTrigger className={`${dayClasses} mt-2`}>
+              <TooltipTrigger className={`${dayClasses}`}>
                 <div className="font-bold m-0">{day}</div>
-                <div className="flex flex-wrap gap-1 mt-1">
+                <div className="flex flex-wrap gap-1">
                   {events[dateKey].map((data, index) => (
                     <EventDot key={index} color={data.color} />
                   ))}

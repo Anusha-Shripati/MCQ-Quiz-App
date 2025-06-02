@@ -76,7 +76,7 @@ function RoleForm({
   );
 
   useEffect(() => {
-    if (modules?.data?.list) {
+    if (modules?.data?.list && !roleData) {
       setPermissionData(
         modules.data.list.map((item: Module) => ({
           module: { id: item.id, name: item.name },
@@ -86,7 +86,7 @@ function RoleForm({
         }))
       );
     }
-  }, [modules]);
+  }, [modules,open]);
 
   useEffect(() => {
     if (open) {
@@ -96,9 +96,6 @@ function RoleForm({
           (roleData?.role_permissions ?? []).length > 0
             ? roleData?.role_permissions
             : permissionData,
-        // roleData?.role_permissions?.length > 0
-        //   ? roleData.role_permissions
-        //   : permissionData,
       };
       setPermissionData(formData.role_permissions || []);
       

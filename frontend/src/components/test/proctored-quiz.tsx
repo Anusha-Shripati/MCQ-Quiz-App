@@ -20,7 +20,6 @@ import { examEndpoint } from '@/lib/endpoint';
 
 
 
-
 export default function ProctoredQuiz() {
   const [answers, setAnswers] = useState<Record<string, { question: IExamQuestion, answer: Answer, answer_id?: string }>>({});
   const [timeLeft, setTimeLeft] = useState(0);
@@ -28,7 +27,6 @@ export default function ProctoredQuiz() {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const router = useRouter();
   const violations = useRef<Violation[]>([]);
-  // const [isFullScreen, setIsFullScreen] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -40,10 +38,6 @@ export default function ProctoredQuiz() {
   const containerRef = useRef<HTMLDivElement>(null);
   const screenshotIntervalRef = useRef<NodeJS.Timeout>();
   const fullscreenElementRef = useRef<Element | null>(null);
-
-
-
-  // const [, captureElement] = useScreenshot();
 
 
   const originalWindowSize = useRef({
@@ -175,13 +169,10 @@ export default function ProctoredQuiz() {
 
     try {
 
-      // Only request if not already in fullscreen
       if (!document.fullscreenElement) {
-        // Wait for user interaction before requesting fullscreen
         containerRef.current.classList.add('h-screen');
         containerRef.current.classList.add('overflow-auto');
         await containerRef.current.requestFullscreen();
-        // setIsFullScreen(true);
       }
     } catch (error) {
       console.error('Fullscreen error:', error);
@@ -202,6 +193,9 @@ export default function ProctoredQuiz() {
   }
 
   const addViolation = (violation: Omit<Violation, 'timestamp'>) => {
+    if (audioRef.current) {
+      audioRef.current.play()
+    }
     const newViolation: Violation = {
       ...violation,
       timestamp: Date.now(),
@@ -318,13 +312,6 @@ export default function ProctoredQuiz() {
         type: 'WINDOW_FOCUS_LOST',
         details: 'User switched to another window',
       });
-
-      // takeScreenshot();
-
-      // Play audio alert
-      if (audioRef.current) {
-        audioRef.current.play()
-      }
     }
   };
 
@@ -401,7 +388,6 @@ export default function ProctoredQuiz() {
       detectMultipleScreens();
     }, 10000);
 
-    // screenshotIntervalRef.current = setInterval(takeScreenshot, QUIZ_CONFIG.screenshotInterval);
 
     // Store original window size
     originalWindowSize.current = {
@@ -441,7 +427,6 @@ export default function ProctoredQuiz() {
       document.addEventListener('fullscreenchange', handleFullScreenChange);
       window.addEventListener('resize', handleResize);
     }, 3000);
-    // document.addEventListener('visibilitychange', handleVisibilityChange);
     document.addEventListener('keydown', handleKeyDown, true);
     document.addEventListener('contextmenu', handleContextMenu, true);
 
@@ -461,7 +446,6 @@ export default function ProctoredQuiz() {
       window.removeEventListener('beforeunload', handleBeforeUnload);
 
       document.removeEventListener('fullscreenchange', handleFullScreenChange);
-      // document.removeEventListener('visibilitychange', handleVisibilityChange);
       document.removeEventListener('keydown', handleKeyDown, true);
       document.removeEventListener('contextmenu', handleContextMenu, true);
     };
@@ -560,15 +544,6 @@ export default function ProctoredQuiz() {
     setCurrentQuestionIndex((prev) => Math.min(prev + 1, questions.length - 1));
   };
 
-  // if (accessError) {
-  //   return (
-  //   );
-  // }
-
-  // if (isLoading|| isExamLoading || isMutating || isSubmiting ) {
-  //   return (
-  //   );
-  // }
   const visibleButtons = () => {
     const total = questions.length;
     const current = currentQuestionIndex;
@@ -603,7 +578,7 @@ export default function ProctoredQuiz() {
 
           <AlertWrapper showAlert={showAlert} alertMessage={alertMessage} onClose={() => setShowAlert(false)} />
 
-          <audio src="/alert.mp3" ref={audioRef} style={{ display: 'none' }} />
+          <audio src="/assets/alert.wav" ref={audioRef} style={{ display: 'none' }} />
 
           <Card className="w-[95vw] max-w-[1200px] mx-auto min-h-[85vh] shadow-xl border-0 rounded-xl overflow-hidden bg-white/95 backdrop-blur-sm">
             <TestHeader timeLeft={timeLeft} currentQuestionIndex={currentQuestionIndex} totalQuestion={questions.length || 0} handleTimerEnd={handleTimerEnd} />

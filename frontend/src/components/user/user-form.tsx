@@ -184,8 +184,8 @@ function UserForm({ open, onClose, userData = null }: UserFormProps) {
                   />
                 </div>
 
-                <Tooltip delayDuration={0}>
-                  <TooltipTrigger><Button variant='outline' type="button" onClick={() => setOpenRole(true)}>+</Button></TooltipTrigger>
+                <Tooltip delayDuration={0 }>
+                  <TooltipTrigger asChild><Button variant='outline' type="button" onClick={() => setOpenRole(true)}>+</Button></TooltipTrigger>
                   <TooltipContent className="bg-gray-800 text-white p-2 rounded shadow-lg">Create a new role</TooltipContent>
                 </Tooltip>
               </div>

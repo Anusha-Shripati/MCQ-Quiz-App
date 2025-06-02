@@ -21,7 +21,6 @@ const Filters = () => {
     dedupingInterval: 60000,
     staleWhileRevalidate: true,
   });
-  console.log('assessments', assessments);
   const { data: technology } = useSWR(technologyEndpoint.LIST, api.get, {
     revalidateOnFocus: false,
     revalidateOnReconnect: false,

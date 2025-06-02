@@ -61,8 +61,8 @@ export default function Questions() {
             color: theme === 'light' ? '#333' : '#fff',
             formatter: `{total|${totalCount}}\n{small|Total Questions}`,
             rich: {
-              total: { fontSize: 24, fontWeight: 'bold', color: '#333' },
-              small: { fontSize: 14, color: '#666' },
+              total: { fontSize: 24, fontWeight: 'bold', color:theme === 'light' ?  '#333':'#fff' },
+              small: { fontSize: 14, color:theme === 'light' ? '#666': '#fff' },
             },
           },
           emphasis: {

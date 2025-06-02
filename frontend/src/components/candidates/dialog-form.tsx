@@ -240,7 +240,7 @@ export default function DialogForm({ candidate, open, setOpen }: CandidateDialog
                   </div>
 
                   <Tooltip delayDuration={0}>
-                    <TooltipTrigger>
+                    <TooltipTrigger asChild>
                       <Button variant='outline' onClick={routeAssessment}> + </Button>
                     </TooltipTrigger>
                     <TooltipContent className="bg-gray-800 text-white p-2 rounded shadow-lg">Create a new assessment</TooltipContent>

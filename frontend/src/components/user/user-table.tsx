@@ -13,6 +13,7 @@ import { useAuthStore } from '@/store/authStore';
 import ReusableTable from '../common/reusable-table';
 import StatusWrapper from '../common/status-wrapper';
 import { userEndpoint } from '@/lib/endpoint';
+import { DeleteDialog } from '../common/delete-dialog';
 
 function UserTable() {
   const [user, setUser] = useState<UserData | null>(null);
@@ -21,7 +22,10 @@ function UserTable() {
     setUser(user);
     setOpen(true);
   };
-  const { userFilter, setUserListData, userList, permissions,paramsLoading } = useAuthStore();
+  const { userFilter, setUserListData, userList, permissions, paramsLoading } = useAuthStore();
+
+  const [deleteId, setDeleteId] = useState<string | null>(null)
+  const [deleteOpen, setDeleteOpen] = useState<boolean>(false)
 
   const {
     data: users,
@@ -35,20 +39,23 @@ function UserTable() {
     setUserListData(users?.data?.count || 0, users?.data?.list || []);
   }, [setUserListData, users]);
 
+  const onDelete = (id: string) => {
+    setDeleteId(id)
+    setDeleteOpen(true)
+  }
+
   const handleUserDelete = async (id: string) => {
-    if (window.confirm('Are you sure you want to delete this user?')) {
-      try {
-        const res = await deleteData(`/user/${id}`);
-        if (res.success) {
-          toast.success('User deleted successfully');
-        }
-        mutate(`${userEndpoint.LIST}?search=${userFilter}`);
-      } catch (error) {
-        if (isAxiosError(error)) {
-          toast.error(error.response.data.message || 'An unexpected error occurred');
-        } else {
-          toast.error('An unexpected error occurred');
-        }
+    try {
+      const res = await deleteData(`/user/${id}`);
+      if (res.success) {
+        toast.success('User deleted successfully');
+      }
+      mutate(`${userEndpoint.LIST}?search=${userFilter}`);
+    } catch (error) {
+      if (isAxiosError(error)) {
+        toast.error(error.response.data.message || 'An unexpected error occurred');
+      } else {
+        toast.error('An unexpected error occurred');
       }
     }
   };
@@ -68,7 +75,7 @@ function UserTable() {
             </Button>
           )}
           {row.role?.name !== 'Super Admin' && permissions?.users.can_edit && (
-            <Button variant="ghost" size="icon" onClick={() => handleUserDelete(row.id)}>
+            <Button variant="ghost" size="icon" onClick={() => onDelete(row.id)}>
               <FiTrash2 className="h-4 w-4 text-destructive" />
             </Button>
           )}
@@ -77,9 +84,11 @@ function UserTable() {
     },
   ];
   return (
-    <StatusWrapper className="min-h-[500px]" error={error } loading={isLoading ||isValidating} reset={mutate}>
+    <StatusWrapper className="min-h-[500px]" error={error} loading={isLoading || isValidating} reset={mutate}>
       <ReusableTable columns={columns} rows={userList} rowKey="id" />
+
       <UserForm open={open} userData={user} onClose={() => setOpen(false)} />
+      <DeleteDialog onDelete={() => handleUserDelete(deleteId as string)} setOpen={setDeleteOpen} isOpen={deleteOpen} />
     </StatusWrapper>
   );
 }

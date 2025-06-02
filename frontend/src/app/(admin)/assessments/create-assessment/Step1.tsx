@@ -148,7 +148,7 @@ const Step1: React.FC<Step1Props> = ({
               />
             </div>
             <Tooltip delayDuration={0}>
-              <TooltipTrigger><Button variant='outline' onClick={() => router.push('/questions/create-question/new')}>+</Button></TooltipTrigger>
+              <TooltipTrigger asChild><Button variant='outline' onClick={() => router.push('/questions/create-question/new')}>+</Button></TooltipTrigger>
               <TooltipContent className="bg-gray-800 text-white p-2 rounded shadow-lg">Create a new technology</TooltipContent>
             </Tooltip>
           </div>

@@ -17,10 +17,11 @@ import { Badge } from '../ui/badge';
 import { useAuthStore } from '@/store/authStore';
 import StatusWrapper from '../common/status-wrapper';
 import { roleEndpoint } from '@/lib/endpoint';
+import { DeleteDialog } from '../common/delete-dialog';
 
 function RoleTable() {
   const [role, setRole] = useState<RoleData | null>(null);
-  const { user,paramsLoading } = useAuthStore();
+  const { user, paramsLoading } = useAuthStore();
   const [open, setOpen] = useState(false);
   const handleEditRole = (role: RoleData) => {
     setRole(role);
@@ -28,6 +29,8 @@ function RoleTable() {
   };
   const { rolesFilter, setRolesListData, rolesList } = useRoleStore();
 
+  const [deleteId, setDeleteId] = useState<string | null>(null)
+  const [deleteOpen, setDeleteOpen] = useState<boolean>(false)
   const {
     data: users,
     isLoading,
@@ -41,23 +44,25 @@ function RoleTable() {
   }, [setRolesListData, users]);
 
   const handleDeleteRole = async (id: string) => {
-    if (window.confirm('Are you sure you want to delete this role?')) {
-      try {
-        const res = await deleteData(`/role/${id}`);
-        if (res.success) {
-          toast.success('Role deleted successfully');
-        }
-        mutate(`${roleEndpoint.LIST}?search=${rolesFilter}`);
-      } catch (error) {
-        if (isAxiosError(error)) {
-          toast.error(error.response.data.message || 'An unexpected error occurred');
-        } else {
-          toast.error('An unexpected error occurred');
-        }
+    try {
+      const res = await deleteData(`/role/${id}`);
+      if (res.success) {
+        toast.success('Role deleted successfully');
+      }
+      mutate(`${roleEndpoint.LIST}?search=${rolesFilter}`);
+    } catch (error) {
+      if (isAxiosError(error)) {
+        toast.error(error.response.data.message || 'An unexpected error occurred');
+      } else {
+        toast.error('An unexpected error occurred');
       }
     }
   };
 
+  const onDelete = (id: string) => {
+    setDeleteId(id)
+    setDeleteOpen(true)
+  }
   const columns = [
     { key: 'name', header: 'Name', render: (row: RoleData) => row.name },
     {
@@ -90,7 +95,7 @@ function RoleTable() {
                 <FiEdit className="h-4 w-4" />
               </Button>
               {row.name !== 'Super Admin' && (
-                <Button variant="ghost" size="icon" onClick={() => handleDeleteRole(row.id)}>
+                <Button variant="ghost" size="icon" onClick={() => onDelete(row.id)}>
                   <FiTrash2 className="h-4 w-4 text-destructive" />
                 </Button>
               )}
@@ -104,6 +109,8 @@ function RoleTable() {
     <StatusWrapper loading={isLoading || isValidating} error={error} className="min-h-[500px]" reset={mutate}>
       <ReusableTable columns={columns} rows={rolesList} rowKey="id" />
       <RoleForm open={open} roleData={role} onClose={() => setOpen(false)} />
+      <DeleteDialog onDelete={() => handleDeleteRole(deleteId as string)} setOpen={setDeleteOpen} isOpen={deleteOpen} />
+
     </StatusWrapper>
   );
 }

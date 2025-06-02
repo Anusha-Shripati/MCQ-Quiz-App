@@ -39,7 +39,7 @@ function InterviewScore() {
     return `${dashboardEndpoint.INTERVIEW_SCORE}?${params.toString()}`;
   }, [filters, page, limit]);
 
-  const { data, isLoading, error,mutate,isValidating } = useSWR(
+  const { data, isLoading, error, mutate, isValidating } = useSWR(
     query,
     api.get
   );
@@ -86,36 +86,36 @@ function InterviewScore() {
   ];
 
   return (
-    <Card className="col-span-12 md:col-span-6 row-span-2">
-      <StatusWrapper loading={isLoading || isValidating} reset={mutate} error={error} className='w-full h-full flex flex-col'>
-        <CardHeader>
-          <div className="flex items-center justify-between space-x-1">
-            <div className="space-y-1">
-              <CardTitle>Interview Scores</CardTitle>
-              <CardDescription className="text-xs text-gray-600">
-                Performance of candidates.
-              </CardDescription>
-            </div>
-            <div className="flex items-center space-x-2">
-              <LanguageScoreSelect setFilters={handleSetFilter} filters={filters} />
-            </div>
+    <Card className="col-span-12 md:col-span-6 row-span-2 flex flex-col">
+      <CardHeader>
+        <div className="flex items-center justify-between space-x-1">
+          <div className="space-y-1">
+            <CardTitle>Interview Scores</CardTitle>
+            <CardDescription className="text-xs text-gray-600">
+              Performance of candidates.
+            </CardDescription>
           </div>
-        </CardHeader>
-        <CardContent className='h-full flex-grow'>
+          <div className="flex items-center space-x-2">
+            <LanguageScoreSelect setFilters={handleSetFilter} filters={filters} />
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className='flex-grow'>
+        <StatusWrapper loading={isLoading || isValidating} reset={mutate} error={error} className='w-full h-full flex flex-col'>
           <Pagination
             currentPage={page}
             currentPageEnd={((page - 1) * limit) + limit}
-            currentPageStart={((page - 1) * limit) + 1 }
+            currentPageStart={((page - 1) * limit) + 1}
             onPageChange={(e) => setPage(e)}
             totalItems={total}
             onPerPageChange={(e) => setLimit(Number(e))}
             itemsPerPage={limit}
             className='h-full'
           >
-            <ReusableTable columns={columns} rows={scoreData} onRowClick={handleNavigation} title={RESULTS_TITLE}rowKey="name" className='max-h-[500px]' />
+            <ReusableTable columns={columns} rows={scoreData} onRowClick={handleNavigation} title={RESULTS_TITLE} rowKey="name" className='max-h-[400px]' />
           </Pagination>
-        </CardContent>
-      </StatusWrapper>
+        </StatusWrapper>
+      </CardContent>
     </Card>
 
   );

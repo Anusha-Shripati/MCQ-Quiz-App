@@ -26,6 +26,7 @@ import StatusWrapper from '../common/status-wrapper';
 import { ExamMetaTech } from '@/types/exam.types';
 import Link from 'next/link';
 import { candidateEndpoint } from '@/lib/endpoint';
+import { DeleteDialog } from '../common/delete-dialog';
 
 function CandidateTable() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -33,6 +34,9 @@ function CandidateTable() {
   const searchParams = useSearchParams();
   const [selectedCandidate, setSelectedCandidate] = useState<null | CandidateFormData>(null);
   const [open, setOpen] = useState(false);
+
+  const [deleteId, setDeleteId] = useState<string | null>(null)
+  const [deleteOpen, setDeleteOpen] = useState<boolean>(false)
   const {
     candidateFilter,
     setCandidateFilter,
@@ -96,6 +100,10 @@ function CandidateTable() {
     setCandidateFilter(filterParams);
   }, [searchParams, technologyOptions, assessmentOptions]);
 
+  const onDelete = (id: string) => {
+    setDeleteId(id)
+    setDeleteOpen(true)
+  }
   const queryObj = useMemo(
     () => ({
       page: currentPage || 1,
@@ -128,7 +136,7 @@ function CandidateTable() {
     error,
     isLoading,
     isValidating,
-    mutate:tableMutate
+    mutate: tableMutate
   } = useSWR(`${candidateEndpoint.LIST}?${cleanedQuery}`, api.get);
 
   useEffect(() => {
@@ -167,26 +175,26 @@ function CandidateTable() {
     const start = new Date(startDate);
     const end = new Date(endDate);
 
-    // Calculate the difference in hours
-    const duration = Math.abs(end.getTime() - start.getTime()) / (1000 * 60 * 60);
+    const diffMs = Math.abs(end.getTime() - start.getTime());
 
-    return `${duration.toFixed(2)} hours`; // e.g., "3 hours"
-  };
+    const hours = Math.floor(diffMs / (1000 * 60 * 60));
+    const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60))
+
+    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')} hours`;
+  }
 
   const handleDelete = async (id: string) => {
-    if (window.confirm('Are you sure you want to delete this user?')) {
-      try {
-        const res = await deleteData(`/candidate/${id}`);
-        if (res.success) {
-          toast.success('Candidate deleted successfully');
-        }
-        await mutate((key:string) => typeof key === 'string' && key.startsWith('/candidate/list'));
-      } catch (error) {
-        if (isAxiosError(error)) {
-          toast.error(error.response.data.message || 'An unexpected error occurred');
-        } else {
-          toast.error('An unexpected error occurred');
-        }
+    try {
+      const res = await deleteData(`/candidate/${id}`);
+      if (res.success) {
+        toast.success('Candidate deleted successfully');
+      }
+      await mutate((key: string) => typeof key === 'string' && key.startsWith('/candidate/list'));
+    } catch (error) {
+      if (isAxiosError(error)) {
+        toast.error(error.response.data.message || 'An unexpected error occurred');
+      } else {
+        toast.error('An unexpected error occurred');
       }
     }
   };
@@ -254,17 +262,6 @@ function CandidateTable() {
       },
       { key: 'experience', header: 'Exp.' },
       { key: 'assessment.name', header: 'Assessment' },
-      // {
-      //   key: "results",
-      //   header: "Result",
-      //   render: (row) => (
-      //     <span
-      //       className={`font-semibold ${row.results === "Pass" ? "text-green-600" : "text-red-600"}`}
-      //     >
-      //       {row.results}
-      //     </span>
-      //   ),
-      // },
       {
         key: 'created_at',
         header: 'Created',
@@ -287,7 +284,7 @@ function CandidateTable() {
 
           return (
             <span className={`px-3 py-1 text-sm font-medium rounded-full ${badgeClass}`}>
-              {status?.replace('_', ' ') || 'Unknown'} {row?.result?.length ? `(${row?.result[0]?.percentage?.toFixed(2)}) %`:""} 
+              {status?.replace('_', ' ') || 'Unknown'} {row?.result?.length ? `(${row?.result[0]?.percentage?.toFixed(2)}) %` : ""}
 
             </span>
           );
@@ -340,7 +337,7 @@ function CandidateTable() {
               variant="ghost"
               size="icon"
               className="hover:bg-red-50 hover:text-red-600"
-              onClick={() => handleDelete(candidate.id as string)}
+              onClick={() => onDelete(candidate.id as string)}
             >
               <Trash2 className="h-4 w-4" />
             </Button>
@@ -365,10 +362,10 @@ function CandidateTable() {
           <div>
             <p className="text-sm text-gray-500 dark:text-gray-300">Result</p>
             <div className="flex gap-2 flex-col">
-              {row.result.length>0 &&<p className="text-lg font-semibold text-blue-500">
+              {row.result.length > 0 && <p className="text-lg font-semibold text-blue-500">
                 {row?.result?.length ? row?.result[0]?.percentage?.toFixed(2) : "-"} %
               </p>}
-              {row.result.length>0 && <Link href={`/results/${row.result[0]?.id}`} target='_blank' className="text-sm text-blue-500 hover:underline">
+              {row.result.length > 0 && <Link href={`/results/${row.result[0]?.id}`} target='_blank' className="text-sm text-blue-500 hover:underline">
                 View Answer
               </Link>}
             </div>
@@ -441,7 +438,7 @@ function CandidateTable() {
                   >
                     {technology.percentage?.toFixed(2)} %
                     <small> (&nbsp;
-                      {technology.score.toFixed(1) } / {technology.total}
+                      {technology.score.toFixed(1)} / {technology.total}
                       &nbsp;) </small>
                   </th>
                 ))}
@@ -455,6 +452,8 @@ function CandidateTable() {
 
   return (
     <StatusWrapper loading={isLoading || isValidating} className="min-h-[500px]" error={error} reset={tableMutate}>
+      <DeleteDialog onDelete={() => handleDelete(deleteId as string)} setOpen={setDeleteOpen} isOpen={deleteOpen} />
+
       <Pagination
         className="flex-grow"
         currentPageStart={currentPageStart}

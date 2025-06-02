@@ -41,8 +41,7 @@ export const roleEndpoint={
 }
 export const resultEndpoint={
     LIST:"/result/list",
-    CREATE:"/question/create",
-    RESULT_BY_ID:"/question",
+    RESULT_BY_ID:"/result",
 
 }
 export const moduleEndpoint={

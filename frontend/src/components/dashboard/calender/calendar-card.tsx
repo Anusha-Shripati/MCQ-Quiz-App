@@ -7,7 +7,7 @@ import { api } from '@/lib/api';
 import { IExam } from '@/types/exam.types';
 import dayjs from 'dayjs';
 import { Button } from '../../ui/form/button';
-import { Tooltip, TooltipContent, TooltipTrigger } from '../../ui/tooltip';
+import { Tooltip,  TooltipTrigger } from '../../ui/tooltip';
 import { DayProps } from 'react-day-picker';
 import EventTooltip from './event-tooltip';
 import { dashboardEndpoint } from '@/lib/endpoint';

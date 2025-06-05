@@ -12,6 +12,10 @@ export class AssessmentController {
     try {
       const { technologies, ...assessmentPayload } = req.body;
 
+      if (assessmentPayload.pass_criteria && typeof assessmentPayload.pass_criteria === 'string') {
+        assessmentPayload.pass_criteria = parseInt(assessmentPayload.pass_criteria, 10);
+      }
+
       for (const tech of technologies) {
         const availableQuestions = await prisma.questions.count({
           where: {
@@ -84,7 +88,6 @@ export class AssessmentController {
 
       const assessment = await assessmentService.getAssessmentById(newAssessment.id);
 
-
       return generateResponse(res, 200, newAssessment, true, 'Assessment created successfully');
     } catch (error) {
       next(error);
@@ -95,6 +98,12 @@ export class AssessmentController {
     try {
       const { id } = req.params;
       const { technologies, ...assessmentPayload } = req.body;
+
+      // Convert pass_criteria to number if it's a string
+      if (assessmentPayload.pass_criteria && typeof assessmentPayload.pass_criteria === 'string') {
+        assessmentPayload.pass_criteria = parseInt(assessmentPayload.pass_criteria, 10);
+      }
+
       const existingAssessment = await assessmentService.getAssessmentById(id);
       if (!existingAssessment) {
         return generateResponse(res, 404, {}, false, 'Assessment not found!');

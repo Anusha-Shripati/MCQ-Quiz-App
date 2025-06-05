@@ -53,7 +53,7 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
   const [selectedQuestion, setSelectedQuestion] = useState<number>(0);
   const [name, setName] = useState<string>('');
   const [isValidTechnology, setValidTechnology] = useState<boolean>(isValidUUID(params.technology));
-  const { data, isLoading, error,isValidating,mutate:questionMutate } = useSWR(
+  const { data, isLoading, error, isValidating, mutate: questionMutate } = useSWR(
     isValidTechnology ? `${questionEndpoint.LIST}?technology_id=${technologyId}` : null,
     api.get
   );

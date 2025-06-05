@@ -49,14 +49,13 @@ export class CandidateController {
       const candidateData: UpdateCandidate = req.body;
       const user = req.user;
 
-
       const existingCandidate = await candidateService.getCandidateById(id);
 
       if (!existingCandidate) {
         return generateResponse(res, 404, {}, false, 'Candidate not found!');
       }
 
-      await examService.updateExam(existingCandidate.exam_id,{
+      await examService.updateExam(existingCandidate.exam_id, {
         user_id: user.id,
         assessment_id: candidateData.assessment_id as string,
         meta: candidateData.meta || {},

@@ -157,7 +157,6 @@ const Step1: React.FC<Step1Props> = ({
           )}
 
         </div>
-
         <div className="space-y-2">
           <Label htmlFor="testDuration" className="font-bold text-gray-900 dark:text-white">
             Test Duration (in minutes)
@@ -171,6 +170,19 @@ const Step1: React.FC<Step1Props> = ({
             name="duration"
             type="select"
             error={errors.duration?.message}
+          />
+        </div>
+        <div className="space-y-2">
+          <FormField
+            label="Passing Score"
+            id="pass_criteria"
+            type="number"
+            value={formData.pass_criteria}
+            placeholder="Enter passing score"
+            error={errors.pass_criteria?.message}
+            {...register('pass_criteria', { valueAsNumber: true })}
+            className="bg-white text-gray-900 border-gray-200 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500
+                     dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
           />
         </div>
       </CardContent>

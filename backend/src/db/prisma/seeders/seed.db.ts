@@ -12,7 +12,594 @@ const TECHNOLOGY_IDS = {
   MONGODB: 'e3f1f2a4-6e17-4f6d-9d4a-96df7f6b0f98',
   JAVASCRIPT: 'a7c8f4b3-2d44-4f82-87aa-78b6a6fca0b9',
   PYTHON: '91f0f2d6-d4b7-4f6a-81e7-02928f315cc0',
+  JAVA: 'c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f',
+  NODE: 'b2c3d4e5-f6a7-8b9c-0d1e-2f3a4b5c6d7e',
+  REACT: 'd3e4f5a6-b7c8-9d0e-1f2a-3b4c5d6e7f8g',
+  EXPRESS: 'e4f5a6b7-c8d9-0e1f-2a3b-4c5d6e7f8g9h',
 };
+
+const mernStackQuestions = [
+  // ---------------------- EASY ----------------------
+  {
+    technology_id: TECHNOLOGY_IDS.JAVASCRIPT,
+    question: 'What does the "M" in MERN stack stand for?',
+    correct_answer: ['0'],
+    options: ['MongoDB', 'MySQL', 'Mongoose', 'Markdown'],
+    time: '2',
+    difficulty_level: Difficulty.easy,
+    type: Question_type.mcq,
+    meta: {},
+  },
+  {
+    technology_id: TECHNOLOGY_IDS.REACT,
+    question: 'Which library is used to build UI in the MERN stack?',
+    correct_answer: ['0'],
+    options: ['React', 'Redux', 'Angular', 'Vue'],
+    time: '2',
+    difficulty_level: Difficulty.easy,
+    type: Question_type.mcq,
+    meta: {},
+  },
+  {
+    technology_id: TECHNOLOGY_IDS.EXPRESS,
+    question: 'What does Express.js help you build?',
+    correct_answer: ['0'],
+    options: ['Web servers', 'Databases', 'React apps', 'Browsers'],
+    time: '2',
+    difficulty_level: Difficulty.easy,
+    type: Question_type.mcq,
+    meta: {},
+  },
+  {
+    technology_id: TECHNOLOGY_IDS.NODE,
+    question: 'Which runtime allows JavaScript to run outside the browser?',
+    correct_answer: ['0'],
+    options: ['Node.js', 'React', 'MongoDB', 'Express'],
+    time: '2',
+    difficulty_level: Difficulty.easy,
+    type: Question_type.mcq,
+    meta: {},
+  },
+  {
+    technology_id: TECHNOLOGY_IDS.MONGODB,
+    question: 'What type of database is MongoDB?',
+    correct_answer: ['0'],
+    options: ['NoSQL', 'SQL', 'Relational', 'GraphQL'],
+    time: '2',
+    difficulty_level: Difficulty.easy,
+    type: Question_type.mcq,
+    meta: {},
+  },
+  {
+    technology_id: TECHNOLOGY_IDS.REACT,
+    question: 'What syntax is used to write HTML in React components?',
+    correct_answer: ['0'],
+    options: ['JSX', 'XML', 'TSX', 'HTML'],
+    time: '2',
+    difficulty_level: Difficulty.easy,
+    type: Question_type.mcq,
+    meta: {},
+  },
+  {
+    technology_id: TECHNOLOGY_IDS.NODE,
+    question: 'Which command initializes a Node.js project?',
+    correct_answer: ['0'],
+    options: ['npm init', 'node start', 'npm install', 'node init'],
+    time: '2',
+    difficulty_level: Difficulty.easy,
+    type: Question_type.mcq,
+    meta: {},
+  },
+  {
+    technology_id: TECHNOLOGY_IDS.MONGODB,
+    question: 'Which command is used to start the MongoDB server?',
+    correct_answer: ['0'],
+    options: ['mongod', 'mongo-start', 'mongo-run', 'start-mongo'],
+    time: '2',
+    difficulty_level: Difficulty.easy,
+    type: Question_type.mcq,
+    meta: {},
+  },
+  {
+    technology_id: TECHNOLOGY_IDS.EXPRESS,
+    question: 'Which function defines a GET route in Express.js?',
+    correct_answer: ['0'],
+    options: ['app.get()', 'get()', 'router()', 'app.route()'],
+    time: '2',
+    difficulty_level: Difficulty.easy,
+    type: Question_type.mcq,
+    meta: {},
+  },
+  {
+    technology_id: TECHNOLOGY_IDS.JAVASCRIPT,
+    question: 'Which keyword is used to declare a variable in JavaScript?',
+    correct_answer: ['0'],
+    options: ['let', 'int', 'define', 'varname'],
+    time: '2',
+    difficulty_level: Difficulty.easy,
+    type: Question_type.mcq,
+    meta: {},
+  },
+  {
+    technology_id: TECHNOLOGY_IDS.JAVASCRIPT,
+    question: 'What does `typeof null` return in JavaScript?',
+    correct_answer: ['1'],
+    options: ['null', 'object', 'undefined', 'boolean'],
+    time: '2',
+    difficulty_level: Difficulty.easy,
+    type: Question_type.mcq,
+    meta: {},
+  },
+  {
+    technology_id: TECHNOLOGY_IDS.REACT,
+    question: 'Which hook is used for managing state in functional components?',
+    correct_answer: ['0'],
+    options: ['useState', 'useEffect', 'useContext', 'useRef'],
+    time: '2',
+    difficulty_level: Difficulty.easy,
+    type: Question_type.mcq,
+    meta: {},
+  },
+  {
+    technology_id: TECHNOLOGY_IDS.EXPRESS,
+    question: 'How do you parse JSON bodies in Express.js?',
+    correct_answer: ['0'],
+    options: ['express.json()', 'express.body()', 'express.parser()', 'express.req()'],
+    time: '2',
+    difficulty_level: Difficulty.easy,
+    type: Question_type.mcq,
+    meta: {},
+  },
+  {
+    technology_id: TECHNOLOGY_IDS.MONGODB,
+    question: 'Which of the following is a MongoDB GUI client?',
+    correct_answer: ['1'],
+    options: ['Mongoose', 'MongoDB Compass', 'Postman', 'Studio 3T'],
+    time: '2',
+    difficulty_level: Difficulty.easy,
+    type: Question_type.mcq,
+    meta: {},
+  },
+  {
+    technology_id: TECHNOLOGY_IDS.NODE,
+    question: 'Which file is the entry point for most Node.js apps?',
+    correct_answer: ['0'],
+    options: ['index.js', 'server.js', 'main.js', 'app.js'],
+    time: '2',
+    difficulty_level: Difficulty.easy,
+    type: Question_type.mcq,
+    meta: {},
+  },
+
+  // ---------------------- MEDIUM ----------------------
+  {
+    technology_id: TECHNOLOGY_IDS.REACT,
+    question: 'What does the React useEffect hook do?',
+    correct_answer: ['2'],
+    options: [
+      'Manages component state',
+      'Creates new components',
+      'Performs side effects in function components',
+      'Handles events',
+    ],
+    time: '3',
+    difficulty_level: Difficulty.medium,
+    type: Question_type.mcq,
+    meta: {},
+  },
+  {
+    technology_id: TECHNOLOGY_IDS.EXPRESS,
+    question: 'Which middleware is used for handling CORS in Express?',
+    correct_answer: ['1'],
+    options: ['body-parser', 'cors', 'helmet', 'morgan'],
+    time: '3',
+    difficulty_level: Difficulty.medium,
+    type: Question_type.mcq,
+    meta: {},
+  },
+  {
+    technology_id: TECHNOLOGY_IDS.NODE,
+    question: 'What does the "process" object in Node.js represent?',
+    correct_answer: ['3'],
+    options: [
+      'File system module',
+      'HTTP server',
+      'Database connection',
+      'Current Node.js process environment',
+    ],
+    time: '3',
+    difficulty_level: Difficulty.medium,
+    type: Question_type.mcq,
+    meta: {},
+  },
+  {
+    technology_id: TECHNOLOGY_IDS.MONGODB,
+    question: 'What does the term "replica set" mean in MongoDB?',
+    correct_answer: ['0'],
+    options: [
+      'A group of MongoDB servers that maintain the same data set',
+      'A collection of unrelated databases',
+      'A backup of the database',
+      'A query operation',
+    ],
+    time: '3',
+    difficulty_level: Difficulty.medium,
+    type: Question_type.mcq,
+    meta: {},
+  },
+  {
+    technology_id: TECHNOLOGY_IDS.REACT,
+    question: 'What is the purpose of keys in React lists?',
+    correct_answer: ['3'],
+    options: [
+      'To style the list',
+      'To enable event handling',
+      'To create new list items',
+      'To help React identify which items have changed',
+    ],
+    time: '3',
+    difficulty_level: Difficulty.medium,
+    type: Question_type.mcq,
+    meta: {},
+  },
+  {
+    technology_id: TECHNOLOGY_IDS.JAVASCRIPT,
+    question: 'What is a closure in JavaScript?',
+    correct_answer: ['2'],
+    options: [
+      'A type of loop',
+      'A special object method',
+      'A function with access to its outer scope',
+      'A variable declaration',
+    ],
+    time: '3',
+    difficulty_level: Difficulty.medium,
+    type: Question_type.mcq,
+    meta: {},
+  },
+  {
+    technology_id: TECHNOLOGY_IDS.EXPRESS,
+    question: 'How do you handle errors in Express middleware?',
+    correct_answer: ['1'],
+    options: [
+      'Using try-catch inside route handlers',
+      'By defining error-handling middleware with four arguments',
+      'By using async functions',
+      'Using the res.send() method',
+    ],
+    time: '3',
+    difficulty_level: Difficulty.medium,
+    type: Question_type.mcq,
+    meta: {},
+  },
+  {
+    technology_id: TECHNOLOGY_IDS.MONGODB,
+    question: 'What does the Mongoose library do?',
+    correct_answer: ['1'],
+    options: [
+      'Creates HTTP servers',
+      'Provides an ODM for MongoDB',
+      'Manages React state',
+      'Compiles JavaScript',
+    ],
+    time: '3',
+    difficulty_level: Difficulty.medium,
+    type: Question_type.mcq,
+    meta: {},
+  },
+  {
+    technology_id: TECHNOLOGY_IDS.NODE,
+    question: 'What module is used for file operations in Node.js?',
+    correct_answer: ['2'],
+    options: ['http', 'net', 'fs', 'path'],
+    time: '3',
+    difficulty_level: Difficulty.medium,
+    type: Question_type.mcq,
+    meta: {},
+  },
+  {
+    technology_id: TECHNOLOGY_IDS.REACT,
+    question: 'What lifecycle method replaces componentDidMount in functional components?',
+    correct_answer: ['0'],
+    options: ['useEffect', 'useState', 'useReducer', 'useContext'],
+    time: '3',
+    difficulty_level: Difficulty.medium,
+    type: Question_type.mcq,
+    meta: {},
+  },
+  {
+    technology_id: TECHNOLOGY_IDS.JAVASCRIPT,
+    question: 'Which method converts JSON to a JavaScript object?',
+    correct_answer: ['1'],
+    options: ['JSON.stringify()', 'JSON.parse()', 'JSON.objectify()', 'JSON.toJS()'],
+    time: '3',
+    difficulty_level: Difficulty.medium,
+    type: Question_type.mcq,
+    meta: {},
+  },
+  {
+    technology_id: TECHNOLOGY_IDS.EXPRESS,
+    question: 'Which command installs Express in a Node.js project?',
+    correct_answer: ['3'],
+    options: [
+      'npm express',
+      'npm get express',
+      'npm install express --save-dev',
+      'npm install express',
+    ],
+    time: '3',
+    difficulty_level: Difficulty.medium,
+    type: Question_type.mcq,
+    meta: {},
+  },
+  {
+    technology_id: TECHNOLOGY_IDS.MONGODB,
+    question: 'How is data stored in MongoDB?',
+    correct_answer: ['0'],
+    options: ['In BSON documents', 'In tables', 'In XML files', 'In CSV files'],
+    time: '3',
+    difficulty_level: Difficulty.medium,
+    type: Question_type.mcq,
+    meta: {},
+  },
+  {
+    technology_id: TECHNOLOGY_IDS.NODE,
+    question: 'What is npm used for in Node.js projects?',
+    correct_answer: ['2'],
+    options: [
+      'To run Node.js code',
+      'To create Node.js apps',
+      'To manage packages and dependencies',
+      'To debug Node.js code',
+    ],
+    time: '3',
+    difficulty_level: Difficulty.medium,
+    type: Question_type.mcq,
+    meta: {},
+  },
+  {
+    technology_id: TECHNOLOGY_IDS.REACT,
+    question: 'What does Redux primarily manage in a React application?',
+    correct_answer: ['1'],
+    options: ['Component lifecycle', 'Application state', 'Routing', 'CSS styles'],
+    time: '3',
+    difficulty_level: Difficulty.medium,
+    type: Question_type.mcq,
+    meta: {},
+  },
+  {
+    technology_id: TECHNOLOGY_IDS.JAVASCRIPT,
+    question: 'Which keyword is used to create a constant variable?',
+    correct_answer: ['0'],
+    options: ['const', 'let', 'var', 'static'],
+    time: '3',
+    difficulty_level: Difficulty.medium,
+    type: Question_type.mcq,
+    meta: {},
+  },
+
+  // ---------------------- HARD ----------------------
+  {
+    technology_id: TECHNOLOGY_IDS.NODE,
+    question: 'How does the Node.js event loop handle asynchronous operations?',
+    correct_answer: ['1'],
+    options: [
+      'By creating new threads for each operation',
+      'By using a single-threaded event loop and callback queue',
+      'By executing operations synchronously',
+      'By blocking the main thread',
+    ],
+    time: '4',
+    difficulty_level: Difficulty.hard,
+    type: Question_type.mcq,
+    meta: {},
+  },
+  {
+    technology_id: TECHNOLOGY_IDS.MONGODB,
+    question: 'Which aggregation pipeline stage filters documents in MongoDB?',
+    correct_answer: ['0'],
+    options: ['$match', '$group', '$project', '$sort'],
+    time: '4',
+    difficulty_level: Difficulty.hard,
+    type: Question_type.mcq,
+    meta: {},
+  },
+  {
+    technology_id: TECHNOLOGY_IDS.REACT,
+    question: 'What is the purpose of React’s useCallback hook?',
+    correct_answer: ['2'],
+    options: [
+      'To memoize component output',
+      'To memoize state',
+      'To memoize functions to prevent unnecessary re-renders',
+      'To create context',
+    ],
+    time: '4',
+    difficulty_level: Difficulty.hard,
+    type: Question_type.mcq,
+    meta: {},
+  },
+  {
+    technology_id: TECHNOLOGY_IDS.EXPRESS,
+    question: 'How can you secure Express apps against common vulnerabilities?',
+    correct_answer: ['1'],
+    options: [
+      'By using express.json()',
+      'By using Helmet middleware',
+      'By using body-parser',
+      'By using cors',
+    ],
+    time: '4',
+    difficulty_level: Difficulty.hard,
+    type: Question_type.mcq,
+    meta: {},
+  },
+  {
+    technology_id: TECHNOLOGY_IDS.JAVASCRIPT,
+    question: 'What is a Promise in JavaScript?',
+    correct_answer: ['0'],
+    options: [
+      'An object representing eventual completion or failure of an async operation',
+      'A function that returns a value',
+      'A synchronous operation',
+      'A variable type',
+    ],
+    time: '4',
+    difficulty_level: Difficulty.hard,
+    type: Question_type.mcq,
+    meta: {},
+  },
+  {
+    technology_id: TECHNOLOGY_IDS.NODE,
+    question: 'What does "callback hell" refer to in Node.js?',
+    correct_answer: ['3'],
+    options: [
+      'A single callback function',
+      'An error in a callback',
+      'Callbacks executed synchronously',
+      'Deeply nested callbacks making code hard to read',
+    ],
+    time: '4',
+    difficulty_level: Difficulty.hard,
+    type: Question_type.mcq,
+    meta: {},
+  },
+  {
+    technology_id: TECHNOLOGY_IDS.MONGODB,
+    question: 'What is sharding in MongoDB?',
+    correct_answer: ['1'],
+    options: [
+      'A backup strategy',
+      'Horizontal scaling by distributing data across multiple servers',
+      'Data replication',
+      'Database clustering',
+    ],
+    time: '4',
+    difficulty_level: Difficulty.hard,
+    type: Question_type.mcq,
+    meta: {},
+  },
+  {
+    technology_id: TECHNOLOGY_IDS.REACT,
+    question: 'How do you optimize React app performance?',
+    correct_answer: ['0'],
+    options: [
+      'Using memoization and code splitting',
+      'Increasing component re-renders',
+      'Avoiding hooks',
+      'Using inline styles extensively',
+    ],
+    time: '4',
+    difficulty_level: Difficulty.hard,
+    type: Question_type.mcq,
+    meta: {},
+  },
+  {
+    technology_id: TECHNOLOGY_IDS.EXPRESS,
+    question: 'How can you handle file uploads in Express?',
+    correct_answer: ['3'],
+    options: ['Using cors', 'Using helmet', 'Using express.json()', 'Using multer middleware'],
+    time: '4',
+    difficulty_level: Difficulty.hard,
+    type: Question_type.mcq,
+    meta: {},
+  },
+  {
+    technology_id: TECHNOLOGY_IDS.JAVASCRIPT,
+    question: 'Which method is used to debounce a function?',
+    correct_answer: ['1'],
+    options: ['setTimeout', 'Using a timer to delay execution', 'clearTimeout', 'setInterval'],
+    time: '4',
+    difficulty_level: Difficulty.hard,
+    type: Question_type.mcq,
+    meta: {},
+  },
+  {
+    technology_id: TECHNOLOGY_IDS.NODE,
+    question: 'What is the purpose of the "cluster" module in Node.js?',
+    correct_answer: ['2'],
+    options: [
+      'File system operations',
+      'Creating HTTP servers',
+      'Enabling multi-core processing by spawning child processes',
+      'Database connection pooling',
+    ],
+    time: '4',
+    difficulty_level: Difficulty.hard,
+    type: Question_type.mcq,
+    meta: {},
+  },
+  {
+    technology_id: TECHNOLOGY_IDS.MONGODB,
+    question: 'Which operator is used to update a field in MongoDB?',
+    correct_answer: ['3'],
+    options: ['$set', '$update', '$change', '$inc'],
+    time: '4',
+    difficulty_level: Difficulty.hard,
+    type: Question_type.mcq,
+    meta: {},
+  },
+  {
+    technology_id: TECHNOLOGY_IDS.REACT,
+    question: 'What is React Fiber?',
+    correct_answer: ['1'],
+    options: [
+      'A UI component library',
+      'A reconciliation algorithm for rendering updates efficiently',
+      'A type of hook',
+      'A state management library',
+    ],
+    time: '4',
+    difficulty_level: Difficulty.hard,
+    type: Question_type.mcq,
+    meta: {},
+  },
+  {
+    technology_id: TECHNOLOGY_IDS.EXPRESS,
+    question: 'How do you implement session management in Express?',
+    correct_answer: ['0'],
+    options: [
+      'Using express-session middleware',
+      'Using passport',
+      'Using cookies manually',
+      'Using JWT',
+    ],
+    time: '4',
+    difficulty_level: Difficulty.hard,
+    type: Question_type.mcq,
+    meta: {},
+  },
+  {
+    technology_id: TECHNOLOGY_IDS.JAVASCRIPT,
+    question: 'What is the difference between "==" and "===" in JavaScript?',
+    correct_answer: ['2'],
+    options: [
+      'They are the same',
+      '== compares type and value, === compares only value',
+      '== compares only value, === compares type and value',
+      'They both compare only type',
+    ],
+    time: '4',
+    difficulty_level: Difficulty.hard,
+    type: Question_type.mcq,
+    meta: {},
+  },
+  {
+    technology_id: TECHNOLOGY_IDS.NODE,
+    question: 'What is event-driven programming in Node.js?',
+    correct_answer: ['1'],
+    options: [
+      'Using loops for events',
+      'Using events and listeners to handle asynchronous operations',
+      'Programming without events',
+      'Blocking the main thread until events complete',
+    ],
+    time: '4',
+    difficulty_level: Difficulty.hard,
+    type: Question_type.mcq,
+    meta: {},
+  },
+];
 
 const mongodbQuestions = [
   {
@@ -232,7 +819,7 @@ const javascriptQuestions = [
   {
     technology_id: TECHNOLOGY_IDS.JAVASCRIPT,
     question: 'Which keyword is used to declare a variable in JavaScript?',
-    correct_answer: ['0'],
+    correct_answer: ['3'],
     options: ['let', 'var', 'const', 'All of the above'],
     time: '2',
     difficulty_level: Difficulty.easy,
@@ -267,7 +854,7 @@ const javascriptQuestions = [
   {
     technology_id: TECHNOLOGY_IDS.JAVASCRIPT,
     question: "What is the result of '2' + 2 in JavaScript?",
-    correct_answer: ["0"],
+    correct_answer: ['0'],
     options: ["'22'", '4', 'NaN', 'Error'],
     time: '2',
     difficulty_level: Difficulty.easy,
@@ -277,7 +864,7 @@ const javascriptQuestions = [
   {
     technology_id: TECHNOLOGY_IDS.JAVASCRIPT,
     question: 'What is a closure in JavaScript?',
-    correct_answer: ["0"],
+    correct_answer: ['0'],
     options: [
       "A function with access to its outer function's scope",
       'A way to close a program',
@@ -307,21 +894,6 @@ const javascriptQuestions = [
   {
     technology_id: TECHNOLOGY_IDS.JAVASCRIPT,
     question: "What is the purpose of the 'bind' method in JavaScript?",
-    correct_answer: ["0"],
-    options: [
-      "To create a new function with a specific 'this' value",
-      'To bind two objects together',
-      'To prevent modification of an object',
-      'To bind event listeners',
-    ],
-    time: '2',
-    difficulty_level: Difficulty.medium,
-    type: Question_type.mcq,
-    meta: {},
-  },
-  {
-    technology_id: TECHNOLOGY_IDS.JAVASCRIPT,
-    question: 'What is a promise in JavaScript?',
     correct_answer: ['0'],
     options: [
       "To create a new function with a specific 'this' value",
@@ -340,15 +912,16 @@ const javascriptQuestions = [
     correct_answer: ['0'],
     options: [
       'An object representing the eventual completion of an asynchronous operation',
-      'A type of variable',
-      'A conditional statement',
-      'A function declaration',
+      'A function that always returns a callback after execution',
+      'A reserved keyword used for declaring future variables',
+      'A synchronous wrapper for JSON data',
     ],
     time: '2',
     difficulty_level: Difficulty.medium,
     type: Question_type.mcq,
     meta: {},
   },
+
   {
     technology_id: TECHNOLOGY_IDS.JAVASCRIPT,
     question: "What is the purpose of the 'async/await' syntax in JavaScript?",
@@ -397,9 +970,7 @@ const javascriptQuestions = [
   {
     technology_id: TECHNOLOGY_IDS.JAVASCRIPT,
     question: "What is the difference between 'null' and 'undefined' in JavaScript?",
-    correct_answer: [
-      "0",
-    ],
+    correct_answer: ['0'],
     options: [
       "'null' is an assigned value representing no value, while 'undefined' means a variable has been declared but not assigned",
       "'undefined' is an assigned value representing no value, while 'null' means a variable has been declared but not assigned",
@@ -414,7 +985,7 @@ const javascriptQuestions = [
   {
     technology_id: TECHNOLOGY_IDS.JAVASCRIPT,
     question: 'What is the purpose of the Symbol data type in JavaScript?',
-    correct_answer: ["0"],
+    correct_answer: ['0'],
     options: [
       "To create unique identifiers that won't collide with other properties",
       'To represent special characters',
@@ -478,7 +1049,7 @@ const pythonQuestions = [
   {
     technology_id: TECHNOLOGY_IDS.PYTHON,
     question: "What is the output of 'Hello' + 'World' in Python?",
-    correct_answer: ["0"],
+    correct_answer: ['0'],
     options: ["'HelloWorld'", "'Hello World'", 'Error', "'Hello' + 'World'"],
     time: '2',
     difficulty_level: Difficulty.easy,
@@ -523,7 +1094,7 @@ const pythonQuestions = [
   {
     technology_id: TECHNOLOGY_IDS.PYTHON,
     question: 'What is the purpose of the __init__ method in Python?',
-    correct_answer: ["0"],
+    correct_answer: ['0'],
     options: [
       "To initialize an object's attributes when it's created",
       'To indicate the start of a program',
@@ -643,9 +1214,7 @@ const pythonQuestions = [
   {
     technology_id: TECHNOLOGY_IDS.PYTHON,
     question: 'What is a descriptor in Python?',
-    correct_answer: [
-      '0',
-    ],
+    correct_answer: ['0'],
     options: [
       'An object attribute with binding behavior, accessed via get/set/delete methods',
       'A special comment that describes a function',
@@ -677,7 +1246,6 @@ async function seedQuestions(questions: any[], technologyName: string) {
 }
 
 async function createTechnologies() {
-
   await prisma.technology.createMany({
     data: [
       {
@@ -692,21 +1260,35 @@ async function createTechnologies() {
         id: TECHNOLOGY_IDS.PYTHON,
         name: 'Python',
       },
+      {
+        id: TECHNOLOGY_IDS.JAVA,
+        name: 'Java',
+      },
+      {
+        id: TECHNOLOGY_IDS.NODE,
+        name: 'Node.js',
+      },
+      {
+        id: TECHNOLOGY_IDS.REACT,
+        name: 'React',
+      },
+      {
+        id: TECHNOLOGY_IDS.EXPRESS,
+        name: 'Express',
+      },
     ],
     skipDuplicates: true,
   });
-
 }
 
 async function createTestCandidates() {
-
   // Get superadmin user ID
   const superadmin = await prisma.user.findFirst({
-    where: { email: "superadmin@example.com" },
+    where: { email: 'superadmin@example.com' },
   });
 
   if (!superadmin) {
-    throw new Error("Superadmin user not found");
+    throw new Error('Superadmin user not found');
   }
 
   // Create assessments for each candidate
@@ -737,38 +1319,36 @@ async function createTestCandidates() {
       return assessment;
     })
   );
-  const candidateService  =new CandidatesService()
-  const examService  =new ExamService()
+  const candidateService = new CandidatesService();
+  const examService = new ExamService();
   // Create candidates with their unique assessments
-  const candidates = assessments.map(async(assessment, i) => {
+  const candidates = assessments.map(async (assessment, i) => {
     const candiadte = {
       name: `test2_${i + 1}`,
       email: `test${i + 1}@gmail.com`,
       phone: `12345678${i}${i + 2}`,
       technology_id: TECHNOLOGY_IDS.MONGODB,
-      experience: "6",
+      experience: '6',
       assessment_id: assessment.id,
-      meta:{},
-      start_date:new Date(),
-      end_date:new Date(new Date().setDate(new Date().getDate() + 10)),
-      exam_id:""
-    }
+      meta: {},
+      start_date: new Date(),
+      end_date: new Date(new Date().setDate(new Date().getDate() + 10)),
+      exam_id: '',
+    };
     const newExam = await examService.createExam({
       user_id: superadmin.id,
       assessment_id: candiadte.assessment_id,
       meta: candiadte.meta || {},
       start_time: candiadte.start_date || new Date(),
-     // ...existing code...
+      // ...existing code...
       end_time: new Date(new Date().setDate(new Date().getDate() + 10)),
       // ...existing code...
     });
-    candiadte.exam_id = newExam?.id || ''
-    await candidateService.createCandidate(candiadte)
-    
+    candiadte.exam_id = newExam?.id || '';
+    await candidateService.createCandidate(candiadte);
   });
 
-  
-  console.log("Test candidates and their assessments created successfully");
+  console.log('Test candidates and their assessments created successfully');
 }
 
 const resetDB = async () => {
@@ -813,7 +1393,7 @@ async function main() {
   }
 
   // Check if modules exist, if not create them
-  const moduleNames = ['candidates', 'questions', 'assessments', 'users','results'];
+  const moduleNames = ['candidates', 'questions', 'assessments', 'users', 'results'];
   for (const name of moduleNames) {
     const existingModule = await prisma.modules.findFirst({
       where: { name },
@@ -848,13 +1428,14 @@ async function main() {
     });
   }
 
-  // Create technologies
+  // Create technologies first, before questions reference them
   await createTechnologies();
 
-  // Seed questions for all technologies
+  // Then seed questions for all technologies
   await seedQuestions(mongodbQuestions, 'MongoDB');
   await seedQuestions(javascriptQuestions, 'JavaScript');
   await seedQuestions(pythonQuestions, 'Python');
+  await seedQuestions(mernStackQuestions, 'MERN');
 
   // Create test candidates
   await createTestCandidates();

@@ -6,7 +6,7 @@ import {
   getDateBoundaries,
   generateLast7Months,
 } from '../utils/dateUtils';
-import dayjs from 'dayjs'
+import dayjs from 'dayjs';
 
 import utc from 'dayjs/plugin/utc';
 export class DashboardService {
@@ -24,7 +24,7 @@ export class DashboardService {
       select: { id: true, name: true },
     });
 
-    const techMap = new Map(technologies.map(tech => [tech.id, tech.name]));
+    const techMap = new Map(technologies.map((tech) => [tech.id, tech.name]));
 
     return questionData.map((group) => ({
       ...group,
@@ -50,10 +50,10 @@ export class DashboardService {
 
     const last7Months = generateLast7Months();
     const monthlyData = new Map(
-      last7Months.map(month => [month.key, { pass: 0, failed: 0, month: month.name }])
+      last7Months.map((month) => [month.key, { pass: 0, failed: 0, month: month.name }])
     );
 
-    results.forEach(result => {
+    results.forEach((result) => {
       const examDate = result.exam.start_time;
       const key = `${examDate.getFullYear()}-${examDate.getMonth()}`;
 
@@ -70,15 +70,16 @@ export class DashboardService {
     const sortedData = Array.from(monthlyData.values());
 
     return {
-      months: sortedData.map(item => item.month),
-      pass: sortedData.map(item => item.pass),
-      failed: sortedData.map(item => item.failed),
+      months: sortedData.map((item) => item.month),
+      pass: sortedData.map((item) => item.pass),
+      failed: sortedData.map((item) => item.failed),
     };
   }
 
   async getInterviewCount() {
     const exams = await prisma.exam.findMany({
       select: { start_time: true },
+      where: { deleted_at: null },
     });
 
     const boundaries = getDateBoundaries();
@@ -94,28 +95,35 @@ export class DashboardService {
     return counts;
   }
 
-  async interviewScoreData(filters: { language: string; min: string, max: string, page: string, limit: string }) {
+  async interviewScoreData(filters: {
+    language: string;
+    min: string;
+    max: string;
+    page: string;
+    limit: string;
+  }) {
     const { language, min, max, page, limit } = filters;
-    const parsedPage = page ? parseInt(page) : 1
-    const parsedLimit = page ? parseInt(limit) : 1
+    const parsedPage = page ? parseInt(page) : 1;
+    const parsedLimit = page ? parseInt(limit) : 1;
     const whereClause: any = {
+      deleted_at: null,
       exam: {
-        assessment: {}
-      }
+        assessment: {},
+      },
     };
 
     if (min)
       whereClause.percentage = {
-        gte: parseFloat(min)
-      }
+        gte: parseFloat(min),
+      };
 
     if (max)
       whereClause.percentage = {
-        lte: parseFloat(max)
-      }
+        lte: parseFloat(max),
+      };
     if (language?.trim()) {
       whereClause.exam.assessment.technologies = {
-        some: { technology_id: language }
+        some: { technology_id: language },
       };
     }
     const results = await prisma.results.findMany({
@@ -148,36 +156,48 @@ export class DashboardService {
         },
       },
       skip: (parsedPage - 1) * parsedLimit,
-      take: parsedLimit
+      take: parsedLimit,
     });
-    const count = await prisma.results.count({ where: whereClause })
+    const count = await prisma.results.count({ where: whereClause });
 
-    return { total: count, page: parsedPage, limit: parsedLimit, list: formatInterviewResults(results as unknown as Result[]) }
+    return {
+      total: count,
+      page: parsedPage,
+      limit: parsedLimit,
+      list: formatInterviewResults(results as unknown as Result[]),
+    };
   }
 
   async calendarData(month: string, year: string) {
-
     dayjs.extend(utc);
-    const startDate = dayjs().set('year', Number(year)).set('month', Number(month)).set('date', 1).startOf('day');
+    const startDate = dayjs()
+      .set('year', Number(year))
+      .set('month', Number(month))
+      .set('date', 1)
+      .startOf('day');
     const endDate = startDate.endOf('month');
-    
+
     const exams = await prisma.exam.findMany({
       where: {
         start_time: {
           gte: startDate.toISOString(),
-          lte: endDate.toISOString()
+          lte: endDate.toISOString(),
         },
+        deleted_at: null,
       },
       select: {
         start_time: true,
         end_time: true,
-        is_completed:true,
-        status:true,
+        is_completed: true,
+        status: true,
         candidate: {
           select: {
             name: true,
-            experience: true
-          }
+            experience: true,
+          },
+          where: {
+            deleted_at: null,
+          },
         },
         assessment: {
           select: {
@@ -186,22 +206,21 @@ export class DashboardService {
               select: {
                 technology: {
                   select: {
-                    name: true
-                  }
-                }
-              }
-            }
+                    name: true,
+                  },
+                },
+              },
+            },
           },
         },
         results: {
           select: {
             id: true,
-            percentage: true
-          }
-        }
-      }
+            percentage: true,
+          },
+        },
+      },
     });
-    return exams
-
+    return exams;
   }
 }

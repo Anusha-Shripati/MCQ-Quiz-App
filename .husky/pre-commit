@@ -1,25 +1,35 @@
 #!/usr/bin/env bash
+set -e
 
 echo "🔍 Checking TypeScript and lint errors..."
 
 # 1. TypeScript - block on errors
+echo "Checking frontend TypeScript..."
 (cd frontend && npx tsc --noEmit) || exit 1
+
+echo "Checking backend TypeScript..."
 (cd backend && npx tsc --noEmit) || exit 1
 
 # 2. ESLint - block only on errors (quiet hides warnings)
+echo "Running frontend ESLint..."
 (cd frontend && npx eslint . --ext .ts,.tsx --quiet) || exit 1
+
+echo "Running backend ESLint..."
 (cd backend && npx eslint . --ext .ts,.tsx --quiet) || exit 1
 
 echo "✅ Lint passed! Formatting staged files..."
 
 # 3. Format only staged files with Prettier
-STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(ts|tsx|js|jsx|json|css|scss|md)$')
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(ts|tsx|js|jsx|json|css|scss|md)$' || true)
 
 if [ -n "$STAGED_FILES" ]; then
+  echo "Formatting files: $STAGED_FILES"
   echo "$STAGED_FILES" | xargs npx prettier --write
 
   # Re-add formatted files to git
   echo "$STAGED_FILES" | xargs git add
+else
+  echo "No files to format"
 fi
 
 echo "✅ All checks and formatting done!"

@@ -9,16 +9,18 @@ interface ResultSummaryProps {
     total: number
     percentage: number
     technologies: { technology_id: string; score: number; total: number; percentage: number }[]
+    passCriteria: number
+    is_passed: boolean
 }
 
-const ResultSummary: React.FC<ResultSummaryProps> = ({ score, total, percentage, technologies }) => {
+const ResultSummary: React.FC<ResultSummaryProps> = ({ score, total, percentage, technologies, passCriteria, is_passed }) => {
     const { data: technology, isLoading } = useSWR(technologyEndpoint.LIST, api.get, {
         revalidateOnFocus: false,
         revalidateOnReconnect: false,
         dedupingInterval: 60000,
         staleWhileRevalidate: true,
     });
-    const [techListWithScores, setTechListWithScores] = React.useState<{ technology_id: string; score: number; total: number; percentage: number;  name: string  }[]>([]);
+    const [techListWithScores, setTechListWithScores] = React.useState<{ technology_id: string; score: number; total: number; percentage: number; name: string }[]>([]);
     useEffect(() => {
         if (technology) {
             const score = technologies.map((tech) => {
@@ -39,7 +41,7 @@ const ResultSummary: React.FC<ResultSummaryProps> = ({ score, total, percentage,
             <div className="flex flex-col md:flex-row items-center justify-between gap-6 px-8 py-8 border-b border-gray-100 dark:border-gray-800 bg-gradient-to-r from-blue-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900">
                 <div className="flex items-center gap-6 w-full md:w-auto">
                     <div className="bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 rounded-full p-4">
-                       <Layers/>
+                        <Layers />
                     </div>
                     <div>
                         <div className="text-xs uppercase tracking-widest text-gray-500 dark:text-gray-400 font-semibold">Your Score</div>
@@ -58,19 +60,23 @@ const ResultSummary: React.FC<ResultSummaryProps> = ({ score, total, percentage,
                         />
                     </div>
                 </div>
+                <div className="flex flex-col items-start gap-1 w-full md:w-auto min-w-[200px]">
+                    <span className="text-xs uppercase tracking-widest text-gray-500 dark:text-gray-400 font-semibold">Passing Criteria</span>
+                    <span className="text-2xl font-bold text-blue-600 dark:text-blue-300">{passCriteria.toFixed(2)}%</span>
+                </div>
                 <div>
-                    <span className={`px-5 py-2 rounded-full font-bold text-lg shadow-sm ${percentage >= 60
+                    <span className={`px-5 py-2 rounded-full font-bold text-lg shadow-sm ${is_passed
                         ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
                         : "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300"
                         }`}>
-                        {percentage >= 60 ? "Passed" : "Failed"}
+                        {is_passed ? "Passed" : "Failed"}
                     </span>
                 </div>
             </div>
             {/* Technology Table */}
             <div className="p-6 md:p-10">
                 <h4 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100 flex items-center gap-2">
-                    <svg className="w-5 h-5 text-blue-500 dark:text-blue-300" fill="currentColor" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.122-6.545L.488 6.91l6.564-.955L10 0l2.948 5.955 6.564.955-4.756 4.635 1.122 6.545z"/></svg>
+                    <svg className="w-5 h-5 text-blue-500 dark:text-blue-300" fill="currentColor" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.122-6.545L.488 6.91l6.564-.955L10 0l2.948 5.955 6.564.955-4.756 4.635 1.122 6.545z" /></svg>
                     Technology Breakdown
                 </h4>
                 <div className="overflow-x-auto rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900">

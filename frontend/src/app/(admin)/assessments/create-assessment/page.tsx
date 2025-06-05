@@ -55,6 +55,12 @@ export default function CreateAssessment() {
     name: z.string().nonempty('Name is required.'),
     duration: z.number().min(1, 'Duration is required'),
     technologies: z.array(technologySchema).min(1, 'At least one category is required'),
+    pass_criteria: z
+      .number({
+        invalid_type_error: 'Passing score is required',
+      })
+      .min(1, 'Passing score must be at least 1')
+      .max(90, 'Passing score must not exceed 90'),
   });
 
   const {
@@ -70,6 +76,7 @@ export default function CreateAssessment() {
       technologies: [],
       duration: 15,
       targetQuestions: 0,
+      pass_criteria: 0,
     },
   });
   const formData = watch();
@@ -108,6 +115,7 @@ export default function CreateAssessment() {
     const newAssessment = {
       name: formData.name,
       duration: formData.duration,
+      pass_criteria: formData.pass_criteria,
       technologies: formData.technologies.map((tech) => ({
         technology_id: tech.id,
         easy: tech.easy,
@@ -123,7 +131,7 @@ export default function CreateAssessment() {
         router.push('/assessments');
         mutate((key) => typeof key === 'string' && key.startsWith('/assessment/list'));
       } else {
-        toast.error(res.messae);
+        toast.error(res.message);
       }
     } catch (error) {
       if (isAxiosError(error)) {

@@ -5,6 +5,7 @@ import Pagination from '@/components/pagination';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { api } from '@/lib/api';
 import { StatusOption } from '@/types/common.types';
+import { Result } from '@/types/exam.types';
 import { format } from 'date-fns';
 import dayjs from 'dayjs';
 import { Eye } from 'lucide-react';
@@ -13,11 +14,11 @@ import qs from 'query-string';
 import { useEffect, useMemo, useState } from 'react';
 import useSWR from 'swr';
 import StatusWrapper from '../common/status-wrapper';
-import { ExamMetaTech, Result } from '@/types/exam.types';
 import Link from 'next/link';
 import { useResultStore } from '@/store/resultStore';
 import { resultEndpoint } from '@/lib/endpoint';
 import { roundOff } from '@/lib/utils';
+import ResultExpandableRow from './result-expandable-row';
 
 function ResultTable() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -41,7 +42,6 @@ function ResultTable() {
 
     params.set('perPage', itemsPerPage.toString());
     params.set('page', currentPage.toString());
-
 
     if (resultFilter.technologyFilter.length > 0) {
       const techLabels = resultFilter.technologyFilter.map((item) => item.label);
@@ -125,7 +125,6 @@ function ResultTable() {
     [queryObj]
   );
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const {
     data: candidateData,
     error,
@@ -226,20 +225,27 @@ function ResultTable() {
       },
       {
         key: 'percentage',
-        header: 'Percentage',
+        header: 'Result',
         render: (row) => {
           const statusMap = {
             pass: 'bg-green-100 text-green-800',
             failed: 'bg-red-100 text-red-800',
           };
 
-          const badgeClass = row?.percentage >= 60 ? statusMap.pass : statusMap.failed;
+          const badgeClass = row?.is_passed ? statusMap.pass : statusMap.failed;
 
           return (
-            <span className={`px-3 py-1 text-sm font-medium rounded-full ${badgeClass}`}>
-              {row?.percentage?.toFixed(2)} %
-
-            </span>
+            <Tooltip>
+              <TooltipTrigger>
+                <span className={`px-3 py-1 text-sm font-medium rounded-full ${badgeClass}`}>
+                  {row?.percentage?.toFixed(2)} % ({row?.is_passed ? 'Pass' : 'Failed'})
+                </span>
+              </TooltipTrigger>
+              <TooltipContent className="bg-gray-800 text-white p-2 rounded shadow-lg">
+                <p className='font-semibold'>Passing Criteria:</p>
+                <p>{row?.pass_criteria} %</p>
+              </TooltipContent>
+            </Tooltip>
           );
         }
       },
@@ -248,10 +254,9 @@ function ResultTable() {
         key: 'actions',
         header: 'Detailed',
         render: (result: Result) => (
-
           <Link
             href={`/results/${result.id}`}
-            className="p-2  rounded-lg transition-all duration-200"
+            className="p-2 rounded-lg transition-all duration-200"
             target='_blank'
           >
             <Eye className="h-4 w-4 text-gray-600 dark:text-gray-300" />
@@ -261,107 +266,9 @@ function ResultTable() {
     ],
     []
   );
-  const getTechnology = (id: string) => {
-    const technology = technologyOptions.find((item) => item.value == id)
-    if (technology) return technology.label
-    return '-'
-  }
 
   const expandableRow: ExpandableRow<Result> = {
-    render: (row: Result) => (
-      <div className="border border-gray-200  p-4 space-y-6 rounded-lg transition-all duration-300 ease-in-out transform origin-top animate-in fade-in zoom-in-95">
-        {/* Row Layout */}
-        <div className="flex items-center justify-between">
-          {/* Result Section */}
-          <div>
-            <p className="text-sm text-gray-500 dark:text-gray-300">Result</p>
-            <div className="flex gap-2 flex-col">
-              <p className="text-lg font-semibold text-blue-500">
-                {row?.percentage?.toFixed(2) || "-"} %
-              </p>
-              <Link href={`/results/${row.id}`} target='_blank' className="text-sm text-blue-500 hover:underline">
-                View Answer
-              </Link>
-            </div>
-          </div>
-
-          {/* Test Time Section */}
-          <div>
-            <p className="text-sm text-gray-500 dark:text-gray-300">Test Time</p>
-            <Tooltip>
-              <TooltipTrigger>
-                <p className="text-lg font-medium text-gray-700 dark:text-gray-300">
-                  {formatTestDuration(
-                    row?.exam?.start_time as string,
-                    row?.exam?.end_time as string
-                  )}
-                </p>
-              </TooltipTrigger>
-              <TooltipContent className="bg-gray-800 text-white p-2 rounded shadow-lg">
-                {formatTestDateRange(
-                  row?.exam?.start_time as string,
-                  row?.exam?.end_time as string
-                )}
-              </TooltipContent>
-            </Tooltip>
-          </div>
-
-          {/* Created Section */}
-          <div>
-            <p className="text-sm text-gray-500 dark:text-gray-300">Created</p>
-            <p className="text-lg font-medium text-gray-700 dark:text-gray-300">
-              {row?.exam?.user?.name}
-            </p>
-            <p className="text-sm text-gray-500 dark:text-gray-300">
-              {row?.exam?.created_at ? dayjs(row?.exam?.created_at).format('DD/MM/YYYY h:m A') : "-"}
-            </p>
-          </div>
-        </div>
-
-        {/* Detailed Table */}
-        <div>
-          <table className="table-auto border-collapse border border-gray-300 w-full">
-            <thead className="dark:text-gray-800">
-              <tr className="dark:bg-gray-500 dark:text-white">
-                <th className="border border-gray-300 px-4 py-2 text-left">Total Percentage</th>
-                {/* Dynamically render category headers */}
-                {row?.exam?.meta?.tech_score?.map((technology: ExamMetaTech) => (
-                  <th
-                    key={technology.technology_id}
-                    className="border border-gray-300 px-4 py-2 text-left"
-                  >
-                    {getTechnology(technology.technology_id)}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td className="border border-gray-300 px-4 py-2">
-                  {row?.percentage?.toFixed(2)} %
-                  <small> (&nbsp;
-                    {row?.score?.toFixed(1)} /&nbsp;
-                    {row?.total}
-                    &nbsp;) </small>
-                </td>
-                {/* Dynamically render category percentages */}
-                {row?.exam?.meta?.tech_score?.map((technology: ExamMetaTech) => (
-                  <th
-                    key={technology.technology_id}
-                    className="border border-gray-300 px-4 py-2 text-left"
-                  >
-                    {technology.percentage?.toFixed(2)} %
-                    <small> (&nbsp;
-                      {technology.score.toFixed(1)} / {technology.total}
-                      &nbsp;) </small>
-                  </th>
-                ))}
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    ),
+    render: (row: Result) => <ResultExpandableRow row={row} technologyOptions={technologyOptions} />
   };
 
   return (

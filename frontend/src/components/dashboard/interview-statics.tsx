@@ -56,7 +56,8 @@ const InterviewStatics: React.FC = () => {
     },
     legend: {
       data: ['Passed', 'Failed'],
-      bottom: '5%',
+      // bottom: '5%',
+      top: '95%',
       textStyle: {
         fontSize: 14,
         color: theme === 'light' ? '#666' : '#fff',

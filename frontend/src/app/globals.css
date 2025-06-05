@@ -36,6 +36,7 @@
     --chart-4: #66a135;
     --chart-5: #6d7e36;
     --radius: 0.5rem;
+    --hover-bg: #f5f5f5; 
   }
 
   .dark {
@@ -63,6 +64,7 @@
     --chart-3: #b97f35;
     --chart-4: #9b538b;
     --chart-5: #ad4979;
+    --hover-bg: #374151;
   }
 }
 

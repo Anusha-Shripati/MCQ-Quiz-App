@@ -59,6 +59,7 @@ model Assessments {
     hard             Int                     @default(0)
     difficulty_score Int                     @default(0)
     duration         Int                     @default(0)
+    pass_criteria    Int                     @default(0)
     created_at       DateTime                @default(now())
     updated_at       DateTime                @updatedAt
     deleted_at       DateTime?

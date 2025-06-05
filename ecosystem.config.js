@@ -3,7 +3,7 @@ module.exports = {
     {
       name: 'mcq-quiz-backend',
       cwd: './backend',
-      script: '/root/.nvm/versions/node/v20.11.1/bin/node',
+      script: 'node',
       args: 'dist/src/index.js',
       instances: 1,
       autorestart: true,

@@ -136,6 +136,7 @@ const Filters = () => {
   return (
     <section className="w-full">
       <div className="flex flex-col md:flex-row md:items-start gap-2 flex-wrap mb-2">
+
         <SearchFilter
           searchQuery={formData.search}
           setSearchQuery={(value) => setValue('search', value)}

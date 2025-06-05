@@ -27,6 +27,7 @@ import { ExamMetaTech } from '@/types/exam.types';
 import Link from 'next/link';
 import { candidateEndpoint } from '@/lib/endpoint';
 import { DeleteDialog } from '../common/delete-dialog';
+import { formatTestDuration } from '@/lib/utils';
 
 function CandidateTable() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -171,17 +172,7 @@ function CandidateTable() {
     return candidateList;
   }, [candidateList]);
 
-  const formatTestDuration = (startDate: string, endDate: string): string => {
-    const start = new Date(startDate);
-    const end = new Date(endDate);
 
-    const diffMs = Math.abs(end.getTime() - start.getTime());
-
-    const hours = Math.floor(diffMs / (1000 * 60 * 60));
-    const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60))
-
-    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')} hours`;
-  }
 
   const handleDelete = async (id: string) => {
     try {

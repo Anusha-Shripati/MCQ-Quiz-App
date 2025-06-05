@@ -12,8 +12,9 @@ export function getShadePerInterviewsCount(
   theme: string = 'light' // Default to "light" theme
 ) {
   if (count <= 0) {
-    return `bg-${defaultColor}-${theme === 'dark' ? '800' : '100'
-      } text-${defaultColor}-${theme === 'dark' ? '400' : '700'}`;
+    return `bg-${defaultColor}-${
+      theme === 'dark' ? '800' : '100'
+    } text-${defaultColor}-${theme === 'dark' ? '400' : '700'}`;
   }
 
   const lightModeShades = {
@@ -48,8 +49,13 @@ export const formatDate = (date: Date): string => {
 };
 
 export const isValidUUID = (id: string): boolean => {
-  return typeof id === 'string' && /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/.test(id);
-}
+  return (
+    typeof id === 'string' &&
+    /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/.test(
+      id
+    )
+  );
+};
 /**
  * Opens the IndexedDB database for storing videos.
  * @returns {Promise<IDBDatabase>} A promise that resolves to the database instance.
@@ -75,7 +81,11 @@ function openVideoDB(examId: string): Promise<IDBDatabase> {
   });
 }
 
-export async function saveVideoToIndexedDB(blob: Blob, key = 'recordedVideo', examId: string): Promise<void> {
+export async function saveVideoToIndexedDB(
+  blob: Blob,
+  key = 'recordedVideo',
+  examId: string
+): Promise<void> {
   try {
     const db = await openVideoDB(examId);
     const tx = db.transaction('videos', 'readwrite');
@@ -99,11 +109,14 @@ export async function saveVideoToIndexedDB(blob: Blob, key = 'recordedVideo', ex
   }
 }
 
-export async function loadVideoFromIndexedDB(key = 'recordedVideo', examId: string, signal?: AbortSignal): Promise<Blob | null> {
+export async function loadVideoFromIndexedDB(
+  key = 'recordedVideo',
+  examId: string,
+  signal?: AbortSignal
+): Promise<Blob | null> {
   try {
     const db = await openVideoDB(examId);
     return new Promise((resolve, reject) => {
-
       if (signal?.aborted) return reject(new DOMException('Aborted', 'AbortError'));
 
       signal?.addEventListener('abort', () => {
@@ -145,8 +158,17 @@ export const dataURLtoBlob = (dataURL: string) => {
   }
 
   return new Blob([u8arr], { type: mime });
-}
+};
 export const roundOff = (number: number, decimal: number = 2): number => {
   return Number(number.toFixed(decimal));
 };
 
+export const formatTestDuration = (startDate: string, endDate: string): string => {
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+
+  const diffMs = Math.abs(end.getTime() - start.getTime());
+  const totalMinutes = roundOff(diffMs / (1000 * 60), 0);
+
+  return `${totalMinutes} minutes`;
+};

@@ -400,4 +400,21 @@ export default class CandidatesService {
       throw new AppError('Failed to generate exam access token', 500);
     }
   }
+
+  async validateCandidateData(candidateData: CreateCandidate | UpdateCandidate) {
+    const existingCandidate = await prisma.candidate.findFirst({
+      where: {
+        deleted_at: null,
+        OR: [
+          { name: candidateData.name, deleted_at: null },
+          { email: candidateData.email, deleted_at: null },
+          { phone: candidateData.phone, deleted_at: null },
+        ],
+      },
+    });
+    if (existingCandidate) {
+      throw new AppError('Candidate with this name, email or phone already exists.', 400);
+    }
+    return true;
+  }
 }

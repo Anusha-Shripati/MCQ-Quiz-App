@@ -11,9 +11,9 @@ echo "🔧 Installing Backend dependencies..."
 cd backend
 npm install
 
-# echo "🔧 Installing Frontend dependencies..."
-# cd ../frontend
-# npm install
+echo "🔧 Installing Frontend dependencies..."
+cd ../frontend
+npm install
 
 cd ..
 
@@ -27,7 +27,7 @@ npm run prisma:migrate:prod
 
 # Build the application
 echo "🏗️ Building the application..."
-npm run build:backend
+npm run build
 
 # Check if PM2 is installed
 if ! command -v pm2 &> /dev/null; then

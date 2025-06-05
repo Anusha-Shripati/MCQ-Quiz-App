@@ -11,6 +11,7 @@
     "dev:frontend": "wait-on http://localhost:$npm_package_config_backend_port/healthcheck && cd frontend && npm run dev",
     "dev:backend": "cd backend && cross-env BACKEND_PORT=$npm_package_config_backend_port npm run dev",
     "build": "concurrently -n frontend,backend \"npm run build:frontend\" \"npm run build:backend\"",
+    "deploy": "./deploy.sh",
     "build:frontend": "cd frontend && npm run build",
     "build:backend": "cd backend && tsc",
     "start": "concurrently -k -n backend,frontend \"npm run start:backend\" \"npm run start:frontend\"",

@@ -14,6 +14,11 @@ export class CandidateController {
       const candidateData: CreateCandidate = req.body;
       const user = req.user;
 
+      const isValid = await candidateService.validateCandidateData(candidateData);
+      if (!isValid) {
+        throw new AppError('Invalid candidate data', 400);
+      }
+
       const newExam = await examService.createExam({
         user_id: user.id,
         assessment_id: candidateData.assessment_id,

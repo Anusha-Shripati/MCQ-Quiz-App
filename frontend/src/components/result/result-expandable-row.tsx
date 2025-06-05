@@ -5,7 +5,8 @@ import Link from 'next/link';
 import dayjs from 'dayjs';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { StatusOption } from '@/types/common.types';
-import { roundOff } from '@/lib/utils';
+import { formatTestDuration } from '@/lib/utils';
+
 
 interface ResultExpandableRowProps {
     row: Result;
@@ -13,17 +14,6 @@ interface ResultExpandableRowProps {
 }
 
 const ResultExpandableRow: React.FC<ResultExpandableRowProps> = ({ row, technologyOptions }) => {
-    const formatTestDuration = (startDate: string, endDate: string): string => {
-        const start = new Date(startDate);
-        const end = new Date(endDate);
-
-        const diffMs = Math.abs(end.getTime() - start.getTime());
-
-        const hours = roundOff(diffMs / (1000 * 60 * 60), 0);
-        const minutes = roundOff((diffMs % (1000 * 60 * 60)) / (1000 * 60), 0)
-
-        return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')} hours`;
-    }
 
     const formatTestDateRange = (startDate: string, endDate: string): string => {
         const start = new Date(startDate);
@@ -70,10 +60,14 @@ const ResultExpandableRow: React.FC<ResultExpandableRowProps> = ({ row, technolo
                             }`}>
                             {row?.is_passed ? "PASSED" : "FAILED"}
                         </span>
+                        <span className="inline-block text-muted-foreground px-3 py-1 rounded-md text-sm font-medium">
+                            Passing Score: {row?.pass_criteria}
+                        </span>
+
                     </div>
                     <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mt-1">
                         <div
-                            className={`h-2 rounded-full ${row?.is_passed
+                            className={`w-full rounded-full h-2 ${row?.is_passed
                                 ? "bg-green-500 dark:bg-green-400"
                                 : "bg-red-500 dark:bg-red-400"
                                 }`}

@@ -63,6 +63,7 @@ CREATE TABLE "Assessments" (
     "hard" INTEGER NOT NULL DEFAULT 0,
     "difficulty_score" INTEGER NOT NULL DEFAULT 0,
     "duration" INTEGER NOT NULL DEFAULT 0,
+    "pass_criteria" INTEGER NOT NULL DEFAULT 0,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
     "deleted_at" TIMESTAMP(3),

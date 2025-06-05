@@ -163,7 +163,7 @@ function AssessmentItem({
         </div>
 
         <div className="flex items-center gap-2">
-          <Button
+          {/* <Button
             variant="ghost"
             size="icon"
             className="hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -190,7 +190,7 @@ function AssessmentItem({
             ) : (
               <ChevronDown className="h-4 w-4 text-gray-600 dark:text-gray-300" />
             )}
-          </Button>
+          </Button> */}
           {/* add tooltip to edit and delete buttons */}
           <Tooltip>
             <TooltipTrigger>
@@ -213,7 +213,7 @@ function AssessmentItem({
                 variant="ghost"
                 size="icon"
                 className="h-10 w-10 rounded-full hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-700 dark:hover:text-red-300 transition-all duration-200"
-                onClick={() => handleDelete(assessmentId)}
+                onClick={() => onDelete(assessmentId)}
               >
                 <Trash2 className="h-4 w-4" />
               </Button>

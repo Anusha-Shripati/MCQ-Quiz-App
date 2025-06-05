@@ -29,7 +29,7 @@ COPY --from=builder /app ./
 COPY .env.sample .env
 
 # Expose the application port
-EXPOSE 3001
+EXPOSE 9001
 
 # Command to start the application
 CMD ["npm", "start"]

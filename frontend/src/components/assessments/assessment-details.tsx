@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { ChevronDown, ChevronUp, Edit, Trash2 } from 'lucide-react';
+import { ChevronDown, ChevronUp, Edit, Trash2, Clock, User, Calendar, BookOpenCheck } from 'lucide-react';
 import { Button } from '@/components/ui/form/button';
 import AssessmentEdit from './assessment-edit';
 import { toast } from 'react-hot-toast';
@@ -16,6 +16,7 @@ import { usePathname, useSearchParams } from 'next/navigation';
 import StatusWrapper from '../common/status-wrapper';
 import { assessmentEndpoint } from '@/lib/endpoint';
 import { DeleteDialog } from '../common/delete-dialog';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 // import StatusWrapper from "../common/status-wrapper";
 
 interface AssessmentItemProps {
@@ -25,12 +26,12 @@ interface AssessmentItemProps {
   createdBy: string;
   createdDate: string;
   duration: string | number;
+  pass_criteria: string | number;
   technologies?: Technology[];
   isExpanded: boolean;
   onToggle: () => void;
   handleEdit: () => void;
   handleDelete: (id: string) => void;
-  pass_criteria?: number;
 }
 
 function AssessmentItem({
@@ -39,9 +40,9 @@ function AssessmentItem({
   createdBy,
   createdDate,
   duration,
+  pass_criteria,
   technologies,
   isExpanded,
-  pass_criteria,
   onToggle,
   handleEdit,
   handleDelete,
@@ -86,19 +87,81 @@ function AssessmentItem({
       <DeleteDialog onDelete={() => handleDelete(deleteId as string)} setOpen={setDeleteOpen} isOpen={deleteOpen} />
       <div className="p-5 flex items-center justify-between">
         <div className="flex-1">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{title}</h3>
-          <p className="text-sm text-gray-500 mt-1 dark:text-gray-400">
-            Created by{' '}
-            <span className="text-gray-700 font-medium dark:text-gray-300">{createdBy}</span> on{' '}
-            <span className="text-gray-700 font-medium dark:text-gray-300">
-              {dayjs(createdDate).format('DD MMM YYYY h:m A')}
-            </span>
-          </p>
-          <p className="text-sm text-gray-500 mt-1 dark:text-gray-400">
-            Duration:{' '}
-            <span className="text-gray-700 font-medium dark:text-gray-300">{duration} minutes</span>
-          </p>
+          <div className="flex items-center gap-3 mb-3">
+            <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100 group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors duration-200">
+              {title}
+            </h3>
+            <div className="px-3 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-medium rounded-full border border-blue-200 dark:border-blue-700">
+              {total} Questions
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
+            <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+              <User className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+              <span className="font-medium text-gray-700 dark:text-gray-300">{createdBy}</span>
+            </div>
+            <Tooltip>
+              <TooltipTrigger>
+                <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                  <Calendar className="h-4 w-4 text-green-600 dark:text-green-400" />
+                  <span className="font-medium text-gray-700 dark:text-gray-300">
+                    {dayjs(createdDate).format('DD MMM YYYY, h:mm A')}
+                  </span>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Created on {dayjs(createdDate).format('DD MMM YYYY, h:mm A')}</p>
+              </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger>
+                <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                  <Clock className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+                  <span className="font-medium text-gray-700 dark:text-gray-300">
+                    {duration} minutes
+                  </span>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Duration of the assessment in minutes.</p>
+              </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger>
+                <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                  <BookOpenCheck className="h-4 w-4 text-orange-600 dark:text-green-400" />
+                  <span className="font-medium text-gray-700 dark:text-gray-300">{pass_criteria} marks</span>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Passing criteria for this assessment.</p>
+              </TooltipContent>
+            </Tooltip>
+          </div>
+
+          <div className="flex items-center gap-4 mt-4 flex-wrap">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-green-500 dark:bg-green-400 rounded-full"></div>
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                Easy: {totalQuestions.easy} ({getPercentage(totalQuestions.easy)})
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-yellow-500 dark:bg-yellow-400 rounded-full"></div>
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                Medium: {totalQuestions.medium} ({getPercentage(totalQuestions.medium)})
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-red-500 dark:bg-red-400 rounded-full"></div>
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                Hard: {totalQuestions.hard} ({getPercentage(totalQuestions.hard)})
+              </span>
+            </div>
+          </div>
         </div>
+
         <div className="flex items-center gap-2">
           <Button
             variant="ghost"
@@ -128,58 +191,165 @@ function AssessmentItem({
               <ChevronDown className="h-4 w-4 text-gray-600 dark:text-gray-300" />
             )}
           </Button>
-        </div>
-      </div>
+          {/* add tooltip to edit and delete buttons */}
+          <Tooltip>
+            <TooltipTrigger>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-10 w-10 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-300 transition-all duration-200"
+                onClick={handleEdit}
+              >
+                <Edit className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Edit Assessment</p>
+            </TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-10 w-10 rounded-full hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-700 dark:hover:text-red-300 transition-all duration-200"
+                onClick={() => handleDelete(assessmentId)}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Delete Assessment</p>
+            </TooltipContent>
+          </Tooltip>
+
+          <Tooltip>
+            <TooltipTrigger>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onToggle}
+                className="h-10 w-10 rounded-full hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-200"
+              >
+                {isExpanded ? (
+                  <ChevronUp className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                ) : (
+                  <ChevronDown className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                )}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{isExpanded ? 'Collapse Details' : 'Expand Details'}</p>
+            </TooltipContent>
+          </Tooltip>
+        </div >
+      </div >
 
       {isExpanded && technologies && (
-        <div className="p-5 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
-          <div className="space-y-4">
-            <div className="grid grid-cols-5 gap-4 pb-2 border-b border-gray-200 dark:border-gray-700">
-              <div className="font-medium text-gray-700 dark:text-gray-300">Technology</div>
-              <div className="text-center font-medium text-gray-700 bg-green-100 rounded-full px-2 py-1">
-                Easy ({getPercentage(totalQuestions.easy)})
-              </div>
-              <div className="text-center font-medium text-gray-700 bg-blue-100 rounded-full px-2 py-1">
-                Medium ({getPercentage(totalQuestions.medium)})
-              </div>
-              <div className="text-center font-medium text-gray-700 bg-red-100 rounded-full px-2 py-1">
-                Hard ({getPercentage(totalQuestions.hard)})
-              </div>
-              <div className="font-medium text-gray-700 dark:text-gray-300 text-right">
-                Total Questions
-              </div>
-            </div>
-            {technologies.map((tech) => (
-              <div key={tech.id} className="grid grid-cols-5 gap-4 py-2">
-                <div className="text-gray-900 dark:text-gray-300 font-medium">
-                  {tech?.technology?.name}{' '}
-                  <span className="text-gray-500">({calculateTechPer(tech)})</span>
+        <div className="border-t border-gray-200 dark:border-gray-600 dark:bg-gray-750 p-6">
+          <h4 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-6 flex items-center gap-2">
+            <div className="w-1 h-6 bg-blue-600 dark:bg-blue-400 rounded-full"></div>
+            Technology Breakdown
+          </h4>
+
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-600 overflow-hidden">
+            <div className="grid grid-cols-6 gap-4 p-4 bg-gray-100 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
+              <div className="font-semibold text-gray-700 dark:text-gray-300">Technology</div>
+              <div className="text-center font-semibold text-gray-700 dark:text-gray-300">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm">
+                  <div className="w-2 h-2"></div>
+                  Easy
                 </div>
-                <div className="text-center text-gray-800 dark:text-gray-300">{tech.easy}</div>
-                <div className="text-center text-gray-800 dark:text-gray-300">{tech.medium}</div>
-                <div className="text-center text-gray-800 dark:text-gray-300">{tech.hard}</div>
-                <div className="text-center text-gray-800 dark:text-gray-300 font-semibold">
-                  {tech.easy + tech.medium + tech.hard}
+              </div>
+              <div className="text-center font-semibold text-gray-700 dark:text-gray-300">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm">
+                  <div className="w-2 h-2"></div>
+                  Medium
+                </div>
+              </div>
+              <div className="text-center font-semibold text-gray-700 dark:text-gray-300">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm">
+                  <div className="w-2 h-2"></div>
+                  Hard
+                </div>
+              </div>
+              <div className="text-center font-semibold text-gray-700 dark:text-gray-300">Total</div>
+              <div className="text-center font-semibold text-gray-700 dark:text-gray-300">Percentage</div>
+            </div>
+
+            {technologies.map((tech, index) => (
+              <div
+                key={tech.id}
+                className={`grid grid-cols-6 gap-4 p-4 dark:hover:bg-gray-750 transition-colors duration-150 ${index % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-25 dark:bg-gray-775'
+                  }`}
+              >
+                <div className="font-medium text-gray-800 dark:text-gray-200 flex items-center gap-2">
+                  <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 dark:from-blue-400 dark:to-blue-500 rounded-lg flex items-center justify-center text-white text-sm font-bold">
+                    {tech?.technology?.name?.charAt(0)?.toUpperCase()}
+                  </div>
+                  {tech?.technology?.name}
+                </div>
+                <div className="text-center">
+                  <span className="inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold border border-green-200 dark:border-green-700">
+                    {tech.easy}
+                  </span>
+                </div>
+                <div className="text-center">
+                  <span className="inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold border border-yellow-200 dark:border-yellow-700">
+                    {tech.medium}
+                  </span>
+                </div>
+                <div className="text-center">
+                  <span className="inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold border border-red-200 dark:border-red-700">
+                    {tech.hard}
+                  </span>
+                </div>
+                <div className="text-center">
+                  <span className="inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold border border-blue-200 dark:border-blue-700">
+                    {tech.easy + tech.medium + tech.hard}
+                  </span>
+                </div>
+                <div className="text-center">
+                  <span className="inline-flex items-center justify-center px-3 py-1 rounded-full text-sm font-semibold border border-purple-200 dark:border-purple-700">
+                    {calculateTechPer(tech)}
+                  </span>
                 </div>
               </div>
             ))}
-            <div className="grid grid-cols-5 gap-4 pt-2 border-t border-gray-200 dark:border-gray-700">
-              <div className="font-semibold text-gray-900 dark:text-gray-300">Total</div>
-              <div className="text-center font-semibold text-gray-900 dark:text-gray-300">
-                {totalQuestions?.easy}
+
+            <div className="grid grid-cols-6 gap-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-t-2 border-blue-200 dark:border-blue-600">
+              <div className="font-bold text-gray-800 dark:text-gray-200 text-lg">Total</div>
+              <div className="text-center">
+                <span className="inline-flex items-center justify-center w-10 h-10 rounded-full text-sm font-bold shadow-md">
+                  {totalQuestions?.easy}
+                </span>
               </div>
-              <div className="text-center font-semibold text-gray-900 dark:text-gray-300">
-                {totalQuestions?.medium}
+              <div className="text-center">
+                <span className="inline-flex items-center justify-center w-10 h-10 rounded-full text-sm font-bold shadow-md">
+                  {totalQuestions?.medium}
+                </span>
               </div>
-              <div className="text-center font-semibold text-gray-900 dark:text-gray-300">
-                {totalQuestions?.hard}
+              <div className="text-center">
+                <span className="inline-flex items-center justify-center w-10 h-10 rounded-full text-sm font-bold shadow-md">
+                  {totalQuestions?.hard}
+                </span>
               </div>
-              <div className="text-center font-semibold text-blue-600">{total}</div>
+              <div className="text-center">
+                <span className="inline-flex items-center justify-center w-10 h-10 rounded-full text-sm font-bold shadow-md">
+                  {total}
+                </span>
+              </div>
+              <div className="text-center">
+                <span className="inline-flex items-center justify-center px-4 py-2 rounded-full text-sm font-bold shadow-lg ">
+                  100%
+                </span>
+              </div>
             </div>
           </div>
         </div>
-      )}
-    </div>
+      )
+      }
+    </div >
   );
 }
 
@@ -221,9 +391,7 @@ export default function AssessmentDetails() {
       setAssessments(assessmentsData.data.list);
       setCurrentPage(assessmentsData.data.page);
       setCurrentPageStart((assessmentsData.data.page - 1) * itemsPerPage + 1);
-      setCurrentPageEnd(
-        Math.min(assessmentsData.data.page * itemsPerPage, assessmentsData.data.total)
-      );
+      setCurrentPageEnd(Math.min(assessmentsData.data.page * itemsPerPage, assessmentsData.data.total));
     }
   }, [assessmentsData]);
 
@@ -270,7 +438,6 @@ export default function AssessmentDetails() {
     setCurrentPage(1);
   };
 
-
   useEffect(() => {
     const params = new URLSearchParams();
 
@@ -281,7 +448,6 @@ export default function AssessmentDetails() {
       if (value) {
         params.set(key, typeof value == 'object' ? JSON.stringify(value) : value);
       }
-
     });
 
     window.history.replaceState(null, '', `${pathname}?${params.toString()}`);
@@ -310,7 +476,7 @@ export default function AssessmentDetails() {
   }
 
   return (
-    <div className="p-4 bg-white dark:bg-[#334155] rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-200 hover:shadow-md">
+    <div className="p-6 bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-300">
       <StatusWrapper
         error={error}
         loading={isLoading || isValidating}
@@ -328,7 +494,7 @@ export default function AssessmentDetails() {
           onPageChange={handlePageChange}
           loading={false}
         >
-          <div className="h-[550px] overflow-auto">
+          <div className="h-[550px] overflow-auto pr-2 py-5 space-y-8 scrollbar-thin scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-500 scrollbar-track-transparent">
             {!error &&
               assessments &&
               assessments.map((assessment: Required<Assessment>) => (
@@ -339,6 +505,7 @@ export default function AssessmentDetails() {
                   createdBy={assessment.created_by_user?.name || ''}
                   createdDate={assessment.created_at}
                   duration={assessment.duration}
+                  pass_criteria={assessment.pass_criteria}
                   technologies={assessment.technologies}
                   isExpanded={expandedId === assessment.id}
                   onToggle={() => setExpandedId(expandedId === assessment.id ? '' : assessment.id)}
@@ -348,7 +515,7 @@ export default function AssessmentDetails() {
               ))}
           </div>
         </Pagination>
-      </StatusWrapper>
-    </div>
+      </StatusWrapper >
+    </div >
   );
 }

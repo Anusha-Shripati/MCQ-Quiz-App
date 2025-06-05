@@ -17,7 +17,6 @@ import StatusWrapper from '../common/status-wrapper';
 import Link from 'next/link';
 import { useResultStore } from '@/store/resultStore';
 import { resultEndpoint } from '@/lib/endpoint';
-import { roundOff } from '@/lib/utils';
 import ResultExpandableRow from './result-expandable-row';
 
 function ResultTable() {
@@ -165,35 +164,35 @@ function ResultTable() {
     return resultList;
   }, [resultList]);
 
-  const formatTestDuration = (startDate: string, endDate: string): string => {
-    const start = new Date(startDate);
-    const end = new Date(endDate);
+  // const formatTestDuration = (startDate: string, endDate: string): string => {
+  //   const start = new Date(startDate);
+  //   const end = new Date(endDate);
 
-    const diffMs = Math.abs(end.getTime() - start.getTime());
+  //   const diffMs = Math.abs(end.getTime() - start.getTime());
 
-    const hours = roundOff(diffMs / (1000 * 60 * 60), 0);
-    const minutes = roundOff((diffMs % (1000 * 60 * 60)) / (1000 * 60), 0)
+  //   const hours = roundOff(diffMs / (1000 * 60 * 60), 0);
+  //   const minutes = roundOff((diffMs % (1000 * 60 * 60)) / (1000 * 60), 0)
 
-    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')} hours`;
-  }
-  const formatTestDateRange = (startDate: string, endDate: string): string => {
-    const start = new Date(startDate);
-    const end = new Date(endDate);
+  //   return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')} hours`;
+  // }
+  // const formatTestDateRange = (startDate: string, endDate: string): string => {
+  //   const start = new Date(startDate);
+  //   const end = new Date(endDate);
 
-    const startTime = start.toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true,
-    });
+  //   const startTime = start.toLocaleTimeString('en-US', {
+  //     hour: '2-digit',
+  //     minute: '2-digit',
+  //     hour12: true,
+  //   });
 
-    const endTime = end.toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true,
-    });
+  //   const endTime = end.toLocaleTimeString('en-US', {
+  //     hour: '2-digit',
+  //     minute: '2-digit',
+  //     hour12: true,
+  //   });
 
-    return `${startTime}–${endTime}`; // e.g., "09:00 AM–12:00 PM"
-  };
+  //   return `${startTime}–${endTime}`; // e.g., "09:00 AM–12:00 PM"
+  // };
 
   const columns = useMemo<Array<Column<Result>>>(
     () => [

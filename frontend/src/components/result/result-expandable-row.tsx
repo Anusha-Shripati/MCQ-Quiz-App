@@ -5,6 +5,7 @@ import Link from 'next/link';
 import dayjs from 'dayjs';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { StatusOption } from '@/types/common.types';
+import { roundOff } from '@/lib/utils';
 
 interface ResultExpandableRowProps {
     row: Result;
@@ -16,11 +17,13 @@ const ResultExpandableRow: React.FC<ResultExpandableRowProps> = ({ row, technolo
         const start = new Date(startDate);
         const end = new Date(endDate);
 
-        // Calculate the difference in hours
-        const duration = Math.abs(end.getTime() - start.getTime()) / (1000 * 60 * 60);
+        const diffMs = Math.abs(end.getTime() - start.getTime());
 
-        return `${duration.toFixed(2)} hours`;
-    };
+        const hours = roundOff(diffMs / (1000 * 60 * 60), 0);
+        const minutes = roundOff((diffMs % (1000 * 60 * 60)) / (1000 * 60), 0)
+
+        return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')} hours`;
+    }
 
     const formatTestDateRange = (startDate: string, endDate: string): string => {
         const start = new Date(startDate);

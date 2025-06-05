@@ -6,9 +6,9 @@ import React from 'react'
 import { HiUser, HiMail, HiBriefcase, HiChip, HiCalendar } from 'react-icons/hi'
 
 interface CandidateInfoProps {
-    candidate: ICandidate | null
-    assessment: Assessment | null
-    exam: IExam | null
+  candidate: ICandidate | null
+  assessment: Assessment | null
+  exam: IExam | null
 }
 
 const infoFields = [

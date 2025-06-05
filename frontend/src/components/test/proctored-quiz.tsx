@@ -16,10 +16,6 @@ import { Check, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { BROWSER_KEY, PROHIBITED_COMBINATIONS, PROHIBITED_KEYS, QUIZ_CONFIG } from '@/shared/constants/data';
 import { examEndpoint } from '@/lib/endpoint';
 
-
-
-
-
 export default function ProctoredQuiz() {
   const [answers, setAnswers] = useState<Record<string, { question: IExamQuestion, answer: Answer, answer_id?: string }>>({});
   const [timeLeft, setTimeLeft] = useState(0);
@@ -78,7 +74,7 @@ export default function ProctoredQuiz() {
     if (examData) {
       setExam(examData.data);
       const obj: Record<string, LocalAnswer> = {}
-      examData.data?.answers?.forEach((a: {question_id:string,user_answer:string[],id:string}) => {
+      examData.data?.answers?.forEach((a: { question_id: string, user_answer: string[], id: string }) => {
         const question = examData.data?.exam_questions.find((q: IExamQuestion) => q.question_id == a.question_id)
 
         obj[a.question_id as string] = {
@@ -510,8 +506,8 @@ export default function ProctoredQuiz() {
             },
           }));
           success = true;
-        } 
-        
+        }
+
       } else {
         const payload = {
           question_id: questionId,
@@ -587,7 +583,7 @@ export default function ProctoredQuiz() {
 
               <div className="flex flex-wrap gap-2 justify-center items-center">
                 {buttonIndexes.map((index, i) => {
-                
+
                   const prev = buttonIndexes[i - 1];
                   const isGap = i > 0 && index - prev > 1;
 

@@ -26,7 +26,7 @@ function Answer() {
   const [assessment, setAssessment] = useState<Assessment | null>(null)
   const [answers, setAnswers] = useState<AnswerData[] | null>([])
   const [result, setResult] = useState<Result | null>(null)
-  const { data, isLoading, error,isValidating,mutate } = useSWR(`${resultEndpoint.RESULT_BY_ID}/${id}`, api.get)
+  const { data, isLoading, error, isValidating, mutate } = useSWR(`${resultEndpoint.RESULT_BY_ID}/${id}`, api.get)
   const [introduction, setIntroduction] = useState<AnswerData | null>(null)
 
   useEffect(() => {
@@ -57,6 +57,8 @@ function Answer() {
               total={result.total}
               percentage={result.percentage}
               technologies={exam?.meta?.tech_score || []}
+              passCriteria={assessment?.pass_criteria || 0}
+              is_passed={result.is_passed}
             />
           )}
 
@@ -93,7 +95,7 @@ function Answer() {
                   )}
                   <div className="w-full aspect-video max-w-xl mb-4 relative">
                     {introduction.user_answer?.[0] ? (
-                      <VideoPreview videoUrl={introduction.user_answer[0]}  />
+                      <VideoPreview videoUrl={introduction.user_answer[0]} />
                     ) : (
                       <div className="flex flex-col items-center justify-center h-full bg-gray-100 dark:bg-gray-700 rounded">
                         <svg className="w-16 h-16 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

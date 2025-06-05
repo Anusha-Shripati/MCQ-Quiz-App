@@ -6,6 +6,10 @@ export const assessmentSchema = {
       name: Joi.string().required().messages({
         'string.empty': 'Technology name is required',
       }),
+      pass_criteria: Joi.number().required().messages({
+        'number.base': 'Passing score must be a number',
+        'number.empty': 'Passing score is required',
+      }),
       technologies: Joi.array().items(
         Joi.object({
           technology_id: Joi.string().required().messages({
@@ -38,6 +42,10 @@ export const assessmentSchema = {
     body: Joi.object({
       name: Joi.string().required().messages({
         'string.empty': 'Technology name is required',
+      }),
+      pass_criteria: Joi.number().required().messages({
+        'number.empty': 'Passing score is required',
+        'number.base': 'Passing score must be a number',
       }),
       technologies: Joi.array().items(
         Joi.object({

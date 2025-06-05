@@ -53,8 +53,13 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
   const [selectedQuestion, setSelectedQuestion] = useState<number>(0);
   const [name, setName] = useState<string>('');
   const [isValidTechnology, setValidTechnology] = useState<boolean>(isValidUUID(params.technology));
+<<<<<<< Updated upstream
   const { data, isLoading, error,isValidating,mutate:questionMutate } = useSWR(
     isValidTechnology ? `${questionEndpoint.LIST}?technology_id=${technologyId}` : null,
+=======
+  const { data, isLoading, error, isValidating, mutate: questionMutate } = useSWR(
+    isValidTechnology ? `/question/list?technology_id=${technologyId}` : null,
+>>>>>>> Stashed changes
     api.get
   );
 

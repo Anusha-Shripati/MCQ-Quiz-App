@@ -31,10 +31,10 @@ const CreateCategory: React.FC = () => {
     const timer = setTimeout(() => {
       const params = new URLSearchParams()
       setTechnologyFilter(searchTerm);
-      if(searchTerm){
+      if (searchTerm) {
         params.set('search', searchTerm);
       }
-      window.history.replaceState(null,'',`${pathname}?${params.toString()}`)
+      window.history.replaceState(null, '', `${pathname}?${params.toString()}`)
     }, 1000);
 
     return () => clearTimeout(timer);
@@ -46,7 +46,7 @@ const CreateCategory: React.FC = () => {
       setSearchTerm(search);
       setTechnologyFilter(search);
     }
-  },[])
+  }, [])
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.toLowerCase();

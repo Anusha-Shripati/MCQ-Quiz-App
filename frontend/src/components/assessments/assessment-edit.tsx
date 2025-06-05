@@ -11,6 +11,7 @@ import { FormField } from '../common/form-field';
 import { Label } from '../ui/form/label';
 import useSWRMutation from 'swr/mutation';
 import { assessmentEndpoint, technologyEndpoint } from '@/lib/endpoint';
+import { z } from 'zod';
 
 interface Option {
   value: string;
@@ -32,6 +33,25 @@ async function update(
   const response = await api.put(url, arg);
   return response;
 }
+
+const technologySchema = z.object({
+  technology_id: z.string().optional(),
+  easy: z.number().min(0, 'Easy questions must not be negative'),
+  medium: z.number().min(0, 'Medium questions must not be negative'),
+  hard: z.number().min(0, 'Hard questions must not be negative'),
+});
+
+const validation = z.object({
+  name: z.string().nonempty('Name is required.'),
+  duration: z.number().min(1, 'Duration is required.'),
+  technologies: z.array(technologySchema).min(1, 'At least one technology is required.'),
+  pass_criteria: z
+    .number({
+      invalid_type_error: 'Passing score is required.',
+    })
+    .min(1, 'Passing score must be at least 1.')
+    .max(90, 'Passing score must not exceed 90.'),
+});
 
 export default function AssessmentEdit({ assessment, onSave, onCancel }: AssessmentEditProps) {
   const [localAssessment, setLocalAssessment] = useState<Assessment & { totalQuestions: number }>(
@@ -195,9 +215,11 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
         toast.error('Failed to save changes');
         return;
       }
+
       const payload = {
         name: localAssessment.name,
         duration: localAssessment.duration,
+        pass_criteria: localAssessment.pass_criteria,
         technologies: localTechnologies.map((tech) => ({
           technology_id: tech.technology?.id,
           easy: tech.easy,
@@ -205,6 +227,19 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
           hard: tech.hard,
         })),
       };
+
+      try {
+        // Validate the payload using Zod
+        validation.parse(payload);
+      } catch (validationError) {
+        if (validationError instanceof z.ZodError) {
+          // Extract and show the first error message
+          const errorMessage = validationError.errors[0]?.message || 'Validation failed';
+          toast.error(errorMessage);
+          return;
+        }
+      }
+
       const res = await trigger(payload);
       if (res.success) {
         toast.success('Assessment updated successfully');
@@ -317,6 +352,28 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
                         hover:border-gray-400 transition-colors dark:bg-gray-800 dark:border-gray-600 
                         dark:text-gray-100 dark:hover:border-gray-500 dark:focus:ring-blue-600"
                   min="1"
+                />
+              </div>
+              <div className="space-y-2 w-1/2">
+                <Label
+                  htmlFor="passCriteria"
+                  className="font-bold text-gray-900 dark:text-white"
+                >
+                  Pass Criteria (%)
+                </Label>
+                <FormField
+                  type="number"
+                  id="passCriteria"
+                  value={localAssessment.pass_criteria ?? 0}
+                  onChange={(e) =>
+                    setLocalAssessment({
+                      ...localAssessment,
+                      pass_criteria: parseInt(e.target.value),
+                    })
+                  }
+                  className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500
+                        hover:border-gray-400 transition-colors dark:bg-gray-800 dark:border-gray-600
+                        dark:text-gray-100 dark:hover:border-gray-500 dark:focus:ring-blue-600"
                 />
               </div>
             </div>

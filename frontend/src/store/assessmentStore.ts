@@ -26,6 +26,7 @@ export interface Assessment {
   name: string;
   created_by: string;
   created_at: string;
+  pass_criteria: number;
   totalQuestions: number;
   duration: string | number;
   technologies: Technology[];

@@ -1,4 +1,4 @@
-import { Assessments } from '@prisma/client';
+import { Assessments, Prisma } from '@prisma/client';
 import { prisma } from '../db/prisma.client';
 
 interface Filters {
@@ -17,10 +17,9 @@ interface technologyPayload {
   assessment_id: string;
 }
 
-type AseessmentPayload = Pick<
-  Assessments,
-  'name' | 'created_by' | 'easy' | 'medium' | 'hard' | 'duration'
->;
+// Using Prisma's generated types for input data
+type AssessmentCreateInput = Prisma.AssessmentsCreateInput;
+type AssessmentUpdateInput = Prisma.AssessmentsUpdateInput;
 
 export class AssessmentsService {
   async getAssessments(filters: Filters) {
@@ -71,11 +70,11 @@ export class AssessmentsService {
       totalPages: Math.ceil(total / limit),
     };
   }
-  async createAssessments(data: AseessmentPayload): Promise<Assessments> {
-    return prisma.assessments.create({ data: data });
+  async createAssessments(data: AssessmentCreateInput): Promise<Assessments> {
+    return prisma.assessments.create({ data });
   }
 
-  async updateAssessments(id: string, data: AseessmentPayload) {
+  async updateAssessments(id: string, data: AssessmentUpdateInput) {
     return prisma.assessments.update({ where: { id }, data });
   }
   async getAssessmentById(id: string) {

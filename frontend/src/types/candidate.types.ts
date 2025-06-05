@@ -25,10 +25,10 @@ export interface CandidateData {
     name: string;
     technologies: {
       id: string;
-      technology:{
+      technology: {
         id: string;
         name: string;
-      }
+      };
     }[];
   };
   technology: {

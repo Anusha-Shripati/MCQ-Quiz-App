@@ -9,25 +9,26 @@ import toast from 'react-hot-toast';
 import { useAuthStore } from '@/store/authStore';
 import { userEndpoint } from '@/lib/endpoint';
 
-const ProfilePictureUpload = ({imageUrl}: {imageUrl: string}) => {
+const ProfilePictureUpload = ({ imageUrl }: { imageUrl: string }) => {
   const [profilePicture, setProfilePicture] = useState<string | null>(imageUrl);
 
   useEffect(() => {
     setProfilePicture(imageUrl);
-  },[imageUrl])
+  }, [imageUrl])
   const { isEditing, setIsEditing } = useProfileStore();
-  const {user,setUser} = useAuthStore()
+  const { user, setUser } = useAuthStore()
 
-  const handleProfilePictureChange = async(event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleProfilePictureChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
+    console.log('Selected file:', file);
     if (file) {
       try {
         const formData = new FormData();
         formData.append('file', file);
         const response = await api.put(`${userEndpoint.UPLOAD_IMAGE}/${user?.id}`, formData);
-        if (response.success ) {
+        if (response.success) {
           setProfilePicture(response.data.path);
-          if(user){
+          if (user) {
             setUser({
               ...user,
               image: response.data.path,
@@ -37,7 +38,7 @@ const ProfilePictureUpload = ({imageUrl}: {imageUrl: string}) => {
         }
 
       } catch (error) {
-        if(isAxiosError(error)) {
+        if (isAxiosError(error)) {
           toast.error(error.response?.data?.message || 'Error uploading file');
         } else {
           toast.error('An unexpected error occurred');

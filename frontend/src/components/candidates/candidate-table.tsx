@@ -144,7 +144,7 @@ function CandidateTable() {
       setCandidateListData(candidateData?.data?.total, candidateData?.data?.list);
     }
   }, [candidateData, setCandidateListData]);
-
+  console.log('candidateData', candidateData);
   const handlePerPageChange = (value: string) => {
     setItemsPerPage(Number(value));
     setCurrentPage(1);
@@ -347,6 +347,7 @@ function CandidateTable() {
     ],
     []
   );
+  console.log()
   const getTechnology = (id: string) => {
     const technology = technologyOptions.find((item) => item.value == id)
     if (technology) return technology.label
@@ -362,12 +363,20 @@ function CandidateTable() {
           <div>
             <p className="text-sm text-gray-500 dark:text-gray-300">Result</p>
             <div className="flex gap-2 flex-col">
-              {row.result.length > 0 && <p className="text-lg font-semibold text-blue-500">
-                {row?.result?.length ? row?.result[0]?.percentage?.toFixed(2) : "-"} %
-              </p>}
-              {row.result.length > 0 && <Link href={`/results/${row.result[0]?.id}`} target='_blank' className="text-sm text-blue-500 hover:underline">
-                View Answer
-              </Link>}
+              {row.exam?.status === 'pending' ? (
+                <p className="text-lg font-medium text-orange-500">
+                  The candidate has not started the exam yet.
+                </p>
+              ) : (
+                <>
+                  {row.result.length > 0 && <p className="text-lg font-semibold text-blue-500">
+                    {row?.result?.length ? row?.result[0]?.percentage?.toFixed(2) : "-"} %
+                  </p>}
+                  {row.result.length > 0 && <Link href={`/results/${row.result[0]?.id}`} target='_blank' className="text-sm text-blue-500 hover:underline">
+                    View Answer
+                  </Link>}
+                </>
+              )}
             </div>
           </div>
 
@@ -404,48 +413,50 @@ function CandidateTable() {
           </div>
         </div>
 
-        {/* Detailed Table */}
-        <div>
-          <table className="table-auto border-collapse border border-gray-300 w-full">
-            <thead className="dark:text-gray-800">
-              <tr className="dark:bg-gray-500 dark:text-white">
-                <th className="border border-gray-300 px-4 py-2 text-left">Total Percentage</th>
-                {/* Dynamically render category headers */}
-                {row?.exam?.meta?.tech_score?.map((technology: ExamMetaTech) => (
-                  <th
-                    key={technology.technology_id}
-                    className="border border-gray-300 px-4 py-2 text-left"
-                  >
-                    {getTechnology(technology.technology_id)}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td className="border border-gray-300 px-4 py-2">
-                  {row?.result?.length ? row?.result[0]?.percentage?.toFixed(2) : "-"} %
-                  <small> (&nbsp;
-                    {row?.result?.length ? row?.result[0]?.score?.toFixed(1) : "-"} /&nbsp;
-                    {row?.result?.length ? row?.result[0]?.total : "-"}
-                    &nbsp;) </small>
-                </td>
-                {/* Dynamically render category percentages */}
-                {row?.exam?.meta?.tech_score?.map((technology: ExamMetaTech) => (
-                  <th
-                    key={technology.technology_id}
-                    className="border border-gray-300 px-4 py-2 text-left"
-                  >
-                    {technology.percentage?.toFixed(2)} %
+        {/* Detailed Table - Only show if not pending */}
+        {row.exam?.status !== 'pending' && (
+          <div>
+            <table className="table-auto border-collapse border border-gray-300 w-full">
+              <thead className="dark:text-gray-800">
+                <tr className="dark:bg-gray-500 dark:text-white">
+                  <th className="border border-gray-300 px-4 py-2 text-left">Total Percentage</th>
+                  {/* Dynamically render category headers */}
+                  {row?.exam?.meta?.tech_score?.map((technology: ExamMetaTech) => (
+                    <th
+                      key={technology.technology_id}
+                      className="border border-gray-300 px-4 py-2 text-left"
+                    >
+                      {getTechnology(technology.technology_id)}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td className="border border-gray-300 px-4 py-2">
+                    {row?.result?.length ? row?.result[0]?.percentage?.toFixed(2) : "-"} %
                     <small> (&nbsp;
-                      {technology.score.toFixed(1)} / {technology.total}
+                      {row?.result?.length ? row?.result[0]?.score?.toFixed(1) : "-"} /&nbsp;
+                      {row?.result?.length ? row?.result[0]?.total : "-"}
                       &nbsp;) </small>
-                  </th>
-                ))}
-              </tr>
-            </tbody>
-          </table>
-        </div>
+                  </td>
+                  {/* Dynamically render category percentages */}
+                  {row?.exam?.meta?.tech_score?.map((technology: ExamMetaTech) => (
+                    <th
+                      key={technology.technology_id}
+                      className="border border-gray-300 px-4 py-2 text-left"
+                    >
+                      {technology.percentage?.toFixed(2)} %
+                      <small> (&nbsp;
+                        {technology.score.toFixed(1)} / {technology.total}
+                        &nbsp;) </small>
+                    </th>
+                  ))}
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     ),
   };

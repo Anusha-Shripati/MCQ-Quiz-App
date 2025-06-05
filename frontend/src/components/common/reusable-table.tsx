@@ -9,11 +9,12 @@ import {
   TableBody,
   TableCell,
 } from '@/components/ui/table';
-import { ChevronDown, ChevronUp } from 'lucide-react'; // Add expand/collapse icons
+import { ChevronDown, ChevronUp } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
 // Define interfaces
 export interface Column<T> {
-  key: keyof T | string; // Allow string for special columns
+  key: keyof T | string;
   header: string;
   className?: string;
   render?: (row: T) => React.ReactNode;
@@ -31,6 +32,9 @@ export interface TableProps<T> {
   className?: string;
   rowKey: keyof T;
   title?: string;
+  isLoadingMore?: boolean;
+  isEndReached?: boolean;
+  intersectionObserverRef?: React.RefObject<HTMLDivElement>;
 }
 
 const ReusableTable = <T extends object>({
@@ -40,6 +44,9 @@ const ReusableTable = <T extends object>({
   onRowClick,
   className,
   title,
+  isLoadingMore,
+  isEndReached,
+  intersectionObserverRef,
 }: TableProps<T>) => {
   const [expandedRow, setExpandedRow] = useState<number | null>(null);
 
@@ -47,7 +54,7 @@ const ReusableTable = <T extends object>({
   const toggleRow = (id: number) => {
     setExpandedRow(expandedRow === id ? null : id);
   };
-
+  console.log('rows', rows);
   return (
     <div className={`overflow-x-auto ${className} overflow-y-auto`}>
       <Table className="min-w-full animate-in fade-in duration-300">
@@ -78,6 +85,8 @@ const ReusableTable = <T extends object>({
               </TableCell>
             </TableRow>
           )}
+
+          {/* Render each row */}
           {rows.map((row, rowIndex) => (
             <React.Fragment key={rowIndex}>
               <TableRow
@@ -141,6 +150,18 @@ const ReusableTable = <T extends object>({
           ))}
         </TableBody>
       </Table>
+      {intersectionObserverRef && <div ref={intersectionObserverRef}>
+        {isLoadingMore && (
+          <div className="flex justify-center items-center py-4">
+            <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+          </div>
+        )}
+        {isEndReached && !isLoadingMore && (
+          <div className="text-center py-4 text-sm text-gray-400">
+            No more data available.
+          </div>
+        )}
+      </div>}
     </div>
   );
 };

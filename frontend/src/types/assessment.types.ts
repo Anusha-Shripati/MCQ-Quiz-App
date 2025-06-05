@@ -8,6 +8,7 @@ export interface AssessmentCategory {
 }
 export interface AssessmentForm {
   name: string;
+  pass_criteria: number;
   technologies: {
     id: string;
     name: string;

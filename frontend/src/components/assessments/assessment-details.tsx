@@ -30,6 +30,7 @@ interface AssessmentItemProps {
   onToggle: () => void;
   handleEdit: () => void;
   handleDelete: (id: string) => void;
+  pass_criteria?: number;
 }
 
 function AssessmentItem({
@@ -40,6 +41,7 @@ function AssessmentItem({
   duration,
   technologies,
   isExpanded,
+  pass_criteria,
   onToggle,
   handleEdit,
   handleDelete,
@@ -81,7 +83,7 @@ function AssessmentItem({
   }
   return (
     <div className="border-b">
-      <DeleteDialog onDelete={() => handleDelete(deleteId as string)} setOpen={setDeleteOpen} isOpen={deleteOpen}  />
+      <DeleteDialog onDelete={() => handleDelete(deleteId as string)} setOpen={setDeleteOpen} isOpen={deleteOpen} />
       <div className="p-5 flex items-center justify-between">
         <div className="flex-1">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{title}</h3>

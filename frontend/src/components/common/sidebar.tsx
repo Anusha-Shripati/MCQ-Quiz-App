@@ -15,6 +15,7 @@ import { Module, Permissions } from '@/types/common.types';
 import { useRouter } from 'next/navigation';
 import { ChevronLeft, ChevronRight, Layers } from 'lucide-react';
 import Image from 'next/image';
+import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
 
 export default function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -241,17 +242,35 @@ function NavItem({
   }, [router, href]);
 
   return (
-    <Link href={href} prefetch={true}>
-      <Button
-        onMouseEnter={handleMouseEnter}
-        className={`w-full text-base relative h-12 flex items-center ${isCollapsed ? 'justify-center' : 'justify-start'}  gap-4 p-3 rounded-lg transition-colors ${isActive
-            ? 'bg-secondary text-secondary-foreground'
-            : 'hover:bg-secondary hover:text-secondary-foreground'
-          }`}
-      >
-        <span className="h-5 w-5">{icon}</span>
-        {!isCollapsed && <span>{label}</span>}
-      </Button>
-    </Link>
+    <Tooltip delayDuration={0}>
+      <Link href={href} prefetch={true}>
+        {isCollapsed ? (
+          <>
+            <TooltipTrigger asChild>
+              <Button
+                onMouseEnter={handleMouseEnter}
+                className="w-full text-base relative h-12 flex justify-center items-center gap-4 p-3 rounded-lg transition-colors hover:bg-secondary hover:text-secondary-foreground"
+              >
+                <span className="h-5 w-5">{icon}</span>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="right" align="center">
+              {label}
+            </TooltipContent>
+          </>
+        ) : (
+          <Button
+            onMouseEnter={handleMouseEnter}
+            className={`w-full text-base relative h-12 flex justify-start items-center gap-4 p-3 rounded-lg transition-colors ${isActive
+              ? 'bg-secondary text-secondary-foreground'
+              : 'hover:bg-secondary hover:text-secondary-foreground'
+              }`}
+          >
+            <span className="h-5 w-5">{icon}</span>
+            <span>{label}</span>
+          </Button>
+        )}
+      </Link>
+    </Tooltip>
   );
 }

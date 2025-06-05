@@ -32,10 +32,10 @@ class ExpressAppProvider {
     // Configure CORS
     this.app.use(
       cors({
-        origin: '*',
+        origin: '*', // No trailing
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
         allowedHeaders: ['Content-Type', 'Authorization', 'x-access-code'],
-        credentials: true,
+        // credentials: true,
         exposedHeaders: ['Content-Range', 'X-Content-Range'],
       })
     );

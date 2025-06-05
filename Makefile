@@ -20,7 +20,6 @@ local-backend:
 	fi
 	npm run docker:down
 	npm run docker:db
-	npm run docker:redis
 	npm run prisma:generate
 	npm run prisma:migrate
 	npm run dev:backend

@@ -8,6 +8,8 @@ echo "📦 Starting deployment process..."
 # Install dependencies if needed
 echo "🔧 Installing Backend dependencies..."
 
+npm install
+
 cd backend
 npm install
 

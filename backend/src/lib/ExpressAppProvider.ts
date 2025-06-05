@@ -30,38 +30,49 @@ class ExpressAppProvider {
 
   private initializeMiddlewares(): void {
     // Configure CORS
-    this.app.use(cors({
-      origin: process.env.FRONTEND_URL || 'http://localhost:3000',
-      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization', 'x-access-code'],
-      credentials: true,
-      exposedHeaders: ['Content-Range', 'X-Content-Range']
-    }));
+    this.app.use(
+      cors({
+        origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+        allowedHeaders: ['Content-Type', 'Authorization', 'x-access-code'],
+        credentials: true,
+        exposedHeaders: ['Content-Range', 'X-Content-Range'],
+      })
+    );
 
     // Configure Helmet with video streaming permissions
-    this.app.use(helmet({
-      crossOriginResourcePolicy: { policy: "cross-origin" },
-      crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" }
-    }));
+    this.app.use(
+      helmet({
+        crossOriginResourcePolicy: { policy: 'cross-origin' },
+        crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' },
+      })
+    );
 
     this.app.use(rateLimiter);
     this.app.use(express.json());
-    
+
     // Configure static file serving with proper headers
-    this.app.use('/uploads', express.static(path.join(__dirname, '../../uploads'), {
-      setHeaders: (res, path) => {
-        res.set('Cross-Origin-Resource-Policy', 'cross-origin');
-        res.set('Access-Control-Allow-Origin', process.env.FRONTEND_URL || 'http://localhost:3000');
-        res.set('Access-Control-Allow-Credentials', 'true');
-        res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-access-code');
-      }
-    }));
+    this.app.use(
+      '/uploads',
+      express.static(path.join(__dirname, '../../uploads'), {
+        setHeaders: (res, path) => {
+          res.set('Cross-Origin-Resource-Policy', 'cross-origin');
+          res.set(
+            'Access-Control-Allow-Origin',
+            process.env.FRONTEND_URL || 'http://localhost:3000'
+          );
+          res.set('Access-Control-Allow-Credentials', 'true');
+          res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-access-code');
+        },
+      })
+    );
     // this.app.use("/bullboard", serverAdapter.getRouter());
   }
 
   private initializeRoutes(): void {
     this.app.use('/api/v1', golbalRouter);
     this.app.get('/healthcheck', (req: Request, res: Response) => {
+      console.log('Healthcheck called');
       res.status(200).json({ message: 'Server is up and running' });
     });
   }
@@ -85,6 +96,7 @@ class ExpressAppProvider {
       await connectToDatabase();
       this.app.listen(this.port, () => {
         // registerCreateArticleWorkerEvents();
+        console.log(`Console Server is running on http://localhost:${this.port}`);
         logger.info(`Server is running on http://localhost:${this.port}`);
       });
     } catch (error) {

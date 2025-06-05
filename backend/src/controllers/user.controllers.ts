@@ -20,6 +20,8 @@ export class UserController {
     try {
       const { email, password } = req.body;
 
+      console.log('EMAIL', email);
+
       const user = await userService.findUserByEmail(email);
       if (!user) {
         return generateResponse(res, 400, {}, false, 'User not found!');
@@ -121,7 +123,6 @@ export class UserController {
       }
 
       if (oldPassword) {
-
         const isPasswordValid = await matchPassword(oldPassword, user.password);
 
         if (!isPasswordValid) {
@@ -214,7 +215,7 @@ export class UserController {
         generateResponse(res, 400, {}, false, 'No file uploaded');
         return;
       }
-      const fileData =await  uploadService.processFile(req.file);
+      const fileData = await uploadService.processFile(req.file);
       await userService.updateUser(userId, {
         image: fileData.path,
       });
@@ -224,5 +225,5 @@ export class UserController {
       console.log(error);
       next(error);
     }
-  }
+  };
 }

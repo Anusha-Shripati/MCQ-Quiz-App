@@ -1,0 +1,80 @@
+image: node:20.11.1
+
+stages:
+  - install
+  - build
+  # - deploy
+
+variables:
+  # DATABASE_URL: "postgresql://postgres:postgres@143.110.254.46:5432/mcq_quiz_db?schema=public"
+  # FRONTEND_URL: "http://143.110.254.46:9000"
+  # BACKEND_PORT: "9002"
+  # REDIS_HOST: "143.110.254.46"
+  # REDIS_PORT: "6379"
+  # ACCESS_SECRET: "mcq-quiz-secret"
+
+cache:
+  paths:
+    - backend/node_modules/
+    - frontend/node_modules/
+    - node_modules/
+
+install_dependencies:
+  stage: install
+  script:
+    - npm install
+    - cd backend && npm install
+    - cd ../frontend && npm install
+    - cd ..
+  artifacts:
+    paths:
+      - backend/node_modules/
+      - frontend/node_modules/
+      - node_modules/
+
+build:
+  stage: build
+  script:
+    - npm run prisma:generate
+    - npm run build
+  artifacts:
+    paths:
+      - backend/dist
+      - frontend/.next
+      - backend/node_modules
+      - frontend/node_modules
+
+# deploy:
+#   stage: deploy
+#   script:
+#     - apt-get update -qq && apt-get install -y -qq ssh
+#     - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+#     - eval $(ssh-agent -s)
+#     - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+#     - mkdir -p ~/.ssh
+#     - chmod 700 ~/.ssh
+#     - echo "$SSH_KNOWN_HOSTS" >> ~/.ssh/known_hosts
+#     - chmod 644 ~/.ssh/known_hosts
+    
+#     - |
+#       ssh $SSH_USER@$SSH_HOST "
+#         cd /var/www/html/mcq-quiz-new &&
+#         git pull origin feat/deploy &&
+#         export NVM_DIR=\$HOME/.nvm &&
+#         source \$NVM_DIR/nvm.sh &&
+#         nvm use 20.11.1 &&
+#         npm install -g pm2 &&
+#         mkdir -p backend/logs &&
+#         npm run prisma:migrate:prod &&
+#         if pm2 list | grep -q 'mcq-quiz-backend'; then
+#           pm2 reload ecosystem.config.js
+#         else
+#           pm2 start ecosystem.config.js
+#         fi &&
+#         pm2 save
+#       "
+  # environment:
+  #   name: production
+  #   url: http://143.110.254.46:9000
+  only:
+    - feat/deploy

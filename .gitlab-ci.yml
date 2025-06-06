@@ -1,5 +1,16 @@
 image: node:20.11.1
 
+workflow:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH != "main"'
+      variables:
+        GIT_STRATEGY: fetch
+      cancel_in_progress: true
+    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "main"'
+      variables:
+        GIT_STRATEGY: fetch
+      cancel_in_progress: false
+
 stages:
   - install
   - build
@@ -86,25 +97,25 @@ build:
   # environment:
   #   name: production
   #   url: http://143.110.254.46:9000
-  only:
-    - feat/deploy
+  # only:
+  #   - feat/deploy
 
-notify_success:
-  stage: notify
-  needs:
-    - build
-  script:
-    - |
-      curl -X POST -H "Content-Type: application/json" \
-      -d "{\"text\":\"✅ Pipeline Success! Branch - $CI_COMMIT_REF_NAME, Commit - $CI_COMMIT_SHORT_SHA\"}" \
-      $GOOGLE_CHAT_WEBHOOK
-  when: on_success
+# notify_success:
+#   stage: notify
+#   needs:
+#     - build
+#   script:
+#     - |
+#       curl -X POST -H "Content-Type: application/json" \
+#       -d "{\"text\":\"✅ Pipeline Success! Branch - $CI_COMMIT_REF_NAME, Commit - $CI_COMMIT_SHORT_SHA\"}" \
+#       $GOOGLE_CHAT_WEBHOOK
+#   when: on_success
 
-notify_failure:
-  stage: notify
-  script:
-    - |
-      curl -X POST -H "Content-Type: application/json" \
-      -d "{\"text\":\"❌ Pipeline Failed! Branch - $CI_COMMIT_REF_NAME, Commit - $CI_COMMIT_SHORT_SHA. Check logs at $CI_PROJECT_URL/-/jobs\"}" \
-      $GOOGLE_CHAT_WEBHOOK
-  when: on_failure
+# notify_failure:
+#   stage: notify
+#   script:
+#     - |
+#       curl -X POST -H "Content-Type: application/json" \
+#       -d "{\"text\":\"❌ Pipeline Failed! Branch - $CI_COMMIT_REF_NAME, Commit - $CI_COMMIT_SHORT_SHA. Check logs at $CI_PROJECT_URL/-/jobs\"}" \
+#       $GOOGLE_CHAT_WEBHOOK
+#   when: on_failure

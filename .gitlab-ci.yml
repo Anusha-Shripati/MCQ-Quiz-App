@@ -15,7 +15,7 @@ stages:
   - install
   - build
   # - deploy
-  - notify
+  # - notify
 
 variables:
   GOOGLE_CHAT_WEBHOOK: "https://chat.googleapis.com/v1/spaces/AAQA-lR4kHg/messages?key=AIzaSyDdI0hCZtE6vySjMm-WEfRq3CPzqKqqsHI&token=A9lMqtlzYkoNaKU7IV5014cAN-hdv5BESiVSxGc_iEk"
@@ -40,10 +40,10 @@ install_dependencies:
   stage: install
   <<: *node_modules_cache
   script:
-    - npm ci --cache .npm --prefer-offline &
-    - cd backend && npm ci --cache .npm --prefer-offline &
-    - cd ../frontend && npm ci --cache .npm --prefer-offline &
-    - wait
+    - npm ci --cache .npm --prefer-offline
+    - cd backend && npm ci --cache .npm --prefer-offline
+    - cd ../frontend && npm ci --cache .npm --prefer-offline
+    - cd ..
     - echo "All installations completed successfully"
 
 build:

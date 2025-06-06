@@ -1,7 +1,6 @@
 'use client';
 import { BasicInfoForm } from '@/components/test/basic-info';
 import ProctoredQuiz from '@/components/test/proctored-quiz';
-import TestError from '@/components/test/error/test-error';
 import TestLoading from '@/components/test/loading/test-loading';
 import TestWarning from '@/components/test/error/test-warning';
 import { VideoRecordingScreen } from '@/components/test/video-recording-screen';
@@ -261,7 +260,11 @@ const QuizPage = () => {
   return (
     <div className="w-screen min-h-screen bg-gray-50">
       {
-        error ? <TestError errorTitle='Access Denied' accessError={error} />
+        error ? <TestWarning text={
+          <ul>
+            <li>{error}</li>
+          </ul>  
+        } title='Access Denied' />
           : loading || !candidate ? <TestLoading />
             : (!permission.camera || !permission.screen) ? <TestWarning text={
               <ul>

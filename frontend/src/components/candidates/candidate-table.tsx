@@ -25,9 +25,6 @@ import useSWR, { mutate } from 'swr';
 import StatusWrapper from '../common/status-wrapper';
 import { ExamMetaTech } from '@/types/exam.types';
 import Link from 'next/link';
-import { candidateEndpoint } from '@/lib/endpoint';
-import { DeleteDialog } from '../common/delete-dialog';
-import { formatTestDuration } from '@/lib/utils';
 
 function CandidateTable() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -35,9 +32,6 @@ function CandidateTable() {
   const searchParams = useSearchParams();
   const [selectedCandidate, setSelectedCandidate] = useState<null | CandidateFormData>(null);
   const [open, setOpen] = useState(false);
-
-  const [deleteId, setDeleteId] = useState<string | null>(null)
-  const [deleteOpen, setDeleteOpen] = useState<boolean>(false)
   const {
     candidateFilter,
     setCandidateFilter,
@@ -101,10 +95,6 @@ function CandidateTable() {
     setCandidateFilter(filterParams);
   }, [searchParams, technologyOptions, assessmentOptions]);
 
-  const onDelete = (id: string) => {
-    setDeleteId(id)
-    setDeleteOpen(true)
-  }
   const queryObj = useMemo(
     () => ({
       page: currentPage || 1,
@@ -136,16 +126,14 @@ function CandidateTable() {
     data: candidateData,
     error,
     isLoading,
-    isValidating,
-    mutate: tableMutate
-  } = useSWR(`${candidateEndpoint.LIST}?${cleanedQuery}`, api.get);
+  } = useSWR(`/candidate/list?${cleanedQuery}`, api.get);
 
   useEffect(() => {
     if (candidateData?.data?.list) {
       setCandidateListData(candidateData?.data?.total, candidateData?.data?.list);
     }
   }, [candidateData, setCandidateListData]);
-  console.log('candidateData', candidateData);
+
   const handlePerPageChange = (value: string) => {
     setItemsPerPage(Number(value));
     setCurrentPage(1);
@@ -172,20 +160,30 @@ function CandidateTable() {
     return candidateList;
   }, [candidateList]);
 
+  const formatTestDuration = (startDate: string, endDate: string): string => {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
 
+    // Calculate the difference in hours
+    const duration = Math.abs(end.getTime() - start.getTime()) / (1000 * 60 * 60);
+
+    return `${duration.toFixed(2)} hours`; // e.g., "3 hours"
+  };
 
   const handleDelete = async (id: string) => {
-    try {
-      const res = await deleteData(`/candidate/${id}`);
-      if (res.success) {
-        toast.success('Candidate deleted successfully');
-      }
-      await mutate((key: string) => typeof key === 'string' && key.startsWith('/candidate/list'));
-    } catch (error) {
-      if (isAxiosError(error)) {
-        toast.error(error.response.data.message || 'An unexpected error occurred');
-      } else {
-        toast.error('An unexpected error occurred');
+    if (window.confirm('Are you sure you want to delete this user?')) {
+      try {
+        const res = await deleteData(`/candidate/${id}`);
+        if (res.success) {
+          toast.success('Candidate deleted successfully');
+        }
+        await mutate((key) => typeof key === 'string' && key.startsWith('/candidate/list'));
+      } catch (error) {
+        if (isAxiosError(error)) {
+          toast.error(error.response.data.message || 'An unexpected error occurred');
+        } else {
+          toast.error('An unexpected error occurred');
+        }
       }
     }
   };
@@ -253,6 +251,17 @@ function CandidateTable() {
       },
       { key: 'experience', header: 'Exp.' },
       { key: 'assessment.name', header: 'Assessment' },
+      // {
+      //   key: "results",
+      //   header: "Result",
+      //   render: (row) => (
+      //     <span
+      //       className={`font-semibold ${row.results === "Pass" ? "text-green-600" : "text-red-600"}`}
+      //     >
+      //       {row.results}
+      //     </span>
+      //   ),
+      // },
       {
         key: 'created_at',
         header: 'Created',
@@ -275,7 +284,7 @@ function CandidateTable() {
 
           return (
             <span className={`px-3 py-1 text-sm font-medium rounded-full ${badgeClass}`}>
-              {status?.replace('_', ' ') || 'Unknown'} {row?.result?.length ? `(${row?.result[0]?.percentage?.toFixed(2)}) %` : ""}
+              {status?.replace('_', ' ') || 'Unknown'} {row?.result?.length ? `(${row?.result[0]?.percentage?.toFixed(2)}) %`:""} 
 
             </span>
           );
@@ -328,7 +337,7 @@ function CandidateTable() {
               variant="ghost"
               size="icon"
               className="hover:bg-red-50 hover:text-red-600"
-              onClick={() => onDelete(candidate.id as string)}
+              onClick={() => handleDelete(candidate.id as string)}
             >
               <Trash2 className="h-4 w-4" />
             </Button>
@@ -338,7 +347,6 @@ function CandidateTable() {
     ],
     []
   );
-  console.log()
   const getTechnology = (id: string) => {
     const technology = technologyOptions.find((item) => item.value == id)
     if (technology) return technology.label
@@ -354,20 +362,12 @@ function CandidateTable() {
           <div>
             <p className="text-sm text-gray-500 dark:text-gray-300">Result</p>
             <div className="flex gap-2 flex-col">
-              {row.exam?.status === 'pending' ? (
-                <p className="text-lg font-medium text-orange-500">
-                  The candidate has not started the exam yet.
-                </p>
-              ) : (
-                <>
-                  {row.result.length > 0 && <p className="text-lg font-semibold text-blue-500">
-                    {row?.result?.length ? row?.result[0]?.percentage?.toFixed(2) : "-"} %
-                  </p>}
-                  {row.result.length > 0 && <Link href={`/results/${row.result[0]?.id}`} target='_blank' className="text-sm text-blue-500 hover:underline">
-                    View Answer
-                  </Link>}
-                </>
-              )}
+              {row.result.length>0 &&<p className="text-lg font-semibold text-blue-500">
+                {row?.result?.length ? row?.result[0]?.percentage?.toFixed(2) : "-"} %
+              </p>}
+              {row.result.length>0 && <Link href={`/results/${row.result[0]?.id}`} target='_blank' className="text-sm text-blue-500 hover:underline">
+                View Answer
+              </Link>}
             </div>
           </div>
 
@@ -404,63 +404,59 @@ function CandidateTable() {
           </div>
         </div>
 
-        {/* Detailed Table - Only show if not pending */}
-        {row.exam?.status !== 'pending' && (
-          <div>
-            <table className="table-auto border-collapse border border-gray-300 w-full">
-              <thead className="dark:text-gray-800">
-                <tr className="dark:bg-gray-500 dark:text-white">
-                  <th className="border border-gray-300 px-4 py-2 text-left">Total Percentage</th>
-                  {/* Dynamically render category headers */}
-                  {row?.exam?.meta?.tech_score?.map((technology: ExamMetaTech) => (
-                    <th
-                      key={technology.technology_id}
-                      className="border border-gray-300 px-4 py-2 text-left"
-                    >
-                      {getTechnology(technology.technology_id)}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td className="border border-gray-300 px-4 py-2">
-                    {row?.result?.length ? row?.result[0]?.percentage?.toFixed(2) : "-"} %
+        {/* Detailed Table */}
+        <div>
+          <table className="table-auto border-collapse border border-gray-300 w-full">
+            <thead className="dark:text-gray-800">
+              <tr className="dark:bg-gray-500 dark:text-white">
+                <th className="border border-gray-300 px-4 py-2 text-left">Total Percentage</th>
+                {/* Dynamically render category headers */}
+                {row?.exam?.meta?.tech_score?.map((technology: ExamMetaTech) => (
+                  <th
+                    key={technology.technology_id}
+                    className="border border-gray-300 px-4 py-2 text-left"
+                  >
+                    {getTechnology(technology.technology_id)}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td className="border border-gray-300 px-4 py-2">
+                  {row?.result?.length ? row?.result[0]?.percentage?.toFixed(2) : "-"} %
+                  <small> (&nbsp;
+                    {row?.result?.length ? row?.result[0]?.score?.toFixed(1) : "-"} /&nbsp;
+                    {row?.result?.length ? row?.result[0]?.total : "-"}
+                    &nbsp;) </small>
+                </td>
+                {/* Dynamically render category percentages */}
+                {row?.exam?.meta?.tech_score?.map((technology: ExamMetaTech) => (
+                  <th
+                    key={technology.technology_id}
+                    className="border border-gray-300 px-4 py-2 text-left"
+                  >
+                    {technology.percentage?.toFixed(2)} %
                     <small> (&nbsp;
-                      {row?.result?.length ? row?.result[0]?.score?.toFixed(1) : "-"} /&nbsp;
-                      {row?.result?.length ? row?.result[0]?.total : "-"}
+                      {technology.score.toFixed(1) } / {technology.total}
                       &nbsp;) </small>
-                  </td>
-                  {/* Dynamically render category percentages */}
-                  {row?.exam?.meta?.tech_score?.map((technology: ExamMetaTech) => (
-                    <th
-                      key={technology.technology_id}
-                      className="border border-gray-300 px-4 py-2 text-left"
-                    >
-                      {technology.percentage?.toFixed(2)} %
-                      <small> (&nbsp;
-                        {technology.score.toFixed(1)} / {technology.total}
-                        &nbsp;) </small>
-                    </th>
-                  ))}
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        )}
+                  </th>
+                ))}
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     ),
   };
 
   return (
-    <StatusWrapper loading={isLoading || isValidating} className="min-h-[500px]" error={error} reset={tableMutate}>
-      <DeleteDialog onDelete={() => handleDelete(deleteId as string)} setOpen={setDeleteOpen} isOpen={deleteOpen} />
-
+    <StatusWrapper loading={isLoading} className="min-h-[500px]" error={error}>
       <Pagination
         className="flex-grow"
         currentPageStart={currentPageStart}
         currentPageEnd={currentPageEnd}
-        totalItems={totalItems}
+        totalItems={0}
         itemsPerPage={itemsPerPage}
         onPerPageChange={handlePerPageChange}
         currentPage={currentPage}
@@ -471,7 +467,7 @@ function CandidateTable() {
             columns={columns}
             rows={currentItems}
             expandableRow={expandableRow}
-            className="mb-6 h-[460px] animate-in fade-in duration-300"
+            className="mb-6 h-[500px] animate-in fade-in duration-300"
             rowKey="id"
           />
         </div>

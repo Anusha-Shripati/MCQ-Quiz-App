@@ -36,13 +36,13 @@ export default function CalendarCard() {
         const { start_time, is_completed, results } = item;
         const dateKey = dayjs(start_time).format('YYYY-MM-DD');
         const pass = results?.percentage >= 60;
-        const color = is_completed ? (pass ? '#16a34a' : '#dc2626') : '#6b7280';
+        const color = is_completed ? (pass ? '#16a34a' : '#dc2626') : (item.status == 'in_progress' ? "#ffa500" : '#6b7280');
         const eventMeta = {
           percentage: results?.percentage?.toFixed(1),
           name: item.candidate?.name,
           experience: item.candidate?.experience,
           assessment: item.assessment?.name,
-          title: is_completed ? (pass ? 'Passed' : 'Failed') : 'Pending',
+          title: is_completed ? (pass ? 'Passed' : 'Failed') : (item.status == 'in_progress' ? "In Progress" : 'Pending'),
           email: item.candidate?.email,
           resultId: item.results?.id,
         };

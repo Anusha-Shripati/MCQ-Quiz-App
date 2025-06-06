@@ -30,7 +30,6 @@ router.get(
 router.post(
   '/:examId/submit-answer',
   authenticateCandidate,
-  upload.single('file'),
   asyncHandler(candidateExamController.submitAnswer)
 );
 router.post(

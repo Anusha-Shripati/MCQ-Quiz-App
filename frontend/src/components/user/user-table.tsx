@@ -84,8 +84,10 @@ function UserTable() {
     },
   ];
   return (
-    <StatusWrapper className="min-h-[500px]" error={error} loading={isLoading || isValidating} reset={mutate}>
-      <ReusableTable columns={columns} rows={userList} rowKey="id" />
+    <StatusWrapper className="min-h-[600px]" error={error} loading={isLoading || isValidating} reset={mutate}>
+      <ReusableTable columns={columns} rows={userList} rowKey="id"
+        className="h-[550px] animate-in fade-in duration-300"
+      />
 
       <UserForm open={open} userData={user} onClose={() => setOpen(false)} />
       <DeleteDialog onDelete={() => handleUserDelete(deleteId as string)} setOpen={setDeleteOpen} isOpen={deleteOpen} />

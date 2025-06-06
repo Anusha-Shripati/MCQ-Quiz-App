@@ -1,6 +1,18 @@
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { toast } from 'react-hot-toast';
+import { api } from './api';
 
+let activeToastId: string | null = null;
+
+export function showSingleToast(message: string, duration = 2000) {
+  if (!activeToastId) {
+    activeToastId = toast.error(message);
+    setTimeout(() => {
+      activeToastId = null;
+    }, duration);
+  }
+}
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
@@ -12,9 +24,8 @@ export function getShadePerInterviewsCount(
   theme: string = 'light' // Default to "light" theme
 ) {
   if (count <= 0) {
-    return `bg-${defaultColor}-${
-      theme === 'dark' ? '800' : '100'
-    } text-${defaultColor}-${theme === 'dark' ? '400' : '700'}`;
+    return `bg-${defaultColor}-${theme === 'dark' ? '800' : '100'
+      } text-${defaultColor}-${theme === 'dark' ? '400' : '700'}`;
   }
 
   const lightModeShades = {
@@ -172,3 +183,24 @@ export const formatTestDuration = (startDate: string, endDate: string): string =
 
   return `${totalMinutes} minutes`;
 };
+
+export const uploadFileInChunks = async (file: Blob, chunkSize: number = 5 * 1024 * 1024, examId: string = '') :Promise<string> => {
+  const totalChunks = Math.ceil(file.size / chunkSize);
+  const fileName = String(Date.now())
+
+  for (let i = 0; i < totalChunks; i++) {
+    const start = i * chunkSize;
+    const end = start + chunkSize;
+    const chunk = file.slice(start, end)
+    const formData = new FormData();
+    formData.append('chunk', chunk);
+    formData.append('filename', fileName);
+    formData.append('index', String(i));
+    formData.append('totalChunks', String(totalChunks));
+    
+    if(examId) formData.append('examId', examId);
+
+    await api.post(`/upload/chunk?chunkFolder=${fileName}`, formData);
+  }
+  return fileName
+}

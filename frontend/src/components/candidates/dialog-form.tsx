@@ -78,7 +78,7 @@ export default function DialogForm({ candidate, open, setOpen }: CandidateDialog
     technology: '',
     assessment: '',
     experience: '',
-    timeValue: 0,
+    timeValue: 1,
     timeUnit: 'days',
     startDate: new Date(),
     endDate: new Date(),

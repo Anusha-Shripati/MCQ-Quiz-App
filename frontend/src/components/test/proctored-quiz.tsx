@@ -10,11 +10,12 @@ import { useRouter } from 'next/navigation';
 import useSWRMutation from 'swr/mutation';
 import AlertWrapper from './error/alert-wrapper';
 import TestLoading from './loading/test-loading';
-import TestError from './error/test-error';
 import Question from './question';
 import { Check, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { BROWSER_KEY, PROHIBITED_COMBINATIONS, PROHIBITED_KEYS, QUIZ_CONFIG } from '@/shared/constants/data';
 import { examEndpoint } from '@/lib/endpoint';
+import TestWarning from './error/test-warning';
+import { uploadFileInChunks } from '@/lib/utils';
 
 export default function ProctoredQuiz() {
   const [answers, setAnswers] = useState<Record<string, { question: IExamQuestion, answer: Answer, answer_id?: string }>>({});
@@ -26,7 +27,6 @@ export default function ProctoredQuiz() {
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [, setTabSwitchCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [accessError, setAccessError] = useState<string | null>(null);
   const [recordingBlob, setRecordingBlob] = useState<Blob | null>(null);
@@ -45,7 +45,9 @@ export default function ProctoredQuiz() {
   const { exam, accessCode, setExam } = useExamStore();
   const [questions, setQuestions] = useState<IExamQuestion[]>([]);
   const alertTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
+  const [prvViolations,setPrvViolations] = useState(0) 
+  console.log(prvViolations);
+  
   const displayAlert = (message: string) => {
     setAlertMessage(message);
     setShowAlert(true);
@@ -63,7 +65,7 @@ export default function ProctoredQuiz() {
   })
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { isMutating, trigger } = useSWRMutation<SubmitAnsReponse, any, string, FormData | SubmitAnsPayload>(
+  const { isMutating, trigger } = useSWRMutation<SubmitAnsReponse, any, string, SubmitAnsPayload>(
     `${examEndpoint.CANDIDATE_EXAM}/${exam?.id}/submit-answer`,
     (url: string, { arg }) => examApi.post(url, arg, accessCode)
   )
@@ -88,6 +90,7 @@ export default function ProctoredQuiz() {
       setQuestions(examData.data?.exam_questions || []);
       setTimeLeft(examData.data?.assessment?.duration * 60);
       checkExamStatus();
+      setPrvViolations(examData?.data?.violations)
     }
   }, [examData]);
 
@@ -97,13 +100,13 @@ export default function ProctoredQuiz() {
     try {
       setIsLoading(true);
 
-      const { data: statusData } = await examApi.get(`/candidate-exam/${exam.id}/status`, accessCode);
+      const { data: statusData } = await examApi.get(`${examEndpoint.CANDIDATE_EXAM}/${exam.id}/status`, accessCode);
       const status = statusData.status;
 
       let startTime: string | null = null;
 
       if (status === 'pending') {
-        const { data: startData } = await examApi.get(`/candidate-exam/${exam.id}/start`, accessCode);
+        const { data: startData } = await examApi.get(`${examEndpoint.CANDIDATE_EXAM}/${exam.id}/start`, accessCode);
         startTime = startData.start_time;
       } else if (status === 'in_progress') {
         startTime = statusData.start_time;
@@ -160,8 +163,10 @@ export default function ProctoredQuiz() {
   };
 
   const requestFullScreen = async () => {
-
+    console.log('opop');
+    
     if (!containerRef.current) return;
+    console.log('opop');
 
     try {
 
@@ -179,9 +184,10 @@ export default function ProctoredQuiz() {
   const submitViolation = async () => {
     if (violations.current.length === 0) return;
     try {
-      await examApi.post(`/candidate-exam/${exam?.id}/submit-violation`, {
+      await examApi.post(`${examEndpoint.CANDIDATE_EXAM}/${exam?.id}/submit-violation`, {
         violations: violations.current,
       }, accessCode);
+      setPrvViolations((prv)=> prv + violations.current.length)
       violations.current = []; // Clear violations after successful submission
     } catch (error) {
       console.error('Error submitting violations:', error);
@@ -189,6 +195,8 @@ export default function ProctoredQuiz() {
   }
 
   const addViolation = (violation: Omit<Violation, 'timestamp'>) => {
+    console.log(violations.current);
+    
     if (audioRef.current) {
       audioRef.current.play()
     }
@@ -199,7 +207,7 @@ export default function ProctoredQuiz() {
 
     violations.current = [...violations.current, newViolation];
 
-    if (violations.current.length >= QUIZ_CONFIG.maxViolations) {
+    if ((violations.current.length + prvViolations) >= QUIZ_CONFIG.maxViolations) {
       // submitQuiz();
     }
     displayAlert(`Warning: ${violation.details}`);
@@ -207,8 +215,6 @@ export default function ProctoredQuiz() {
   };
 
   const handleKeyDown = (e: KeyboardEvent) => {
-    // Allow F11 for fullscreen
-    if (process.env.MODE == 'development') return
     if (e.key === 'F11') {
       e.preventDefault();
       requestFullScreen();
@@ -217,10 +223,10 @@ export default function ProctoredQuiz() {
 
     if (PROHIBITED_KEYS.includes(e.key)) {
       e.preventDefault();
-      addViolation({
-        type: 'PROHIBITED_KEY',
-        details: `Attempted to use ${e.key} key`,
-      });
+      // addViolation({
+      //   type: 'PROHIBITED_KEY',
+      //   details: `Attempted to use ${e.key} key`,
+      // });
       return;
     }
 
@@ -231,10 +237,10 @@ export default function ProctoredQuiz() {
         e[combo.modifier as keyof KeyboardEvent]
       ) {
         e.preventDefault();
-        addViolation({
-          type: 'PROHIBITED_KEY_COMBO',
-          details: `Attempted to use ${combo.modifier.replace('Key', '')}+${combo.key}`,
-        });
+        // addViolation({
+        //   type: 'PROHIBITED_KEY_COMBO',
+        //   details: `Attempted to use ${combo.modifier.replace('Key', '')}+${combo.key}`,
+        // });
         return;
       }
     }
@@ -244,28 +250,28 @@ export default function ProctoredQuiz() {
     if (
       (e.ctrlKey || e.metaKey) && BROWSER_KEY.includes(e.key)) {
       e.preventDefault();
-      addViolation({
-        type: 'BROWSER_SHORTCUT',
-        details: `Attempted to use ${e.ctrlKey ? 'Ctrl' : 'Cmd'}+${e.key}`,
-      });
+      // addViolation({
+      //   type: 'BROWSER_SHORTCUT',
+      //   details: `Attempted to use ${e.ctrlKey ? 'Ctrl' : 'Cmd'}+${e.key}`,
+      // });
       return;
     }
 
     // Prevent Alt key combinations (menu shortcuts)
     if (e.altKey) {
       e.preventDefault();
-      addViolation({
-        type: 'ALT_SHORTCUT',
-        details: `Attempted to use Alt+${e.key}`,
-      });
+      // addViolation({
+      //   type: 'ALT_SHORTCUT',
+      //   details: `Attempted to use Alt+${e.key}`,
+      // });
       return;
     }
     if (e.ctrlKey && e.shiftKey && e.key === 'I') {
       e.preventDefault();
-      addViolation({
-        type: 'INSPECT_ELEMENT',
-        details: `Attempted to inspect element`,
-      });
+      // addViolation({
+      //   type: 'INSPECT_ELEMENT',
+      //   details: `Attempted to inspect element`,
+      // });
       return;
     }
   };
@@ -295,14 +301,7 @@ export default function ProctoredQuiz() {
 
   const handleWindowFocus = () => {
     if (!document.hasFocus()) {
-      setTabSwitchCount((prev) => {
-        const newCount = prev + 1;
-        if (newCount > 5) {
-          // submitQuiz();
-        }
-        displayAlert(`WARNING: Tab switching detected! This is violation ${newCount} of 5.`);
-        return newCount;
-      });
+      displayAlert(`WARNING: Tab switching detected!`);
 
       addViolation({
         type: 'WINDOW_FOCUS_LOST',
@@ -390,7 +389,6 @@ export default function ProctoredQuiz() {
       width: window.innerWidth,
       height: window.innerHeight,
     };
-    setTabSwitchCount(0);
 
     // Handlers
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -488,11 +486,13 @@ export default function ProctoredQuiz() {
           goToNextQuestion();
           return;
         }
-
-        const formData = new FormData();
-        formData.append('question_id', questionId);
-        formData.append('file', recordingBlob as Blob);
-        const response = await trigger(formData)
+        const foldername = await uploadFileInChunks(recordingBlob as Blob);
+        const payload ={
+          foldername,
+          merge_chunk:true,
+          question_id:questionId
+        }
+        const response = await trigger(payload)
         if (response.success) {
 
           const userAnswer = response.data?.answer?.user_answer?.[0] as string;
@@ -566,7 +566,9 @@ export default function ProctoredQuiz() {
       className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 p-4 md:p-8"
     >
       {accessError ? (
-        <TestError accessError={accessError} errorTitle="Access Denied" />
+        <TestWarning text={<ul>
+          <li>{accessError}</li>
+        </ul>} title="Access Denied" />
       ) : (isLoading || isExamLoading) ? (
         <TestLoading />
       ) : (
@@ -575,6 +577,21 @@ export default function ProctoredQuiz() {
           <AlertWrapper showAlert={showAlert} alertMessage={alertMessage} onClose={() => setShowAlert(false)} />
 
           <audio src="/assets/alert.wav" ref={audioRef} style={{ display: 'none' }} />
+          <Card className="w-[95vw] max-w-[1200px] mx-auto min-h-[70px] mb-3 shadow-xl border-0 rounded-xl text-black overflow-hidden bg-white/95 backdrop-blur-sm">
+            <div className="p-4 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium text-gray-700">Violations:</span>
+                <span className={`text-lg font-bold ${(prvViolations + violations.current.length) >= 4 ? 'text-red-600' : 'text-blue-600'}`}>
+                  {prvViolations + violations.current.length} / 5
+                </span>
+              </div>
+              {(prvViolations + violations.current.length) >= 3 && (
+                <div className="text-sm text-red-600 font-medium">
+                  Warning: Quiz will be automatically submitted at 5 violations
+                </div>
+              )}
+            </div>
+          </Card>
 
           <Card className="w-[95vw] max-w-[1200px] mx-auto min-h-[85vh] shadow-xl border-0 rounded-xl overflow-hidden bg-white/95 backdrop-blur-sm">
             <TestHeader timeLeft={timeLeft} currentQuestionIndex={currentQuestionIndex} totalQuestion={questions.length || 0} handleTimerEnd={handleTimerEnd} />

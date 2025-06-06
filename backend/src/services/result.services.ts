@@ -66,6 +66,7 @@ export class ResultService {
     const technology_ids = params.technology_ids?.split(',') || [];
 
     const exam: any = {
+      deleted_at: null,
       ...(params.search && {
         OR: [
           {
@@ -134,9 +135,7 @@ export class ResultService {
     const where = {
       deleted_at: null,
       ...(Object.keys(exam).length && {
-        exam: {
-          deleted_at: null,
-        },
+        exam
       }),
       ...(percentage && { percentage }),
     };
@@ -166,7 +165,7 @@ export class ResultService {
                 },
                 id: true,
                 name: true,
-                pass_criteria: true, // Add pass_criteria to assessment selection
+                pass_criteria: true,
               },
             },
             start_time: true,

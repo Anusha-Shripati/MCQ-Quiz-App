@@ -271,7 +271,7 @@ function ResultTable() {
   };
 
   return (
-    <StatusWrapper loading={isLoading || isValidating} reset={mutate} className="min-h-[500px]" error={error}>
+    <StatusWrapper loading={isLoading || isValidating } reset={mutate} className="min-h-[600px]" error={error}>
       <Pagination
         className="flex-grow"
         currentPageStart={currentPageStart}
@@ -282,12 +282,12 @@ function ResultTable() {
         currentPage={currentPage}
         onPageChange={handlePageChange}
       >
-        <div className="min-h-[500px]">
+        <div className="h-full">
           <ReusableTable
             columns={columns}
             rows={currentItems}
             expandableRow={expandableRow}
-            className="mb-6 h-[460px] animate-in fade-in duration-300"
+            className="h-[550px] animate-in fade-in duration-300"
             rowKey="id"
           />
         </div>

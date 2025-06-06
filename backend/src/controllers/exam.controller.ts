@@ -81,16 +81,4 @@ export class ExamController {
     const exam = await examService.startExam(examId);
     return generateResponse(res, 200, exam, true, 'Exam started successfully');
   };
-
-  // submitExam = async (req: Request, res: Response) => {
-  //     const { examId } = req.params;
-  //     const { answers, violations, screenshots } = req.body;
-  //     const result = await examService.submitExam(examId, {
-  //         answers,
-  //         violations,
-  //         screenshots
-  //     });
-
-  //     return generateResponse(res, 200, result, true, "Exam submitted successfully");
-  // };
 }

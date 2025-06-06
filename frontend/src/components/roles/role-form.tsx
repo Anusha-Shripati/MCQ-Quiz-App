@@ -12,6 +12,7 @@ import PermissionsTable from './permission-table';
 import { Module, Permissions, RoleData } from '@/types/common.types';
 import useSWRMutation from 'swr/mutation';
 import { moduleEndpoint, roleEndpoint } from '@/lib/endpoint';
+import { showSingleToast } from '@/lib/utils';
 const permissionSchema = z.object({
   can_read: z.boolean(),
   can_edit: z.boolean(),
@@ -113,6 +114,10 @@ function RoleForm({
           can_edit: perm.can_edit,
         })),
       };
+      if(data.role_permissions.every((item)=>item.can_edit==false && item.can_read==false)){
+        showSingleToast('At least one permission must be selected');
+        return;
+      }
       let res;
       if (roleData) {
         res = await updateTrigger(payload);

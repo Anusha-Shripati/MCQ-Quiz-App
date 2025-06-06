@@ -9,12 +9,11 @@ import {
   TableBody,
   TableCell,
 } from '@/components/ui/table';
-import { ChevronDown, ChevronUp } from 'lucide-react';
-import { Loader2 } from 'lucide-react';
+import { ChevronDown, ChevronUp } from 'lucide-react'; // Add expand/collapse icons
 
 // Define interfaces
 export interface Column<T> {
-  key: keyof T | string;
+  key: keyof T | string; // Allow string for special columns
   header: string;
   className?: string;
   render?: (row: T) => React.ReactNode;
@@ -31,10 +30,6 @@ export interface TableProps<T> {
   onRowClick?: (row: T) => void;
   className?: string;
   rowKey: keyof T;
-  title?: string;
-  isLoadingMore?: boolean;
-  isEndReached?: boolean;
-  intersectionObserverRef?: React.RefObject<HTMLDivElement>;
 }
 
 const ReusableTable = <T extends object>({
@@ -43,10 +38,6 @@ const ReusableTable = <T extends object>({
   expandableRow,
   onRowClick,
   className,
-  title,
-  isLoadingMore,
-  isEndReached,
-  intersectionObserverRef,
 }: TableProps<T>) => {
   const [expandedRow, setExpandedRow] = useState<number | null>(null);
 
@@ -54,10 +45,10 @@ const ReusableTable = <T extends object>({
   const toggleRow = (id: number) => {
     setExpandedRow(expandedRow === id ? null : id);
   };
-  console.log('rows', rows);
+
   return (
     <div className={`overflow-x-auto ${className} overflow-y-auto`}>
-      <Table className="min-w-full animate-in fade-in duration-300">
+      <Table className={`min-w-full animate-in fade-in duration-300 ${rows.length === 0 ?'h-full':""}`}>
         <TableHeader className="sticky z-10">
           <TableRow className="bg-gradient-to-r from-blue-50 to-blue-100 dark:from-gray-700 dark:to-gray-800">
             {columns.map((column) => (
@@ -85,18 +76,12 @@ const ReusableTable = <T extends object>({
               </TableCell>
             </TableRow>
           )}
-
-          {/* Render each row */}
           {rows.map((row, rowIndex) => (
             <React.Fragment key={rowIndex}>
               <TableRow
-                title={title}
-                onDoubleClick={() => {
+                onClick={() => {
                   onRowClick?.(row);
                 }}
-                // onClick={() => {
-                //   onRowClick?.(row);
-                // }}
                 className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200"
               >
                 {columns.map((column) => {
@@ -150,18 +135,6 @@ const ReusableTable = <T extends object>({
           ))}
         </TableBody>
       </Table>
-      {intersectionObserverRef && <div ref={intersectionObserverRef}>
-        {isLoadingMore && (
-          <div className="flex justify-center items-center py-4">
-            <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
-          </div>
-        )}
-        {isEndReached && !isLoadingMore && (
-          <div className="text-center py-4 text-sm text-gray-400">
-            No more data available.
-          </div>
-        )}
-      </div>}
     </div>
   );
 };

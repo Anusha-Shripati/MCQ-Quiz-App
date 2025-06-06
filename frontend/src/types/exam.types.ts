@@ -86,7 +86,8 @@ export interface LocalAnswer {
 }
 export interface SubmitAnsPayload {
   question_id: string;
-  user_answer: (string | number)[];
+  user_answer?: (string | number)[];
+  foldername?:string
 }
 export interface SubmitAnsReponse {
   success: boolean;

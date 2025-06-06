@@ -481,10 +481,10 @@ export default function AssessmentDetails() {
         error={error}
         loading={isLoading || isValidating}
         reset={assessmentMutate}
-        className="min-h-[500px]"
+        className="min-h-[700px] flex"
       >
         <Pagination
-          className="flex-grow min-h-[500px]"
+          className="flex-grow"
           currentPageStart={currentPageStart}
           currentPageEnd={currentPageEnd}
           totalItems={assessmentsData?.data?.total || 0}
@@ -494,7 +494,7 @@ export default function AssessmentDetails() {
           onPageChange={handlePageChange}
           loading={false}
         >
-          <div className="h-[550px] overflow-auto pr-2 py-5 space-y-8 scrollbar-thin scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-500 scrollbar-track-transparent">
+          <div className="h-[650px] overflow-auto pr-2 py-5 space-y-8 scrollbar-thin scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-500 scrollbar-track-transparent">
             {!error &&
               assessments &&
               assessments.map((assessment: Required<Assessment>) => (
@@ -513,6 +513,7 @@ export default function AssessmentDetails() {
                   handleDelete={handleDelete}
                 />
               ))}
+              {assessments.length ==0 &&<div className='w-full h-full flex justify-center items-center'>No data found</div>}
           </div>
         </Pagination>
       </StatusWrapper >

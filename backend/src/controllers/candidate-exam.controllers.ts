@@ -2,7 +2,8 @@ import { Request, Response, NextFunction } from 'express';
 import { CandidateExamService } from '../services/candiate-exam.services';
 import { generateResponse } from '../utils/generateResponse';
 import { UploadService } from '../services/upload.services';
-
+import path from 'path';
+import fs from 'fs'
 export class CandidateExamController {
   constructor(
     private candidateExamService: CandidateExamService,
@@ -88,9 +89,10 @@ export class CandidateExamController {
       const exam_id  = req.candidateInfo?.examId as string;
       let file;
       
-      if (req.file) {
-          file = await this.uploadService.processFile(req.file);
-          req.body.user_answer = [file.path];
+      if (req.body.merge_chunk) {
+        
+          const file = await this.uploadService.mergeChunk(req.body.foldername,exam_id)
+          req.body.user_answer = [typeof file === 'string' ? file : file.path];
         }
       if (!candidate_id) throw new Error('Candidate not authenticated');
 

@@ -20,4 +20,18 @@ export class UploadController {
       next(error);
     }
   };
+  uploadChunk = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      if (!req.file) {
+        generateResponse(res, 400, {}, false, 'No file uploaded');
+        return;
+      }
+
+      const fileData = await uploadService.processFile(req.file);
+      generateResponse(res, 200, fileData, true, 'File uploaded successfully');
+      return;
+    } catch (error) {
+      next(error);
+    }
+  };
 }

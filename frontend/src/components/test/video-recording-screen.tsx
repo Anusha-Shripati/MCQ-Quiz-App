@@ -10,6 +10,7 @@ import { useExamStore } from '@/store/examStore';
 import useSWRMutation from 'swr/mutation';
 import {  useState } from 'react';
 import { examEndpoint } from '@/lib/endpoint';
+import { uploadFileInChunks } from '@/lib/utils';
 
 // Types
 interface VideoRecorderProps {
@@ -23,7 +24,7 @@ export const VideoRecordingScreen = ({ onRecordingComplete, videoLink }: VideoRe
   const { exam, accessCode } = useExamStore();
     const [recordingBlob, setRecordingBlob] = useState<Blob | null>(null);
     const [recordingUrl, setRecordingUrl] = useState<string | null>(null);
-  const { isMutating, error, trigger } = useSWRMutation(`${examEndpoint.CANDIDATE_EXAM}/${exam?.id}/submit-answer`, (url: string, { arg }: { arg: FormData }) => examApi.post(url, arg, accessCode))
+  const { isMutating, error, trigger } = useSWRMutation(`${examEndpoint.CANDIDATE_EXAM}/${exam?.id}/submit-answer`, (url: string, { arg }: { arg: {foldername:string,question_name:string,merge_chunk:boolean} }) => examApi.post(url, arg, accessCode))
 
   const onContinue = async () => {
 
@@ -32,11 +33,19 @@ export const VideoRecordingScreen = ({ onRecordingComplete, videoLink }: VideoRe
       return;
     }
 
-    const formData = new FormData();
-    formData.append('file', recordingBlob as Blob);
-    formData.append('question_name', 'introduction');
+    const foldername = await uploadFileInChunks(recordingBlob as Blob);
 
-    const data = await trigger(formData);
+    const payload={
+      foldername,
+      merge_chunk:true,
+      question_name:'introduction'
+    }
+
+    // const formData = new FormData();
+    // formData.append('file', recordingBlob as Blob);
+    // formData.append('question_name', 'introduction');
+
+    const data = await trigger(payload);
     if (data.success) {
       onRecordingComplete();
     } else {

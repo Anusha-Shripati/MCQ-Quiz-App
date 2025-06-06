@@ -12,7 +12,7 @@ interface QuestionSidebarProps {
   questions: Question[];
   selectedQuestion: number;
   setSelectedQuestion: (index: number) => void;
-  handleDeleteQuestion: (question: Question, index: number) => void;
+  handleDeleteQuestion: ( index: number) => void;
   handleAddQuestion: () => void;
 }
 
@@ -24,10 +24,7 @@ const QuestionSidebar: React.FC<QuestionSidebarProps> = ({
   handleAddQuestion,
 }) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [questionToDelete, setQuestionToDelete] = useState<{
-    question: Question;
-    index: number;
-  } | null>(null);
+  const [questionToDelete, setQuestionToDelete] = useState<number|null>(null);
   const searchParams = useSearchParams();
   const pathname = usePathname();
 
@@ -48,15 +45,14 @@ const QuestionSidebar: React.FC<QuestionSidebarProps> = ({
     [setSelectedQuestion, updateQueryParams]
   );
 
-  const openDeleteModal = useCallback((question: Question, index: number) => {
-    setQuestionToDelete({ question, index });
+  const openDeleteModal = useCallback(( index: number) => {
+    setQuestionToDelete(index );
     setIsDeleteModalOpen(true);
   }, []);
 
   const confirmDelete = useCallback(() => {
     if (questionToDelete !== null) {
-
-      handleDeleteQuestion(questionToDelete.question, questionToDelete.index);
+      handleDeleteQuestion(questionToDelete);
     }
     setQuestionToDelete(null);
 
@@ -105,7 +101,7 @@ const QuestionSidebar: React.FC<QuestionSidebarProps> = ({
                   className="hover:bg-red-500/10 rounded-full p-1 sm:p-2 ml-1"
                   onClick={(e) => {
                     e.stopPropagation();
-                    openDeleteModal(q, index);
+                    openDeleteModal(index);
                   }}
                 >
                   <Trash2 className="h-3 w-3 sm:h-4 sm:w-4 text-red-500 hover:text-red-600" />

@@ -24,7 +24,7 @@ interface QuestionCardProps {
   selectedQuestion: number;
   questions: Question[] | Required<Question>[];
   handleQuestionTypeChange: (value: Question['type'], index: number) => void;
-  handleDeleteQuestion: (question: Question, index: number) => void;
+  handleDeleteQuestion: (index: number) => void;
   setQuestions: React.Dispatch<React.SetStateAction<Question[] | Required<Question>[]>>;
   handleReset: () => void;
   technologyId: string;
@@ -104,86 +104,6 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
     updateQuestion
   );
 
-  const handleSave = async () => {
-    const payload = {
-      technology_id: technologyId,
-      question: question.question,
-      correct_answer: question.correct_answer,
-      options: question.options.filter((opt) => opt.trim() !== ''),
-      time: question.time,
-      difficulty_level: question.difficulty_level,
-      type: question.type,
-      meta: question.meta || {},
-    };
-
-    let valid = true;
-
-    if (
-      (question.type === 'mcq' || question.type === 'multiple_select') &&
-      question.correct_answer.length === 0
-    ) {
-      toast.error('Please select at least one correct answer.');
-      valid = false;
-    }
-
-    if (
-      question.type === 'text' &&
-      (!question.correct_answer[0] || question.correct_answer[0].trim() === '')
-    ) {
-      toast.error('Please provide the correct answer for the fill-in-the-blank question.');
-      valid = false;
-    }
-
-    if (
-      question.type === 'code_snippet' &&
-      (!question.meta?.code || (question.meta.code as string)?.trim() === '')
-    ) {
-      toast.error('Please provide the codePlease provide the video URL snippet.');
-      valid = false;
-    }
-
-    if (
-      question.type === 'video' &&
-      question.meta?.videoToVideo &&
-      (!question.question?.trim() || question.question.trim() === '') &&
-      (!question.meta?.video_url || (question.meta?.video_url as string)?.trim() === '')
-    ) {
-      toast.error('Please provide either a question or a video URL.');
-      valid = false;
-    }
-
-    if (!valid) {
-      return;
-    }
-
-    try {
-      let response;
-      if (question.id) {
-        response = await update(payload);
-        toast.success('Question updated successfully!');
-      } else {
-        response = await trigger(payload);
-        toast.success('Question created successfully!');
-      }
-      if (response.success) {
-        setQuestions((prev) => {
-          const updatedQuestions = [...prev];
-          const questionIndex = updatedQuestions.findIndex((q) => q.id === question.id);
-          updatedQuestions[questionIndex] = response.data;
-          return updatedQuestions;
-        });
-        if (editQuestion && typeof onSave !== 'undefined') {
-          onSave();
-        }
-      }
-    } catch (error: unknown) {
-      console.log(error);
-
-      const axiosError = error as AxiosError<{ message: string }>;
-      toast.error(axiosError.response?.data?.message || 'Something went wrong.');
-    }
-
-  };
 
   const handleCorrectOptionChange = (
     optionIndex: number,
@@ -223,8 +143,6 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
 
   const handleVideoToVideo = () => {
     const updatedQuestions = [...questions];
-    console.log(updatedQuestions[selectedQuestion].meta);
-    
     if (updatedQuestions[selectedQuestion].meta) {
       let videoToVideo = updatedQuestions[selectedQuestion].meta.videoToVideo;
 
@@ -239,21 +157,8 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
     }
   };
 
-  // useEffect(() => {
-  //   if (!videoToVideo && questions && selectedQuestion && questions[selectedQuestion]) {
-  //     const updatedQuestions = [...questions];
-  //     if (updatedQuestions[selectedQuestion]?.meta?.video_url) {
-  //       delete updatedQuestions[selectedQuestion].meta.video_url;
-  //     }
-  //     setQuestions(updatedQuestions);
-  //   }
-  // }, [questions, selectedQuestion, videoToVideo]);
-
   return (
-    <Card
-      className={`h-[570px] flex flex-col 
-        }`}
-    >
+    <Card>
       <CardHeader>
         <CardTitle className="text-xl font-bold flex justify-between text-gray-900 dark:text-white">
           Question {selectedQuestion + 1}
@@ -294,7 +199,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
             placeholder="Difficulty"
             options={questionDifficultyOptions}
           />
-          <FormField
+          {/* <FormField
             parentClassName="w-full"
             label="Time (In minutes)"
             type="number"
@@ -307,7 +212,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
                 e.target.value > 0 && e.target.value < 100 ? e.target.value : 0;
               setQuestions(updatedQuestions);
             }}
-          />
+          /> */}
         </div>
 
         {question.type === 'video' ? (
@@ -443,7 +348,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
               <Button
                 variant="destructive"
                 onClick={() => {
-                  handleDeleteQuestion(question, selectedQuestion);
+                  handleDeleteQuestion(selectedQuestion);
                   setIsDeleteModalOpen(false);
                 }}
               >
@@ -457,9 +362,6 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
           <div className="mt-2 flex justify-end gap-4">
             <Button variant="outline" onClick={handleReset} disabled={isMutating || updating}>
               Reset
-            </Button>
-            <Button variant="outline" onClick={handleSave} disabled={isMutating || updating}>
-              Save
             </Button>
           </div>
         )}

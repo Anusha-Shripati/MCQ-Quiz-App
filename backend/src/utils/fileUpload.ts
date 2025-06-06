@@ -45,16 +45,16 @@ else {
             let path = uploadPath;
             if(req.params.examId) path+=`/${req.params.examId}`;
             if(req.query.fileType) path+=`/${req.query.fileType}`;
+            if(req.query.chunkFolder) path+=`/${req.query.chunkFolder}`;
             if (!fs.existsSync(path)) {
                 fs.mkdirSync(path, { recursive: true });
             }
-            console.log(path)
             cb(null, path);
         },
         filename: (req: Express.Request, file: Express.Multer.File, cb) => {
             const ext = path.extname(file.originalname) || `.${file.mimetype.split('/')[1]}`;
             const baseName = path.basename(file.originalname, ext);
-            cb(null, `${baseName}-${Date.now()}${ext}`);
+            cb(null, req.body.index && req.query.chunkFolder ? `${req.body.index}`: `${baseName}-${Date.now()}${ext}`);
         },
     });
 }
@@ -64,7 +64,7 @@ const fileFilter = (
     file: Express.Multer.File,
     cb: multer.FileFilterCallback
 ) => {
-    if (file.mimetype.startsWith('image/') || file.mimetype.startsWith('video/')) {
+    if (file.mimetype.startsWith('image/') || file.mimetype.startsWith('video/') || file.mimetype == 'application/octet-stream') {
         cb(null, true);
     } else {
         cb(new Error('Only image and video files are allowed!'));
@@ -85,14 +85,28 @@ export const convertWebmToMp4 = (inputPath: string): Promise<string> => {
     return new Promise((resolve, reject) => {
         const ext = path.extname(inputPath);
         if (ext == '.webm') {
-            
             const outputPath = inputPath.replace(ext, '.mp4');
             
             ffmpeg(inputPath)
             .output(outputPath)
+            .outputOptions([
+                '-c:v libx264',  // Use H.264 codec
+                '-preset ultrafast',  // Use fastest encoding preset
+                '-crf 28',  // Slightly lower quality but faster encoding
+                '-c:a aac',  // Use AAC audio codec
+                '-b:a 128k'  // Lower audio bitrate for faster processing
+            ])
+            .on('start', (commandLine) => {
+                console.log('Started FFmpeg with command:', commandLine);
+            })
+            .on('progress', (progress) => {
+                const percent = progress.percent ?? 0;
+                console.log(`Processing: ${Math.round(percent)}% done`);
+            })
             .on('end', () => {
-                
-                resolve(outputPath.split('/uploads/')[1]);
+                console.log('Conversion finished');
+                fs.rmSync(inputPath);
+                resolve(outputPath.split('uploads/')[1]);
             })
             .on('error', (err: any) => {
                 console.error('❌ FFmpeg error:', err.message);

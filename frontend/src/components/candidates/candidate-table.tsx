@@ -456,7 +456,7 @@ function CandidateTable() {
         className="flex-grow"
         currentPageStart={currentPageStart}
         currentPageEnd={currentPageEnd}
-        totalItems={0}
+        totalItems={totalItems}
         itemsPerPage={itemsPerPage}
         onPerPageChange={handlePerPageChange}
         currentPage={currentPage}

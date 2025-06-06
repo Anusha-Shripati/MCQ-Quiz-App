@@ -4,6 +4,7 @@ stages:
   - install
   - build
   # - deploy
+  - notify
 
 variables:
   # DATABASE_URL: "postgresql://postgres:postgres@143.110.254.46:5432/mcq_quiz_db?schema=public"
@@ -12,6 +13,7 @@ variables:
   # REDIS_HOST: "143.110.254.46"
   # REDIS_PORT: "6379"
   # ACCESS_SECRET: "mcq-quiz-secret"
+  GOOGLE_CHAT_WEBHOOK: "https://chat.googleapis.com/v1/spaces/AAQA-lR4kHg/messages?key=AIzaSyDdI0hCZtE6vySjMm-WEfRq3CPzqKqqsHI&token=A9lMqtlzYkoNaKU7IV5014cAN-hdv5BESiVSxGc_iEk"
 
 cache:
   paths:
@@ -78,3 +80,21 @@ build:
   #   url: http://143.110.254.46:9000
   only:
     - feat/deploy
+
+notify_success:
+  stage: notify
+  script:
+    - |
+      curl -X POST -H "Content-Type: application/json" \
+      -d "{\"text\":\"✅ Pipeline Success! Branch - $CI_COMMIT_REF_NAME, Commit - $CI_COMMIT_SHORT_SHA\"}" \
+      $GOOGLE_CHAT_WEBHOOK
+  when: on_success
+
+notify_failure:
+  stage: notify
+  script:
+    - |
+      curl -X POST -H "Content-Type: application/json" \
+      -d "{\"text\":\"❌ Pipeline Failed! Branch - $CI_COMMIT_REF_NAME, Commit - $CI_COMMIT_SHORT_SHA. Check logs at $CI_PROJECT_URL/-/jobs\"}" \
+      $GOOGLE_CHAT_WEBHOOK
+  when: on_failure

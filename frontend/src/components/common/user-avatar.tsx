@@ -32,7 +32,7 @@ const UserAvatar = () => {
         <div
           className={`flex items-center rounded-sm cursor-pointer gap-3`}
         >
-          <Avatar className="w-11 h-11 rounded-full">
+          <Avatar className="w-9 h-9 rounded-full">
             <Image
               src={`${user?.image || 'https://avatars.githubusercontent.com/u/47379519?v=4'}`}
               className="w-full h-full"

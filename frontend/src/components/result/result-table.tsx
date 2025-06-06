@@ -8,7 +8,7 @@ import { StatusOption } from '@/types/common.types';
 import { Result } from '@/types/exam.types';
 import { format } from 'date-fns';
 import dayjs from 'dayjs';
-import { Eye } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import qs from 'query-string';
 import { useEffect, useMemo, useState } from 'react';
@@ -22,6 +22,7 @@ import ResultExpandableRow from './result-expandable-row';
 function ResultTable() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [expandedRowId, setExpandedRowId] = useState<number | null>(null);
   const searchParams = useSearchParams();
   const {
     resultFilter,
@@ -156,6 +157,11 @@ function ResultTable() {
     window.history.pushState(null, '', `${pathname}?${newParams.toString()}`);
   };
 
+  const handleRowClick = (result: Result) => {
+
+    setExpandedRowId(expandedRowId === Number(result.id) ? null : Number(result.id));
+  };
+
   const currentPageStart = (currentPage - 1) * itemsPerPage + 1;
   const currentPageEnd = Math.min(currentPage * itemsPerPage, totalItems);
 
@@ -163,36 +169,6 @@ function ResultTable() {
   const currentItems = useMemo(() => {
     return resultList;
   }, [resultList]);
-
-  // const formatTestDuration = (startDate: string, endDate: string): string => {
-  //   const start = new Date(startDate);
-  //   const end = new Date(endDate);
-
-  //   const diffMs = Math.abs(end.getTime() - start.getTime());
-
-  //   const hours = roundOff(diffMs / (1000 * 60 * 60), 0);
-  //   const minutes = roundOff((diffMs % (1000 * 60 * 60)) / (1000 * 60), 0)
-
-  //   return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')} hours`;
-  // }
-  // const formatTestDateRange = (startDate: string, endDate: string): string => {
-  //   const start = new Date(startDate);
-  //   const end = new Date(endDate);
-
-  //   const startTime = start.toLocaleTimeString('en-US', {
-  //     hour: '2-digit',
-  //     minute: '2-digit',
-  //     hour12: true,
-  //   });
-
-  //   const endTime = end.toLocaleTimeString('en-US', {
-  //     hour: '2-digit',
-  //     minute: '2-digit',
-  //     hour12: true,
-  //   });
-
-  //   return `${startTime}–${endTime}`; // e.g., "09:00 AM–12:00 PM"
-  // };
 
   const columns = useMemo<Array<Column<Result>>>(
     () => [
@@ -210,9 +186,25 @@ function ResultTable() {
         key: 'technology',
         header: 'Technology',
         render: (row) => {
-          return row?.exam?.assessment?.technologies
-            ? row?.exam?.assessment?.technologies?.map((item) => item?.technology?.name).join(', ')
-            : '-';
+          const technologies = row?.exam?.assessment?.technologies || [];
+          const totalTechnologies = technologies.length;
+          const displayTechnologies = technologies.slice(0, 2).map(item => item?.technology?.name).filter(Boolean);
+          const remainingCount = totalTechnologies > 2 ? ` +${totalTechnologies - 2}` : '';
+
+          const allTechnologies = technologies.map(item => item?.technology?.name).filter(Boolean).join(', ');
+
+          return totalTechnologies > 0 ? (
+            <Tooltip>
+              <TooltipTrigger>
+                <span>
+                  {displayTechnologies.join(', ')}{remainingCount}
+                </span>
+              </TooltipTrigger>
+              <TooltipContent className="bg-gray-800 text-white p-2 rounded shadow-lg">
+                <p>{allTechnologies}</p>
+              </TooltipContent>
+            </Tooltip>
+          ) : '-';
         },
       },
       { key: 'experience', header: 'Exp. (Year)', render: (row) => row.exam?.candidate?.experience || '-' },
@@ -248,7 +240,6 @@ function ResultTable() {
           );
         }
       },
-
       {
         key: 'actions',
         header: 'Detailed',
@@ -257,8 +248,9 @@ function ResultTable() {
             href={`/results/${result.id}`}
             className="p-2 rounded-lg transition-all duration-200"
             target='_blank'
+            onClick={(e) => e.stopPropagation()} // Prevent row click when clicking the arrow
           >
-            <Eye className="h-4 w-4 text-gray-600 dark:text-gray-300" />
+            <ArrowRight className="h-4 w-4 text-gray-600 dark:text-gray-300" />
           </Link>
         ),
       },
@@ -289,6 +281,7 @@ function ResultTable() {
             expandableRow={expandableRow}
             className="h-[550px] animate-in fade-in duration-300"
             rowKey="id"
+            onRowClick={handleRowClick}
           />
         </div>
       </Pagination>

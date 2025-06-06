@@ -30,6 +30,10 @@ export interface TableProps<T> {
   onRowClick?: (row: T) => void;
   className?: string;
   rowKey: keyof T;
+  title?: string;
+  intersectionObserverRef?: React.RefObject<HTMLDivElement>;
+  isEndReached?: boolean;
+  isLoadingMore?: boolean;
 }
 
 const ReusableTable = <T extends object>({
@@ -38,6 +42,10 @@ const ReusableTable = <T extends object>({
   expandableRow,
   onRowClick,
   className,
+  title,
+  intersectionObserverRef,
+  isEndReached,
+  isLoadingMore,
 }: TableProps<T>) => {
   const [expandedRow, setExpandedRow] = useState<number | null>(null);
 
@@ -46,9 +54,20 @@ const ReusableTable = <T extends object>({
     setExpandedRow(expandedRow === id ? null : id);
   };
 
+  const handleRowClick = (row: T, rowIndex: number) => {
+    // If expandableRow is provided, toggle the row
+    if (expandableRow) {
+      toggleRow(rowIndex);
+    }
+    // If onRowClick is provided, call it
+    if (onRowClick) {
+      onRowClick(row);
+    }
+  };
+
   return (
     <div className={`overflow-x-auto ${className} overflow-y-auto`}>
-      <Table className={`min-w-full animate-in fade-in duration-300 ${rows.length === 0 ?'h-full':""}`}>
+      <Table className={`min-w-full animate-in fade-in duration-300 ${rows.length === 0 ? 'h-full' : ""}`}>
         <TableHeader className="sticky z-10">
           <TableRow className="bg-gradient-to-r from-blue-50 to-blue-100 dark:from-gray-700 dark:to-gray-800">
             {columns.map((column) => (
@@ -66,7 +85,7 @@ const ReusableTable = <T extends object>({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {rows.length === 0 && (
+          {rows.length === 0 && !intersectionObserverRef && (
             <TableRow>
               <TableCell
                 colSpan={columns.length + (expandableRow ? 1 : 0)}
@@ -79,9 +98,8 @@ const ReusableTable = <T extends object>({
           {rows.map((row, rowIndex) => (
             <React.Fragment key={rowIndex}>
               <TableRow
-                onClick={() => {
-                  onRowClick?.(row);
-                }}
+                title={title}
+                onClick={() => handleRowClick(row, rowIndex)}
                 className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200"
               >
                 {columns.map((column) => {
@@ -107,11 +125,7 @@ const ReusableTable = <T extends object>({
                 })}
                 {/* Add the expand/collapse icon if expandableRow is provided */}
                 {expandableRow && (
-                  <TableCell
-                    onClick={() => {
-                      toggleRow(rowIndex);
-                    }}
-                  >
+                  <TableCell>
                     {expandedRow === rowIndex ? (
                       <ChevronUp className="h-4 w-4" />
                     ) : (
@@ -133,6 +147,18 @@ const ReusableTable = <T extends object>({
               )}
             </React.Fragment>
           ))}
+          {
+            (isEndReached && !isLoadingMore) && (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length + (expandableRow ? 1 : 0)}
+                  className="text-center py-4"
+                >
+                  No more data available
+                </TableCell>
+              </TableRow>
+            )
+          }
         </TableBody>
       </Table>
     </div>

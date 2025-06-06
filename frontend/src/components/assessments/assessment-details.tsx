@@ -476,7 +476,7 @@ export default function AssessmentDetails() {
   }
 
   return (
-    <div className="p-6 bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-300">
+    <div className="p-6 bg-white dark:bg-card rounded-2xl shadow-sm order border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-300">
       <StatusWrapper
         error={error}
         loading={isLoading || isValidating}

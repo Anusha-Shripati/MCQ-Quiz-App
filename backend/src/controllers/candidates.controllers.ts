@@ -93,6 +93,7 @@ export class CandidateController {
   get = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const query = req.query;
+      console.log('Query parameters:', query);
       const candidates = await candidateService.getCandidates(query);
       return generateResponse(res, 200, candidates, true, 'Candidates fetched successfully');
     } catch (error) {

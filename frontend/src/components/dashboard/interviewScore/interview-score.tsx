@@ -112,7 +112,7 @@ function InterviewScore() {
 
   const handleNavigation = (row: ScoreData) => {
     router.push(`/results/${row.id}`);
-  };
+  }
 
   const columns = [
     { key: 'date', header: 'Date', render: (row: ScoreData) => row.date },
@@ -139,18 +139,18 @@ function InterviewScore() {
 
   return (
     <Card className="col-span-12 md:col-span-6 row-span-2">
-      <StatusWrapper loading={isLoading} reset={mutate} error={error} className="w-full h-full flex flex-col">
-        <CardHeader>
-          <div className="flex items-center justify-between space-x-1">
-            <div className="space-y-1">
-              <CardTitle>Interview Scores</CardTitle>
-              <CardDescription className="text-xs text-gray-600">
-                Performance of candidates.
-              </CardDescription>
-            </div>
-            <LanguageScoreSelect setFilters={handleSetFilter} filters={filters} />
+      <CardHeader>
+        <div className="flex items-center justify-between space-x-1">
+          <div className="space-y-1">
+            <CardTitle>Interview Scores</CardTitle>
+            <CardDescription className="text-xs text-gray-600">
+              Performance of candidates.
+            </CardDescription>
           </div>
-        </CardHeader>
+          <LanguageScoreSelect setFilters={handleSetFilter} filters={filters} />
+        </div>
+      </CardHeader>
+      <StatusWrapper loading={isLoading} reset={mutate} error={error} className="w-full h-full flex flex-col">
         <CardContent className="h-full flex-grow">
           <ReusableTable
             columns={columns}
@@ -159,9 +159,9 @@ function InterviewScore() {
             title={RESULTS_TITLE}
             rowKey="id"
             className="max-h-[500px]"
-            isLoadingMore={isLoadingMore}
             isEndReached={isEndReached}
             intersectionObserverRef={observerRef}
+            isLoadingMore={isLoadingMore}
           />
         </CardContent>
       </StatusWrapper>

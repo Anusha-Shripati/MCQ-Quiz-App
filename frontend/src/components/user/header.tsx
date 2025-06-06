@@ -10,7 +10,7 @@ import { usePathname } from 'next/navigation';
 function Header() {
   const [searchTerm, setSearchTerm] = useState('');
   const [open, setOpen] = useState(false);
-  const { setUserFilter, userCount, permissions } = useAuthStore();
+  const { setUserFilter, permissions } = useAuthStore();
   const pathname = usePathname();
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
@@ -22,11 +22,11 @@ function Header() {
   useEffect(() => {
     const timer = setTimeout(() => {
       const params = new URLSearchParams();
-      if(searchTerm){
+      if (searchTerm) {
         params.set('search', searchTerm);
       }
-        setUserFilter(searchTerm);
-    
+      setUserFilter(searchTerm);
+
       window.history.replaceState(null, '', `${pathname}?${params.toString()}`);
     }, 1000);
 
@@ -42,8 +42,7 @@ function Header() {
   }, []);
 
   return (
-    <div className="flex justify-between w-full">
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-white">All Users ({userCount || 0})</h1>
+    <div className="flex justify-end w-full mb-4">
       <div className="flex space-x-4 items-center">
         <Input
           type="text"

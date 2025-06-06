@@ -135,7 +135,7 @@ export class ResultService {
     const where = {
       deleted_at: null,
       ...(Object.keys(exam).length && {
-        exam
+        exam,
       }),
       ...(percentage && { percentage }),
     };

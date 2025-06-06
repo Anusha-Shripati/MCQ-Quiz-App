@@ -11,10 +11,10 @@ import { usePathname } from 'next/navigation';
 function Header() {
   const [searchTerm, setSearchTerm] = useState('');
   const [open, setOpen] = useState(false);
-  const { setRolesFilter, rolesCount } = useRoleStore();
+  const { setRolesFilter } = useRoleStore();
   const { user } = useAuthStore();
   const pathname = usePathname()
-  
+
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
   };
@@ -24,7 +24,7 @@ function Header() {
   useEffect(() => {
     const timer = setTimeout(() => {
       const params = new URLSearchParams();
-      if(searchTerm){
+      if (searchTerm) {
         params.set('search', searchTerm);
       }
       setRolesFilter(searchTerm);
@@ -44,8 +44,7 @@ function Header() {
   }, []);
 
   return (
-    <div className="flex justify-between w-full">
-      <h2 className="text-2xl font-bold text-gray-900 dark:text-white">All Roles ({rolesCount || 0})</h2>
+    <div className="flex justify-end w-full">
       <div className="flex space-x-4 items-center">
         <Input
           type="text"

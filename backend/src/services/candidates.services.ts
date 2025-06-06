@@ -226,9 +226,11 @@ export default class CandidatesService {
     page?: string;
     search?: string;
     assessmentFilter?: string | string[];
+    technologyFilter?: string | string[]; // Add technologyFilter parameter
   }) {
     const where: Prisma.CandidateWhereInput = { deleted_at: null };
 
+    // Handle search query
     if (query.search) {
       where.OR = [
         {
@@ -246,6 +248,7 @@ export default class CandidatesService {
       ];
     }
 
+    // Handle date range filter
     if (query.created) {
       try {
         const dateRange = JSON.parse(query.created)?.range;
@@ -264,10 +267,29 @@ export default class CandidatesService {
       }
     }
 
+    // Handle assessment filter
     if (query.assessmentFilter) {
       where.assessment_id = Array.isArray(query.assessmentFilter)
         ? { in: query.assessmentFilter }
         : query.assessmentFilter;
+    }
+
+    // Handle technology filter
+    if (query.technologyFilter) {
+      const techIds = Array.isArray(query.technologyFilter)
+        ? query.technologyFilter
+        : [query.technologyFilter];
+
+      // Find assessments that have these technologies
+      where.assessment = {
+        technologies: {
+          some: {
+            technology_id: {
+              in: techIds,
+            },
+          },
+        },
+      };
     }
 
     const page = Number(query.page) || 1;
@@ -318,6 +340,7 @@ export default class CandidatesService {
       skip,
       take: limit,
     });
+
     return {
       list: candidates,
       total,

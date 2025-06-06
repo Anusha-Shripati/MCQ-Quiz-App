@@ -133,7 +133,6 @@ function CandidateTable() {
       setCandidateListData(candidateData?.data?.total, candidateData?.data?.list);
     }
   }, [candidateData, setCandidateListData]);
-
   const handlePerPageChange = (value: string) => {
     setItemsPerPage(Number(value));
     setCurrentPage(1);
@@ -234,19 +233,69 @@ function CandidateTable() {
         key: 'exam.start_time',
         header: 'Test Date',
         render: (row) =>
-          row.exam?.start_time
-            ? format(new Date(row.exam.start_time), 'MMM dd, yyyy hh:mm a')
-            : '-',
+          row.exam?.start_time ? (
+            <span className="text-sm">
+              {format(new Date(row.exam.start_time), 'MMM dd, yyyy hh:mm a')}
+            </span>
+          ) : (
+            <span className="text-sm">-</span>
+          ),
       },
       { key: 'name', header: 'Name' },
-      { key: 'email', header: 'Email' },
+      {
+        key: 'email',
+        header: 'Email',
+        render: (row) => {
+          const email = row?.email || '';
+          const [localPart, domain] = email.split('@');
+
+          if (!localPart || !domain) return '-';
+
+          const visiblePart = localPart.slice(0, 5);
+          return (
+            <Tooltip>
+              <TooltipTrigger>
+                <span className="text-sm">
+                  {visiblePart}...@{domain}
+                </span>
+              </TooltipTrigger>
+              <TooltipContent className="bg-gray-800 text-white p-2 rounded shadow-lg">
+                {email}
+              </TooltipContent>
+            </Tooltip>
+          );
+        }
+      },
+
       {
         key: 'technology',
         header: 'Technology',
         render: (row) => {
-          return row.assessment?.technologies
-            ? row.assessment?.technologies?.map((item) => item?.technology?.name).join(', ')
-            : '-';
+          const totalTechnologies = row.assessment?.technologies?.length || 0;
+          const displayTechnologies = row.assessment?.technologies?.slice(0, 2) || [];
+          const remainingCount = totalTechnologies > 2 ? ` +${totalTechnologies - 2}` : '';
+
+          const allTechnologies = row.assessment?.technologies?.map(item => item?.technology?.name).filter(Boolean).join(', ');
+
+          return totalTechnologies > 0 ? (
+            <Tooltip>
+              <TooltipTrigger>
+                <span className="text-sm">
+                  {displayTechnologies.map((tech, index) => (
+                    <span key={index} className="mr-1">
+                      {tech?.technology?.name}
+                    </span>
+                  ))}
+                  {remainingCount}
+                </span>
+              </TooltipTrigger>
+              <TooltipContent className="bg-gray-800 text-white p-2 rounded shadow-lg">
+                {allTechnologies || 'No technologies available'}
+              </TooltipContent>
+            </Tooltip>
+          ) : (
+            <span className="text-sm">-</span>
+          );
         },
       },
       { key: 'experience', header: 'Exp.' },
@@ -265,7 +314,11 @@ function CandidateTable() {
       {
         key: 'created_at',
         header: 'Created',
-        render: (row) => format(new Date(row.created_at), 'MMM dd, yyyy hh:mm a'),
+        render: (row) => (
+          <span className="text-sm">
+            {format(new Date(row.created_at), 'MMM dd, yyyy hh:mm a')}
+          </span>
+        ),
       },
       {
         key: 'status',
@@ -278,15 +331,19 @@ function CandidateTable() {
           };
 
           const status = row.exam?.status as 'completed' | 'in_progress' | 'pending';
-
-
           const badgeClass = statusMap[status] || 'bg-gray-100 text-gray-800';
 
           return (
-            <span className={`px-3 py-1 text-sm font-medium rounded-full ${badgeClass}`}>
-              {status?.replace('_', ' ') || 'Unknown'} {row?.result?.length ? `(${row?.result[0]?.percentage?.toFixed(2)}) %`:""} 
-
-            </span>
+            <Tooltip>
+              <TooltipTrigger>
+                <div className={`inline-block px-3 py-1 text-sm font-medium rounded-md ${badgeClass} text-center`}>
+                  <div>{status?.replace('_', ' ') || 'Unknown'}</div>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent className="bg-gray-800 text-white p-2 rounded shadow-lg">
+                {row?.result?.length ? `(${row?.result[0]?.percentage?.toFixed(2)}) %` : "Exam not started"}
+              </TooltipContent>
+            </Tooltip>
           );
         }
       },
@@ -362,10 +419,10 @@ function CandidateTable() {
           <div>
             <p className="text-sm text-gray-500 dark:text-gray-300">Result</p>
             <div className="flex gap-2 flex-col">
-              {row.result.length>0 &&<p className="text-lg font-semibold text-blue-500">
+              {row.result.length > 0 && <p className="text-lg font-semibold text-blue-500">
                 {row?.result?.length ? row?.result[0]?.percentage?.toFixed(2) : "-"} %
               </p>}
-              {row.result.length>0 && <Link href={`/results/${row.result[0]?.id}`} target='_blank' className="text-sm text-blue-500 hover:underline">
+              {row.result.length > 0 && <Link href={`/results/${row.result[0]?.id}`} target='_blank' className="text-sm text-blue-500 hover:underline">
                 View Answer
               </Link>}
             </div>
@@ -438,7 +495,7 @@ function CandidateTable() {
                   >
                     {technology.percentage?.toFixed(2)} %
                     <small> (&nbsp;
-                      {technology.score.toFixed(1) } / {technology.total}
+                      {technology.score.toFixed(1)} / {technology.total}
                       &nbsp;) </small>
                   </th>
                 ))}

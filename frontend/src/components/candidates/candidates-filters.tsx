@@ -1,7 +1,7 @@
 'use client';
 import { cn } from '@/lib/utils';
 import { AssessmentOption, CandidateFilter, TechnologyOption } from '@/types/candidate.types';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { Button } from '../ui/form/button';
 import { AssessmentFilter } from './filters/assessment-filter';
 import { FilterOptions } from './filters/filter-options';
@@ -9,10 +9,11 @@ import { SearchFilter } from './filters/search-filter';
 import { TechnologyFilter } from './filters/technology-filter';
 import { api } from '@/lib/api';
 import { useCandidateStore } from '@/store/candidateStore';
-import { ListFilterIcon } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import useSWR from 'swr';
 import { assessmentEndpoint, technologyEndpoint } from '@/lib/endpoint';
+import useDebounce from '@/hooks/useDebounce';
+import { isEqual } from 'lodash';
 
 const Filters = () => {
   const { data: assessments } = useSWR(assessmentEndpoint.ALL, api.get, {
@@ -36,6 +37,12 @@ const Filters = () => {
     technologyOptions,
     candidateFilter,
   } = useCandidateStore();
+
+  // Keep track of whether the form is being updated from external source
+  const isExternalUpdate = useRef(false);
+  // Keep track of previous filter values for comparison
+
+  const prevFilterRef = useRef<CandidateFilter | null>(null);
 
   useEffect(() => {
     const assessmentOptions =
@@ -73,8 +80,15 @@ const Filters = () => {
   });
 
   const formData = watch();
+  const debouncedFormData = useDebounce(formData, 500);
 
   const getData = () => {
+    // Only proceed if this isn't an external update
+    if (isExternalUpdate.current) {
+      isExternalUpdate.current = false;
+      return;
+    }
+
     const payload: CandidateFilter = {
       searchQuery: formData.searchQuery || '',
       technologyFilter: (formData.technologyFilter || []).map((item: TechnologyOption) => ({
@@ -87,28 +101,42 @@ const Filters = () => {
       })),
       created: formData.created?.range
         ? {
-            days: formData.created?.days,
-            range: {
-              from: formData.created.range.from
-                ? new Date(formData.created.range.from.setHours(0, 0, 0, 0))
-                : undefined,
-              to: formData.created.range.to
-                ? new Date(formData.created.range.to.setHours(23, 59, 59, 999))
-                : undefined,
-            },
-          }
+          days: formData.created?.days,
+          range: {
+            from: formData.created.range.from
+              ? new Date(formData.created.range.from.setHours(0, 0, 0, 0))
+              : undefined,
+            to: formData.created.range.to
+              ? new Date(formData.created.range.to.setHours(23, 59, 59, 999))
+              : undefined,
+          },
+        }
         : undefined,
     };
+
+    // Skip update if payload is the same as previous
+    if (prevFilterRef.current && isEqual(prevFilterRef.current, payload)) {
+      return;
+    }
+
+    prevFilterRef.current = payload;
     setCandidateFilter(payload);
   };
 
+
+  useEffect(() => {
+    getData();
+  }, [debouncedFormData]);
+
   const clearAllFilters = () => {
+    prevFilterRef.current = defaultValues;
     reset(defaultValues);
     setCandidateFilter(defaultValues);
   };
 
   useEffect(() => {
-    reset({
+    // Skip if values are the same to prevent loop
+    const newFormData = {
       searchQuery: candidateFilter.searchQuery || '',
       technologyFilter: candidateFilter.technologyFilter || [],
       assessmentFilter: candidateFilter.assessmentFilter || [],
@@ -116,7 +144,13 @@ const Filters = () => {
         days: candidateFilter.created?.days || '',
         range: candidateFilter.created?.range || undefined,
       },
-    });
+    };
+
+    // Only reset if values are different
+    if (!isEqual(newFormData, formData)) {
+      isExternalUpdate.current = true;
+      reset(newFormData);
+    }
   }, [candidateFilter]);
 
   const isFilter = useMemo(() => {
@@ -156,24 +190,21 @@ const Filters = () => {
         />
 
         <FilterOptions formData={formData} setValue={setValue} register={register} />
-        <Button className="ml-2 cursor-pointer" onClick={getData}>
-          <ListFilterIcon size={30} />
-        </Button>
-      </div>
-      <div className="flex justify-end items-center gap-4 flex-wrap mt-2 ml-2">
-        {isFilter && (
-          <Button
-            variant="destructive"
-            onClick={clearAllFilters}
-            className={cn(
-              'h-11 px-4 text-sm font-medium whitespace-nowrap',
-              'bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700',
-              'focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800'
-            )}
-          >
-            Clear All
-          </Button>
-        )}
+        <div className="flex justify-end items-center gap-4 flex-wrap ml-2">
+          {isFilter && (
+            <Button
+              variant="destructive"
+              onClick={clearAllFilters}
+              className={cn(
+                'h-10 px-4 text-sm font-medium whitespace-nowrap',
+                'bg-red-400 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700',
+                'focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800'
+              )}
+            >
+              Clear All
+            </Button>
+          )}
+        </div>
       </div>
     </section>
   );

@@ -1,19 +1,20 @@
 'use client';
 import { cn } from '@/lib/utils';
 import { StatusOption } from '@/types/common.types';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { Button } from '../ui/form/button';
 import { AssessmentFilter } from '../candidates/filters/assessment-filter';
 import { SearchFilter } from '../candidates/filters/search-filter';
 import { TechnologyFilter } from '../candidates/filters/technology-filter';
 import { api } from '@/lib/api';
-import { ListFilterIcon } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import useSWR from 'swr';
 import { useResultStore } from '@/store/resultStore';
 import { ResultFilter } from '@/types/exam.types';
 import { PercentageFilter } from './percentage-options';
 import { assessmentEndpoint, technologyEndpoint } from '@/lib/endpoint';
+import useDebounce from '@/hooks/useDebounce';
+import { isEqual } from 'lodash';
 
 const Filters = () => {
   const { data: assessments } = useSWR(assessmentEndpoint.ALL, api.get, {
@@ -28,6 +29,7 @@ const Filters = () => {
     dedupingInterval: 60000,
     staleWhileRevalidate: true,
   });
+
   const {
     setResultFilter,
     setAssessmentOptions,
@@ -36,6 +38,11 @@ const Filters = () => {
     technologyOptions,
     resultFilter,
   } = useResultStore();
+
+  // Keep track of whether the form is being updated from external source
+  const isExternalUpdate = useRef(false);
+  // Keep track of previous filter values for comparison
+  const prevFilterRef = useRef<ResultFilter | null>(null);
 
   useEffect(() => {
     const assessmentOptions =
@@ -71,14 +78,37 @@ const Filters = () => {
     experienceTo: null,
     days: ""
   }
-  const { setValue, watch, reset, setError, handleSubmit, formState: { errors }, clearErrors } = useForm<ResultFilter>({
+
+  const { setValue, watch, reset, setError, formState: { errors }, clearErrors } = useForm<ResultFilter>({
     defaultValues,
   });
 
   const formData = watch();
+  const debouncedFormData = useDebounce(formData, 500);
 
+  const applyFilters = () => {
+    // Only proceed if this isn't an external update
+    if (isExternalUpdate.current) {
+      isExternalUpdate.current = false;
+      return;
+    }
 
-  const getData = handleSubmit(() => {
+    // Validate inputs before applying
+    if (
+      (formData.percentageFrom !== null && (Number(formData.percentageFrom) < 0 || Number(formData.percentageFrom) > 100)) ||
+      (formData.percentageTo !== null && (Number(formData.percentageTo) < 0 || Number(formData.percentageTo) > 100))
+    ) {
+      if (formData.percentageFrom !== null && (Number(formData.percentageFrom) < 0 || Number(formData.percentageFrom) > 100)) {
+        setError('percentageFrom', { message: 'Must be 0-100' });
+      }
+      if (formData.percentageTo !== null && (Number(formData.percentageTo) < 0 || Number(formData.percentageTo) > 100)) {
+        setError('percentageTo', { message: 'Must be 0-100' });
+      }
+      return;
+    }
+
+    // Clear any errors before applying filters
+    clearErrors();
 
     const payload: ResultFilter = {
       search: formData.search || '',
@@ -98,16 +128,30 @@ const Filters = () => {
       experienceTo: formData.experienceTo !== null ? Number(formData.experienceTo) : null,
       days: formData.days,
     };
+
+    // Skip update if payload is the same as previous
+    if (prevFilterRef.current && isEqual(prevFilterRef.current, payload)) {
+      return;
+    }
+
+    prevFilterRef.current = payload;
     setResultFilter(payload);
-  });
+  };
+
+  // Apply filters automatically when debounced form data changes
+  useEffect(() => {
+    applyFilters();
+  }, [debouncedFormData]);
 
   const clearAllFilters = () => {
+    prevFilterRef.current = defaultValues;
     reset(defaultValues);
     setResultFilter(defaultValues);
   };
 
   useEffect(() => {
-    reset({
+    // Skip if values are the same to prevent loop
+    const newFormData = {
       search: resultFilter.search || '',
       assessmentFilter: resultFilter.assessmentFilter || [],
       technologyFilter: resultFilter.technologyFilter || [],
@@ -118,7 +162,13 @@ const Filters = () => {
       experienceFrom: resultFilter.experienceFrom !== null ? Number(resultFilter.experienceFrom) : null,
       experienceTo: resultFilter.experienceTo !== null ? Number(resultFilter.experienceTo) : null,
       days: resultFilter.days || ""
-    });
+    };
+
+    // Only reset if values are different
+    if (!isEqual(newFormData, formData)) {
+      isExternalUpdate.current = true;
+      reset(newFormData);
+    }
   }, [resultFilter]);
 
   const isFilter = useMemo(() => {
@@ -136,7 +186,6 @@ const Filters = () => {
   return (
     <section className="w-full">
       <div className="flex flex-col md:flex-row md:items-start gap-2 flex-wrap mb-2">
-
         <SearchFilter
           searchQuery={formData.search}
           setSearchQuery={(value) => setValue('search', value)}
@@ -155,6 +204,7 @@ const Filters = () => {
           onChange={(value: StatusOption[]) => setValue('assessmentFilter', value)}
           options={assessmentOptions}
         />
+
         <div className='flex flex-col w-40'>
           <PercentageFilter
             filterName='Percentage'
@@ -171,6 +221,7 @@ const Filters = () => {
             errors?.percentageTo && <p className='text-red-500 text-sm'>{errors.percentageTo.message}</p>
           }
         </div>
+
         <div className='flex flex-col w-40'>
           <PercentageFilter
             filterName='Experience'
@@ -187,32 +238,29 @@ const Filters = () => {
             errors?.experienceTo && <p className='text-red-500 text-sm'>{errors.experienceTo.message}</p>
           }
         </div>
+
         <PercentageFilter
           filterName='Exam Date'
           formData={formData}
           setValue={setValue}
         />
-        <div className='flex fitems-center h-full mt-1'>
-          <Button className="ml-2 cursor-pointer" onClick={getData}>
-            <ListFilterIcon size={30} />
-          </Button>
+        <div className="flex justify-end items-center gap-4 flex-wrap mt-1 ml-2">
+          {isFilter && (
+            <Button
+              variant="destructive"
+              onClick={clearAllFilters}
+              className={cn(
+                'h-10 px-4 text-sm font-medium whitespace-nowrap',
+                'bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700',
+                'focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800'
+              )}
+            >
+              Clear All
+            </Button>
+          )}
         </div>
       </div>
-      <div className="flex justify-end items-center gap-4 flex-wrap mt-2 ml-2">
-        {isFilter && (
-          <Button
-            variant="destructive"
-            onClick={clearAllFilters}
-            className={cn(
-              'h-11 px-4 text-sm font-medium whitespace-nowrap',
-              'bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700',
-              'focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800'
-            )}
-          >
-            Clear All
-          </Button>
-        )}
-      </div>
+
     </section>
   );
 };

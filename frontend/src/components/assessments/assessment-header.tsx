@@ -1,18 +1,20 @@
 'use client';
 
 import { Button } from '@/components/ui/form/button';
-import { ListFilterIcon, PlusCircle } from 'lucide-react';
+import { PlusCircle } from 'lucide-react';
 import Link from 'next/link';
 import { Controller, useForm } from 'react-hook-form';
 import { DateRange, User } from '@/types/common.types';
 import { AssessmentFilters, useAssessmentStore } from '@/store/assessmentStore';
 import DatePickerWithRange from '../ui/form/date-range-picker';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { FormField } from '../common/form-field';
 import useSWR from 'swr';
 import { fetcher } from '@/lib/api';
 import { cn } from '@/lib/utils';
 import { userEndpoint } from '@/lib/endpoint';
+import useDebounce from '@/hooks/useDebounce';
+import { isEqual } from 'lodash';
 
 export default function AssessmentHeader() {
   const defaultValues: AssessmentFilters = {
@@ -29,19 +31,26 @@ export default function AssessmentHeader() {
     defaultValues,
   });
 
+  // Keep track of whether the form is being updated from external source
+  const isExternalUpdate = useRef(false);
+  // Keep track of previous filter values for comparison
+  const prevFilterRef = useRef<AssessmentFilters | null>(null);
 
   useEffect(() => {
-    reset({
-      name: filters.name || '',
-      created_by: filters.created_by || '',
-      created_duation: filters.created_duation || undefined,
-      view: filters.view || ''
-    })
-  }, [filters])
-
-
+    // Skip if values are the same to prevent loop
+    if (!isEqual(filters, watch())) {
+      isExternalUpdate.current = true;
+      reset({
+        name: filters.name || '',
+        created_by: filters.created_by || '',
+        created_duation: filters.created_duation || undefined,
+        view: filters.view || ''
+      });
+    }
+  }, [filters]);
 
   const allFields = watch();
+  const debouncedFields = useDebounce(allFields, 800);
 
   const headerUsersOptions = useMemo(() => {
     if (users) {
@@ -77,35 +86,49 @@ export default function AssessmentHeader() {
     }
   };
 
-  const handleFilterClick = () => {
-    setFilters(allFields);
-  };
-
-    const isFilter = useMemo(() => {
-      return Object.keys(allFields).some((key: string) => {
-        const typedKey = key as keyof AssessmentFilters;
-        if (typedKey === 'created_duation') {
-          return allFields[typedKey]?.from !== undefined || allFields[typedKey]?.to !== undefined;
-        } 
-        else if (typedKey === 'created_by') {
-          return allFields[typedKey] !== 'all';
-        } 
-        else {
-          return !!allFields[typedKey];
-        }
-      });
-    }, [allFields]);
-
-    const clearAllFilters=()=>{
-      reset(defaultValues);
-      setFilters(defaultValues)
+  // Automatically apply filters when debounced fields change
+  useEffect(() => {
+    if (isExternalUpdate.current) {
+      isExternalUpdate.current = false;
+      return;
     }
+
+    // Skip update if payload is the same as previous
+    if (prevFilterRef.current && isEqual(prevFilterRef.current, debouncedFields)) {
+      return;
+    }
+
+    prevFilterRef.current = debouncedFields;
+    setFilters(debouncedFields);
+  }, [debouncedFields, setFilters]);
+
+  const isFilter = useMemo(() => {
+    return Object.keys(allFields).some((key: string) => {
+      const typedKey = key as keyof AssessmentFilters;
+      if (typedKey === 'created_duation') {
+        return allFields[typedKey]?.from !== undefined || allFields[typedKey]?.to !== undefined;
+      }
+      else if (typedKey === 'created_by') {
+        return allFields[typedKey] !== 'all';
+      }
+      else {
+        return !!allFields[typedKey];
+      }
+    });
+  }, [allFields]);
+
+  const clearAllFilters = () => {
+    prevFilterRef.current = defaultValues;
+    reset(defaultValues);
+    setFilters(defaultValues);
+  };
 
   return (
     <div className="flex flex-col md:flex-row items-center gap-6">
-      <div className="flex flex-wrap items-center gap-3">
+
+      <div className="flex flex-wrap items-center gap-4 ml-auto">
         <FormField
-          className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-300 min-w-[200px]"
+          className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-300 min-w-[200px] h-10"
           type="text"
           value={allFields.name}
           placeholder="Search by name"
@@ -116,7 +139,7 @@ export default function AssessmentHeader() {
           control={control}
           render={({ field }) => (
             <FormField
-              className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-300 min-w-[200px]"
+              className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-300 min-w-[200px] h-10"
               type="select"
               onChange={field.onChange}
               value={field.value}
@@ -125,10 +148,6 @@ export default function AssessmentHeader() {
             />
           )}
         />
-      </div>
-
-      {/* View Mode and Create Button */}
-      <div className="flex flex-wrap items-center gap-4 ml-auto">
         {/* View Mode Buttons */}
         <div className="flex bg-white dark:bg-gray-800 rounded-lg p-1 shadow-sm border border-gray-200 dark:border-gray-600">
           <Button
@@ -151,9 +170,6 @@ export default function AssessmentHeader() {
           </Button>
           <DatePickerWithRange selected={allFields.created_duation} onSelect={handleDateChange} />
         </div>
-        <Button className="ml-2 cursor-pointer" onClick={handleFilterClick}>
-          <ListFilterIcon size={30} />
-        </Button>
         {isFilter && (
           <Button
             variant="destructive"

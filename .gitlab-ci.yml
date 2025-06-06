@@ -41,7 +41,7 @@ build:
   needs:
     - install_dependencies
   script:
-    - npm run prisma:generate
+    # - npm run prisma:generate
     - npm run build
   artifacts:
     name: "$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"

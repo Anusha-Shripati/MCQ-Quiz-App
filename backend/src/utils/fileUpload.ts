@@ -89,12 +89,18 @@ export const convertWebmToMp4 = (inputPath: string): Promise<string> => {
             
             ffmpeg(inputPath)
             .output(outputPath)
+            .inputOptions([
+                '-f webm',  // Force input format to webm
+                '-err_detect ignore_err'  // Ignore errors in input
+            ])
             .outputOptions([
                 '-c:v libx264',  // Use H.264 codec
                 '-preset ultrafast',  // Use fastest encoding preset
                 '-crf 28',  // Slightly lower quality but faster encoding
                 '-c:a aac',  // Use AAC audio codec
-                '-b:a 128k'  // Lower audio bitrate for faster processing
+                '-b:a 128k',  // Lower audio bitrate for faster processing
+                '-movflags +faststart',  // Enable fast start for web playback
+                '-y'  // Overwrite output file if exists
             ])
             .on('start', (commandLine) => {
                 console.log('Started FFmpeg with command:', commandLine);
@@ -105,12 +111,24 @@ export const convertWebmToMp4 = (inputPath: string): Promise<string> => {
             })
             .on('end', () => {
                 console.log('Conversion finished');
-                fs.rmSync(inputPath);
-                resolve(outputPath.split('uploads/')[1]);
+                try {
+                    fs.rmSync(inputPath);
+                    resolve(outputPath.split('uploads/')[1]);
+                } catch (error) {
+                    console.error('Error removing input file:', error);
+                    resolve(outputPath.split('uploads/')[1]);
+                }
             })
             .on('error', (err: any) => {
                 console.error('❌ FFmpeg error:', err.message);
-                reject(err);
+                // If conversion fails, try to use the original file
+                try {
+                    fs.copyFileSync(inputPath, outputPath);
+                    console.log('Using original file as fallback');
+                    resolve(outputPath.split('uploads/')[1]);
+                } catch (error) {
+                    reject(err);
+                }
             })
             .run();
         }

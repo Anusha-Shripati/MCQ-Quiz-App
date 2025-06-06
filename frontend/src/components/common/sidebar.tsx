@@ -53,17 +53,17 @@ export default function Sidebar() {
       } catch (error) {
         console.error('Error fetching permissions:', error);
         setPermissions(null, null);
-        document.cookie = `role=; path=/;`;
-        document.cookie = `permissions=; path=/;`;
-        document.cookie = 'token=; path=/;';
-        router.push('/');
+        // document.cookie = `role=; path=/;`;
+        // document.cookie = `permissions=; path=/;`;
+        // document.cookie = 'token=; path=/;';
+        // router.push('/');
         return null;
       }
     }
   };
 
   const { data: permissions, isLoading } = useSWR(`/user/${user?.id}`, getPermission, {
-    refreshInterval: 30000,
+    // refreshInterval: 30000,
   });
   const pathname = usePathname();
   useEffect(() => {

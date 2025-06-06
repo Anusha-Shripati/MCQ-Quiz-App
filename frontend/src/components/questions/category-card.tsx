@@ -2,9 +2,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import CategoryMenu from './category-menu';
 import { useRouter } from 'next/navigation';
-import { Eye, Plus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { Button } from '../ui/form/button';
-// import Link from "next/link";
 import { QuestionCategory } from '@/shared/types/app';
 
 export const CategoryCard = ({
@@ -32,20 +31,20 @@ export const CategoryCard = ({
     <Card className="shadow-md hover:shadow-lg transition-all duration-200">
       <CardHeader className="flex flex-row justify-between items-center border-b pb-2">
         <CardTitle className="text-lg font-semibold">{category.name}</CardTitle>
-        <div className="flex items-center justify-center">
-          {/* <Link href={`/questions/create-question/`}> */}
+        <div className="flex items-center justify-center gap-2">
           <Button
-            variant="outline"
-            size="default"
-            className="dark:border-gray-600 dark:text-white dark:hover:bg-gray-700 mb-2"
-            onClick={handleNavigate}
-          >
-            {/* <Plus className="h-4 w-4" /> Add */}
-            <Eye className="h-4 w-4 text-blue-500" />
-            View
-          </Button>
-          {/* </Link> */}
-          {/* <CategoryMenu category={category} handleNavigate={handleNavigate} /> */}
+              variant="outline"
+              size="default"
+              className="dark:border-gray-600 dark:text-white dark:hover:bg-gray-700"
+              onClick={handleAddQuestion}
+            >
+              <Plus className="h-4 w-4" /> Add Questions
+            </Button>
+            <CategoryMenu
+              category={category}
+              handleDelete={handleDelete}
+              handleNavigate={handleNavigate}
+            />
         </div>
       </CardHeader>
       <CardContent>
@@ -90,33 +89,7 @@ export const CategoryCard = ({
                 category.difficultyCount.hard}
             </span>
           </div>
-          <div className="flex items-center justify-between">
-            {/* <Link href={`/questions/create-question/`}> */}
-            <Button
-              variant="outline"
-              size="default"
-              className="dark:border-gray-600 dark:text-white dark:hover:bg-gray-700"
-              onClick={handleAddQuestion}
-            >
-              <Plus className="h-4 w-4" /> Add Questions
-            </Button>
-            {/* <Button
-            variant="outline"
-            size="default"
-            className="hover:bg-gray-600"
-            onClick={handleAddQuestion}
-          >
-            <Plus className="h-4 w-4" /> View
-          </Button> */}
-            {/* </Link> */}
-            <CategoryMenu
-              category={category}
-              // handleNavigate={handleNavigate}
-              handleDelete={handleDelete}
-            />
-          </div>
         </div>
-        {/* <CategoryActions category={category} /> */}
       </CardContent>
     </Card>
   );

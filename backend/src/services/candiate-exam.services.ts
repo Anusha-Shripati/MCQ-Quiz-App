@@ -2,7 +2,7 @@ import { Answers, Questions } from '@prisma/client';
 import { AppError } from '../common/errors/AppError';
 import { prisma } from '../db/prisma.client';
 import { UploadService } from './upload.services';
-import { Decimal } from '@prisma/client/runtime/library';
+import { Decimal, JsonObject } from '@prisma/client/runtime/library';
 
 
 interface Violation {
@@ -71,6 +71,7 @@ export class CandidateExamService {
         start_time: true,
         status: true,
         candidate: true,
+        meta:true,
         assessment: {
           select: {
             technologies: {
@@ -118,10 +119,13 @@ export class CandidateExamService {
         },
       },
     });
-
+    let violations = 0 
+    if(exam?.meta && Array.isArray((exam?.meta as JsonObject)?.violations)){
+      violations = ((exam?.meta as JsonObject)?.violations as {name:string}[]).length
+    }
     if (!exam) throw new AppError('Exam not found', 404);
-
-    return exam;
+    const {meta,...rest} = exam
+    return {...rest,violations};
   }
 
   async startExam(examId: string, candidateId: string) {

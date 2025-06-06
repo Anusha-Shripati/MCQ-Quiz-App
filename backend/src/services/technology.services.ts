@@ -1,6 +1,5 @@
-import { Technology } from '@prisma/client';
+import { Questions, Technology, Prisma } from '@prisma/client';
 import { prisma } from '../db/prisma.client';
-
 export class TechnologyService {
   async getTechnologies(filters: { name: string }): Promise<Technology[]> {
     const { name } = filters;
@@ -47,18 +46,43 @@ export class TechnologyService {
       };
     });
   }
-  async createTechnology(data: { name: string }): Promise<Technology | null> {
-    return prisma.technology.create({ data: data });
+  async createTechnology(data: { name: string, questions: Omit<Questions, 'id'>[] }) {
+
+    const result = await prisma.$transaction(async (tx) => {
+      const technology = await tx.technology.create({ data: { name: data.name } });
+      const arr = data.questions?.map((item) => ({
+        ...item,
+        technology_id: technology.id,
+        options: item.options as Prisma.InputJsonValue,
+        meta: item.meta as Prisma.InputJsonValue
+      }))
+      const questions = await tx.questions.createMany({ data: arr })
+      return questions
+    })
+    return result
+
   }
 
   async updateTechnology(
     id: string,
-    data: { name: string; deleted_at?: Date | null }
-  ): Promise<Technology | null> {
-    return prisma.technology.update({ where: { id }, data });
+    data: { name: string; deleted_at?: Date | null, questions: Omit<Questions, 'id'>[] }
+  ){
+    const result = await prisma.$transaction(async (tx) => {
+      await tx.questions.deleteMany({ where: { technology_id: id } })
+      const technology = await tx.technology.update({ where: { id }, data: { name: data.name, deleted_at: data.deleted_at } });
+      const arr = data.questions?.map((item) => ({
+        ...item,
+        technology_id: technology.id,
+        options: item.options as Prisma.InputJsonValue,
+        meta: item.meta as Prisma.InputJsonValue
+      }))
+      const questions = await tx.questions.createMany({ data: arr })
+      return questions
+    })
+    return result
   }
   async getTechnologyById(id: string) {
-    return prisma.technology.findUnique({ where: { id }, include: { questions: true } });
+    return prisma.technology.findUnique({ where: { id }, include: { questions:{ orderBy:{created_at:'asc'}} } });
   }
   async getTechnologyByName(name: string): Promise<Technology | null> {
     return prisma.technology.findUnique({ where: { name } });

@@ -14,8 +14,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         <div className="flex flex-col w-full">
           <HeaderPage />
           <div
-            className="flex-1 bg-secondary border overflow-y flex justify-center"
-            style={{ height: 'calc(100vh - 10rem)' }}
+            className="flex-grow bg-secondary border overflow-y flex justify-center"
           >
             {/* <ScrollArea className="px-6 w-full xl:max-w-[1600px]"> */}
             <ScrollArea  className="px-6 w-full">

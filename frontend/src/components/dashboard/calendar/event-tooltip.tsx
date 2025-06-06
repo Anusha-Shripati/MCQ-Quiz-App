@@ -74,7 +74,7 @@ function EventTooltip({ events, dateKey }: { events: CalendarEvent, dateKey: str
                                                 <div>
                                                     <span className="font-medium text-gray-700 dark:text-gray-300">Experience: </span>
                                                     <span className="text-gray-900 dark:text-gray-100">
-                                                        {`${item.meta?.experience} Y.` || <span className="italic text-gray-400">N/A</span>}
+                                                        {item.meta?.experience?item.meta?.experience +'Y.' :'N/A'}
                                                     </span>
                                                 </div>
                                                 {item.meta?.percentage && <div>

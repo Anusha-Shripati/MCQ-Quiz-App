@@ -53,14 +53,17 @@ function Snapshots(props: SnapshotsProps) {
                         return <Content value={item} key={index}>
                             <div className='flex gap-2 flex-wrap justify-start'>
                                 {props[item as keyof SnapshotsProps].map((img: SnapShot, index) => {
-                                    return <div className="flex flex-col cursor-pointer transition-transform"  key={index} onClick={() => toggle(item, index)}>
+                                    return <div className="flex flex-col cursor-pointer transition-transform" key={index} onClick={() => toggle(item, index)}>
                                         <div className="overflow-hidden rounded-lg mb-2">
                                             <Image
                                                 src={img.image}
                                                 alt="Snapshot"
                                                 height={180}
                                                 width={270}
-                                                className="object-cover transition-all duration-300 hover:brightness-90"
+                                                className="object-cover h-[180px] transition-all duration-300 hover:brightness-90"
+                                                onError={() => {
+                                                    img.image = '/fallback.png'
+                                                }}
                                             />
                                         </div>
                                         <div className="w-full text-center">
@@ -96,12 +99,12 @@ function Snapshots(props: SnapshotsProps) {
                         >
                             {props[selected as keyof SnapshotsProps].map((img, idx) => (
                                 <div key={idx} className="flex flex-col items-center">
-                                    <Image
+                                    <img
                                         src={img.image}
                                         alt="Snapshot"
                                         className="max-h-[70vh] object-contain rounded-lg shadow-lg"
                                     />
-                                    <p className="legend bg-black/70 text-white px-4 py-2 rounded-b-lg " style={{ width: '20%',margin:'0px',left:'auto' }}>
+                                    <p className="legend bg-black/70 text-white px-4 py-2 rounded-b-lg " style={{ width: '20%', margin: '0px', left: 'auto' }}>
                                         <span>{renderDateTime(img.timestamp)} </span>
                                     </p>
                                 </div>

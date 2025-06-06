@@ -15,7 +15,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog';
-import { Edit, Trash, MoreVertical } from 'lucide-react';
+import { Edit, Trash, MoreVertical, Eye, EyeIcon } from 'lucide-react';
 import { Button } from '../ui/form/button';
 import { QuestionCategory } from '@/shared/types/app';
 import { useRouter } from 'next/navigation';
@@ -33,9 +33,11 @@ async function deleteCategory(url: string) {
 const CategoryMenu = ({
   category,
   handleDelete,
+  handleNavigate
 }: {
   category: QuestionCategory;
   handleDelete: (id: string) => void;
+  handleNavigate: () => void;
 }) => {
   const router = useRouter();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -43,11 +45,7 @@ const CategoryMenu = ({
   const handleEditCategory = (category: string) => {
     router.push(`/questions/create-question/${category}`);
   };
-
-  // const handleDeleteCategory = (category: QuestionCategory) => {
-  //   console.log(category);
-  // };
-  const { trigger } = useSWRMutation(`${technologyEndpoint.TECHNOLOGY_BY_ID}/${category.id}`, deleteCategory);
+  const { trigger } = useSWRMutation(`${technologyEndpoint.TECHNOLOGY_BY_ID}/${category.id}`, deleteCategory); 
   const handleDeleteCategory = async () => {
     try {
       await trigger();
@@ -76,19 +74,19 @@ const CategoryMenu = ({
           <span className="text-gray-900 dark:text-gray-200">Edit</span>
         </DropdownMenuItem>
         <DropdownMenuItem
+          onClick={() => handleNavigate()}
+          className="flex items-center space-x-2 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"
+        >
+          <EyeIcon className="h-4 w-4 text-gray-600 dark:text-gray-300" />
+          <span className="text-gray-900 dark:text-gray-200">View</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem
           onClick={() => setIsDeleteModalOpen(true)}
           className="flex items-center space-x-2 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"
         >
           <Trash className="h-4 w-4 text-red-500" />
           <span className="text-gray-900 dark:text-gray-200">Delete</span>
         </DropdownMenuItem>
-        {/* <DropdownMenuItem
-          onClick={() => handleNavigate()}
-          className="flex items-center space-x-2 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"
-        >
-          <Eye className="h-4 w-4 text-blue-500" />
-          <span className="text-gray-900 dark:text-gray-200">View</span>
-        </DropdownMenuItem> */}
       </DropdownMenuContent>
 
       <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>

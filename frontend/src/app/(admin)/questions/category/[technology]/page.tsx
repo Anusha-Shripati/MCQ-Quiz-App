@@ -115,14 +115,13 @@ const CategoryPage = () => {
     updatedQuestions[index].options = ['', '', '', '', '', ''];
     updatedQuestions[index].correct_answer = [];
     updatedQuestions[index].meta = {};
-    if (value === 'code_snippet' || value === 'code_editor') {
-
+    if (value === 'code_snippet' || value === 'code_editor' || value === 'text') {
       updatedQuestions[index].correct_answer = [];
+      updatedQuestions[index].options = [];
       if (updatedQuestions[index]?.meta?.code === undefined) {
         updatedQuestions[index].meta = { code: '' };
       }
     }
-
     setQuestionsData(updatedQuestions);
   };
 

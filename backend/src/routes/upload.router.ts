@@ -7,5 +7,6 @@ const uploadController = new UploadController();
 
 
 router.post('/', upload.single('file'), uploadController.uploadFile);
+router.post('/chunk', upload.single('chunk'),uploadController.uploadChunk);
 
 export default router;

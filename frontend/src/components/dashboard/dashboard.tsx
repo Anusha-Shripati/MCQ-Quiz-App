@@ -1,11 +1,9 @@
 import { Card } from '@/components/ui/card';
-import CalendarCard from './calender/calendar-card';
+import CalendarCard from './calendar/calendar-card';
 import InterviewStatics from '@/components/dashboard/interview-statics';
 import Questions from '@/components/dashboard/questions';
 import InterviewCount from './interview-count';
 import InterviewScore from './interviewScore/interview-score';
-// import { ThemeToggle } from "../common/theme-toggle";
-// import LogoutButton from "../common/logout-button";
 
 export default function Dashboard() {
   return (

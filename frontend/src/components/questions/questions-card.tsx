@@ -65,7 +65,7 @@ export const QuestionCard = ({
             {questionType[question.type as keyof typeof questionType]?.label || 'Unknown'}
           </Badge>
         </div>
-        <ul className="space-y-2">
+       {(question.type == "mcq" || question.type == "multiple_select") && <ul className="space-y-2">
           {question.options?.map((option, index) => (
             <li
               key={index}
@@ -103,7 +103,7 @@ export const QuestionCard = ({
           ) : (
             ''
           )}
-        </ul>
+        </ul>}
         <div className="flex justify-between items-center mt-4 text-sm">
           <div className="space-x-1">
             <Button variant="link" className="text-blue-500 hover:underline" onClick={handleEdit}>

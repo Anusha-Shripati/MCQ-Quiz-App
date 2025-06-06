@@ -69,7 +69,7 @@ export function PaginationControls({
   };
 
   return (
-    <div className="flex flex-col sm:flex-row justify-between items-center mt-6 px-4 space-y-4 sm:space-y-0">
+    <div className="flex flex-col sm:flex-row justify-between items-center  px-4 space-y-4 sm:space-y-0">
       <div className="flex items-center space-x-2">
         <Button
           variant="outline"

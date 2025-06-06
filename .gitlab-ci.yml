@@ -7,44 +7,51 @@ stages:
   - notify
 
 variables:
-  # DATABASE_URL: "postgresql://postgres:postgres@143.110.254.46:5432/mcq_quiz_db?schema=public"
-  # FRONTEND_URL: "http://143.110.254.46:9000"
-  # BACKEND_PORT: "9002"
-  # REDIS_HOST: "143.110.254.46"
-  # REDIS_PORT: "6379"
-  # ACCESS_SECRET: "mcq-quiz-secret"
   GOOGLE_CHAT_WEBHOOK: "https://chat.googleapis.com/v1/spaces/AAQA-lR4kHg/messages?key=AIzaSyDdI0hCZtE6vySjMm-WEfRq3CPzqKqqsHI&token=A9lMqtlzYkoNaKU7IV5014cAN-hdv5BESiVSxGc_iEk"
 
+# Global cache configuration
 cache:
+  key: ${CI_COMMIT_REF_SLUG}
   paths:
-    - backend/node_modules/
-    - frontend/node_modules/
-    - node_modules/
+    - .npm/
+  policy: pull
 
-install_dependencies:
-  stage: install
-  script:
-    - npm install
-    - cd backend && npm install
-    - cd ../frontend && npm install
-    - cd ..
-  artifacts:
+.node_modules_cache: &node_modules_cache
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}-node-modules
     paths:
       - backend/node_modules/
       - frontend/node_modules/
       - node_modules/
+    policy: pull-push
+
+install_dependencies:
+  stage: install
+  <<: *node_modules_cache
+  script:
+    - npm ci --cache .npm --prefer-offline
+    - cd backend && npm ci --cache .npm --prefer-offline
+    - cd ../frontend && npm ci --cache .npm --prefer-offline
+    - cd ..
 
 build:
   stage: build
+  <<: *node_modules_cache
+  needs:
+    - install_dependencies
   script:
     - npm run prisma:generate
     - npm run build
   artifacts:
+    name: "$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA"
+    expire_in: 1 week
     paths:
-      - backend/dist
-      - frontend/.next
-      - backend/node_modules
-      - frontend/node_modules
+      - backend/dist/
+      - frontend/.next/
+    exclude:
+      - backend/node_modules/**/*
+      - frontend/node_modules/**/*
+      - node_modules/**/*
 
 # deploy:
 #   stage: deploy
@@ -83,6 +90,8 @@ build:
 
 notify_success:
   stage: notify
+  needs:
+    - build
   script:
     - |
       curl -X POST -H "Content-Type: application/json" \

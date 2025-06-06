@@ -12,7 +12,6 @@ import { Button } from '@/components/ui/form/button';
 import { Input } from '@/components/ui/form/input';
 import { api } from '@/lib/api';
 import { Question } from '@/shared/types/app';
-import { AxiosError } from 'axios';
 import React, { useMemo, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import useSWRMutation from 'swr/mutation';
@@ -61,8 +60,6 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
   handleDeleteQuestion,
   setQuestions,
   handleReset,
-  technologyId,
-  onSave,
   onCancel,
   editQuestion,
 }) => {
@@ -82,7 +79,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
         { value: 'mcq', label: 'Radio Select' },
         { value: 'text', label: 'Fill in the Blanks' },
         { value: 'code_snippet', label: 'Code Snippet' },
-        { value: 'code_editor', label: 'Code Editor' }, 
+        { value: 'code_editor', label: 'Code Editor' },
         { value: 'video', label: 'Video' },
       ] as { value: Question['type']; label: string }[],
     []
@@ -98,8 +95,8 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
     []
   );
 
-  const { trigger, isMutating } = useSWRMutation(questionEndpoint.CREATE, createQuestion);
-  const { trigger: update, isMutating: updating } = useSWRMutation(
+  const { isMutating } = useSWRMutation(questionEndpoint.CREATE, createQuestion);
+  const { isMutating: updating } = useSWRMutation(
     `${questionEndpoint.QUESTION_BY_ID}/${question?.id}`,
     updateQuestion
   );

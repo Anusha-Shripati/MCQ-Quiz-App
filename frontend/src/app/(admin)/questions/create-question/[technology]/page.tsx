@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/form/button';
 import QuestionCard from '@/components/questions/create-question-card';
 import QuestionSidebar from '@/components/questions/create-question-sidebar';
@@ -15,8 +15,6 @@ import StatusWrapper from '@/components/common/status-wrapper';
 import { FormField } from '@/components/common/form-field';
 import useSWRMutation from 'swr/mutation';
 import { isValidUUID, showSingleToast } from '@/lib/utils';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/form/input';
 import { isAxiosError } from 'axios';
 import { questionEndpoint, technologyEndpoint } from '@/lib/endpoint';
 // import { isValidObjectId } from '@/lib/utils';
@@ -52,7 +50,7 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
   const router = useRouter();
   const [selectedQuestion, setSelectedQuestion] = useState<number>(0);
   const [name, setName] = useState<string>('');
-  const [isValidTechnology, setValidTechnology] = useState<boolean>(isValidUUID(params.technology));
+  const [isValidTechnology] = useState<boolean>(isValidUUID(params.technology));
   const { data, isLoading, error, isValidating, mutate: questionMutate } = useSWR(
     isValidTechnology ? `${questionEndpoint.LIST}?technology_id=${technologyId}` : null,
     api.get
@@ -148,11 +146,11 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
 
   const handleSave = async () => {
     let message = ""
-    questions.forEach((q,index) => {
+    questions.forEach((q, index) => {
       if (q.question.trim() == "") {
         message += `Please enter question ${index + 1} `
       }
-      else if((q.type == "mcq" || q.type == "multiple_select" || q.type == "text" ) && q.correct_answer.length == 0){
+      else if ((q.type == "mcq" || q.type == "multiple_select" || q.type == "text") && q.correct_answer.length == 0) {
         message += `Please select correct answer for question ${index + 1} `
       }
     })

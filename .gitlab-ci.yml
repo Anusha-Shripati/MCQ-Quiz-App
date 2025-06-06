@@ -29,10 +29,11 @@ install_dependencies:
   stage: install
   <<: *node_modules_cache
   script:
-    - npm ci --cache .npm --prefer-offline
-    - cd backend && npm ci --cache .npm --prefer-offline
-    - cd ../frontend && npm ci --cache .npm --prefer-offline
-    - cd ..
+    - npm ci --cache .npm --prefer-offline &
+    - cd backend && npm ci --cache .npm --prefer-offline &
+    - cd ../frontend && npm ci --cache .npm --prefer-offline &
+    - wait
+    - echo "All installations completed successfully"
 
 build:
   stage: build

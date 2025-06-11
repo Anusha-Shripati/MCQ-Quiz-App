@@ -72,4 +72,17 @@ export class QuestionsController {
       next(error);
     }
   };
+
+ downloadQuestionFile = async (req: Request, res: Response, next: NextFunction) => {
+  console.log('Downloading question file');
+  try {
+    const buffer = await questionsService.downloadQuestionFile();
+
+    res.setHeader('Content-Disposition', 'attachment; filename="bulk-question-template.xlsx"');
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    return res.send(buffer);
+  } catch (error) {
+    next(error);
+  }
+};
 }

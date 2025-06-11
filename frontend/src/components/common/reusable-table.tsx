@@ -9,7 +9,7 @@ import {
   TableBody,
   TableCell,
 } from '@/components/ui/table';
-import { ChevronDown, ChevronUp } from 'lucide-react'; // Add expand/collapse icons
+
 
 // Define interfaces
 export interface Column<T> {
@@ -34,6 +34,7 @@ export interface TableProps<T> {
   intersectionObserverRef?: React.RefObject<HTMLDivElement>;
   isEndReached?: boolean;
   isLoadingMore?: boolean;
+  expandedRows?: number[]; // Optional prop to control expanded rows
 }
 
 const ReusableTable = <T extends object>({
@@ -46,17 +47,20 @@ const ReusableTable = <T extends object>({
   intersectionObserverRef,
   isEndReached,
   isLoadingMore,
+
 }: TableProps<T>) => {
-  const [expandedRow, setExpandedRow] = useState<number | null>(null);
+  const [expandedRow, setExpandedRow] = useState<number[]>([]);
 
   // Toggle expandable row
   const toggleRow = (id: number) => {
-    setExpandedRow(expandedRow === id ? null : id);
+    console.log('Toggling row:', id);
+    setExpandedRow(expandedRow.includes(id) ? expandedRow.filter(rowId => rowId !== id) : [...expandedRow, id]);
   };
 
   const handleRowClick = (row: T, rowIndex: number) => {
     // If expandableRow is provided, toggle the row
     if (expandableRow) {
+      console.log('Row clicked:', row);
       toggleRow(rowIndex);
     }
     // If onRowClick is provided, call it
@@ -123,19 +127,10 @@ const ReusableTable = <T extends object>({
                     </TableCell>
                   );
                 })}
-                {/* Add the expand/collapse icon if expandableRow is provided */}
-                {expandableRow && (
-                  <TableCell>
-                    {expandedRow === rowIndex ? (
-                      <ChevronUp className="h-4 w-4" />
-                    ) : (
-                      <ChevronDown className="h-4 w-4" />
-                    )}
-                  </TableCell>
-                )}
+               
               </TableRow>
               {/* Render expandable content if expandableRow is provided and the row is expanded */}
-              {expandableRow && expandedRow === rowIndex && (
+              {expandableRow && expandedRow.includes(rowIndex) && (
                 <TableRow>
                   <TableCell
                     colSpan={columns.length + (expandableRow ? 1 : 0)}

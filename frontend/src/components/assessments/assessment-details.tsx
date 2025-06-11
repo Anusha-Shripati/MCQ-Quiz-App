@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { ChevronDown, ChevronUp, Edit, Trash2, Clock, User, Calendar, BookOpenCheck } from 'lucide-react';
+import {  Edit, Trash2, Clock, User, Calendar, BookOpenCheck } from 'lucide-react';
 import { Button } from '@/components/ui/form/button';
 import AssessmentEdit from './assessment-edit';
 import { toast } from 'react-hot-toast';
@@ -17,6 +17,7 @@ import StatusWrapper from '../common/status-wrapper';
 import { assessmentEndpoint } from '@/lib/endpoint';
 import { DeleteDialog } from '../common/delete-dialog';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { HeightTransition } from '@/components/ui/animations/height-transition';
 // import StatusWrapper from "../common/status-wrapper";
 
 interface AssessmentItemProps {
@@ -78,6 +79,10 @@ function AssessmentItem({
     },
     [assessmentId]
   );
+  // Prevent event bubbling from action buttons
+  const handleActionClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
   const onDelete = (assessmentId: string) => {
     setDeleteId(assessmentId)
     setDeleteOpen(true)
@@ -85,7 +90,13 @@ function AssessmentItem({
   return (
     <div className="border-b">
       <DeleteDialog onDelete={() => handleDelete(deleteId as string)} setOpen={setDeleteOpen} isOpen={deleteOpen} />
-      <div className="p-5 flex items-center justify-between">
+      <div
+        className="px-6 py-8 flex items-center justify-between cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50 group transition-colors duration-200"
+        onClick={onToggle}
+        role="button"
+        aria-expanded={isExpanded}
+        aria-controls={`tech-breakdown-${assessmentId}`}
+      >
         <div className="flex-1">
           <div className="flex items-center gap-3 mb-3">
             <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100 group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors duration-200">
@@ -162,7 +173,7 @@ function AssessmentItem({
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2" onClick={handleActionClick}>
           {/* <Button
             variant="ghost"
             size="icon"
@@ -223,7 +234,7 @@ function AssessmentItem({
             </TooltipContent>
           </Tooltip>
 
-          <Tooltip>
+          {/* <Tooltip>
             <TooltipTrigger>
               <Button
                 variant="ghost"
@@ -231,25 +242,26 @@ function AssessmentItem({
                 onClick={onToggle}
                 className="h-10 w-10 rounded-full hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-200"
               >
-                {isExpanded ? (
-                  <ChevronUp className="h-5 w-5 text-gray-600 dark:text-gray-400" />
-                ) : (
+                <div className={`transition-transform duration-300 ${isExpanded ? 'rotate-180' : 'rotate-0'}`}>
                   <ChevronDown className="h-5 w-5 text-gray-600 dark:text-gray-400" />
-                )}
+                </div>
               </Button>
             </TooltipTrigger>
             <TooltipContent>
               <p>{isExpanded ? 'Collapse Details' : 'Expand Details'}</p>
             </TooltipContent>
-          </Tooltip>
-        </div >
-      </div >
+          </Tooltip> */}
+        </div>
+      </div>
 
-      {isExpanded && technologies && (
-        <div className="border-t border-gray-200 dark:border-gray-600 dark:bg-gray-750 p-6">
+      <HeightTransition isVisible={isExpanded && !!technologies}>
+        <div
+          id={`tech-breakdown-${assessmentId}`}
+          className="border-t border-gray-200 dark:border-gray-600 dark:bg-gray-750 p-6"
+        >
           <h4 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-6 flex items-center gap-2">
             <div className="w-1 h-6 bg-blue-600 dark:bg-blue-400 rounded-full"></div>
-            Technology Breakdown
+            Technology Breakdown  {(title ? `(${title})` : '')}
           </h4>
 
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-600 overflow-hidden">
@@ -277,7 +289,7 @@ function AssessmentItem({
               <div className="text-center font-semibold text-gray-700 dark:text-gray-300">Percentage</div>
             </div>
 
-            {technologies.map((tech, index) => (
+            {technologies?.map((tech, index) => (
               <div
                 key={tech.id}
                 className={`grid grid-cols-6 gap-4 p-4 dark:hover:bg-gray-750 transition-colors duration-150 ${index % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-25 dark:bg-gray-775'
@@ -347,14 +359,14 @@ function AssessmentItem({
             </div>
           </div>
         </div>
-      )
-      }
+      </HeightTransition>
     </div >
   );
 }
 
 export default function AssessmentDetails() {
-  const [expandedId, setExpandedId] = useState<string>('mern');
+  // Change from string to string array to track multiple expanded items
+  const [expandedIds, setExpandedIds] = useState<string[]>([]);
   const [editing, setEditing] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [itemsPerPage, setItemsPerPage] = useState<number>(10);
@@ -469,6 +481,15 @@ export default function AssessmentDetails() {
   }, []);
 
 
+  // Toggle function to add/remove IDs from the expandedIds array
+  const toggleExpanded = (id: string) => {
+    setExpandedIds(prev => 
+      prev.includes(id) 
+        ? prev.filter(item => item !== id) 
+        : [...prev, id]
+    );
+  };
+
   if (editing) {
     return currentAssessment ? (
       <AssessmentEdit assessment={currentAssessment} onSave={handleSave} onCancel={handleCancel} />
@@ -476,47 +497,47 @@ export default function AssessmentDetails() {
   }
 
   return (
-    <div className="p-6 bg-white dark:bg-card rounded-2xl shadow-sm order border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-300">
-      <StatusWrapper
-        error={error}
-        loading={isLoading || isValidating}
-        reset={assessmentMutate}
-        className="min-h-[700px] flex"
+    <StatusWrapper
+      error={error}
+      loading={isLoading || isValidating}
+      reset={assessmentMutate}
+      className="min-h-[74vh] flex"
+    >
+      <Pagination
+        className="flex-grow"
+        currentPageStart={currentPageStart}
+        currentPageEnd={currentPageEnd}
+        totalItems={assessmentsData?.data?.total || 0}
+        itemsPerPage={itemsPerPage}
+        onPerPageChange={handlePerPageChange}
+        currentPage={currentPage}
+        onPageChange={handlePageChange}
+        loading={false}
       >
-        <Pagination
-          className="flex-grow"
-          currentPageStart={currentPageStart}
-          currentPageEnd={currentPageEnd}
-          totalItems={assessmentsData?.data?.total || 0}
-          itemsPerPage={itemsPerPage}
-          onPerPageChange={handlePerPageChange}
-          currentPage={currentPage}
-          onPageChange={handlePageChange}
-          loading={false}
-        >
-          <div className="h-[650px] overflow-auto pr-2 py-5 space-y-8 scrollbar-thin scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-500 scrollbar-track-transparent">
-            {!error &&
-              assessments &&
-              assessments.map((assessment: Required<Assessment>) => (
-                <AssessmentItem
-                  key={assessment.id}
-                  assessmentId={assessment.id}
-                  title={assessment.name}
-                  createdBy={assessment.created_by_user?.name || ''}
-                  createdDate={assessment.created_at}
-                  duration={assessment.duration}
-                  pass_criteria={assessment.pass_criteria}
-                  technologies={assessment.technologies}
-                  isExpanded={expandedId === assessment.id}
-                  onToggle={() => setExpandedId(expandedId === assessment.id ? '' : assessment.id)}
-                  handleEdit={() => handleEdit(assessment)}
-                  handleDelete={handleDelete}
-                />
-              ))}
-              {assessments.length ==0 &&<div className='w-full h-full flex justify-center items-center'>No data found</div>}
-          </div>
-        </Pagination>
-      </StatusWrapper >
-    </div >
+        <div className="h-[65vh] overflow-auto scrollbar-thin scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-500 scrollbar-track-transparent">
+          {!error &&
+            assessments &&
+            assessments.map((assessment: Required<Assessment>) => (
+              <AssessmentItem
+                key={assessment.id}
+                assessmentId={assessment.id}
+                title={assessment.name}
+                createdBy={assessment.created_by_user?.name || ''}
+                createdDate={assessment.created_at}
+                duration={assessment.duration}
+                pass_criteria={assessment.pass_criteria}
+                technologies={assessment.technologies}
+                // Update to check if ID exists in the expandedIds array
+                isExpanded={expandedIds.includes(assessment.id)}
+                // Update toggle to use the new toggleExpanded function
+                onToggle={() => toggleExpanded(assessment.id)}
+                handleEdit={() => handleEdit(assessment)}
+                handleDelete={handleDelete}
+              />
+            ))}
+          {assessments.length == 0 && <div className='w-full h-full flex justify-center items-center'>No data found</div>}
+        </div>
+      </Pagination>
+    </StatusWrapper>
   );
 }

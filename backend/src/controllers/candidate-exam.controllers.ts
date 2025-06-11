@@ -184,4 +184,6 @@ export class CandidateExamController {
       next(error);
     }
   };
+
+ 
 }

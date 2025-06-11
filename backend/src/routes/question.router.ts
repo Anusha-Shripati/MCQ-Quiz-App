@@ -7,6 +7,7 @@ import { authenticateAndAuthorize } from '../middlewares/auth.middleware';
 
 const questionRouter = express.Router();
 const questionsController = new QuestionsController();
+questionRouter.get("/download", authenticateAndAuthorize('questions.can_read'), asyncHandler(questionsController.downloadQuestionFile));
 
 questionRouter.post(
   '/create',

@@ -1,5 +1,6 @@
 import { Prisma, Questions } from '@prisma/client';
 import { prisma } from '../db/prisma.client';
+import * as XLSX from 'xlsx';
 
 interface QuestionsPayload {
   technology_id: string;
@@ -105,6 +106,26 @@ export class QuestionService {
       totalPages,
       technology,
     };
+  }
+
+  async downloadQuestionFile(): Promise<Buffer> {
+    const sampleData = [
+      {
+        technology_name: 'javascript',
+        question: 'What does the "M" in MERN stack stand for?',
+        correct_answer: '0',
+        options: 'MongoDB;MySQL;Mongoose;Markdown',
+        difficulty_level: 'easy',
+      },
+    ];
+
+    const worksheet = XLSX.utils.json_to_sheet(sampleData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Questions');
+
+    const buffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'buffer' });
+
+    return buffer;
   }
 }
 

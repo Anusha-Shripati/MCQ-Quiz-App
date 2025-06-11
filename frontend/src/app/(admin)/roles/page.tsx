@@ -1,19 +1,14 @@
-import { Card, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import Header from '@/components/roles/header';
 import RoleTable from '@/components/roles/role-table';
-import MainHeader from '@/components/roles/main-header';
+
 
 const UserTable = () => {
   return (
-    <div className="p-6 ">
-      <div className="mb-6">
-        <MainHeader />
-      </div>
-      <Card className="flex flex-col p-4 sm:p-6 gap-2">
+    <div className="px-2 py-6 flex flex-col">
+      <Card className="flex flex-col p-4 sm:p-6 gap-2 h-full">
         <Header />
-        <CardContent>
-          <RoleTable />
-        </CardContent>
+        <RoleTable />
       </Card>
     </div>
   );

@@ -84,7 +84,7 @@ function UserTable() {
     },
   ];
   return (
-    <StatusWrapper className="min-h-[600px]" error={error} loading={isLoading || isValidating} reset={mutate}>
+    <StatusWrapper className="min-h-[74vh]" error={error} loading={isLoading || isValidating} reset={mutate}>
       <ReusableTable columns={columns} rows={userList} rowKey="id"
         className="h-[550px] animate-in fade-in duration-300"
       />

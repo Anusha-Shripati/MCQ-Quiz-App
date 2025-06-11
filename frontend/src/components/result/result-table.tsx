@@ -228,7 +228,7 @@ function ResultTable() {
           return (
             <Tooltip>
               <TooltipTrigger>
-                <span className={`px-3 py-1 text-sm font-medium rounded-full ${badgeClass}`}>
+                <span className={`px-3 py-1 text-sm font-medium rounded-full ${badgeClass} `}>
                   {row?.percentage?.toFixed(2)} % ({row?.is_passed ? 'Pass' : 'Failed'})
                 </span>
               </TooltipTrigger>
@@ -242,7 +242,7 @@ function ResultTable() {
       },
       {
         key: 'actions',
-        header: 'Detailed',
+        header: '',
         render: (result: Result) => (
           <Link
             href={`/results/${result.id}`}
@@ -263,7 +263,8 @@ function ResultTable() {
   };
 
   return (
-    <StatusWrapper loading={isLoading || isValidating } reset={mutate} className="min-h-[600px]" error={error}>
+  
+    <StatusWrapper loading={isLoading || isValidating } reset={mutate} className="min-h-[68vh] flex" error={error}>
       <Pagination
         className="flex-grow"
         currentPageStart={currentPageStart}
@@ -274,18 +275,19 @@ function ResultTable() {
         currentPage={currentPage}
         onPageChange={handlePageChange}
       >
-        <div className="h-full">
+          <div className="h-[60vh] overflow-auto">
           <ReusableTable
             columns={columns}
             rows={currentItems}
             expandableRow={expandableRow}
-            className="h-[550px] animate-in fade-in duration-300"
+            className="h-[65vh] animate-in fade-in duration-300"
             rowKey="id"
             onRowClick={handleRowClick}
           />
         </div>
       </Pagination>
     </StatusWrapper>
+
   );
 }
 

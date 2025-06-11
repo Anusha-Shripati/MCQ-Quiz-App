@@ -14,6 +14,7 @@ import useSWR from 'swr';
 import { assessmentEndpoint, technologyEndpoint } from '@/lib/endpoint';
 import useDebounce from '@/hooks/useDebounce';
 import { isEqual } from 'lodash';
+import CreateCandidateDialog from './create-candidate-dialog';
 
 const Filters = () => {
   const { data: assessments } = useSWR(assessmentEndpoint.ALL, api.get, {
@@ -169,7 +170,7 @@ const Filters = () => {
 
   return (
     <section className="w-full">
-      <div className="flex flex-col md:flex-row md:items-center gap-2 flex-wrap mb-2">
+      <div className="flex flex-col justify-end md:flex-row md:items-center gap-2 flex-wrap mb-2">
         <SearchFilter
           searchQuery={formData.searchQuery}
           setSearchQuery={(value) => setValue('searchQuery', value)}
@@ -205,6 +206,7 @@ const Filters = () => {
             </Button>
           )}
         </div>
+        <CreateCandidateDialog />
       </div>
     </section>
   );

@@ -3,8 +3,7 @@ import { AppError } from '../common/errors/AppError';
 import { prisma } from '../db/prisma.client';
 import { UploadService } from './upload.services';
 import { Decimal, JsonObject } from '@prisma/client/runtime/library';
-
-
+import nodemailer from 'nodemailer';
 interface Violation {
   type: string;
   timestamp: number;
@@ -492,5 +491,7 @@ export class CandidateExamService {
     });
     return uploadedFile
   }
+
+
 }
 

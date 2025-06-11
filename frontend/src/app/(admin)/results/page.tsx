@@ -6,14 +6,9 @@ import ResultFilter from '@/components/result/result-filters';
 
 export default function Results() {
   return (
-    <div className="p-4 sm:p-6 dark:bg-gray-900">
-      <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-6 px-4">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 ">
-          All Results
-        </h1>
-      </div>
+    <div className="px-2 py-6 flex flex-col">
       <Card className="flex flex-col p-4 sm:p-6 gap-2">
-        <ResultFilter />
+          <ResultFilter />
         <ResultTable />
       </Card>
     </div>

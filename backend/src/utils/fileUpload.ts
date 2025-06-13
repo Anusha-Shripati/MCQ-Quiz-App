@@ -113,7 +113,12 @@ export const convertWebmToMp4 = (inputPath: string): Promise<string> => {
                 console.log('Started FFmpeg with command:', cmd);
             })
             .on('stderr', (line) => {
-                console.error('FFmpeg stderr:', line);le.log('Conversion f
+                console.error('FFmpeg stderr:', line);
+            })
+            .on('end', () => {
+                console.log('Conversion finished');
+                fs.rmSync(inputPath, { force: true });
+                resolve(outputPath.split('uploads/')[1]);
             })
             .on('error', (err) => {
                 console.error('❌ FFmpeg error:', err.message);

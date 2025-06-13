@@ -22,8 +22,9 @@ export interface IPagination {
 export interface Result {
   id: string;
   percentage: number;
-  candidate: Candidate;
+  pass_criteria: number;
   exam: Exam;
+  candidate: Candidate;
 }
 
 export interface Exam {
@@ -44,6 +45,7 @@ export interface Technology {
 
 export interface Assessment {
   name: string;
-  technologies: Technology[];
+  pass_criteria: number;
+  technologies: { technology: { name: string } }[];
 }
 

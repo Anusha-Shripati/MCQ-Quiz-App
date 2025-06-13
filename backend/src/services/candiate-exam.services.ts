@@ -18,10 +18,9 @@ type AnswerWithQuestion = Answers & { question: Questions | null, score?: Decima
 export class CandidateExamService {
   private uploadService;
   constructor() {
-    this.uploadService = new UploadService()
+    this.uploadService = new UploadService();
   }
   async getCandidate(candidateId: string, examId?: string) {
-
     const candidate = await prisma.candidate.findUnique({
       where: { id: candidateId },
       include: {
@@ -38,7 +37,7 @@ export class CandidateExamService {
         answers: {
           where: {
             ...(examId ? { exam_id: examId } : {}),
-            question_name: "introduction"
+            question_name: 'introduction',
           },
         },
       },
@@ -70,7 +69,7 @@ export class CandidateExamService {
         start_time: true,
         status: true,
         candidate: true,
-        meta:true,
+        meta: true,
         assessment: {
           select: {
             technologies: {
@@ -78,27 +77,26 @@ export class CandidateExamService {
                 technology: {
                   select: {
                     id: true,
-                    name: true
-                  }
+                    name: true,
+                  },
                 },
-
               },
             },
-            duration: true
+            duration: true,
           },
         },
         answers: {
           where: {
             question_id: {
-              not: null
-            }
+              not: null,
+            },
           },
           select: {
             id: true,
             question_id: true,
             question_name: true,
             user_answer: true,
-          }
+          },
         },
         exam_questions: {
           include: {
@@ -110,21 +108,20 @@ export class CandidateExamService {
                 time: true,
                 meta: true,
                 technology: true,
-                question: true
-              }
-            }
+                question: true,
+              },
+            },
           },
-
         },
       },
     });
-    let violations = 0 
-    if(exam?.meta && Array.isArray((exam?.meta as JsonObject)?.violations)){
-      violations = ((exam?.meta as JsonObject)?.violations as {name:string}[]).length
+    let violations = 0;
+    if (exam?.meta && Array.isArray((exam?.meta as JsonObject)?.violations)) {
+      violations = ((exam?.meta as JsonObject)?.violations as { name: string }[]).length;
     }
     if (!exam) throw new AppError('Exam not found', 404);
-    const {meta,...rest} = exam
-    return {...rest,violations};
+    const { meta, ...rest } = exam;
+    return { ...rest, violations };
   }
 
   async startExam(examId: string, candidateId: string) {
@@ -163,7 +160,7 @@ export class CandidateExamService {
       },
     });
 
-    return updatedExam
+    return updatedExam;
   }
 
   async getNextQuestion(examId: string, candidateId: string, currentQuestionId?: string) {
@@ -198,12 +195,12 @@ export class CandidateExamService {
   async submitAnswer(
     exam_id: string,
     candidate_id: string,
-    data: { question_id?: string; user_answer: string[], question_name: string },
+    data: { question_id?: string; user_answer: string[]; question_name: string }
   ) {
     let result = {
       score: 0,
       weight: 0,
-    }
+    };
     if (data.question_id) {
       const examQuestion = await prisma.exam_questions.findFirst({
         where: {
@@ -211,17 +208,15 @@ export class CandidateExamService {
           question_id: data.question_id,
         },
         include: {
-          question: true
-        }
+          question: true,
+        },
       });
       if (!examQuestion) {
         throw new AppError('Question not found in this exam', 404);
       }
       const { difficulty_level, correct_answer, type } = examQuestion.question;
 
-      const weight = difficulty_level === 'easy' ? 1
-        : difficulty_level === 'medium' ? 2
-          : 3;
+      const weight = difficulty_level === 'easy' ? 1 : difficulty_level === 'medium' ? 2 : 3;
 
       result.score = weight;
       result.weight = weight;
@@ -229,15 +224,14 @@ export class CandidateExamService {
 
       if (Array.isArray(correct_answer) && Array.isArray(userAns) && correct_answer.length) {
         if (type == 'multiple_select') {
-          const correctCount = userAns.filter(ans => correct_answer.includes(ans)).length;
+          const correctCount = userAns.filter((ans) => correct_answer.includes(ans)).length;
           const falseCount = userAns.length - correctCount;
-          const score = ((correctCount - falseCount) * weight) / correct_answer.length
+          const score = ((correctCount - falseCount) * weight) / correct_answer.length;
           result.score = score > 0 ? score : 0;
         } else {
-          result.score = correct_answer[0] == userAns[0] ? weight : 0
+          result.score = correct_answer[0] == userAns[0] ? weight : 0;
         }
       }
-
     }
 
     const ans = await prisma.answers.findFirst({
@@ -249,21 +243,19 @@ export class CandidateExamService {
       },
     });
 
-
-
     if (ans) {
       const newAns = await prisma.answers.update({
         where: { id: ans.id },
         data: {
           user_answer: data.user_answer,
           question_name: data.question_name,
-          ...result
+          ...result,
         },
       });
       return {
         id: newAns.id,
-        user_answer: newAns.user_answer
-      }
+        user_answer: newAns.user_answer,
+      };
     }
 
     const newAns = await prisma.answers.create({
@@ -273,25 +265,22 @@ export class CandidateExamService {
         candidate_id: candidate_id,
         user_answer: data.user_answer,
         question_name: data.question_name || null,
-        ...result
+        ...result,
       },
     });
     return {
       id: newAns.id,
-      user_answer: newAns.user_answer
-
-    }
+      user_answer: newAns.user_answer,
+    };
   }
 
-  async resetAnswer(
-    answer_id?: string,
-  ) {
+  async resetAnswer(answer_id?: string) {
     await prisma.answers.delete({
       where: {
-        id: answer_id
+        id: answer_id,
       },
     });
-    return null
+    return null;
   }
 
   // async finishExam(examId: string, candidateId: string) {
@@ -371,61 +360,69 @@ export class CandidateExamService {
     };
   }
   async finishExam(examId: string, candidateId: string) {
-
     try {
       const existingResult = await prisma.results.findFirst({ where: { exam_id: examId } });
 
       if (existingResult) {
-        return
+        return;
       }
 
       let answers = await prisma.answers.findMany({
         where: { exam_id: examId, question_id: { not: null } },
         include: {
-          question: true
-        }
-      })
+          question: true,
+        },
+      });
       const obj = {
         score: 0,
         total: 0,
-      }
+      };
 
-      let tech_score: { technology_id: string, score: number, total: number, percentage: number }[] = [];
+      let tech_score: {
+        technology_id: string;
+        score: number;
+        total: number;
+        percentage: number;
+      }[] = [];
       answers.forEach((answer) => {
         const { question } = answer;
 
         const { difficulty_level } = question as Questions;
 
-        const weight = difficulty_level === 'easy' ? 1
-          : difficulty_level === 'medium' ? 2
-            : 3;
+        const weight = difficulty_level === 'easy' ? 1 : difficulty_level === 'medium' ? 2 : 3;
 
         obj.total += weight;
         obj.score += answer.score;
-          
-        const technology_score = tech_score.find(tech => tech.technology_id == question?.technology_id)
+
+        const technology_score = tech_score.find(
+          (tech) => tech.technology_id == question?.technology_id
+        );
         if (question?.id && !technology_score) {
-          tech_score.push({ technology_id: question.technology_id, score: answer.score, total: answer.weight, percentage: answer.score * 100 / answer.weight })
+          tech_score.push({
+            technology_id: question.technology_id,
+            score: answer.score,
+            total: answer.weight,
+            percentage: (answer.score * 100) / answer.weight,
+          });
         } else if (technology_score) {
-          technology_score.score += answer.score
-          technology_score.total += answer.weight
-          technology_score.percentage  = technology_score.score * 100 / technology_score.total
+          technology_score.score += answer.score;
+          technology_score.total += answer.weight;
+          technology_score.percentage = (technology_score.score * 100) / technology_score.total;
         }
       });
-
 
       const result = await prisma.results.create({
         data: {
           score: obj.score,
           total: obj.total,
-          percentage: obj.score * 100 / obj.total,
+          percentage: (obj.score * 100) / obj.total,
           candidate_id: candidateId,
           exam_id: examId,
-        }
-      })
-      const exam = await prisma.exam.findFirst({ where: { id: examId } })
+        },
+      });
+      const exam = await prisma.exam.findFirst({ where: { id: examId } });
       const updatedMeta: ExamMeta = {
-        ...(exam?.meta as ExamMeta || {}),
+        ...((exam?.meta as ExamMeta) || {}),
         tech_score: tech_score,
       };
 
@@ -433,14 +430,17 @@ export class CandidateExamService {
         prisma.answers.updateMany({ where: { exam_id: examId }, data: { result_id: result.id } }),
         prisma.exam.update({
           where: { id: examId },
-          data: { status: 'completed', end_time: new Date(), is_completed: true, meta: updatedMeta },
+          data: {
+            status: 'completed',
+            end_time: new Date(),
+            is_completed: true,
+            meta: updatedMeta,
+          },
         }),
       ]);
       return returnValue;
-
     } catch (error: any) {
-      throw new Error(error)
-
+      throw new Error(error);
     }
   }
 
@@ -450,7 +450,7 @@ export class CandidateExamService {
       select: { meta: true },
     });
     const updatedMeta: ExamMeta = {
-      ...(exam?.meta as ExamMeta || {}),
+      ...((exam?.meta as ExamMeta) || {}),
       violations: [...((exam?.meta as ExamMeta)?.violations || []), ...data.violations],
     };
 
@@ -463,24 +463,34 @@ export class CandidateExamService {
     });
   }
 
-  async saveSnapshot(examId: string, file: Express.Multer.File, { timestamp, fileType }: { timestamp: number, fileType: 'screenshot' | 'camera' }) {
+  async saveSnapshot(
+    examId: string,
+    file: Express.Multer.File,
+    { timestamp, fileType }: { timestamp: number; fileType: 'screenshot' | 'camera' }
+  ) {
     const exam = await prisma.exam.findUnique({
       where: { id: examId },
       select: { meta: true },
     });
     if (!exam) throw new AppError('Exam not found', 404);
     let updatedMeta: ExamMeta;
-    const uploadedFile = await this.uploadService.processFile(file)
+    const uploadedFile = await this.uploadService.processFile(file);
 
     if (fileType == 'screenshot') {
       updatedMeta = {
-        ...(exam?.meta as ExamMeta || {}),
-        screenshots: [...(exam?.meta as ExamMeta)?.screenshots || [], { timestamp: timestamp, image: uploadedFile.path }]
+        ...((exam?.meta as ExamMeta) || {}),
+        screenshots: [
+          ...((exam?.meta as ExamMeta)?.screenshots || []),
+          { timestamp: timestamp, image: uploadedFile.path },
+        ],
       };
     } else {
       updatedMeta = {
-        ...(exam?.meta as ExamMeta || {}),
-        camera: [...(exam?.meta as ExamMeta)?.camera || [], { timestamp: timestamp, image: uploadedFile.path }]
+        ...((exam?.meta as ExamMeta) || {}),
+        camera: [
+          ...((exam?.meta as ExamMeta)?.camera || []),
+          { timestamp: timestamp, image: uploadedFile.path },
+        ],
       };
     }
     await prisma.exam.update({
@@ -489,9 +499,38 @@ export class CandidateExamService {
         meta: updatedMeta,
       },
     });
-    return uploadedFile
+    return uploadedFile;
   }
 
+  async sendThankYouEmail(candidateId: string, examId: string) {
+    const candidate = await this.getCandidate(candidateId, examId);
+    if (!candidate.email) throw new AppError('Candidate email not found', 404);
 
+    const exam = await this.getExam(examId, candidateId);
+
+    if (!exam) throw new AppError('Exam not found', 404);
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: candidate.email,
+      subject: 'Thank You for Completing the Exam',
+    };
+    const mailContent = `
+      <h1>Thank You for Completing the Exam</h1>
+      <p>Dear ${candidate.name || 'Candidate'},</p>
+      <p>Thank you for taking the time to complete the exam. We appreciate your effort and dedication.</p>
+      <p>We will review your performance and get back to you soon.</p>
+      <p>Best regards,</p>
+      <p>LR Exam Team</p>
+    `;
+    await transporter.sendMail(mailOptions);
+
+    return true;
+  }
 }
-

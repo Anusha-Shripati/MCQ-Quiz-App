@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import QuestionsService from '../services/question.services';
 import { generateResponse } from '../utils/generateResponse';
 
+
 const questionsService = new QuestionsService();
 export class QuestionsController {
   create = async (req: Request, res: Response, next: NextFunction) => {
@@ -73,16 +74,39 @@ export class QuestionsController {
     }
   };
 
- downloadQuestionFile = async (req: Request, res: Response, next: NextFunction) => {
-  console.log('Downloading question file');
-  try {
-    const buffer = await questionsService.downloadQuestionFile();
+  downloadQuestionFile = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const buffer = await questionsService.downloadQuestionFile();
+      res.setHeader('Content-Disposition', 'attachment; filename="questions-import-template.xlsx"');
+      res.setHeader(
+        'Content-Type',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      );
+      return res.send(buffer);
+    } catch (error) {
+      next(error);
+    }
+  };
 
-    res.setHeader('Content-Disposition', 'attachment; filename="bulk-question-template.xlsx"');
-    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    return res.send(buffer);
-  } catch (error) {
-    next(error);
-  }
-};
+  importQuestionsFromXlsx = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      if (!req.file) {
+        return generateResponse(res, 400, {}, false, 'No file uploaded');
+      }
+
+      const result = await questionsService.importQuestionsFromXlsx(req.file.buffer);
+      
+      return generateResponse(
+        res, 
+        200, 
+        result, 
+        result.errors.length === 0, 
+        result.errors.length === 0 
+          ? 'Questions imported successfully'
+          : `Imported ${result.totalImported} questions with ${result.errors.length} errors`
+      );
+    } catch (error) {
+      next(error);
+    }
+  };
 }

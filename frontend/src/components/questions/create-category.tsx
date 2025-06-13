@@ -13,7 +13,8 @@ import { useQuestionStore } from '@/store/questionStore';
 import { usePathname, useRouter } from 'next/navigation';
 import { technologyEndpoint } from '@/lib/endpoint';
 
-// Define props type
+import ImportSampleXLSX from './import-sample-xlsx';
+
 async function createCategory(url: string, { arg }: { arg: { name: string } }) {
   const response = await api.post(url, arg);
   return response.data;
@@ -21,20 +22,22 @@ async function createCategory(url: string, { arg }: { arg: { name: string } }) {
 
 const CreateCategory: React.FC = () => {
   const [open, setOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
   const [categoryName, setCategoryName] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+
   const pathname = usePathname();
-  const router = useRouter()
+  const router = useRouter();
   const { setTechnologyFilter, technologyFilter } = useQuestionStore();
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      const params = new URLSearchParams()
+      const params = new URLSearchParams();
       setTechnologyFilter(searchTerm);
       if (searchTerm) {
         params.set('search', searchTerm);
       }
-      window.history.replaceState(null, '', `${pathname}?${params.toString()}`)
+      window.history.replaceState(null, '', `${pathname}?${params.toString()}`);
     }, 1000);
 
     return () => clearTimeout(timer);
@@ -46,7 +49,7 @@ const CreateCategory: React.FC = () => {
       setSearchTerm(search);
       setTechnologyFilter(search);
     }
-  }, [])
+  }, []);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.toLowerCase();
@@ -69,6 +72,11 @@ const CreateCategory: React.FC = () => {
     }
   };
 
+  const handleImportSuccess = () => {
+    // Refresh the technology list after successful import
+    mutate(`/technology/list?search=${technologyFilter}`);
+  };
+
   return (
     <>
       <div className="flex gap-4">
@@ -80,10 +88,15 @@ const CreateCategory: React.FC = () => {
         />
         <Button
           className="bg-blue-600 text-primary-foreground hover:bg-primary/90"
-          // onClick={() => setOpen(true)}
           onClick={() => router.push('/questions/create-question/new')}
         >
           Create Technology
+        </Button>
+        <Button
+          className="bg-blue-600 text-primary-foreground hover:bg-primary/90"
+          onClick={() => setImportOpen(true)}
+        >
+          Import Questions
         </Button>
       </div>
 
@@ -110,6 +123,12 @@ const CreateCategory: React.FC = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      <ImportSampleXLSX
+        importOpen={importOpen}
+        setImportOpen={setImportOpen}
+        onImportSuccess={handleImportSuccess}
+      />
     </>
   );
 };

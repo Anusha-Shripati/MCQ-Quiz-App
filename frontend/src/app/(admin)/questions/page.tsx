@@ -46,6 +46,7 @@ export default function QuestionsPage() {
     <div className="px-2 py-6 flex flex-col">
       <div className="flex items-center justify-end mb-6">
         <CreateCategory />
+
       </div>
       <StatusWrapper className="w-full min-h-[600px]" loading={isLoading || isValidating} error={error}  reset={questionMutate}>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-in fade-in duration-300">

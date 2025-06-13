@@ -1284,7 +1284,7 @@ async function createTechnologies() {
 async function createTestCandidates() {
   // Get superadmin user ID
   const superadmin = await prisma.user.findFirst({
-    where: { email: 'superadmin@example.com' },
+    where: { email: 'alankrit@logicrays.com' },
   });
 
   if (!superadmin) {
@@ -1414,13 +1414,13 @@ async function main() {
 
   // Check if user exists, if not create it
   const existingUser = await prisma.user.findFirst({
-    where: { email: 'superadmin@example.com' },
+    where: { email: 'alankrit@logicrays.com' },
   });
 
   if (!existingUser) {
     await prisma.user.create({
       data: {
-        email: 'superadmin@example.com',
+        email: 'alankrit@logicrays.com',
         password: hashedPassword,
         role_id: role.id,
         name: 'Super Admin',

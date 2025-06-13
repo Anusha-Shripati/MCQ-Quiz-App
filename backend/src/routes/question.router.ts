@@ -1,13 +1,21 @@
 import express from 'express';
 import { QuestionsController } from '../controllers/question.controllers';
-import { validateRequest } from '../middlewares/validation.middleware';
+import { validateRequest, validateUploadFile } from '../middlewares/validation.middleware';
 import { questionsSchema } from '../validationSchemas/questions.validations';
 import { asyncHandler } from '../utils/asyncHandler';
 import { authenticateAndAuthorize } from '../middlewares/auth.middleware';
 
 const questionRouter = express.Router();
 const questionsController = new QuestionsController();
-questionRouter.get("/download", authenticateAndAuthorize('questions.can_read'), asyncHandler(questionsController.downloadQuestionFile));
+
+questionRouter.get('/download-template', asyncHandler(questionsController.downloadQuestionFile));
+
+questionRouter.post(
+  '/import',
+  authenticateAndAuthorize('questions.can_edit'),
+  validateUploadFile(),
+  asyncHandler(questionsController.importQuestionsFromXlsx)
+);
 
 questionRouter.post(
   '/create',

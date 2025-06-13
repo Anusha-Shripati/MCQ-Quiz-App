@@ -146,12 +146,12 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
 
   const handleSave = async () => {
     let message = ""
-    questions.forEach((q, index) => {
+    questions.forEach((q) => {
       if (q.question.trim() == "") {
-        message += `Please enter question ${index + 1} `
+        message = "Cannot save an empty question. Please add content."
       }
       else if ((q.type == "mcq" || q.type == "multiple_select" || q.type == "text") && q.correct_answer.length == 0) {
-        message += `Please select correct answer for question ${index + 1} `
+        message = "Cannot save an empty question. Please add content."
       }
     })
     if (message) {

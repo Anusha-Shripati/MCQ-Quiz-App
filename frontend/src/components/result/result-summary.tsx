@@ -55,7 +55,7 @@ const ResultSummary: React.FC<ResultSummaryProps> = ({ score, total, percentage,
                     <span className="text-2xl font-bold text-blue-600 dark:text-blue-300">{percentage.toFixed(2)}%</span>
                     <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mt-2">
                         <div
-                            className={`h-2 rounded-full ${percentage >= 60 ? "bg-green-500 dark:bg-green-400" : "bg-red-500 dark:bg-red-400"}`}
+                            className={`h-2 rounded-full ${percentage >= passCriteria ? "bg-green-500 dark:bg-green-400" : "bg-red-500 dark:bg-red-400"}`}
                             style={{ width: `${Math.min(percentage, 100)}%` }}
                         />
                     </div>

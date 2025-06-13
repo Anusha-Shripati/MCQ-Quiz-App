@@ -39,6 +39,8 @@ interface AuthState {
     user: User | null
   ) => Promise<void>;
   setUser: (user: User | null) => void;
+  isAuthenticated: () => boolean;
+
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -126,5 +128,17 @@ export const useAuthStore = create<AuthState>((set) => ({
     localStorage.removeItem('user');
     document.cookie = 'token=; path=/;';
     set({ user: null, loading: false });
+  },
+  isAuthenticated: () => {
+    const storedUser = localStorage.getItem('user');
+    if (!storedUser) return false;
+    try {
+      const user = JSON.parse(storedUser);
+      return !!user && !!user.token;
+    } catch (error) {
+      console.error('Error checking authentication status:', error);
+      localStorage.removeItem('user');
+      return false;
+    }
   },
 }));

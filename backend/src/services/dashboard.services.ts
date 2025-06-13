@@ -143,6 +143,7 @@ export class DashboardService {
             assessment: {
               select: {
                 name: true,
+                pass_criteria: true,
                 technologies: {
                   select: {
                     technology: {
@@ -202,6 +203,7 @@ export class DashboardService {
         assessment: {
           select: {
             name: true,
+            pass_criteria: true,
             technologies: {
               select: {
                 technology: {

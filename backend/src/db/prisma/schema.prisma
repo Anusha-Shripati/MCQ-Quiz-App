@@ -25,6 +25,16 @@ model User {
     @@map("users")
 }
 
+model Reset_password {
+  id         String   @id @default(uuid())
+  email      String   @unique
+  otp        String
+  expires_at DateTime
+  created_at DateTime @default(now())
+
+  @@map("password_resets")
+}
+
 model Roles {
     id               String             @id @default(uuid())
     name             String             @unique

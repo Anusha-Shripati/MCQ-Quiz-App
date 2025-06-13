@@ -1,5 +1,7 @@
 import { Roles, User } from '@prisma/client'; // Import Role if needed
 import { prisma } from '../db/prisma.client';
+import dayjs from 'dayjs';
+import nodemailer from 'nodemailer';
 
 export class UserService {
   async createUser(
@@ -103,4 +105,63 @@ export class UserService {
       data: { deleted_at: new Date() },
     });
   }
+  async generateAndSendOtp(name: string, email: string) {
+  
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    const expiresAt = dayjs().add(10, 'minute').toDate();
+    await prisma.reset_password.deleteMany({ where: { email } });
+
+    await prisma.reset_password.create({
+      data: {
+        email,
+        otp, 
+        expires_at: expiresAt,
+      },
+    });
+
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASSWORD,
+      },
+    });
+
+    const mailOptions = {
+      from: process.env.SMTP_USER,
+      to: email,
+      subject: 'Your OTP for Password Reset',
+      html: `
+        <div style="font-family: Arial, sans-serif; padding: 20px;">
+          <h2>Password Reset Request</h2>
+          <p>Hello ${name}</p>
+          <p>You requested to reset your password. Use the OTP below:</p>
+          <h3 style="color: #333;">${otp}</h3>
+          <p>This OTP will expire in 10 minutes.</p>
+          <p>If you didn’t request this, you can ignore this email.</p>
+          <br/>
+          <p>Thanks,</p>
+          <p>LR Dev Team</p>
+        </div>
+      `,
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    return true;
+  }
+  async validateOtp(email: string, otp: string) {
+    const resetPassword = await prisma.reset_password.findFirst({
+      where: { email, otp, expires_at: { gte: new Date() } },
+    });
+
+    if (!resetPassword) {
+      throw new Error('Invalid or expired OTP');
+      
+    }
+
+    return resetPassword;
+  }
+
 }

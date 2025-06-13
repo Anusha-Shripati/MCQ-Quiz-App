@@ -11,11 +11,12 @@ export const assessmentEndpoint = {
     ALL:"/assessment/all"
 }
 
-export const technologyEndpoint={
-    LIST:"/technology/list",
-    TECHNOLOGY_BY_ID:"/technology",
-    CREATE:"/technology/create"
-}
+export const technologyEndpoint = {
+  LIST: '/technology/list',
+  TECHNOLOGY_BY_ID: '/technology',
+  CREATE: '/technology/create',
+  DOWNLOAD_TEMPLATE: '/question/download-template',
+};
 export const userEndpoint={
     LIST:"/user/list",
     CREATE:"/user/create",

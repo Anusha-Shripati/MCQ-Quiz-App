@@ -249,7 +249,10 @@ function NavItem({
             <TooltipTrigger asChild>
               <Button
                 onMouseEnter={handleMouseEnter}
-                className="w-full text-base relative h-12 flex justify-center items-center gap-4 p-3 rounded-lg transition-colors hover:bg-secondary hover:text-secondary-foreground"
+                className={`w-full text-base relative h-12 flex justify-center items-center gap-4 p-3 rounded-lg transition-colors ${isActive
+                  ? 'bg-secondary text-secondary-foreground'
+                  : 'hover:bg-secondary hover:text-secondary-foreground'
+                  }`}
               >
                 <span className="h-5 w-5">{icon}</span>
               </Button>
@@ -261,10 +264,10 @@ function NavItem({
         ) : (
           <Button
             onMouseEnter={handleMouseEnter}
-            className={`w-full text-base relative h-12 flex justify-start items-center gap-4 p-3 rounded-lg transition-colors ${isActive
-              ? 'bg-secondary text-secondary-foreground'
-              : 'hover:bg-secondary hover:text-secondary-foreground'
-              }`}
+              className={`w-full text-base relative h-12 flex justify-start items-center gap-4 p-3 rounded-lg transition-colors ${isActive
+                ? 'bg-secondary text-secondary-foreground'
+                : 'hover:bg-secondary hover:text-secondary-foreground'
+                }`}
           >
             <span className="h-5 w-5">{icon}</span>
             <span>{label}</span>

@@ -58,7 +58,8 @@ export const formatInterviewResults = (results: Result[]) => {
     const techNames = result.exam.assessment.technologies
       .map((t) => t.technology.name)
       .join(', ');
-
+    const passCriteria = result.exam.assessment.pass_criteria;
+    
     return {
       id: result.id,
       date: formatToISTDate(result.exam.start_time),
@@ -68,6 +69,7 @@ export const formatInterviewResults = (results: Result[]) => {
       scoreValue,
       assessmentName: result.exam.assessment.name,
       technologies: techNames,
+      pass_criteria: passCriteria,
     };
   });
 }
@@ -89,3 +91,101 @@ export const generateLast7Months = (now: Date = new Date()) => {
     };
   });
 }
+export const sampleData = [
+      {
+        technology_name: 'JAVASCRIPT',
+        question: 'What does the "M" in MERN stack stand for?',
+        correct_answer: '0', // Index of the correct answer in options
+        options: 'MongoDB,MySQL,Mongoose,Markdown', // Comma-separated options
+        difficulty_level: 'easy', // easy, medium, or hard
+      },
+      {
+        technology_name: 'REACT',
+        question: 'Which hook is used for side effects in React?',
+        correct_answer: '1',
+        options: 'useState,useEffect,useContext,useReducer',
+        difficulty_level: 'medium',
+      },
+      {
+        technology_name: 'NODE',
+        question: 'What is the package manager for Node.js?',
+        correct_answer: '0',
+        options: 'npm,yarn,pnpm,bower',
+        difficulty_level: 'Hard',
+      },
+    ];
+    
+export const docData = [
+      { field: 'Field', description: 'Description', example: 'Example' },
+      {
+        field: 'technology_name',
+        description: 'Name of the technology (case insensitive)',
+        example: 'JAVASCRIPT, REACT, NODE',
+      },
+      { field: 'question', description: 'The question text', example: 'What does DOM stand for?' },
+      {
+        field: 'correct_answer',
+        description: 'Index of correct option(s), starting from 0',
+        example: '0 (for single answer), 0,1 (for multiple)',
+      },
+      {
+        field: 'options',
+        description: 'Comma separated list of options',
+        example: 'Option1,Option2,Option3,Option4',
+      },
+      {
+        field: 'difficulty_level',
+        description: 'Level of difficulty',
+        example: 'easy, medium, hard',
+      },
+    ];
+
+export const allTechnologiesWorldwide = [
+  // Programming Languages
+  "JavaScript", "TypeScript", "Python", "Java", "C", "C++", "C#", "Go", "Rust", "Ruby", "PHP", "Kotlin", "Swift", "Scala", "Perl", "R", "Dart",
+
+  // Frontend Technologies
+  "HTML", "CSS", "SASS", "SCSS", "JavaScript", "TypeScript", "React", "Nextjs", "Vuejs", "Nuxtjs", "Angular", "Svelte", "Tailwind CSS", "Bootstrap", "Material UI", "Redux", "Zustand", "jQuery", "Lit", "Alpinejs",
+
+  // Backend Technologies
+  "Nodejs", "Expressjs", "NestJS", "Django", "Flask", "FastAPI", "Spring Boot", "Laravel", "Symfony", "Ruby on Rails", "ASPNET Core", "Phoenix", "Koajs", "Hapijs", "Micronaut", "Actix", "Gin",
+
+  // Databases
+  "MySQL", "PostgreSQL", "MongoDB", "SQLite", "MariaDB", "Oracle", "Firebase", "Redis", "Cassandra", "DynamoDB", "Couchbase", "Elasticsearch", "Neo4j", "TimescaleDB", "ClickHouse",
+
+  // DevOps & CI/CD
+  "Docker", "Kubernetes", "Jenkins", "GitLab CI", "GitHub Actions", "CircleCI", "Travis CI", "TeamCity", "Azure DevOps", "Terraform", "Ansible", "Puppet", "Chef", "Vagrant", "Helm", "Prometheus", "Grafana",
+
+  // Cloud Platforms
+  "AWS", "Google Cloud Platform", "Microsoft Azure", "IBM Cloud", "Alibaba Cloud", "DigitalOcean", "Heroku", "Netlify", "Vercel", "Render", "Cloudflare", "Firebase Hosting", "Oracle Cloud",
+
+  // Version Control & Collaboration
+  "Git", "GitHub", "GitLab", "Bitbucket", "Subversion (SVN)", "Mercurial",
+
+  // Mobile Development
+  "React Native", "Flutter", "Swift", "Kotlin", "Ionic", "Cordova", "Xamarin", "NativeScript", "Objective-C",
+
+  // Desktop Development
+  "Electron", "Tauri", "Qt", "GTK", "WinForms", "WPF", "NET MAUI",
+
+  // AI & Machine Learning
+  "TensorFlow", "PyTorch", "Keras", "Scikit-learn", "OpenCV", "XGBoost", "LightGBM", "Hugging Face Transformers", "LangChain", "spaCy", "NLTK", "Pandas", "NumPy", "Matplotlib", "Jupyter", "Google Colab",
+
+  // Data Engineering & Big Data
+  "Apache Hadoop", "Apache Spark", "Kafka", "Airflow", "Flink", "Presto", "Snowflake", "Databricks", "Redshift", "BigQuery", "Dask", "dbt",
+
+  // APIs & Tools
+  "GraphQL", "REST", "Apollo", "Postman", "Swagger", "gRPC", "OpenAPI",
+
+  // CMS & E-commerce
+  "WordPress", "Strapi", "Contentful", "Sanity", "Ghost", "Shopify", "Magento", "WooCommerce", "BigCommerce", "Medusajs", "Saleor",
+
+  // Testing Tools
+  "Jest", "Mocha", "Chai", "Vitest", "Cypress", "Playwright", "Selenium", "Puppeteer", "TestCafe", "JUnit", "RSpec",
+
+  // Security
+  "OWASP", "Burp Suite", "Metasploit", "Nmap", "Wireshark", "Snort", "Suricata", "Vault",
+
+  // Miscellaneous Tools
+  "Figma", "Adobe XD", "Sketch", "Notion", "Trello", "Jira", "Slack", "Zoom", "VS Code", "IntelliJ IDEA", "PostgreSQL Studio", "DataGrip"
+];

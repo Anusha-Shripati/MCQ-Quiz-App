@@ -105,10 +105,18 @@ const Filters = () => {
           days: formData.created?.days,
           range: {
             from: formData.created.range.from
-              ? new Date(formData.created.range.from.setHours(0, 0, 0, 0))
+              ? (() => {
+                const fromDate = new Date(formData.created.range.from!);
+                fromDate.setHours(0, 0, 0, 0);
+                return fromDate;
+              })()
               : undefined,
             to: formData.created.range.to
-              ? new Date(formData.created.range.to.setHours(23, 59, 59, 999))
+              ? (() => {
+                const toDate = new Date(formData.created.range.to as string | number | Date);
+                toDate.setHours(23, 59, 59, 999);
+                return toDate;
+              })()
               : undefined,
           },
         }

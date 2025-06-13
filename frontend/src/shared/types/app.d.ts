@@ -67,3 +67,27 @@ export interface TablePaginationProps {
   className?: string;
   loading?: boolean;
 }
+export interface EnterEmailProps {
+  onNext: () => void;
+  setEmail: (email: string) => void;
+}
+export interface ValidateOTPProps {
+  onNext: () => void;
+  onPrevious: () => void;
+  setOtp: (otp: string) => void;
+  email: string;
+}
+export interface NewPasswordProps {
+  onPrevious: () => void;
+  email: string;
+  otp: string;
+}
+
+export interface ApiError {
+  response?: {
+    data?: {
+      message?: string;
+    };
+  };
+  message?: string;
+}

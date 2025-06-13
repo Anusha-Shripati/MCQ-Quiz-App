@@ -77,4 +77,10 @@ router.get(
   asyncHandler(candidateExamController.getCandidate)
 );
 
+router.post(
+  '/:examId/send-thank-you-email',
+  authenticateCandidate,
+  asyncHandler(candidateExamController.sendThankYouEmail)
+);
+
 export default router;

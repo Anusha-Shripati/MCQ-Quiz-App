@@ -12,6 +12,7 @@ import ReusableTable from '../../common/reusable-table';
 import StatusWrapper from '@/components/common/status-wrapper';
 import { useRouter } from 'next/navigation';
 import { RESULTS_TITLE } from '@/shared/constants/data';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 
 interface ScoreData {
@@ -19,6 +20,7 @@ interface ScoreData {
   date: string;
   name: string;
   score: string;
+  pass_criteria: number;
 }
 
 interface InterviewScoreResponse {
@@ -65,7 +67,7 @@ function InterviewScore() {
   } = useSWRInfinite(getKey, api.get, {
     revalidateFirstPage: false,
   });
-
+  console.log('Interview Score Data:', data);
   const observerRef = useRef<HTMLDivElement | null>(null);
   const isLoadingMore = isValidating && size > 0;
 
@@ -129,10 +131,17 @@ function InterviewScore() {
       key: 'score',
       header: 'Score',
       render: (row: ScoreData) => (
-        <div className="flex items-center space-x-2">
-          <Progress value={parseInt(row.score)} className="w-32 " />
-          <span>{row.score}</span>
-        </div>
+        <Tooltip>
+          <TooltipTrigger>
+            <div className="flex items-center space-x-2">
+              <Progress value={parseInt(row.score)} pass_criteria={row.pass_criteria} className="w-32" />
+              <span>{row.score}</span>
+            </div>
+          </TooltipTrigger>
+          <TooltipContent>
+            <span>Pass Criteria: {row.pass_criteria}%</span>
+          </TooltipContent> 
+        </Tooltip>
       ),
     },
   ];

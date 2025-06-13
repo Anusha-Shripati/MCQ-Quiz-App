@@ -56,4 +56,17 @@ userRouter.delete(
   asyncHandler(userController.delete)
 );
 
+userRouter.post(
+  '/validate-email',
+  validateRequest(userSchema.validateEmail),
+  asyncHandler(userController.validateEmail)
+);
+userRouter.post("/validate-otp", validateRequest(userSchema.validateOtp), asyncHandler(userController.validateOtp));
+
+userRouter.post(
+  '/reset-password',
+  validateRequest(userSchema.resetPassword),
+  asyncHandler(userController.resetPassword)
+);
+
 export default userRouter;

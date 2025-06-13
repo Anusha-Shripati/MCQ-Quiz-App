@@ -79,47 +79,48 @@ export const upload = multer({
     },
 });
 
-
-
 export const convertWebmToMp4 = (inputPath: string): Promise<string> => {
     return new Promise((resolve, reject) => {
         const ext = path.extname(inputPath);
-        if (ext == '.webm') {
-            const outputPath = inputPath.replace(ext, '.mp4');
-            
-            ffmpeg(inputPath)
+        if (ext !== '.webm') return resolve(inputPath);
+
+        // Validate file existence and size
+        try {
+            const stats = fs.statSync(inputPath);
+            if (stats.size === 0) {
+                return reject(new Error('File is empty or corrupted'));
+            }
+        } catch (e) {
+            return reject(new Error('File does not exist'));
+        }
+
+        const outputPath = inputPath.replace(ext, '.mp4');
+
+        ffmpeg(inputPath)
             .output(outputPath)
             .inputOptions([
                 '-f webm',  // Force input format to webm
                 '-err_detect ignore_err'  // Ignore errors in input
             ])
             .outputOptions([
-                '-c:v libx264',  // Use H.264 codec
-                '-preset ultrafast',  // Use fastest encoding preset
-                '-crf 28',  // Slightly lower quality but faster encoding
-                '-c:a aac',  // Use AAC audio codec
-                '-b:a 128k',  // Lower audio bitrate for faster processing
-                '-movflags +faststart',  // Enable fast start for web playback
-                '-y'  // Overwrite output file if exists
+                '-c:v libx264',
+                '-preset ultrafast',
+                '-crf 28',
+                '-c:a aac',
+                '-b:a 128k'
             ])
-            .on('start', (commandLine) => {
-                console.log('Started FFmpeg with command:', commandLine);
+            .on('start', (cmd) => {
+                console.log('Started FFmpeg with command:', cmd);
             })
-            .on('progress', (progress) => {
-                const percent = progress.percent ?? 0;
-                console.log(`Processing: ${Math.round(percent)}% done`);
+            .on('stderr', (line) => {
+                console.error('FFmpeg stderr:', line);
             })
             .on('end', () => {
                 console.log('Conversion finished');
-                try {
-                    fs.rmSync(inputPath);
-                    resolve(outputPath.split('uploads/')[1]);
-                } catch (error) {
-                    console.error('Error removing input file:', error);
-                    resolve(outputPath.split('uploads/')[1]);
-                }
+                fs.rmSync(inputPath, { force: true });
+                resolve(outputPath.split('uploads/')[1]);
             })
-            .on('error', (err: any) => {
+            .on('error', (err) => {
                 console.error('❌ FFmpeg error:', err.message);
                 // If conversion fails, try to use the original file
                 try {
@@ -131,9 +132,6 @@ export const convertWebmToMp4 = (inputPath: string): Promise<string> => {
                 }
             })
             .run();
-        }
-        else {
-            resolve(inputPath);
-        }
     });
 };
+

@@ -106,7 +106,7 @@ function RoleTable() {
     },
   ];
   return (
-    <StatusWrapper loading={isLoading || isValidating} error={error} className="min-h-[600px]" reset={mutate}>
+    <StatusWrapper loading={isLoading || isValidating} error={error} className="min-h-[76vh]" reset={mutate}>
       <ReusableTable columns={columns} rows={rolesList} rowKey="id" className="min-h-[550px]"/>
       <RoleForm open={open} roleData={role} onClose={() => setOpen(false)} />
       <DeleteDialog onDelete={() => handleDeleteRole(deleteId as string)} setOpen={setDeleteOpen} isOpen={deleteOpen} />

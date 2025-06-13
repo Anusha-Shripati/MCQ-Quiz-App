@@ -95,3 +95,22 @@ export const isAxiosError = (
 ): error is { response: { data: { message: string } } } => {
   return typeof error === 'object' && error !== null && 'response' in error;
 };
+
+export async function validateEmail(url: string, { arg }: { arg: { email: string } }) {
+  const response = await api.post(url, arg);
+  return response;
+}
+export const validateOtp = async (
+  url: string,
+  { arg }: { arg: { email: string; otp: string } }
+) => {
+  const response = await api.post(url, arg);
+  return response;
+};
+export async function resetPassword(
+  url: string,
+  { arg }: { arg: { email: string; newPassword: string; confirmPassword: string } }
+) {
+  const response = await api.post(url, arg);
+  return response;
+}

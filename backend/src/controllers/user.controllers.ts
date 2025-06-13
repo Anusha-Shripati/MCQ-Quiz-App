@@ -226,4 +226,63 @@ export class UserController {
       next(error);
     }
   };
+  validateEmail = async (req: Request, res: Response, next: NextFunction) => {
+    const { email } = req.body;
+    try {
+      const user = await userService.findUserByEmail(email);
+      if(!user){
+        generateResponse(res, 404, {}, false, 'User not found');
+        return;
+      }
+      else {
+        await userService.generateAndSendOtp(user.name, user.email);
+        generateResponse(res, 200, { email: user.email }, true, 'Email is valid');
+      }
+    }
+    catch (error) {
+      console.log(error);
+      next(error);
+    }
+  }
+  validateOtp = async (req: Request, res: Response, next: NextFunction) => {
+    const { email, otp } = req.body;
+    try {
+      const user = await userService.findUserByEmail(email);
+      if (!user) {
+        generateResponse(res, 404, {}, false, 'User not found');
+        return;
+      }
+      
+      try {
+        const validOtp = await userService.validateOtp(email, otp);
+        generateResponse(res, 200, { email: user.email }, true, 'OTP is valid');
+      } catch (error) {
+        generateResponse(res, 400, '', false, (typeof error === 'string' ? error : 'Invalid or expired OTP'));
+        return;
+      }
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  }
+  resetPassword = async (req: Request, res: Response, next: NextFunction) => {
+    const { email, newPassword, confirmPassword } = req.body;
+    try {
+      const user = await userService.findUserByEmail(email);
+      if (!user) {
+        generateResponse(res, 404, {}, false, 'User not found');
+        return;
+      }
+      if (newPassword !== confirmPassword) {
+        generateResponse(res, 400, {}, false, 'Passwords do not match');
+        return;
+      }
+      const hashedPassword = await encryptStringCrypt(newPassword);
+      await userService.updateUser(user.id, { password: hashedPassword });
+      generateResponse(res, 200, {}, true, 'Password reset successfully');
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  }
 }

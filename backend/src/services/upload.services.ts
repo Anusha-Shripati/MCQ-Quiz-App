@@ -15,10 +15,9 @@ export class UploadService {
     if(file.mimetype.includes('webm')){
       filePath = await convertWebmToMp4(file.path);
     }
-    
-
+  
     return {
-      originalName: file.originalname,
+      originalName: file.originalname, 
       mimeType: file.mimetype,
       fileName: file.filename,
       size: file.size,

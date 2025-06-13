@@ -336,8 +336,11 @@ function CandidateTable() {
           return (
             <Tooltip>
               <TooltipTrigger>
-                <div className={`inline-block px-3 py-1 text-sm font-medium rounded-md ${badgeClass} text-center`}>
-                  <div>{status?.replace('_', ' ') || 'Unknown'}</div>
+          <div
+            className={`inline-block px-3 py-1 text-sm font-medium rounded-md ${badgeClass} text-center min-w-[100px]`}
+            style={{ minWidth: 100, display: 'inline-block' }}
+          >
+                <div>{status?.replace('_', ' ') || 'Unknown'}</div>
                 </div>
               </TooltipTrigger>
               <TooltipContent className="bg-gray-800 text-white p-2 rounded shadow-lg">
@@ -508,7 +511,7 @@ function CandidateTable() {
   };
 
   return (
-    <StatusWrapper loading={isLoading} className="min-h-[500px]" error={error}>
+    <StatusWrapper loading={isLoading} className="min-h-[74vh]" error={error}>
       <Pagination
         className="flex-grow"
         currentPageStart={currentPageStart}
@@ -524,7 +527,7 @@ function CandidateTable() {
             columns={columns}
             rows={currentItems}
             expandableRow={expandableRow}
-            className="mb-6 h-[500px] animate-in fade-in duration-300"
+            className="mb-6 h-[65vh] animate-in fade-in duration-300"
             rowKey="id"
           />
         </div>

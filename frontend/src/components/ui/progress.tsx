@@ -9,9 +9,15 @@ const Progress = React.forwardRef<
   React.ElementRef<typeof ProgressPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof ProgressPrimitive.Root> & {
     value?: number;
+    pass_criteria?: number;
   }
->(({ className, value = 0, ...props }, ref) => {
-  const progressColor = value >= 70 ? 'bg-green-600' : value >= 50 ? 'bg-yellow-500' : 'bg-red-600';
+>(({ className, value = 0, pass_criteria , ...props }, ref) => {
+  const progressColor =
+    pass_criteria !== undefined
+      ? value >= pass_criteria
+        ? 'bg-green-600'
+        : 'bg-red-600'
+      : 'bg-blue-600';
 
   return (
     <ProgressPrimitive.Root

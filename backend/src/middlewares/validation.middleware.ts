@@ -3,6 +3,7 @@ import Joi from 'joi';
 
 import { AppError } from '../common/errors/AppError';
 import { IValidatedSchema, IValidationSchema, TRequestPart } from '../common/types/types';
+import { upload } from '../utils/uploadXlsx';
 
 export const validateRequest = (schema: IValidationSchema) => {
   return (req: Request, res: Response, next: NextFunction) => {
@@ -37,4 +38,8 @@ export const validateRequest = (schema: IValidationSchema) => {
     }
     next();
   };
+
+};
+export const validateUploadFile = () => {
+  return upload.single('file');
 };

@@ -14,6 +14,7 @@ import useSWR from 'swr';
 import { assessmentEndpoint, technologyEndpoint } from '@/lib/endpoint';
 import useDebounce from '@/hooks/useDebounce';
 import { isEqual } from 'lodash';
+import CreateCandidateDialog from './create-candidate-dialog';
 
 const Filters = () => {
   const { data: assessments } = useSWR(assessmentEndpoint.ALL, api.get, {
@@ -104,10 +105,18 @@ const Filters = () => {
           days: formData.created?.days,
           range: {
             from: formData.created.range.from
-              ? new Date(formData.created.range.from.setHours(0, 0, 0, 0))
+              ? (() => {
+                const fromDate = new Date(formData.created.range.from!);
+                fromDate.setHours(0, 0, 0, 0);
+                return fromDate;
+              })()
               : undefined,
             to: formData.created.range.to
-              ? new Date(formData.created.range.to.setHours(23, 59, 59, 999))
+              ? (() => {
+                const toDate = new Date(formData.created.range.to as string | number | Date);
+                toDate.setHours(23, 59, 59, 999);
+                return toDate;
+              })()
               : undefined,
           },
         }
@@ -169,7 +178,7 @@ const Filters = () => {
 
   return (
     <section className="w-full">
-      <div className="flex flex-col md:flex-row md:items-center gap-2 flex-wrap mb-2">
+      <div className="flex flex-col justify-end md:flex-row md:items-center gap-2 flex-wrap mb-2">
         <SearchFilter
           searchQuery={formData.searchQuery}
           setSearchQuery={(value) => setValue('searchQuery', value)}
@@ -205,6 +214,7 @@ const Filters = () => {
             </Button>
           )}
         </div>
+        <CreateCandidateDialog />
       </div>
     </section>
   );

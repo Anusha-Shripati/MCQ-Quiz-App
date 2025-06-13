@@ -73,6 +73,7 @@ export interface IAssessment extends ITimestamps {
   difficulty_score: number;
   duration: number;
   technologies?: IAssessmentTechnology[];
+  pass_criteria: number;
 }
 
 export interface IQuestion extends ITimestamps {

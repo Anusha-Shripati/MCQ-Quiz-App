@@ -11,11 +11,12 @@ export const assessmentEndpoint = {
     ALL:"/assessment/all"
 }
 
-export const technologyEndpoint={
-    LIST:"/technology/list",
-    TECHNOLOGY_BY_ID:"/technology",
-    CREATE:"/technology/create"
-}
+export const technologyEndpoint = {
+  LIST: '/technology/list',
+  TECHNOLOGY_BY_ID: '/technology',
+  CREATE: '/technology/create',
+  DOWNLOAD_TEMPLATE: '/question/download-template',
+};
 export const userEndpoint={
     LIST:"/user/list",
     CREATE:"/user/create",
@@ -49,5 +50,6 @@ export const moduleEndpoint={
 }
 export const examEndpoint={
     BY_ID:"/candidate-exam",
-    CANDIDATE_EXAM:"/candidate-exam"
+    CANDIDATE_EXAM:"/candidate-exam",
+    SEND_THANK_YOU_EMAIL:"/candidate-exam/send-thank-you-email"
 }

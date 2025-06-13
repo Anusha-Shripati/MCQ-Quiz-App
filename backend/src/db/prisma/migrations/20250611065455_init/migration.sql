@@ -27,6 +27,17 @@ CREATE TABLE "users" (
 );
 
 -- CreateTable
+CREATE TABLE "password_resets" (
+    "id" TEXT NOT NULL,
+    "email" TEXT NOT NULL,
+    "otp" TEXT NOT NULL,
+    "expires_at" TIMESTAMP(3) NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "password_resets_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "Roles" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
@@ -193,6 +204,9 @@ CREATE TABLE "Answers" (
 
 -- CreateIndex
 CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "password_resets_email_key" ON "password_resets"("email");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Roles_name_key" ON "Roles"("name");

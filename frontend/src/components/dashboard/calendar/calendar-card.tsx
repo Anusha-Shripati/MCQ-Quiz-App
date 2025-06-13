@@ -28,14 +28,13 @@ export default function CalendarCard() {
   }, [month, year]);
 
   const { data } = useSWR(query, api.get);
-  console.log('Calendar Data:', data);
   useEffect(() => {
     if (data && Array.isArray(data.data)) {
       const eventMap: CalendarEvent = {};
       data.data.forEach((item: IExam) => {
         const { start_time, is_completed, results } = item;
         const dateKey = dayjs(start_time).format('YYYY-MM-DD');
-        const pass = results?.percentage >= 60;
+        const pass = results?.percentage >= item.assessment?.pass_criteria;
         const color = is_completed ? (pass ? '#16a34a' : '#dc2626') : (item.status == 'in_progress' ? "#ffa500" : '#6b7280');
         const eventMeta = {
           percentage: results?.percentage?.toFixed(1),

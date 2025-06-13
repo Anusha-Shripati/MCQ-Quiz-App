@@ -323,8 +323,8 @@ export default function ProctoredQuiz() {
     try {
       await handleNextQuestion();
       setIsSubmitting(true);
-      await submitTrigger()
-
+      await submitTrigger();
+      
       router.push('/thank-you');
     } catch (error) {
       console.error('Error submitting quiz:', error);
@@ -334,6 +334,7 @@ export default function ProctoredQuiz() {
     }
   };
 
+  // Also update the timer end handler to send email on auto-submit
   const handleTimerEnd = async () => {
     if (isSubmittingRef.current) return;
     isSubmittingRef.current = true;
@@ -342,7 +343,9 @@ export default function ProctoredQuiz() {
       if (document.fullscreenElement) {
         await document.exitFullscreen();
       }
-      await submitTrigger()
+      await submitTrigger();
+      
+    
       router.push('/thank-you');  // use router if available
     } catch (error) {
       console.error('Auto-submit failed:', error);

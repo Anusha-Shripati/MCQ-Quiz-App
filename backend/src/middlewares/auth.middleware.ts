@@ -35,6 +35,7 @@ export const authenticateAndAuthorize =
       return;
     }
 
+
     const token = authHeader.split(' ')[1] || '';
     try {
       const decoded = jwt.verify(token, process.env.ACCESS_SECRET as string) as {

@@ -40,7 +40,7 @@ const ImportSampleXLSX = ({
   onImportSuccess,
 }: ImportSampleXLSXProps) => {
   const { trigger: downloadTemplateTrigger, isMutating: isDownloading } = useSWRMutation(
-    '/question/download-template',
+    '/api/v1/question/download-template',
     downloadTemplateFile
   );
 

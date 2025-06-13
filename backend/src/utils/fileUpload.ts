@@ -98,6 +98,10 @@ export const convertWebmToMp4 = (inputPath: string): Promise<string> => {
 
         ffmpeg(inputPath)
             .output(outputPath)
+            .inputOptions([
+                '-f webm',  // Force input format to webm
+                '-err_detect ignore_err'  // Ignore errors in input
+            ])
             .outputOptions([
                 '-c:v libx264',
                 '-preset ultrafast',
@@ -109,16 +113,18 @@ export const convertWebmToMp4 = (inputPath: string): Promise<string> => {
                 console.log('Started FFmpeg with command:', cmd);
             })
             .on('stderr', (line) => {
-                console.error('FFmpeg stderr:', line);
-            })
-            .on('end', () => {
-                console.log('Conversion finished');
-                fs.rmSync(inputPath, { force: true });
-                resolve(outputPath.split('uploads/')[1]);
+                console.error('FFmpeg stderr:', line);le.log('Conversion f
             })
             .on('error', (err) => {
                 console.error('❌ FFmpeg error:', err.message);
-                reject(err);
+                // If conversion fails, try to use the original file
+                try {
+                    fs.copyFileSync(inputPath, outputPath);
+                    console.log('Using original file as fallback');
+                    resolve(outputPath.split('uploads/')[1]);
+                } catch (error) {
+                    reject(err);
+                }
             })
             .run();
     });

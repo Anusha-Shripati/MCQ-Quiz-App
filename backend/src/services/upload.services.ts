@@ -71,7 +71,7 @@ export class UploadService {
 
     await new Promise<void>((resolve, reject) => {
       writeStream.on('finish', () => {
-        fs.rmSync(chunkDir, { recursive: true });
+        // fs.rmSync(chunkDir, { recursive: true });
         resolve();
       });
       writeStream.on('error', reject);

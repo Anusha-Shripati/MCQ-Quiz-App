@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios, { AxiosInstance} from 'axios';
 
 /**
  * Add request/response interceptors to an axios instance for debugging

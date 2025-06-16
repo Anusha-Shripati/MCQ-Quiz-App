@@ -51,14 +51,15 @@ export class RoleController {
       const updatedRole = await roleService.updateRole(id, { name });
 
       if (role_permissions && Array.isArray(role_permissions)) {
-        await roleService.deleteRolePermissions(id);
         await roleService.assignPermissionsToRole(updatedRole.id, role_permissions);
+        await roleService.deleteRolePermissions(id);
       }
       return generateResponse(res, 200, updatedRole, true, 'Role updated successfully');
     } catch (error) {
       next(error);
     }
   };
+
   delete = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
@@ -66,8 +67,8 @@ export class RoleController {
       if (!existingRole) {
         return generateResponse(res, 404, {}, false, 'Role not found!');
       }
-      await roleService.deleteRolePermissions(id);
       await roleService.deleteRole(id);
+      await roleService.deleteRolePermissions(id);
       return generateResponse(res, 200, {}, true, 'Role delete successfully');
     } catch (error) {
       next(error);

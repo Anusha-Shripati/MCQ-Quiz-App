@@ -63,6 +63,7 @@ export class UserService {
       },
     });
   }
+  
   async updateUser(id: string, data: Record<string, string | null>) {
     const user = await prisma.user.update({ where: { id }, data });
     if (!user) return null;

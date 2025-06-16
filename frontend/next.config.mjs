@@ -3,7 +3,7 @@ const nextConfig = {
 
   reactStrictMode: false,
     images: {
-        domains: ['localhost','avatars.githubusercontent.com'],
+        domains: ['localhost','avatars.githubusercontent.com','mcq-api.lrdevteam.com'],
       },
     // output: 'export',
 };

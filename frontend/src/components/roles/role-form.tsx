@@ -20,7 +20,7 @@ const permissionSchema = z.object({
 });
 
 const roleSchema = z.object({
-  name: z.string().min(1, 'Name is required'),
+  name: z.string().min(1, 'Role is required.').max(20,"Role can not be exceed max length 20."),
   role_permissions: z.array(permissionSchema),
 });
 

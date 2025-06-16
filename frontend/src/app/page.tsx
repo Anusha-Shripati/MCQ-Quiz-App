@@ -18,11 +18,6 @@ const loginSchema = z.object({
   password: z.string().min(6, 'Password must be at least 6 characters.'),
 });
 
-const defaultValues = {
-  email: 'alankrit@logicrays.com',
-  password: 'Hello@1234',
-};
-
 export default function Home() {
   const router = useRouter();
   const { login, isAuthenticated } = useAuthStore();
@@ -41,7 +36,10 @@ export default function Home() {
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<z.infer<typeof loginSchema>>({
-    defaultValues: defaultValues,
+    defaultValues: {
+      email: '',
+      password: '',
+    },
     resolver: zodResolver(loginSchema),
   });
 
@@ -53,7 +51,7 @@ export default function Home() {
     } catch (error) {
       console.error('Login error:', error);
       // if (err instanceof Error) toast.error(err.message);
-       toast.error('The account sign-in details are incorrect. Please try again.');
+      toast.error('The account sign-in details are incorrect. Please try again.');
     }
   };
 
@@ -76,7 +74,7 @@ export default function Home() {
     <div className="bg-gradient-to-r from-gray-700 to-gray-900 min-h-screen w-full flex flex-col items-center justify-center px-4 py-8">
       <Card className="w-full max-w-[650px] shadow-xl overflow-hidden bg-gray-900 text-gray-200 border-gray-700">
         <div className="bg-gray-800 p-5 border-b border-gray-700 flex items-center justify-center">
-          <TypographyH2 >Welcome To MCQ APP</TypographyH2>
+          <TypographyH2>Welcome To MCQ APP</TypographyH2>
         </div>
 
         <div className="p-8">
@@ -99,9 +97,7 @@ export default function Home() {
                     placeholder="Enter your email"
                     {...register('email')}
                     className="h-10 bg-gray-800 border-gray-700 text-gray-200 focus:bg-gray-800 focus:border-gray-600 hover:bg-gray-800 focus-visible:ring-gray-700 focus-visible:ring-1 focus-visible:ring-offset-0"
-
                     error={errors.email?.message}
-
                   />
                 </div>
                 <div className="flex flex-col space-y-1.5 relative">
@@ -113,7 +109,6 @@ export default function Home() {
                     {...register('password')}
                     className="h-10 bg-gray-800 border-gray-700 text-gray-200 focus:bg-gray-800 focus:border-gray-600 hover:bg-gray-800 focus-visible:ring-gray-700 focus-visible:ring-1 focus-visible:ring-offset-0"
                     error={errors.password?.message}
-
                   />
                   <Button
                     type="button"
@@ -141,7 +136,7 @@ export default function Home() {
             </form>
 
             <div className="text-center mt-6">
-              <TypographyH4 >
+              <TypographyH4>
                 Don&apos;t have an account?{' '}
                 <Link href="/register" className="text-blue-400 hover:underline">
                   Contact Admin

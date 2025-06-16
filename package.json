@@ -31,7 +31,8 @@
     "docker:redis": "cd backend && docker-compose up -d redis",
     "docker:logs": "cd backend && docker-compose logs -f",
     "docker:ps": "cd backend && docker-compose ps",
-    "seed:db": "cd backend && npm run seed:db"
+    "seed:db": "cd backend && npm run seed:db",
+    "prisma:reset": "cd backend && npm run prisma:reset"
   },
   "config": {
     "backend_port": "3001"

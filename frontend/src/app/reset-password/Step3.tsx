@@ -8,9 +8,9 @@ import { EyeIcon, EyeOffIcon, LockIcon } from 'lucide-react';
 import useSWRMutation from 'swr/mutation';
 import { resetPassword } from '@/lib/api';
 import { ApiError, NewPasswordProps } from '@/shared/types/app';
-import { IoMdArrowRoundBack } from 'react-icons/io';
 
-const NewPassword: React.FC<NewPasswordProps> = ({ onPrevious, email }) => {
+
+const NewPassword: React.FC<NewPasswordProps> = ({ email }) => {
     const { trigger, isMutating } = useSWRMutation('/user/reset-password', resetPassword);
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -108,19 +108,11 @@ const NewPassword: React.FC<NewPasswordProps> = ({ onPrevious, email }) => {
                     </div>
                 </div>
 
-                <div className="flex justify-between space-x-4 pt-4">
-                    <Button
-                        type="button"
-                        variant="ghost"
-                        onClick={onPrevious}
-                        className="px-6 h-12 bg-gray-800 hover:bg-gray-700 text-gray-100 focus:bg-gray-800 focus:ring-1 focus:ring-gray-600"
-                    >
-                        <IoMdArrowRoundBack />
-                    </Button>
+                <div className="flex justify-between space-x-4 pt-4 w-full">
                     <Button
                         type="submit"
                         disabled={isLoading || isMutating}
-                        className="px-6 h-12 bg-gray-800 hover:bg-gray-700 text-gray-100 focus:bg-gray-800 focus:ring-1 focus:ring-gray-600"
+                        className="px-6 h-12 bg-gray-800 hover:bg-gray-700 text-gray-100 focus:bg-gray-800 focus:ring-1 focus:ring-gray-600 w-full"
                     >
                         {isLoading || isMutating ? 'Resetting...' : 'Reset Password'}
                     </Button>

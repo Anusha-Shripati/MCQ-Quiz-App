@@ -25,7 +25,7 @@ export const VideoRecordingScreen = ({ onRecordingComplete, videoLink }: VideoRe
     const [recordingBlob, setRecordingBlob] = useState<Blob | null>(null);
     const [recordingUrl, setRecordingUrl] = useState<string | null>(null);
   const { isMutating, error, trigger } = useSWRMutation(`${examEndpoint.CANDIDATE_EXAM}/${exam?.id}/submit-answer`, (url: string, { arg }: { arg: {foldername:string,question_name:string,merge_chunk:boolean} }) => examApi.post(url, arg, accessCode))
-
+  
   const onContinue = async () => {
 
     if(recordingUrl == videoLink){

@@ -31,8 +31,7 @@ const VideoRecorder = ({ onRecordingComplete, maxTime, videoKey = 'video', video
     const [isStreamReady, setIsStreamReady] = useState(false);
     const animationFrameRef = useRef<number | null>(null);
     const { exam,cameraStreamRef } = useExamStore();
-
-
+    const [isUploading, setIsUploading] = useState(false);
 
     const startCamera = useCallback(async () => {
         setIsStreamReady(false);
@@ -324,6 +323,12 @@ const VideoRecorder = ({ onRecordingComplete, maxTime, videoKey = 'video', video
             startCamera();
         }, 1000);
     }
+
+    const handleContinue = () => {
+        setIsUploading(true);
+        onRecordingComplete(recordedChunks, recordedVideo as string);
+    }
+
     return (
         <div className="space-y-4 max-w-4xl mx-auto p-6">
             {error && (
@@ -383,8 +388,8 @@ const VideoRecorder = ({ onRecordingComplete, maxTime, videoKey = 'video', video
                 onStart={startRecording}
                 onStop={stopRecording}
                 onReset={resetRecording}
-                onContinue={() => onRecordingComplete(recordedChunks, recordedVideo as string)}
-                isLoading={isLoading}
+                onContinue={handleContinue}
+                isLoading={isLoading || isUploading}
             />}
         </div>
     );

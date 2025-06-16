@@ -4,6 +4,7 @@ import { convertWebmToMp4 } from '../utils/fileUpload';
 import fs from 'fs'
 import { S3Client, GetObjectCommand, PutObjectCommand, ListObjectsV2Command, DeleteObjectsCommand } from '@aws-sdk/client-s3';
 import { Readable } from 'stream';
+import { logger } from '../config/logger';
 
 const storageMode = process.env.STORAGE_MODE || 'local';
 
@@ -48,6 +49,8 @@ export class UploadService {
     const chunkDir = path.join('uploads', foldername);
     
     if (!fs.existsSync(chunkDir)) {
+      logger.error(`Chunk directory ${chunkDir} does not exist.`);
+      console.log(`Chunk directory ${chunkDir} does not exist.`);
       fs.mkdirSync(chunkDir, { recursive: true });
     }
 

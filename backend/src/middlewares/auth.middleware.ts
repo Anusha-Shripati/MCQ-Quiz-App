@@ -66,7 +66,7 @@ export const authenticateAndAuthorize =
           return;
         }
 
-        const modulePermission = permissions.find((p) => p.module?.name === moduleName);
+        const modulePermission = permissions.find((p:any) => p.module?.name === moduleName);
         if (!modulePermission || !modulePermission[action as Actions]) {
           generateResponse(res, 403, {}, false, 'Request not allowed.');
           return;

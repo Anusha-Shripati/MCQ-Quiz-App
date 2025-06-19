@@ -1,9 +1,8 @@
 import { Prisma, Questions, Technology } from '@prisma/client';
 import { prisma } from '../db/prisma.client';
 import * as XLSX from 'xlsx';
-import * as fs from 'fs';
-import * as path from 'path';
 import { allTechnologiesWorldwide, docData, sampleData } from '../utils/dateUtils';
+import { CacheService } from './cacheService';
 
 interface QuestionsPayload {
   technology_id: string;
@@ -25,6 +24,14 @@ interface ImportedQuestion {
 }
 
 export class QuestionService {
+
+  private cacheService;
+  private cacheTime = 60;
+
+  constructor() {
+    this.cacheService = new CacheService()
+  }
+
   async getQuestions(filters: {
     technology_id?: string;
     page?: string;
@@ -32,6 +39,11 @@ export class QuestionService {
     difficulty_level?: string;
     search?: string;
   }) {
+
+    const key = this.cacheService.generateKey('questions', filters)
+    const data = await this.cacheService.getKey(key);
+    if (data) return JSON.parse(data)
+
     const query: Prisma.QuestionsWhereInput = {
       deleted_at: null,
       technology_id: filters.technology_id ? filters.technology_id : undefined,
@@ -55,11 +67,19 @@ export class QuestionService {
         },
       });
     }
-    return prisma.questions.findMany({ include: { technology: true } });
+    const response = prisma.questions.findMany({ include: { technology: true } });
+
+    await this.cacheService.setKey(key, response, this.cacheTime)
+    return response
   }
 
   async getQuestionById(id: string): Promise<Questions | null> {
-    return prisma.questions.findUnique({ where: { id } });
+
+    const data = await this.cacheService.getKey(`question:${id}`)
+    if (data) JSON.stringify(data)
+    const response = prisma.questions.findUnique({ where: { id } });
+    await this.cacheService.setKey(`question:${id}`, response, this.cacheTime)
+    return response
   }
 
   async createQuestion(data: QuestionsPayload): Promise<Questions> {
@@ -83,6 +103,10 @@ export class QuestionService {
     difficulty_level?: string;
     search?: string;
   }) {
+    const key = this.cacheService.generateKey('questions:technology', filters)
+    const data = await this.cacheService.getKey(key);
+    if (data) return JSON.parse(data)
+
     const query: Prisma.QuestionsWhereInput = {
       technology_id: filters.technology_id ? filters.technology_id : undefined,
       difficulty_level: filters.difficulty_level
@@ -109,7 +133,8 @@ export class QuestionService {
       totalQuestions / (filters.limit ? Number(filters.limit) : totalQuestions)
     );
     const technology = await prisma.technology.findUnique({ where: { id: filters.technology_id } });
-    return {
+
+    const response = {
       list: questions,
       total: totalQuestions,
       page,
@@ -117,6 +142,8 @@ export class QuestionService {
       totalPages,
       technology,
     };
+    await this.cacheService.setKey(key, response, this.cacheTime)
+    return response
   }
 
   async downloadQuestionFile(): Promise<Buffer> {
@@ -134,19 +161,19 @@ export class QuestionService {
     });
 
     const sampleQuestionsData = technologiesWithQuestions
-      .filter(tech => tech.questions.length > 0) 
+      .filter(tech => tech.questions.length > 0)
       .map(tech => {
         const question = tech.questions[0];
         return {
           question: question.question,
-          correct_answer: question.correct_answer.join(','), 
+          correct_answer: question.correct_answer.join(','),
           options: Array.isArray(question.options) ? question.options.join(',') : question.options,
           difficulty_level: question.difficulty_level,
         };
       });
     console.log('Sample Questions Data:', sampleQuestionsData);
     const dataToUse = sampleQuestionsData.length > 0 ? sampleQuestionsData : sampleData;
-    
+
     const worksheet = XLSX.utils.json_to_sheet(dataToUse);
 
     const wscols = [
@@ -178,12 +205,12 @@ export class QuestionService {
     technologyName?: string 
   }> {
     const workbook = XLSX.read(fileBuffer, { type: 'buffer' });
-    const sheetName = workbook.SheetNames[0]; 
+    const sheetName = workbook.SheetNames[0];
     const worksheet = workbook.Sheets[sheetName];
-    
+
     // Convert sheet to JSON
     const questions = XLSX.utils.sheet_to_json<ImportedQuestion>(worksheet);
-    
+
     if (questions.length === 0) {
       return {
         totalImported: 0,
@@ -204,23 +231,23 @@ export class QuestionService {
     }
     
     const errors: string[] = [];
-    
+
     for (const [index, row] of questions.entries()) {
-      const rowNum = index + 2; 
-      
+      const rowNum = index + 2;
+
       try {
         if (!row.question || String(row.question).trim() === '') {
           errors.push(`Row ${rowNum}: Missing question. This field is required.`);
         }
-        
+
         if (!row.options || String(row.options).trim() === '') {
           errors.push(`Row ${rowNum}: Missing options. This field is required.`);
         }
-        
+
         if (!row.correct_answer || String(row.correct_answer).trim() === '') {
           errors.push(`Row ${rowNum}: Missing correct answer. This field is required.`);
         }
-        
+
         if (!row.difficulty_level || String(row.difficulty_level).trim() === '') {
           errors.push(`Row ${rowNum}: Missing difficulty level. This field is required.`);
         }
@@ -240,25 +267,25 @@ export class QuestionService {
             errors.push(`Row ${rowNum}: Options must contain at least 4 comma-separated values.`);
           }
         }
-        
+
         // Validate correct_answer contains valid indexes
         if (row.correct_answer && optionsArray.length > 0) {
           const correctAnswer = String(row.correct_answer);
           let correctAnswersArray: string[];
-          
+
           if (correctAnswer.includes(',')) {
             correctAnswersArray = correctAnswer.split(',').map(ans => ans.trim());
           } else {
             correctAnswersArray = [correctAnswer.trim()];
           }
-          
+
           for (const answer of correctAnswersArray) {
             // Check if the answer is a valid number
             if (!/^\d+$/.test(answer)) {
               errors.push(`Row ${rowNum}: Correct answer "${answer}" is not a valid index number.`);
               continue;
             }
-            
+
             const ansIndex = parseInt(answer, 10);
             if (ansIndex < 0 || ansIndex >= optionsArray.length) {
               console.log(ansIndex, optionsArray.length);
@@ -266,11 +293,11 @@ export class QuestionService {
             }
           }
         }
-        
+
         if (row.difficulty_level) {
           const validDifficultyLevels = ['easy', 'medium', 'hard'];
           const difficultyLevel = String(row.difficulty_level).toLowerCase();
-          
+
           if (!validDifficultyLevels.includes(difficultyLevel)) {
             errors.push(`Row ${rowNum}: Invalid difficulty level "${row.difficulty_level}". Must be one of: easy, medium, hard`);
           }
@@ -280,7 +307,7 @@ export class QuestionService {
         errors.push(`Row ${rowNum}: ${errorMessage}`);
       }
     }
-    
+
     // If any validation errors were found, return them without creating anything
     if (errors.length > 0) {
       return {
@@ -288,27 +315,27 @@ export class QuestionService {
         errors
       };
     }
-    
+
     // All validations passed, proceed with import using a transaction
     let totalImported = 0;
-    
+
     try {
       await prisma.$transaction(async (tx) => {
         for (const row of questions) {
           const optionsString = String(row.options);
           const optionsArray = optionsString.split(',').map(opt => opt.trim());
-          
+
           const correctAnswer = String(row.correct_answer);
           let correctAnswersIndexes: string[];
-          
+
           if (correctAnswer.includes(',')) {
             correctAnswersIndexes = correctAnswer.split(',').map(ans => ans.trim());
           } else {
             correctAnswersIndexes = [correctAnswer.trim()];
           }
-          
+
           const difficultyLevel = String(row.difficulty_level).toLowerCase();
-          
+
           await tx.questions.create({
             data: {
               technology_id: technologyId, // Use the specified technology ID
@@ -317,21 +344,21 @@ export class QuestionService {
               options: optionsArray,
               time: "60",
               difficulty_level: difficultyLevel as 'easy' | 'medium' | 'hard',
-              type: 'mcq', 
-              meta: {} 
+              type: 'mcq',
+              meta: {}
             }
           });
-          
+
           totalImported++;
         }
       });
-      
+
       return {
         totalImported,
         technologyName: technology.name,  // Include technology name in successful response
         errors: []
       };
-      
+
     } catch (error) {
       console.error('Import transaction failed:', error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error during import';

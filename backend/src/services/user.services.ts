@@ -2,8 +2,17 @@ import { Roles, User } from '@prisma/client'; // Import Role if needed
 import { prisma } from '../db/prisma.client';
 import dayjs from 'dayjs';
 import nodemailer from 'nodemailer';
+import { CacheService } from './cacheService';
 
 export class UserService {
+  private cacheService;
+  private cacheTime = 60;
+
+  constructor() {
+    this.cacheService = new CacheService()
+  }
+
+
   async createUser(
     data: Pick<User, 'email' | 'password' | 'created_at' | 'role_id' | 'name'>
   ): Promise<User> {
@@ -19,7 +28,11 @@ export class UserService {
   }
 
   async findUserByEmail(email: string): Promise<User | null> {
-    return await prisma.user.findUnique({
+
+    const data = await this.cacheService.getKey(`user:email:${email}`);
+    if (data) return JSON.parse(data)
+    
+      const response =  await prisma.user.findUnique({
       where: { email },
       include: {
         role: {
@@ -39,10 +52,16 @@ export class UserService {
         },
       },
     });
+    await this.cacheService.setKey(`user:email:${email}}`, response, this.cacheTime)
+    return response
   }
 
   async findUserById(userId: string): Promise<(User & { role: Roles | null }) | null> {
-    return await prisma.user.findUnique({
+
+    const data = await this.cacheService.getKey(`user:${userId}`);
+
+    if (data) return JSON.parse(data)
+    const response = await prisma.user.findUnique({
       where: { id: userId, deleted_at: null },
       include: {
         role: {
@@ -62,8 +81,10 @@ export class UserService {
         },
       },
     });
+    await this.cacheService.setKey(`user:${userId}`, response, this.cacheTime)
+    return response
   }
-  
+
   async updateUser(id: string, data: Record<string, string | null>) {
     const user = await prisma.user.update({ where: { id }, data });
     if (!user) return null;
@@ -79,7 +100,10 @@ export class UserService {
   async findManyUsers(
     filter: Record<string, any>
   ): Promise<Pick<User, 'id' | 'email' | 'role_id'>[]> {
-    return await prisma.user.findMany({
+    const key = this.cacheService.generateKey('user:filter',filter)
+    const data = await this.cacheService.getKey(key)
+    if(data) return JSON.parse(data)
+    const response =  await prisma.user.findMany({
       where: {
         ...filter,
         deleted_at: null,
@@ -99,6 +123,8 @@ export class UserService {
         },
       },
     });
+    await this.cacheService.setKey(key,response,this.cacheTime)
+    return response
   }
   async delete(id: string) {
     return await prisma.user.update({
@@ -107,7 +133,7 @@ export class UserService {
     });
   }
   async generateAndSendOtp(name: string, email: string) {
-  
+
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
     const expiresAt = dayjs().add(10, 'minute').toDate();
@@ -116,7 +142,7 @@ export class UserService {
     await prisma.reset_password.create({
       data: {
         email,
-        otp, 
+        otp,
         expires_at: expiresAt,
       },
     });
@@ -159,7 +185,7 @@ export class UserService {
 
     if (!resetPassword) {
       throw new Error('Invalid or expired OTP');
-      
+
     }
 
     return resetPassword;

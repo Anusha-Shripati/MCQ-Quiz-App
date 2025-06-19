@@ -1,4 +1,5 @@
 import { prisma } from '../db/prisma.client';
+import { CacheService } from './cacheService';
 
 interface ResultParams {
   page?: string;
@@ -14,7 +15,18 @@ interface ResultParams {
   experienceTo?: string;
 }
 export class ResultService {
+
+    private cacheService;
+    private cacheTime = 60;
+  
+    constructor() {
+      this.cacheService = new CacheService()
+    }
+  
   get = async (id: string) => {
+    const data = await this.cacheService.getKey(`result:${id}`);
+    if (data) return JSON.parse(data)
+
     const result = await prisma.results.findFirst({
       where: { id: id },
       include: {
@@ -55,10 +67,18 @@ export class ResultService {
       };
     }
 
-    return result;
+
+    await this.cacheService.setKey(`question:${id}`, result, this.cacheTime)
+    return result
   };
 
   list = async (params: ResultParams) => {
+
+
+    const key = this.cacheService.generateKey('questions', params)
+    const data = await this.cacheService.getKey(key);
+    if (data) return JSON.parse(data)
+
     const page = params.page ? Number(params.page) : 1;
     const limit = params.limit ? Number(params.limit) : 10;
     const skip = (page - 1) * limit;
@@ -207,6 +227,9 @@ export class ResultService {
       };
     });
 
-    return { list: processedResults, total, page, limit };
+    const response= { list: processedResults, total, page, limit };
+
+    await this.cacheService.setKey(key, response, this.cacheTime)
+    return response
   };
 }

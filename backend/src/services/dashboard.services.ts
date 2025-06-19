@@ -9,8 +9,20 @@ import {
 import dayjs from 'dayjs';
 
 import utc from 'dayjs/plugin/utc';
+import { CacheService } from './cacheService';
 export class DashboardService {
+
+  private cacheService;
+  private cacheTime = 60;
+  constructor() {
+    this.cacheService = new CacheService()
+  }
   async getQuestionData() {
+
+    const data = await this.cacheService.getKey('dashboard:question-data')
+    if (data) {
+      return JSON.parse(data)
+    }
     const questionData = await prisma.questions.groupBy({
       by: ['technology_id'],
       _count: true,
@@ -26,13 +38,19 @@ export class DashboardService {
 
     const techMap = new Map(technologies.map((tech) => [tech.id, tech.name]));
 
-    return questionData.map((group) => ({
+    const response = questionData.map((group) => ({
       ...group,
       name: techMap.get(group.technology_id) || 'Unknown',
     }));
+    await this.cacheService.setKey('dashboard:question-data', response, this.cacheTime)
+    return response
   }
 
   async getInterviewData() {
+    const data = await this.cacheService.getKey('dashboard:interview-data')
+    if (data) {
+      return JSON.parse(data)
+    }
     const results = await prisma.results.findMany({
       select: {
         percentage: true,
@@ -68,15 +86,20 @@ export class DashboardService {
     });
 
     const sortedData = Array.from(monthlyData.values());
-
-    return {
+    const response = {
       months: sortedData.map((item) => item.month),
       pass: sortedData.map((item) => item.pass),
       failed: sortedData.map((item) => item.failed),
-    };
+    }
+    await this.cacheService.setKey("dadhboard:interview-data", response, this.cacheTime)
+    return response;
   }
 
   async getInterviewCount() {
+    const data = await this.cacheService.getKey('dashboard:interview-count')
+    if (data) {
+      return JSON.parse(data)
+    }
     const exams = await prisma.exam.findMany({
       select: { start_time: true },
       where: { deleted_at: null },
@@ -91,7 +114,7 @@ export class DashboardService {
         counts[category as keyof typeof counts]++;
       }
     });
-
+    await this.cacheService.setKey('dashboard:interview-count', counts, this.cacheTime)
     return counts;
   }
 
@@ -103,6 +126,12 @@ export class DashboardService {
     limit: string;
   }) {
     const { language, min, max, page, limit } = filters;
+
+    const key = await this.cacheService.generateKey('dashboard:interview-score', { language, min, max, page, limit })
+    const data = await this.cacheService.getKey(key)
+    if (data) {
+      return JSON.parse(data)
+    }
     const parsedPage = page ? parseInt(page) : 1;
     const parsedLimit = page ? parseInt(limit) : 1;
     const whereClause: any = {
@@ -161,15 +190,22 @@ export class DashboardService {
     });
     const count = await prisma.results.count({ where: whereClause });
 
-    return {
+    const response = {
       total: count,
       page: parsedPage,
       limit: parsedLimit,
       list: formatInterviewResults(results as unknown as Result[]),
     };
+    await this.cacheService.setKey(key, response, this.cacheTime)
+    return response
   }
 
   async calendarData(month: string, year: string) {
+    const key = this.cacheService.generateKey("dashboard:calender-data", { month, year })
+    const data = await this.cacheService.getKey(key)
+    if (data) {
+      return JSON.parse(data)
+    }
     dayjs.extend(utc);
     const startDate = dayjs()
       .set('year', Number(year))
@@ -223,6 +259,7 @@ export class DashboardService {
         },
       },
     });
+    await this.cacheService.setKey(key, exams, this.cacheTime)
     return exams;
   }
 }

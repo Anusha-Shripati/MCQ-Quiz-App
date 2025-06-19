@@ -66,7 +66,7 @@ export const QuestionCard = ({
           </Badge>
         </div>
        {(question.type == "mcq" || question.type == "multiple_select") && <ul className="space-y-2">
-          {question.options?.map((option, index) => (
+          {question.options?.filter((option)=> option!=="").map((option, index) => (
             <li
               key={index}
               className={`p-2 rounded-md text-sm md:text-base ${

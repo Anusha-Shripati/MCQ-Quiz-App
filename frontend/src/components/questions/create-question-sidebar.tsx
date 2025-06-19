@@ -14,6 +14,7 @@ interface QuestionSidebarProps {
   setSelectedQuestion: (index: number) => void;
   handleDeleteQuestion: ( index: number) => void;
   handleAddQuestion: () => void;
+  validationErrors?: {[key: number]: string}; // Add validation errors prop
 }
 
 const QuestionSidebar: React.FC<QuestionSidebarProps> = ({
@@ -22,6 +23,7 @@ const QuestionSidebar: React.FC<QuestionSidebarProps> = ({
   setSelectedQuestion,
   handleDeleteQuestion,
   handleAddQuestion,
+  validationErrors = {}
 }) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [questionToDelete, setQuestionToDelete] = useState<number|null>(null);
@@ -83,6 +85,7 @@ const QuestionSidebar: React.FC<QuestionSidebarProps> = ({
                 className={clsx(
                   'p-2 sm:p-3 rounded-lg cursor-pointer flex justify-between items-center transition-all duration-200 ease-in-out border w-100',
                   q.id ? '' : 'border-[#ffa500]',
+                  validationErrors[index] ? 'border-red-500' : '',
                   selectedQuestion === index
                     ? 'bg-blue-500 text-white hover:bg-blue-600 shadow-md'
                     : 'bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 shadow-sm'
@@ -95,17 +98,22 @@ const QuestionSidebar: React.FC<QuestionSidebarProps> = ({
                   </span>
                   {!q.id && <small className="text-[10px] sm:text-xs">Not saved</small>}
                 </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="hover:bg-red-500/10 rounded-full p-1 sm:p-2 ml-1"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    openDeleteModal(index);
-                  }}
-                >
-                  <Trash2 className="h-3 w-3 sm:h-4 sm:w-4 text-red-500 hover:text-red-600" />
-                </Button>
+                <div className="flex items-center">
+                  {validationErrors[index] && (
+                    <span className="text-xs text-red-500 mr-1" title={validationErrors[index]}>⚠️</span>
+                  )}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="hover:bg-red-500/10 rounded-full p-1 sm:p-2"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openDeleteModal(index);
+                    }}
+                  >
+                    <Trash2 className="h-3 w-3 sm:h-4 sm:w-4 text-red-500 hover:text-red-600" />
+                  </Button>
+                </div>
               </li>
             ))}
           </ul>

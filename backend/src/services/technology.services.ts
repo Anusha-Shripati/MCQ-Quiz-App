@@ -25,7 +25,8 @@ export class TechnologyService {
       },
     });
 
-    return technologies.map((tech) => {
+    return technologies
+    .map((tech) => {
       const difficultyCount = {
         easy: 0,
         medium: 0,

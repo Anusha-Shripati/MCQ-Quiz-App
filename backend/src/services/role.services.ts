@@ -48,7 +48,7 @@ export class RoleService {
   }
 
   async deleteRole(roleId: string) {
-    return prisma.roles.deleteMany({
+    return prisma.roles.delete({
       where: {
         id: roleId,
       },
@@ -72,6 +72,37 @@ export class RoleService {
   async getPermissionByRole(id: string) {
     return prisma.role_permissions.findMany({ where: { role_id: id }, include: { module: true } });
   }
+
+  async checkRoleHasUsers(roleId: string): Promise<number> {
+    return await prisma.user.count({
+      where: {
+        role_id: roleId,
+        deleted_at: null,
+      },
+    });
+  }
+
+async nullifyRoleForSoftDeletedUsers(roleId: string) {
+  return prisma.user.updateMany({
+    where: {
+      role_id: roleId,
+      NOT: { deleted_at: null },
+    },
+    data: {
+      role_id: undefined,
+    },
+  });
 }
+async countAllUsersByRole(roleId: string): Promise<number> {
+  return prisma.user.count({
+    where: {
+      role_id: roleId,
+      deleted_at: null,
+    },
+  });
+}
+
+}
+
 
 export default RoleService;

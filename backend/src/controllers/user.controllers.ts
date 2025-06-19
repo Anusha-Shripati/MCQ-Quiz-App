@@ -31,7 +31,12 @@ export class UserController {
       if (!isPasswordValid) {
         return generateResponse(res, 400, {}, false, 'Invalid password!');
       }
-
+      if( user.deleted_at) {
+        return generateResponse(res, 400, {}, false, 'User is deleted!');
+      }
+      if (!user.role_id) {
+        return generateResponse(res, 400, {}, false, 'User is not found!');
+      }
       const role = await roleService.findRoleById(user.role_id);
       const token = createToken(user.id, user.email, role?.name, role?.id);
 
@@ -116,14 +121,15 @@ export class UserController {
     try {
       const userId = req.params.id;
       const { oldPassword, newPassword } = req.body;
-
+      let isPasswordValid;
+      
       const user = await userService.findUserById(userId);
       if (!user) {
         return generateResponse(res, 404, {}, false, 'User not found!');
       }
 
       if (oldPassword) {
-        const isPasswordValid = await matchPassword(oldPassword, user.password);
+        isPasswordValid = await matchPassword(oldPassword, user.password);
 
         if (!isPasswordValid) {
           return generateResponse(res, 400, {}, false, 'Invalid old password!');
@@ -131,8 +137,13 @@ export class UserController {
       }
       let hashPass = user.password;
       if (newPassword) {
+        const isSamePassword = await matchPassword(newPassword, user.password);
+        if (isSamePassword) {
+          return generateResponse(res, 400, {}, false, 'New password cannot be same as old password, Please choose a different password.');
+        }
         hashPass = await encryptStringCrypt(newPassword);
       }
+
       const newUser = await userService.changePassword(user.id, hashPass);
 
       generateResponse(res, 200, newUser, true, 'Password updated successfully!');

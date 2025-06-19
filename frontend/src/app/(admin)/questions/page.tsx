@@ -14,7 +14,6 @@ import { technologyEndpoint } from '@/lib/endpoint';
 
 export default function QuestionsPage() {
   const [categoriesArray, setCategoriesArray] = useState<QuestionCategory[]>([]);
-
   const { technologyFilter } = useQuestionStore();
   const { paramsLoading } = useAuthStore();
   const { data, isLoading, error ,mutate:questionMutate,isValidating } = useSWR(paramsLoading ? null : `${technologyEndpoint.LIST}?search=${technologyFilter}`, api.get);
@@ -45,7 +44,7 @@ export default function QuestionsPage() {
   return (
     <div className="px-2 py-6 flex flex-col">
       <div className="flex items-center justify-end mb-6">
-        <CreateCategory />
+        <CreateCategory categoriesArray={categoriesArray} />
 
       </div>
       <StatusWrapper className="w-full min-h-[600px]" loading={isLoading || isValidating} error={error}  reset={questionMutate}>

@@ -6,18 +6,18 @@ export class TechnologyController {
   create = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { name, questions } = req.body;
-      const trimName = name.trim()
+      const trimName = name.trim();
       const technology = await technologyService.getTechnologyByName(trimName);
       if (technology && technology.deleted_at) {
         const newTechnology = await technologyService.updateTechnology(technology.id, {
           name: trimName,
           deleted_at: null,
-          questions
+          questions,
         });
         return generateResponse(res, 200, newTechnology, true, 'Technology created successfully');
       } else if (technology) {
         return generateResponse(res, 400, {}, false, 'Technology name already exists');
-      }
+        }
       const newTechnology = await technologyService.createTechnology({ name: trimName, questions });
       return generateResponse(res, 200, newTechnology, true, 'Technology created successfully');
     } catch (error) {
@@ -41,7 +41,7 @@ export class TechnologyController {
     try {
       const { id } = req.params;
       const { name, questions } = req.body;
-      const trimName = name.trim()
+      const trimName = name.trim();
 
       const existingTechnology = await technologyService.getTechnologyById(id);
       if (!existingTechnology) {
@@ -52,12 +52,31 @@ export class TechnologyController {
         if (duplicateTechnology && !duplicateTechnology.deleted_at) {
           return generateResponse(res, 400, {}, false, 'Technology name already exists');
         } else if (duplicateTechnology) {
-          await technologyService.deleteTechnology(duplicateTechnology.id)
+          await technologyService.deleteTechnology(duplicateTechnology.id);
         }
       }
+      console.log('questions', questions);
+
+
+      for (const question of questions) {
+        if (
+          (question.type === 'mcq' || question.type === 'multiple_select') &&
+          (!Array.isArray(question.options) ||
+            question.options.filter((opt: string) => opt && opt.trim() !== '').length < 4)
+        ) {
+          return generateResponse(
+            res,
+            400,
+            { questionId: question.id || null },
+            false,
+            `Question "${question.question}" must have at least 4 non-empty options`
+          );
+        }
+      }
+
       const updatedTechnology = await technologyService.updateTechnology(id, {
         name: trimName,
-        questions
+        questions,
       });
       return generateResponse(res, 200, updatedTechnology, true, 'Technology updated successfully');
     } catch (error) {

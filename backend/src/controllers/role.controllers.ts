@@ -35,7 +35,9 @@ export class RoleController {
   update = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
+      console.log('Update role ID:', id);
       const { name, role_permissions } = req.body;
+      console.log('Update role data:', { name, role_permissions });
       const existingRole = await roleService.findRoleById(id);
       if (!existingRole) {
         return generateResponse(res, 404, {}, false, 'Role not found!');
@@ -51,8 +53,9 @@ export class RoleController {
       const updatedRole = await roleService.updateRole(id, { name });
 
       if (role_permissions && Array.isArray(role_permissions)) {
+
+        await roleService.deleteRolePermissions(id)
         await roleService.assignPermissionsToRole(updatedRole.id, role_permissions);
-        await roleService.deleteRolePermissions(id);
       }
       return generateResponse(res, 200, updatedRole, true, 'Role updated successfully');
     } catch (error) {
@@ -60,20 +63,38 @@ export class RoleController {
     }
   };
 
-  delete = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const { id } = req.params;
-      const existingRole = await roleService.findRoleById(id);
-      if (!existingRole) {
-        return generateResponse(res, 404, {}, false, 'Role not found!');
-      }
-      await roleService.deleteRole(id);
-      await roleService.deleteRolePermissions(id);
-      return generateResponse(res, 200, {}, true, 'Role delete successfully');
-    } catch (error) {
-      next(error);
+delete = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+
+    // Step 1: Check if role exists
+    const existingRole = await roleService.findRoleById(id);
+    if (!existingRole) {
+      return generateResponse(res, 404, {}, false, 'Role not found!');
     }
-  };
+
+    const totalUserCount = await roleService.countAllUsersByRole(id);
+    console.log('Total users with this role:', totalUserCount);
+    if (totalUserCount > 0) {
+      return generateResponse(
+        res,
+        400,
+        { userCount: totalUserCount },
+        false,
+        `Cannot delete this role. ${totalUserCount} users are still assigned to it. Please reassign or permanently delete them first.`
+      );
+    }
+    await roleService.nullifyRoleForSoftDeletedUsers(id);
+    await roleService.deleteRolePermissions(id);
+    await roleService.deleteRole(id);
+
+    return generateResponse(res, 200, {}, true, 'Role deleted successfully');
+  } catch (error) {
+    console.error('Error in delete role:', error);
+    next(error);
+  }
+};
+
   get = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { search } = req.query;

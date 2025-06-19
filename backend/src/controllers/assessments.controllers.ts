@@ -12,6 +12,23 @@ export class AssessmentController {
     try {
       const { technologies, ...assessmentPayload } = req.body;
 
+      const existingAssessment = await prisma.assessments.findFirst({
+        where: {
+          name: assessmentPayload.name,
+          deleted_at: null
+        }
+      });
+
+      if (existingAssessment) {
+        return generateResponse(
+          res,
+          400,
+          {},
+          false,
+          `Assessment with name '${assessmentPayload.name}' already exists.`
+        );
+      }
+
       if (assessmentPayload.pass_criteria && typeof assessmentPayload.pass_criteria === 'string') {
         assessmentPayload.pass_criteria = parseInt(assessmentPayload.pass_criteria, 10);
       }
@@ -71,7 +88,7 @@ export class AssessmentController {
       const score = (easy * 1 + medium * 2 + hard * 3) / total;
 
       const difficulty_score = Math.round(score);
-
+      
       const newAssessment = await assessmentService.createAssessments({
         ...assessmentPayload,
         difficulty_score,

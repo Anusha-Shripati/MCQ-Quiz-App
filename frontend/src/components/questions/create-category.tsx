@@ -1,5 +1,4 @@
 'use client';
-
 import React, { useEffect, useState } from 'react';
 import { Input } from '@/components/ui/form/input';
 import { Button } from '@/components/ui/form/button';
@@ -14,21 +13,41 @@ import { usePathname, useRouter } from 'next/navigation';
 import { technologyEndpoint } from '@/lib/endpoint';
 
 import ImportSampleXLSX from './import-sample-xlsx';
+import { useAuthStore } from '@/store/authStore';
+import { Permission } from '@/types/common.types';
+import { QuestionCategory } from '@/shared/types/app';
 
 async function createCategory(url: string, { arg }: { arg: { name: string } }) {
   const response = await api.post(url, arg);
   return response.data;
 }
 
-const CreateCategory: React.FC = () => {
+interface CreateCategoryProps {
+  categoriesArray?: QuestionCategory[];
+}
+
+const CreateCategory: React.FC<CreateCategoryProps> = ({ categoriesArray = [] }) => {
   const [open, setOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [categoryName, setCategoryName] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
-
+  const [isQuestionEditable, setIsQuestionEditable] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
+  const {user} = useAuthStore();
   const { setTechnologyFilter, technologyFilter } = useQuestionStore();
+  
+  useEffect(() => {
+    const permissions = Array.isArray(user?.role?.role_permissions)
+      ? (user.role.role_permissions as Permission[])
+      : [];
+    if (permissions.length > 0) {
+      const canQuestionEdit = permissions.some(
+        (permission) => permission.module?.name === 'questions' && permission.can_edit === true
+      );
+      setIsQuestionEditable(canQuestionEdit);
+    }
+  }, [user?.role]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -86,7 +105,9 @@ const CreateCategory: React.FC = () => {
           value={searchTerm}
           onChange={handleSearch}
         />
-        <Button
+        {isQuestionEditable && (
+          <>
+          <Button
           className="bg-blue-600 text-primary-foreground hover:bg-primary/90"
           onClick={() => router.push('/questions/create-question/new')}
         >
@@ -98,6 +119,8 @@ const CreateCategory: React.FC = () => {
         >
           Import Questions
         </Button>
+          </>
+        )}
       </div>
 
       {/* Add/Edit Category Modal */}
@@ -128,6 +151,7 @@ const CreateCategory: React.FC = () => {
         importOpen={importOpen}
         setImportOpen={setImportOpen}
         onImportSuccess={handleImportSuccess}
+        categoriesArray={categoriesArray}
       />
     </>
   );

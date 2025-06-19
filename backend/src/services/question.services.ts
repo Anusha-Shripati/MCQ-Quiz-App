@@ -138,7 +138,6 @@ export class QuestionService {
       .map(tech => {
         const question = tech.questions[0];
         return {
-          technology_name: tech.name,
           question: question.question,
           correct_answer: question.correct_answer.join(','), 
           options: Array.isArray(question.options) ? question.options.join(',') : question.options,
@@ -151,7 +150,6 @@ export class QuestionService {
     const worksheet = XLSX.utils.json_to_sheet(dataToUse);
 
     const wscols = [
-      { wch: 15 }, // technology_name
       { wch: 50 }, // question
       { wch: 15 }, // correct_answer
       { wch: 50 }, // options
@@ -174,11 +172,10 @@ export class QuestionService {
     return buffer;
   }
 
-  async importQuestionsFromXlsx(fileBuffer: Buffer): Promise<{ 
+  async importQuestionsFromXlsx(fileBuffer: Buffer, technologyId: string): Promise<{ 
     totalImported: number,
-    technologiesCreated: number,
-    technologiesUpdated: number,
-    errors: string[]
+    errors: string[],
+    technologyName?: string 
   }> {
     const workbook = XLSX.read(fileBuffer, { type: 'buffer' });
     const sheetName = workbook.SheetNames[0]; 
@@ -190,9 +187,19 @@ export class QuestionService {
     if (questions.length === 0) {
       return {
         totalImported: 0,
-        technologiesCreated: 0,
-        technologiesUpdated: 0,
         errors: ['The uploaded file contains no data or has an incorrect format']
+      };
+    }
+    
+    // Verify that the specified technology exists
+    const technology = await prisma.technology.findUnique({
+      where: { id: technologyId }
+    });
+    
+    if (!technology) {
+      return {
+        totalImported: 0,
+        errors: [`Technology with ID ${technologyId} not found`]
       };
     }
     
@@ -202,10 +209,6 @@ export class QuestionService {
       const rowNum = index + 2; 
       
       try {
-        if (!row.technology_name) {
-          errors.push(`Row ${rowNum}: Missing technology name. This field is required.`);
-        }
-        
         if (!row.question || String(row.question).trim() === '') {
           errors.push(`Row ${rowNum}: Missing question. This field is required.`);
         }
@@ -221,26 +224,20 @@ export class QuestionService {
         if (!row.difficulty_level || String(row.difficulty_level).trim() === '') {
           errors.push(`Row ${rowNum}: Missing difficulty level. This field is required.`);
         }
-        
-        // Validate technology is in allowed list
-        if (row.technology_name && !allTechnologiesWorldwide.includes(row.technology_name)) {
-          errors.push(`Row ${rowNum}: Invalid technology name "${row.technology_name}". Must be one of the allowed technologies.`);
-        }
-        
-        // Validate options format
+
         let optionsArray: string[] = [];
+        let originalOptionsArray: string[] = [];
         if (row.options) {
           const optionsString = String(row.options);
-          optionsArray = optionsString.split(',').map(opt => opt.trim());
+          originalOptionsArray = optionsString.split(',').map(opt => opt.trim());
+          
+          // Process options for storage
+          optionsArray = optionsString
+            .split(',')
+            .map(opt => opt.trim().toLowerCase().replace(/\s+/g, ' '));
           
           if (optionsArray.length < 4) {
             errors.push(`Row ${rowNum}: Options must contain at least 4 comma-separated values.`);
-          }
-          
-          // Check for duplicate options
-          const uniqueOptions = new Set(optionsArray);
-          if (uniqueOptions.size !== optionsArray.length) {
-            errors.push(`Row ${rowNum}: Options contain duplicates. Each option must be unique.`);
           }
         }
         
@@ -288,57 +285,16 @@ export class QuestionService {
     if (errors.length > 0) {
       return {
         totalImported: 0,
-        technologiesCreated: 0,
-        technologiesUpdated: 0,
         errors
       };
     }
     
     // All validations passed, proceed with import using a transaction
-    let technologiesCreated = 0;
-    let technologiesUpdated = 0;
     let totalImported = 0;
     
     try {
-
       await prisma.$transaction(async (tx) => {
-        // Track technologies to avoid creating duplicates within the same import
-        const processedTechnologies = new Map<string, string>();
-        
         for (const row of questions) {
-          // Normalize technology name (case insensitive)
-          const techName = String(row.technology_name).trim().toUpperCase();
-          
-          // Check if we've already processed this technology in this import
-          let technology = processedTechnologies.get(techName);
-          
-          if (!technology) {
-            // Find existing technology or create new one
-            const existingTech = await tx.technology.findFirst({
-              where: {
-                name: {
-                  equals: techName,
-                  mode: 'insensitive'
-                }
-              }
-            });
-            
-            if (existingTech) {
-              technology = existingTech.id;
-              processedTechnologies.set(techName, existingTech.id);
-              technologiesUpdated++;
-            } else {
-              const newTech = await tx.technology.create({
-                data: {
-                  name: techName
-                }
-              });
-              technology = newTech.id;
-              processedTechnologies.set(techName, newTech.id);
-              technologiesCreated++;
-            }
-          }
-          
           const optionsString = String(row.options);
           const optionsArray = optionsString.split(',').map(opt => opt.trim());
           
@@ -355,7 +311,7 @@ export class QuestionService {
           
           await tx.questions.create({
             data: {
-              technology_id: technology,
+              technology_id: technologyId, // Use the specified technology ID
               question: String(row.question),
               correct_answer: correctAnswersIndexes,
               options: optionsArray,
@@ -372,8 +328,7 @@ export class QuestionService {
       
       return {
         totalImported,
-        technologiesCreated,
-        technologiesUpdated,
+        technologyName: technology.name,  // Include technology name in successful response
         errors: []
       };
       
@@ -382,11 +337,16 @@ export class QuestionService {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error during import';
       return {
         totalImported: 0,
-        technologiesCreated: 0,
-        technologiesUpdated: 0,
         errors: [`Transaction failed: ${errorMessage}`]
       };
     }
+  }
+
+  async getTechnology(): Promise<Technology[]> {
+    return prisma.technology.findMany({
+      where: { deleted_at: null },
+      orderBy: { name: 'asc' },
+    });
   }
 }
 

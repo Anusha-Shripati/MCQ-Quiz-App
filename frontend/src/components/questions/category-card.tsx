@@ -2,9 +2,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import CategoryMenu from './category-menu';
 import { useRouter } from 'next/navigation';
-import { Plus } from 'lucide-react';
+import { EyeIcon, Plus } from 'lucide-react';
 import { Button } from '../ui/form/button';
 import { QuestionCategory } from '@/shared/types/app';
+import { useAuthStore } from '@/store/authStore';
+import { useEffect, useState } from 'react';
+import { Permission } from '@/types/common.types';
 
 export const CategoryCard = ({
   category,
@@ -14,6 +17,9 @@ export const CategoryCard = ({
   handleDelete: (id: string) => void;
 }) => {
   const router = useRouter();
+  const {user} = useAuthStore();
+  const [isQuestionEditable, setIsQuestionEditable] = useState(false);
+
   const handleNavigate = () => {
     router.push(`/questions/category/${category.id}`);
   };
@@ -27,10 +33,23 @@ export const CategoryCard = ({
     router.push(`/questions/category/${category.id}?difficulty=${difficulty}`);
   };
 
+  useEffect(() => {
+    const permissions = Array.isArray(user?.role?.role_permissions)
+      ? (user.role.role_permissions as Permission[])
+      : [];
+    if (permissions.length > 0) {
+      const canQuestionEdit = permissions.some(
+        (permission) => permission.module?.name === 'questions' && permission.can_edit === true
+      );
+      setIsQuestionEditable(canQuestionEdit);
+    }
+    }, [user?.role]);
+
   return (
     <Card className="shadow-md hover:shadow-lg transition-all duration-200">
       <CardHeader className="flex flex-row justify-between items-center border-b pb-2">
         <CardTitle className="text-lg font-semibold">{category.name}</CardTitle>
+        {isQuestionEditable ? (
         <div className="flex items-center justify-center gap-2">
           <Button
               variant="outline"
@@ -46,6 +65,18 @@ export const CategoryCard = ({
               handleNavigate={handleNavigate}
             />
         </div>
+        ):(
+          <div className='flex items-center justify-center'>
+          <Button
+          variant="outline"
+          onClick={() => handleNavigate()}
+          className="dark:border-gray-600 dark:text-white dark:hover:bg-gray-700"
+        >
+          <EyeIcon className="h-4 w-4 text-gray-600 dark:text-gray-300" />
+          <span className="text-gray-900 dark:text-gray-200">View</span>
+            </Button>
+           </div>
+        )}
       </CardHeader>
       <CardContent>
         <div className="space-y-3 mt-2">

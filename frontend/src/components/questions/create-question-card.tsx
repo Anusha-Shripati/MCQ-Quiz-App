@@ -30,6 +30,7 @@ interface QuestionCardProps {
   onSave?: () => void;
   onCancel?: () => void;
   editQuestion?: boolean;
+  validationError?: string; // Add validation error prop
 }
 
 interface CreateQuestionPayload {
@@ -62,8 +63,14 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
   handleReset,
   onCancel,
   editQuestion,
+  validationError,
 }) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  // Add state to check if the question field has content
+  const hasQuestionContent = useMemo(
+    () => Boolean(question.question && question.question.trim()),
+    [question.question]
+  );
 
   const ensureFiveOptions = (options: string[] = []) => {
     while (options.length < 5) {
@@ -75,12 +82,12 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
   const questionTypeOptions = useMemo(
     () =>
       [
-        { value: 'multiple_select', label: 'Multiple Choice' },
+        // { value: 'multiple_select', label: 'Multiple Choice' },
         { value: 'mcq', label: 'Radio Select' },
-        { value: 'text', label: 'Fill in the Blanks' },
-        { value: 'code_snippet', label: 'Code Snippet' },
-        { value: 'code_editor', label: 'Code Editor' },
-        { value: 'video', label: 'Video' },
+        // { value: 'text', label: 'Fill in the Blanks' },
+        // { value: 'code_snippet', label: 'Code Snippet' },
+        // { value: 'code_editor', label: 'Code Editor' },
+        // { value: 'video', label: 'Video' },
       ] as { value: Question['type']; label: string }[],
     []
   );
@@ -100,7 +107,6 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
     `${questionEndpoint.QUESTION_BY_ID}/${question?.id}`,
     updateQuestion
   );
-
 
   const handleCorrectOptionChange = (
     optionIndex: number,
@@ -154,8 +160,18 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
     }
   };
 
+  // Add a state to track option errors
+  const [optionErrors, setOptionErrors] = useState<{[key: number]: string}>({});
+
+  // Helper function to check for duplicate options
+  const checkDuplicateOption = (options: string[], value: string, currentIndex: number) => {
+    return options.findIndex((opt, idx) => 
+      idx !== currentIndex && opt.trim() === value.trim() && value.trim() !== ''
+    );
+  };
+
   return (
-    <Card>
+    <Card className={validationError ? "border-2 border-red-500" : ""}>
       <CardHeader>
         <CardTitle className="text-xl font-bold flex justify-between text-gray-900 dark:text-white">
           Question {selectedQuestion + 1}
@@ -169,6 +185,12 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
         </CardTitle>
       </CardHeader>
       <CardContent>
+        {validationError && (
+          <div className="mb-4 p-2 bg-red-100 text-red-700 rounded-md border border-red-300">
+            {validationError}
+          </div>
+        )}
+        
         <div className="flex gap-4 mb-4">
           <FormField
             label="Type"
@@ -181,6 +203,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
             }
             placeholder="Question Type"
             options={questionTypeOptions}
+            disabled={!hasQuestionContent}
           />
           <FormField
             label="Difficulty Type"
@@ -236,12 +259,14 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
             updatedQuestions[selectedQuestion].question = e.target.value;
             setQuestions(updatedQuestions);
           }}
-          className="mb-4"
+          className={`mb-4 ${validationError && !question.question.trim() ? "border-red-500" : ""}`}
         />
 
         {question.type === 'video' && question.meta?.videoToVideo ? (
           <>
-            <label className="block text-sm font-medium mb-1">Video link <small>( Enter embedded link )</small></label>
+            <label className="block text-sm font-medium mb-1">
+              Video link <small>( Enter embedded link )</small>
+            </label>
             <textarea
               placeholder="Enter video url"
               value={(question.meta?.video_url || '') as string}
@@ -263,6 +288,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
                     name={`radio-${question.id}`}
                     checked={question.correct_answer.includes(i.toString())}
                     onChange={(e) => handleCorrectOptionChange(i, selectedQuestion, 'mcq', e)}
+                    disabled={!option.trim()} // Disable radio if option is empty
                   />
                 ) : (
                   <input
@@ -271,32 +297,66 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
                     onChange={(e) =>
                       handleCorrectOptionChange(i, selectedQuestion, 'multiple_select', e)
                     }
+                    disabled={!option.trim()} // Disable checkbox if option is empty
                   />
                 )}
-                <Input
-                  placeholder={`Option ${i + 1}`}
-                  value={option}
-                  onChange={(e) => {
-                    const updatedQuestions = [...questions];
-                    const newValue = e.target.value;
-                    updatedQuestions[selectedQuestion].options[i] = newValue;
-                    setQuestions(updatedQuestions);
-                  }}
-                  onBlur={(e) => {
-                    // if same option than denied
-                    const updatedQuestions = [...questions];
-                    const newValue = e.target.value;
-                    const op_index = updatedQuestions[selectedQuestion].options.indexOf(newValue);
-                    if (op_index !== -1 && op_index !== i && newValue) {
-                      updatedQuestions[selectedQuestion].options[i] = '';
-                      e.target.value = '';
-                      toast.error('Option already exists');
-                      return;
-                    }
-                    setQuestions(updatedQuestions);
-                  }}
-                  className={i >= 4 ? 'border-dashed border-gray-400' : ''}
-                />
+                <div className="flex-1">
+                  <Input
+                    placeholder={`Option ${i + 1}`}
+                    value={option}
+                    onChange={(e) => {
+                      const updatedQuestions = [...questions];
+                      const newValue = e.target.value;
+                      updatedQuestions[selectedQuestion].options[i] = newValue;
+                      
+                      // Clear error when typing
+                      if (optionErrors[i]) {
+                        const newErrors = {...optionErrors};
+                        delete newErrors[i];
+                        setOptionErrors(newErrors);
+                      }
+                      
+                      setQuestions(updatedQuestions);
+                    }}
+                    onBlur={(e) => {
+                      // Check for duplicate options
+                      const updatedQuestions = [...questions];
+                      const newValue = e.target.value.trim();
+                      
+                      if (newValue === '') return;
+                      
+                      const dupIndex = checkDuplicateOption(
+                        updatedQuestions[selectedQuestion].options, 
+                        newValue, 
+                        i
+                      );
+                      
+                      if (dupIndex !== -1) {
+                        // Mark as duplicate
+                        updatedQuestions[selectedQuestion].options[i] = '';
+                        e.target.value = '';
+                        setQuestions(updatedQuestions);
+                        
+                        // Set error for this option
+                        setOptionErrors(prev => ({
+                          ...prev,
+                          [i]: `Duplicate of option ${dupIndex + 1}`
+                        }));
+                        
+                        toast.error('Option already exists');
+                        return;
+                      }
+                    }}
+                    className={`
+                      ${i >= 4 ? 'border-dashed border-gray-400' : ''} 
+                      ${validationError && i < 4 && !option.trim() ? 'border-red-500 bg-red-50' : ''}
+                      ${optionErrors[i] ? 'border-red-500 bg-red-50' : ''}
+                    `}
+                  />
+                  {optionErrors[i] && (
+                    <p className="text-xs text-red-500 mt-1">{optionErrors[i]}</p>
+                  )}
+                </div>
               </div>
             ))}
           </div>

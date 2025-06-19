@@ -7,15 +7,16 @@ import { authenticateAndAuthorize } from '../middlewares/auth.middleware';
 
 const questionRouter = express.Router();
 const questionsController = new QuestionsController();
-
-questionRouter.get('/download-template', asyncHandler(questionsController.downloadQuestionFile));
-
 questionRouter.post(
   '/import',
   authenticateAndAuthorize('questions.can_edit'),
   validateUploadFile(),
   asyncHandler(questionsController.importQuestionsFromXlsx)
 );
+
+questionRouter.get('/download-template', asyncHandler(questionsController.downloadQuestionFile));
+questionRouter.get('/technology', asyncHandler(questionsController.getTechnology));
+
 
 questionRouter.post(
   '/create',
@@ -48,5 +49,7 @@ questionRouter.delete(
   validateRequest(questionsSchema.delete),
   asyncHandler(questionsController.delete)
 );
+
+
 
 export default questionRouter;

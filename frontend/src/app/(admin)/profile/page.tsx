@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -12,17 +12,19 @@ import toast from 'react-hot-toast';
 import { EyeIcon, EyeOffIcon } from 'lucide-react';
 import { useProfileStore } from '@/store/profileStore';
 import { userEndpoint } from '@/lib/endpoint';
+const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
 const userInfoSchema = z.object({
-  userName: z.string().min(1, 'User Name is required'),
-  email: z.string().email('Invalid email format'),
+  userName: z.string().min(1, 'User Name is required').max(25, 'User Name must be at most 25 characters'),
+  email: z.string().regex(emailRegex,"Invalid email format.")
 });
 
 const passwordChangeSchema = z
   .object({
     oldPassword: z.string().min(1, 'Old Password is required'),
-    newPassword: z.string().min(8, 'Password must be at least 8 characters'),
-    reNewPassword: z.string().min(1, 'Re-New Password is required'),
+    newPassword: z.string().min(8, 'Password must be at least 8 characters').regex(passwordRegex, 'Password must contain at least one uppercase letter, one number, and one special character'),
+    reNewPassword: z.string().min(1, 'Re-New Password is required').regex(passwordRegex, 'Password must contain at least one uppercase letter, one number, and one special character'),
   })
   .refine((data) => data.newPassword === data.reNewPassword, {
     message: 'Passwords do not match',
@@ -51,6 +53,7 @@ export default function Profile() {
     handleSubmit: handleUserInfoSubmit,
     formState: { errors: userInfoErrors },
     reset: userReset,
+    setValue
   } = useForm({
     resolver: zodResolver(userInfoSchema),
     defaultValues: {
@@ -58,6 +61,13 @@ export default function Profile() {
       email: user?.email || '',
     },
   });
+  
+  useEffect(() => {
+    if (user) {
+      setValue('userName', user.name || '');
+      setValue('email', user.email || '');
+    }
+  }, [user]);
 
   const {
     register: registerPassword,
@@ -82,6 +92,7 @@ export default function Profile() {
         });
         if (res.success) {
           toast.success('User Info Updated Successfully');
+          // Update the form with the returned data
           userReset({
             userName: res.data.name,
             email: res.data.email,
@@ -180,6 +191,7 @@ export default function Profile() {
                       label="Email"
                       {...registerUserInfo('email')}
                       className="w-full mt-2 dark:bg-gray-800 dark:text-white"
+                      // error={userInfoErrors.email?.message}
                       disabled={!isEditing}
                     />
                     {userInfoErrors.email && (
@@ -188,15 +200,15 @@ export default function Profile() {
                   </div>
 
                   {isEditing && (
-                    <div className="flex justify-end">
+                  <div className="flex justify-end">
                       <Button
                         type="submit"
                         className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 mt-4"
                       >
-                        Save
-                      </Button>
-                    </div>
-                  )}
+                          Save
+                        </Button>
+                      </div>
+                    )}
                 </form>
               </div>
             </div>

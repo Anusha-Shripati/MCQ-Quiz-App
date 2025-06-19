@@ -62,3 +62,12 @@ export interface CalendarEvent {
     }
   }[]
 }
+export interface Module {
+  name: string;
+}
+
+export interface Permission {
+  can_read: boolean;
+  can_edit: boolean;
+  module: Module;
+}

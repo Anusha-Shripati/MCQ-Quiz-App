@@ -9,7 +9,7 @@ datasource db {
 
 model User {
     id          String        @id @default(uuid())
-    role_id     String
+    role_id     String?
     name        String
     email       String        @unique
     password    String
@@ -17,7 +17,7 @@ model User {
     created_at  DateTime      @default(now())
     updated_at  DateTime      @updatedAt
     deleted_at  DateTime?
-    role        Roles         @relation(fields: [role_id], references: [id], name: "UserRole")
+    role    Roles?  @relation(fields: [role_id], references: [id], name: "UserRole", onDelete: SetNull)
     image       String?
     assessments Assessments[]
     exams       Exam[]

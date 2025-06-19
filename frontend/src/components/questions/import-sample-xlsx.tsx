@@ -8,11 +8,14 @@ import { Button } from '../ui/form/button';
 import { api } from '@/lib/api';
 import { mutate } from 'swr';
 import { cn } from '@/lib/utils';
+import { QuestionCategory } from '@/shared/types/app';
+import { FormField } from '../common/form-field';
 
 interface ImportSampleXLSXProps {
   importOpen: boolean;
   setImportOpen: (open: boolean) => void;
   onImportSuccess?: () => void;
+  categoriesArray: QuestionCategory[];
 }
 
 async function downloadTemplateFile(url: string) {
@@ -38,6 +41,7 @@ const ImportSampleXLSX = ({
   importOpen,
   setImportOpen,
   onImportSuccess,
+  categoriesArray
 }: ImportSampleXLSXProps) => {
   const { trigger: downloadTemplateTrigger, isMutating: isDownloading } = useSWRMutation(
     '/api/v1/question/download-template',
@@ -51,6 +55,7 @@ const ImportSampleXLSX = ({
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [selectedTechnology, setSelectedTechnology] = useState<string>('');
 
   const downloadSampleTemplate = async () => {
     try {
@@ -81,8 +86,14 @@ const ImportSampleXLSX = ({
       return;
     }
 
+    if (!selectedTechnology) {
+      toast.error('Please select a technology/category');
+      return;
+    }
+
     const formData = new FormData();
     formData.append('file', selectedFile);
+    formData.append('technologyId', selectedTechnology);
 
     try {
       toast.loading('Importing questions...');
@@ -93,6 +104,7 @@ const ImportSampleXLSX = ({
       if (result.success) {
         toast.success(result.message || 'Questions imported successfully');
         setSelectedFile(null);
+        setSelectedTechnology('');
         setImportOpen(false);
         if (onImportSuccess) onImportSuccess();
         mutate(`/technology/list`);
@@ -159,6 +171,19 @@ const ImportSampleXLSX = ({
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-6">
+            {/* Technology selection dropdown */}
+            <FormField
+              type="select"
+              options={categoriesArray.map(category => ({
+                value: category.id,
+                label: category.name
+              }))}
+              value={selectedTechnology}
+              onChange={(value) => setSelectedTechnology(value)}
+              className="w-full"
+              placeholder="Technology"
+            />
+
             {/* Upload area with improved visual feedback */}
             <div
               className={cn(
@@ -302,10 +327,10 @@ const ImportSampleXLSX = ({
               </Button>
               <Button
                 onClick={handleImportQuestions}
-                disabled={!selectedFile || isUploading}
+                disabled={!selectedFile || !selectedTechnology || isUploading}
                 className={cn(
                   'bg-blue-600 hover:bg-blue-700 text-white font-medium transition-all duration-200 dark:bg-blue-600 dark:hover:bg-blue-700',
-                  !selectedFile && 'opacity-60 cursor-not-allowed',
+                  (!selectedFile || !selectedTechnology) && 'opacity-60 cursor-not-allowed',
                   isUploading && 'animate-pulse'
                 )}
               >

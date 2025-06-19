@@ -93,9 +93,10 @@ export class QuestionsController {
       if (!req.file) {
         return generateResponse(res, 400, {}, false, 'No file uploaded');
       }
+      const file = req.file;
+      const { technologyId } = req.body;
+      const result = await questionsService.importQuestionsFromXlsx(file.buffer, technologyId);
 
-      const result = await questionsService.importQuestionsFromXlsx(req.file.buffer);
-      
       return generateResponse(
         res, 
         200, 
@@ -109,4 +110,12 @@ export class QuestionsController {
       next(error);
     }
   };
+  getTechnology = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const technology = await questionsService.getTechnology();
+      return generateResponse(res, 200, technology, true, 'Technology fetched successfully');
+    } catch (error) {
+      next(error);
+    }
+  }
 }

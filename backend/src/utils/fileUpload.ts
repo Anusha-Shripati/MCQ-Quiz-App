@@ -47,7 +47,6 @@ if (storageMode === 's3') {
       if (req.query.fileType) path += `/${req.query.fileType}`;
       if (req.query.chunkFolder) path += `/${req.query.chunkFolder}`;
 
-      console.log(path, `Chunk directory ${path}`);
 
       if (!fs.existsSync(path)) {
         fs.mkdirSync(path, { recursive: true });

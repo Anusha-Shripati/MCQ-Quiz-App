@@ -16,6 +16,7 @@ import resultRouter from './result.router';
 
 const router = express.Router();
 
+router.use('/question', questionRouter);
 router.use('/articles', articleRouter);
 router.use('/user', adminRouter);
 router.use('/role', roleRouter);
@@ -23,7 +24,6 @@ router.use('/module', moduleRouter);
 router.use('/technology', technologyRouter);
 router.use('/assessment', assessmentRouter);
 router.use('/dashboard', dashboardRouter);
-router.use('/question', questionRouter);
 router.use('/candidate', candidateRouter);
 router.use('/exam', examRouter);
 router.use('/candidate-exam', candidateExamRouter);

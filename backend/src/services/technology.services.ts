@@ -37,7 +37,7 @@ export class TechnologyService {
       },
     });
 
-    return technologies
+    const response= technologies
     .map((tech) => {
       const difficultyCount = {
         easy: 0,

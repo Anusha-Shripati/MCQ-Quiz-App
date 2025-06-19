@@ -93,21 +93,18 @@ export const generateLast7Months = (now: Date = new Date()) => {
 }
 export const sampleData = [
       {
-        technology_name: 'JAVASCRIPT',
         question: 'What does the "M" in MERN stack stand for?',
         correct_answer: '0', // Index of the correct answer in options
         options: 'MongoDB,MySQL,Mongoose,Markdown', // Comma-separated options
         difficulty_level: 'easy', // easy, medium, or hard
       },
       {
-        technology_name: 'REACT',
         question: 'Which hook is used for side effects in React?',
         correct_answer: '1',
         options: 'useState,useEffect,useContext,useReducer',
         difficulty_level: 'medium',
       },
       {
-        technology_name: 'NODE',
         question: 'What is the package manager for Node.js?',
         correct_answer: '0',
         options: 'npm,yarn,pnpm,bower',

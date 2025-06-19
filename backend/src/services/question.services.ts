@@ -144,7 +144,7 @@ export class QuestionService {
           difficulty_level: question.difficulty_level,
         };
       });
-
+    console.log('Sample Questions Data:', sampleQuestionsData);
     const dataToUse = sampleQuestionsData.length > 0 ? sampleQuestionsData : sampleData;
     
     const worksheet = XLSX.utils.json_to_sheet(dataToUse);

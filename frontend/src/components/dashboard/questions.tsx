@@ -18,6 +18,8 @@ export default function Questions() {
   const { theme } = useTheme();
   const { data: questionsData, isLoading, error, isValidating, mutate } = useSWR(dashboardEndpoint.QUESTIONS_DATA, api.get);
   const [options, setOptions] = useState({})
+  console.log(questionsData?.data,'questionsData?.data');
+  
   const totalCount = useMemo(
     () => questionsData?.data?.reduce((sum: number, item: GraphData) => sum + item._count, 0) || 0,
     [questionsData]

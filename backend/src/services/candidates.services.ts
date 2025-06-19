@@ -3,11 +3,19 @@ import jwt from 'jsonwebtoken';
 import { AppError } from '../common/errors/AppError';
 import { CreateCandidate, UpdateCandidate } from '../types/candidate.types';
 import ExamService from './exam.services';
+import { CacheService } from './cacheService';
 
 const prisma = new PrismaClient();
 const examService = new ExamService();
 
 export default class CandidatesService {
+  
+  private cacheService;
+  private cacheTime=60;
+  
+  constructor(){
+    this.cacheService = new CacheService()
+  }
   async createCandidate(data: CreateCandidate & { exam_id: string }) {
     try {
       const result = await prisma.$transaction(
@@ -230,6 +238,10 @@ export default class CandidatesService {
   }) {
     const where: Prisma.CandidateWhereInput = { deleted_at: null };
 
+    const key = this.cacheService.generateKey('candidate',query)
+    const data = await this.cacheService.getKey(key);
+    if(data) return JSON.parse(data)
+
     // Handle search query
     if (query.search) {
       where.OR = [
@@ -341,31 +353,41 @@ export default class CandidatesService {
       take: limit,
     });
 
-    return {
+    const response =  {
       list: candidates,
       total,
       page,
       limit,
       totalPages: Math.ceil(total / limit),
     };
+
+    await this.cacheService.setKey(key,response,this.cacheTime)
+    return response
   }
 
   async getCandidateById(id: string) {
     try {
-      return await prisma.candidate.findUnique({
+      const data = await this.cacheService.getKey(`candidate:${id}`)
+      if(data) return JSON.parse(data)
+      const response = await prisma.candidate.findUnique({
         where: { id },
         include: {
           assessment: true,
           exam: true,
         },
       });
+      await this.cacheService.setKey(`candidate:${id}`,response,this.cacheTime)
+      return response
     } catch (error) {
       throw new AppError('Failed to fetch candidate', 500);
     }
   }
 
   async getCandidateByExamId(id: string) {
-    return await prisma.candidate.findFirst({
+    const data = await this.cacheService.getKey(`candidate:exam:${id}`)
+    if( data)return JSON.stringify(data);
+
+    const response=  await prisma.candidate.findFirst({
       where: { exam_id: id },
       select: {
         name: true,
@@ -374,6 +396,9 @@ export default class CandidatesService {
         experience: true,
       },
     });
+
+    await this.cacheService.setKey(`candidate:exam`,response,this.cacheTime)
+    return response
   }
 
   private async generateCandiateAccessToken(examId: string, candidate: any) {

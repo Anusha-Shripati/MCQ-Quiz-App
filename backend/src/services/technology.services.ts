@@ -1,8 +1,20 @@
 import { Questions, Technology, Prisma } from '@prisma/client';
 import { prisma } from '../db/prisma.client';
+import { CacheService } from './cacheService';
 export class TechnologyService {
+  private cacheService;
+  private cacheTime = 60;
+
+  constructor(){
+    this.cacheService = new CacheService()
+  }
+
   async getTechnologies(filters: { name: string }): Promise<Technology[]> {
     const { name } = filters;
+    const key = this.cacheService.generateKey('technology-all',{name});
+    const data = await this.cacheService.getKey(key);
+    if(data) return JSON.parse(data)
+
     const technologies = await prisma.technology.findMany({
       where: {
         name: name ? { contains: name, mode: 'insensitive' } : undefined,
@@ -46,6 +58,10 @@ export class TechnologyService {
         difficultyCount,
       };
     });
+
+    await this.cacheService.setKey(key,response,this.cacheTime)
+    
+    return response
   }
   async createTechnology(data: { name: string, questions: Omit<Questions, 'id'>[] }) {
 
@@ -83,7 +99,13 @@ export class TechnologyService {
     return result
   }
   async getTechnologyById(id: string) {
-    return prisma.technology.findUnique({ where: { id }, include: { questions:{ orderBy:{created_at:'asc'}} } });
+    const data = await this.cacheService.getKey(`technology:${id}`);
+    if(data) JSON.parse(data)
+
+    const response =  prisma.technology.findUnique({ where: { id }, include: { questions:{ orderBy:{created_at:'asc'}} } });
+    await this.cacheService.setKey(`technology:${id}`,response,this.cacheTime)
+    
+    return response
   }
   async getTechnologyByName(name: string): Promise<Technology | null> {
     return prisma.technology.findUnique({ where: { name } });

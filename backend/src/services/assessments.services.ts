@@ -1,5 +1,6 @@
 import { Assessments, Prisma } from '@prisma/client';
 import { prisma } from '../db/prisma.client';
+import { CacheService } from './cacheService';
 
 interface Filters {
   name?: string;
@@ -22,10 +23,23 @@ type AssessmentCreateInput = Prisma.AssessmentsCreateInput;
 type AssessmentUpdateInput = Prisma.AssessmentsUpdateInput;
 
 export class AssessmentsService {
+  private cacheService;
+  private cacheTime = 60;
+
+  constructor() {
+    this.cacheService = new CacheService();
+  }
   async getAssessments(filters: Filters) {
+
     const { name, created_by, created_from, created_to } = filters;
+
     const page = Number(filters.page) || 1;
     const limit = Number(filters.limit) || 10;
+    const key = this.cacheService.generateKey('assessments', {page, name, created_by, created_from, created_to })
+    const data = await this.cacheService.getKey(key)
+    if (data) {
+      return JSON.parse(data)
+    }
     const query: any = {
       name: name ? { contains: name, mode: 'insensitive' } : undefined,
       created_by: created_by && created_by != 'all' ? created_by : undefined,
@@ -62,13 +76,15 @@ export class AssessmentsService {
     const total = await prisma.assessments.count({
       where: { ...query },
     });
-    return {
+    const response =  {
       list: assessments,
       total,
       page,
       limit,
       totalPages: Math.ceil(total / limit),
     };
+    await this.cacheService.setKey(key,response,this.cacheTime)
+    return response
   }
   async createAssessments(data: AssessmentCreateInput): Promise<Assessments> {
     return prisma.assessments.create({ data });
@@ -78,7 +94,9 @@ export class AssessmentsService {
     return prisma.assessments.update({ where: { id }, data });
   }
   async getAssessmentById(id: string) {
-    return prisma.assessments.findUnique({
+    const data = await this.cacheService.getKey(`assessment:${id}`);
+    if(data) return JSON.parse(data)
+    const response= prisma.assessments.findUnique({
       where: { id },
       include: {
         technologies: {
@@ -93,6 +111,8 @@ export class AssessmentsService {
         },
       },
     });
+    await this.cacheService.setKey(`assessment:${id}`,response,this.cacheTime)
+    return response
   }
   async deleteAssessment(id: string): Promise<Assessments | null> {
     return prisma.assessments.update({ where: { id }, data: { deleted_at: new Date() } });
@@ -110,6 +130,11 @@ export class AssessmentsService {
     });
   }
   async getAllAssessments() {
+
+    const data = await this.cacheService.getKey('assessment-all');
+
+    if(data) return JSON.parse(data);
+
     const assessments = await prisma.assessments.findMany({
       where: {
         deleted_at: null,
@@ -125,12 +150,14 @@ export class AssessmentsService {
       },
       orderBy: { created_at: 'desc' },
     });
-    return assessments.map((assessment: any) => {
+    const response=  assessments.map((assessment: any) => {
       return {
         ...assessment,
         technologies: assessment.technologies.map((item: any) => item.technology),
       };
     });
+    await this.cacheService.setKey('assessment-all',response,this.cacheTime);
+    return response;
   }
 }
 

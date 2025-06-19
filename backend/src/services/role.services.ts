@@ -1,11 +1,23 @@
 import { Roles } from '@prisma/client';
 import { prisma } from '../db/prisma.client';
 import { Permissions } from '../controllers/role.controllers';
+import { CacheService } from './cacheService';
 
 export class RoleService {
+  private cacheService;
+  private cacheTime = 60;
+
+  constructor() {
+    this.cacheService = new CacheService();
+  }
+
   async getRoles(filters: { name: string }) {
     const { name } = filters;
-    return prisma.roles.findMany({
+    const key = this.cacheService.generateKey('roles:all', { name });
+    const data = await this.cacheService.getKey(key);
+    if (data) return JSON.parse(data);
+
+    const roles = await prisma.roles.findMany({
       where: {
         name: name ? { contains: name, mode: 'insensitive' } : undefined,
       },
@@ -19,31 +31,44 @@ export class RoleService {
         },
       },
     });
+
+    await this.cacheService.setKey(key, roles, this.cacheTime);
+    return roles;
   }
+
   async findRoleByName(name: string): Promise<Roles | null> {
-    return await prisma.roles.findUnique({
-      where: {
-        name,
-      },
+    const key = `role:name:${name}`;
+    const data = await this.cacheService.getKey(key);
+    if (data) return JSON.parse(data);
+
+    const role = await prisma.roles.findUnique({
+      where: { name },
     });
+    await this.cacheService.setKey(key, role, this.cacheTime);
+    return role;
   }
 
   async findRoleById(id: string): Promise<Roles | null> {
-    return prisma.roles.findUnique({ where: { id } });
+    const key = `role:id:${id}`;
+    const data = await this.cacheService.getKey(key);
+    if (data) return JSON.parse(data);
+
+    const role = await prisma.roles.findUnique({ where: { id } });
+    await this.cacheService.setKey(key, role, this.cacheTime);
+    return role;
   }
 
   async createRole(name: string): Promise<Roles> {
-    return prisma.roles.create({
-      data: {
-        name,
-      },
+    const role = await prisma.roles.create({
+      data: { name },
     });
+    // Optionally, you may want to clear related cache here
+    return role;
   }
+
   async deleteRolePermissions(roleId: string) {
     return prisma.role_permissions.deleteMany({
-      where: {
-        role_id: roleId,
-      },
+      where: { role_id: roleId },
     });
   }
 
@@ -54,23 +79,34 @@ export class RoleService {
       },
     });
   }
+
   async assignPermissionsToRole(roleId: string, permissions: Permissions[]) {
-    const role_permissions = permissions.map((p) => {
-      return {
-        can_read: p.can_read,
-        can_edit: p.can_edit,
-        module_id: p.module_id,
-        role_id: roleId,
-      };
-    });
+    const role_permissions = permissions.map((p) => ({
+      can_read: p.can_read,
+      can_edit: p.can_edit,
+      module_id: p.module_id,
+      role_id: roleId,
+    }));
     return prisma.role_permissions.createMany({ data: role_permissions });
   }
 
   async updateRole(id: string, data: { name?: string }) {
-    return prisma.roles.update({ where: { id }, data });
+    const role = await prisma.roles.update({ where: { id }, data });
+    // Optionally, you may want to clear related cache here
+    return role;
   }
+
   async getPermissionByRole(id: string) {
-    return prisma.role_permissions.findMany({ where: { role_id: id }, include: { module: true } });
+    const key = `role:permissions:${id}`;
+    const data = await this.cacheService.getKey(key);
+    if (data) return JSON.parse(data);
+
+    const permissions = await prisma.role_permissions.findMany({
+      where: { role_id: id },
+      include: { module: true },
+    });
+    await this.cacheService.setKey(key, permissions, this.cacheTime);
+    return permissions;
   }
 
   async checkRoleHasUsers(roleId: string): Promise<number> {

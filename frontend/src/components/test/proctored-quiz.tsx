@@ -464,8 +464,9 @@ export default function ProctoredQuiz() {
       return;
     }
     setAnswers((prv) => {
-      delete prv[current_question.question_id];
-      return prv
+      const temp = {...prv}
+      delete temp[current_question.question_id];
+      return temp
     })
 
 

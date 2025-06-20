@@ -82,6 +82,7 @@ const CategoryPage = () => {
   };
 
   const handleDelete = async (id: string) => {
+    console.log('Deleting question with ID:', id);
     try {
       if (id) {
         await api.delete(`/question/${id}`);
@@ -110,7 +111,6 @@ const CategoryPage = () => {
   );
 
   const handleQuestionTypeChange = (value: Question['type'], index: number) => {
-    
     const updatedQuestions = [...questionsData];
     updatedQuestions[index].type = value;
     updatedQuestions[index].options = ['', '', '', '', '', ''];
@@ -131,74 +131,75 @@ const CategoryPage = () => {
   };
 
   return (
- <div className="px-2 py-6 flex flex-col h-full min-h-[74vh]">
-       <Card className="flex flex-col p-4 sm:p-6 gap-2 px-3 py-2">
-        <div className="flex items-center mb-6">
+    <div className="h-[calc(100vh-78px)] flex flex-col px-2 py-5">
+      {' '}
+      <Card className="flex flex-col h-full">
+        <div className="flex items-center p-4 border-b">
           <Button variant="ghost" onClick={() => window.history.back()}>
             <ArrowLeft className="h-4 w-4" />
           </Button>
-          <div className={`text-2xl font-bold dark:text-white dark:text-gray-900`}>
-            {data?.data?.technology?.name}
-          </div>
+          <div className="text-2xl font-bold ml-2">{data?.data?.technology?.name}</div>
         </div>
 
-        <FilterBar 
-          totalQuestions={questionsData.length}
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          selectedDifficulties={selectedDifficulties}
-          onDifficultyChange={handleDifficultyChange}
-          technology={technology as string}
-        />
-        <Pagination
-          className="flex-grow h-full"
-          currentPageStart={currentPageStart}
-          currentPageEnd={currentPageEnd}
-          totalItems={total}
-          itemsPerPage={itemsPerPage}
-          onPerPageChange={handlePerPageChange}
-          currentPage={currentPage}
-          onPageChange={handlePageChange}
-          loading={isLoading}
-        >
-          <div className="w-full">
-            {questionsData.map((question: Required<Question>, index) => (
-              <React.Fragment key={index}>
-                {selectedQuestion !== index && (
-                  <QuestionCard
-                    index={index}
-                    key={index}
-                    question={question}
-                    handleDelete={handleDelete}
-                    handleEdit={() => handleEdit(index)}
-                  />
-                )}
+        <div className="sticky z-10 px-6 py-4">
+          <FilterBar
+            totalQuestions={questionsData.length}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            selectedDifficulties={selectedDifficulties}
+            onDifficultyChange={handleDifficultyChange}
+            technology={technology as string}
+          />
+        </div>
 
-                {selectedQuestion == index && (
-                  <CreateQuestionCard
-                    question={questionsData[selectedQuestion as number]}
-                    selectedQuestion={selectedQuestion}
-                    questions={questionsData}
-                    handleQuestionTypeChange={handleQuestionTypeChange}
-                    handleDeleteQuestion={() => handleDelete(question.id as string)}
-                    setQuestions={
-                      setQuestionsData as React.Dispatch<
-                        React.SetStateAction<Question[] | Required<Question>[]>
-                      >
-                    }
-                    handleReset={handleReset}
-                    technologyId={technology as string}
-                    editQuestion={true}
-                    onSave={() => setSelectedQuestion(null)}
-                    onCancel={() => setSelectedQuestion(null)}
-                  />
-                )}
-              </React.Fragment>
-            ))}
-          </div>
-        </Pagination>
+        <div className="flex-grow overflow-y-auto px-4 py-2 space-y-4">
+          {questionsData.map((question: Required<Question>, index) => (
+            <React.Fragment key={index}>
+              {selectedQuestion !== index && (
+                <QuestionCard
+                  index={index}
+                  question={question}
+                  handleDelete={handleDelete}
+                  handleEdit={() => handleEdit(index)}
+                />
+              )}
+              {selectedQuestion === index && (
+                <CreateQuestionCard
+                  question={questionsData[selectedQuestion]}
+                  selectedQuestion={selectedQuestion}
+                  questions={questionsData}
+                  handleQuestionTypeChange={handleQuestionTypeChange}
+                  handleDeleteQuestion={() => handleDelete(question.id)}
+                  setQuestions={
+                    setQuestionsData as React.Dispatch<
+                      React.SetStateAction<Question[] | Required<Question>[]>
+                    >
+                  }
+                  handleReset={handleReset}
+                  technologyId={technology as string}
+                  editQuestion={true}
+                  onSave={() => setSelectedQuestion(null)}
+                  onCancel={() => setSelectedQuestion(null)}
+                />
+              )}
+            </React.Fragment>
+          ))}
+        </div>
+
+        <div className="sticky bottom-0 z-10 py-2">
+          <Pagination
+            currentPageStart={currentPageStart}
+            currentPageEnd={currentPageEnd}
+            totalItems={total}
+            itemsPerPage={itemsPerPage}
+            onPerPageChange={handlePerPageChange}
+            currentPage={currentPage}
+            onPageChange={handlePageChange}
+            loading={isLoading}
+          />
+        </div>
       </Card>
-</div>
+    </div>
   );
 };
 

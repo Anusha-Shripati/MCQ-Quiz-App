@@ -2,7 +2,6 @@ import { Request, Response, NextFunction } from 'express';
 import QuestionsService from '../services/question.services';
 import { generateResponse } from '../utils/generateResponse';
 
-
 const questionsService = new QuestionsService();
 export class QuestionsController {
   create = async (req: Request, res: Response, next: NextFunction) => {
@@ -32,16 +31,27 @@ export class QuestionsController {
   delete = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
+
       const existingQuestion = await questionsService.getQuestionById(id);
       if (!existingQuestion) {
+        console.log('Question not found');
         return generateResponse(res, 404, {}, false, 'Question not found!');
       }
+
       await questionsService.deleteQuestion(id);
-      return generateResponse(res, 200, {}, true, 'Question delete successfully');
+      return generateResponse(res, 200, {}, true, 'Question deleted successfully');
     } catch (error) {
-      next(error);
+      console.error('Error deleting question:', error);
+      return generateResponse(
+        res,
+        500,
+        {},
+        false,
+        error instanceof Error ? error.message : 'Internal server error'
+      );
     }
   };
+
   get = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const search = req.query;
@@ -98,11 +108,11 @@ export class QuestionsController {
       const result = await questionsService.importQuestionsFromXlsx(file.buffer, technologyId);
 
       return generateResponse(
-        res, 
-        200, 
-        result, 
-        result.errors.length === 0, 
-        result.errors.length === 0 
+        res,
+        200,
+        result,
+        result.errors.length === 0,
+        result.errors.length === 0
           ? 'Questions imported successfully'
           : `Imported ${result.totalImported} questions with ${result.errors.length} errors`
       );
@@ -117,5 +127,5 @@ export class QuestionsController {
     } catch (error) {
       next(error);
     }
-  }
+  };
 }

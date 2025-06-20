@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { TypographyH2, TypographyH4 } from '@/styles/typography';
+import { TypographyH2 } from '@/styles/typography';
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/form/button';
@@ -135,14 +135,14 @@ export default function Home() {
               </div>
             </form>
 
-            <div className="text-center mt-6">
+            {/* <div className="text-center mt-6">
               <TypographyH4>
                 Don&apos;t have an account?{' '}
                 <Link href="/register" className="text-blue-400 hover:underline">
                   Contact Admin
                 </Link>
               </TypographyH4>
-            </div>
+            </div> */}
           </CardContent>
         </div>
       </Card>

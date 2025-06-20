@@ -7,6 +7,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import Link from 'next/link';
 import { Question } from '@/shared/types/app';
+import { useAuthStore } from '@/store/authStore';
 
 interface FilterBarProps {
   totalQuestions: number;
@@ -26,7 +27,8 @@ export const FilterBar = ({
   technology,
 }: FilterBarProps) => {
   const difficulties: Question['difficulty_level'][] = ['easy', 'medium', 'hard'];
-
+  const { hasPermissionQuestionEdit } = useAuthStore();
+  const isQuestionEditable = hasPermissionQuestionEdit();
   return (
     <div className="flex flex-col mb-6 sm:flex-row items-start sm:items-center justify-between sm:space-x-6 space-y-4 sm:space-y-0">
       <h2 className="text-xl font-semibold">{`Questions List (${totalQuestions})`}</h2>
@@ -73,13 +75,15 @@ export const FilterBar = ({
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
-        <Link
-          href="/questions/create-question/[QuestionSlug]"
-          as={`/questions/create-question/${technology}`}
-          className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
-        >
-          Create Questions
-        </Link>
+        {isQuestionEditable && (
+          <Link
+            href="/questions/create-question/[QuestionSlug]"
+            as={`/questions/create-question/${technology}`}
+            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
+          >
+            Create Questions
+          </Link>
+        )}
       </div>
     </div>
   );

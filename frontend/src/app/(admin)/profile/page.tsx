@@ -12,8 +12,10 @@ import toast from 'react-hot-toast';
 import { EyeIcon, EyeOffIcon } from 'lucide-react';
 import { useProfileStore } from '@/store/profileStore';
 import { userEndpoint } from '@/lib/endpoint';
+import PasswordRequirements from '@/components/profile/PasswordRequirements';
 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
 
 const userInfoSchema = z.object({
   userName: z.string().min(1, 'User Name is required').max(25, 'User Name must be at most 25 characters'),
@@ -23,8 +25,11 @@ const userInfoSchema = z.object({
 const passwordChangeSchema = z
   .object({
     oldPassword: z.string().min(1, 'Old Password is required'),
-    newPassword: z.string().min(8, 'Password must be at least 8 characters').regex(passwordRegex, 'Password must contain at least one uppercase letter, one number, and one special character'),
-    reNewPassword: z.string().min(1, 'Re-New Password is required').regex(passwordRegex, 'Password must contain at least one uppercase letter, one number, and one special character'),
+    newPassword: z
+      .string()
+      .min(8, 'Password must be at least 8 characters')
+      .regex(passwordRegex, 'Invalid password format'),
+    reNewPassword: z.string().min(1, 'Re-New Password is required'),
   })
   .refine((data) => data.newPassword === data.reNewPassword, {
     message: 'Passwords do not match',
@@ -69,11 +74,15 @@ export default function Profile() {
     }
   }, [user]);
 
+  const [newPassword, setNewPassword] = useState('');
+  const [showPasswordRequirements, setShowPasswordRequirements] = useState(false);
+
   const {
     register: registerPassword,
     handleSubmit: handlePasswordSubmit,
     formState: { errors: passwordErrors },
     reset: passwordReset,
+    watch,
   } = useForm({
     resolver: zodResolver(passwordChangeSchema),
     defaultValues: {
@@ -82,6 +91,16 @@ export default function Profile() {
       reNewPassword: '',
     },
   });
+
+  // Watch the password field to update validation in real-time
+  useEffect(() => {
+    const subscription = watch((value, { name }) => {
+      if (name === 'newPassword') {
+        setNewPassword(value.newPassword || '');
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [watch]);
 
   const onSaveUserInfo = async (data: { userName: string; email: string }) => {
     try {
@@ -141,7 +160,7 @@ export default function Profile() {
 
   return (
     <>
-      <div className="mt-11 mb-16 p-4">
+      <div className="mt-11 mb-16 p-4 h-[65vh]">
         <h1 className="text-3xl font-bold mb-8 dark:text-white flex align-center justify-center">
           User Profile
         </h1>
@@ -200,15 +219,15 @@ export default function Profile() {
                   </div>
 
                   {isEditing && (
-                  <div className="flex justify-end">
+                    <div className="flex justify-end">
                       <Button
                         type="submit"
                         className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 mt-4"
                       >
-                          Save
-                        </Button>
-                      </div>
-                    )}
+                        Save
+                      </Button>
+                    </div>
+                  )}
                 </form>
               </div>
             </div>
@@ -240,7 +259,7 @@ export default function Profile() {
                     type={showPassword.new ? 'text' : 'password'}
                     {...registerPassword('newPassword')}
                     className="w-full dark:bg-gray-800 dark:text-white"
-                    error={passwordErrors.newPassword?.message}
+                    onFocus={() => setShowPasswordRequirements(true)}
                   />
                   <button
                     type="button"
@@ -249,6 +268,7 @@ export default function Profile() {
                   >
                     {showPassword.new ? <EyeOffIcon size={20} /> : <EyeIcon size={20} />}
                   </button>
+                  {showPasswordRequirements && <PasswordRequirements password={newPassword} />}
                 </div>
 
                 <div className="relative">

@@ -47,12 +47,13 @@ const QuestionSidebar: React.FC<QuestionSidebarProps> = ({
     [setSelectedQuestion, updateQueryParams]
   );
 
-  const openDeleteModal = useCallback(( index: number) => {
-    setQuestionToDelete(index );
+  const openDeleteModal = useCallback((index: number) => {
+    setQuestionToDelete(index);
     setIsDeleteModalOpen(true);
   }, []);
 
   const confirmDelete = useCallback(() => {
+    console.log("Deleting question at index:", questionToDelete);
     if (questionToDelete !== null) {
       handleDeleteQuestion(questionToDelete);
     }

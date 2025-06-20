@@ -115,6 +115,19 @@ export class CandidateExamService {
         },
       },
     });
+    
+    // Filter out empty string options from questions
+    if (exam?.exam_questions) {
+      exam.exam_questions = exam.exam_questions.map(examQuestion => {
+        if (examQuestion.question?.options && Array.isArray(examQuestion.question.options)) {
+          examQuestion.question.options = examQuestion.question.options.filter(option => 
+            option !== "" && option !== null
+          );
+        }
+        return examQuestion;
+      });
+    }
+    
     let violations = 0;
     if (exam?.meta && Array.isArray((exam?.meta as JsonObject)?.violations)) {
       violations = ((exam?.meta as JsonObject)?.violations as { name: string }[]).length;

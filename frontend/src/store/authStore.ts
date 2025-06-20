@@ -40,10 +40,15 @@ interface AuthState {
   ) => Promise<void>;
   setUser: (user: User | null) => void;
   isAuthenticated: () => boolean;
+  hasPermissionCandidateEdit: () => boolean;
+  hasPermissionQuestionEdit: () => boolean;
+  hasPermissionAssessmentEdit: () => boolean;
+  hasPermissionUserEdit: () => boolean;
+  hasPermissionResultEdit: () => boolean;
 
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
+export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   initializing: true,
   loading: false,
@@ -141,4 +146,35 @@ export const useAuthStore = create<AuthState>((set) => ({
       return false;
     }
   },
+hasPermissionCandidateEdit: (): boolean => {
+  const { permissions } = get();
+  if (!permissions) return false;
+  return !!permissions.candidates && permissions.candidates.can_edit === true;
+},
+
+hasPermissionQuestionEdit: (): boolean => {
+  const { permissions } = get();
+  if (!permissions) return false;
+  return !!permissions.questions && permissions.questions.can_edit === true;
+},
+
+hasPermissionAssessmentEdit: (): boolean => {
+  const { permissions } = get();
+  if (!permissions) return false;
+  return !!permissions.assessments && permissions.assessments.can_edit === true;
+},
+
+hasPermissionUserEdit: (): boolean => {
+  const { permissions } = get();
+  if (!permissions) return false;
+  return !!permissions.users && permissions.users.can_edit === true;
+},
+
+hasPermissionResultEdit: (): boolean => {
+  const { permissions } = get();
+  if (!permissions) return false;
+  return !!permissions.results && permissions.results.can_edit === true;
+},
+
+  
 }));

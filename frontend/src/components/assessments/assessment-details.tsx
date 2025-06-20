@@ -1,11 +1,16 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import {  Edit, Trash2, Clock, User, Calendar, BookOpenCheck } from 'lucide-react';
+import { Edit, Trash2, Clock, User, Calendar, BookOpenCheck } from 'lucide-react';
 import { Button } from '@/components/ui/form/button';
 import AssessmentEdit from './assessment-edit';
 import { toast } from 'react-hot-toast';
-import { Assessment, AssessmentFilters, Technology, useAssessmentStore } from '@/store/assessmentStore';
+import {
+  Assessment,
+  AssessmentFilters,
+  Technology,
+  useAssessmentStore,
+} from '@/store/assessmentStore';
 // import { LoadingSpinner } from "../ui/loading-spinner";
 import useSWR, { mutate } from 'swr';
 import Pagination from '../pagination';
@@ -18,6 +23,7 @@ import { assessmentEndpoint } from '@/lib/endpoint';
 import { DeleteDialog } from '../common/delete-dialog';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { HeightTransition } from '@/components/ui/animations/height-transition';
+import { useAuthStore } from '@/store/authStore';
 // import StatusWrapper from "../common/status-wrapper";
 
 interface AssessmentItemProps {
@@ -49,8 +55,10 @@ function AssessmentItem({
   handleDelete,
 }: AssessmentItemProps) {
   const initial = { easy: 0, medium: 0, hard: 0 };
-  const [deleteId, setDeleteId] = useState<string | null>(null)
-  const [deleteOpen, setDeleteOpen] = useState<boolean>(false)
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [deleteOpen, setDeleteOpen] = useState<boolean>(false);
+  const { hasPermissionAssessmentEdit } = useAuthStore();
+  const isAssessmentEditable = hasPermissionAssessmentEdit();
 
   const totalQuestions =
     technologies?.reduce(
@@ -84,12 +92,16 @@ function AssessmentItem({
     e.stopPropagation();
   };
   const onDelete = (assessmentId: string) => {
-    setDeleteId(assessmentId)
-    setDeleteOpen(true)
-  }
+    setDeleteId(assessmentId);
+    setDeleteOpen(true);
+  };
   return (
     <div className="border-b">
-      <DeleteDialog onDelete={() => handleDelete(deleteId as string)} setOpen={setDeleteOpen} isOpen={deleteOpen} />
+      <DeleteDialog
+        onDelete={() => handleDelete(deleteId as string)}
+        setOpen={setDeleteOpen}
+        isOpen={deleteOpen}
+      />
       <div
         className="px-6 py-8 flex items-center justify-between cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50 group transition-colors duration-200"
         onClick={onToggle}
@@ -142,7 +154,9 @@ function AssessmentItem({
               <TooltipTrigger>
                 <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                   <BookOpenCheck className="h-4 w-4 text-orange-600 dark:text-green-400" />
-                  <span className="font-medium text-gray-700 dark:text-gray-300">{pass_criteria} marks</span>
+                  <span className="font-medium text-gray-700 dark:text-gray-300">
+                    {pass_criteria} marks
+                  </span>
                 </div>
               </TooltipTrigger>
               <TooltipContent>
@@ -203,36 +217,40 @@ function AssessmentItem({
             )}
           </Button> */}
           {/* add tooltip to edit and delete buttons */}
-          <Tooltip>
-            <TooltipTrigger>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-10 w-10 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-300 transition-all duration-200"
-                onClick={handleEdit}
-              >
-                <Edit className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Edit Assessment</p>
-            </TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-10 w-10 rounded-full hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-700 dark:hover:text-red-300 transition-all duration-200"
-                onClick={() => onDelete(assessmentId)}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Delete Assessment</p>
-            </TooltipContent>
-          </Tooltip>
+          {isAssessmentEditable && (
+            <>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-10 w-10 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-300 transition-all duration-200"
+                    onClick={handleEdit}
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Edit Assessment</p>
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-10 w-10 rounded-full hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-700 dark:hover:text-red-300 transition-all duration-200"
+                    onClick={() => onDelete(assessmentId)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Delete Assessment</p>
+                </TooltipContent>
+              </Tooltip>
+            </>
+          )}
 
           {/* <Tooltip>
             <TooltipTrigger>
@@ -261,7 +279,7 @@ function AssessmentItem({
         >
           <h4 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-6 flex items-center gap-2">
             <div className="w-1 h-6 bg-blue-600 dark:bg-blue-400 rounded-full"></div>
-            Technology Breakdown  {(title ? `(${title})` : '')}
+            Technology Breakdown {title ? `(${title})` : ''}
           </h4>
 
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-600 overflow-hidden">
@@ -285,15 +303,20 @@ function AssessmentItem({
                   Hard
                 </div>
               </div>
-              <div className="text-center font-semibold text-gray-700 dark:text-gray-300">Total</div>
-              <div className="text-center font-semibold text-gray-700 dark:text-gray-300">Percentage</div>
+              <div className="text-center font-semibold text-gray-700 dark:text-gray-300">
+                Total
+              </div>
+              <div className="text-center font-semibold text-gray-700 dark:text-gray-300">
+                Percentage
+              </div>
             </div>
 
             {technologies?.map((tech, index) => (
               <div
                 key={tech.id}
-                className={`grid grid-cols-6 gap-4 p-4 dark:hover:bg-gray-750 transition-colors duration-150 ${index % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-25 dark:bg-gray-775'
-                  }`}
+                className={`grid grid-cols-6 gap-4 p-4 dark:hover:bg-gray-750 transition-colors duration-150 ${
+                  index % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-25 dark:bg-gray-775'
+                }`}
               >
                 <div className="font-medium text-gray-800 dark:text-gray-200 flex items-center gap-2">
                   <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 dark:from-blue-400 dark:to-blue-500 rounded-lg flex items-center justify-center text-white text-sm font-bold">
@@ -360,7 +383,7 @@ function AssessmentItem({
           </div>
         </div>
       </HeightTransition>
-    </div >
+    </div>
   );
 }
 
@@ -395,7 +418,7 @@ export default function AssessmentDetails() {
     error,
     isLoading,
     mutate: assessmentMutate,
-    isValidating
+    isValidating,
   } = useSWR(`${assessmentEndpoint.LIST}?${cleanedQuery}`, api.get);
 
   useEffect(() => {
@@ -403,7 +426,9 @@ export default function AssessmentDetails() {
       setAssessments(assessmentsData.data.list);
       setCurrentPage(assessmentsData.data.page);
       setCurrentPageStart((assessmentsData.data.page - 1) * itemsPerPage + 1);
-      setCurrentPageEnd(Math.min(assessmentsData.data.page * itemsPerPage, assessmentsData.data.total));
+      setCurrentPageEnd(
+        Math.min(assessmentsData.data.page * itemsPerPage, assessmentsData.data.total)
+      );
     }
   }, [assessmentsData]);
 
@@ -475,18 +500,17 @@ export default function AssessmentDetails() {
       name: params.get('name') || '',
       view: params.get('view') || '',
       created_by: params.get('created_by') || '',
-      created_duation: params.get('created_duation') ? JSON.parse(params.get('created_duation') as string) : undefined,
+      created_duation: params.get('created_duation')
+        ? JSON.parse(params.get('created_duation') as string)
+        : undefined,
     };
     setFilters(filterParams as AssessmentFilters);
   }, []);
 
-
   // Toggle function to add/remove IDs from the expandedIds array
   const toggleExpanded = (id: string) => {
-    setExpandedIds(prev => 
-      prev.includes(id) 
-        ? prev.filter(item => item !== id) 
-        : [...prev, id]
+    setExpandedIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
     );
   };
 
@@ -535,7 +559,9 @@ export default function AssessmentDetails() {
                 handleDelete={handleDelete}
               />
             ))}
-          {assessments.length == 0 && <div className='w-full h-full flex justify-center items-center'>No data found</div>}
+          {assessments.length == 0 && (
+            <div className="w-full h-full flex justify-center items-center">No data found</div>
+          )}
         </div>
       </Pagination>
     </StatusWrapper>

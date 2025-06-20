@@ -12,6 +12,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { useState } from 'react';
+import { useAuthStore } from '@/store/authStore';
 
 // interface QuestionCardProps {
 //   question: Question;
@@ -51,72 +52,85 @@ export const QuestionCard = ({
   handleEdit: () => void;
 }) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  
+  const { hasPermissionQuestionEdit } = useAuthStore();
+  const isQuestionEditable = hasPermissionQuestionEdit();
+
   return (
     <>
-      <Card
-        className={`dark:bg-gray-700 dark:text-gray-200 bg-gray-100 text-gray-800 mb-4 p-4 shadow-sm`}
-      >
+      <Card className="dark:bg-gray-700 dark:text-gray-200 bg-gray-100 text-gray-800 mb-4 p-4 shadow-sm w-full h-card md:h-auto">
         <div className="text-lg font-semibold mb-2 flex justify-between items-start">
-          {index + 1}. {question.question}
-          <Badge
-            className={`dark:bg-gray-600 dark:text-gray-200 bg-gray-200 text-gray-800" py-1 px-3`}
-          >
+          <div className="break-words pr-2 flex-1 overflow-hidden">
+            <span>{index + 1}. </span>
+            <span className="whitespace-pre-wrap overflow-hidden">{question.question}</span>
+          </div>
+          <Badge className="dark:bg-gray-600 dark:text-gray-200 bg-gray-200 text-gray-800 py-1 px-3 flex-shrink-0">
             {questionType[question.type as keyof typeof questionType]?.label || 'Unknown'}
           </Badge>
         </div>
-       {(question.type == "mcq" || question.type == "multiple_select") && <ul className="space-y-2">
-          {question.options?.filter((option)=> option!=="").map((option, index) => (
-            <li
-              key={index}
-              className={`p-2 rounded-md text-sm md:text-base ${
-                question?.correct_answer.includes(index.toString())
-                  ? 'dark:bg-green-800 dark:text-green-100 bg-green-100 text-green-800'
-                  : 'dark:bg-gray-800 dark:text-gray-400 bg-gray-100 text-gray-800'
-              }`}
-            >
-              {String.fromCharCode(65 + index)}. {option}
-            </li>
-          ))}
-          {question.meta?.code ? (
-            <li
-              key={index}
-              className={`p-2 rounded-md text-sm md:text-base ${
-                question?.correct_answer.includes(index.toString())
-                  ? 'dark:bg-green-800 dark:text-green-100 bg-green-100 text-green-800'
-                  : 'dark:bg-gray-800 dark:text-gray-400 bg-gray-100 text-gray-800'
-              }`}
-            >
-              {question.meta?.code as string}
-            </li>
-          ) : (
-            ''
-          )}
-          
-          {question.meta?.videoToVideo ? (
-            <div
-              key={index}
-              className='w-full'
-              dangerouslySetInnerHTML={{ __html: question.meta?.video_url || '' }}
-            >
-            </div>
-          ) : (
-            ''
-          )}
-        </ul>}
+        {(question.type == 'mcq' || question.type == 'multiple_select') && (
+          <ul className="space-y-2 max-w-full">
+            {question.options
+              ?.filter((option) => option !== '')
+              .map((option, index) => (
+                <li
+                  key={index}
+                  className={`p-2 rounded-md text-sm md:text-base break-words whitespace-pre-wrap overflow-hidden ${
+                    question?.correct_answer.includes(index.toString())
+                      ? 'dark:bg-green-800 dark:text-green-100 bg-green-100 text-green-800'
+                      : 'dark:bg-gray-800 dark:text-gray-400 bg-gray-100 text-gray-800'
+                  }`}
+                >
+                  {String.fromCharCode(65 + index)}. {option}
+                </li>
+              ))}
+            {question.meta?.code ? (
+              <li
+                key="code"
+                className={`p-2 rounded-md text-sm md:text-base max-w-full whitespace-pre-wrap break-all ${
+                  question?.correct_answer.includes(index.toString())
+                    ? 'dark:bg-green-800 dark:text-green-100 bg-green-100 text-green-800'
+                    : 'dark:bg-gray-800 dark:text-gray-400 bg-gray-100 text-gray-800'
+                }`}
+              >
+                <pre className="overflow-x-auto max-w-full">{question.meta?.code as string}</pre>
+              </li>
+            ) : (
+              ''
+            )}
+
+            {question.meta?.videoToVideo ? (
+              <div
+                key="video"
+                className="w-full overflow-hidden"
+                dangerouslySetInnerHTML={{ __html: question.meta?.video_url || '' }}
+              ></div>
+            ) : (
+              ''
+            )}
+          </ul>
+        )}
         <div className="flex justify-between items-center mt-4 text-sm">
-          <div className="space-x-1">
-            <Button variant="link" className="text-blue-500 hover:underline" onClick={handleEdit}>
-              Edit
-            </Button>
-            <Button
-              variant="link"
-              className="text-red-500 hover:underline"
-              onClick={() => setIsDeleteModalOpen(true)}
-            >
-              Delete
-            </Button>
-          </div>
+          {isQuestionEditable && (
+            <>
+              <div className="space-x-1">
+                <Button
+                  variant="link"
+                  className="text-blue-500 hover:underline"
+                  onClick={handleEdit}
+                >
+                  Edit
+                </Button>
+                <Button
+                  variant="link"
+                  className="text-red-500 hover:underline"
+                  onClick={() => setIsDeleteModalOpen(true)}
+                >
+                  Delete
+                </Button>
+              </div>
+            </>
+          )}
+
           <Badge
             className={`${badgeClass[difficulties[question.difficulty_level]?.color as keyof typeof badgeClass] || ''} py-1 px-3`}
           >

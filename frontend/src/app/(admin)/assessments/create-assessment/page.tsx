@@ -29,6 +29,10 @@ async function create(url: string, { arg }: { arg: CreateAssessmentPayload }) {
   return response;
 }
 
+async function checkUniqueAssessment(url: string, { arg }: { arg: { name: string } }) {
+  const response = await api.post(url, arg);
+  return response;
+}
 export default function CreateAssessment() {
   const router = useRouter();
   const [step, setStep] = useState(1);
@@ -37,6 +41,10 @@ export default function CreateAssessment() {
   const { data } = useSWR('/technology/list', api.get);
 
   const { trigger, isMutating } = useSWRMutation(`/assessment/create`, create);
+  const { trigger: assessmentTrigger } = useSWRMutation(
+    `/assessment/check-unique`,
+    checkUniqueAssessment
+  );
 
   useEffect(() => {
     if (data) {
@@ -87,7 +95,29 @@ export default function CreateAssessment() {
   }));
 
   const handleNextStep = async () => {
-    const valudate = await fromTrigger();
+    const validate = await fromTrigger();
+
+    if (step === 1) {
+      try {
+        const response = await assessmentTrigger({ name: formData.name });
+        console.log(response);
+      } catch (error) {
+        if (isAxiosError(error) && error.response) {
+          const message =
+            error.response.data?.message || 'An error occurred while checking assessment name';
+          if (message.toLowerCase().includes('already exists')) {
+            toast.error(message);
+          } else {
+            toast.error(message);
+          }
+        } else {
+          toast.error('An error occurred while checking assessment name uniqueness');
+          console.error(error);
+        }
+        return;
+      }
+    }
+
     if (step === 2) {
       const isValid = formData.technologies.every((cat) => cat.easy || cat.medium || cat.hard);
       if (!isValid) {
@@ -95,7 +125,8 @@ export default function CreateAssessment() {
         return;
       }
     }
-    if (valudate) {
+
+    if (validate) {
       setStep((prev) => prev + 1);
     }
   };

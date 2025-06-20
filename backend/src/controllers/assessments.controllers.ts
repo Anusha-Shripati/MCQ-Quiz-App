@@ -260,4 +260,30 @@ export class AssessmentController {
       next(error);
     }
   };
+  checkUnique = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { name } = req.body;
+      const existingAssessment = await prisma.assessments.findFirst({
+        where: {
+          name,
+          deleted_at: null
+        }
+      });
+
+      if (existingAssessment) {
+        return generateResponse(
+          res,
+          400,
+          {},
+          false,
+          `Assessment with name '${name}' already exists.`
+        );
+      }
+
+      return generateResponse(res, 200, {}, true, 'Assessment name is unique');
+    } catch (error) {
+      next(error);
+    }
+  };
+  
 }

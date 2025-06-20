@@ -85,11 +85,11 @@ export class TechnologyService {
     data: { name: string; deleted_at?: Date | null, questions: Omit<Questions, 'id'>[] }
   ){
     const result = await prisma.$transaction(async (tx) => {
-      await tx.questions.deleteMany({ where: { technology_id: id } })
-      const technology = await tx.technology.update({ where: { id }, data: { name: data.name, deleted_at: data.deleted_at } });
+      // await tx.questions.deleteMany({ where: { technology_id: id } })
+      // const technology = await tx.technology.update({ where: { id }, data: { name: data.name, deleted_at: data.deleted_at } });
       const arr = data.questions?.map((item) => ({
         ...item,
-        technology_id: technology.id,
+        technology_id: id,
         options: item.options as Prisma.InputJsonValue,
         meta: item.meta as Prisma.InputJsonValue
       }))

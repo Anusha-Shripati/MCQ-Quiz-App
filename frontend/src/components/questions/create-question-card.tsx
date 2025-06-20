@@ -64,6 +64,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
   onCancel,
   editQuestion,
   validationError,
+  onSave
 }) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   // Add state to check if the question field has content
@@ -161,11 +162,11 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
   };
 
   // Add a state to track option errors
-  const [optionErrors, setOptionErrors] = useState<{[key: number]: string}>({});
+  const [optionErrors, setOptionErrors] = useState<{ [key: number]: string }>({});
 
   // Helper function to check for duplicate options
   const checkDuplicateOption = (options: string[], value: string, currentIndex: number) => {
-    return options.findIndex((opt, idx) => 
+    return options.findIndex((opt, idx) =>
       idx !== currentIndex && opt.trim() === value.trim() && value.trim() !== ''
     );
   };
@@ -190,7 +191,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
             {validationError}
           </div>
         )}
-        
+
         <div className="flex gap-4 mb-4">
           <FormField
             label="Type"
@@ -308,41 +309,41 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
                       const updatedQuestions = [...questions];
                       const newValue = e.target.value;
                       updatedQuestions[selectedQuestion].options[i] = newValue;
-                      
+
                       // Clear error when typing
                       if (optionErrors[i]) {
-                        const newErrors = {...optionErrors};
+                        const newErrors = { ...optionErrors };
                         delete newErrors[i];
                         setOptionErrors(newErrors);
                       }
-                      
+
                       setQuestions(updatedQuestions);
                     }}
                     onBlur={(e) => {
                       // Check for duplicate options
                       const updatedQuestions = [...questions];
                       const newValue = e.target.value.trim();
-                      
+
                       if (newValue === '') return;
-                      
+
                       const dupIndex = checkDuplicateOption(
-                        updatedQuestions[selectedQuestion].options, 
-                        newValue, 
+                        updatedQuestions[selectedQuestion].options,
+                        newValue,
                         i
                       );
-                      
+
                       if (dupIndex !== -1) {
                         // Mark as duplicate
                         updatedQuestions[selectedQuestion].options[i] = '';
                         e.target.value = '';
                         setQuestions(updatedQuestions);
-                        
+
                         // Set error for this option
                         setOptionErrors(prev => ({
                           ...prev,
                           [i]: `Duplicate of option ${dupIndex + 1}`
                         }));
-                        
+
                         toast.error('Option already exists');
                         return;
                       }
@@ -417,6 +418,9 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
 
         {questions.length !== 0 && (
           <div className="mt-2 flex justify-end gap-4">
+            {onSave && <Button variant="default" className='px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900' onClick={onSave} disabled={isMutating || updating}>
+              Save
+            </Button>}
             <Button variant="outline" onClick={handleReset} disabled={isMutating || updating}>
               Reset
             </Button>

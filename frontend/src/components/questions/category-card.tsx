@@ -36,9 +36,10 @@ export const CategoryCard = ({
     <Card className="shadow-md hover:shadow-lg transition-all duration-200">
       <CardHeader className="flex flex-row justify-between items-center border-b pb-2">
         <CardTitle className="text-lg font-semibold">{category.name}</CardTitle>
-        {isQuestionEditable ? (
-        <div className="flex items-center justify-center gap-2">
-          <Button
+        <div className='flex gap-2'>
+
+          {isQuestionEditable && <div className="flex items-center justify-center gap-2">
+            <Button
               variant="outline"
               size="default"
               className="dark:border-gray-600 dark:text-white dark:hover:bg-gray-700"
@@ -46,24 +47,26 @@ export const CategoryCard = ({
             >
               <Plus className="h-4 w-4" /> Add Questions
             </Button>
-            <CategoryMenu
+          </div>
+          }
+          {/* <CategoryMenu
               category={category}
               handleDelete={handleDelete}
               handleNavigate={handleNavigate}
-            />
-        </div>
-        ):(
+            /> */}
+
           <div className='flex items-center justify-center'>
-          <Button
-          variant="outline"
-          onClick={() => handleNavigate()}
-          className="dark:border-gray-600 dark:text-white dark:hover:bg-gray-700"
-        >
-          <EyeIcon className="h-4 w-4 text-gray-600 dark:text-gray-300" />
-          <span className="text-gray-900 dark:text-gray-200">View</span>
+            <Button
+              variant="outline"
+              onClick={() => handleNavigate()}
+              className="dark:border-gray-600 dark:text-white dark:hover:bg-gray-700"
+            >
+              <EyeIcon className="h-4 w-4 text-gray-600 dark:text-gray-300" />
+              <span className="text-gray-900 dark:text-gray-200">View all</span>
             </Button>
-           </div>
-        )}
+          </div>
+        </div>
+
       </CardHeader>
       <CardContent>
         <div className="space-y-3 mt-2">

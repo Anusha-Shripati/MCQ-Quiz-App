@@ -31,7 +31,6 @@ export class UserService {
 
     const data = await this.cacheService.getKey(`user:email:${email}`);
     if (data) return JSON.parse(data)
-      console.log('DATA', data)
     
       const response =  await prisma.user.findUnique({
       where: { email },

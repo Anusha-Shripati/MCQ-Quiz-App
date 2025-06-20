@@ -128,16 +128,7 @@ export default function Sidebar() {
                   isCollapsed={isCollapsed}
                   isActive={pathname.includes('dashboard')}
                 />
-                {permissions?.assessments?.can_read && (
-                  <NavItem
-                    href="/assessments"
-                    icon={<FiFileText size={30} />}
-                    label="Assessment"
-                    isCollapsed={isCollapsed}
-                    isActive={pathname.includes('assessments')}
 
-                  />
-                )}
                 {permissions?.questions?.can_read && (
                   <NavItem
                     href="/questions"
@@ -145,6 +136,16 @@ export default function Sidebar() {
                     label="Questions"
                     isCollapsed={isCollapsed}
                     isActive={pathname.includes('questions')}
+
+                  />
+                )}
+                {permissions?.assessments?.can_read && (
+                  <NavItem
+                    href="/assessments"
+                    icon={<FiFileText size={30} />}
+                    label="Assessment"
+                    isCollapsed={isCollapsed}
+                    isActive={pathname.includes('assessments')}
 
                   />
                 )}
@@ -264,10 +265,10 @@ function NavItem({
         ) : (
           <Button
             onMouseEnter={handleMouseEnter}
-              className={`w-full text-base relative h-12 flex justify-start items-center gap-4 p-3 rounded-lg transition-colors ${isActive
-                ? 'bg-secondary text-secondary-foreground'
-                : 'hover:bg-secondary hover:text-secondary-foreground'
-                }`}
+            className={`w-full text-base relative h-12 flex justify-start items-center gap-4 p-3 rounded-lg transition-colors ${isActive
+              ? 'bg-secondary text-secondary-foreground'
+              : 'hover:bg-secondary hover:text-secondary-foreground'
+              }`}
           >
             <span className="h-5 w-5">{icon}</span>
             <span>{label}</span>

@@ -47,15 +47,15 @@ export class TechnologyController {
       if (!existingTechnology) {
         return generateResponse(res, 400, {}, false, 'Technology not found');
       }
-      if (existingTechnology.name.trim() != trimName) {
-        const duplicateTechnology = await technologyService.getTechnologyByName(trimName);
-        if (duplicateTechnology && !duplicateTechnology.deleted_at) {
-          return generateResponse(res, 400, {}, false, 'Technology name already exists');
-        } else if (duplicateTechnology) {
-          await technologyService.deleteTechnology(duplicateTechnology.id);
-        }
-      }
-      console.log('questions', questions);
+      // if (existingTechnology.name.trim() != trimName) {
+      //   const duplicateTechnology = await technologyService.getTechnologyByName(trimName);
+      //   if (duplicateTechnology && !duplicateTechnology.deleted_at) {
+      //     return generateResponse(res, 400, {}, false, 'Technology name already exists');
+      //   } else if (duplicateTechnology) {
+      //     await technologyService.deleteTechnology(duplicateTechnology.id);
+      //   }
+      // }
+      // console.log('questions', questions);
 
 
       for (const question of questions) {

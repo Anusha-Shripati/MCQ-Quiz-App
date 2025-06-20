@@ -20,6 +20,8 @@ const loginSchema = z.object({
 
 export default function Home() {
   const router = useRouter();
+
+
   const { login, isAuthenticated } = useAuthStore();
   const [isLoading, setIsLoading] = useState(true);
 

@@ -66,19 +66,19 @@ const CategoryMenu = ({
         align="start"
         className="w-48 flex flex-col space-y-1 p-2 bg-white dark:bg-gray-800 rounded-md shadow-md dark:shadow-lg"
       >
-        <DropdownMenuItem
+        {/* <DropdownMenuItem
           onClick={() => handleEditCategory(category.id)}
           className="flex items-center space-x-2 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"
         >
           <Edit className="h-4 w-4 text-gray-600 dark:text-gray-300" />
           <span className="text-gray-900 dark:text-gray-200">Edit</span>
-        </DropdownMenuItem>
+        </DropdownMenuItem> */}
         <DropdownMenuItem
           onClick={() => handleNavigate()}
           className="flex items-center space-x-2 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"
         >
           <EyeIcon className="h-4 w-4 text-gray-600 dark:text-gray-300" />
-          <span className="text-gray-900 dark:text-gray-200">View</span>
+          <span className="text-gray-900 dark:text-gray-200">View / Edit</span>
         </DropdownMenuItem>
         {/* <DropdownMenuItem
           onClick={() => setIsDeleteModalOpen(true)}

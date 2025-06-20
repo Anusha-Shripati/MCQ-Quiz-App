@@ -60,7 +60,7 @@ export const QuestionCard = ({
       <Card className="dark:bg-gray-700 dark:text-gray-200 bg-gray-100 text-gray-800 mb-4 p-4 shadow-sm w-full h-card md:h-auto">
         <div className="text-lg font-semibold mb-2 flex justify-between items-start">
           <div className="break-words pr-2 flex-1 overflow-hidden">
-            <span>{index + 1}. </span>
+            <span>{index}. </span>
             <span className="whitespace-pre-wrap overflow-hidden">{question.question}</span>
           </div>
           <Badge className="dark:bg-gray-600 dark:text-gray-200 bg-gray-200 text-gray-800 py-1 px-3 flex-shrink-0">

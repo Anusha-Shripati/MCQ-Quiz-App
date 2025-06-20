@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { Module, Permissions, UserData } from '@/types/common.types';
 import { api, isAxiosError } from '@/lib/api';
 import { userEndpoint } from '@/lib/endpoint';
+import Cookies from 'js-cookie';
 
 interface User {
   id?: string;
@@ -139,7 +140,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     if (!storedUser) return false;
     try {
       const user = JSON.parse(storedUser);
-      return !!user && !!user.token;
+      const token = Cookies.get('token')
+      return !!user && !!token;
     } catch (error) {
       console.error('Error checking authentication status:', error);
       localStorage.removeItem('user');

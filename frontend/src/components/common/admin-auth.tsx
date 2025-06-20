@@ -19,7 +19,7 @@ export default function AdminAuth({ children }: { children: ReactNode }) {
     }
     setLoading(false);
   }, [router]);
-
+  
   if (loading) {
     return <LoadingSpinner className="min-h-screen w-full" />;
   }

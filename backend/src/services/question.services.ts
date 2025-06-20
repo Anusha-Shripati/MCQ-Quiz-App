@@ -149,7 +149,7 @@ export class QuestionService {
 
     const questions = await prisma.questions.findMany({
       where: { ...query },
-      orderBy: { created_at: 'desc' },
+      orderBy: { created_at: 'asc' },
       skip: (page - 1) * limit,
       take: limit,
     });

@@ -16,7 +16,7 @@ import { FormField } from '@/components/common/form-field';
 import useSWRMutation from 'swr/mutation';
 import { isValidUUID, showSingleToast } from '@/lib/utils';
 import { isAxiosError } from 'axios';
-import { questionEndpoint, technologyEndpoint } from '@/lib/endpoint';
+import { technologyEndpoint } from '@/lib/endpoint';
 
 // import { isValidObjectId } from '@/lib/utils';
 
@@ -63,16 +63,16 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
   ] = useState<boolean>(isValidUUID(params.technology));
   const [technology, setTechnology] = useState<string>('');
 
-  const {
-    data,
-    isLoading,
-    error,
-    isValidating,
-    mutate: questionMutate,
-  } = useSWR(
-    isValidTechnology ? `${questionEndpoint.LIST}?technology_id=${technologyId}` : null,
-    api.get
-  );
+  // const {
+  //   data,
+  //   isLoading,
+  //   error,
+  //   isValidating,
+  //   mutate: questionMutate,
+  // } = useSWR(
+  //   isValidTechnology ? `${questionEndpoint.LIST}?technology_id=${technologyId}` : null,
+  //   api.get
+  // );
 
   const { trigger, isMutating } = useSWRMutation(`${technologyEndpoint.CREATE}`, create);
   const { trigger: updateTrigger, isMutating: updating } = useSWRMutation(
@@ -83,13 +83,6 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
   const { trigger: deleteTrigger } = useSWRMutation('question', deleteQuestion);
 
   useEffect(() => {
-    setName(data?.data?.technology?.name || '');
-    if (data?.data?.list?.length) {
-      setQuestions(data?.data?.list);
-      if (selectedQuestion > data?.data?.list.length) {
-        setSelectedQuestion(data?.data?.list.length - 1);
-      }
-    } else {
       setQuestions([
         {
           technology_id: technologyId,
@@ -103,8 +96,7 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
         },
       ]);
       setSelectedQuestion(0);
-    }
-  }, [data, technologyId]);
+  }, [technologyId]);
 
   // Add new useEffect to set the technology value when technologyId or technologyData changes
   useEffect(() => {
@@ -138,21 +130,7 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
   };
 
   const handleDeleteQuestion = async (index: number) => {
-    const questionId = questions[index].id;
-    if (!questionId) {
-      toast.error('Question is missing. Cannot delete question.');
-      return;
-    }
-    try {
-      const response = await deleteTrigger({ questionId });
-      toast.success(response.message || 'Question deleted successfully!');
-      await questionMutate();
-    } catch (error) {
-      console.error('Error deleting question:', error);
-      isAxiosError(error)
-        ? toast.error(error.response?.data?.message || 'Failed to delete question.')
-        : toast.error('Failed to delete question.');
-    }
+    setQuestions((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleQuestionTypeChange = (value: Question['type'], index: number) => {
@@ -328,9 +306,6 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
       </div>
       <StatusWrapper
         className="p-6 dark:bg-gray-900 min-h-[500px] transition-all duration-300"
-        loading={isLoading || isValidating}
-        reset={questionMutate}
-        error={error}
       >
         <div className="flex gap-6">
           {/* Sidebar for questions no. list */}

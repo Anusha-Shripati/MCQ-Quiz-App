@@ -24,9 +24,9 @@ export const questionsSchema = {
         }),
       }),
       options: Joi.array().items(Joi.string()),
-      time: Joi.string().required().messages({
-        'string.empty': 'Time is required',
-      }),
+      // time: Joi.string().required().messages({
+      //   'string.empty': 'Time is required',
+      // }),
       difficulty_level: Joi.string().valid('easy', 'medium', 'hard').required().messages({
         'string.empty': 'Level is required',
         'any.only': 'Level must be one of easy, medium, hard',
@@ -82,9 +82,9 @@ export const questionsSchema = {
         }),
       }),
       options: Joi.array().items(Joi.string()),
-      time: Joi.string().required().messages({
-        'string.empty': 'Time is required',
-      }),
+      // time: Joi.string().required().messages({
+      //   'string.empty': 'Time is required',
+      // }),
       difficulty_level: Joi.string().valid('easy', 'medium', 'hard').required().messages({
         'string.empty': 'Level is required',
         'any.only': 'Level must be one of easy, medium, hard',

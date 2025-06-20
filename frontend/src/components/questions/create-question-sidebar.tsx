@@ -97,7 +97,6 @@ const QuestionSidebar: React.FC<QuestionSidebarProps> = ({
                   <span className="text-xs sm:text-sm font-medium truncate">
                     {index + 1}. {q.question ? q.question : `Question ${index + 1}`}
                   </span>
-                  {!q.id && <small className="text-[10px] sm:text-xs">Not saved</small>}
                 </div>
                 <div className="flex items-center">
                   {validationErrors[index] && (

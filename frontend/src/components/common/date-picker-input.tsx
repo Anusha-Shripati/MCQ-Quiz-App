@@ -12,7 +12,7 @@ interface DatePickerInputProps {
   setDate: (date?: Date) => void;
   error?: string | undefined;
 }
-
+const today = new Date();
 export const DatePickerInput = ({ label, date, setDate, error }: DatePickerInputProps) => {
   const [isOpen, setIsOpen] = useState(false);
   return (
@@ -30,6 +30,7 @@ export const DatePickerInput = ({ label, date, setDate, error }: DatePickerInput
         <PopoverContent className="w-auto p-0" align="start">
           <Calendar
             mode="single"
+            disabled={(dateValue: Date) => dateValue < today}
             selected={date}
             onSelect={setDate}
             className="rounded-md border dark:bg-gray-900 bg-gray-50"

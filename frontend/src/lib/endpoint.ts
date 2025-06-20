@@ -34,7 +34,7 @@ export const questionEndpoint={
     LIST:"/question/list",
     CREATE:"/question/create",
     QUESTION_BY_ID:"/question",
-
+    DELETE :"/question/delete",
 }
 export const roleEndpoint={
     LIST:"/role/list",

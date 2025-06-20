@@ -14,7 +14,7 @@ import { technologyEndpoint } from '@/lib/endpoint';
 
 import ImportSampleXLSX from './import-sample-xlsx';
 import { useAuthStore } from '@/store/authStore';
-import { Permission } from '@/types/common.types';
+
 import { QuestionCategory } from '@/shared/types/app';
 
 async function createCategory(url: string, { arg }: { arg: { name: string } }) {
@@ -31,24 +31,12 @@ const CreateCategory: React.FC<CreateCategoryProps> = ({ categoriesArray = [] })
   const [importOpen, setImportOpen] = useState(false);
   const [categoryName, setCategoryName] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
-  const [isQuestionEditable, setIsQuestionEditable] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
-  const {user} = useAuthStore();
+  const { hasPermissionQuestionEdit } = useAuthStore();
+  const isQuestionEditable = hasPermissionQuestionEdit();
   const { setTechnologyFilter, technologyFilter } = useQuestionStore();
   
-  useEffect(() => {
-    const permissions = Array.isArray(user?.role?.role_permissions)
-      ? (user.role.role_permissions as Permission[])
-      : [];
-    if (permissions.length > 0) {
-      const canQuestionEdit = permissions.some(
-        (permission) => permission.module?.name === 'questions' && permission.can_edit === true
-      );
-      setIsQuestionEditable(canQuestionEdit);
-    }
-  }, [user?.role]);
-
   useEffect(() => {
     const timer = setTimeout(() => {
       const params = new URLSearchParams();

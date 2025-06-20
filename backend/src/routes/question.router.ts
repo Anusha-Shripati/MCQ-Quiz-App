@@ -17,7 +17,6 @@ questionRouter.post(
 questionRouter.get('/download-template', asyncHandler(questionsController.downloadQuestionFile));
 questionRouter.get('/technology', asyncHandler(questionsController.getTechnology));
 
-
 questionRouter.post(
   '/create',
   authenticateAndAuthorize('questions.can_edit'),
@@ -49,7 +48,5 @@ questionRouter.delete(
   validateRequest(questionsSchema.delete),
   asyncHandler(questionsController.delete)
 );
-
-
 
 export default questionRouter;

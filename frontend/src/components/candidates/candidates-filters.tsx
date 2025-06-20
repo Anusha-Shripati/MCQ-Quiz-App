@@ -15,6 +15,7 @@ import { assessmentEndpoint, technologyEndpoint } from '@/lib/endpoint';
 import useDebounce from '@/hooks/useDebounce';
 import { isEqual } from 'lodash';
 import CreateCandidateDialog from './create-candidate-dialog';
+import { useAuthStore } from '@/store/authStore';
 
 const Filters = () => {
   const { data: assessments } = useSWR(assessmentEndpoint.ALL, api.get, {
@@ -38,7 +39,8 @@ const Filters = () => {
     technologyOptions,
     candidateFilter,
   } = useCandidateStore();
-
+  const {hasPermissionCandidateEdit} = useAuthStore();
+  const canCreateCandidate = hasPermissionCandidateEdit();
   // Keep track of whether the form is being updated from external source
   const isExternalUpdate = useRef(false);
   // Keep track of previous filter values for comparison
@@ -214,7 +216,9 @@ const Filters = () => {
             </Button>
           )}
         </div>
-        <CreateCandidateDialog />
+        {canCreateCandidate && (
+          <CreateCandidateDialog />
+        )}
       </div>
     </section>
   );

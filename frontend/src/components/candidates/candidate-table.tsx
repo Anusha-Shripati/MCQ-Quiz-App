@@ -26,7 +26,7 @@ import StatusWrapper from '../common/status-wrapper';
 import { ExamMetaTech } from '@/types/exam.types';
 import Link from 'next/link';
 import { useAuthStore } from '@/store/authStore';
-import { Permission } from '@/types/common.types';
+
 
 function CandidateTable() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -45,20 +45,8 @@ function CandidateTable() {
   } = useCandidateStore();
   const totalItems = candidateCount;
   const pathname = usePathname();
-  const { user } = useAuthStore();
-  const [isCandidateEditable, setIsCandidateEditable] = useState(false);
-  
-  useEffect(() => {
-    const permissions = Array.isArray(user?.role?.role_permissions)
-      ? (user.role.role_permissions as Permission[])
-      : [];
-    if (permissions.length > 0) {
-      const canEditCandidates = permissions.some(
-        (permission) => permission.module?.name === 'candidates' && permission.can_edit === true
-      );
-      setIsCandidateEditable(canEditCandidates);
-    }
-  }, [user?.role]);
+  const { hasPermissionCandidateEdit } = useAuthStore();
+  const canEditCandidate = hasPermissionCandidateEdit();
 
   useEffect(() => {
     const params = new URLSearchParams();
@@ -409,7 +397,7 @@ function CandidateTable() {
             >
               <FiMail className="h-5 w-5 text-gray-700 dark:text-gray-300" />
             </Button>
-            {isCandidateEditable && (
+            {canEditCandidate && (
               <>
                 <Button
                   onClick={(e) => {
@@ -438,7 +426,7 @@ function CandidateTable() {
         ),
       },
     ],
-    [isCandidateEditable]
+    [canEditCandidate]
   );
   const getTechnology = (id: string) => {
     const technology = technologyOptions.find((item) => item.value == id);

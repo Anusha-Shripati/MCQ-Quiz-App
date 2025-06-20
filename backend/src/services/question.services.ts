@@ -86,11 +86,36 @@ export class QuestionService {
     return prisma.questions.create({ data });
   }
   async deleteQuestion(questionId: string) {
-    return prisma.questions.delete({
-      where: {
-        id: questionId,
-      },
-    });
+    try {
+      // Check if the question is associated with any exam
+      const examQuestion = await prisma.exam_questions.findFirst({
+        where: { question_id: questionId },
+        include: {
+          exam: {
+            include: {
+              assessment: true
+            }
+          }
+        }
+      });
+      
+      if (examQuestion) {
+        const assessmentName = examQuestion.exam.assessment.name;
+        throw new Error(`This question is associated with assessment "${assessmentName}". Please delete the assessment first or remove this question from the assessment.`);
+      }
+      
+      return prisma.questions.delete({
+        where: {
+          id: questionId,
+        },
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        throw error;
+      } else {
+        throw new Error('Failed to delete question due to database constraints.');
+      }
+    }
   }
   async updateQuestion(id: string, data: QuestionsPayload) {
     return prisma.questions.update({ where: { id }, data });
@@ -218,7 +243,6 @@ export class QuestionService {
       };
     }
     
-    // Verify that the specified technology exists
     const technology = await prisma.technology.findUnique({
       where: { id: technologyId }
     });
@@ -231,11 +255,11 @@ export class QuestionService {
     }
     
     const errors: string[] = [];
-
-    for (const [index, row] of questions.entries()) {
-      const rowNum = index + 2;
-
-      try {
+    
+    for (const [index, row] of questions.entries()) { 
+      const rowNum = index + 2; 
+      
+      try { 
         if (!row.question || String(row.question).trim() === '') {
           errors.push(`Row ${rowNum}: Missing question. This field is required.`);
         }
@@ -244,7 +268,7 @@ export class QuestionService {
           errors.push(`Row ${rowNum}: Missing options. This field is required.`);
         }
 
-        if (!row.correct_answer || String(row.correct_answer).trim() === '') {
+        if (row.correct_answer == null || String(row.correct_answer).trim() === '') {
           errors.push(`Row ${rowNum}: Missing correct answer. This field is required.`);
         }
 

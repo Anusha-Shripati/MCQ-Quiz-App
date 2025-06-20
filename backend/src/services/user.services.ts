@@ -31,6 +31,7 @@ export class UserService {
 
     const data = await this.cacheService.getKey(`user:email:${email}`);
     if (data) return JSON.parse(data)
+      console.log('DATA', data)
     
       const response =  await prisma.user.findUnique({
       where: { email },
@@ -84,13 +85,30 @@ export class UserService {
     await this.cacheService.setKey(`user:${userId}`, response, this.cacheTime)
     return response
   }
+  
+  async updateUser(id: string, data: Record<string, any>) {
 
-  async updateUser(id: string, data: Record<string, string | null>) {
-    const user = await prisma.user.update({ where: { id }, data });
+    const { role_id, deletedAt, ...restData } = data;
+    const updateData: any = { ...restData };
+    if (role_id) {
+      updateData.role = {
+        connect: { id: role_id }
+      };
+    }
+    if (deletedAt !== undefined) {
+      updateData.deleted_at = deletedAt;
+    }
+
+    const user = await prisma.user.update({ 
+      where: { id }, 
+      data: updateData 
+    });
+    
     if (!user) return null;
     const { password, token, ...rest } = user;
     return rest;
   }
+  
   async changePassword(id: string, password: string) {
     const user = await prisma.user.update({ where: { id }, data: { password } });
     if (!user) return null;

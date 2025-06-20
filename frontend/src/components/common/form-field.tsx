@@ -27,6 +27,7 @@ interface FormFieldProps {
   inputMode?: 'none' | 'text' | 'tel' | 'url' | 'email' | 'numeric' | 'decimal' | 'search';
   pattern?: string;
   maxLength?: number;
+  onFocus?: (e: React.FocusEvent<HTMLInputElement>) => void;
 }
 
 interface SelectOption {

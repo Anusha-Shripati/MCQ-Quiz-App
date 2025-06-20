@@ -14,6 +14,7 @@ assessmentRouter.post(
   validateRequest(assessmentSchema.create),
   asyncHandler(assessmentController.create)
 );
+assessmentRouter.post("/check-unique", validateRequest(assessmentSchema.checkUnique), asyncHandler(assessmentController.checkUnique));
 
 assessmentRouter.put(
   '/:id',
@@ -44,5 +45,6 @@ assessmentRouter.delete(
   validateRequest(assessmentSchema.delete),
   asyncHandler(assessmentController.delete)
 );
+
 
 export default assessmentRouter;

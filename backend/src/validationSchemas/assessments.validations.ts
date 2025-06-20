@@ -87,4 +87,11 @@ export const assessmentSchema = {
       }),
     }),
   },
+  checkUnique: {
+    body: Joi.object({
+      name: Joi.string().required().messages({
+        'string.empty': 'Technology name is required',
+      }),
+    }),
+  },
 };

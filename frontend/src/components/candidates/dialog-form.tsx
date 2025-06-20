@@ -173,6 +173,7 @@ export default function DialogForm({ candidate, open, setOpen }: CandidateDialog
   const routeAssessment = () => {
     router.push('/assessments');
   }
+  
 
   return (
     <Dialog

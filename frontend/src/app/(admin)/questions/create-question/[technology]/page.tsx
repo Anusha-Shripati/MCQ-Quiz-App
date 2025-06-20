@@ -24,8 +24,14 @@ async function create(url: string, { arg }: { arg: { name: string; questions: Qu
   const response = await api.post(url, arg);
   return response;
 }
+
 async function update(url: string, { arg }: { arg: { name: string; questions: Question[] } }) {
   const response = await api.put(url, arg);
+  return response;
+}
+
+async function deleteQuestion(url: string, { arg }: { arg: { questionId: string } }) {
+  const response = await api.delete(`question/${arg.questionId}`);
   return response;
 }
 
@@ -51,9 +57,12 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
   const router = useRouter();
   const [selectedQuestion, setSelectedQuestion] = useState<number>(0);
   const [name, setName] = useState<string>('');
-  const [isValidTechnology, setIsValidTechnology]: [boolean, React.Dispatch<React.SetStateAction<boolean>>] = useState<boolean>(isValidUUID(params.technology));
+  const [isValidTechnology, setIsValidTechnology]: [
+    boolean,
+    React.Dispatch<React.SetStateAction<boolean>>,
+  ] = useState<boolean>(isValidUUID(params.technology));
   const [technology, setTechnology] = useState<string>('');
-  console.log('Technology ID:', technology);
+
   const {
     data,
     isLoading,
@@ -70,6 +79,8 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
     `${technologyEndpoint.TECHNOLOGY_BY_ID}/${technologyId}`,
     update
   );
+
+  const { trigger: deleteTrigger } = useSWRMutation('question', deleteQuestion);
 
   useEffect(() => {
     setName(data?.data?.technology?.name || '');
@@ -127,13 +138,20 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
   };
 
   const handleDeleteQuestion = async (index: number) => {
-    const updatedQuestions = questions.filter((_, i) => i !== index);
-    setQuestions(updatedQuestions);
-
-    if (selectedQuestion >= updatedQuestions.length && updatedQuestions.length) {
-      setSelectedQuestion(updatedQuestions.length - 1);
-    } else if (updatedQuestions.length == 0) {
-      setSelectedQuestion(0);
+    const questionId = questions[index].id;
+    if (!questionId) {
+      toast.error('Question is missing. Cannot delete question.');
+      return;
+    }
+    try {
+      const response = await deleteTrigger({ questionId });
+      toast.success(response.message || 'Question deleted successfully!');
+      await questionMutate();
+    } catch (error) {
+      console.error('Error deleting question:', error);
+      isAxiosError(error)
+        ? toast.error(error.response?.data?.message || 'Failed to delete question.')
+        : toast.error('Failed to delete question.');
     }
   };
 
@@ -278,7 +296,7 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
     );
   };
   const isNewTechnology = !isValidTechnology || !technology;
-  
+
   return (
     <div className="px-2 py-6 flex flex-col h-screen">
       {/* Header with back button and technology selection */}
@@ -292,7 +310,7 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
               type="select"
               placeholder="Technology"
               className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-300 w-full"
-              value={isNewTechnology ? "" : technology}
+              value={isNewTechnology ? '' : technology}
               onChange={(value: string) => {
                 handleSelectTechnology(value);
               }}
@@ -338,7 +356,6 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
                   description="Get started by adding a new question."
                   actionText="Add Question"
                   onAction={() => {
-                    // Example: Add a new question
                     const newQuestion: Question = {
                       technology_id: technologyId,
                       question: '',

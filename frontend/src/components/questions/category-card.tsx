@@ -6,8 +6,7 @@ import { EyeIcon, Plus } from 'lucide-react';
 import { Button } from '../ui/form/button';
 import { QuestionCategory } from '@/shared/types/app';
 import { useAuthStore } from '@/store/authStore';
-import { useEffect, useState } from 'react';
-import { Permission } from '@/types/common.types';
+
 
 export const CategoryCard = ({
   category,
@@ -17,8 +16,8 @@ export const CategoryCard = ({
   handleDelete: (id: string) => void;
 }) => {
   const router = useRouter();
-  const {user} = useAuthStore();
-  const [isQuestionEditable, setIsQuestionEditable] = useState(false);
+  const { hasPermissionQuestionEdit } = useAuthStore();
+  const isQuestionEditable = hasPermissionQuestionEdit();
 
   const handleNavigate = () => {
     router.push(`/questions/category/${category.id}`);
@@ -32,18 +31,6 @@ export const CategoryCard = ({
     event.stopPropagation();
     router.push(`/questions/category/${category.id}?difficulty=${difficulty}`);
   };
-
-  useEffect(() => {
-    const permissions = Array.isArray(user?.role?.role_permissions)
-      ? (user.role.role_permissions as Permission[])
-      : [];
-    if (permissions.length > 0) {
-      const canQuestionEdit = permissions.some(
-        (permission) => permission.module?.name === 'questions' && permission.can_edit === true
-      );
-      setIsQuestionEditable(canQuestionEdit);
-    }
-    }, [user?.role]);
 
   return (
     <Card className="shadow-md hover:shadow-lg transition-all duration-200">

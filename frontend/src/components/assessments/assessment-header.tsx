@@ -15,6 +15,7 @@ import { cn } from '@/lib/utils';
 import { userEndpoint } from '@/lib/endpoint';
 import useDebounce from '@/hooks/useDebounce';
 import { isEqual } from 'lodash';
+import { useAuthStore } from '@/store/authStore';
 
 export default function AssessmentHeader() {
   const defaultValues: AssessmentFilters = {
@@ -26,6 +27,8 @@ export default function AssessmentHeader() {
 
   const { data: users } = useSWR(userEndpoint.LIST, fetcher);
   const { setFilters, filters } = useAssessmentStore();
+  const { hasPermissionAssessmentEdit } = useAuthStore();
+  const isAssessmentEditable = hasPermissionAssessmentEdit();
 
   const { control, setValue, watch, register, reset } = useForm<AssessmentFilters>({
     defaultValues,
@@ -44,7 +47,7 @@ export default function AssessmentHeader() {
         name: filters.name || '',
         created_by: filters.created_by || '',
         created_duation: filters.created_duation || undefined,
-        view: filters.view || ''
+        view: filters.view || '',
       });
     }
   }, [filters]);
@@ -107,11 +110,9 @@ export default function AssessmentHeader() {
       const typedKey = key as keyof AssessmentFilters;
       if (typedKey === 'created_duation') {
         return allFields[typedKey]?.from !== undefined || allFields[typedKey]?.to !== undefined;
-      }
-      else if (typedKey === 'created_by') {
+      } else if (typedKey === 'created_by') {
         return allFields[typedKey] !== 'all';
-      }
-      else {
+      } else {
         return !!allFields[typedKey];
       }
     });
@@ -125,7 +126,6 @@ export default function AssessmentHeader() {
 
   return (
     <div className="flex flex-col md:flex-row items-center gap-6">
-
       <div className="flex flex-wrap items-center gap-4 ml-auto">
         <FormField
           className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-300 min-w-[200px] h-10"
@@ -153,8 +153,9 @@ export default function AssessmentHeader() {
           <Button
             variant={allFields.view === 'today' ? 'secondary' : 'ghost'}
             size="sm"
-            className={`${allFields.view === 'today' ? 'bg-gray-100 dark:bg-gray-700' : ''
-              } text-gray-900 dark:text-gray-300`}
+            className={`${
+              allFields.view === 'today' ? 'bg-gray-100 dark:bg-gray-700' : ''
+            } text-gray-900 dark:text-gray-300`}
             onClick={() => handleViewChange('today')}
           >
             Today
@@ -162,8 +163,9 @@ export default function AssessmentHeader() {
           <Button
             variant={allFields.view === 'week' ? 'secondary' : 'ghost'}
             size="sm"
-            className={`${allFields.view === 'week' ? 'bg-gray-100 dark:bg-gray-700' : ''
-              } text-gray-900 dark:text-gray-300`}
+            className={`${
+              allFields.view === 'week' ? 'bg-gray-100 dark:bg-gray-700' : ''
+            } text-gray-900 dark:text-gray-300`}
             onClick={() => handleViewChange('week')}
           >
             Week
@@ -183,13 +185,14 @@ export default function AssessmentHeader() {
             Clear All
           </Button>
         )}
-
-        <Link href="/assessments/create-assessment">
-          <Button className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm">
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Create Assessment
-          </Button>
-        </Link>
+        {isAssessmentEditable && (
+          <Link href="/assessments/create-assessment">
+            <Button className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm">
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Create Assessment
+            </Button>
+          </Link>
+        )}
       </div>
     </div>
   );

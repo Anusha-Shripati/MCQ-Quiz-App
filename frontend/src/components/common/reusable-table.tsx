@@ -58,12 +58,9 @@ const ReusableTable = <T extends object>({
   };
 
   const handleRowClick = (row: T, rowIndex: number) => {
-    // If expandableRow is provided, toggle the row
     if (expandableRow) {
-      console.log('Row clicked:', row);
       toggleRow(rowIndex);
     }
-    // If onRowClick is provided, call it
     if (onRowClick) {
       onRowClick(row);
     }
@@ -91,8 +88,7 @@ const ReusableTable = <T extends object>({
         <TableBody>
           {rows.length === 0 && !intersectionObserverRef && (
             <TableRow>
-              <TableCell
-                colSpan={columns.length + (expandableRow ? 1 : 0)}
+              <TableCell                colSpan={columns.length + (expandableRow ? 1 : 0)}
                 className="text-center py-4"
               >
                 No data available

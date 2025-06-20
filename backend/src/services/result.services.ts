@@ -59,7 +59,16 @@ export class ResultService {
     if (result) {
       const passCriteria = result.exam?.assessment?.pass_criteria;
       const isPassed = result.percentage >= passCriteria;
-
+      result.answers.forEach((answer) => {
+        if (
+          answer?.question?.options &&
+          Array.isArray(answer.question.options)
+        ) {
+          answer.question.options = answer.question.options.filter(
+            (option) => typeof option === 'string' && option.trim() !== ''
+          );
+        }
+      });
       return {
         ...result,
         is_passed: isPassed,

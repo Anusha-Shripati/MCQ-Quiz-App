@@ -53,6 +53,7 @@ export class UserController {
       const user = await userService.findUserByEmail(payload.email);
       if (user) {
         if (user.deleted_at) {
+          console.log('User is deleted, updating user');
           const hashedPassword = await encryptStringCrypt(payload.password);
           let updatedUser = await userService.updateUser(user.id, {
             email: payload.email,

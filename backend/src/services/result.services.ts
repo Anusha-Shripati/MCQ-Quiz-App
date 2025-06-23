@@ -1,5 +1,6 @@
 import { prisma } from '../db/prisma.client';
 import { CacheService } from './cacheService';
+import { UploadService } from './upload.services';
 
 interface ResultParams {
   page?: string;
@@ -17,15 +18,19 @@ interface ResultParams {
 export class ResultService {
 
     private cacheService;
+    private uploadService;
     private cacheTime = 60;
   
     constructor() {
       this.cacheService = new CacheService()
+      this.uploadService = new UploadService()
     }
   
   get = async (id: string) => {
     const data = await this.cacheService.getKey(`result:${id}`);
     if (data) return JSON.parse(data)
+
+
 
     const result = await prisma.results.findFirst({
       where: { id: id },
@@ -59,16 +64,32 @@ export class ResultService {
     if (result) {
       const passCriteria = result.exam?.assessment?.pass_criteria;
       const isPassed = result.percentage >= passCriteria;
-      result.answers.forEach((answer) => {
+
+      await Promise.all(result.answers.map(async(answer) => {
+        if (answer.question_name === 'introduction' && !answer.user_answer[0].includes('http')) {
+          console.log('Merging chunks for introduction question');
+
+          const file = await this.uploadService.mergeChunk(answer.user_answer[0], answer.exam_id);
+          const updatedUserAnswer = [typeof file === 'string' ? file : file.path];
+
+          await prisma.answers.update({
+            where: { id: answer.id },
+            data: { user_answer: updatedUserAnswer }
+          });
+          
+          answer.user_answer = updatedUserAnswer;
+        }
         if (
           answer?.question?.options &&
           Array.isArray(answer.question.options)
         ) {
+
           answer.question.options = answer.question.options.filter(
             (option) => typeof option === 'string' && option.trim() !== ''
           );
         }
-      });
+      }));
+      
       return {
         ...result,
         is_passed: isPassed,

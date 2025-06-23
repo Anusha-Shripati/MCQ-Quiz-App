@@ -90,8 +90,8 @@ export class CandidateExamController {
       let file;
 
       if (req.body.merge_chunk) {
-        const file = await this.uploadService.mergeChunk(req.body.foldername, exam_id);
-        req.body.user_answer = [typeof file === 'string' ? file : file.path];
+        // const file = await this.uploadService.mergeChunk(req.body.foldername, exam_id);
+        req.body.user_answer = [req.body.foldername];
       }
       if (!candidate_id) throw new Error('Candidate not authenticated');
 

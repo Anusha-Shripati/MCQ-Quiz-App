@@ -3,9 +3,8 @@ import { CategoryCard } from '@/components/questions/category-card';
 import CreateCategory from '@/components/questions/create-category';
 import { useEffect, useState } from 'react';
 import { QuestionCategory } from '@/shared/types/app';
-import toast from 'react-hot-toast';
-import useSWR, { mutate } from 'swr';
-import { api, isAxiosError } from '@/lib/api';
+import useSWR from 'swr';
+import { api } from '@/lib/api';
 import { useQuestionStore } from '@/store/questionStore';
 // import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import StatusWrapper from '@/components/common/status-wrapper';
@@ -23,23 +22,23 @@ export default function QuestionsPage() {
     }
   }, [data]);
 
-  const handleDelete = async (techId: string) => {
-    // if (window.confirm("Are you sure you want to delete this Technology?")) {
-    try {
-      const res = await api.delete(`${technologyEndpoint.TECHNOLOGY_BY_ID}/${techId}`);
-      if (res.success) {
-        toast.success('Technology deleted successfully');
-      }
-      mutate(`/technology/list?search=${technologyFilter}`);
-    } catch (error) {
-      if (isAxiosError(error)) {
-        toast.error(error.response.data.message || 'An unexpected error occurred');
-      } else {
-        toast.error('An unexpected error occurred');
-      }
-    }
-    // }
-  };
+  // const handleDelete = async (techId: string) => {
+  //   // if (window.confirm("Are you sure you want to delete this Technology?")) {
+  //   try {
+  //     const res = await api.delete(`${technologyEndpoint.TECHNOLOGY_BY_ID}/${techId}`);
+  //     if (res.success) {
+  //       toast.success('Technology deleted successfully');
+  //     }
+  //     mutate(`/technology/list?search=${technologyFilter}`);
+  //   } catch (error) {
+  //     if (isAxiosError(error)) {
+  //       toast.error(error.response.data.message || 'An unexpected error occurred');
+  //     } else {
+  //       toast.error('An unexpected error occurred');
+  //     }
+  //   }
+  //   // }
+  // };
 
   return (
     <div className="px-2 py-6 flex flex-col">
@@ -51,7 +50,7 @@ export default function QuestionsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-in fade-in duration-300">
           {categoriesArray.length > 0 ? (
             categoriesArray.map((list: QuestionCategory) => (
-              <CategoryCard key={list.id} category={list} handleDelete={handleDelete} />
+              <CategoryCard key={list.id} category={list}  />
             ))
           ) : (
             <div className="col-span-full min-h-[80vh] flex items-center justify-center">

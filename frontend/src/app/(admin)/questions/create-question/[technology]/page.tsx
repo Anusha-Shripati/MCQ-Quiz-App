@@ -30,11 +30,6 @@ async function update(url: string, { arg }: { arg: { name: string; questions: Qu
   return response;
 }
 
-async function deleteQuestion(url: string, { arg }: { arg: { questionId: string } }) {
-  const response = await api.delete(`question/${arg.questionId}`);
-  return response;
-}
-
 const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }) => {
   const { data: technologyData } = useSWR(`${technologyEndpoint.LIST}`, api.get);
   const [technologyId, setTechnologyId] = useState<string>(params.technology);
@@ -80,22 +75,20 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
     update
   );
 
-  const { trigger: deleteTrigger } = useSWRMutation('question', deleteQuestion);
-
   useEffect(() => {
-      setQuestions([
-        {
-          technology_id: technologyId,
-          question: '',
-          options: ['', '', '', '', '', ''],
-          correct_answer: [],
-          time: '',
-          difficulty_level: 'easy',
-          type: 'mcq',
-          meta: {},
-        },
-      ]);
-      setSelectedQuestion(0);
+    setQuestions([
+      {
+        technology_id: technologyId,
+        question: '',
+        options: ['', '', '', '', '', ''],
+        correct_answer: [],
+        time: '',
+        difficulty_level: 'easy',
+        type: 'mcq',
+        meta: {},
+      },
+    ]);
+    setSelectedQuestion(0);
   }, [technologyId]);
 
   // Add new useEffect to set the technology value when technologyId or technologyData changes
@@ -304,9 +297,7 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
           </Button>
         </div>
       </div>
-      <StatusWrapper
-        className="p-6 dark:bg-gray-900 min-h-[500px] transition-all duration-300"
-      >
+      <StatusWrapper className="p-6 dark:bg-gray-900 min-h-[500px] transition-all duration-300">
         <div className="flex gap-6">
           {/* Sidebar for questions no. list */}
           {questions.length ? (

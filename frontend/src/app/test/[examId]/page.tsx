@@ -6,30 +6,47 @@ import TestWarning from '@/components/test/error/test-warning';
 import { VideoRecordingScreen } from '@/components/test/video-recording-screen';
 import { examApi } from '@/lib/api';
 import { dataURLtoBlob } from '@/lib/utils';
-import { BROWSER_KEY, PROHIBITED_COMBINATIONS, PROHIBITED_KEYS, QUIZ_CONFIG, SNAPSHOT } from '@/shared/constants/data';
+import {
+  BROWSER_KEY,
+  PROHIBITED_COMBINATIONS,
+  PROHIBITED_KEYS,
+  QUIZ_CONFIG,
+  SNAPSHOT,
+} from '@/shared/constants/data';
 import { useExamStore } from '@/store/examStore';
 import { EXAM_STEP } from '@/types/exam.types';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { examEndpoint } from '@/lib/endpoint';
 
-
 const QuizPage = () => {
   const params = useParams();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { current_step, setCurrentStep, setAccessCode, setCandidate, candidate, setExam, setCameraStream, cameraStreamRef } = useExamStore();
+  const {
+    current_step,
+    setCurrentStep,
+    setAccessCode,
+    setCandidate,
+    candidate,
+    setExam,
+    setCameraStream,
+    cameraStreamRef,
+  } = useExamStore();
   const router = useRouter();
 
   const [videoLink, setVideoLink] = useState<string | null>(null);
 
   const screenStrean = useRef<MediaStream | null>(null);
-  const screenSnapshotRef = useRef<HTMLVideoElement | null>(null)
-  const cameraSnapshotRef = useRef<HTMLVideoElement | null>(null)
-  const cameraCanvas = useRef<HTMLCanvasElement | null>(null)
-  const screenCanvas = useRef<HTMLCanvasElement | null>(null)
-  const interval = useRef<NodeJS.Timeout | null>(null)
-  const [permission, setPermission] = useState<{ camera: boolean, screen: boolean }>({ camera: true, screen: true })
+  const screenSnapshotRef = useRef<HTMLVideoElement | null>(null);
+  const cameraSnapshotRef = useRef<HTMLVideoElement | null>(null);
+  const cameraCanvas = useRef<HTMLCanvasElement | null>(null);
+  const screenCanvas = useRef<HTMLCanvasElement | null>(null);
+  const interval = useRef<NodeJS.Timeout | null>(null);
+  const [permission, setPermission] = useState<{ camera: boolean; screen: boolean }>({
+    camera: true,
+    screen: true,
+  });
 
   const handleKeyDown = (e: KeyboardEvent) => {
     if (PROHIBITED_KEYS.includes(e.key)) {
@@ -50,8 +67,7 @@ const QuizPage = () => {
     }
 
     // Prevent browser shortcuts
-    if (
-      (e.ctrlKey || e.metaKey) && BROWSER_KEY.includes(e.key)) {
+    if ((e.ctrlKey || e.metaKey) && BROWSER_KEY.includes(e.key)) {
       e.preventDefault();
 
       return;
@@ -86,25 +102,28 @@ const QuizPage = () => {
         return;
       }
 
-      const videoLink = data.data?.answers?.find((a: { question_name: string }) => a.question_name === 'introduction')?.user_answer[0] || null;
+      const videoLink =
+        data.data?.answers?.find(
+          (a: { question_name: string }) => a.question_name === 'introduction'
+        )?.user_answer[0] || null;
       setVideoLink(videoLink);
       setCandidate(data.data);
       setExam(data.data.exam);
       setLoading(false);
       setError(null);
-      return true
+      return true;
     } catch (err) {
       setLoading(false);
 
       console.error('Error fetching candidate:', err);
       setError('Failed to fetch candidate data');
       screenStrean.current?.getTracks().forEach((track) => {
-        track.stop()
-      })
+        track.stop();
+      });
       cameraStreamRef?.getTracks().forEach((track) => {
-        track.stop()
-      })
-      throw new Error('Failed to fetch candidate data')
+        track.stop();
+      });
+      throw new Error('Failed to fetch candidate data');
     }
   };
 
@@ -114,25 +133,24 @@ const QuizPage = () => {
 
   const startScreenRecording = async () => {
     try {
-
       screenStrean.current = await navigator.mediaDevices.getDisplayMedia({
         video: {
           displaySurface: 'monitor',
         },
-        audio: false
-      })
-      setPermission((prv) => ({ ...prv, screen: true }))
+        audio: false,
+      });
+      setPermission((prv) => ({ ...prv, screen: true }));
       const track = screenStrean.current.getVideoTracks()[0];
       const settings = track.getSettings();
       track.onended = () => {
-        stopRecording()
-        setPermission((prv) => ({ ...prv, screen: false }))
-      }
+        stopRecording();
+        setPermission((prv) => ({ ...prv, screen: false }));
+      };
 
       if (settings.displaySurface == 'monitor') {
-        setPermission((prv) => ({ ...prv, screen: true }))
+        setPermission((prv) => ({ ...prv, screen: true }));
       } else {
-        setPermission((prv) => ({ ...prv, screen: false }))
+        setPermission((prv) => ({ ...prv, screen: false }));
         screenStrean.current.getTracks().forEach((track) => track.stop());
         return;
       }
@@ -142,41 +160,40 @@ const QuizPage = () => {
       }
     } catch (error) {
       console.log(error);
-      
-      setPermission((prv) => ({ ...prv, screen: false }))
+
+      setPermission((prv) => ({ ...prv, screen: false }));
     }
-  }
+  };
   const startCamera = async () => {
     try {
       const cameraStream = await navigator.mediaDevices.getUserMedia({
         video: true,
-        audio: true
-      })
-      const videoTrack = cameraStream.getVideoTracks()[0]
+        audio: true,
+      });
+      const videoTrack = cameraStream.getVideoTracks()[0];
       videoTrack.onended = () => {
-        setPermission((prv) => ({ ...prv, camera: false }))
-      }
+        setPermission((prv) => ({ ...prv, camera: false }));
+      };
       setCameraStream(cameraStream);
 
-      setPermission((prv) => ({ ...prv, camera: true }))
+      setPermission((prv) => ({ ...prv, camera: true }));
 
       if (cameraSnapshotRef.current) {
         cameraSnapshotRef.current.srcObject = cameraStream;
         cameraSnapshotRef.current.muted = true; // Mute the camera stream to avoid feedback
         await cameraSnapshotRef.current.play();
       }
-
     } catch (error) {
       console.log(error);
-      
+
       setError('Failed to start camera');
 
-      setPermission((prv) => ({ ...prv, camera: false }))
+      setPermission((prv) => ({ ...prv, camera: false }));
     }
-  }
+  };
 
   const takeScreenshot = async (ref: HTMLVideoElement, canvas: HTMLCanvasElement, type: string) => {
-    if (!ref || !canvas) return
+    if (!ref || !canvas) return;
 
     canvas.width = ref.videoWidth;
     canvas.height = ref.videoHeight;
@@ -184,59 +201,84 @@ const QuizPage = () => {
     const ctx = canvas.getContext('2d');
     ctx?.drawImage(ref, 0, 0, canvas.width, canvas.height);
     const imageDataURL = canvas.toDataURL('image/jpeg', 0.8);
-    const blob = dataURLtoBlob(imageDataURL)
+    const blob = dataURLtoBlob(imageDataURL);
 
-    const formData = new FormData()
-    formData.append('file', blob)
-    formData.append('timestamp', Date.now().toString())
+    const formData = new FormData();
+    formData.append('file', blob);
+    formData.append('timestamp', Date.now().toString());
 
     try {
       const urlParams = new URLSearchParams(window.location.search);
       const code = urlParams.get('code');
-      await examApi.post(`${examEndpoint.CANDIDATE_EXAM}/${params.examId}/snapshot?fileType=${type}`, formData, code as string)
+      await examApi.post(
+        `${examEndpoint.CANDIDATE_EXAM}/${params.examId}/snapshot?fileType=${type}`,
+        formData,
+        code as string
+      );
     } catch (error) {
       console.error('Error taking screenshot:', error);
     }
-  }
+  };
 
   const stopRecording = async () => {
     screenStrean.current?.getTracks().forEach((track) => {
-      track.stop()
-    })
+      track.stop();
+    });
     cameraStreamRef?.getTracks().forEach((track) => {
-      track.stop()
-    })
-  }
+      track.stop();
+    });
+  };
 
   const init = async () => {
     try {
       const success = await fetchCandidate();
-      if (!success) return
-      await Promise.allSettled([startScreenRecording(), startCamera()])
-      takeScreenshot(screenSnapshotRef.current as HTMLVideoElement, screenCanvas.current as HTMLCanvasElement, SNAPSHOT.screenshot)
-      takeScreenshot(cameraSnapshotRef.current as HTMLVideoElement, cameraCanvas.current as HTMLCanvasElement, SNAPSHOT.camera)
+      if (!success) return;
+      await Promise.allSettled([startScreenRecording(), startCamera()]);
+      takeScreenshot(
+        screenSnapshotRef.current as HTMLVideoElement,
+        screenCanvas.current as HTMLCanvasElement,
+        SNAPSHOT.screenshot
+      );
+      takeScreenshot(
+        cameraSnapshotRef.current as HTMLVideoElement,
+        cameraCanvas.current as HTMLCanvasElement,
+        SNAPSHOT.camera
+      );
 
       interval.current = setInterval(() => {
         const randomDelayMsScreen = Math.floor(Math.random() * 61) * 1000;
         const randomDelayMsCamera = Math.floor(Math.random() * 61) * 1000;
         setTimeout(() => {
-          if (screenSnapshotRef.current !== null && screenCanvas.current !== null && permission.screen) {
-            takeScreenshot(screenSnapshotRef.current as HTMLVideoElement, screenCanvas.current as HTMLCanvasElement, SNAPSHOT.screenshot)
+          if (
+            screenSnapshotRef.current !== null &&
+            screenCanvas.current !== null &&
+            permission.screen
+          ) {
+            takeScreenshot(
+              screenSnapshotRef.current as HTMLVideoElement,
+              screenCanvas.current as HTMLCanvasElement,
+              SNAPSHOT.screenshot
+            );
           }
-        }, randomDelayMsScreen)
+        }, randomDelayMsScreen);
         setTimeout(() => {
-          if (cameraSnapshotRef.current !== null && cameraCanvas.current !== null && permission.camera) {
-            takeScreenshot(cameraSnapshotRef.current as HTMLVideoElement, cameraCanvas.current as HTMLCanvasElement, SNAPSHOT.camera)
+          if (
+            cameraSnapshotRef.current !== null &&
+            cameraCanvas.current !== null &&
+            permission.camera
+          ) {
+            takeScreenshot(
+              cameraSnapshotRef.current as HTMLVideoElement,
+              cameraCanvas.current as HTMLCanvasElement,
+              SNAPSHOT.camera
+            );
           }
-        }, randomDelayMsCamera)
-      }, QUIZ_CONFIG.screenshotInterval)
-
+        }, randomDelayMsCamera);
+      }, QUIZ_CONFIG.screenshotInterval);
     } catch (error) {
       console.log(error);
-      
     }
-
-  }
+  };
 
   //======================================= Important for screenshots ===================================================
   useEffect(() => {
@@ -249,42 +291,59 @@ const QuizPage = () => {
       },
       true
     );
-    init()
+    init();
 
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
-      interval.current && clearInterval(interval.current)
-      stopRecording()
+      interval.current && clearInterval(interval.current);
+      stopRecording();
     };
   }, []);
   return (
     <div className="w-screen min-h-screen bg-gray-50">
-      {
-        error ? <TestWarning text={
-          <ul>
-            <li>{error}</li>
-          </ul>  
-        } title='Access Denied' />  
-          : loading || !candidate ? <TestLoading />
-            : (!permission.camera || !permission.screen) ? <TestWarning text={
-              <ul>
-                {!permission.screen && <li>In the screen sharing popup, select <strong>Entire Screen</strong> and then click <strong>Share</strong>. You can refresh this page </li>}
-                {!permission.camera && <li>Make sure camera is on</li>}
-              </ul>
-            } title='Permissions' />
-              : <>
-                {current_step === EXAM_STEP.BASIC_INFO && <BasicInfoForm />}
-                {current_step === EXAM_STEP.VIDEO_RECORDING && (
-                  <VideoRecordingScreen onRecordingComplete={handleRecordingComplete} videoLink={videoLink || undefined} />
-                )}
-                {current_step === EXAM_STEP.QUIZ && candidate && <ProctoredQuiz />}
-              </>
-      }
+      {error ? (
+        <TestWarning
+          text={
+            <ul>
+              <li>{error}</li>
+            </ul>
+          }
+          title="Access Denied"
+        />
+      ) : loading || !candidate ? (
+        <TestLoading />
+      ) : !permission.camera || !permission.screen ? (
+        <TestWarning
+          text={
+            <ul>
+              {!permission.screen && (
+                <li>
+                  In the screen sharing popup, select <strong>Entire Screen</strong> and then click{' '}
+                  <strong>Share</strong>. You can refresh this page{' '}
+                </li>
+              )}
+              {!permission.camera && <li>Make sure camera is on</li>}
+            </ul>
+          }
+          title="Permissions"
+        />
+      ) : (
+        <>
+          {current_step === EXAM_STEP.BASIC_INFO && <BasicInfoForm />}
+          {current_step === EXAM_STEP.VIDEO_RECORDING && (
+            <VideoRecordingScreen
+              onRecordingComplete={handleRecordingComplete}
+              videoLink={videoLink || undefined}
+            />
+          )}
+          {current_step === EXAM_STEP.QUIZ && candidate && <ProctoredQuiz />}
+        </>
+      )}
 
-      <video ref={screenSnapshotRef} className='hidden'></video>
-      <video ref={cameraSnapshotRef} className='hidden'></video>
-      <canvas ref={cameraCanvas} className='hidden'></canvas>
-      <canvas ref={screenCanvas} className='hidden'></canvas>
+      <video ref={screenSnapshotRef} className="hidden"></video>
+      <video ref={cameraSnapshotRef} className="hidden"></video>
+      <canvas ref={cameraCanvas} className="hidden"></canvas>
+      <canvas ref={screenCanvas} className="hidden"></canvas>
     </div>
   );
 };

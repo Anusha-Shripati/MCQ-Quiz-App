@@ -1,20 +1,12 @@
 'use client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import CategoryMenu from './category-menu';
 import { useRouter } from 'next/navigation';
 import { EyeIcon, Plus } from 'lucide-react';
 import { Button } from '../ui/form/button';
 import { QuestionCategory } from '@/shared/types/app';
 import { useAuthStore } from '@/store/authStore';
 
-
-export const CategoryCard = ({
-  category,
-  handleDelete,
-}: {
-  category: QuestionCategory;
-  handleDelete: (id: string) => void;
-}) => {
+export const CategoryCard = ({ category }: { category: QuestionCategory }) => {
   const router = useRouter();
   const { hasPermissionQuestionEdit } = useAuthStore();
   const isQuestionEditable = hasPermissionQuestionEdit();
@@ -36,26 +28,26 @@ export const CategoryCard = ({
     <Card className="shadow-md hover:shadow-lg transition-all duration-200">
       <CardHeader className="flex flex-row justify-between items-center border-b pb-2">
         <CardTitle className="text-lg font-semibold">{category.name}</CardTitle>
-        <div className='flex gap-2'>
-
-          {isQuestionEditable && <div className="flex items-center justify-center gap-2">
-            <Button
-              variant="outline"
-              size="default"
-              className="dark:border-gray-600 dark:text-white dark:hover:bg-gray-700"
-              onClick={handleAddQuestion}
-            >
-              <Plus className="h-4 w-4" /> Add Questions
-            </Button>
-          </div>
-          }
+        <div className="flex gap-2">
+          {isQuestionEditable && (
+            <div className="flex items-center justify-center gap-2">
+              <Button
+                variant="outline"
+                size="default"
+                className="dark:border-gray-600 dark:text-white dark:hover:bg-gray-700"
+                onClick={handleAddQuestion}
+              >
+                <Plus className="h-4 w-4" /> Add Questions
+              </Button>
+            </div>
+          )}
           {/* <CategoryMenu
               category={category}
               handleDelete={handleDelete}
               handleNavigate={handleNavigate}
             /> */}
 
-          <div className='flex items-center justify-center'>
+          <div className="flex items-center justify-center">
             <Button
               variant="outline"
               onClick={() => handleNavigate()}
@@ -66,7 +58,6 @@ export const CategoryCard = ({
             </Button>
           </div>
         </div>
-
       </CardHeader>
       <CardContent>
         <div className="space-y-3 mt-2">

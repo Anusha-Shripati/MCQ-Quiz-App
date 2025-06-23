@@ -9,7 +9,7 @@ import { QuestionCard } from '@/components/questions/questions-card';
 import CreateQuestionCard from '@/components/questions/create-question-card';
 import Pagination from '@/components/pagination';
 import { Question } from '@/shared/types/app';
-import useSWR, { mutate } from 'swr';
+import useSWR from 'swr';
 import { api, isAxiosError } from '@/lib/api';
 import toast from 'react-hot-toast';
 import { useQuestionStore } from '@/store/questionStore';
@@ -92,8 +92,7 @@ const CategoryPage = () => {
             typeof key === 'string' && key.startsWith(`/question/list?technology_id=${technology}`)
         );
       }
-    setSelectedQuestion(null);
-
+      setSelectedQuestion(null);
     } catch (error) {
       console.error('Error deleting question:', error);
       toast.error('Failed to delete question');
@@ -102,7 +101,7 @@ const CategoryPage = () => {
 
   const handleEdit = (index: number) => {
     setSelectedQuestion(index);
-    setPrvQuestion(JSON.parse(JSON.stringify(questionsData[index])))
+    setPrvQuestion(JSON.parse(JSON.stringify(questionsData[index])));
   };
 
   const currentPageStart = useMemo(
@@ -132,34 +131,36 @@ const CategoryPage = () => {
 
   const handleReset = () => {
     setQuestionsData((prv) =>
-      prv.map((item, index) =>
-        selectedQuestion == index && prvQuestion ? prvQuestion : item
-      )
+      prv.map((item, index) => (selectedQuestion == index && prvQuestion ? prvQuestion : item))
     );
   };
   const handleSave = async (question: Question) => {
     try {
-      question.options = question.options.filter(item => item.trim())
+      question.options = question.options.filter((item) => item.trim());
       const payload = {
-        options: question.options.filter(item => item.trim()),
+        options: question.options.filter((item) => item.trim()),
         technology_id: question.technology_id,
         question: question.question,
         correct_answer: question.correct_answer,
         difficulty_level: question.difficulty_level,
         type: question.type,
         meta: question.meta,
-      }
-      await api.put(`${questionEndpoint.QUESTION_BY_ID}/${question.id}`, payload)
+      };
+      await api.put(`${questionEndpoint.QUESTION_BY_ID}/${question.id}`, payload);
       setSelectedQuestion(null);
       mutate(
         (key: string) =>
           typeof key === 'string' && key.startsWith(`/question/list?technology_id=${technology}`)
       );
-      toast.success('Successfully updated')
+      toast.success('Successfully updated');
     } catch (error) {
-      toast.error(isAxiosError(error) ? (error?.response?.data?.message || 'Failed to update') : 'Failed to update')
+      toast.error(
+        isAxiosError(error)
+          ? error?.response?.data?.message || 'Failed to update'
+          : 'Failed to update'
+      );
     }
-  }
+  };
 
   return (
     <div className="h-[calc(100vh-78px)] flex flex-col px-2 py-5">

@@ -15,10 +15,9 @@ import {
   DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog';
-import { Edit, MoreVertical, EyeIcon } from 'lucide-react';
+import { MoreVertical, EyeIcon } from 'lucide-react';
 import { Button } from '../ui/form/button';
 import { QuestionCategory } from '@/shared/types/app';
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import useSWRMutation from 'swr/mutation';
 import { api } from '@/lib/api';
@@ -33,19 +32,22 @@ async function deleteCategory(url: string) {
 const CategoryMenu = ({
   category,
   handleDelete,
-  handleNavigate
+  handleNavigate,
 }: {
   category: QuestionCategory;
   handleDelete: (id: string) => void;
   handleNavigate: () => void;
 }) => {
-  const router = useRouter();
+  // const router = useRouter();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
-  const handleEditCategory = (category: string) => {
-    router.push(`/questions/create-question/${category}`);
-  };
-  const { trigger } = useSWRMutation(`${technologyEndpoint.TECHNOLOGY_BY_ID}/${category.id}`, deleteCategory);
+  // const handleEditCategory = (category: string) => {
+  //   router.push(`/questions/create-question/${category}`);
+  // };
+  const { trigger } = useSWRMutation(
+    `${technologyEndpoint.TECHNOLOGY_BY_ID}/${category.id}`,
+    deleteCategory
+  );
   const handleDeleteCategory = async () => {
     try {
       await trigger();

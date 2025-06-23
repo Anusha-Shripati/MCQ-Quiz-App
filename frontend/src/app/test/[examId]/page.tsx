@@ -264,7 +264,7 @@ const QuizPage = () => {
           <ul>
             <li>{error}</li>
           </ul>  
-        } title='Access Denied' />
+        } title='Access Denied' />  
           : loading || !candidate ? <TestLoading />
             : (!permission.camera || !permission.screen) ? <TestWarning text={
               <ul>

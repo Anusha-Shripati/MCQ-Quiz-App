@@ -105,7 +105,7 @@ function InterviewScore() {
     };
   }, [isEndReached, isLoadingMore, setSize]);
 
-  const handleSetFilter = (name: string, value: string) => {
+  const handleSetFilter = (name: string, value: string) => {  
     setFilters((prev) => ({
       ...prev,
       [name]: value,

@@ -22,42 +22,54 @@ interface VideoRecorderProps {
 // Main Component
 export const VideoRecordingScreen = ({ onRecordingComplete, videoLink }: VideoRecorderProps) => {
   const { exam, accessCode } = useExamStore();
-    const [recordingBlob, setRecordingBlob] = useState<Blob | null>(null);
-    const [recordingUrl, setRecordingUrl] = useState<string | null>(null);
-  const { isMutating, error, trigger } = useSWRMutation(`${examEndpoint.CANDIDATE_EXAM}/${exam?.id}/submit-answer`, (url: string, { arg }: { arg: {foldername:string,question_name:string,merge_chunk:boolean} }) => examApi.post(url, arg, accessCode))
+  const [recordingBlob, setRecordingBlob] = useState<Blob | null>(null);
+  const [recordingUrl, setRecordingUrl] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState<boolean>(false);
+  
+  const { trigger } = useSWRMutation(`${examEndpoint.CANDIDATE_EXAM}/${exam?.id}/submit-answer`, 
+    (url: string, { arg }: { arg: {foldername:string,question_name:string,merge_chunk:boolean} }) => 
+      examApi.post(url, arg, accessCode)
+  );
   
   const onContinue = async () => {
-
+    // If we're using an existing video, proceed immediately
     if(recordingUrl == videoLink){
       onRecordingComplete();
       return;
     }
 
-    const foldername = await uploadFileInChunks(recordingBlob as Blob);
-
-    const payload={
-      foldername,
-      merge_chunk:true,
-      question_name:'introduction'
-    }
-
-    // const formData = new FormData();
-    // formData.append('file', recordingBlob as Blob);
-    // formData.append('question_name', 'introduction');
-
-    const data = await trigger(payload);
-    if (data.success) {
+    try {
+      setIsUploading(true);
+      
+      // Upload chunks - this we need to wait for
+      const foldername = await uploadFileInChunks(recordingBlob as Blob);
+      
+      // Prepare payload for background processing
+      const payload = {
+        foldername,
+        merge_chunk: true,
+        question_name: 'introduction'
+      };
       onRecordingComplete();
-    } else {
-      console.error('Error uploading video:', error);
+      trigger(payload)
+        .catch(error => {
+          console.error('Background video processing failed:', error);
+        })
+        .finally(() => {
+          setIsUploading(false);
+        });
+    } catch (error) {
+      console.error('Error uploading video chunks:', error);
+      setIsUploading(false);
+      // Show error to user but don't block UI
     }
-
   };
 
   const handleStopRecording = (blob: Blob | null, url: string) => {
     setRecordingBlob(blob);
     setRecordingUrl(url);
-  }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
       <div className="max-w-6xl w-full grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -103,12 +115,19 @@ export const VideoRecordingScreen = ({ onRecordingComplete, videoLink }: VideoRe
           </CardHeader>
           <CardContent className="pt-6">
 
-            <VideoRecorder videoKey='introduction' onRecordingComplete={onContinue} onRecordingStop={handleStopRecording} maxTime={90} videoLink={videoLink} isLoading={isMutating}/>
-            {error && (
+            <VideoRecorder 
+              videoKey='introduction' 
+              onRecordingComplete={onContinue} 
+              onRecordingStop={handleStopRecording} 
+              maxTime={90} 
+              videoLink={videoLink} 
+              isLoading={isUploading}
+            />
+            {/* {error && (
               <div className="mt-4 text-red-600">
                 <p>Error: {error.message}</p>
               </div>
-            )}
+            )} */}
           </CardContent>
         </Card>
       </div>

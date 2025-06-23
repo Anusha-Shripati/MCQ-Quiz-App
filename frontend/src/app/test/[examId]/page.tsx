@@ -18,11 +18,16 @@ import { EXAM_STEP } from '@/types/exam.types';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { examEndpoint } from '@/lib/endpoint';
+import ScreenShareErrorModal from '@/components/test/screen-share-error';
+import FirefoxScreenSharePrompt from '@/components/test/firefox-screen-share-model';
+const MIN_WIDTH = 1920;
+const MIN_HEIGHT = 1080;
 
 const QuizPage = () => {
   const params = useParams();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const {
     current_step,
     setCurrentStep,
@@ -36,8 +41,10 @@ const QuizPage = () => {
   const router = useRouter();
 
   const [videoLink, setVideoLink] = useState<string | null>(null);
+  const [showFirefoxScreenSharePrompt, setShowFirefoxScreenSharePrompt] = useState(false);
+  const [showScreenShareErrorModal, setShowScreenShareErrorModal] = useState(false);
 
-  const screenStrean = useRef<MediaStream | null>(null);
+  const screenStream = useRef<MediaStream | null>(null);
   const screenSnapshotRef = useRef<HTMLVideoElement | null>(null);
   const cameraSnapshotRef = useRef<HTMLVideoElement | null>(null);
   const cameraCanvas = useRef<HTMLCanvasElement | null>(null);
@@ -117,7 +124,7 @@ const QuizPage = () => {
 
       console.error('Error fetching candidate:', err);
       setError('Failed to fetch candidate data');
-      screenStrean.current?.getTracks().forEach((track) => {
+      screenStream.current?.getTracks().forEach((track) => {
         track.stop();
       });
       cameraStreamRef?.getTracks().forEach((track) => {
@@ -131,39 +138,125 @@ const QuizPage = () => {
     setCurrentStep(EXAM_STEP.QUIZ);
   };
 
+  const isFirefox = () => {
+    return typeof window !== 'undefined' && navigator.userAgent.indexOf('Firefox') !== -1;
+  };
+
+  const getBrowser = () => {
+    const userAgent = navigator.userAgent;
+    if (/Chrome/.test(userAgent) && /Google Inc/.test(navigator.vendor)) return 'chrome';
+    if (/Firefox/.test(userAgent)) return 'firefox';
+    if (/Safari/.test(userAgent) && /Apple Computer/.test(navigator.vendor)) return 'safari';
+    return 'unknown';
+  };
+
+  const validateEntireScreenShare = () => {
+    const track = screenStream.current?.getVideoTracks()[0];
+    if (!track) return false;
+
+    const settings = track.getSettings();
+    console.log('Screen share settings:', settings);
+    const { width = 0, height = 0 } = settings;
+
+    // You can log for debugging
+    console.log('Screen share resolution:', width, height);
+
+    const isLikelyFullScreen = width >= MIN_WIDTH && height >= MIN_HEIGHT;
+    return isLikelyFullScreen;
+  };
   const startScreenRecording = async () => {
     try {
-      screenStrean.current = await navigator.mediaDevices.getDisplayMedia({
-        video: {
-          displaySurface: 'monitor',
-        },
-        audio: false,
-      });
+      // For Firefox, we need user interaction to trigger the screen sharing dialog
+      if (isFirefox() && !screenStream.current) {
+        setShowFirefoxScreenSharePrompt(true);
+        return;
+      }
+
+      // Different approach based on browser
+      if (getBrowser() === 'firefox') {
+        console.log('Firefox detected, requesting screen sharing');
+        screenStream.current = await navigator.mediaDevices.getDisplayMedia({
+          video: true,
+          audio: false,
+        });
+      } else {
+        screenStream.current = await navigator.mediaDevices.getDisplayMedia({
+          video: {
+            displaySurface: 'monitor',
+          },
+          audio: false,
+        });
+      }
+
       setPermission((prv) => ({ ...prv, screen: true }));
-      const track = screenStrean.current.getVideoTracks()[0];
+      const track = screenStream.current.getVideoTracks()[0];
       const settings = track.getSettings();
       track.onended = () => {
         stopRecording();
         setPermission((prv) => ({ ...prv, screen: false }));
       };
 
-      if (settings.displaySurface == 'monitor') {
+      if (settings.displaySurface === 'monitor' || !settings.displaySurface) {
         setPermission((prv) => ({ ...prv, screen: true }));
       } else {
         setPermission((prv) => ({ ...prv, screen: false }));
-        screenStrean.current.getTracks().forEach((track) => track.stop());
+        screenStream.current.getTracks().forEach((track) => track.stop());
         return;
       }
+
       if (screenSnapshotRef.current) {
-        screenSnapshotRef.current.srcObject = screenStrean.current;
+        screenSnapshotRef.current.srcObject = screenStream.current;
         await screenSnapshotRef.current.play();
       }
-    } catch (error) {
-      console.log(error);
 
+      setShowFirefoxScreenSharePrompt(false);
+    } catch (error) {
+      console.log('Screen sharing error:', error);
       setPermission((prv) => ({ ...prv, screen: false }));
     }
   };
+
+  const handleFirefoxScreenShare = async () => {
+    try {
+      console.log('Firefox share button clicked');
+      // We need to call getDisplayMedia directly in the event handler for Firefox
+      if (getBrowser() === 'firefox') {
+        screenStream.current = await navigator.mediaDevices.getDisplayMedia({
+          video: true,
+          audio: false,
+        });
+        const isFullScreen = validateEntireScreenShare();
+        if (!isFullScreen) {
+          // Stop tracks if not entire screen
+          screenStream.current.getTracks().forEach((track) => track.stop());
+          setPermission((prev) => ({ ...prev, screen: false }));
+
+          // Show error modal instead of toast
+          setShowScreenShareErrorModal(true);
+          return;
+        }
+        setPermission((prv) => ({ ...prv, screen: true }));
+        const track = screenStream.current.getVideoTracks()[0];
+        track.onended = () => {
+          stopRecording();
+          setPermission((prv) => ({ ...prv, screen: false }));
+        };
+
+        if (screenSnapshotRef.current) {
+          screenSnapshotRef.current.srcObject = screenStream.current;
+          await screenSnapshotRef.current.play();
+        }
+
+        setShowFirefoxScreenSharePrompt(false);
+      } else {
+        startScreenRecording();
+      }
+    } catch (error) {
+      console.log('Firefox screen share error:', error);
+      setPermission((prv) => ({ ...prv, screen: false }));
+    }
+  };
+
   const startCamera = async () => {
     try {
       const cameraStream = await navigator.mediaDevices.getUserMedia({
@@ -221,7 +314,7 @@ const QuizPage = () => {
   };
 
   const stopRecording = async () => {
-    screenStrean.current?.getTracks().forEach((track) => {
+    screenStream.current?.getTracks().forEach((track) => {
       track.stop();
     });
     cameraStreamRef?.getTracks().forEach((track) => {
@@ -229,21 +322,63 @@ const QuizPage = () => {
     });
   };
 
+  const requestFullscreen = () => {
+    try {
+      if (document.documentElement.requestFullscreen) {
+        document.documentElement.requestFullscreen()
+          .then(() => {
+            console.log('Entered fullscreen mode');
+            setIsFullscreen(true);
+          })
+          .catch(err => {
+            console.error('Error attempting to enable fullscreen:', err);
+          });
+      } else {
+        console.log('Fullscreen API not supported');
+      }
+    } catch (error) {
+      console.error('Error requesting fullscreen:', error);
+    }
+  };
+
+  const handleFullscreenChange = () => {
+    const isCurrentlyFullscreen = document.fullscreenElement !== null;
+    setIsFullscreen(isCurrentlyFullscreen);
+    
+    // If user exited fullscreen, try to re-enter
+    if (!isCurrentlyFullscreen && !error) {
+      // Small delay to prevent immediate re-trigger
+      setTimeout(() => {
+        requestFullscreen();
+      }, 1000);
+    }
+  };
+
   const init = async () => {
     try {
       const success = await fetchCandidate();
       if (!success) return;
-      await Promise.allSettled([startScreenRecording(), startCamera()]);
-      takeScreenshot(
-        screenSnapshotRef.current as HTMLVideoElement,
-        screenCanvas.current as HTMLCanvasElement,
-        SNAPSHOT.screenshot
-      );
+      await startCamera();
+
+      if (!isFirefox()) {
+        await startScreenRecording();
+      } else {
+        setShowFirefoxScreenSharePrompt(true);
+      }
+
       takeScreenshot(
         cameraSnapshotRef.current as HTMLVideoElement,
         cameraCanvas.current as HTMLCanvasElement,
         SNAPSHOT.camera
       );
+
+      if (permission.screen) {
+        takeScreenshot(
+          screenSnapshotRef.current as HTMLVideoElement,
+          screenCanvas.current as HTMLCanvasElement,
+          SNAPSHOT.screenshot
+        );
+      }
 
       interval.current = setInterval(() => {
         const randomDelayMsScreen = Math.floor(Math.random() * 61) * 1000;
@@ -291,16 +426,73 @@ const QuizPage = () => {
       },
       true
     );
+    
+    // Add fullscreen change event listener
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    
+    // Request fullscreen when component mounts
+    if (typeof window !== 'undefined') {
+      // Small delay to ensure the page is fully loaded
+      setTimeout(() => {
+        requestFullscreen();
+      }, 1000);
+    }
+    
     init();
 
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
       interval.current && clearInterval(interval.current);
       stopRecording();
     };
   }, []);
+
+  // Add a reminder for fullscreen if user exits
+  useEffect(() => {
+    if (!isFullscreen && !loading && !error) {
+      const timer = setTimeout(() => {
+        requestFullscreen();
+      }, 5000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isFullscreen, loading, error]);
+
   return (
     <div className="w-screen min-h-screen bg-gray-50">
+      {!isFullscreen && !loading && !error && (
+        <div className="fixed top-0 left-0 right-0 bg-red-600 text-white py-2 px-4 text-center z-50 flex items-center justify-center">
+          <svg 
+            xmlns="http://www.w3.org/2000/svg" 
+            fill="none" 
+            viewBox="0 0 24 24" 
+            strokeWidth={1.5} 
+            stroke="currentColor" 
+            className="w-5 h-5 mr-2"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
+          </svg>
+          Fullscreen mode is required for this exam. 
+          <button 
+            onClick={requestFullscreen}
+            className="ml-4 bg-white text-red-600 px-3 py-1 rounded-md font-medium hover:bg-gray-100 transition-colors"
+          >
+            Enter Fullscreen
+          </button>
+        </div>
+      )}
+      
+      {showFirefoxScreenSharePrompt && (
+        <FirefoxScreenSharePrompt handleFirefoxScreenShare={handleFirefoxScreenShare} />
+      )}
+      {showScreenShareErrorModal && (
+        <ScreenShareErrorModal
+          setShowScreenShareErrorModal={setShowScreenShareErrorModal}
+          setShowFirefoxScreenSharePrompt={setShowFirefoxScreenSharePrompt}
+        />
+      )}
+
       {error ? (
         <TestWarning
           text={
@@ -312,14 +504,14 @@ const QuizPage = () => {
         />
       ) : loading || !candidate ? (
         <TestLoading />
-      ) : !permission.camera || !permission.screen ? (
+      ) : !permission.camera || (!permission.screen && !showFirefoxScreenSharePrompt) ? (
         <TestWarning
           text={
             <ul>
-              {!permission.screen && (
+              {!permission.screen && !showFirefoxScreenSharePrompt && (
                 <li>
                   In the screen sharing popup, select <strong>Entire Screen</strong> and then click{' '}
-                  <strong>Share</strong>. You can refresh this page{' '}
+                  <strong>Share</strong>. You can refresh this page.{' '}
                 </li>
               )}
               {!permission.camera && <li>Make sure camera is on</li>}

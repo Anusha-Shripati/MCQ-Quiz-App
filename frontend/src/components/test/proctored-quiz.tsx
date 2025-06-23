@@ -740,7 +740,3 @@ export default function ProctoredQuiz() {
   );
 
 }
-
-
-
-

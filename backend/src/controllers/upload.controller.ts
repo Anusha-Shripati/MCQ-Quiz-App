@@ -26,7 +26,6 @@ export class UploadController {
         generateResponse(res, 400, {}, false, 'No file uploaded');
         return;
       }
-      console.log('req.file', req.file);
       const fileData = await uploadService.processFile(req.file);
       generateResponse(res, 200, fileData, true, 'File uploaded successfully');
       return;

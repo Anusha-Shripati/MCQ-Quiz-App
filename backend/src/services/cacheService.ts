@@ -1,9 +1,9 @@
-// import client from '../lib/redis'
+import client from '../lib/redis'
 
 
 export class CacheService {
     async setKey(key: string, data: any, limit: number) {
-        // await client.set(key, JSON.stringify(data), 'EX', limit)
+        await client.set(key, JSON.stringify(data), 'EX', limit)
     }
 
     async getKey(key: string) {

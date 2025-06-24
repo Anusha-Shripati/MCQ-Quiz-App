@@ -14,6 +14,7 @@ import { connectToDatabase } from '../db/prisma.client';
 import { logger } from '../config/logger';
 import golbalRouter from '../routes';
 import path from 'path';
+import { registerMergeQueueWorker } from '../workers/mergeWorker';
 
 class ExpressAppProvider {
   public app: Express;
@@ -94,6 +95,7 @@ class ExpressAppProvider {
   public async startServer(): Promise<void> {
     try {
       await connectToDatabase();
+      registerMergeQueueWorker(); 
       this.app.listen(this.port, () => {
         // registerCreateArticleWorkerEvents();
         console.log(`Console Server is running on http://localhost:${this.port}`);

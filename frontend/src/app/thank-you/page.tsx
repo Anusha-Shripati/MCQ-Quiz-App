@@ -5,7 +5,9 @@ import { FC, useEffect } from 'react';
 
 const ThankYouPage: FC = () => {
   const {cameraStreamRef} = useExamStore()
-  useEffect(() => { 
+  useEffect(() => {
+    if (document.fullscreenElement) document.exitFullscreen();
+
     cameraStreamRef?.getTracks().forEach((track)=>{
       track.stop()
     },[])

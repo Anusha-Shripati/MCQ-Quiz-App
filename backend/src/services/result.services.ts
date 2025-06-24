@@ -16,21 +16,18 @@ interface ResultParams {
   experienceTo?: string;
 }
 export class ResultService {
+  private cacheService;
+  private uploadService;
+  private cacheTime = 60;
 
-    private cacheService;
-    private uploadService;
-    private cacheTime = 60;
-  
-    constructor() {
-      this.cacheService = new CacheService()
-      this.uploadService = new UploadService()
-    }
-  
+  constructor() {
+    this.cacheService = new CacheService();
+    this.uploadService = new UploadService();
+  }
+
   get = async (id: string) => {
     const data = await this.cacheService.getKey(`result:${id}`);
-    if (data) return JSON.parse(data)
-
-
+    if (data) return JSON.parse(data);
 
     const result = await prisma.results.findFirst({
       where: { id: id },
@@ -62,34 +59,18 @@ export class ResultService {
     });
 
     if (result) {
+      console.log('Result found:', result);
       const passCriteria = result.exam?.assessment?.pass_criteria;
       const isPassed = result.percentage >= passCriteria;
 
-      await Promise.all(result.answers.map(async(answer) => {
-        if (answer.question_name === 'introduction' && !answer.user_answer[0].includes('http')) {
-          console.log('Merging chunks for introduction question');
-
-          const file = await this.uploadService.mergeChunk(answer.user_answer[0], answer.exam_id);
-          const updatedUserAnswer = [typeof file === 'string' ? file : file.path];
-
-          await prisma.answers.update({
-            where: { id: answer.id },
-            data: { user_answer: updatedUserAnswer }
-          });
-          
-          answer.user_answer = updatedUserAnswer;
-        }
-        if (
-          answer?.question?.options &&
-          Array.isArray(answer.question.options)
-        ) {
-
+      result.answers.map((answer) => {
+        if (answer?.question?.options && Array.isArray(answer.question.options)) {
           answer.question.options = answer.question.options.filter(
             (option) => typeof option === 'string' && option.trim() !== ''
           );
         }
-      }));
-      
+      });
+
       return {
         ...result,
         is_passed: isPassed,
@@ -97,17 +78,14 @@ export class ResultService {
       };
     }
 
-
-    await this.cacheService.setKey(`question:${id}`, result, this.cacheTime)
-    return result
+    await this.cacheService.setKey(`question:${id}`, result, this.cacheTime);
+    return result;
   };
 
   list = async (params: ResultParams) => {
-
-
-    const key = this.cacheService.generateKey('questions', params)
+    const key = this.cacheService.generateKey('questions', params);
     const data = await this.cacheService.getKey(key);
-    if (data) return JSON.parse(data)
+    if (data) return JSON.parse(data);
 
     const page = params.page ? Number(params.page) : 1;
     const limit = params.limit ? Number(params.limit) : 10;
@@ -257,9 +235,9 @@ export class ResultService {
       };
     });
 
-    const response= { list: processedResults, total, page, limit };
+    const response = { list: processedResults, total, page, limit };
 
-    await this.cacheService.setKey(key, response, this.cacheTime)
-    return response
+    await this.cacheService.setKey(key, response, this.cacheTime);
+    return response;
   };
 }

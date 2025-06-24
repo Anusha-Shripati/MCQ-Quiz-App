@@ -318,21 +318,21 @@ export default function ProctoredQuiz() {
     }));
   }, [answers]);
 
-  const submitQuiz = async () => {
-    if (isSubmitting) return;
-    try {
-      await handleNextQuestion();
-      setIsSubmitting(true);
-      await submitTrigger();
-      
-      router.push('/thank-you');
-    } catch (error) {
-      console.error('Error submitting quiz:', error);
-      setIsSubmitting(false);
+const submitQuiz = async () => {
+  if (isSubmitting) return;
+  try {
+        await handleNextQuestion();
+    setIsSubmitting(true);
+    await submitTrigger();
+    
+    router.push('/thank-you');
+  } catch (error) {
+    console.error('Error submitting quiz:', error);
+    setIsSubmitting(false);
       setShowAlert(true)
       setAlertMessage(isAxiosError(error) ? error.response?.data.message : 'An error occurred')
-    }
-  };
+  }
+};
 
   // Also update the timer end handler to send email on auto-submit
   const handleTimerEnd = async () => {

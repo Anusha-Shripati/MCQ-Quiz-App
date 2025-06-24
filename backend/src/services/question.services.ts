@@ -24,12 +24,11 @@ interface ImportedQuestion {
 }
 
 export class QuestionService {
-
   private cacheService;
   private cacheTime = 60;
 
   constructor() {
-    this.cacheService = new CacheService()
+    this.cacheService = new CacheService();
   }
 
   async getQuestions(filters: {
@@ -39,10 +38,9 @@ export class QuestionService {
     difficulty_level?: string;
     search?: string;
   }) {
-
-    const key = this.cacheService.generateKey('questions', filters)
+    const key = this.cacheService.generateKey('questions', filters);
     const data = await this.cacheService.getKey(key);
-    if (data) return JSON.parse(data)
+    if (data) return JSON.parse(data);
 
     const query: Prisma.QuestionsWhereInput = {
       deleted_at: null,
@@ -69,17 +67,16 @@ export class QuestionService {
     }
     const response = prisma.questions.findMany({ include: { technology: true } });
 
-    await this.cacheService.setKey(key, response, this.cacheTime)
-    return response
+    await this.cacheService.setKey(key, response, this.cacheTime);
+    return response;
   }
 
   async getQuestionById(id: string): Promise<Questions | null> {
-
-    const data = await this.cacheService.getKey(`question:${id}`)
-    if (data) JSON.stringify(data)
+    const data = await this.cacheService.getKey(`question:${id}`);
+    if (data) JSON.stringify(data);
     const response = prisma.questions.findUnique({ where: { id } });
-    await this.cacheService.setKey(`question:${id}`, response, this.cacheTime)
-    return response
+    await this.cacheService.setKey(`question:${id}`, response, this.cacheTime);
+    return response;
   }
 
   async createQuestion(data: QuestionsPayload): Promise<Questions> {
@@ -93,17 +90,24 @@ export class QuestionService {
         include: {
           exam: {
             include: {
-              assessment: true
-            }
-          }
-        }
+              assessment: true,
+            },
+          },
+        },
       });
-      
+
       if (examQuestion) {
-        const assessmentName = examQuestion.exam.assessment.name;
-        throw new Error(`This question is associated with assessment "${assessmentName}". Please delete the assessment first or remove this question from the assessment.`);
+        if (!examQuestion.exam.assessment.deleted_at) {
+          const assessmentName = examQuestion.exam.assessment.name;
+          throw new Error(
+            `This question is associated with assessment "${assessmentName}". Please delete the assessment first or remove this question from the assessment.`
+          );
+        }
       }
-      
+      await prisma.exam_questions.deleteMany({
+        where: { question_id: questionId },
+      });
+
       return prisma.questions.delete({
         where: {
           id: questionId,
@@ -128,9 +132,9 @@ export class QuestionService {
     difficulty_level?: string;
     search?: string;
   }) {
-    const key = this.cacheService.generateKey('questions:technology', filters)
+    const key = this.cacheService.generateKey('questions:technology', filters);
     const data = await this.cacheService.getKey(key);
-    if (data) return JSON.parse(data)
+    if (data) return JSON.parse(data);
 
     const query: Prisma.QuestionsWhereInput = {
       technology_id: filters.technology_id ? filters.technology_id : undefined,
@@ -167,8 +171,8 @@ export class QuestionService {
       totalPages,
       technology,
     };
-    await this.cacheService.setKey(key, response, this.cacheTime)
-    return response
+    await this.cacheService.setKey(key, response, this.cacheTime);
+    return response;
   }
 
   async downloadQuestionFile(): Promise<Buffer> {
@@ -178,16 +182,16 @@ export class QuestionService {
         questions: {
           where: { deleted_at: null },
           take: 1,
-        }
+        },
       },
       orderBy: {
         name: 'asc',
-      }
+      },
     });
 
     const sampleQuestionsData = technologiesWithQuestions
-      .filter(tech => tech.questions.length > 0)
-      .map(tech => {
+      .filter((tech) => tech.questions.length > 0)
+      .map((tech) => {
         const question = tech.questions[0];
         return {
           question: question.question,
@@ -224,10 +228,13 @@ export class QuestionService {
     return buffer;
   }
 
-  async importQuestionsFromXlsx(fileBuffer: Buffer, technologyId: string): Promise<{ 
-    totalImported: number,
-    errors: string[],
-    technologyName?: string 
+  async importQuestionsFromXlsx(
+    fileBuffer: Buffer,
+    technologyId: string
+  ): Promise<{
+    totalImported: number;
+    errors: string[];
+    technologyName?: string;
   }> {
     const workbook = XLSX.read(fileBuffer, { type: 'buffer' });
     const sheetName = workbook.SheetNames[0];
@@ -239,27 +246,27 @@ export class QuestionService {
     if (questions.length === 0) {
       return {
         totalImported: 0,
-        errors: ['The uploaded file contains no data or has an incorrect format']
+        errors: ['The uploaded file contains no data or has an incorrect format'],
       };
     }
-    
+
     const technology = await prisma.technology.findUnique({
-      where: { id: technologyId }
+      where: { id: technologyId },
     });
-    
+
     if (!technology) {
       return {
         totalImported: 0,
-        errors: [`Technology with ID ${technologyId} not found`]
+        errors: [`Technology with ID ${technologyId} not found`],
       };
     }
-    
+
     const errors: string[] = [];
-    
-    for (const [index, row] of questions.entries()) { 
-      const rowNum = index + 2; 
-      
-      try { 
+
+    for (const [index, row] of questions.entries()) {
+      const rowNum = index + 2;
+
+      try {
         if (!row.question || String(row.question).trim() === '') {
           errors.push(`Row ${rowNum}: Missing question. This field is required.`);
         }
@@ -280,13 +287,13 @@ export class QuestionService {
         let originalOptionsArray: string[] = [];
         if (row.options) {
           const optionsString = String(row.options);
-          originalOptionsArray = optionsString.split(',').map(opt => opt.trim());
-          
+          originalOptionsArray = optionsString.split(',').map((opt) => opt.trim());
+
           // Process options for storage
           optionsArray = optionsString
             .split(',')
-            .map(opt => opt.trim().toLowerCase().replace(/\s+/g, ' '));
-          
+            .map((opt) => opt.trim().toLowerCase().replace(/\s+/g, ' '));
+
           if (optionsArray.length < 4) {
             errors.push(`Row ${rowNum}: Options must contain at least 4 comma-separated values.`);
           }
@@ -298,7 +305,7 @@ export class QuestionService {
           let correctAnswersArray: string[];
 
           if (correctAnswer.includes(',')) {
-            correctAnswersArray = correctAnswer.split(',').map(ans => ans.trim());
+            correctAnswersArray = correctAnswer.split(',').map((ans) => ans.trim());
           } else {
             correctAnswersArray = [correctAnswer.trim()];
           }
@@ -313,7 +320,9 @@ export class QuestionService {
             const ansIndex = parseInt(answer, 10);
             if (ansIndex < 0 || ansIndex >= optionsArray.length) {
               console.log(ansIndex, optionsArray.length);
-              errors.push(`Row ${rowNum}: Correct answer index ${ansIndex} is out of range. Must be between 0 and ${optionsArray.length - 1}.`);
+              errors.push(
+                `Row ${rowNum}: Correct answer index ${ansIndex} is out of range. Must be between 0 and ${optionsArray.length - 1}.`
+              );
             }
           }
         }
@@ -323,7 +332,9 @@ export class QuestionService {
           const difficultyLevel = String(row.difficulty_level).toLowerCase();
 
           if (!validDifficultyLevels.includes(difficultyLevel)) {
-            errors.push(`Row ${rowNum}: Invalid difficulty level "${row.difficulty_level}". Must be one of: easy, medium, hard`);
+            errors.push(
+              `Row ${rowNum}: Invalid difficulty level "${row.difficulty_level}". Must be one of: easy, medium, hard`
+            );
           }
         }
       } catch (error) {
@@ -336,7 +347,7 @@ export class QuestionService {
     if (errors.length > 0) {
       return {
         totalImported: 0,
-        errors
+        errors,
       };
     }
 
@@ -347,13 +358,13 @@ export class QuestionService {
       await prisma.$transaction(async (tx) => {
         for (const row of questions) {
           const optionsString = String(row.options);
-          const optionsArray = optionsString.split(',').map(opt => opt.trim());
+          const optionsArray = optionsString.split(',').map((opt) => opt.trim());
 
           const correctAnswer = String(row.correct_answer);
           let correctAnswersIndexes: string[];
 
           if (correctAnswer.includes(',')) {
-            correctAnswersIndexes = correctAnswer.split(',').map(ans => ans.trim());
+            correctAnswersIndexes = correctAnswer.split(',').map((ans) => ans.trim());
           } else {
             correctAnswersIndexes = [correctAnswer.trim()];
           }
@@ -366,11 +377,11 @@ export class QuestionService {
               question: String(row.question),
               correct_answer: correctAnswersIndexes,
               options: optionsArray,
-              time: "60",
+              time: '60',
               difficulty_level: difficultyLevel as 'easy' | 'medium' | 'hard',
               type: 'mcq',
-              meta: {}
-            }
+              meta: {},
+            },
           });
 
           totalImported++;
@@ -379,16 +390,15 @@ export class QuestionService {
 
       return {
         totalImported,
-        technologyName: technology.name,  // Include technology name in successful response
-        errors: []
+        technologyName: technology.name, // Include technology name in successful response
+        errors: [],
       };
-
     } catch (error) {
       console.error('Import transaction failed:', error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error during import';
       return {
         totalImported: 0,
-        errors: [`Transaction failed: ${errorMessage}`]
+        errors: [`Transaction failed: ${errorMessage}`],
       };
     }
   }

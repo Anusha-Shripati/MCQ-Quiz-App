@@ -67,7 +67,7 @@ import { Button } from '../ui/form/button';
                   </div>}
             {!isLoading && <>
             <Video className="w-5 h-5 mr-2" />
-            Continue
+            Submit Introduction and Start Exam
             </>}
           </Button>
         </div>

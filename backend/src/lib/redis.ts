@@ -1,8 +1,19 @@
-// import Redis from 'ioredis'
+import Redis from 'ioredis'
+import { logger } from '../config/logger'
 
-// const redis = new Redis({port: 6379});
+const redis = new Redis({
+  host: process.env.REDIS_HOST || 'localhost',
+  port: process.env.REDIS_PORT ? Number(process.env.REDIS_PORT) : 6379,
+  maxRetriesPerRequest: null
+});
 
-// redis.on("error", (err) => console.error("Redis connection error:", err));
+redis.on("connect", () => {
+  logger.info("Redis connected successfully!");
+});
 
-// export default redis 
+redis.on("error", (err) => {
+  logger.error("Redis connection error:", err.message);
+});
+
+export default redis
 

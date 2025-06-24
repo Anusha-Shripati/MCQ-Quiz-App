@@ -54,7 +54,7 @@ export const QuestionCard = ({
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const { hasPermissionQuestionEdit } = useAuthStore();
   const isQuestionEditable = hasPermissionQuestionEdit();
-
+  console.log('QuestionCard');
   return (
     <>
       <Card className="dark:bg-gray-700 dark:text-gray-200 bg-gray-100 text-gray-800 mb-4 p-4 shadow-sm w-full h-card md:h-auto">

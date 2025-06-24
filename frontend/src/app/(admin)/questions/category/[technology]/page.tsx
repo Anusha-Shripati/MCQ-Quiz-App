@@ -93,9 +93,14 @@ const CategoryPage = () => {
         );
       }
       setSelectedQuestion(null);
+      toast.success('Successfully deleted question.');
     } catch (error) {
       console.error('Error deleting question:', error);
-      toast.error('Failed to delete question');
+      toast.error(
+        isAxiosError(error)
+          ? error?.response?.data?.message || 'Failed to delete question'
+          : 'Failed to delete question'
+      );
     }
   };
 
@@ -185,6 +190,9 @@ const CategoryPage = () => {
         </div>
 
         <div className="flex-grow overflow-y-auto px-4 py-2 space-y-4">
+          {questionsData.length === 0 && (
+            <div className="flex justify-center items-center h-80 dark:text-white-500">No questions found. Please add some questions.</div>
+          )}
           {questionsData.map((question: Required<Question>, index) => (
             <React.Fragment key={index}>
               {selectedQuestion !== index && (

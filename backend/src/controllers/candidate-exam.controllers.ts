@@ -4,6 +4,7 @@ import { generateResponse } from '../utils/generateResponse';
 import { UploadService } from '../services/upload.services';
 import path from 'path';
 import fs from 'fs'
+import { mergeQueue } from '../queue/mergeQueue';
 export class CandidateExamController {
   constructor(
     private candidateExamService: CandidateExamService,
@@ -83,32 +84,43 @@ export class CandidateExamController {
     }
   };
 
-  submitAnswer = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const candidate_id = req.candidateInfo?.candidateId;
-      const exam_id = req.candidateInfo?.examId as string;
-      let file;
+submitAnswer = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const candidate_id = req.candidateInfo?.candidateId;
+    const exam_id = req.candidateInfo?.examId as string;
 
-      if (req.body.merge_chunk) {
-        // const file = await this.uploadService.mergeChunk(req.body.foldername, exam_id);
-        req.body.user_answer = [req.body.foldername];
-      }
-      if (!candidate_id) throw new Error('Candidate not authenticated');
+    if (!candidate_id) throw new Error('Candidate not authenticated');
 
-      const answer = await this.candidateExamService.submitAnswer(exam_id, candidate_id, {
-        ...req.body,
-        file,
+    let file;
+
+    if (req.body.merge_chunk) {
+      // Enqueue merge task
+      await mergeQueue.add('mergeChunk', {
+        foldername: req.body.foldername,
+        exam_id,
+        candidate_id,
+        body: req.body,
       });
-      const response = {
-        message: 'Answer submitted successfully',
-        answer,
-      };
-
-      generateResponse(res, 200, response, true, response.message);
-    } catch (error) {
-      next(error);
+      console.log('Merge task added to queue');
+      return generateResponse(
+        res,
+        202,
+        { message: 'Merging scheduled. Answer will be submitted shortly.' },
+        true
+      );
     }
-  };
+
+    // If no merge required, submit directly
+    const answer = await this.candidateExamService.submitAnswer(exam_id, candidate_id, {
+      ...req.body,
+      file,
+    });
+
+    generateResponse(res, 200, { message: 'Answer submitted successfully', answer }, true);
+  } catch (error) {
+    next(error);
+  }
+};
   resetAnswer = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const candidate_id = req.candidateInfo?.candidateId;

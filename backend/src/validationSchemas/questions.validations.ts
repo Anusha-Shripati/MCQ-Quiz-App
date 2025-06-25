@@ -7,15 +7,15 @@ export const questionsSchema = {
         'string.empty': 'Technology is required',
         'string.uuid': 'Invalid Technology Id format',
       }),
-      question: Joi.string()
-        .allow('')
-        .when('type', {
-          is: 'video',
-          then: Joi.optional(),
-          otherwise: Joi.required().messages({
-            'string.empty': 'Question is required',
-          }),
-        }),
+      question: Joi.string().required(),
+        // .allow('')
+        // .when('type', {
+        //   is: 'video',
+        //   then: Joi.optional(),
+        //   otherwise: Joi.required().messages({
+        //     'string.empty': 'Question is required',
+        //   }),
+        // }),
       correct_answer: Joi.when('type', {
         is: 'code_snippet',
         then: Joi.any().optional(),
@@ -23,7 +23,9 @@ export const questionsSchema = {
           'string.empty': 'Correct answer is required',
         }),
       }),
-      options: Joi.array().items(Joi.string()),
+      options: Joi.array().items(Joi.string()).min(4).messages({
+        'array.min': 'At least 4 options are required',
+      }),
       // time: Joi.string().required().messages({
       //   'string.empty': 'Time is required',
       // }),
@@ -65,15 +67,15 @@ export const questionsSchema = {
         'string.empty': 'Technology is required',
         'string.uuid': 'Invalid Technology Id format',
       }),
-      question: Joi.string()
-        .allow('')
-        .when('type', {
-          is: 'video',
-          then: Joi.optional(),
-          otherwise: Joi.required().messages({
-            'string.empty': 'Question is required',
-          }),
-        }),
+      question: Joi.string().required(),
+        // .allow('')
+        // .when('type', {
+        //   is: 'video',
+        //   then: Joi.optional(),
+        //   otherwise: Joi.required().messages({
+        //     'string.empty': 'Question is required',
+        //   }),
+        // }),
       correct_answer: Joi.when('type', {
         is: 'code_snippet',
         then: Joi.any().optional(),
@@ -81,7 +83,9 @@ export const questionsSchema = {
           'string.empty': 'Correct answer is required',
         }),
       }),
-      options: Joi.array().items(Joi.string()),
+      options: Joi.array().items(Joi.string()).min(4).messages({
+        'array.min': 'At least 4 options are required',
+      }),
       // time: Joi.string().required().messages({
       //   'string.empty': 'Time is required',
       // }),

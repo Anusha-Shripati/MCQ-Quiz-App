@@ -219,7 +219,10 @@ const CategoryPage = () => {
                   technologyId={technology as string}
                   editQuestion={true}
                   onSave={() => handleSave(question)}
-                  onCancel={() => setSelectedQuestion(null)}
+                  onCancel={() => {
+                    handleReset();
+                    setSelectedQuestion(null)}
+                  }
                 />
               )}
             </React.Fragment>

@@ -20,8 +20,6 @@ export class UserController {
     try {
       const { email, password } = req.body;
 
-      console.log('EMAIL', email);
-
       const user = await userService.findUserByEmail(email);
       if (!user) {
         return generateResponse(res, 400, {}, false, 'User not found!');
@@ -31,7 +29,7 @@ export class UserController {
       if (!isPasswordValid) {
         return generateResponse(res, 400, {}, false, 'Invalid password!');
       }
-      if( user.deleted_at) {
+      if (user.deleted_at) {
         return generateResponse(res, 400, {}, false, 'User is deleted!');
       }
       if (!user.role_id) {
@@ -49,26 +47,33 @@ export class UserController {
   create = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const payload: UserPayload = req.body;
-
       const user = await userService.findUserByEmail(payload.email);
+      const hashedPassword = await encryptStringCrypt(payload.password);
       if (user) {
         if (user.deleted_at) {
-          console.log('User is deleted, updating user');
-          const hashedPassword = await encryptStringCrypt(payload.password);
-          let updatedUser = await userService.updateUser(user.id, {
-            email: payload.email,
-            name: payload.name,
-            role_id: payload.role_id,
-            password: hashedPassword,
-            deletedAt: null,
-          });
-          return generateResponse(res, 200, updatedUser, true, 'User created successfully!');
+          try {
+            const updatedUser = await userService.updateUser(user.id, {
+              email: payload.email,
+              name: payload.name,
+              role_id: payload.role_id,
+              password: hashedPassword,
+              deleted_at: null,
+            });
+            return generateResponse(res, 200, updatedUser, true, 'User restored successfully!');
+          } catch (error) {
+            console.error('Error restoring user:', error);
+            return generateResponse(
+              res,
+              500,
+              {},
+              false,
+              'Failed to restore user. Please try again.'
+            );
+          }
         } else {
           return generateResponse(res, 400, {}, false, 'User already exists');
         }
       }
-
-      const hashedPassword = await encryptStringCrypt(payload.password);
 
       const newUser = await userService.createUser({
         email: payload.email,
@@ -78,8 +83,9 @@ export class UserController {
         name: payload.name,
       });
 
-      generateResponse(res, 200, newUser, true, 'User created successfully!');
+      return generateResponse(res, 200, newUser, true, 'User created successfully!');
     } catch (error) {
+      console.error('Error creating user:', error);
       next(error);
     }
   };
@@ -95,11 +101,38 @@ export class UserController {
       }
 
       if (payload.email && payload.email !== user.email) {
-        const duplicateUser = await userService.findUserByEmail(payload.email);
+        const duplicateUser = await userService.findUserByEmailForUpdate(payload.email);
         if (duplicateUser) {
-          return generateResponse(res, 400, {}, false, 'Email is already exists!');
+          return generateResponse(res, 400, {}, false, 'Email already exists!');
+        }
+
+        const softDeletedUser = await userService.findSoftDeletedUserByEmail(payload.email);
+        if (softDeletedUser) {
+          let hashPass = user.password;
+          if (payload.password) {
+            hashPass = await encryptStringCrypt(payload.password);
+          }
+
+          await userService.updateUser(softDeletedUser.id, {
+            email: payload.email,
+            name: payload.name || user.name,
+            role_id: payload.role_id || user.role_id,
+            password: hashPass,
+            deleted_at: null,
+          });
+
+          await userService.delete(userId);
+
+          return generateResponse(
+            res,
+            200,
+            { ...softDeletedUser, deleted_at: null },
+            true,
+            'User updated and restored successfully!'
+          );
         }
       }
+
       let hashPass = user.password;
       if (payload.password) {
         hashPass = await encryptStringCrypt(payload.password);
@@ -123,7 +156,7 @@ export class UserController {
       const userId = req.params.id;
       const { oldPassword, newPassword } = req.body;
       let isPasswordValid;
-      
+
       const user = await userService.findUserById(userId);
       if (!user) {
         return generateResponse(res, 404, {}, false, 'User not found!');
@@ -140,7 +173,13 @@ export class UserController {
       if (newPassword) {
         const isSamePassword = await matchPassword(newPassword, user.password);
         if (isSamePassword) {
-          return generateResponse(res, 400, {}, false, 'New password cannot be same as old password, Please choose a different password.');
+          return generateResponse(
+            res,
+            400,
+            {},
+            false,
+            'New password cannot be same as old password, Please choose a different password.'
+          );
         }
         hashPass = await encryptStringCrypt(newPassword);
       }
@@ -242,20 +281,18 @@ export class UserController {
     const { email } = req.body;
     try {
       const user = await userService.findUserByEmail(email);
-      if(!user){
+      if (!user) {
         generateResponse(res, 404, {}, false, 'User not found');
         return;
-      }
-      else {
+      } else {
         await userService.generateAndSendOtp(user.name, user.email);
         generateResponse(res, 200, { email: user.email }, true, 'Email is valid');
       }
-    }
-    catch (error) {
+    } catch (error) {
       console.log(error);
       next(error);
     }
-  }
+  };
   validateOtp = async (req: Request, res: Response, next: NextFunction) => {
     const { email, otp } = req.body;
     try {
@@ -264,19 +301,31 @@ export class UserController {
         generateResponse(res, 404, {}, false, 'User not found');
         return;
       }
-      
+
       try {
         const validOtp = await userService.validateOtp(email, otp);
-        generateResponse(res, 200, { email: user.email }, true, 'OTP is valid');
+        generateResponse(
+          res,
+          200,
+          { email: user.email },
+          true,
+          'OTP is valid. You can reset your password now.'
+        );
       } catch (error) {
-        generateResponse(res, 400, '', false, (typeof error === 'string' ? error : 'Invalid or expired OTP'));
+        generateResponse(
+          res,
+          400,
+          '',
+          false,
+          typeof error === 'string' ? error : 'Invalid or expired OTP. Please try again.'
+        );
         return;
       }
     } catch (error) {
       console.log(error);
       next(error);
     }
-  }
+  };
   resetPassword = async (req: Request, res: Response, next: NextFunction) => {
     const { email, newPassword, confirmPassword } = req.body;
     try {
@@ -296,5 +345,5 @@ export class UserController {
       console.log(error);
       next(error);
     }
-  }
+  };
 }

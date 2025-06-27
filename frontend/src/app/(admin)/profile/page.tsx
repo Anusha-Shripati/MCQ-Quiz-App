@@ -13,9 +13,7 @@ import { EyeIcon, EyeOffIcon } from 'lucide-react';
 import { useProfileStore } from '@/store/profileStore';
 import { userEndpoint } from '@/lib/endpoint';
 import PasswordRequirements from '@/components/profile/PasswordRequirements';
-const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-
+import { emailRegex, passwordRegex } from '@/shared/constants/data';
 
 const userInfoSchema = z.object({
   userName: z.string().min(1, 'User Name is required').max(25, 'User Name must be at most 25 characters'),

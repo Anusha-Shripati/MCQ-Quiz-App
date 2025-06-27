@@ -11,7 +11,7 @@ import useSWRMutation from 'swr/mutation';
 import AlertWrapper from './error/alert-wrapper';
 import TestLoading from './loading/test-loading';
 import Question from './question';
-import { Check, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { BROWSER_KEY, PROHIBITED_COMBINATIONS, PROHIBITED_KEYS, QUIZ_CONFIG } from '@/shared/constants/data';
 import { examEndpoint } from '@/lib/endpoint';
 import TestWarning from './error/test-warning';
@@ -384,7 +384,7 @@ const submitQuiz = async () => {
     detectMultipleScreens();
     const screenInterval = setInterval(() => {
       detectMultipleScreens();
-    }, 10000);
+    }, 5000);
 
 
     // Store original window size
@@ -577,7 +577,6 @@ const submitQuiz = async () => {
         <TestLoading />
       ) : (
         <>
-
           <AlertWrapper showAlert={showAlert} alertMessage={alertMessage} onClose={() => setShowAlert(false)} />
 
           <audio src="/assets/alert.wav" ref={audioRef} style={{ display: 'none' }} />
@@ -598,7 +597,16 @@ const submitQuiz = async () => {
           </Card>
 
           <Card className="w-[95vw] max-w-[1200px] mx-auto min-h-[85vh] shadow-xl border-0 rounded-xl overflow-hidden bg-white/95 backdrop-blur-sm">
-            <TestHeader timeLeft={timeLeft} currentQuestionIndex={currentQuestionIndex} totalQuestion={questions.length || 0} handleTimerEnd={handleTimerEnd} />
+            <TestHeader 
+              submitQuiz={submitQuiz} 
+              timeLeft={timeLeft} 
+              currentQuestionIndex={currentQuestionIndex} 
+              totalQuestion={questions.length || 0} 
+              handleTimerEnd={handleTimerEnd} 
+              isSubmiting={isSubmiting} 
+              isMutating={isMutating}
+              answeredQuestionsCount={Object.keys(answers).length} 
+            />
 
             <CardContent className="p-4 md:p-8 space-y-6">
 
@@ -716,22 +724,6 @@ const submitQuiz = async () => {
                 </Button>
               </div>
 
-              <div className="flex justify-center pt-2">
-                <Button
-                  onClick={() => submitQuiz()}
-                  disabled={Object.keys(answers).length !== questions.length || isSubmitting}
-                  className="px-8 py-3 bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 text-white font-medium rounded-full shadow-sm hover:shadow transition-all flex items-center gap-2 w-40"
-                >{(isMutating || isSubmiting) ? <div className="flex flex-col items-center justify-center gap-4">
-                  <Loader2 className="w-8 h-8 text-white animate-spin" />
-                </div>
-                  : <>
-                    Submit Quiz
-                    <Check />
-                  </>
-                  }
-
-                </Button>
-              </div>
             </CardContent>
           </Card>
         </>)}

@@ -17,7 +17,7 @@ interface VideoRecorderProps {
     isLoading:boolean
     showControls?:boolean
 }
-const VideoRecorder = ({ onRecordingComplete, maxTime, videoKey = 'video', videoLink, onRecordingStop,isLoading,showControls=true }: VideoRecorderProps) => {
+const VideoRecorder = ({ onRecordingComplete, maxTime, videoKey = 'video', videoLink, onRecordingStop, isLoading, showControls=true }: VideoRecorderProps) => {
     const videoRef = useRef<HTMLVideoElement | null>(null);
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const streamRef = useRef<MediaStream | null>(null);
@@ -30,19 +30,13 @@ const VideoRecorder = ({ onRecordingComplete, maxTime, videoKey = 'video', video
     const [recordedChunks, setRecordedChunks] = useState<Blob[]>([]);
     const [isStreamReady, setIsStreamReady] = useState(false);
     const animationFrameRef = useRef<number | null>(null);
-    const { exam,cameraStreamRef } = useExamStore();
+    const { exam, cameraStreamRef } = useExamStore();
     const [isUploading, setIsUploading] = useState(false);
 
     const startCamera = useCallback(async () => {
         setIsStreamReady(false);
 
         try {
-            // const stream = await navigator.mediaDevices.getUserMedia({
-            //     video: true,
-            //     audio: true,
-            // });
-            // console.log('start camera');
-            
             streamRef.current = cameraStreamRef;
 
             if (videoRef.current) {
@@ -111,8 +105,6 @@ const VideoRecorder = ({ onRecordingComplete, maxTime, videoKey = 'video', video
 
     const startRecording = useCallback(async () => {
         if (!streamRef.current || !isStreamReady) {
-            // await startCamera();
-
             // Add a small delay to ensure camera is ready
             await new Promise((resolve) => setTimeout(resolve, 500));
 
@@ -172,7 +164,7 @@ const VideoRecorder = ({ onRecordingComplete, maxTime, videoKey = 'video', video
             mediaRecorder.start();
             setStatus('recording');
 
-            // Set up timer for 30 seconds
+            // Set up timer for max seconds
             timeLeftRef.current = maxTime;
             if (timeLeftRefSpan.current) {
                 timeLeftRefSpan.current.textContent = timeLeftRef.current + 's';
@@ -195,17 +187,7 @@ const VideoRecorder = ({ onRecordingComplete, maxTime, videoKey = 'video', video
         }
     }, [])
 
-
-
     const stopCamera = useCallback(() => {
-
-        // if (streamRef.current) {
-        //     streamRef.current.getTracks().forEach((track) => {
-        //         track.stop();
-        //     });
-        //     streamRef.current = null;
-        // }
-
         if (videoRef.current) {
             videoRef.current.srcObject = null;
         }
@@ -214,7 +196,6 @@ const VideoRecorder = ({ onRecordingComplete, maxTime, videoKey = 'video', video
     }, []);
 
     const stopRecording = useCallback(() => {
-
         // Clear timer interval
         if (timerRef.current) {
             clearInterval(timerRef.current);
@@ -244,7 +225,6 @@ const VideoRecorder = ({ onRecordingComplete, maxTime, videoKey = 'video', video
     }, [stopCamera]);
 
     const resetRecording = useCallback(() => {
-
         // Release blob URL to avoid memory leaks
         if (recordedVideo) {
             URL.revokeObjectURL(recordedVideo);
@@ -280,6 +260,7 @@ const VideoRecorder = ({ onRecordingComplete, maxTime, videoKey = 'video', video
             }
         };
     }, [stopCamera]);
+    
     useEffect(() => {
         if (status !== 'idle' && status !== 'recording') return;
         if (!videoRef.current || !streamRef.current) return;
@@ -299,7 +280,8 @@ const VideoRecorder = ({ onRecordingComplete, maxTime, videoKey = 'video', video
             }
         };
     }, [status, isStreamReady]);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const onError = (err: any) => {
         console.log(err);
         setStatus('idle');
@@ -314,11 +296,10 @@ const VideoRecorder = ({ onRecordingComplete, maxTime, videoKey = 'video', video
             mediaRecorderRef.current.stop();
         }
         
-
         setRecordedChunks([]);
         setRecordedVideo(null);
         
-        // Restart camera after a short dela
+        // Restart camera after a short delay
         setTimeout(() => {
             startCamera();
         }, 1000);
@@ -330,50 +311,54 @@ const VideoRecorder = ({ onRecordingComplete, maxTime, videoKey = 'video', video
     }
 
     return (
-        <div className="space-y-4 max-w-4xl mx-auto p-6">
+        <div className="space-y-4 max-w-4xl mx-auto">
             {error && (
-                <Alert variant="destructive" className="animate-in fade-in-50 slide-in-from-top-5">
+                <Alert variant="destructive" className="animate-in fade-in-50 slide-in-from-top-5 mb-5">
                     <AlertCircle className="h-4 w-4" />
                     <AlertDescription>{error}</AlertDescription>
                 </Alert>
             )}
 
-            <div className="relative rounded-xl overflow-hidden shadow-2xl bg-gradient-to-b from-gray-900 to-gray-800 p-1 hover:shadow-blue-800/20 transition-all duration-300">
+            <div className="relative overflow-hidden rounded-xl shadow-lg bg-gradient-to-b from-indigo-900 to-purple-900 p-1.5">
                 <div className="aspect-video relative rounded-lg overflow-hidden bg-black">
-                    {/* Loading indicator only when actually loading */}
+                    {/* Loading indicator */}
                     {status === 'loading' && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-black z-10">
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/70 backdrop-blur-sm z-10">
                             <div className="flex flex-col items-center">
-                                <Loader2 className="h-10 w-10 text-blue-500 animate-spin mb-2" />
-                                <span className="text-white animate-pulse text-sm">Loading camera...</span>
+                                <Loader2 className="h-10 w-10 text-indigo-400 animate-spin mb-2" />
+                                <span className="text-white/90 animate-pulse text-sm font-medium">Initializing camera...</span>
                             </div>
                         </div>
                     )}
 
-                    {/* Always show the camera feed */}
+                    {/* Camera feed */}
                     {status !== 'preview' && (
                         <>
                             <video
                                 ref={videoRef}
                                 autoPlay
-                                playsInline
                                 muted
                                 className="absolute inset-0 w-full h-full object-cover transform scale-x-[-1]"
                             />
                             {status === 'idle' && isStreamReady && (
                                 <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm opacity-0 hover:opacity-100 transition-opacity duration-300">
-                                    <div className="bg-blue-600/90 backdrop-blur-md text-white px-5 py-3 rounded-full font-medium shadow-lg transform hover:scale-105 transition-transform flex items-center">
-                                        <Camera className="w-5 h-5 mr-2" />
+                                    <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-3 rounded-full font-medium shadow-lg transform hover:scale-105 transition-transform flex items-center gap-2">
+                                        <Camera className="w-5 h-5" />
                                         Ready to record
                                     </div>
                                 </div>
                             )}
                         </>
                     )}
-                    {status === 'preview' && recordedVideo && <VideoPreview videoUrl={recordedVideo} onError={onError} />}
 
+                    {/* Video preview */}
+                    {status === 'preview' && recordedVideo && 
+                        <VideoPreview videoUrl={recordedVideo} onError={onError} />
+                    }
+
+                    {/* Recording timer */}
                     {status === 'recording' && (
-                        <div className="absolute top-4 right-4 flex items-center gap-2 bg-red-600/90 backdrop-blur text-white px-5 py-2 rounded-full shadow-lg z-20 animate-pulse">
+                        <div className="absolute top-4 right-4 flex items-center gap-2 bg-gradient-to-r from-red-500 to-pink-500 text-white px-4 py-2 rounded-full shadow-lg z-20">
                             <div className="h-3 w-3 rounded-full bg-white animate-pulse" />
                             <span ref={timeLeftRefSpan} className="font-medium">
                                 {timeLeftRef.current}s
@@ -383,14 +368,16 @@ const VideoRecorder = ({ onRecordingComplete, maxTime, videoKey = 'video', video
                 </div>
             </div>
 
-           {showControls && <VideoControls
-                status={status}
-                onStart={startRecording}
-                onStop={stopRecording}
-                onReset={resetRecording}
-                onContinue={handleContinue}
-                isLoading={isLoading || isUploading}
-            />}
+            {showControls && 
+                <VideoControls
+                    status={status}
+                    onStart={startRecording}
+                    onStop={stopRecording}
+                    onReset={resetRecording}
+                    onContinue={handleContinue}
+                    isLoading={isLoading || isUploading}
+                />
+            }
         </div>
     );
 };

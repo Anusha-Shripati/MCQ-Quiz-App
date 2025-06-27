@@ -15,13 +15,22 @@ import useSWRMutation from 'swr/mutation';
 import RoleForm from '../roles/role-form';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { roleEndpoint, userEndpoint } from '@/lib/endpoint';
+import { passwordRegex } from '@/shared/constants/data';
+import PasswordRequirements from '@/components/profile/PasswordRequirements';
 
 const userSchema = z
   .object({
     name: z.string().min(1, 'Name is required'),
     email: z.string().email('Invalid email address'),
-    password: z.string().min(6, 'Password must be at least 6 characters').nullable(),
-    confirmPassword: z.string().min(6, 'Confirm Password must match Password').nullable(),
+    password: z
+      .string()
+      .min(8, 'Match the below password requirements.')
+      .regex(passwordRegex, 'Invalid password format')
+      .nullable(),
+    confirmPassword: z
+      .string()
+      .min(8, 'Confirm Password must match Password.')
+      .nullable(),
     role: z.string().min(1, 'Role is required'),
   })
   .refine((data) => data.password === data.confirmPassword, {
@@ -74,7 +83,9 @@ function UserForm({ open, onClose, userData = null }: UserFormProps) {
   const [openRoleForm, setOpenRole] = useState(false);
   const [passwordChange, setPasswordChange] = useState(false);
   const [showPassword, setShowPassword] = useState({ password: false, confirmPassword: false });
-
+  const [passchange, setPassChange] = useState('');
+  const [isBlank, setIsBlank] = useState(false);
+  const [showPasswordRequirements, setShowPasswordRequirements] = useState(false);
   const togglePassword = (name: keyof typeof showPassword) =>
     setShowPassword((prv) => ({ ...prv, [name]: !prv[name] }));
 
@@ -142,7 +153,17 @@ function UserForm({ open, onClose, userData = null }: UserFormProps) {
       reset(formData);
       setPasswordChange(userData ? false : true);
     }
-  }, [open]);
+  }, [open, reset, userData]);
+
+  useEffect(() => {
+    if (passchange.length > 0) {
+      console.log('Password changed:', passchange);
+      setIsBlank(false);
+    } else {
+      setPassChange('');
+      setIsBlank(true);
+    }
+  }, [passchange]);
 
   return (
     <Dialog open={open} onOpenChange={(open) => !open && onClose()}>
@@ -172,8 +193,8 @@ function UserForm({ open, onClose, userData = null }: UserFormProps) {
               />
             </div>
             <div className="space-y-2 ">
-              <div className='flex items-end gap-2'>
-                <div className='flex-grow'>
+              <div className="flex items-end gap-2">
+                <div className="flex-grow">
                   <FormField
                     onChange={(e) => setValue('role', e)}
                     type="select"
@@ -184,13 +205,20 @@ function UserForm({ open, onClose, userData = null }: UserFormProps) {
                   />
                 </div>
 
-                <Tooltip delayDuration={0 }>
-                  <TooltipTrigger asChild><Button variant='outline' type="button" onClick={() => setOpenRole(true)}>+</Button></TooltipTrigger>
-                  <TooltipContent className="bg-gray-800 text-white p-2 rounded shadow-lg">Create a new role</TooltipContent>
+                <Tooltip delayDuration={0}>
+                  <TooltipTrigger asChild>
+                    <Button variant="outline" type="button" onClick={() => setOpenRole(true)}>
+                      +
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent className="bg-gray-800 text-white p-2 rounded shadow-lg">
+                    Create a new role
+                  </TooltipContent>
                 </Tooltip>
               </div>
-              {errors.role?.message && <p className="text-red-500 text-sm mt-1">{errors.role?.message}</p>}
-
+              {errors.role?.message && (
+                <p className="text-red-500 text-sm mt-1">{errors.role?.message}</p>
+              )}
             </div>
             {userData && (
               <div className="space-y-2">
@@ -212,6 +240,10 @@ function UserForm({ open, onClose, userData = null }: UserFormProps) {
                     className="dark:bg-gray-700"
                     type={showPassword.password ? 'text' : 'password'}
                     error={errors.password?.message}
+                    onChange={(e) => {
+                      setPassChange(e.target.value);
+                    }}
+                    onFocus={() => setShowPasswordRequirements(true)}
                   />
                   <button
                     type="button"
@@ -220,6 +252,7 @@ function UserForm({ open, onClose, userData = null }: UserFormProps) {
                   >
                     {showPassword.password ? <EyeOffIcon size={20} /> : <EyeIcon size={20} />}
                   </button>
+                  {showPasswordRequirements && <PasswordRequirements password={passchange} />}
                 </div>
                 <div className="space-y-2 relative">
                   <FormField
@@ -254,7 +287,11 @@ function UserForm({ open, onClose, userData = null }: UserFormProps) {
               >
                 Close
               </Button>
-              <Button type="submit" className="bg-green-600" disabled={isMutating || updating}>
+              <Button
+                type="submit"
+                className="bg-green-600"
+                disabled={isMutating || updating || (isBlank && passwordChange)}
+              >
                 {userData ? 'Update' : 'Save'}
               </Button>
             </div>
@@ -262,7 +299,6 @@ function UserForm({ open, onClose, userData = null }: UserFormProps) {
         </form>
       </DialogContent>
       <RoleForm open={openRoleForm} onClose={() => setOpenRole(false)} />
-
     </Dialog>
   );
 }

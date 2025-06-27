@@ -8,25 +8,31 @@ import { EyeIcon, EyeOffIcon, LockIcon } from 'lucide-react';
 import useSWRMutation from 'swr/mutation';
 import { resetPassword } from '@/lib/api';
 import { ApiError, NewPasswordProps } from '@/shared/types/app';
-
+import { passwordRegex } from '@/shared/constants/data';
+import PasswordRequirements from '@/components/profile/PasswordRequirements';
 
 const NewPassword: React.FC<NewPasswordProps> = ({ email }) => {
+
     const { trigger, isMutating } = useSWRMutation('/user/reset-password', resetPassword);
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [showPasswordRequirements, setShowPasswordRequirements] = useState(false);
     const router = useRouter();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
-        if (password.length < 8) {
-            toast.error('Password must be at least 8 characters long');
+        
+        // Validate password against the regex pattern
+        if (!passwordRegex.test(password)) {
+            toast.error('Password must meet all requirements');
             setIsLoading(false);
             return;
         }
+        
         if (password !== confirmPassword) {
             toast.error('Passwords do not match');
             setIsLoading(false);
@@ -71,6 +77,7 @@ const NewPassword: React.FC<NewPasswordProps> = ({ email }) => {
                             placeholder="Enter new password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
+                            onFocus={() => setShowPasswordRequirements(true)}
                             required
                             className="h-12 pr-12 bg-gray-800 border-gray-700 text-gray-200 focus:bg-gray-800 focus:border-gray-600 hover:bg-gray-800 focus-visible:ring-gray-700 focus-visible:ring-1 focus-visible:ring-offset-0"
                         />
@@ -83,6 +90,7 @@ const NewPassword: React.FC<NewPasswordProps> = ({ email }) => {
                             {showPassword ? <EyeOffIcon size={18} /> : <EyeIcon size={18} />}
                         </Button>
                     </div>
+                    {showPasswordRequirements && <PasswordRequirements password={password} />}
                 </div>
 
                 <div className="space-y-3">

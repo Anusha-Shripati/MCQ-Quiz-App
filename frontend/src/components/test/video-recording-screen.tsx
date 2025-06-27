@@ -1,14 +1,17 @@
 'use client';
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Camera,
+  VideoIcon,
+  MicIcon,
+  SunIcon,
+  MonitorIcon
 } from 'lucide-react';
 import VideoRecorder from '../video-recording/VideoRecorder';
 import { examApi } from '@/lib/api';
 import { useExamStore } from '@/store/examStore';
 import useSWRMutation from 'swr/mutation';
-import {  useState } from 'react';
+import { useState } from 'react';
 import { examEndpoint } from '@/lib/endpoint';
 import { uploadFileInChunks } from '@/lib/utils';
 
@@ -17,7 +20,6 @@ interface VideoRecorderProps {
   onRecordingComplete: () => void;
   videoLink?: string;
 }
-
 
 // Main Component
 export const VideoRecordingScreen = ({ onRecordingComplete, videoLink }: VideoRecorderProps) => {
@@ -71,65 +73,103 @@ export const VideoRecordingScreen = ({ onRecordingComplete, videoLink }: VideoRe
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
-      <div className="max-w-6xl w-full grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex items-center justify-center p-6">
+      <div className="max-w-7xl w-full grid grid-cols-1 lg:grid-cols-5 gap-8">
         {/* Instructions Card */}
-        <Card className="bg-white shadow-lg hover:shadow-xl transition-shadow duration-300 border-0">
-          <CardHeader className="space-y-1 border-b pb-6">
-            <div className="flex items-center gap-2 text-blue-600">
-              <Camera className="h-5 w-5" />
-              <CardTitle className="text-xl font-semibold">Recording Instructions</CardTitle>
+        <div className="lg:col-span-2">
+          <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100 h-full">
+            <div className="p-6 bg-gradient-to-r from-blue-50 to-indigo-50">
+              <div className="flex items-center gap-2 text-blue-700">
+                <Camera className="h-5 w-5" />
+                <h2 className="text-xl font-bold">Recording Instructions</h2>
+              </div>
+              <p className="text-sm text-gray-600 mt-1">Follow these guidelines for the best recording</p>
             </div>
-            <p className="text-sm text-gray-500">Follow these guidelines for the best recording</p>
-          </CardHeader>
-          <CardContent className="pt-6">
-            <div className="space-y-6">
-              <div className="p-4 bg-blue-50 rounded-lg border border-blue-100">
+            
+            <div className="p-6 space-y-6">
+              <div className="bg-blue-50 rounded-lg p-5 border border-blue-100">
                 <ul className="space-y-4">
-                  {[
-                    'Ensure good lighting on your face',
-                    'Speak clearly and maintain eye contact',
-                    'Keep a professional background',
-                    'Recording will last for 30 seconds',
-                    'You can re-record if needed',
-                  ].map((tip, index) => (
-                    <li key={index} className="flex items-center gap-3 text-gray-700">
-                      <div className="h-2 w-2 rounded-full bg-blue-500" />
-                      {tip}
-                    </li>
-                  ))}
+                  <li className="flex items-start gap-3">
+                    <div className="bg-blue-100 rounded-full p-2 flex-shrink-0 mt-0.5">
+                      <SunIcon className="h-4 w-4 text-blue-600" />
+                    </div>
+                    <span className="text-gray-700">Ensure good lighting on your face</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <div className="bg-blue-100 rounded-full p-2 flex-shrink-0 mt-0.5">
+                      <MicIcon className="h-4 w-4 text-blue-600" />
+                    </div>
+                    <span className="text-gray-700">Speak clearly and maintain eye contact</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <div className="bg-blue-100 rounded-full p-2 flex-shrink-0 mt-0.5">
+                      <MonitorIcon className="h-4 w-4 text-blue-600" />
+                    </div>
+                    <span className="text-gray-700">Keep a professional background</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <div className="bg-blue-100 rounded-full p-2 flex-shrink-0 mt-0.5">
+                      <VideoIcon className="h-4 w-4 text-blue-600" />
+                    </div>
+                    <span className="text-gray-700">Recording will last for up to 90 seconds</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <div className="bg-blue-100 rounded-full p-2 flex-shrink-0 mt-0.5">
+                      <Camera className="h-4 w-4 text-blue-600" />
+                    </div>
+                    <span className="text-gray-700">You can re-record if needed</span>
+                  </li>
+                </ul>
+              </div>
+              
+              <div className="bg-indigo-50 p-5 rounded-lg border border-indigo-100">
+                <h3 className="font-semibold text-indigo-700 mb-3">Tips for a Great Introduction</h3>
+                <ul className="space-y-2 text-indigo-900">
+                  <li className="flex items-start gap-2">
+                    <span>•</span>
+                    <span>Briefly introduce yourself and your background</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span>•</span>
+                    <span>Mention your relevant experience and skills</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span>•</span>
+                    <span>Speak naturally and confidently</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span>•</span>
+                    <span>Stay focused and concise</span>
+                  </li>
                 </ul>
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Video Recorder Card */}
-        <Card className="bg-white shadow-lg hover:shadow-xl transition-shadow duration-300 border-0 flex flex-col">
-          <CardHeader className="space-y-1 border-b pb-6">
-            <div className="flex items-center gap-2 text-purple-600">
-              <Camera className="h-5 w-5" />
-              <CardTitle className="text-xl font-semibold">Record Your Introduction</CardTitle>
-            </div>
-            <p className="text-sm text-gray-500">Please introduce yourself and your experience</p>
-          </CardHeader>
-          <CardContent className="pt-6">
-
-            <VideoRecorder 
-              videoKey='introduction' 
-              onRecordingComplete={onContinue} 
-              onRecordingStop={handleStopRecording} 
-              maxTime={90} 
-              videoLink={videoLink} 
-              isLoading={isUploading}
-            />
-            {/* {error && (
-              <div className="mt-4 text-red-600">
-                <p>Error: {error.message}</p>
+        <div className="lg:col-span-3">
+          <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100 h-full">
+            <div className="p-6 bg-gradient-to-r from-indigo-50 to-purple-50">
+              <div className="flex items-center gap-2 text-indigo-700">
+                <Camera className="h-5 w-5" />
+                <h2 className="text-xl font-bold">Record Your Introduction</h2>
               </div>
-            )} */}
-          </CardContent>
-        </Card>
+              <p className="text-sm text-gray-600 mt-1">Please introduce yourself and your experience</p>
+            </div>
+            
+            <div className="p-6">
+              <VideoRecorder 
+                videoKey='introduction' 
+                onRecordingComplete={onContinue} 
+                onRecordingStop={handleStopRecording} 
+                maxTime={90} 
+                videoLink={videoLink} 
+                isLoading={isUploading}
+              />
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

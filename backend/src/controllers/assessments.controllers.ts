@@ -15,8 +15,8 @@ export class AssessmentController {
       const existingAssessment = await prisma.assessments.findFirst({
         where: {
           name: assessmentPayload.name,
-          deleted_at: null
-        }
+          deleted_at: null,
+        },
       });
 
       if (existingAssessment) {
@@ -34,42 +34,71 @@ export class AssessmentController {
       }
 
       for (const tech of technologies) {
-        const availableQuestions = await prisma.questions.count({
+        const technologiesName = await prisma.technology.findUnique({
           where: {
-            technology_id: tech.technology_id,
-            difficulty_level: tech.easy > 0 ? 'easy' : tech.medium > 0 ? 'medium' : 'hard',
-            deleted_at: null,
+            id: tech.technology_id,
+          },
+          select: {
+            name: true,
           },
         });
 
-        if (tech.easy > 0 && availableQuestions < tech.easy) {
-          return generateResponse(
-            res,
-            400,
-            {},
-            false,
-            `Not enough easy questions available for technology ${tech.technology_id}. Requested: ${tech.easy}, Available: ${availableQuestions}`
-          );
+        if (tech.easy > 0) {
+          const easyQuestions = await prisma.questions.count({
+            where: {
+              technology_id: tech.technology_id,
+              difficulty_level: 'easy',
+              deleted_at: null,
+            },
+          });
+
+          if (easyQuestions < tech.easy) {
+            return generateResponse(
+              res,
+              400,
+              {},
+              false,
+              `Not enough easy questions available for technology ${technologiesName?.name}. Requested: ${tech.easy}, Available: ${easyQuestions}`
+            );
+          }
+        }
+        if (tech.medium > 0) {
+          const mediumQuestions = await prisma.questions.count({
+            where: {
+              technology_id: tech.technology_id,
+              difficulty_level: 'medium',
+              deleted_at: null,
+            },
+          });
+          if (mediumQuestions < tech.medium) {
+            return generateResponse(
+              res,
+              400,
+              {},
+              false,
+              `Not enough medium questions available for technology ${technologiesName?.name}. Requested: ${tech.medium}, Available: ${mediumQuestions}`
+            );
+          }
         }
 
-        if (tech.medium > 0 && availableQuestions < tech.medium) {
-          return generateResponse(
-            res,
-            400,
-            {},
-            false,
-            `Not enough medium questions available for technology ${tech.technology_id}. Requested: ${tech.medium}, Available: ${availableQuestions}`
-          );
-        }
+        if (tech.hard > 0) {
+          const hardQuestions = await prisma.questions.count({
+            where: {
+              technology_id: tech.technology_id,
+              difficulty_level: 'hard',
+              deleted_at: null,
+            },
+          });
 
-        if (tech.hard > 0 && availableQuestions < tech.hard) {
-          return generateResponse(
-            res,
-            400,
-            {},
-            false,
-            `Not enough hard questions available for technology ${tech.technology_id}. Requested: ${tech.hard}, Available: ${availableQuestions}`
-          );
+          if (hardQuestions < tech.hard) {
+            return generateResponse(
+              res,
+              400,
+              {},
+              false,
+              `Not enough hard questions available for technology ${technologiesName?.name}. Requested: ${tech.hard}, Available: ${hardQuestions}`
+            );
+          }
         }
       }
 
@@ -88,7 +117,7 @@ export class AssessmentController {
       const score = (easy * 1 + medium * 2 + hard * 3) / total;
 
       const difficulty_score = Math.round(score);
-      
+
       const newAssessment = await assessmentService.createAssessments({
         ...assessmentPayload,
         difficulty_score,
@@ -115,8 +144,22 @@ export class AssessmentController {
     try {
       const { id } = req.params;
       const { technologies, ...assessmentPayload } = req.body;
+      const existingAssessmentWithSameName = await prisma.assessments.findFirst({
+        where: {
+          name: assessmentPayload.name,
+          deleted_at: null,
+        },
+      });
+      if (existingAssessmentWithSameName) {
+        return generateResponse(
+          res,
+          400,
+          {},
+          false,
+          `Assessment with name '${assessmentPayload.name}' already exists.`
+        );
+      }
 
-      // Convert pass_criteria to number if it's a string
       if (assessmentPayload.pass_criteria && typeof assessmentPayload.pass_criteria === 'string') {
         assessmentPayload.pass_criteria = parseInt(assessmentPayload.pass_criteria, 10);
       }
@@ -127,42 +170,70 @@ export class AssessmentController {
       }
 
       for (const tech of technologies) {
-        const availableQuestions = await prisma.questions.count({
+        const technologiesName = await prisma.technology.findUnique({
           where: {
-            technology_id: tech.technology_id,
-            difficulty_level: tech.easy > 0 ? 'easy' : tech.medium > 0 ? 'medium' : 'hard',
-            deleted_at: null,
+            id: tech.technology_id,
+          },
+          select: {
+            name: true,
           },
         });
 
-        if (tech.easy > 0 && availableQuestions < tech.easy) {
-          return generateResponse(
-            res,
-            400,
-            {},
-            false,
-            `Not enough easy questions available for technology ${tech.technology_id}. Requested: ${tech.easy}, Available: ${availableQuestions}`
-          );
-        }
+        if (tech.easy > 0) {
+          const easyQuestions = await prisma.questions.count({
+            where: {
+              technology_id: tech.technology_id,
+              difficulty_level: 'easy',
+              deleted_at: null,
+            },
+          });
 
-        if (tech.medium > 0 && availableQuestions < tech.medium) {
-          return generateResponse(
-            res,
-            400,
-            {},
-            false,
-            `Not enough medium questions available for technology ${tech.technology_id}. Requested: ${tech.medium}, Available: ${availableQuestions}`
-          );
+          if (easyQuestions < tech.easy) {
+            return generateResponse(
+              res,
+              400,
+              {},
+              false,
+              `Not enough easy questions available for technology ${technologiesName?.name}. Requested: ${tech.easy}, Available: ${easyQuestions}`
+            );
+          }
         }
+        if (tech.medium > 0) {
+          const mediumQuestions = await prisma.questions.count({
+            where: {
+              technology_id: tech.technology_id,
+              difficulty_level: 'medium',
+              deleted_at: null,
+            },
+          });
+          if (mediumQuestions < tech.medium) {
+            return generateResponse(
+              res,
+              400,
+              {},
+              false,
+              `Not enough medium questions available for technology ${technologiesName?.name}. Requested: ${tech.medium}, Available: ${mediumQuestions}`
+            );
+          }
+        }
+        if (tech.hard > 0) {
+          const hardQuestions = await prisma.questions.count({
+            where: {
+              technology_id: tech.technology_id,
+              difficulty_level: 'hard',
+              deleted_at: null,
+            },
+          });
 
-        if (tech.hard > 0 && availableQuestions < tech.hard) {
-          return generateResponse(
-            res,
-            400,
-            {},
-            false,
-            `Not enough hard questions available for technology ${tech.technology_id}. Requested: ${tech.hard}, Available: ${availableQuestions}`
-          );
+          if (hardQuestions < tech.hard) {
+            return generateResponse(
+              res,
+              400,
+              {},
+              false,
+              `Not enough hard questions available for technology ${technologiesName?.name}. Requested: ${tech.hard}, Available: ${hardQuestions}`
+            );
+          }
         }
       }
 
@@ -266,8 +337,8 @@ export class AssessmentController {
       const existingAssessment = await prisma.assessments.findFirst({
         where: {
           name,
-          deleted_at: null
-        }
+          deleted_at: null,
+        },
       });
 
       if (existingAssessment) {
@@ -285,5 +356,4 @@ export class AssessmentController {
       next(error);
     }
   };
-  
 }

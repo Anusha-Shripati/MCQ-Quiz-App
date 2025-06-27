@@ -125,8 +125,9 @@ export class AssessmentsService {
     return prisma.assessment_technology.createMany({ data: assessment_technologies });
   }
   async deleteTechnologyAssessment(assessment_id: string) {
-    return prisma.assessment_technology.deleteMany({
+    return prisma.assessment_technology.updateMany({
       where: { assessment_id },
+      data: { deleted_at: new Date() }
     });
   }
   async getAllAssessments() {

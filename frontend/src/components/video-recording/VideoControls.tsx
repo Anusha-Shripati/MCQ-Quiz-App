@@ -80,7 +80,7 @@ const VideoControls = ({
           ) : (
             <>
               <Video className="w-5 h-5" />
-              <span className="mr-1">Continue</span>
+              <span className="mr-1">Submit Introduction and Start Exam</span>
               <ArrowRight className="w-4 h-4" />
             </>
           )}

@@ -236,6 +236,7 @@ const QuizPage = () => {
       setPermission,
       setCameraError,
       cameraStreamRef,
+      cameraSnapshotRef,
       0,
       3
     );

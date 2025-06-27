@@ -32,6 +32,7 @@ export const startCamera = async (
   setPermission: (perm: { camera: boolean; screen: boolean } | ((prev: { camera: boolean; screen: boolean }) => { camera: boolean; screen: boolean })) => void,
   setCameraError: (error: string | null) => void,
   cameraStreamRef: MediaStream | null,
+  cameraSnapshotRef: React.RefObject<HTMLVideoElement> ,
   retryCount = 0,
   maxRetries = 3
 ): Promise<boolean> => {
@@ -73,9 +74,15 @@ export const startCamera = async (
       console.log('Camera track ended, attempting reconnection');
       setPermission((prv: { camera: boolean; screen: boolean }) => ({ ...prv, camera: false }));
       // Try to reconnect camera if it disconnects unexpectedly
-      startCamera(setCameraStream, setPermission, setCameraError, null, 0, maxRetries);
+      startCamera(setCameraStream, setPermission, setCameraError, null, cameraSnapshotRef, 0, maxRetries);
     };
-    
+    if (cameraSnapshotRef.current) {
+      cameraSnapshotRef.current.srcObject = cameraStream;
+      // Mute the video element to prevent audio feedback/echo
+      cameraSnapshotRef.current.muted = true;
+      await cameraSnapshotRef.current.play();
+    }
+
     setCameraStream(cameraStream);
     setPermission((prv: { camera: boolean; screen: boolean }) => ({ ...prv, camera: true }));
     
@@ -88,7 +95,7 @@ export const startCamera = async (
     if (retryCount < maxRetries) {
       console.log(`Retrying camera initialization in 1 second... (${retryCount + 1}/${maxRetries})`);
       await new Promise(resolve => setTimeout(resolve, 1000));
-      return startCamera(setCameraStream, setPermission, setCameraError, null, retryCount + 1, maxRetries);
+      return startCamera(setCameraStream, setPermission, setCameraError, null,cameraSnapshotRef, retryCount + 1, maxRetries);
     }
     
     // If all retries fail, update error state
@@ -167,4 +174,4 @@ export const stopMediaStreams = (
       track.stop();
     });
   }
-}; 
+};

@@ -147,9 +147,11 @@ export class AssessmentController {
       const existingAssessmentWithSameName = await prisma.assessments.findFirst({
         where: {
           name: assessmentPayload.name,
+          id: { not: id },
           deleted_at: null,
         },
       });
+      
       if (existingAssessmentWithSameName) {
         return generateResponse(
           res,
@@ -262,6 +264,11 @@ export class AssessmentController {
 
       if (technologies && Array.isArray(technologies)) {
         await assessmentService.deleteTechnologyAssessment(id);
+        
+        // Invalidate the assessment cache
+        await assessmentService.cacheService.deleteKey(`assessment:${id}`);
+        await assessmentService.cacheService.deleteKey('assessment-all');
+        
         await assessmentService.assignTechnologiesToAssessment(updatedRole.id, technologies);
 
         // Find all incomplete exams for this assessment

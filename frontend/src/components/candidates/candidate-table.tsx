@@ -27,7 +27,6 @@ import { ExamMetaTech } from '@/types/exam.types';
 import Link from 'next/link';
 import { useAuthStore } from '@/store/authStore';
 
-
 function CandidateTable() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -367,26 +366,29 @@ function CandidateTable() {
         header: 'Share',
         render: (candidate: ICandidate) => (
           <div className="flex items-center gap-2">
-            <Button
-              onClick={async (e) => {
-                e.stopPropagation();
-                try {
-                  navigator.clipboard.writeText(candidate.meta.examLink as string);
-                  const expiresAt = new Date(candidate.meta.tokenExpiresAt as string);
-                  const formattedExpiration = expiresAt.toLocaleString();
+            {candidate.exam?.status !== 'completed' && (
+              <Button
+                onClick={async (e) => {
+                  e.stopPropagation();
+                  try {
+                    navigator.clipboard.writeText(candidate.meta.examLink as string);
+                    const expiresAt = new Date(candidate.meta.tokenExpiresAt as string);
+                    const formattedExpiration = expiresAt.toLocaleString();
 
-                  toast.success(`Exam link copied! Valid until ${formattedExpiration}`);
-                } catch (error) {
-                  console.error('Error getting exam link:', error);
-                  toast.error('Failed to get exam link');
-                }
-              }}
-              variant="ghost"
-              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all duration-200"
-              title="Copy exam access link"
-            >
-              <FiCopy className="h-5 w-5 text-gray-700 dark:text-gray-300" />
-            </Button>
+                    toast.success(`Exam link copied! Valid until ${formattedExpiration}`);
+                  } catch (error) {
+                    console.error('Error getting exam link:', error);
+                    toast.error('Failed to get exam link');
+                  }
+                }}
+                variant="ghost"
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all duration-200"
+                title="Copy exam access link"
+              >
+                <FiCopy className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+              </Button>
+            )}
+
             <Button
               onClick={(e) => {
                 e.stopPropagation();
@@ -397,7 +399,7 @@ function CandidateTable() {
             >
               <FiMail className="h-5 w-5 text-gray-700 dark:text-gray-300" />
             </Button>
-            {canEditCandidate && (
+            {(candidate.exam?.status !== 'completed' && canEditCandidate) && (
               <>
                 <Button
                   onClick={(e) => {

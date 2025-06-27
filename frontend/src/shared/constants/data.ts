@@ -1215,7 +1215,7 @@ export const PROHIBITED_KEYS = [
   'F9',
   'F10',
   // 'F11',
-  'F12',
+  // 'F12',
   'PrintScreen',
   'ScrollLock',
   'Pause',
@@ -1271,3 +1271,6 @@ interface Exam {
 }
 
 export const RESULTS_TITLE = "Double Click to show detailed result.";
+
+export const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+export const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;

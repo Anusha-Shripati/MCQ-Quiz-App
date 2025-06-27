@@ -59,7 +59,6 @@ export class ResultService {
     });
 
     if (result) {
-      console.log('Result found:', result);
       const passCriteria = result.exam?.assessment?.pass_criteria;
       const isPassed = result.percentage >= passCriteria;
 

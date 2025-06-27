@@ -26,11 +26,7 @@ export class TechnologyService {
             deleted_at: null,
           },
         },
-        assessment_technology: {
-          where: {
-            deleted_at: null,
-          },
-        },
+        assessment_technology: {}
       },
       orderBy: {
         created_at: 'desc',

@@ -1,18 +1,13 @@
 import { useExamStore } from '@/store/examStore';
 import { EXAM_STEP } from '@/types/exam.types';
 import { Camera, FileText, Info, Mail, User, UserCircle } from 'lucide-react';
-import { memo, useState } from 'react';
+import { memo } from 'react';
 import { Button } from '../ui/form/button';
 
-const InstructionCard = ({
-  setAccepted,
-  accepted,
-}: {
-  setAccepted: (value: boolean) => void;
-  accepted: boolean;
-}) => {
+
+const InstructionCard = () => {
   return (
-    <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
+    <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100 pb-1">
       <div className="p-6 bg-gradient-to-r from-blue-50 to-indigo-50">
         <div className="flex items-center gap-2 text-blue-700">
           <Info className="h-5 w-5" />
@@ -277,18 +272,6 @@ const InstructionCard = ({
           </div>
         </div>
 
-        <div className="mt-4 flex items-center gap-2">
-          <input
-            type="checkbox"
-            id="accept-terms"
-            className="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
-            checked={accepted}
-            onChange={() => setAccepted(!accepted)}
-          />
-          <label htmlFor="accept-terms" className="text-sm text-gray-700 cursor-pointer">
-            I have read and agree to all the guidelines and terms.
-          </label>
-        </div>
       </div>
     </div>
   );
@@ -325,7 +308,6 @@ const FormField = ({
 
 const BasicInfoForm: React.FC = memo(() => {
   const { candidate, setCurrentStep } = useExamStore();
-  const [accepted, setAccepted] = useState(false);
   const handleBasicInfoSubmit = () => {
     setCurrentStep(EXAM_STEP.VIDEO_RECORDING);
   };
@@ -334,7 +316,7 @@ const BasicInfoForm: React.FC = memo(() => {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex items-center justify-center p-6">
       <div className="max-w-7xl w-full grid grid-cols-1 lg:grid-cols-5 gap-8">
         <div className="lg:col-span-3">
-          <InstructionCard setAccepted={setAccepted} accepted={accepted} />
+          <InstructionCard />
         </div>
 
         <div className="lg:col-span-2">
@@ -379,10 +361,7 @@ const BasicInfoForm: React.FC = memo(() => {
                     .join(', ') as string
                 }
               />
-
-              <div className="pt-6">
                 <Button
-                  disabled={!accepted}
                   onClick={handleBasicInfoSubmit}
                   className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700
                             text-white font-medium py-3.5 px-6 rounded-lg shadow-lg hover:shadow-xl 
@@ -397,7 +376,6 @@ const BasicInfoForm: React.FC = memo(() => {
                   By clicking &quot;Proceed&quot;, you confirm your details are correct and accept
                   our terms.
                 </p>
-              </div>
             </div>
           </div>
         </div>

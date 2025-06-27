@@ -162,12 +162,18 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
   };
 
   const handleTechnologyChange = (selectedOptions: readonly Option[]) => {
-    const updatedTechnologies = selectedOptions.map((tech) => {
-      const existingTech = localTechnologies.find((t) => t.technology?.id === tech?.value);
+    // Create mapping of existing techs by ID for quick lookup
+    const existingTechMap = Object.fromEntries(
+      localTechnologies.map(tech => [tech.technology?.id, tech])
+    );
+
+    // Map selected options to technologies, preserving existing data when available
+    const updatedTechnologies = selectedOptions.map((option) => {
+      const existingTech = existingTechMap[option.value];
       if (existingTech) return existingTech;
 
       return {
-        technology: { id: tech?.value, name: tech?.label },
+        technology: { id: option.value, name: option.label },
         percentage: Math.floor(100 / selectedOptions.length),
         easy: 0,
         medium: 0,

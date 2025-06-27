@@ -23,7 +23,7 @@ type AssessmentCreateInput = Prisma.AssessmentsCreateInput;
 type AssessmentUpdateInput = Prisma.AssessmentsUpdateInput;
 
 export class AssessmentsService {
-  private cacheService;
+  public cacheService;
   private cacheTime = 60;
 
   constructor() {
@@ -100,6 +100,9 @@ export class AssessmentsService {
       where: { id },
       include: {
         technologies: {
+          where: { 
+            deleted_at: null
+          },
           include: {
             technology: {
               select: {
@@ -125,9 +128,8 @@ export class AssessmentsService {
     return prisma.assessment_technology.createMany({ data: assessment_technologies });
   }
   async deleteTechnologyAssessment(assessment_id: string) {
-    return prisma.assessment_technology.updateMany({
-      where: { assessment_id },
-      data: { deleted_at: new Date() }
+    return prisma.assessment_technology.deleteMany({
+      where: { assessment_id }
     });
   }
   async getAllAssessments() {

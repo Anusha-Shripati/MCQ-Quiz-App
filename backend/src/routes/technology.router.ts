@@ -11,13 +11,13 @@ const technologyController = new TechnologyController();
 technologyRouter.post(
   '/create',
   validateRequest(teachnologySchema.create),
-  authenticateAndAuthorize('assessments.can_edit'),
+  // authenticateAndAuthorize('assessments.can_edit'),
   asyncHandler(technologyController.create)
 );
 
 technologyRouter.get(
   '/list',
-  authenticateAndAuthorize('assessments.can_read'),
+  // authenticateAndAuthorize('assessments.can_read'),
   asyncHandler(technologyController.list)
 );
 
@@ -30,20 +30,20 @@ technologyRouter.get(
 technologyRouter.get(
   '/:id',
   validateRequest(teachnologySchema.get),
-  authenticateAndAuthorize('assessments.can_read'),
+  // authenticateAndAuthorize('assessments.can_read'),
   asyncHandler(technologyController.getTechnologyById)
 );
 
 technologyRouter.put(
   '/:id',
-  authenticateAndAuthorize('assessments.can_edit'),
+  // authenticateAndAuthorize('assessments.can_edit'),
   validateRequest(teachnologySchema.update),
   asyncHandler(technologyController.update)
 );
 
 technologyRouter.delete(
   '/:id',
-  authenticateAndAuthorize('assessments.can_edit'),
+  // authenticateAndAuthorize('assessments.can_edit'),
   validateRequest(teachnologySchema.delete),
   asyncHandler(technologyController.delete)
 );

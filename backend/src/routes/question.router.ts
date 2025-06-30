@@ -9,7 +9,7 @@ const questionRouter = express.Router();
 const questionsController = new QuestionsController();
 questionRouter.post(
   '/import',
-  authenticateAndAuthorize('questions.can_edit'),
+  // authenticateAndAuthorize('questions.can_edit'),
   validateUploadFile(),
   asyncHandler(questionsController.importQuestionsFromXlsx)
 );
@@ -19,32 +19,32 @@ questionRouter.get('/technology', asyncHandler(questionsController.getTechnology
 
 questionRouter.post(
   '/create',
-  authenticateAndAuthorize('questions.can_edit'),
+  // authenticateAndAuthorize('questions.can_edit'),
   validateRequest(questionsSchema.create),
   asyncHandler(questionsController.create)
 );
 
 questionRouter.put(
   '/:id',
-  authenticateAndAuthorize('questions.can_edit'),
+  // authenticateAndAuthorize('questions.can_edit'),
   validateRequest(questionsSchema.update),
   asyncHandler(questionsController.update)
 );
 questionRouter.get(
   '/list',
-  authenticateAndAuthorize('questions.can_read'),
+  // authenticateAndAuthorize('questions.can_read'),
   asyncHandler(questionsController.get)
 );
 questionRouter.get(
   '/:id',
-  authenticateAndAuthorize('questions.can_read'),
+  // authenticateAndAuthorize('questions.can_read'),
   validateRequest(questionsSchema.get),
   asyncHandler(questionsController.getQuestionById)
 );
 
 questionRouter.delete(
   '/:id',
-  authenticateAndAuthorize('questions.can_edit'),
+  // authenticateAndAuthorize('questions.can_edit')
   validateRequest(questionsSchema.delete),
   asyncHandler(questionsController.delete)
 );

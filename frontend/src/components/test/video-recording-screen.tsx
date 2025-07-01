@@ -14,6 +14,8 @@ import useSWRMutation from 'swr/mutation';
 import { useState } from 'react';
 import { examEndpoint } from '@/lib/endpoint';
 import { uploadFileInChunks } from '@/lib/utils';
+import FaceVerification from './face-verification';
+import { Card, CardHeader, CardContent, CardTitle, CardDescription } from '@/components/ui/card';
 
 // Types
 interface VideoRecorderProps {
@@ -27,6 +29,8 @@ export const VideoRecordingScreen = ({ onRecordingComplete, videoLink }: VideoRe
   const [recordingBlob, setRecordingBlob] = useState<Blob | null>(null);
   const [recordingUrl, setRecordingUrl] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState<boolean>(false);
+  const [faceVerified, setFaceVerified] = useState<boolean>(false);
+  const { cameraStreamRef } = useExamStore();
   
   const { trigger } = useSWRMutation(`${examEndpoint.CANDIDATE_EXAM}/${exam?.id}/submit-answer`, 
     (url: string, { arg }: { arg: {foldername:string,question_name:string,merge_chunk:boolean} }) => 
@@ -72,21 +76,27 @@ export const VideoRecordingScreen = ({ onRecordingComplete, videoLink }: VideoRe
     setRecordingUrl(url);
   };
 
+  const handleFaceVerificationComplete = () => {
+    setFaceVerified(true);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex items-center justify-center p-6">
       <div className="max-w-7xl w-full grid grid-cols-1 lg:grid-cols-5 gap-8">
         {/* Instructions Card */}
         <div className="lg:col-span-2">
-          <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100 h-full">
-            <div className="p-6 bg-gradient-to-r from-blue-50 to-indigo-50">
-              <div className="flex items-center gap-2 text-blue-700">
+          <Card className="bg-white shadow-md overflow-hidden border border-gray-100 h-full">
+            <CardHeader className="p-6 bg-gradient-to-r from-blue-50 to-indigo-50">
+              <CardTitle className="flex items-center gap-2 text-blue-700 text-xl font-bold">
                 <Camera className="h-5 w-5" />
-                <h2 className="text-xl font-bold">Recording Instructions</h2>
-              </div>
-              <p className="text-sm text-gray-600 mt-1">Follow these guidelines for the best recording</p>
-            </div>
+                Recording Instructions
+              </CardTitle>
+              <CardDescription className="text-sm text-gray-600 mt-1">
+                Follow these guidelines for the best recording
+              </CardDescription>
+            </CardHeader>
             
-            <div className="p-6 space-y-6">
+            <CardContent className="p-6 space-y-6">
               <div className="bg-blue-50 rounded-lg p-5 border border-blue-100">
                 <ul className="space-y-4">
                   <li className="flex items-start gap-3">
@@ -143,32 +153,43 @@ export const VideoRecordingScreen = ({ onRecordingComplete, videoLink }: VideoRe
                   </li>
                 </ul>
               </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Video Recorder Card */}
         <div className="lg:col-span-3">
-          <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100 h-full">
-            <div className="p-6 bg-gradient-to-r from-indigo-50 to-purple-50">
-              <div className="flex items-center gap-2 text-indigo-700">
+          <Card className="bg-white shadow-md overflow-hidden border border-gray-100 h-full">
+            <CardHeader className="p-6 bg-gradient-to-r from-indigo-50 to-purple-50">
+              <CardTitle className="flex items-center gap-2 text-indigo-700 text-xl font-bold">
                 <Camera className="h-5 w-5" />
-                <h2 className="text-xl font-bold">Record Your Introduction</h2>
-              </div>
-              <p className="text-sm text-gray-600 mt-1">Please introduce yourself and your experience</p>
-            </div>
+                {!faceVerified ? 'Face Verification Required' : 'Record Your Introduction'}
+              </CardTitle>
+              <CardDescription className="text-sm text-gray-600 mt-1">
+                {!faceVerified 
+                  ? 'Please complete face verification before recording' 
+                  : 'Please introduce yourself and your experience'}
+              </CardDescription>
+            </CardHeader>
             
-            <div className="p-6">
-              <VideoRecorder 
-                videoKey='introduction' 
-                onRecordingComplete={onContinue} 
-                onRecordingStop={handleStopRecording} 
-                maxTime={90} 
-                videoLink={videoLink} 
-                isLoading={isUploading}
-              />
-            </div>
-          </div>
+            <CardContent className="p-6">
+              {!faceVerified ? (
+                <FaceVerification 
+                  onVerificationComplete={handleFaceVerificationComplete}
+                  cameraStream={cameraStreamRef}
+                />
+              ) : (
+                <VideoRecorder 
+                  videoKey='introduction' 
+                  onRecordingComplete={onContinue} 
+                  onRecordingStop={handleStopRecording} 
+                  maxTime={90} 
+                  videoLink={videoLink} 
+                  isLoading={isUploading}
+                />
+              )}
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>

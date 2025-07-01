@@ -30,7 +30,12 @@ export const DatePickerInput = ({ label, date, setDate, error }: DatePickerInput
         <PopoverContent className="w-auto p-0" align="start">
           <Calendar
             mode="single"
-            disabled={(dateValue: Date) => dateValue < today}
+            disabled={(dateValue: Date) => {
+              // Compare only the date parts to allow today's date
+              const todayDateOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+              const dateValueOnly = new Date(dateValue.getFullYear(), dateValue.getMonth(), dateValue.getDate());
+              return dateValueOnly < todayDateOnly;
+            }}
             selected={date}
             onSelect={setDate}
             className="rounded-md border dark:bg-gray-900 bg-gray-50"

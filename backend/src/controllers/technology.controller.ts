@@ -17,7 +17,7 @@ export class TechnologyController {
         return generateResponse(res, 200, newTechnology, true, 'Technology created successfully');
       } else if (technology) {
         return generateResponse(res, 400, {}, false, 'Technology name already exists');
-        }
+      }
       const newTechnology = await technologyService.createTechnology({ name: trimName, questions });
       return generateResponse(res, 200, newTechnology, true, 'Technology created successfully');
     } catch (error) {
@@ -57,7 +57,6 @@ export class TechnologyController {
       // }
       // console.log('questions', questions);
 
-
       for (const question of questions) {
         if (
           (question.type === 'mcq' || question.type === 'multiple_select') &&
@@ -71,6 +70,41 @@ export class TechnologyController {
             false,
             `Question "${question.question}" must have at least 4 non-empty options`
           );
+        }
+      }
+
+      for (const question of questions) {
+        if (question.type === 'mcq' || question.type === 'multiple_select') {
+          const questionNames = questions.map((q: any) => q.question.trim());
+          const duplicateQuestion = questionNames.find((q: string, index: number) => {
+            return questionNames.indexOf(q) !== index;
+          });
+          if (duplicateQuestion) {
+            return generateResponse(
+              res,
+              400,
+              { question: duplicateQuestion },
+              false,
+              `Question already exists in your current stack at question ${questionNames.indexOf(duplicateQuestion) + 1}. Please change the question name.`
+            );
+          }
+        }
+      }
+
+      for (const question of questions) {
+        if (question.type === 'mcq' || question.type === 'multiple_select') {
+          const existingQuestion = await technologyService.getQuestionByName(
+            question.question.trim()
+          );
+          if (existingQuestion && existingQuestion.id !== question.id) {
+            return generateResponse(
+              res,
+              400,
+              { questionId: question.id || null },
+              false,
+              `Question "${question.question}" already exists in the database. Please change the question name.`
+            );
+          }
         }
       }
 

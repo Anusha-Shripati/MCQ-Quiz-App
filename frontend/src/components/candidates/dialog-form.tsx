@@ -228,7 +228,7 @@ export default function DialogForm({ candidate, open, setOpen }: CandidateDialog
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <div className="flex items-end gap-1">
-                  <div className='flex-grow'>
+                  <div className='flex-grow overflow-hidden px-1 py-1'>
                     <FormField
                       label="Assessment"
                       id="assessment"
@@ -239,16 +239,18 @@ export default function DialogForm({ candidate, open, setOpen }: CandidateDialog
                       disabled={assessmentOptions.length === 0}
                     />
                   </div>
-
+                 <div className='px-1 py-1'>
                   <Tooltip delayDuration={0}>
                     <TooltipTrigger asChild>
                       <Button variant='outline' onClick={routeAssessment}> + </Button>
                     </TooltipTrigger>
                     <TooltipContent className="bg-gray-800 text-white p-2 rounded shadow-lg">Create a new assessment</TooltipContent>
                   </Tooltip>
+                  </div>
                 </div>
                 {errors?.assessment?.message && <p className="text-red-500 text-sm mt-1">{errors?.assessment?.message}</p>}
               </div>
+            <div className='px-1 py-1'>
               <FormField
                 label="Experience"
                 id="experience"
@@ -260,6 +262,7 @@ export default function DialogForm({ candidate, open, setOpen }: CandidateDialog
                 {...register('experience')}
                 error={errors.experience?.message as ErrorType}
               />
+              </div>
             </div>
             <FormField
               label="Technology"

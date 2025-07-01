@@ -42,9 +42,9 @@ export const FilterBar = ({
         />
         <DropdownMenu>
           <DropdownMenuTrigger
-            className={`px-4 py-2 rounded-md border cursor-pointer 
-                dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600
-                bg-gray-200 text-gray-800 border-gray-300`}
+            className={`px-4 py-[10px] rounded-md border cursor-pointer 
+                    dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600
+                    bg-gray-200 text-gray-800 border-gray-300`}
           >
             Select Difficulty
           </DropdownMenuTrigger>
@@ -79,7 +79,7 @@ export const FilterBar = ({
           <Link
             href="/questions/create-question/[QuestionSlug]"
             as={`/questions/create-question/${technology}`}
-            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
+            className="px-4 py-3 text-sm font-medium text-white bg-blue-600 rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
           >
             Create Questions
           </Link>

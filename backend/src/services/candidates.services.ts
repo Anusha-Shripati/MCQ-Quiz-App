@@ -20,33 +20,33 @@ export default class CandidatesService {
     try {
       const result = await prisma.$transaction(
         async (tx) => {
-          const existingEmail = await tx.candidate.findUnique({
-            where: { email: data.email },
-          });
-          if (existingEmail && existingEmail.deleted_at === null) {
-            throw new AppError('Email already exists', 400);
-          } else if (existingEmail && existingEmail.deleted_at !== null) {
-            await tx.answers.deleteMany({
-              where: { candidate_id: existingEmail.id },
-            });
-            await tx.candidate.delete({
-              where: { id: existingEmail.id },
-            });
-          }
+          // const existingEmail = await tx.candidate.findUnique({
+          //   where: { email: data.email },
+          // });
+          // if (existingEmail && existingEmail.deleted_at === null) {
+          //   throw new AppError('Email already exists', 400);
+          // } else if (existingEmail && existingEmail.deleted_at !== null) {
+          //   await tx.answers.deleteMany({
+          //     where: { candidate_id: existingEmail.id },
+          //   });
+          //   await tx.candidate.delete({
+          //     where: { id: existingEmail.id },
+          //   });
+          // }
 
-          const existingPhone = await tx.candidate.findUnique({
-            where: { phone: data.phone },
-          });
-          if (existingPhone && existingPhone.deleted_at === null) {
-            throw new AppError('Phone number already exists', 400);
-          } else if (existingPhone && existingPhone.deleted_at !== null) {
-            await tx.answers.deleteMany({
-              where: { candidate_id: existingPhone.id },
-            });
-            await tx.candidate.delete({
-              where: { id: existingPhone.id },
-            });
-          }
+          // const existingPhone = await tx.candidate.findUnique({
+          //   where: { phone: data.phone },
+          // });
+          // if (existingPhone && existingPhone.deleted_at === null) {
+          //   throw new AppError('Phone number already exists', 400);
+          // } else if (existingPhone && existingPhone.deleted_at !== null) {
+          //   await tx.answers.deleteMany({
+          //     where: { candidate_id: existingPhone.id },
+          //   });
+          //   await tx.candidate.delete({
+          //     where: { id: existingPhone.id },
+          //   });
+          // }
 
           const newCandidate = await tx.candidate.create({
             data: {
@@ -109,33 +109,33 @@ export default class CandidatesService {
             throw new AppError('Candidate not found', 404);
           }
 
-          if (data.email && data.email !== existingCandidate.email) {
-            const existingEmail = await tx.candidate.findUnique({
-              where: { email: data.email, deleted_at: null },
-            });
+          // if (data.email && data.email !== existingCandidate.email) {
+          //   const existingEmail = await tx.candidate.findUnique({
+          //     where: { email: data.email, deleted_at: null },
+          //   });
 
-            if (existingEmail && existingEmail.deleted_at === null) {
-              throw new AppError('Email already exists', 400);
-            } else if (existingEmail && existingEmail.deleted_at !== null) {
-              await tx.candidate.delete({
-                where: { id: existingEmail.id },
-              });
-            }
-          }
+          //   if (existingEmail && existingEmail.deleted_at === null) {
+          //     throw new AppError('Email already exists', 400);
+          //   } else if (existingEmail && existingEmail.deleted_at !== null) {
+          //     await tx.candidate.delete({
+          //       where: { id: existingEmail.id },
+          //     });
+          //   }
+          // }
 
-          if (data.phone && data.phone !== existingCandidate.phone) {
-            const existingPhone = await tx.candidate.findUnique({
-              where: { phone: data.phone, deleted_at: null },
-            });
+          // if (data.phone && data.phone !== existingCandidate.phone) {
+          //   const existingPhone = await tx.candidate.findUnique({
+          //     where: { phone: data.phone, deleted_at: null },
+          //   });
 
-            if (existingPhone && existingPhone.deleted_at === null) {
-              throw new AppError('Phone number already exists', 400);
-            } else if (existingPhone && existingPhone.deleted_at !== null) {
-              await tx.candidate.delete({
-                where: { id: existingPhone.id },
-              });
-            }
-          }
+          //   if (existingPhone && existingPhone.deleted_at === null) {
+          //     throw new AppError('Phone number already exists', 400);
+          //   } else if (existingPhone && existingPhone.deleted_at !== null) {
+          //     await tx.candidate.delete({
+          //       where: { id: existingPhone.id },
+          //     });
+          //   }
+          // }
 
           if (data.assessment_id && data.assessment_id !== existingCandidate.assessment_id) {
             if (!existingCandidate.exam) {

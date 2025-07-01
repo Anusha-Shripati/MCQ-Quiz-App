@@ -126,9 +126,9 @@ model Candidate {
     assessment_id String
     exam_id       String      @unique
     name          String
-    email         String      @unique
+    email         String
     experience    Float       @default(0)
-    phone         String      @unique
+    phone         String
     meta          Json?
     created_at    DateTime    @default(now())
     updated_at    DateTime    @updatedAt

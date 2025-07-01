@@ -10,6 +10,7 @@ export interface CreateCandidate {
   meta?: any;
   start_date?: Date;
   end_date?: Date;
+    
 }
 
 export interface UpdateCandidate extends Partial<CreateCandidate> {

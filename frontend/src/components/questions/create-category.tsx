@@ -9,7 +9,7 @@ import { AxiosError } from 'axios';
 import useSWRMutation from 'swr/mutation';
 import { mutate } from 'swr';
 import { useQuestionStore } from '@/store/questionStore';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { technologyEndpoint } from '@/lib/endpoint';
 
 import ImportSampleXLSX from './import-sample-xlsx';
@@ -32,7 +32,6 @@ const CreateCategory: React.FC<CreateCategoryProps> = ({ categoriesArray = [] })
   const [categoryName, setCategoryName] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const pathname = usePathname();
-  const router = useRouter();
   const { hasPermissionQuestionEdit } = useAuthStore();
   const isQuestionEditable = hasPermissionQuestionEdit();
   const { setTechnologyFilter, technologyFilter } = useQuestionStore();
@@ -95,12 +94,12 @@ const CreateCategory: React.FC<CreateCategoryProps> = ({ categoriesArray = [] })
         />
         {isQuestionEditable && (
           <>
-          <Button
+          {/* <Button
           className="bg-blue-600 text-primary-foreground hover:bg-primary/90"
           onClick={() => router.push('/questions/create-question/new')}
         >
           Create Technology
-        </Button>
+        </Button> */}
         <Button
           className="bg-blue-600 text-primary-foreground hover:bg-primary/90"
           onClick={() => setImportOpen(true)}

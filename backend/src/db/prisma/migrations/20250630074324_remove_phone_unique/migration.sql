@@ -13,7 +13,7 @@ CREATE TYPE "Question_type" AS ENUM ('multiple_select', 'video', 'text', 'mcq', 
 -- CreateTable
 CREATE TABLE "users" (
     "id" TEXT NOT NULL,
-    "role_id" TEXT NOT NULL,
+    "role_id" TEXT,
     "name" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "password" TEXT NOT NULL,
@@ -224,16 +224,10 @@ CREATE UNIQUE INDEX "Technology_name_key" ON "Technology"("name");
 CREATE UNIQUE INDEX "Candidate_exam_id_key" ON "Candidate"("exam_id");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Candidate_email_key" ON "Candidate"("email");
-
--- CreateIndex
-CREATE UNIQUE INDEX "Candidate_phone_key" ON "Candidate"("phone");
-
--- CreateIndex
 CREATE UNIQUE INDEX "Results_exam_id_key" ON "Results"("exam_id");
 
 -- AddForeignKey
-ALTER TABLE "users" ADD CONSTRAINT "users_role_id_fkey" FOREIGN KEY ("role_id") REFERENCES "Roles"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "users" ADD CONSTRAINT "users_role_id_fkey" FOREIGN KEY ("role_id") REFERENCES "Roles"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Role_permissions" ADD CONSTRAINT "Role_permissions_role_id_fkey" FOREIGN KEY ("role_id") REFERENCES "Roles"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

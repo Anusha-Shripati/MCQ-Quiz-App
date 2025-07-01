@@ -19,6 +19,7 @@ import SafariWindowShareError from '@/components/test/safari-window-share-error'
 import CheckValidDevice from '@/components/test/check-valid-device';
 import MultipleScreensWarning from '@/components/test/multiple-screens-warning';
 import CameraRetry from '@/components/test/camera-retry';
+import ExamExpired from '@/components/test/exam-expired';
 
 // Hooks and Stores
 import useDeviceDetection from '@/hooks/useDeviceDetection';
@@ -33,10 +34,10 @@ import { QUIZ_CONFIG, SNAPSHOT } from '@/shared/constants/data';
 import { EXAM_STEP } from '@/types/exam.types';
 
 // Utility functions
-import { detectMultipleScreens, isFirefox, isSafari, getBrowser } from '@/components/test/utils/screenDetection';
-import { startCamera, takeScreenshot, stopMediaStreams } from '@/components/test/utils/cameraUtils';
-import { startScreenRecording, handleFirefoxScreenShare, handleSafariScreenShare } from '@/components/test/utils/screenShare';
-import { requestFullscreen, setupSecurityEventListeners } from '@/components/test/utils/securityUtils';
+import { detectMultipleScreens, isFirefox, isSafari, getBrowser } from '@/components/test/testUtils/screenDetection';
+import { startCamera, takeScreenshot, stopMediaStreams } from '@/components/test/testUtils/cameraUtils';
+import { startScreenRecording, handleFirefoxScreenShare, handleSafariScreenShare } from '@/components/test/testUtils/screenShare';
+import { requestFullscreen, setupSecurityEventListeners } from '@/components/test/testUtils/securityUtils';
 
 
 const QuizPage = () => {
@@ -66,6 +67,7 @@ const QuizPage = () => {
   const [showCameraRetry, setShowCameraRetry] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [showSafariWindowShareError, setShowSafariWindowShareError] = useState(false);
+  const [examExpired, setExamExpired] = useState(false);
 
   const screenStream = useRef<MediaStream | null>(null);
   const screenSnapshotRef = useRef<HTMLVideoElement | null>(null);
@@ -77,6 +79,18 @@ const QuizPage = () => {
     camera: true,
     screen: true,
   });
+
+  const checkExamExpired = (endTimeStr: string): boolean => {
+    try {
+      const endTime = new Date(endTimeStr).getTime();
+      const currentTime = new Date().getTime();
+      
+      return currentTime > endTime;
+    } catch (err) {
+      console.error('Error checking exam expiry:', err);
+      return false;
+    }
+  };
 
   /**
    * Fetches candidate data from the API
@@ -94,6 +108,7 @@ const QuizPage = () => {
       setAccessCode(code);
 
       const data = await examApi.get(examEndpoint.CANDIDATE_EXAM, code);
+      console.log('Candidate data:', data.data.exam.end_time);
 
       if (!data.success) {
         setError(data.message || 'Access denied. Invalid or expired access code.');
@@ -102,6 +117,13 @@ const QuizPage = () => {
       
       if (data.data.exam.status === 'completed') {
         router.push('/thank-you');
+        return false;
+      }
+
+      // Check if exam has expired
+      const isExpired = checkExamExpired(data.data.exam.end_time);
+      setExamExpired(isExpired);
+      if (isExpired) {
         return false;
       }
 
@@ -520,6 +542,11 @@ const QuizPage = () => {
             </ul>
           }
           title="Access Denied"
+        />
+      ) : examExpired ? (
+        <ExamExpired 
+          contactEmail="support@yourexamdomain.com"
+          onRetry={() => window.location.reload()}
         />
       ) : loading || !candidate ? (
         <TestLoading />

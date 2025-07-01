@@ -14,14 +14,14 @@ interface ExamStore {
   accessCode: string;
   exam: IExam | null;
   candidate: CandidateData | null;
+  cameraStreamRef: MediaStream | null;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
   setAccessCode: (code: string) => void;
   setExam: (exam: IExam | null) => void;
   setCurrentStep: (step: EXAM_STEP) => void;
   setCandidate: (candidate: CandidateData | null) => void;
-  cameraStreamRef: MediaStream | null,
-  setCameraStream :(stream:MediaStream)=>void
+  setCameraStream: (stream: MediaStream) => void;
 }
 
 export const useExamStore = create<ExamStore>((set) => ({
@@ -30,11 +30,9 @@ export const useExamStore = create<ExamStore>((set) => ({
   exam: null,
   candidate: null,
   accessCode: '',
-  cameraStreamRef:null,
+  cameraStreamRef: null,
   current_step: EXAM_STEP.BASIC_INFO,
-  setCameraStream:(stream:MediaStream)=>{
-    set({cameraStreamRef:stream})
-  },
+  setCameraStream: (stream) => set({ cameraStreamRef: stream }),
   setCandidate: (candidate: CandidateData | null) => {
     set({ candidate });
   },

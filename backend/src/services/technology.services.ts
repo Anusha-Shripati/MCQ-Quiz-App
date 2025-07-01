@@ -106,6 +106,9 @@ export class TechnologyService {
   async getTechnologyByName(name: string): Promise<Technology | null> {
     return prisma.technology.findUnique({ where: { name } });
   }
+  async getQuestionByName(name: string): Promise<Questions | null> {
+    return prisma.questions.findFirst({ where: { question: name } });
+  }
 
   async deleteTechnology(id: string): Promise<Technology | null> {
     const currentDate = new Date();

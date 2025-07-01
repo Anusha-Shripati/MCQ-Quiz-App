@@ -83,12 +83,12 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
   const questionTypeOptions = useMemo(
     () =>
       [
-        // { value: 'multiple_select', label: 'Multiple Choice' },
+        { value: 'multiple_select', label: 'Multiple Choice' },
         { value: 'mcq', label: 'Radio Select' },
-        // { value: 'text', label: 'Fill in the Blanks' },
-        // { value: 'code_snippet', label: 'Code Snippet' },
-        // { value: 'code_editor', label: 'Code Editor' },
-        // { value: 'video', label: 'Video' },
+        { value: 'text', label: 'Fill in the Blanks' },
+        { value: 'code_snippet', label: 'Code Snippet' },
+        { value: 'code_editor', label: 'Code Editor' },
+        { value: 'video', label: 'Video' },
       ] as { value: Question['type']; label: string }[],
     []
   );

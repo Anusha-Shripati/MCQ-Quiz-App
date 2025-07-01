@@ -4,6 +4,7 @@ import { generateResponse } from '../utils/generateResponse';
 import { createToken, encryptStringCrypt, matchPassword } from '../middlewares/auth.middleware';
 import RoleService from '../services/role.services';
 import { UploadService } from '../services/upload.services';
+import { sendWelcomeEmail } from '../utils/email.utils';
 
 const userService = new UserService();
 const roleService = new RoleService();
@@ -59,6 +60,8 @@ export class UserController {
               password: hashedPassword,
               deleted_at: null,
             });
+            // Send welcome back email
+            await sendWelcomeEmail(payload.name, payload.email, payload.password);
             return generateResponse(res, 200, updatedUser, true, 'User restored successfully!');
           } catch (error) {
             console.error('Error restoring user:', error);
@@ -82,6 +85,8 @@ export class UserController {
         created_at: new Date(),
         name: payload.name,
       });
+      const role = newUser.role_id ? await roleService.findRoleById(newUser.role_id) : null;
+      await sendWelcomeEmail(payload.name, payload.email, payload.password, role?.name);
 
       return generateResponse(res, 200, newUser, true, 'User created successfully!');
     } catch (error) {
@@ -122,7 +127,7 @@ export class UserController {
           });
 
           await userService.delete(userId);
-
+          
           return generateResponse(
             res,
             200,

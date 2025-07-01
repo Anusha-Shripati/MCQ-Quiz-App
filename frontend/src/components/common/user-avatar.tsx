@@ -10,7 +10,6 @@ import {
 } from '../ui/dropdown-menu';
 import { LogOut, Settings } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 
 const UserAvatar = () => {
   const { user } = useAuthStore();
@@ -33,8 +32,8 @@ const UserAvatar = () => {
           className={`flex items-center rounded-sm cursor-pointer gap-3`}
         >
           <Avatar className="w-9 h-9 rounded-full">
-            <Image
-              src={`${user?.image || 'https://avatars.githubusercontent.com/u/47379519?v=4'}`}
+            <img
+              src={`${((process.env.NEXT_PUBLIC_IMGAE_PREFIX || '') + (user?.image || '')) || 'https://avatars.githubusercontent.com/u/47379519?v=4'}`}
               className="w-full h-full"
               alt="User Avatar" 
               width={96}

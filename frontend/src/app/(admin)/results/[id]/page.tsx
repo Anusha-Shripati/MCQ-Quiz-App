@@ -28,6 +28,7 @@ function Answer() {
   const [result, setResult] = useState<Result | null>(null)
   const { data, isLoading, error, isValidating, mutate } = useSWR(`${resultEndpoint.RESULT_BY_ID}/${id}`, api.get)
   const [introduction, setIntroduction] = useState<AnswerData | null>(null)
+  const [activeTab, setActiveTab] = useState('introduction')
 
   useEffect(() => {
     if (data) {
@@ -62,7 +63,11 @@ function Answer() {
             />
           )}
 
-          <Tabs className="mt-8" defaultValue="introduction">
+          <Tabs
+            className="mt-8"
+            value={activeTab}
+            onValueChange={setActiveTab}
+          >
             <List className="flex border-b border-gray-200 dark:border-gray-700 mb-6">
               <Trigger
                 className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 data-[state=active]:border-b-2 data-[state=active]:border-blue-600 dark:data-[state=active]:border-blue-400"
@@ -95,7 +100,7 @@ function Answer() {
                   )}
                   <div className="w-full aspect-video max-w-xl mb-4 relative">
                     {introduction.user_answer?.[0] ? (
-                      <VideoPreview videoUrl={introduction.user_answer[0]} />
+                      <VideoPreview videoUrl={`${process.env.NEXT_PUBLIC_IMGAE_PREFIX}${introduction.user_answer[0]}`} />
                     ) : (
                       <div className="flex flex-col items-center justify-center h-full bg-gray-100 dark:bg-gray-700 rounded">
                         <svg className="w-16 h-16 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

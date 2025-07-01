@@ -43,6 +43,7 @@ export const roleEndpoint={
 export const resultEndpoint={
     LIST:"/result/list",
     RESULT_BY_ID:"/result",
+    UPDATE_SCORE:"/result/update-score",
 
 }
 export const moduleEndpoint={

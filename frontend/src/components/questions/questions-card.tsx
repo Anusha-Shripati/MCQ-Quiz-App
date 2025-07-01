@@ -54,7 +54,7 @@ export const QuestionCard = ({
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const { hasPermissionQuestionEdit } = useAuthStore();
   const isQuestionEditable = hasPermissionQuestionEdit();
-  console.log('QuestionCard');
+  console.log(question);
   return (
     <>
       <Card className="dark:bg-gray-700 dark:text-gray-200 bg-gray-100 text-gray-800 mb-4 p-4 shadow-sm w-full h-card md:h-auto">
@@ -67,48 +67,49 @@ export const QuestionCard = ({
             {questionType[question.type as keyof typeof questionType]?.label || 'Unknown'}
           </Badge>
         </div>
-        {(question.type == 'mcq' || question.type == 'multiple_select') && (
-          <ul className="space-y-2 max-w-full">
-            {question.options
-              ?.filter((option) => option !== '')
-              .map((option, index) => (
-                <li
-                  key={index}
-                  className={`p-2 rounded-md text-sm md:text-base break-words whitespace-pre-wrap overflow-hidden ${
-                    question?.correct_answer.includes(index.toString())
-                      ? 'dark:bg-green-800 dark:text-green-100 bg-green-100 text-green-800'
-                      : 'dark:bg-gray-800 dark:text-gray-400 bg-gray-100 text-gray-800'
-                  }`}
-                >
-                  {String.fromCharCode(65 + index)}. {option}
-                </li>
-              ))}
-            {question.meta?.code ? (
-              <li
-                key="code"
-                className={`p-2 rounded-md text-sm md:text-base max-w-full whitespace-pre-wrap break-all ${
-                  question?.correct_answer.includes(index.toString())
-                    ? 'dark:bg-green-800 dark:text-green-100 bg-green-100 text-green-800'
-                    : 'dark:bg-gray-800 dark:text-gray-400 bg-gray-100 text-gray-800'
-                }`}
-              >
-                <pre className="overflow-x-auto max-w-full">{question.meta?.code as string}</pre>
-              </li>
-            ) : (
-              ''
-            )}
+        <ul className="space-y-2 max-w-full">
+          {(question.type == 'mcq' || question.type == 'multiple_select') && (
+            <>
+              {question.options
+                ?.filter((option) => option !== '')
+                .map((option, index) => (
+                  <li
+                    key={index}
+                    className={`p-2 rounded-md text-sm md:text-base break-words whitespace-pre-wrap overflow-hidden ${question?.correct_answer.includes(index.toString())
+                        ? 'dark:bg-green-800 dark:text-green-100 bg-green-100 text-green-800'
+                        : 'dark:bg-gray-800 dark:text-gray-400 bg-gray-100 text-gray-800'
+                      }`}
+                  >
+                    {String.fromCharCode(65 + index)}. {option}
+                  </li>
+                ))}
+            </>
+          )}
 
-            {question.meta?.videoToVideo ? (
-              <div
-                key="video"
-                className="w-full overflow-hidden"
-                dangerouslySetInnerHTML={{ __html: question.meta?.video_url || '' }}
-              ></div>
-            ) : (
-              ''
-            )}
-          </ul>
-        )}
+          {question.meta?.code ? (
+            <li
+              key="code"
+              className={`p-2 rounded-md text-sm md:text-base max-w-full whitespace-pre-wrap break-all ${question?.correct_answer.includes(index.toString())
+                  ? 'dark:bg-green-800 dark:text-green-100 bg-green-100 text-green-800'
+                  : 'dark:bg-gray-800 dark:text-gray-400 bg-gray-100 text-gray-800'
+                }`}
+            >
+              <pre className="overflow-x-auto max-w-full">{question.meta?.code as string}</pre>
+            </li>
+          ) : (
+            ''
+          )}
+
+          {question.meta?.videoToVideo ? (
+            <div
+              key="video"
+              className="w-full overflow-hidden"
+              dangerouslySetInnerHTML={{ __html: question.meta?.video_url || '' }}
+            ></div>
+          ) : (
+            ''
+          )}
+        </ul>
         <div className="flex justify-between items-center mt-4 text-sm">
           {isQuestionEditable && (
             <>

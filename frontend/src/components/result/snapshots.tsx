@@ -56,7 +56,7 @@ function Snapshots(props: SnapshotsProps) {
                                     return <div className="flex flex-col cursor-pointer transition-transform" key={index} onClick={() => toggle(item, index)}>
                                         <div className="overflow-hidden rounded-lg mb-2">
                                             <Image
-                                                src={img.image}
+                                                src={`${process.env.NEXT_PUBLIC_IMGAE_PREFIX}${img.image}`}
                                                 alt="Snapshot"
                                                 height={180}
                                                 width={270}
@@ -100,7 +100,8 @@ function Snapshots(props: SnapshotsProps) {
                             {props[selected as keyof SnapshotsProps].map((img, idx) => (
                                 <div key={idx} className="flex flex-col items-center">
                                     <img
-                                        src={img.image}
+                                        src={`${process.env.NEXT_PUBLIC_IMGAE_PREFIX}${img.image}`}
+
                                         alt="Snapshot"
                                         className="max-h-[70vh] object-contain rounded-lg shadow-lg"
                                     />

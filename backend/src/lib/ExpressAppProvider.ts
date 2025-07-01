@@ -15,6 +15,8 @@ import { logger } from '../config/logger';
 import golbalRouter from '../routes';
 import path from 'path';
 import { registerMergeQueueWorker } from '../workers/mergeWorker';
+import { DeleteObjectsCommand, ListObjectsV2Command } from '@aws-sdk/client-s3';
+import { s3Client } from '../utils/S3';
 
 class ExpressAppProvider {
   public app: Express;
@@ -76,6 +78,90 @@ class ExpressAppProvider {
       console.log('Healthcheck called');
       res.status(200).json({ message: 'Server is up and running' });
     });
+
+
+    this.app.get('/get-bucket', (req, res) => {
+
+      async function listAllObjects(bucketName: any) {
+        let isTruncated: any = true;
+        let continuationToken;
+        const allObjects = [];
+
+        while (isTruncated) {
+          const params: any = {
+            Bucket: bucketName,
+            ContinuationToken: continuationToken,
+            MaxKeys: 1000,
+          };
+
+          const data = await s3Client.send(new ListObjectsV2Command(params));
+
+          if (data.Contents) {
+            allObjects.push(...data.Contents);
+          }
+
+          isTruncated = data.IsTruncated;
+          continuationToken = data.NextContinuationToken;
+        }
+
+        return allObjects;
+      }
+
+      listAllObjects(process.env.AWS_BUCKET_NAME).then(objects => {
+        console.log("Total objects:", objects.length);
+        res.send(objects.map(obj => obj.Key));
+      });
+    })
+    this.app.get('/delete-bucket', (req, res) => {
+
+      async function listAllObjects(bucketName: any) {
+        let isTruncated: any = true;
+        let continuationToken;
+        const allObjects = [];
+
+        while (isTruncated) {
+          const listResponse: any = await s3Client.send(
+            new ListObjectsV2Command({
+              Bucket: bucketName,
+              ContinuationToken: continuationToken,
+            })
+          );
+
+          const contents = listResponse.Contents || [];
+
+          if (contents.length === 0) {
+            console.log("Bucket is already empty.");
+            return;
+          }
+
+          // Step 2: Prepare list of objects to delete
+          const objectsToDelete = contents.map((item: any) => ({ Key: item.Key! }));
+          console.log(objectsToDelete);
+
+          // Step 3: Delete the batch
+          await s3Client.send(
+            new DeleteObjectsCommand({
+              Bucket: bucketName,
+              Delete: {
+                Objects: objectsToDelete,
+                Quiet: false,
+              },
+            })
+          );
+
+          console.log(`Deleted ${objectsToDelete.length} objects.`);
+
+          isTruncated = listResponse.IsTruncated ?? false;
+          continuationToken = listResponse.NextContinuationToken;
+        }
+      }
+
+      listAllObjects(process.env.AWS_BUCKET_NAME).then(objects => {
+        res.send('Success');
+      });
+
+    })
+
   }
 
   private initializeErrorHandling(): void {
@@ -95,7 +181,7 @@ class ExpressAppProvider {
   public async startServer(): Promise<void> {
     try {
       await connectToDatabase();
-      registerMergeQueueWorker(); 
+      registerMergeQueueWorker();
       this.app.listen(this.port, () => {
         // registerCreateArticleWorkerEvents();
         console.log(`Console Server is running on http://localhost:${this.port}`);

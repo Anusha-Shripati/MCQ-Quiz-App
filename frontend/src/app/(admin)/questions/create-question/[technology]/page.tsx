@@ -169,6 +169,7 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
     const errors: { [key: number]: string } = {};
 
     questions.forEach((q, index) => {
+      errors[index] = '';
       if (q.question.trim() === '') {
         errors[index] = 'Question cannot be empty';
         hasErrors = true;
@@ -190,7 +191,7 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
           }
         }
 
-        if (q.correct_answer.length === 0) {
+        if (q.correct_answer.length === 0 ) {
           errors[index] = errors[index] || 'Please select at least one correct answer';
           hasErrors = true;
         }
@@ -209,7 +210,7 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
       return;
     }
 
-    if (isValidTechnology) {
+    // if (isValidTechnology) {
       try {
         const response = await updateTrigger({ name, questions });
         toast.success(response.message || 'Technology saved successfully!');
@@ -222,28 +223,30 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
             : 'Failed to save technology.'
         );
       }
-    } else {
-      try {
-        const response = await trigger({ name, questions });
-        toast.success(response.message || 'Technology created successfully!');
-        window.history.replaceState(null, '', `/questions/create-question/${response.data.id}`);
-        setTechnologyId(response.data.id);
-        router.push('/questions');
-        mutate((key: string) => typeof key === 'string' && key.startsWith('/technology/list'));
-      } catch (error) {
-        showSingleToast(
-          isAxiosError(error)
-            ? error.response?.data?.message || 'Failed to save technology.'
-            : 'Failed to save technology.'
-        );
-      }
-    }
+    // } else {
+    //   try {
+    //     const response = await trigger({ name, questions });
+    //     toast.success(response.message || 'Technology created successfully!');
+    //     window.history.replaceState(null, '', `/questions/create-question/${response.data.id}`);
+    //     setTechnologyId(response.data.id);
+    //     router.push('/questions');
+    //     mutate((key: string) => typeof key === 'string' && key.startsWith('/technology/list'));
+    //   } catch (error) {
+    //     showSingleToast(
+    //       isAxiosError(error)
+    //         ? error.response?.data?.message || 'Failed to save technology.'
+    //         : 'Failed to save technology.'
+    //     );
+    //   }
+    // }
   };
   const handleSelectTechnology = (value: string) => {
     setTechnology(value);
+    console.log(value,technologyData?.data?.list);
     const selectedTech = technologyData?.data?.list.find(
       (tech: { id: string; name: string }) => tech.id === value
     );
+    
     if (selectedTech) {
       setName(selectedTech.name);
       window.history.replaceState(null, '', `/questions/create-question/${selectedTech.id}`);
@@ -266,7 +269,6 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
       })) || []
     );
   };
-  const isNewTechnology = !isValidTechnology || !technology;
 
   return (
     <div className="px-2 py-6 flex flex-col h-screen">
@@ -281,7 +283,7 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
               type="select"
               placeholder="Technology"
               className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-300 w-full"
-              value={isNewTechnology ? '' : technology}
+              value={ technology}
               onChange={(value: string) => {
                 handleSelectTechnology(value);
               }}

@@ -5,3 +5,5 @@ export interface UploadedFile {
   size: number;
   path: string;
 }
+
+export type MergeChunk={ UploadId:string, key:string, parts:[{ETag:string, PartNumber:number}]}

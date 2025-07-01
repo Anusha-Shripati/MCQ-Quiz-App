@@ -45,9 +45,8 @@ export default function ProctoredQuiz() {
   const { exam, accessCode, setExam } = useExamStore();
   const [questions, setQuestions] = useState<IExamQuestion[]>([]);
   const alertTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const [prvViolations,setPrvViolations] = useState(0) 
-  console.log(prvViolations);
-  
+  const [prvViolations, setPrvViolations] = useState(0)
+
   const displayAlert = (message: string) => {
     setAlertMessage(message);
     setShowAlert(true);
@@ -69,8 +68,14 @@ export default function ProctoredQuiz() {
     `${examEndpoint.CANDIDATE_EXAM}/${exam?.id}/submit-answer`,
     (url: string, { arg }) => examApi.post(url, arg, accessCode)
   )
+  const { trigger:videoTrigger, isMutating:isVideoMutating } = useSWRMutation(`${examEndpoint.CANDIDATE_EXAM}/${exam?.id}/submit-answer`, 
+    (url: string, { arg }: { arg: {foldername:string,UploadId:string,parts:{ETag:string,PartNumber:number}[],question_id:string,merge_chunk:boolean} }) => 
+      examApi.post(url, arg, accessCode)
+  );
+  
   const { isMutating: isSubmiting, trigger: submitTrigger } = useSWRMutation(`${examEndpoint.CANDIDATE_EXAM}/${exam?.id}/finish`, (url: string) => examApi.get(url, accessCode))
   const { isMutating: isReseting, trigger: resetTrigger } = useSWRMutation(`${examEndpoint.CANDIDATE_EXAM}/${exam?.id}/reset-answer`, (url: string, { arg }: { arg: { answer_id: string } }) => examApi.post(url, arg, accessCode))
+  console.log(isMutating , isSubmiting , isVideoMutating,'isVideoMutating');
 
   useEffect(() => {
     if (examData) {
@@ -84,6 +89,7 @@ export default function ProctoredQuiz() {
           answer: question.question.type == QuestionType.MULTIPLE_SELECT ? a.user_answer : a.user_answer[0],
           answer_id: a.id
         }
+        obj[a.question_id as string].answer = question.question.type == QuestionType.VIDEO ? (process.env.NEXT_PUBLIC_IMGAE_PREFIX || '')+obj[a.question_id as string].answer : obj[a.question_id as string].answer
       })
       setAnswers(obj)
       localStorage.setItem('quizAnswers', JSON.stringify(obj))
@@ -163,10 +169,8 @@ export default function ProctoredQuiz() {
   };
 
   const requestFullScreen = async () => {
-    console.log('opop');
-    
+
     if (!containerRef.current) return;
-    console.log('opop');
 
     try {
 
@@ -187,7 +191,7 @@ export default function ProctoredQuiz() {
       await examApi.post(`${examEndpoint.CANDIDATE_EXAM}/${exam?.id}/submit-violation`, {
         violations: violations.current,
       }, accessCode);
-      setPrvViolations((prv)=> prv + violations.current.length)
+      setPrvViolations((prv) => prv + violations.current.length)
       violations.current = []; // Clear violations after successful submission
     } catch (error) {
       console.error('Error submitting violations:', error);
@@ -195,8 +199,7 @@ export default function ProctoredQuiz() {
   }
 
   const addViolation = (violation: Omit<Violation, 'timestamp'>) => {
-    console.log(violations.current);
-    
+
     if (audioRef.current) {
       audioRef.current.play()
     }
@@ -210,7 +213,7 @@ export default function ProctoredQuiz() {
     if ((violations.current.length + prvViolations) >= QUIZ_CONFIG.maxViolations) {
       // submitQuiz();
     }
-    displayAlert(`Warning: ${violation.details}`);
+    // displayAlert(`Warning: ${violation.details}`);
 
   };
 
@@ -318,21 +321,21 @@ export default function ProctoredQuiz() {
     }));
   }, [answers]);
 
-const submitQuiz = async () => {
-  if (isSubmitting) return;
-  try {
-        await handleNextQuestion();
-    setIsSubmitting(true);
-    await submitTrigger();
-    
-    router.push('/thank-you');
-  } catch (error) {
-    console.error('Error submitting quiz:', error);
-    setIsSubmitting(false);
+  const submitQuiz = async () => {
+    if (isSubmitting) return;
+    try {
+      await handleNextQuestion();
+      setIsSubmitting(true);
+      await submitTrigger();
+
+      router.push('/thank-you');
+    } catch (error) {
+      console.error('Error submitting quiz:', error);
+      setIsSubmitting(false);
       setShowAlert(true)
       setAlertMessage(isAxiosError(error) ? error.response?.data.message : 'An error occurred')
-  }
-};
+    }
+  };
 
   // Also update the timer end handler to send email on auto-submit
   const handleTimerEnd = async () => {
@@ -344,8 +347,8 @@ const submitQuiz = async () => {
         await document.exitFullscreen();
       }
       await submitTrigger();
-      
-    
+
+
       router.push('/thank-you');  // use router if available
     } catch (error) {
       console.error('Auto-submit failed:', error);
@@ -464,7 +467,7 @@ const submitQuiz = async () => {
       return;
     }
     setAnswers((prv) => {
-      const temp = {...prv}
+      const temp = { ...prv }
       delete temp[current_question.question_id];
       return temp
     })
@@ -486,27 +489,36 @@ const submitQuiz = async () => {
       let success = false;
 
       if (questionType === QuestionType.VIDEO) {
-        if (recordingUrl === existingAnswer) {
-          goToNextQuestion();
-          return;
-        }
-        const foldername = await uploadFileInChunks(recordingBlob as Blob);
-        const payload ={
-          foldername,
-          merge_chunk:true,
-          question_id:questionId
-        }
-        const response = await trigger(payload)
+        // if (recordingUrl === existingAnswer) {
+        //   goToNextQuestion();
+        //   return;
+        // }
+        const { fileName, parts, UploadId } = await uploadFileInChunks(recordingBlob as Blob, 5 * 1024 * 1024, exam?.id || '');
+
+        // Prepare payload for background processing
+        const payload = {
+          foldername: fileName,
+          UploadId,
+          parts,
+          merge_chunk: true,
+          question_id: questionId
+        };
+
+        const response = await videoTrigger(payload)
+          .catch(error => {
+            console.error('Background video processing failed:', error);
+          })
+        console.log(response);
         if (response.success) {
 
-          const userAnswer = response.data?.answer?.user_answer?.[0] as string;
+          // const userAnswer = response.data?.answer?.user_answer?.[0] as string;
 
           setAnswers((prev) => ({
             ...prev,
             [questionId]: {
               question: current,
-              answer: userAnswer,
-              answer_id: response.data?.answer?.id
+              answer: recordingUrl || '',
+              answer_id: questionId
             },
           }));
           success = true;
@@ -577,9 +589,9 @@ const submitQuiz = async () => {
         <TestLoading />
       ) : (
         <>
-          <AlertWrapper showAlert={showAlert} alertMessage={alertMessage} onClose={() => setShowAlert(false)} />
+          {/* <AlertWrapper showAlert={showAlert} alertMessage={alertMessage} onClose={() => setShowAlert(false)} /> */}
 
-          <audio src="/assets/alert.wav" ref={audioRef} style={{ display: 'none' }} />
+          {/* <audio src="/assets/alert.wav" ref={audioRef} style={{ display: 'none' }} /> */}
           <Card className="w-[95vw] max-w-[1200px] mx-auto min-h-[70px] mb-3 shadow-xl border-0 rounded-xl text-black overflow-hidden bg-white/95 backdrop-blur-sm">
             <div className="p-4 flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -597,15 +609,15 @@ const submitQuiz = async () => {
           </Card>
 
           <Card className="w-[95vw] max-w-[1200px] mx-auto min-h-[85vh] shadow-xl border-0 rounded-xl overflow-hidden bg-white/95 backdrop-blur-sm">
-            <TestHeader 
-              submitQuiz={submitQuiz} 
-              timeLeft={timeLeft} 
-              currentQuestionIndex={currentQuestionIndex} 
-              totalQuestion={questions.length || 0} 
-              handleTimerEnd={handleTimerEnd} 
-              isSubmiting={isSubmiting} 
+            <TestHeader
+              submitQuiz={submitQuiz}
+              timeLeft={timeLeft}
+              currentQuestionIndex={currentQuestionIndex}
+              totalQuestion={questions.length || 0}
+              handleTimerEnd={handleTimerEnd}
+              isSubmiting={isSubmiting}
               isMutating={isMutating}
-              answeredQuestionsCount={Object.keys(answers).length} 
+              answeredQuestionsCount={Object.keys(answers).length}
             />
 
             <CardContent className="p-4 md:p-8 space-y-6">
@@ -668,7 +680,7 @@ const submitQuiz = async () => {
                   </h2>
 
                   <div className="pt-2 text-black">
-                    <Question question={questions[currentQuestionIndex]} answers={answers} isLoading={isMutating || isSubmiting} handleAnswerChange={handleAnswerChange} handleStopRecording={handleStopRecording} handleNextQuestion={handleNextQuestion} />
+                    <Question question={questions[currentQuestionIndex]} answers={answers} isLoading={isMutating || isSubmiting || isVideoMutating} handleAnswerChange={handleAnswerChange} handleStopRecording={handleStopRecording} handleNextQuestion={handleNextQuestion} />
                   </div>
                 </div>
               </div>}
@@ -709,7 +721,7 @@ const submitQuiz = async () => {
 
                 <Button
                   onClick={() => handleNextQuestion()}
-                  disabled={(answers[questions[currentQuestionIndex].question_id]?.answer ? false : true) || (isMutating || isSubmiting)}
+                  disabled={(answers[questions[currentQuestionIndex].question_id]?.answer ? false : true) || (isMutating || isSubmiting || isVideoMutating)}
                   variant="outline"
                   className="px-6 py-2 flex items-center gap-2 rounded-full transition-all w-40"
                 >

@@ -1,12 +1,12 @@
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
-import { S3Client } from '@aws-sdk/client-s3';
 import ffmpeg from 'fluent-ffmpeg';
 import multerS3 from 'multer-s3';
 import { v4 as uuidv4 } from 'uuid';
 import { Request } from 'express';
 import { logger } from '../config/logger';
+import { s3Client } from './S3';
 
 const storageMode = process.env.STORAGE_MODE || 'local';
 
@@ -14,16 +14,10 @@ let storage: multer.StorageEngine;
 type ExamFileUploadRequest = Request<{ examId?: string }, any, any, { fileType?: string }>;
 
 if (storageMode === 's3') {
-  const s3 = new S3Client({
-    credentials: {
-      accessKeyId: process.env.AWS_ACCESS_KEY_ID as string,
-      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY as string,
-    },
-    region: process.env.AWS_REGION as string,
-  });
+
 
   storage = multerS3({
-    s3,
+    s3:s3Client,
     bucket: process.env.AWS_BUCKET_NAME as string,
     acl: 'public-read',
     key: (req: ExamFileUploadRequest, file, cb) => {

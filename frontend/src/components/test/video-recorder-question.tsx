@@ -1,4 +1,4 @@
-import React, { FC ,useEffect, useState } from 'react';
+import React, { FC ,useEffect, useMemo, useState } from 'react';
 import VideoRecorder  from '../video-recording/VideoRecorder';
 import { IExamQuestion } from '@/types/exam.types';
 interface VideoRecorderProps {
@@ -11,13 +11,13 @@ interface VideoRecorderProps {
 }
 
 export const VideoRecorderQuestion: FC<VideoRecorderProps> = React.memo(({ question,answers,onRecordingComplete,onRecordingStop,isLoading}) => {
-  const [iframeHTML] = useState(() => question.question?.meta?.video_url || '');
+  const iframeHTML = useMemo(() => question.question?.meta?.video_url || '',[question]);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   useEffect(() => {
     setVideoUrl(answers[question.question_id]?.answer as string);
-  }, [answers]);
-    console.log(iframeHTML);
-    
+    console.log(answers[question.question_id]);
+  }, [answers,question.question_id]);
+
   return (
     <>
         {iframeHTML.includes('iframe') ? (

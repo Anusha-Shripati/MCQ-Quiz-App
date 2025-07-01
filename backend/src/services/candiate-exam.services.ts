@@ -10,7 +10,7 @@ interface Violation {
   details: string;
 }
 
-interface ExamMeta {
+export interface ExamMeta {
   violations?: Violation[];
   [key: string]: any;
 }
@@ -428,7 +428,7 @@ export class CandidateExamService {
         data: {
           score: obj.score,
           total: obj.total,
-          percentage: (obj.score * 100) / obj.total,
+          percentage: ((obj.score || 0) * 100) / (obj.total||1),
           candidate_id: candidateId,
           exam_id: examId,
         },
@@ -456,6 +456,7 @@ export class CandidateExamService {
       throw new Error(error);
     }
   }
+
 
   async submitViolation(examId: string, data: { violations: Violation[] }) {
     const exam = await prisma.exam.findUnique({

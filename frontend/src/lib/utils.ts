@@ -184,10 +184,11 @@ export const formatTestDuration = (startDate: string, endDate: string): string =
   return `${totalMinutes} minutes`;
 };
 
-export const uploadFileInChunks = async (file: Blob, chunkSize: number = 5 * 1024 * 1024, examId: string = '') :Promise<string> => {
+export const uploadFileInChunks = async (file: Blob, chunkSize: number = 5 * 1024 * 1024, examId: string = ''): Promise<{UploadId:string, fileName: string, parts: { ETag: string, PartNumber: number }[] }> => {
   const totalChunks = Math.ceil(file.size / chunkSize);
   const fileName = String(Date.now())
-
+  let UploadId;
+  let parts = [];
   for (let i = 0; i < totalChunks; i++) {
     const start = i * chunkSize;
     const end = start + chunkSize;
@@ -197,10 +198,17 @@ export const uploadFileInChunks = async (file: Blob, chunkSize: number = 5 * 102
     formData.append('filename', fileName);
     formData.append('index', String(i));
     formData.append('totalChunks', String(totalChunks));
-    
-    if(examId) formData.append('examId', examId);
+    if (UploadId) {
+      formData.append('UploadId', UploadId);
+    }
 
-    await api.post(`/upload/chunk?chunkFolder=${fileName}`, formData);
+    if (examId) formData.append('examId', examId);
+
+    const response = await api.post(`/upload/chunk?chunkFolder=${fileName}`, formData);
+    UploadId = response.data.UploadId
+    if(UploadId){
+      parts.push({ ETag: JSON.parse(response.data.ETag as string), PartNumber: i + 1 })
+    }
   }
-  return fileName
+  return {UploadId, fileName, parts }
 }

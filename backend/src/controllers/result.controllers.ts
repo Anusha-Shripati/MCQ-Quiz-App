@@ -23,4 +23,15 @@ export class ResultController {
       next(error);
     }
   };
+
+  updateScore = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { resultId,questionId,score } = req.body;
+
+      const answer = await resultService.updateScore(resultId,questionId,score);
+      generateResponse(res, 200, answer, true, "Successfully update");
+    } catch (error) {
+      next(error);
+    }
+  };
 }

@@ -53,8 +53,8 @@ const ProfilePictureUpload = ({ imageUrl }: { imageUrl: string }) => {
       <div className="relative w-24 h-24">
         {/* Display profile picture or placeholder */}
         {profilePicture ? (
-          <Image
-            src={profilePicture}
+          <img
+            src={`${process.env.NEXT_PUBLIC_IMGAE_PREFIX}${profilePicture}`}
             alt="Profile"
             width={96}
             height={96}

@@ -35,10 +35,9 @@ const VideoRecorder = ({ onRecordingComplete, maxTime, videoKey = 'video', video
 
     const startCamera = useCallback(async () => {
         setIsStreamReady(false);
-
+        setRecordedVideo(null);
         try {
             streamRef.current = cameraStreamRef;
-
             if (videoRef.current) {
                 videoRef.current.srcObject = streamRef.current;
                 await videoRef.current.play().catch((err) => {
@@ -62,7 +61,6 @@ const VideoRecorder = ({ onRecordingComplete, maxTime, videoKey = 'video', video
         controllerRef.current = controller;
 
         const signal = controller.signal;
-
         if (videoLink) {
             setRecordedVideo(videoLink);
             onRecordingStop && onRecordingStop(null, videoLink);
@@ -85,6 +83,7 @@ const VideoRecorder = ({ onRecordingComplete, maxTime, videoKey = 'video', video
                     setStatus('preview');
                 } else {
                     startCamera();
+                    setStatus('idle');
                 }
             });
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -283,7 +282,6 @@ const VideoRecorder = ({ onRecordingComplete, maxTime, videoKey = 'video', video
     
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const onError = (err: any) => {
-        console.log(err);
         setStatus('idle');
         
         // Cleanup existing video URL
@@ -310,6 +308,7 @@ const VideoRecorder = ({ onRecordingComplete, maxTime, videoKey = 'video', video
         onRecordingComplete(recordedChunks, recordedVideo as string);
     }
 
+    
     return (
         <div className="space-y-4 max-w-4xl mx-auto">
             {error && (

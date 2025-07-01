@@ -17,6 +17,10 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'mcq-api.lrdevteam.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'lr-mcq.s3.ap-south-1.amazonaws.com',
+      },
     ],
   },
 };

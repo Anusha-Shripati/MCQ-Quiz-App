@@ -33,7 +33,7 @@ export const VideoRecordingScreen = ({ onRecordingComplete, videoLink }: VideoRe
   const { cameraStreamRef } = useExamStore();
   
   const { trigger } = useSWRMutation(`${examEndpoint.CANDIDATE_EXAM}/${exam?.id}/submit-answer`, 
-    (url: string, { arg }: { arg: {foldername:string,question_name:string,merge_chunk:boolean} }) => 
+    (url: string, { arg }: { arg: {foldername:string,UploadId:string,parts:{ETag:string,PartNumber:number}[],question_name:string,merge_chunk:boolean} }) => 
       examApi.post(url, arg, accessCode)
   );
   
@@ -48,15 +48,18 @@ export const VideoRecordingScreen = ({ onRecordingComplete, videoLink }: VideoRe
       setIsUploading(true);
       
       // Upload chunks - this we need to wait for
-      const foldername = await uploadFileInChunks(recordingBlob as Blob);
+      const {fileName,parts,UploadId} = await uploadFileInChunks(recordingBlob as Blob,5 * 1024 * 1024,exam?.id || '');
       
       // Prepare payload for background processing
       const payload = {
-        foldername,
+        foldername:fileName,
+        UploadId,
+        parts,
         merge_chunk: true,
         question_name: 'introduction'
       };
       onRecordingComplete();
+      
       trigger(payload)
         .catch(error => {
           console.error('Background video processing failed:', error);

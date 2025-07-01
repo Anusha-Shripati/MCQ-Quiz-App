@@ -132,7 +132,7 @@ const QuizPage = () => {
           (a: { question_name: string }) => a.question_name === 'introduction'
         )?.user_answer[0] || null;
         
-      setVideoLink(videoLink);
+      setVideoLink(videoLink? process.env.NEXT_PUBLIC_IMGAE_PREFIX + videoLink:videoLink);
       setCandidate(data.data);
       setExam(data.data.exam);
       setLoading(false);

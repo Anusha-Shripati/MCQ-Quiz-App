@@ -11,11 +11,17 @@ const resultController = new ResultController()
 resultRouter.get("/list",
     authenticateAndAuthorize('results.can_read'),
     asyncHandler(resultController.list));
-    
+
 resultRouter.get("/:id",
     authenticateAndAuthorize('results.can_read'),
     validateRequest(resultSchema.get),
     asyncHandler(resultController.get));
+
+resultRouter.post("/update-score",
+    authenticateAndAuthorize('results.can_edit'),
+    validateRequest(resultSchema.updateScore),
+    asyncHandler(resultController.updateScore));
+
 
 
 export default resultRouter;

@@ -42,7 +42,6 @@ function Question({ question, answers, handleAnswerChange, handleStopRecording, 
         case QuestionType.VIDEO:
             return (
                 <VideoRecorderQuestion isLoading={isLoading} question={question} answers={answers} onRecordingStop={(blob, url) => {
-                    console.log(blob);
                     return handleStopRecording(blob, url)
                 }} onRecordingComplete={() => handleNextQuestion()} />
             );

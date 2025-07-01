@@ -1,5 +1,6 @@
 import { prisma } from '../db/prisma.client';
 import { CacheService } from './cacheService';
+import { ExamMeta } from './candiate-exam.services';
 import { UploadService } from './upload.services';
 
 interface ResultParams {
@@ -54,6 +55,9 @@ export class ResultService {
               },
             },
           },
+          orderBy:{
+            created_at:'asc'
+          }
         },
       },
     });
@@ -239,4 +243,74 @@ export class ResultService {
     await this.cacheService.setKey(key, response, this.cacheTime);
     return response;
   };
+
+  async updateScore(resultId: string, questionId: string, score: number) {
+    try {
+      const existingResult = await prisma.results.findFirst({
+        where: { id: resultId },
+        include: { exam: true },
+      });
+      const existingAns = await prisma.answers.findFirst({
+        where: { question_id: questionId },
+        include: { question: true },
+      });
+
+      if (!existingResult || !existingAns) {
+        throw new Error('Result or Answer not found');
+      }
+      if (score > existingAns.weight) {
+        throw new Error('Marks should be less than or equal to its weightage');
+      }
+
+      // Extract and update tech_score
+      const meta: ExamMeta = (existingResult.exam.meta as ExamMeta) || {};
+      let tech_score: {
+        technology_id: string;
+        score: number;
+        total: number;
+        percentage: number;
+      }[] = Array.isArray(meta.tech_score) ? meta.tech_score : [];
+
+      tech_score = tech_score.map((item) => {
+        if (item.technology_id === existingAns.question?.technology_id) {
+          const newScore = item.score - (existingAns.score || 0) + score;
+          return {
+            ...item,
+            score: newScore,
+            percentage: (newScore * 100) / (item.total || 1),
+          };
+        }
+        return item;
+      });
+
+      const totalScore = tech_score.reduce((sum, item) => sum + (item.score || 0), 0);
+
+      const result = await prisma.results.update({
+        where: { id: resultId },
+        data: {
+          score: totalScore,
+          percentage: (totalScore * 100) / (existingResult.total || 1),
+        },
+      });
+
+      const updatedMeta: ExamMeta = {
+        ...meta,
+        tech_score,
+      };
+      const exam = await prisma.exam.update({
+        where: { id: existingResult.exam_id },
+        data: { meta: updatedMeta },
+      });
+
+      const ans = await prisma.answers.update({
+        where: { id: existingAns.id },
+        data: { score: score },
+      });
+
+      return { result, exam, score };
+    } catch (error: any) {
+      throw new Error(error.message || error);
+    }
+  }
+
 }

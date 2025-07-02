@@ -188,7 +188,7 @@ export const uploadFileInChunks = async (file: Blob, chunkSize: number = 5 * 102
   const totalChunks = Math.ceil(file.size / chunkSize);
   const fileName = String(Date.now())
   let UploadId;
-  let parts = [];
+  const parts = [];
   for (let i = 0; i < totalChunks; i++) {
     const start = i * chunkSize;
     const end = start + chunkSize;

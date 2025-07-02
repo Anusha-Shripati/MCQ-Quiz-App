@@ -281,7 +281,9 @@ const VideoRecorder = ({ onRecordingComplete, maxTime, videoKey = 'video', video
     }, [status, isStreamReady]);
     
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const onError = (err: any) => {
+    const onError = () => {
+        // console.log(err);
+        
         setStatus('idle');
         
         // Cleanup existing video URL

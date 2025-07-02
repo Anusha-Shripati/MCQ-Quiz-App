@@ -130,7 +130,7 @@ const QuestionReview: React.FC<QuestionReviewProps> = ({ answers }) => {
                           onClick={() =>
                             handleSelection({
                               ...ans,
-                              result_id: (ans as any).result_id ?? '',
+                              result_id: (ans as AnswerData).result_id ?? '',
                               score: String(ans.score ?? 0),
                             } as Answer)
                           }

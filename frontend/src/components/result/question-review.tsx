@@ -47,8 +47,8 @@ const QuestionReview: React.FC<QuestionReviewProps> = ({ answers }) => {
   }
   const handleSave = async () => {
     setScoreError('')
-
-    if (isNaN(updatedScore) || !updatedScore) {
+    
+    if (isNaN(updatedScore) ) {
       setScoreError(scoreError + ' Please enter valid number')
       return
     }
@@ -211,15 +211,13 @@ const QuestionReview: React.FC<QuestionReviewProps> = ({ answers }) => {
                   <div className="relative">
                     <p className="text-xs text-purple-600 dark:text-purple-300 mb-1">Candidate Answer</p>
                     <p className="font-medium text-purple-900 dark:text-purple-100 text-sm">
-                      {Array.isArray(ans.user_answer) ? ans.user_answer.map((item) => ans.question?.options[Number(item)]).filter(item => item).join(', ') : '-'}
+                      {Array.isArray(ans.user_answer) ? ans.user_answer.map((item:string) => ans.question?.options[Number(item)]).filter(item => item).join(', ') : '-'}
                     </p>
                   </div>
                   <div className="relative">
                     <p className="text-xs text-indigo-600 dark:text-indigo-300 mb-1">Correct Answer</p>
                     <p className="font-medium text-indigo-900 dark:text-indigo-100 text-sm">
-                      {Array.isArray(ans.question?.correct_answer)
-                        ? ans.question.correct_answer.join(', ')
-                        : '-'}
+                      {Array.isArray(ans.question?.correct_answer) ? ans.question?.correct_answer.map((item) => ans.question?.options[Number(item)]).filter(item => item).join(', ') : '-'}
                     </p>
                   </div>
                 </div>}

@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import Image from 'next/image';
 import { Camera, User2Icon } from 'lucide-react';
 import { Input } from '../ui/form/input';
 import { Button } from '../ui/form/button';

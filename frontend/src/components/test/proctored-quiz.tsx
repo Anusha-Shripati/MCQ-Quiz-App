@@ -213,7 +213,7 @@ export default function ProctoredQuiz() {
     if ((violations.current.length + prvViolations) >= QUIZ_CONFIG.maxViolations) {
       // submitQuiz();
     }
-    // displayAlert(`Warning: ${violation.details}`);
+    displayAlert(`Warning: ${violation.details}`);
 
   };
 
@@ -589,9 +589,9 @@ export default function ProctoredQuiz() {
         <TestLoading />
       ) : (
         <>
-          {/* <AlertWrapper showAlert={showAlert} alertMessage={alertMessage} onClose={() => setShowAlert(false)} /> */}
+          <AlertWrapper showAlert={showAlert} alertMessage={alertMessage} onClose={() => setShowAlert(false)} />
 
-          {/* <audio src="/assets/alert.wav" ref={audioRef} style={{ display: 'none' }} /> */}
+          <audio src="/assets/alert.wav" ref={audioRef} style={{ display: 'none' }} />
           <Card className="w-[95vw] max-w-[1200px] mx-auto min-h-[70px] mb-3 shadow-xl border-0 rounded-xl text-black overflow-hidden bg-white/95 backdrop-blur-sm">
             <div className="p-4 flex items-center justify-between">
               <div className="flex items-center gap-2">

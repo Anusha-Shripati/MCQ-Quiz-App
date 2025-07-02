@@ -116,6 +116,7 @@ export interface AnswerData {
     };
     type: QuestionType;
   };
+  result_id?:string;
   question_name: string;
 }
 

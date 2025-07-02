@@ -14,16 +14,16 @@ import { api } from '@/lib/api';
 import StatusWrapper from '@/components/common/status-wrapper';
 import { FormField } from '@/components/common/form-field';
 import useSWRMutation from 'swr/mutation';
-import { isValidUUID, showSingleToast } from '@/lib/utils';
+import { showSingleToast } from '@/lib/utils';
 import { isAxiosError } from 'axios';
 import { technologyEndpoint } from '@/lib/endpoint';
 
 // import { isValidObjectId } from '@/lib/utils';
 
-async function create(url: string, { arg }: { arg: { name: string; questions: Question[] } }) {
-  const response = await api.post(url, arg);
-  return response;
-}
+// async function create(url: string, { arg }: { arg: { name: string; questions: Question[] } }) {
+//   const response = await api.post(url, arg);
+//   return response;
+// }
 
 async function update(url: string, { arg }: { arg: { name: string; questions: Question[] } }) {
   const response = await api.put(url, arg);
@@ -52,10 +52,10 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
   const router = useRouter();
   const [selectedQuestion, setSelectedQuestion] = useState<number>(0);
   const [name, setName] = useState<string>('');
-  const [isValidTechnology, setIsValidTechnology]: [
-    boolean,
-    React.Dispatch<React.SetStateAction<boolean>>,
-  ] = useState<boolean>(isValidUUID(params.technology));
+  // const [isValidTechnology, setIsValidTechnology]: [
+  //   boolean,
+  //   React.Dispatch<React.SetStateAction<boolean>>,
+  // ] = useState<boolean>(isValidUUID(params.technology));
   const [technology, setTechnology] = useState<string>('');
 
   // const {
@@ -69,7 +69,8 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
   //   api.get
   // );
 
-  const { trigger, isMutating } = useSWRMutation(`${technologyEndpoint.CREATE}`, create);
+  // const { trigger, isMutating } = useSWRMutation(`${technologyEndpoint.CREATE}`, create);
+
   const { trigger: updateTrigger, isMutating: updating } = useSWRMutation(
     `${technologyEndpoint.TECHNOLOGY_BY_ID}/${technologyId}`,
     update
@@ -252,7 +253,7 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
       window.history.replaceState(null, '', `/questions/create-question/${selectedTech.id}`);
       // router.push(`/questions/create-question/${selectedTech.id}`);
       setTechnologyId(selectedTech.id);
-      setIsValidTechnology(isValidUUID(selectedTech.id));
+      // setIsValidTechnology(isValidUUID(selectedTech.id));
     }
   };
   type TechnologyData = {
@@ -293,7 +294,7 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
           <Button
             className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
             onClick={handleSave}
-            disabled={isMutating || updating}
+            disabled={ updating}
           >
             Save
           </Button>

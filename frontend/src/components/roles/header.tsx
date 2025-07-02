@@ -47,7 +47,7 @@ function Header() {
     <div className="flex justify-end w-full">
       <div className="flex space-x-4 items-center">
         <Input
-          type="text"
+          type="search"
           placeholder="Search Roles..."
           className="w-64"
           value={searchTerm}

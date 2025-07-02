@@ -11,7 +11,7 @@ import { forwardRef, useMemo } from 'react';
 interface FormFieldProps {
   label?: string;
   id?: string;
-  type?: 'text' | 'email' | 'tel' | 'select' | 'number' | 'password';
+  type?: 'text' | 'email' | 'tel' | 'select' | 'number' | 'password' | 'search';
   options?: SelectOption[] | (string | number)[];
   value?: string | number;
   error?: string | undefined;

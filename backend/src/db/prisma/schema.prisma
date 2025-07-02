@@ -83,9 +83,9 @@ model Assessment_technology {
     id            String      @id @default(uuid())
     technology_id String
     assessment_id String
-    easy          Int         @default(0)
-    medium        Int         @default(0)
-    hard          Int         @default(0)
+    easy          Json       
+    medium        Json       
+    hard          Json       
     assessments   Assessments @relation(fields: [assessment_id], references: [id])
     technology    Technology  @relation(fields: [technology_id], references: [id])
     created_at    DateTime    @default(now())

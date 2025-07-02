@@ -46,9 +46,35 @@ const Step1: React.FC<Step1Props> = ({
       newValue?.map((option) => ({
         id: option.value,
         name: option.label,
-        easy: 0,
-        medium: 0,
-        hard: 0,
+        easy: {
+            multiple_select:0,
+            mcq:0,
+            text:0,
+            code_snippet:0,
+            code_editor:0,
+            video:0,
+            total:0
+        },
+        medium: {
+
+          multiple_select:0,
+          mcq:0,
+          text:0,
+          code_snippet:0,
+          code_editor:0,
+          video:0,
+          total:0
+        },
+        hard: {
+
+          multiple_select:0,
+          mcq:0,
+          text:0,
+          code_snippet:0,
+          code_editor:0,
+          video:0,
+          total:0
+        },
       })) || [];
     setValue('technologies', selectedTechnology.length ? selectedTechnology : []);
   };

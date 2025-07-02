@@ -79,6 +79,30 @@ const QuestionReview: React.FC<QuestionReviewProps> = ({ answers }) => {
     setUpdatedScore(Number(ans.score))
     setSelectedAns(ans)
   }
+
+  const handleScoreChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = Number(e.target.value);
+    let maxScore = 1; // default for easy
+    const difficulty = selectedAns?.question?.difficulty_level;
+    if (difficulty === 'medium') maxScore = 2;
+    if (difficulty === 'hard') maxScore = 3;
+
+    if (isNaN(value)) {
+      setScoreError('Please enter a valid number');
+      return;
+    }
+    if (value > maxScore) {
+      setScoreError(`Please enter a value less than or equal to its max score (${maxScore})`);
+      return;
+    }
+    if (value < 0) {
+      setScoreError('Please enter a positive score');
+      return;
+    }
+    setScoreError('');
+    setUpdatedScore(value);
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-3 mb-4">
@@ -267,7 +291,7 @@ const QuestionReview: React.FC<QuestionReviewProps> = ({ answers }) => {
             placeholder="Enter Score"
             className="dark:bg-gray-700"
             error={scoreError}
-            onChange={(e) => setUpdatedScore(e.target.value > (selectedAns?.weight || 0) || e.target.value < 0 ? (selectedAns?.score || 0) : e.target.value)}
+            onChange={handleScoreChange}
           />
           <DialogFooter>
             <Button variant="outline" onClick={() => setSelectedAns(null)} className="text-gray-900 dark:text-white">

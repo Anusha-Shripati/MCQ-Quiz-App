@@ -119,7 +119,7 @@ export default function CreateAssessment() {
     }
 
     if (step === 2) {
-      const isValid = formData.technologies.every((cat) => cat.easy || cat.medium || cat.hard);
+      const isValid = formData.technologies.every((cat) => cat.easy.total || cat.medium.total || cat.hard.total);
       if (!isValid) {
         toast.error('Each category must have at least one question');
         return;
@@ -137,7 +137,7 @@ export default function CreateAssessment() {
 
   const calculateTotalSum = () => {
     return formData.technologies.reduce((sum, tech) => {
-      return sum + tech.easy + tech.medium + tech.hard;
+      return sum + tech.easy.total + tech.medium.total + tech.hard.total;
     }, 0);
   };
 
@@ -155,6 +155,9 @@ export default function CreateAssessment() {
       })),
     };
 
+    // console.log(newAssessment);
+    // return
+    
     try {
       const res = await trigger(newAssessment);
       if (res.success) {

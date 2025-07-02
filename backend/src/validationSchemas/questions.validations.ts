@@ -23,8 +23,14 @@ export const questionsSchema = {
           'string.empty': 'Correct answer is required',
         }),
       }),
-      options: Joi.array().items(Joi.string()).min(4).messages({
-        'array.min': 'At least 4 options are required',
+      
+      options: Joi.when('type', {
+        is: Joi.valid('mcq', 'multiple_select'),
+        then: Joi.array().items(Joi.string()).min(4).required().messages({
+          'array.min': 'At least 4 options are required',
+          'any.required': 'Options are required for MCQ and Multiple Select types',
+        }),
+        otherwise: Joi.array().items(Joi.string()).optional(),
       }),
       // time: Joi.string().required().messages({
       //   'string.empty': 'Time is required',
@@ -83,8 +89,13 @@ export const questionsSchema = {
           'string.empty': 'Correct answer is required',
         }),
       }),
-      options: Joi.array().items(Joi.string()).min(4).messages({
-        'array.min': 'At least 4 options are required',
+      options: Joi.when('type', {
+        is: Joi.valid('mcq', 'multiple_select'),
+        then: Joi.array().items(Joi.string()).min(4).required().messages({
+          'array.min': 'At least 4 options are required',
+          'any.required': 'Options are required for MCQ and Multiple Select types',
+        }),
+        otherwise: Joi.array().items(Joi.string()).optional(),
       }),
       // time: Joi.string().required().messages({
       //   'string.empty': 'Time is required',

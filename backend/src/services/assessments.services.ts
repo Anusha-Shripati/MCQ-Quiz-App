@@ -87,6 +87,8 @@ export class AssessmentsService {
     return response
   }
   async createAssessments(data: AssessmentCreateInput): Promise<Assessments> {
+    console.log(data);
+    
     return prisma.assessments.create({ data });
   }
 

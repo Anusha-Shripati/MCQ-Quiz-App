@@ -63,9 +63,9 @@ function AssessmentItem({
   const totalQuestions =
     technologies?.reduce(
       (total, tech) => ({
-        easy: total.easy + tech.easy,
-        medium: total.medium + tech.medium,
-        hard: total.hard + tech.hard,
+        easy: total.easy + tech.easy.total,
+        medium: total.medium + tech.medium.total,
+        hard: total.hard + tech.hard.total,
       }),
       initial
     ) || initial;
@@ -81,7 +81,7 @@ function AssessmentItem({
   const calculateTechPer = useCallback(
     (technology: Technology) => {
       const totalTech =
-        (technology?.easy || 0) + (technology?.medium || 0) + (technology?.hard || 0);
+        (technology?.easy.total || 0) + (technology?.medium.total || 0) + (technology?.hard.total || 0);
       if (!totalTech) return '0.00%';
       return `${Math.round((totalTech / total) * 100)}%`;
     },
@@ -125,7 +125,7 @@ function AssessmentItem({
               <span className="font-medium text-gray-700 dark:text-gray-300">{createdBy}</span>
             </div>
             <Tooltip>
-              <TooltipTrigger>
+              <TooltipTrigger asChild>
                 <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                   <Calendar className="h-4 w-4 text-green-600 dark:text-green-400" />
                   <span className="font-medium text-gray-700 dark:text-gray-300">
@@ -138,7 +138,7 @@ function AssessmentItem({
               </TooltipContent>
             </Tooltip>
             <Tooltip>
-              <TooltipTrigger>
+              <TooltipTrigger asChild>
                 <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                   <Clock className="h-4 w-4 text-orange-600 dark:text-orange-400" />
                   <span className="font-medium text-gray-700 dark:text-gray-300">
@@ -151,7 +151,7 @@ function AssessmentItem({
               </TooltipContent>
             </Tooltip>
             <Tooltip>
-              <TooltipTrigger>
+              <TooltipTrigger asChild>
                 <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                   <BookOpenCheck className="h-4 w-4 text-orange-600 dark:text-green-400" />
                   <span className="font-medium text-gray-700 dark:text-gray-300">
@@ -220,7 +220,7 @@ function AssessmentItem({
           {isAssessmentEditable && (
             <>
               <Tooltip>
-                <TooltipTrigger>
+                <TooltipTrigger asChild>
                   <Button
                     variant="ghost"
                     size="icon"
@@ -235,7 +235,7 @@ function AssessmentItem({
                 </TooltipContent>
               </Tooltip>
               <Tooltip>
-                <TooltipTrigger>
+                <TooltipTrigger asChild>
                   <Button
                     variant="ghost"
                     size="icon"
@@ -326,22 +326,22 @@ function AssessmentItem({
                 </div>
                 <div className="text-center">
                   <span className="inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold border border-green-200 dark:border-green-700">
-                    {tech.easy}
+                    {tech.easy.total}
                   </span>
                 </div>
                 <div className="text-center">
                   <span className="inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold border border-yellow-200 dark:border-yellow-700">
-                    {tech.medium}
+                    {tech.medium.total}
                   </span>
                 </div>
                 <div className="text-center">
                   <span className="inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold border border-red-200 dark:border-red-700">
-                    {tech.hard}
+                    {tech.hard.total}
                   </span>
                 </div>
                 <div className="text-center">
                   <span className="inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold border border-blue-200 dark:border-blue-700">
-                    {tech.easy + tech.medium + tech.hard}
+                    {tech.easy.total + tech.medium.total + tech.hard.total}
                   </span>
                 </div>
                 <div className="text-center">
@@ -388,7 +388,6 @@ function AssessmentItem({
 }
 
 export default function AssessmentDetails() {
-  // Change from string to string array to track multiple expanded items
   const [expandedIds, setExpandedIds] = useState<string[]>([]);
   const [editing, setEditing] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState<number>(1);

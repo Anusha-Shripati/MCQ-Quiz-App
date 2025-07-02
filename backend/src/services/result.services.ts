@@ -248,7 +248,7 @@ export class ResultService {
     try {
       const existingResult = await prisma.results.findFirst({
         where: { id: resultId },
-        include: { exam: true },
+        include: { exam: true,answers:{include:{ question:true}} },
       });
       const existingAns = await prisma.answers.findFirst({
         where: { question_id: questionId },
@@ -273,7 +273,9 @@ export class ResultService {
 
       tech_score = tech_score.map((item) => {
         if (item.technology_id === existingAns.question?.technology_id) {
-          const newScore = item.score - (existingAns.score || 0) + score;
+          const allAns  =  existingResult.answers.filter((inner)=>inner.question?.technology_id == item.technology_id);
+          const total = allAns.reduce((sum,ans)=> ans.id !== existingAns.id ? sum+ Number(ans.score) : sum,0 ) 
+          const newScore = total + score;
           return {
             ...item,
             score: newScore,
@@ -307,7 +309,7 @@ export class ResultService {
         data: { score: score },
       });
 
-      return { result, exam, score };
+      return { result, exam, ans };
     } catch (error: any) {
       throw new Error(error.message || error);
     }

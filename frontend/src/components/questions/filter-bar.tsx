@@ -34,7 +34,7 @@ export const FilterBar = ({
       <h2 className="text-xl font-semibold">{`Questions List (${totalQuestions})`}</h2>
       <div className="flex items-center justify-center gap-2">
         <Input
-          type="text"
+          type="search"
           placeholder="Search questions..."
           className="w-[300px] py-5 dark:border-gray-400"
           value={searchQuery}

@@ -7,7 +7,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { DateRange, User } from '@/types/common.types';
 import { AssessmentFilters, useAssessmentStore } from '@/store/assessmentStore';
 import DatePickerWithRange from '../ui/form/date-range-picker';
-import { useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { FormField } from '../common/form-field';
 import useSWR from 'swr';
 import { fetcher } from '@/lib/api';
@@ -18,21 +18,21 @@ import { isEqual } from 'lodash';
 import { useAuthStore } from '@/store/authStore';
 
 export default function AssessmentHeader() {
-  const defaultValues: AssessmentFilters = {
+  const defaultValues = useMemo<AssessmentFilters>(() => ({
     name: '',
     created_by: 'all',
     created_duation: undefined,
     view: '',
-  };
+  }), []);
 
   const { data: users } = useSWR(userEndpoint.LIST, fetcher);
   const { setFilters, filters } = useAssessmentStore();
   const { hasPermissionAssessmentEdit } = useAuthStore();
   const isAssessmentEditable = hasPermissionAssessmentEdit();
-
   const { control, setValue, watch, register, reset } = useForm<AssessmentFilters>({
     defaultValues,
   });
+
 
   // Keep track of whether the form is being updated from external source
   const isExternalUpdate = useRef(false);
@@ -45,14 +45,26 @@ export default function AssessmentHeader() {
       isExternalUpdate.current = true;
       reset({
         name: filters.name || '',
-        created_by: filters.created_by || '',
+        created_by: filters.created_by || 'all',
         created_duation: filters.created_duation || undefined,
         view: filters.view || '',
       });
     }
-  }, [filters]);
+  }, [filters, reset, watch]);
 
-  const allFields = watch();
+  // Use specific watch fields instead of watching everything
+  const name = watch('name');
+  const created_by = watch('created_by');
+  const created_duration = watch('created_duation');
+  const view = watch('view');
+  
+  const allFields = useMemo(() => ({
+    name,
+    created_by,
+    created_duation: created_duration,
+    view,
+  }), [name, created_by, created_duration, view]);
+  
   const debouncedFields = useDebounce(allFields, 800);
 
   const headerUsersOptions = useMemo(() => {
@@ -106,30 +118,27 @@ export default function AssessmentHeader() {
   }, [debouncedFields, setFilters]);
 
   const isFilter = useMemo(() => {
-    return Object.keys(allFields).some((key: string) => {
-      const typedKey = key as keyof AssessmentFilters;
-      if (typedKey === 'created_duation') {
-        return allFields[typedKey]?.from !== undefined || allFields[typedKey]?.to !== undefined;
-      } else if (typedKey === 'created_by') {
-        return allFields[typedKey] !== 'all';
-      } else {
-        return !!allFields[typedKey];
-      }
-    });
-  }, [allFields]);
+    return (
+      (name && name !== '') ||
+      created_by !== 'all' ||
+      (created_duration?.from !== undefined || created_duration?.to !== undefined) ||
+      (view && view !== '')
+    );
+  }, [name, created_by, created_duration, view]);
 
-  const clearAllFilters = () => {
+  const clearAllFilters = useCallback(() => {
     prevFilterRef.current = defaultValues;
     reset(defaultValues);
     setFilters(defaultValues);
-  };
+  }, [defaultValues, reset, setFilters]);
+
 
   return (
     <div className="flex flex-col md:flex-row items-center gap-6">
       <div className="flex flex-wrap items-center gap-4 ml-auto">
         <FormField
           className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-300 min-w-[200px] h-10"
-          type="text"
+          type="search"
           value={allFields.name}
           placeholder="Search by name"
           {...register('name')}

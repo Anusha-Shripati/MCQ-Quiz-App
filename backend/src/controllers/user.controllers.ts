@@ -74,7 +74,7 @@ export class UserController {
             );
           }
         } else {
-          return generateResponse(res, 400, {}, false, 'User already exists');
+          return generateResponse(res, 400, {}, false, 'Email already exists.');
         }
       }
 

@@ -1,5 +1,6 @@
 import { api } from '@/lib/api';
 import { assessmentEndpoint } from '@/lib/endpoint';
+import { AssessmentQuestionType } from '@/types/assessment.types';
 import { DateRange } from '@/types/common.types';
 import { isAxiosError } from 'axios';
 import { create } from 'zustand';
@@ -17,9 +18,9 @@ export interface Technology {
     name: string;
   };
   technology_id?: string;
-  hard: number;
-  easy: number;
-  medium: number;
+  hard: AssessmentQuestionType;
+  easy: AssessmentQuestionType;
+  medium: AssessmentQuestionType;
 }
 export interface Assessment {
   id?: string;

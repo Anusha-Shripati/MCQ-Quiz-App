@@ -1,5 +1,6 @@
 import { TechnologyOption } from '@/types/candidate.types';
 import { StatusOption } from '@/types/common.types';
+import { Question } from '../types/app';
 
 export const data = [
   {
@@ -1260,6 +1261,15 @@ export const questionDifficulty: { [key: string]: string } = {
   'medium': 'Medium',
   'hard': 'Hard',
 };
+
+export const questionTypeOptions= [
+  { value: 'multiple_select', label: 'Multiple Choice' },
+  { value: 'mcq', label: 'Radio Select' },
+  { value: 'text', label: 'Fill in the Blanks' },
+  { value: 'code_snippet', label: 'Code Snippet' },
+  { value: 'code_editor', label: 'Code Editor' },
+  { value: 'video', label: 'Video' },
+] as { value: Question['type']; label: string }[]
 
 export const commonRoutes: string[] = ['dashboard', 'profile', ''];
 

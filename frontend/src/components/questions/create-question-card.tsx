@@ -17,6 +17,7 @@ import { toast } from 'react-hot-toast';
 import useSWRMutation from 'swr/mutation';
 import { FormField } from '../common/form-field';
 import { questionEndpoint } from '@/lib/endpoint';
+import { questionTypeOptions } from '@/shared/constants/data';
 
 interface QuestionCardProps {
   question: Question;
@@ -80,18 +81,6 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
     return options.slice(0, 5);
   };
 
-  const questionTypeOptions = useMemo(
-    () =>
-      [
-        { value: 'multiple_select', label: 'Multiple Choice' },
-        { value: 'mcq', label: 'Radio Select' },
-        { value: 'text', label: 'Fill in the Blanks' },
-        { value: 'code_snippet', label: 'Code Snippet' },
-        { value: 'code_editor', label: 'Code Editor' },
-        { value: 'video', label: 'Video' },
-      ] as { value: Question['type']; label: string }[],
-    []
-  );
 
   const questionDifficultyOptions = useMemo(
     () =>

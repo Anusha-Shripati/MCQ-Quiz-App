@@ -1,4 +1,4 @@
-import { Difficulty, Prisma, PrismaClient } from '@prisma/client';
+import { Difficulty, Prisma, PrismaClient, Questions } from '@prisma/client';
 import { AppError } from '../common/errors/AppError';
 
 const prisma = new PrismaClient();
@@ -30,13 +30,19 @@ export default class ExamService {
     }
 
     for (const tech of assessment.technologies) {
-      const easyQuestions = await this.getRandomQuestions('easy', tech.easy, tech.technology_id);
-      const mediumQuestions = await this.getRandomQuestions(
-        'medium',
-        tech.medium,
-        tech.technology_id
-      );
-      const hardQuestions = await this.getRandomQuestions('hard', tech.hard, tech.technology_id);
+      let easyQuestions: Questions[] = [];
+      let mediumQuestions: Questions[] = [];
+      let hardQuestions: Questions[] = [];
+      try {
+        easyQuestions = await this.getRandomQuestions('easy', tech.easy as Record<Questions['type'], number>, tech.technology_id);
+        mediumQuestions = await this.getRandomQuestions('medium', tech.medium as Record<Questions['type'], number>, tech.technology_id);
+        hardQuestions = await this.getRandomQuestions('hard', tech.hard as Record<Questions['type'], number>, tech.technology_id);
+      } catch (err) {
+        if (err instanceof AppError) {
+          throw err;
+        }
+        throw new AppError('Unexpected error while fetching questions', 500);
+      }
 
       const allQuestions = [...easyQuestions, ...mediumQuestions, ...hardQuestions];
 
@@ -188,20 +194,25 @@ export default class ExamService {
     }
   }
 
-  async getRandomQuestions(difficulty: Difficulty, count: number, technologyId: string) {
-    const questions = await prisma.questions.findMany({
-      where: {
-        technology_id: technologyId,
-        difficulty_level: difficulty,
-      },
-    });
+  async getRandomQuestions(difficulty: Difficulty, type: Record<Questions['type'], number>, technologyId: string) {
+    let arr: Questions[] = [];
+    for (const [key, value] of Object.entries(type).filter(([key]) => key !== 'total')) {
+      const questions = await prisma.questions.findMany({
+        where: {
+          technology_id: technologyId,
+          difficulty_level: difficulty,
+          type: key as Questions['type'],
+        },
+      });
 
-    if (questions.length < count) {
-      throw new AppError(`Not enough ${difficulty} questions available for this technology`, 400);
+      if (questions.length < value) {
+        throw new AppError(`Not enough ${difficulty} questions available for this technology`, 400);
+      }
+
+      const shuffled = questions.sort(() => 0.5 - Math.random());
+      arr = [...arr, ...shuffled.slice(0, value)];
     }
-
-    const shuffled = questions.sort(() => 0.5 - Math.random());
-    return shuffled.slice(0, count);
+    return arr;
   }
 
   async updateExam(id: string, data: any) {
@@ -287,51 +298,61 @@ export default class ExamService {
   }
 
   async generateExamQuestions(examId: string, technologyId: string) {
-    try {
-      // Get the exam and its assessment details
-      const exam = await prisma.exam.findUnique({
-        where: { id: examId },
-        include: {
-          assessment: true,
-        },
-      });
-
-      if (!exam) {
-        throw new AppError('Exam not found', 404);
-      }
-
-      const { assessment } = exam;
-      const { easy, medium, hard } = assessment;
-
-      const easyQuestions = await this.getRandomQuestions('easy', easy, technologyId);
-      const mediumQuestions = await this.getRandomQuestions('medium', medium, technologyId);
-      const hardQuestions = await this.getRandomQuestions('hard', hard, technologyId);
-
-      // Combine all questions
-      const allQuestions = [...easyQuestions, ...mediumQuestions, ...hardQuestions];
-
-      // Create exam questions
-      const examQuestions = await Promise.all(
-        allQuestions.map((question) =>
-          prisma.exam_questions.create({
-            data: {
-              exam: {
-                connect: { id: examId },
-              },
-              question: {
-                connect: { id: question.id },
+    const exam = await prisma.exam.findUnique({
+      where: { id: examId },
+      include: {
+        assessment: {
+          include: {
+            technologies: {
+              where: {
+                id: technologyId,
               },
             },
-          })
-        )
-      );
+          },
+        },
+      },
+    });
 
-      return examQuestions;
-    } catch (error) {
-      if (error instanceof AppError) {
-        throw error;
-      }
-      throw new AppError('Failed to generate exam questions', 500);
+    if (!exam) {
+      throw new AppError('Exam not found', 404);
     }
+
+    const { assessment } = exam;
+    const { easy, medium, hard } = assessment.technologies[0];
+
+    let easyQuestions: Questions[] = [];
+    let mediumQuestions: Questions[] = [];
+    let hardQuestions: Questions[] = [];
+    try {
+      easyQuestions = await this.getRandomQuestions('easy', easy as Record<Questions['type'], number>, technologyId);
+      mediumQuestions = await this.getRandomQuestions('medium', medium as Record<Questions['type'], number>, technologyId);
+      hardQuestions = await this.getRandomQuestions('hard', hard as Record<Questions['type'], number>, technologyId);
+    } catch (err) {
+      if (err instanceof AppError) {
+        throw err;
+      }
+      throw new AppError('Unexpected error while fetching questions', 500);
+    }
+
+    // Combine all questions
+    const allQuestions = [...easyQuestions, ...mediumQuestions, ...hardQuestions];
+
+    // Create exam questions
+    const examQuestions = await Promise.all(
+      allQuestions.map((question) =>
+        prisma.exam_questions.create({
+          data: {
+            exam: {
+              connect: { id: examId },
+            },
+            question: {
+              connect: { id: question.id },
+            },
+          },
+        })
+      )
+    );
+
+    return examQuestions;
   }
 }

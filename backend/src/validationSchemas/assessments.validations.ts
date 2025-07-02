@@ -15,15 +15,9 @@ export const assessmentSchema = {
           technology_id: Joi.string().required().messages({
             'string.empty': 'Technology ID is required',
           }),
-          easy: Joi.number().messages({
-            'number.base': 'Easy must be a number',
-          }),
-          medium: Joi.number().messages({
-            'number.base': 'Medium must be a number',
-          }),
-          hard: Joi.number().messages({
-            'number.base': 'Hard must be a number',
-          }),
+          easy: Joi.object(),
+          medium: Joi.object(),
+          hard: Joi.object(),
         })
       ),
       duration: Joi.number().required().messages({
@@ -52,15 +46,9 @@ export const assessmentSchema = {
           technology_id: Joi.string().required().messages({
             'string.empty': 'Technology ID is required',
           }),
-          easy: Joi.number().messages({
-            'number.base': 'Easy must be a number',
-          }),
-          medium: Joi.number().messages({
-            'number.base': 'Medium must be a number',
-          }),
-          hard: Joi.number().messages({
-            'number.base': 'Hard must be a number',
-          }),
+          easy: Joi.object(),
+          medium:Joi.object(),
+          hard:Joi.object(),
         })
       ),
       duration: Joi.number().required().messages({

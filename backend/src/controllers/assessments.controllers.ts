@@ -43,7 +43,7 @@ export class AssessmentController {
           },
         });
 
-        if (tech.easy > 0) {
+        if (tech.easy.total > 0) {
           const easyQuestions = await prisma.questions.count({
             where: {
               technology_id: tech.technology_id,
@@ -52,7 +52,7 @@ export class AssessmentController {
             },
           });
 
-          if (easyQuestions < tech.easy) {
+          if (easyQuestions < tech.easy.total) {
             return generateResponse(
               res,
               400,
@@ -62,7 +62,7 @@ export class AssessmentController {
             );
           }
         }
-        if (tech.medium > 0) {
+        if (tech.medium.total > 0) {
           const mediumQuestions = await prisma.questions.count({
             where: {
               technology_id: tech.technology_id,
@@ -70,7 +70,7 @@ export class AssessmentController {
               deleted_at: null,
             },
           });
-          if (mediumQuestions < tech.medium) {
+          if (mediumQuestions < tech.medium.total) {
             return generateResponse(
               res,
               400,
@@ -81,7 +81,7 @@ export class AssessmentController {
           }
         }
 
-        if (tech.hard > 0) {
+        if (tech.hard.total > 0) {
           const hardQuestions = await prisma.questions.count({
             where: {
               technology_id: tech.technology_id,
@@ -90,7 +90,7 @@ export class AssessmentController {
             },
           });
 
-          if (hardQuestions < tech.hard) {
+          if (hardQuestions < tech.hard.total) {
             return generateResponse(
               res,
               400,
@@ -104,9 +104,9 @@ export class AssessmentController {
 
       const { easy, medium, hard } = technologies.reduce(
         (acc: any, tech: any) => {
-          acc.easy += tech.easy || 0;
-          acc.medium += tech.medium || 0;
-          acc.hard += tech.hard || 0;
+          acc.easy += tech.easy.total || 0;
+          acc.medium += tech.medium.total || 0;
+          acc.hard += tech.hard.total || 0;
           return acc;
         },
         { easy: 0, medium: 0, hard: 0 }
@@ -132,7 +132,7 @@ export class AssessmentController {
         req.body.technologies
       );
 
-      const assessment = await assessmentService.getAssessmentById(newAssessment.id);
+      // const assessment = await assessmentService.getAssessmentById(newAssessment.id);
 
       return generateResponse(res, 200, newAssessment, true, 'Assessment created successfully');
     } catch (error) {
@@ -181,7 +181,7 @@ export class AssessmentController {
           },
         });
 
-        if (tech.easy > 0) {
+        if (tech.easy.total > 0) {
           const easyQuestions = await prisma.questions.count({
             where: {
               technology_id: tech.technology_id,
@@ -190,7 +190,7 @@ export class AssessmentController {
             },
           });
 
-          if (easyQuestions < tech.easy) {
+          if (easyQuestions < tech.easy.total) {
             return generateResponse(
               res,
               400,
@@ -200,7 +200,7 @@ export class AssessmentController {
             );
           }
         }
-        if (tech.medium > 0) {
+        if (tech.medium.total > 0) {
           const mediumQuestions = await prisma.questions.count({
             where: {
               technology_id: tech.technology_id,
@@ -208,7 +208,7 @@ export class AssessmentController {
               deleted_at: null,
             },
           });
-          if (mediumQuestions < tech.medium) {
+          if (mediumQuestions < tech.medium.total) {
             return generateResponse(
               res,
               400,
@@ -218,7 +218,7 @@ export class AssessmentController {
             );
           }
         }
-        if (tech.hard > 0) {
+        if (tech.hard.total > 0) {
           const hardQuestions = await prisma.questions.count({
             where: {
               technology_id: tech.technology_id,
@@ -227,7 +227,7 @@ export class AssessmentController {
             },
           });
 
-          if (hardQuestions < tech.hard) {
+          if (hardQuestions < tech.hard.total) {
             return generateResponse(
               res,
               400,
@@ -241,9 +241,9 @@ export class AssessmentController {
 
       const { easy, medium, hard } = technologies.reduce(
         (acc: any, tech: any) => {
-          acc.easy += tech.easy || 0;
-          acc.medium += tech.medium || 0;
-          acc.hard += tech.hard || 0;
+          acc.easy += tech.easy.total || 0;
+          acc.medium += tech.medium.total || 0;
+          acc.hard += tech.hard.total || 0;
           return acc;
         },
         { easy: 0, medium: 0, hard: 0 }
@@ -265,13 +265,11 @@ export class AssessmentController {
       if (technologies && Array.isArray(technologies)) {
         await assessmentService.deleteTechnologyAssessment(id);
         
-        // Invalidate the assessment cache
         await assessmentService.cacheService.deleteKey(`assessment:${id}`);
         await assessmentService.cacheService.deleteKey('assessment-all');
         
         await assessmentService.assignTechnologiesToAssessment(updatedRole.id, technologies);
 
-        // Find all incomplete exams for this assessment
         const incompleteExams = await prisma.exam.findMany({
           where: {
             assessment_id: id,

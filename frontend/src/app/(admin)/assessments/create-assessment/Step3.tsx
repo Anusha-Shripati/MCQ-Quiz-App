@@ -18,6 +18,7 @@ import { Button } from '@/components/ui/form/button';
 import { Label } from '@/components/ui/form/label';
 import { ArrowLeft } from 'lucide-react';
 import { AssessmentForm } from '@/types/assessment.types';
+import { questionTypeOptions } from '@/shared/constants/data';
 
 interface Step3Props {
   formData: AssessmentForm;
@@ -38,7 +39,7 @@ const Step3: React.FC<Step3Props> = ({
 }) => {
   const calculateDifficultyPercentage = (difficulty: 'easy' | 'medium' | 'hard') => {
     const totalForDifficulty = formData.technologies.reduce(
-      (sum, tech) => sum + tech[difficulty],
+      (sum, tech) => sum + tech[difficulty].total,
       0
     );
     return formData.targetQuestions > 0
@@ -135,18 +136,44 @@ const Step3: React.FC<Step3Props> = ({
               </TableHeader>
               <TableBody>
                 {formData.technologies.map((tech) => {
-                  const total = tech.easy + tech.medium + tech.hard;
+                  const total = tech.easy.total + tech.medium.total + tech.hard.total;
                   return (
-                    <TableRow key={tech.name} className="hover:bg-gray-50 dark:hover:bg-gray-600">
+                    <TableRow key={tech.name} className="hover:bg-gray-50 dark:hover:bg-gray-600 text-lg">
                       <TableCell className="font-medium p-2 dark:text-white">{tech.name}</TableCell>
                       <TableCell className="text-center p-2 dark:text-gray-300">
-                        {tech.easy}
+                        <div className='flex flex-col gap-2 w-3/4 '>
+                          {questionTypeOptions.map((item)=>{
+                            return <div className='flex gap-3 justify-between' key={item.value}>
+                              <label>{item.label}: </label>
+                              <label>{tech.easy[item.value] || 0}</label>
+                            </div>
+                          })}
+                        </div>
+                        <div className='flex w-3/4 justify-between mt-3 font-bold text-md border-t-2  pt-2'> <label >Total:</label> <span> {tech.easy.total}</span></div>
+
                       </TableCell>
                       <TableCell className="text-center p-2 dark:text-gray-300">
-                        {tech.medium}
+                        <div className='flex flex-col gap-2 w-3/4 '>
+                          {questionTypeOptions.map((item)=>{
+                            return <div className='flex gap-3 justify-between' key={item.value}>
+                              <label>{item.label}: </label>
+                              <label>{tech.medium[item.value] || 0}</label>
+                            </div>
+                          })}
+                        </div>
+                        <div className='flex w-3/4 justify-between mt-3 font-bold text-md border-t-2  pt-2'> <label >Total:</label> <span> {tech.medium.total}</span></div>
+
                       </TableCell>
-                      <TableCell className="text-center p-2 dark:text-gray-300">
-                        {tech.hard}
+                      <TableCell className="text-center p-2 dark:text-gray-300" >
+                        <div className='flex flex-col gap-2 w-3/4 '>
+                          {questionTypeOptions.map((item)=>{
+                            return <div className='flex gap-3 justify-between' key={item.value}>
+                              <label>{item.label}: </label>
+                              <label>{tech.medium[item.value] || 0}</label>
+                            </div>
+                          })}
+                        </div>
+                       <div className='flex w-3/4 justify-between mt-3 font-bold text-md border-t-2 pt-2'> <label >Total:</label> <span> {tech.hard.total}</span></div>
                       </TableCell>
                       <TableCell className="text-center p-2 font-semibold dark:text-white">
                         {total}
@@ -157,13 +184,13 @@ const Step3: React.FC<Step3Props> = ({
                 <TableRow className="hover:bg-gray-50 dark:hover:bg-gray-600">
                   <TableCell className="font-medium p-2 dark:text-white">Total</TableCell>
                   <TableCell className="text-center p-2 dark:text-gray-300">
-                    {formData.technologies.reduce((sum, tech) => sum + tech.easy, 0)}
+                    {formData.technologies.reduce((sum, tech) => sum + tech.easy.total, 0)}
                   </TableCell>
                   <TableCell className="text-center p-2 dark:text-gray-300">
-                    {formData.technologies.reduce((sum, tech) => sum + tech.medium, 0)}
+                    {formData.technologies.reduce((sum, tech) => sum + tech.medium.total, 0)}
                   </TableCell>
                   <TableCell className="text-center p-2 dark:text-gray-300">
-                    {formData.technologies.reduce((sum, tech) => sum + tech.hard, 0)}
+                    {formData.technologies.reduce((sum, tech) => sum + tech.hard.total, 0)}
                   </TableCell>
                   <TableCell className="text-center p-2 font-semibold dark:text-white">
                     {calculateTotalSum()}

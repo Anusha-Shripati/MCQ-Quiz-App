@@ -1,3 +1,5 @@
+import { Question } from "@/shared/types/app";
+
 export interface AssessmentCategory {
   name: string;
   questions: {
@@ -6,15 +8,16 @@ export interface AssessmentCategory {
     hard: number;
   };
 }
+export type AssessmentQuestionType = Record<Question['type'],number | string> & {total:number}
 export interface AssessmentForm {
   name: string;
   pass_criteria: number;
   technologies: {
     id: string;
     name: string;
-    easy: number;
-    medium: number;
-    hard: number;
+    easy: AssessmentQuestionType
+    medium: AssessmentQuestionType;
+    hard: AssessmentQuestionType;
   }[];
   duration: number | string;
   targetQuestions: number;

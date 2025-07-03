@@ -206,7 +206,8 @@ export default class ExamService {
       });
 
       if (questions.length < value) {
-        throw new AppError(`Not enough ${difficulty} questions available for this technology`, 400);
+        if(questions.length) throw new AppError( `Not enough ${difficulty} questions available for this technology: only ${questions.length} question(s) found for "${key}".`, 400);
+        throw new AppError( `No ${difficulty} questions available for this technology for "${key}".`, 400);
       }
 
       const shuffled = questions.sort(() => 0.5 - Math.random());

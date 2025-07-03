@@ -66,6 +66,7 @@ export class AssessmentsService {
           select: {
             id: true,
             name: true,
+            deleted_at:true
           },
         },
       },

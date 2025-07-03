@@ -3,11 +3,15 @@ import dynamic from 'next/dynamic';
 import { Card } from '@/components/ui/card';
 import CandidateTable from '../../../components/candidates/candidate-table';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
-
+import { Metadata } from 'next';
 const FiltersCandidates = dynamic(() => import('@/components/candidates/candidates-filters'), {
   ssr: false,
   loading: () => <LoadingSpinner />,
 });
+
+export const metadata: Metadata = {
+  title: 'Candidates',
+};
 
 export default function Candidates() {
   return (

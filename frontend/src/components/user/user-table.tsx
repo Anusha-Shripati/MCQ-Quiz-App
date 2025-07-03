@@ -64,6 +64,7 @@ function UserTable() {
     { key: 'name', header: 'User Name', render: (row: UserData) => row.name },
     { key: 'email', header: 'Email', render: (row: UserData) => row.email },
     { key: 'role', header: 'Role', render: (row: UserData) => row.role?.name },
+    { key: 'created_by', header: 'Creted By', render: (row: UserData) => row.created_by_user?.name || '-' },
     {
       key: 'action',
       header: 'Action',

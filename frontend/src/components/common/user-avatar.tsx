@@ -8,7 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
-import { LogOut, Settings } from 'lucide-react';
+import { LogOut, Settings, User2Icon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 const UserAvatar = () => {
@@ -32,13 +32,33 @@ const UserAvatar = () => {
           className={`flex items-center rounded-sm cursor-pointer gap-3`}
         >
           <Avatar className="w-9 h-9 rounded-full">
-            <img
-              src={`${((process.env.NEXT_PUBLIC_IMGAE_PREFIX || '') + (user?.image || '')) || 'https://avatars.githubusercontent.com/u/47379519?v=4'}`}
+            {/* <img
+              src={`${((process.env.NEXT_PUBLIC_IMGAE_PREFIX || '') + (user?.image || ''))}`}
               className="w-full h-full"
-              alt="User Avatar" 
+              alt="User Avatar"
               width={96}
               height={96}
-            />
+            /> */}
+            {user?.image ? (
+              <img
+                src={`${((process.env.NEXT_PUBLIC_IMGAE_PREFIX || '') + (user?.image || ''))}`}
+                className="w-full h-full"
+                alt="User Avatar"
+                width={96}
+                height={96}
+                onError={(e) => {
+                  e.currentTarget.onerror = null;
+                  e.currentTarget.src = '/fallback.png';
+                }}
+              />
+            ) : (
+              <div
+                className="w-9 h-9 rounded-full border-2 border-gray-200 dark:border-gray-700 flex items-center justify-center bg-gray-100 dark:bg-gray-800"
+                aria-label="Default profile picture"
+              >
+                <User2Icon className="text-gray-400 dark:text-gray-500 text-xl" />
+              </div>
+            )}
           </Avatar>
 
           {/* <div>

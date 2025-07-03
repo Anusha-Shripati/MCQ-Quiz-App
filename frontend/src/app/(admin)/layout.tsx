@@ -4,7 +4,7 @@ import Sidebar from '@/components/common/sidebar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import AdminAuth from '@/components/common/admin-auth';
 import { SWRConfig } from 'swr';
-import  HeaderPage from '@/app/(admin)/header/page';
+import  HeaderPage from '@/components/common/header';
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   return (

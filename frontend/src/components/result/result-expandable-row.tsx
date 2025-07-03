@@ -130,7 +130,7 @@ const ResultExpandableRow: React.FC<ResultExpandableRowProps> = ({ row, technolo
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                             </svg>
                         </div>
-                        <span className="text-xl font-semibold text-gray-800 dark:text-gray-200">{row?.exam?.user?.name || "-"}</span>
+                        <span className="text-xl font-semibold text-gray-800 dark:text-gray-200">{row?.exam?.user?.name} {row?.exam?.user?.deleted_at ? <span className="text-red-500"> (Deleted)</span> : '' }</span>
                     </div>
 
                     <div className="text-sm font-medium text-gray-500 dark:text-gray-400 mt-2 mb-1">Created At</div>

@@ -53,12 +53,11 @@ const QuestionSidebar: React.FC<QuestionSidebarProps> = ({
   }, []);
 
   const confirmDelete = useCallback(() => {
-    console.log("Deleting question at index:", questionToDelete);
     if (questionToDelete !== null) {
       handleDeleteQuestion(questionToDelete);
     }
     setQuestionToDelete(null);
-
+    
   }, [questionToDelete, handleDeleteQuestion]);
 
   return (

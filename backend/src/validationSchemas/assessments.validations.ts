@@ -82,4 +82,9 @@ export const assessmentSchema = {
       }),
     }),
   },
+  checkQuestion: {
+    body: Joi.object({
+      technologies: Joi.array()
+    }),
+  },
 };

@@ -13,6 +13,7 @@ interface QuestionsPayload {
   difficulty_level: 'easy' | 'medium' | 'hard';
   type: 'multiple_select' | 'video' | 'text' | 'mcq' | 'code_snippet';
   meta: any;
+  created_by:string
 }
 
 interface ImportedQuestion {
@@ -154,6 +155,14 @@ export class QuestionService {
     const questions = await prisma.questions.findMany({
       where: { ...query },
       orderBy: { created_at: 'asc' },
+      include:{
+        created_by_user:{
+          select:{
+            name:true,
+            deleted_at:true
+          }
+        }
+      },
       skip: (page - 1) * limit,
       take: limit,
     });
@@ -230,7 +239,8 @@ export class QuestionService {
 
   async importQuestionsFromXlsx(
     fileBuffer: Buffer,
-    technologyId: string
+    technologyId: string,
+    created_by:string
   ): Promise<{
     totalImported: number;
     errors: string[];
@@ -381,6 +391,7 @@ export class QuestionService {
               difficulty_level: difficultyLevel as 'easy' | 'medium' | 'hard',
               type: 'mcq',
               meta: {},
+              created_by:created_by
             },
           });
 

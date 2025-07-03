@@ -3,6 +3,7 @@ import AssessmentsService from '../services/assessments.services';
 import { generateResponse } from '../utils/generateResponse';
 import { prisma } from '../db/prisma.client';
 import ExamService from '../services/exam.services';
+import { Questions } from '@prisma/client';
 
 const assessmentService = new AssessmentsService();
 const examService = new ExamService();
@@ -151,7 +152,7 @@ export class AssessmentController {
           deleted_at: null,
         },
       });
-      
+
       if (existingAssessmentWithSameName) {
         return generateResponse(
           res,
@@ -264,10 +265,10 @@ export class AssessmentController {
 
       if (technologies && Array.isArray(technologies)) {
         await assessmentService.deleteTechnologyAssessment(id);
-        
+
         await assessmentService.cacheService.deleteKey(`assessment:${id}`);
         await assessmentService.cacheService.deleteKey('assessment-all');
-        
+
         await assessmentService.assignTechnologiesToAssessment(updatedRole.id, technologies);
 
         const incompleteExams = await prisma.exam.findMany({
@@ -357,6 +358,39 @@ export class AssessmentController {
       }
 
       return generateResponse(res, 200, {}, true, 'Assessment name is unique');
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  checkQuestion = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const technologyIds = req.body.technologies;
+      const results = await prisma.questions.groupBy({
+        by: ['technology_id', 'difficulty_level', 'type'],
+        where: {
+          technology_id: { in: technologyIds },
+          deleted_at: null,
+        },
+        _count: {
+          _all: true,
+        },
+      });
+      
+      const obj: { [key: string]: { easy: {[key: string]:number}; medium: {[key: string]:number}; hard: {[key: string]:number} } } = {};
+      results.forEach((result: any) => {
+        if (!obj[result?.technology_id as string]) {
+          obj[result.technology_id]={
+            easy:{},
+            medium:{},
+            hard:{},
+          }
+        }
+        if(!obj[result.technology_id][result.difficulty_level as 'easy' | 'medium' | 'hard'][result.type])obj[result.technology_id][result.difficulty_level as 'easy' | 'medium' | 'hard'][result.type]=0
+        obj[result.technology_id][result.difficulty_level as 'easy' | 'medium' | 'hard'][result.type] += 1;
+      });
+
+      return generateResponse(res, 200, { success: true, results: obj }, true, 'Successfully checked');
     } catch (error) {
       next(error);
     }

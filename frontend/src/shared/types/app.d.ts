@@ -48,6 +48,10 @@ export interface Question {
   created_at?: string;
   updated_at?: string;
   deleted_at?: string | null;
+  created_by_user?:{
+    name:string,
+    deleted_at:string
+  }
 }
 
 export interface PaginationProps {

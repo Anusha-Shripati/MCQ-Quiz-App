@@ -7,50 +7,52 @@ export const dashboardEndpoint = {
 }
 export const assessmentEndpoint = {
     LIST: "/assessment/list",
-    ASSESSMENT_BY_ID:"/assessment",
-    ALL:"/assessment/all"
+    ASSESSMENT_BY_ID: "/assessment",
+    ALL: "/assessment/all",
+    CHECK_UNIQUE: '/assessment/check-unique',
+    CHECK_QUESTIONS: "/assessment/check-question"
 }
 
 export const technologyEndpoint = {
-  LIST: '/technology/list',
-  TECHNOLOGY_BY_ID: '/technology',
-  CREATE: '/technology/create',
-  DOWNLOAD_TEMPLATE: '/question/download-template',
+    LIST: '/technology/list',
+    TECHNOLOGY_BY_ID: '/technology',
+    CREATE: '/technology/create',
+    DOWNLOAD_TEMPLATE: '/question/download-template',
 };
-export const userEndpoint={
-    LIST:"/user/list",
-    CREATE:"/user/create",
-    UPLOAD_IMAGE:"/user/upload-image",
-    USER_BY_ID:"/user",
-    CHANGE_PASSWORD:"/user/change-password",
-    LOGIN:'/user/login'
+export const userEndpoint = {
+    LIST: "/user/list",
+    CREATE: "/user/create",
+    UPLOAD_IMAGE: "/user/upload-image",
+    USER_BY_ID: "/user",
+    CHANGE_PASSWORD: "/user/change-password",
+    LOGIN: '/user/login'
 }
-export const candidateEndpoint={
-    LIST:"/candidate/list",
-    CREATE:"/candidate/create",
-    CANDIDATE_BY_ID:"/candidate"
+export const candidateEndpoint = {
+    LIST: "/candidate/list",
+    CREATE: "/candidate/create",
+    CANDIDATE_BY_ID: "/candidate"
 }
-export const questionEndpoint={
-    LIST:"/question/list",
-    CREATE:"/question/create",
-    QUESTION_BY_ID:"/question",
-    DELETE :"/question/delete",
+export const questionEndpoint = {
+    LIST: "/question/list",
+    CREATE: "/question/create",
+    QUESTION_BY_ID: "/question",
+    DELETE: "/question/delete",
 }
-export const roleEndpoint={
-    LIST:"/role/list",
-    CREATE:"/role/create",
+export const roleEndpoint = {
+    LIST: "/role/list",
+    CREATE: "/role/create",
 }
-export const resultEndpoint={
-    LIST:"/result/list",
-    RESULT_BY_ID:"/result",
-    UPDATE_SCORE:"/result/update-score",
+export const resultEndpoint = {
+    LIST: "/result/list",
+    RESULT_BY_ID: "/result",
+    UPDATE_SCORE: "/result/update-score",
 
 }
-export const moduleEndpoint={
-    LIST:"/module/list",
+export const moduleEndpoint = {
+    LIST: "/module/list",
 }
-export const examEndpoint={
-    BY_ID:"/candidate-exam",
-    CANDIDATE_EXAM:"/candidate-exam",
-    SEND_THANK_YOU_EMAIL:"/candidate-exam/send-thank-you-email"
+export const examEndpoint = {
+    BY_ID: "/candidate-exam",
+    CANDIDATE_EXAM: "/candidate-exam",
+    SEND_THANK_YOU_EMAIL: "/candidate-exam/send-thank-you-email"
 }

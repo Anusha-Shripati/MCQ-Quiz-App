@@ -1,6 +1,11 @@
 import AssessmentHeader from '@/components/assessments/assessment-header';
 import AssessmentDetails from '@/components/assessments/assessment-details';
 import { Card } from '@/components/ui/card';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Assessments',
+};
 
 export default function AssessmentPage() {
   return (

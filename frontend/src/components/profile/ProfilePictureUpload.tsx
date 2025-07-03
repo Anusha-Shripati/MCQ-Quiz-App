@@ -58,6 +58,10 @@ const ProfilePictureUpload = ({ imageUrl }: { imageUrl: string }) => {
             width={96}
             height={96}
             className="w-24 h-24 rounded-full object-cover border-2 border-gray-200 dark:border-gray-700"
+            onError={(e) => {
+              e.currentTarget.onerror = null;
+              e.currentTarget.src = '/fallback.png';
+            }}
           />
         ) : (
           <div

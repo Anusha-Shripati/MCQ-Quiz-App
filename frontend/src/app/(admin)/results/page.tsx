@@ -2,7 +2,11 @@ import React from 'react';
 import { Card } from '@/components/ui/card';
 import ResultTable from '@/components/result/result-table';
 import ResultFilter from '@/components/result/result-filters';
+import { Metadata } from 'next';
 
+export const metadata: Metadata = {
+  title: 'Results',
+};
 
 export default function Results() {
   return (

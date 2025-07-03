@@ -174,6 +174,9 @@ export class ResultService {
       where,
       skip,
       take: limit,
+      orderBy:{
+        created_at:'desc'  as const
+      },
       select: {
         id: true,
         score: true,
@@ -223,6 +226,7 @@ export class ResultService {
           },
         },
       },
+      
     };
     const results = await prisma.results.findMany(query);
     const total = await prisma.results.count({ where });

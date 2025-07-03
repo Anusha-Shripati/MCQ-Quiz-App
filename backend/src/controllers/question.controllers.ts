@@ -6,7 +6,7 @@ const questionsService = new QuestionsService();
 export class QuestionsController {
   create = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const question = await questionsService.createQuestion(req.body);
+      const question = await questionsService.createQuestion({...req.body,created_by:req.user?.id});
       return generateResponse(res, 200, question, true, 'Question created successfully');
     } catch (error) {
       next(error);
@@ -75,7 +75,6 @@ export class QuestionsController {
   };
   getQuestionByTechnologyId = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { technology } = req.params;
       const search = req.query;
       const assessmentData = await questionsService.getQuestionByTechnologyId(search);
       return generateResponse(res, 200, assessmentData, true, 'Question fetched successfully');
@@ -105,7 +104,7 @@ export class QuestionsController {
       }
       const file = req.file;
       const { technologyId } = req.body;
-      const result = await questionsService.importQuestionsFromXlsx(file.buffer, technologyId);
+      const result = await questionsService.importQuestionsFromXlsx(file.buffer, technologyId,req.user?.id || '');
 
       return generateResponse(
         res,

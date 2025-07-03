@@ -34,6 +34,7 @@ export interface Assessment {
   created_by_user: {
     id: string;
     name: string;
+    deleted_at:string
   };
 }
 export interface AssessmentFilters {

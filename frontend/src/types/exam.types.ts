@@ -16,6 +16,7 @@ export interface IExam extends ITimestamps {
   user: {
     id: string;
     name: string;
+    deleted_at:string;
   };
   results: Result;
 }

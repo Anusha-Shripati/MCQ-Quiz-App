@@ -8,31 +8,36 @@ datasource db {
 }
 
 model User {
-    id          String        @id @default(uuid())
-    role_id     String?
-    name        String
-    email       String        @unique
-    password    String
-    token       String?
-    created_at  DateTime      @default(now())
-    updated_at  DateTime      @updatedAt
-    deleted_at  DateTime?
-    role    Roles?  @relation(fields: [role_id], references: [id], name: "UserRole", onDelete: SetNull)
-    image       String?
-    assessments Assessments[]
-    exams       Exam[]
+    id              String        @id @default(uuid())
+    role_id         String?
+    name            String
+    email           String        @unique
+    password        String
+    token           String?
+    created_at      DateTime      @default(now())
+    updated_at      DateTime      @updatedAt
+    deleted_at      DateTime?
+    role            Roles?        @relation(fields: [role_id], references: [id], name: "UserRole", onDelete: SetNull)
+    image           String?
+    created_by      String?
+    assessments     Assessments[]
+    questions       Questions[]
+    exams           Exam[]
+    Candidate       Candidate[]
+    childs          User[]        @relation("User")
+    created_by_user User?         @relation("User", fields: [created_by], references: [id])
 
     @@map("users")
 }
 
 model Reset_password {
-  id         String   @id @default(uuid())
-  email      String   @unique
-  otp        String
-  expires_at DateTime
-  created_at DateTime @default(now())
+    id         String   @id @default(uuid())
+    email      String   @unique
+    otp        String
+    expires_at DateTime
+    created_at DateTime @default(now())
 
-  @@map("password_resets")
+    @@map("password_resets")
 }
 
 model Roles {
@@ -83,9 +88,9 @@ model Assessment_technology {
     id            String      @id @default(uuid())
     technology_id String
     assessment_id String
-    easy          Json       
-    medium        Json       
-    hard          Json       
+    easy          Json
+    medium        Json
+    hard          Json
     assessments   Assessments @relation(fields: [assessment_id], references: [id])
     technology    Technology  @relation(fields: [technology_id], references: [id])
     created_at    DateTime    @default(now())
@@ -116,27 +121,31 @@ model Questions {
     created_at       DateTime         @default(now())
     updated_at       DateTime         @updatedAt
     deleted_at       DateTime?
+    created_by       String
     technology       Technology       @relation(fields: [technology_id], references: [id])
     exam_questions   Exam_questions[]
     answers          Answers[]
+    created_by_user  User             @relation(fields: [created_by], references: [id])
 }
 
 model Candidate {
-    id            String      @id @default(uuid())
-    assessment_id String
-    exam_id       String      @unique
-    name          String
-    email         String
-    experience    Float       @default(0)
-    phone         String
-    meta          Json?
-    created_at    DateTime    @default(now())
-    updated_at    DateTime    @updatedAt
-    deleted_at    DateTime?
-    assessment    Assessments @relation(fields: [assessment_id], references: [id])
-    exam          Exam        @relation(fields: [exam_id], references: [id])
-    answers       Answers[]
-    result        Results[]
+    id              String      @id @default(uuid())
+    assessment_id   String
+    exam_id         String      @unique
+    name            String
+    email           String
+    experience      Float       @default(0)
+    phone           String
+    meta            Json?
+    created_at      DateTime    @default(now())
+    updated_at      DateTime    @updatedAt
+    deleted_at      DateTime?
+    created_by      String
+    assessment      Assessments @relation(fields: [assessment_id], references: [id])
+    exam            Exam        @relation(fields: [exam_id], references: [id])
+    answers         Answers[]
+    result          Results[]
+    created_by_user User        @relation(fields: [created_by], references: [id])
 }
 
 model Exam {

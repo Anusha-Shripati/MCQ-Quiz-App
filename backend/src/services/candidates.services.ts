@@ -1,4 +1,4 @@
-import { Candidate, Prisma, PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
 import jwt from 'jsonwebtoken';
 import { AppError } from '../common/errors/AppError';
 import { CreateCandidate, UpdateCandidate } from '../types/candidate.types';
@@ -57,6 +57,7 @@ export default class CandidatesService {
               assessment_id: data.assessment_id,
               exam_id: data.exam_id,
               meta: data.meta as Prisma.JsonObject,
+              created_by:data.created_by
             },
             include: {
               assessment: true,
@@ -329,6 +330,7 @@ export default class CandidatesService {
               select: {
                 id: true,
                 name: true,
+                deleted_at:true
               },
             },
             meta: true,
@@ -343,6 +345,12 @@ export default class CandidatesService {
             score: true,
             percentage: true,
             total: true,
+          },
+        },
+        created_by_user: {
+          select: {
+            name: true,
+            deleted_at:true
           },
         },
       },

@@ -1,6 +1,11 @@
 import { Card } from '@/components/ui/card';
 import Header from '@/components/roles/header';
 import RoleTable from '@/components/roles/role-table';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Roles',
+};
 
 
 const UserTable = () => {

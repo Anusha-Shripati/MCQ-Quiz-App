@@ -113,6 +113,11 @@ export interface ICandidate extends ITimestamps {
   technology?: {
     name: string;
   };
+  created_by_user?:{
+    name:string;
+    deleted_at:string
+
+  }
 }
 
 export interface FiltersProps {

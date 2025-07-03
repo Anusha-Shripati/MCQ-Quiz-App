@@ -329,6 +329,15 @@ function CandidateTable() {
         ),
       },
       {
+        key: 'created_by_user.name',
+        header: 'Created By',
+        render: (row) => (
+          <span className="text-sm">
+            {row.created_by_user?.name} {row.created_by_user?.deleted_at ? <span className="text-red-500"> (Deleted)</span> : '' }
+          </span>
+        ),
+      },
+      {
         key: 'status',
         header: 'Status',
         render: (row) => {
@@ -487,7 +496,7 @@ function CandidateTable() {
           <div>
             <p className="text-sm text-gray-500 dark:text-gray-300">Created</p>
             <p className="text-lg font-medium text-gray-700 dark:text-gray-300">
-              {row?.exam?.user?.name}
+              {row?.exam?.user?.name} {row?.exam?.user?.deleted_at ? <span className="text-red-500"> (Deleted)</span> : '' }
             </p>
             <p className="text-sm text-gray-500 dark:text-gray-300">
               {row?.created_at ? dayjs(row?.created_at).format('DD/MM/YYYY h:m A') : '-'}

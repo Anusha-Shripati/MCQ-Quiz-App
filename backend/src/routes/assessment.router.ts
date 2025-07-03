@@ -15,7 +15,7 @@ assessmentRouter.post(
   asyncHandler(assessmentController.create)
 );
 assessmentRouter.post("/check-unique", validateRequest(assessmentSchema.checkUnique), asyncHandler(assessmentController.checkUnique));
-
+assessmentRouter.post("/check-question", validateRequest(assessmentSchema.checkQuestion), asyncHandler(assessmentController.checkQuestion));
 assessmentRouter.put(
   '/:id',
   validateRequest(assessmentSchema.update),

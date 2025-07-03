@@ -12,6 +12,7 @@ import toast from 'react-hot-toast';
 import { useAuthStore } from '@/store/authStore';
 import { FormField } from '@/components/common/form-field';
 import { EyeIcon, EyeOffIcon } from 'lucide-react';
+import { ThemeToggle } from '@/components/common/theme-toggle';
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address.'),
@@ -73,18 +74,20 @@ export default function Home() {
   }
 
   return (
-    <div className="bg-gradient-to-r from-gray-700 to-gray-900 min-h-screen w-full flex flex-col items-center justify-center px-4 py-8">
-      <Card className="w-full max-w-[650px] shadow-xl overflow-hidden bg-gray-900 text-gray-200 border-gray-700">
-        <div className="bg-gray-800 p-5 border-b border-gray-700 flex items-center justify-center">
+    <div className="bg-white dark:bg-gradient-to-r dark:from-gray-700 dark:to-gray-900 min-h-screen w-full flex flex-col items-center justify-center px-4 py-8">
+      <div className='absolute top-5 right-10'><ThemeToggle/></div>
+
+      <Card className="w-full max-w-[650px] shadow-xl overflow-hidden bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-200 border-gray-300 dark:border-gray-700">
+        <div className="bg-gray-200 dark:bg-gray-800 p-5 border-b border-gray-300 dark:border-gray-700 flex items-center justify-center">
           <TypographyH2>Welcome To MCQ APP</TypographyH2>
         </div>
 
         <div className="p-8">
           <CardHeader className="px-0 pt-0">
-            <CardTitle className="text-3xl font-bold text-center text-gray-100">
+            <CardTitle className="text-3xl font-bold text-center text-gray-900 dark:text-gray-100">
               Admin Login
             </CardTitle>
-            <CardDescription className="text-base text-center text-gray-400">
+            <CardDescription className="text-base text-center text-gray-500 dark:text-gray-400">
               Only users with admin privileges can perform this action.
             </CardDescription>
           </CardHeader>
@@ -98,7 +101,7 @@ export default function Home() {
                     id="email"
                     placeholder="Enter your email"
                     {...register('email')}
-                    className="h-10 bg-gray-800 border-gray-700 text-gray-200 focus:bg-gray-800 focus:border-gray-600 hover:bg-gray-800 focus-visible:ring-gray-700 focus-visible:ring-1 focus-visible:ring-offset-0"
+                    className="h-10 bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-200 focus:bg-gray-100 dark:focus:bg-gray-800 focus:border-gray-400 dark:focus:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 focus-visible:ring-gray-300 dark:focus-visible:ring-gray-700 focus-visible:ring-1 focus-visible:ring-offset-0"
                     error={errors.email?.message}
                   />
                 </div>
@@ -109,13 +112,13 @@ export default function Home() {
                     type={showPassword ? 'text' : 'password'}
                     placeholder="Enter your password"
                     {...register('password')}
-                    className="h-10 bg-gray-800 border-gray-700 text-gray-200 focus:bg-gray-800 focus:border-gray-600 hover:bg-gray-800 focus-visible:ring-gray-700 focus-visible:ring-1 focus-visible:ring-offset-0"
+                    className="h-10 bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-200 focus:bg-gray-100 dark:focus:bg-gray-800 focus:border-gray-400 dark:focus:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 focus-visible:ring-gray-300 dark:focus-visible:ring-gray-700 focus-visible:ring-1 focus-visible:ring-offset-0"
                     error={errors.password?.message}
                   />
                   <Button
                     type="button"
                     onClick={togglePassword}
-                    className="absolute right-3 text-gray-400 hover:text-gray-200 top-[37px] transform -translate-y-1/2 bg-transparent border-none shadow-none focus:bg-transparent focus:ring-0"
+                    className="absolute right-3 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 top-[37px] transform -translate-y-1/2 bg-transparent border-none shadow-none focus:bg-transparent focus:ring-0"
                   >
                     {showPassword ? <EyeOffIcon size={20} /> : <EyeIcon size={20} />}
                   </Button>
@@ -123,14 +126,14 @@ export default function Home() {
               </div>
               <div className="mt-4">
                 <div className="flex justify-between text-sm mb-4">
-                  <Link href="/reset-password" className="text-blue-400 hover:underline">
+                  <Link href="/reset-password" className="text-blue-600 dark:text-blue-400 hover:underline">
                     Forgot password?
                   </Link>
                 </div>
                 <Button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full text-lg bg-gray-800 hover:bg-gray-700 text-gray-100 focus:bg-gray-800 focus:ring-1 focus:ring-gray-600"
+                  className="w-full text-lg bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100 focus:bg-gray-200 dark:focus:bg-gray-800 focus:ring-1 focus:ring-gray-400 dark:focus:ring-gray-600"
                 >
                   {isSubmitting ? 'Signing in...' : 'Sign In'}
                 </Button>
@@ -140,7 +143,7 @@ export default function Home() {
             {/* <div className="text-center mt-6">
               <TypographyH4>
                 Don&apos;t have an account?{' '}
-                <Link href="/register" className="text-blue-400 hover:underline">
+                <Link href="/register" className="text-blue-600 dark:text-blue-400 hover:underline">
                   Contact Admin
                 </Link>
               </TypographyH4>

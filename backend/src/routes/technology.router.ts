@@ -36,7 +36,7 @@ technologyRouter.get(
 
 technologyRouter.put(
   '/:id',
-  // authenticateAndAuthorize('assessments.can_edit'),
+  authenticateAndAuthorize(),
   validateRequest(teachnologySchema.update),
   asyncHandler(technologyController.update)
 );

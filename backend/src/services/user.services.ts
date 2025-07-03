@@ -3,6 +3,7 @@ import { prisma } from '../db/prisma.client';
 import dayjs from 'dayjs';
 import nodemailer from 'nodemailer';
 import { CacheService } from './cacheService';
+import { sendAccountDeletedEmail } from '../utils/email.utils';
 
 export class UserService {
   private cacheService;
@@ -13,7 +14,7 @@ export class UserService {
   }
 
   async createUser(
-    data: Pick<User, 'email' | 'password' | 'created_at' | 'role_id' | 'name'>
+    data: Pick<User, 'email' | 'password' | 'created_at' | 'role_id' | 'name' |'created_by'>
   ): Promise<User> {
     return await prisma.user.create({
       data: {
@@ -22,6 +23,7 @@ export class UserService {
         role_id: data.role_id,
         created_at: data.created_at,
         name: data.name,
+        created_by:data.created_by
       },
     });
   }
@@ -125,6 +127,9 @@ export class UserService {
       const user = await prisma.user.update({
         where: { id },
         data: updateData,
+        include:{
+          role:true
+        }
       });
 
       if (!user) return null;
@@ -166,16 +171,27 @@ export class UserService {
             name: true,
           },
         },
+        created_by_user:{
+          select:{
+            name:true,
+            deleted_at:true
+          }
+        },
       },
+      orderBy:{
+        created_at:'desc'
+      }
     });
     await this.cacheService.setKey(key, response, this.cacheTime);
     return response;
   }
   async delete(id: string) {
-    return await prisma.user.update({
+    const user = await prisma.user.update({
       where: { id: id },
       data: { deleted_at: new Date() },
     });
+    await sendAccountDeletedEmail(user.name,user.email)
+    return user
   }
   async generateAndSendOtp(name: string, email: string) {
     const otp = Math.floor(100000 + Math.random() * 900000).toString();

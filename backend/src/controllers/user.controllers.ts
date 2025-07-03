@@ -4,7 +4,7 @@ import { generateResponse } from '../utils/generateResponse';
 import { createToken, encryptStringCrypt, matchPassword } from '../middlewares/auth.middleware';
 import RoleService from '../services/role.services';
 import { UploadService } from '../services/upload.services';
-import { sendWelcomeEmail } from '../utils/email.utils';
+import { sendAccountUpdateEmail, sendWelcomeEmail } from '../utils/email.utils';
 
 const userService = new UserService();
 const roleService = new RoleService();
@@ -59,6 +59,7 @@ export class UserController {
               role_id: payload.role_id,
               password: hashedPassword,
               deleted_at: null,
+              created_by:req.user?.id
             });
             // Send welcome back email
             await sendWelcomeEmail(payload.name, payload.email, payload.password);
@@ -84,6 +85,7 @@ export class UserController {
         role_id: payload.role_id,
         created_at: new Date(),
         name: payload.name,
+        created_by:req.user?.id
       });
       const role = newUser.role_id ? await roleService.findRoleById(newUser.role_id) : null;
       await sendWelcomeEmail(payload.name, payload.email, payload.password, role?.name);
@@ -149,6 +151,8 @@ export class UserController {
         role_id: payload.role_id,
         password: hashPass,
       });
+      
+      await sendAccountUpdateEmail(payload.name, payload.email, payload.password, newUser?.role?.name);
 
       generateResponse(res, 200, newUser, true, 'User updated successfully!');
     } catch (error) {

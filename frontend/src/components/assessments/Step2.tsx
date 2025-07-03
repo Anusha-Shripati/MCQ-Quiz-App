@@ -15,6 +15,9 @@ import { AssessmentForm } from '@/types/assessment.types';
 import toast from 'react-hot-toast';
 import { questionTypeOptions } from '@/shared/constants/data';
 import { Question } from '@/shared/types/app';
+import useSWR from 'swr';
+import { assessmentEndpoint } from '@/lib/endpoint';
+import { api } from '@/lib/api';
 
 type Step2Props = {
   formData: AssessmentForm;
@@ -36,6 +39,16 @@ const Step2: React.FC<Step2Props> = ({
   calculateTotalSum,
 }) => {
   const errorTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const { data: technologyData } = useSWR(assessmentEndpoint.CHECK_QUESTIONS, ()=>api.post(assessmentEndpoint.CHECK_QUESTIONS, {technologies: formData.technologies.map((tech)=>tech.id)}));
+
+  const getMaxQuestions = (techId: string, difficulty: 'easy' | 'medium' | 'hard',type:Question['type']) => {
+
+    return (
+      technologyData?.data?.results?.[techId]?.[difficulty]?.[type] ??
+      0 // fallback if not loaded yet
+    );
+  };
 
   const showError = (message: string) => {
     if (errorTimeoutRef.current) return;
@@ -59,10 +72,17 @@ const Step2: React.FC<Step2Props> = ({
   const handleQuestionCountChange = (
     index: number,
     difficulty: 'easy' | 'medium' | 'hard',
-    type:Question['type'],
+    type: Question['type'],
     value: string
   ) => {
-    const numValue =value as string;
+    const numValue = value as string;
+    const techId = formData.technologies[index].id;
+    const maxAllowed = getMaxQuestions(techId, difficulty,type);
+
+    if (parseInt(numValue || '0') > maxAllowed) {
+      showError(`You can only allocate up to ${maxAllowed} questions for this difficulty.`);
+      return;
+    }
 
     const totalSum = calculateTotalSum();
     const remainingQuestions =
@@ -151,24 +171,24 @@ const Step2: React.FC<Step2Props> = ({
                     />
                     <div className='w-full flex flex-col gap-2 mt-3'>
                       {questionTypeOptions.map((item) => {
+                        const maxAllowed = getMaxQuestions(technology.id, difficulty as 'easy' | 'medium' | 'hard',item.value);
                         return <div className='flex justify-between w-full' key={item.value}>
-                          
-                          <label>{item.label}</label>
-                          
+                          <label>{item.label} <span className="text-xs text-gray-400">({maxAllowed})</span></label>
                           <Input
-                          type="number"
-                          min="0"
-                          value={technology[difficulty as 'easy' | 'medium' | 'hard'][item.value]}
-                          onChange={(e) =>
-                            handleQuestionCountChange(
-                              index,
-                              difficulty as 'easy' | 'medium' | 'hard',
-                              item.value,
-                              e.target.value
-                            )
-                          }
-                          className="w-28 m-0 text-center bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                        /></div>
+                            type="number"
+                            min="0"
+                            value={technology[difficulty as 'easy' | 'medium' | 'hard'][item.value]}
+                            onChange={(e) =>
+                              handleQuestionCountChange(
+                                index,
+                                difficulty as 'easy' | 'medium' | 'hard',
+                                item.value,
+                                e.target.value
+                              )
+                            }
+                            className="w-28 m-0 text-center bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                          />
+                        </div>
                       })}
                     </div>
                   </div>

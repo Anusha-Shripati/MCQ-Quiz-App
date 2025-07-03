@@ -4,7 +4,6 @@ import { Card } from '@/components/ui/card';
 import { Question } from '@/shared/types/app';
 import {
   Dialog,
-  // DialogTrigger,
   DialogContent,
   DialogHeader,
   DialogTitle,
@@ -18,7 +17,7 @@ import { useAuthStore } from '@/store/authStore';
 //   question: Question;
 // }
 const questionType = {
-  mcq: { label: 'Multiple Choice', color: 'blue' },
+  mcq: { label: 'MCQ', color: 'blue' },
   code_snippet: { label: 'Code Snippet', color: 'purple' },
   text: { label: 'Fill in the blanks', color: 'green' },
   multiple_select: { label: 'Multiple Select', color: 'orange' },
@@ -57,30 +56,43 @@ export const QuestionCard = ({
   console.log(question);
   return (
     <>
-      <Card className="dark:bg-gray-700 dark:text-gray-200 bg-gray-100 text-gray-800 mb-4 p-4 shadow-sm w-full h-card md:h-auto">
-        <div className="text-lg font-semibold mb-2 flex justify-between items-start">
-          <div className="break-words pr-2 flex-1 overflow-hidden">
-            <span>{index}. </span>
-            <span className="whitespace-pre-wrap overflow-hidden">{question.question}</span>
+      <Card className="relative bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-800 dark:via-gray-900 dark:to-gray-800 rounded-2xl p-6 mb-8 border border-gray-200 dark:border-gray-700 transition-all duration-300">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-4">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <span className="text-xl font-bold text-blue-700 dark:text-blue-300">{index}.</span>
+              <span className="text-lg font-semibold text-gray-900 dark:text-gray-100 whitespace-pre-wrap break-words overflow-hidden">
+                {question.question}
+              </span>
+            </div>
+            <div className="mt-1 text-xs text-gray-500 dark:text-gray-400 font-medium">
+              Created by: <span className="font-semibold">{question?.created_by_user?.name || ''} {question?.created_by_user?.deleted_at ? <span className="text-red-500"> (Deleted)</span> : ''}</span>
+            </div>
           </div>
-          <Badge className="dark:bg-gray-600 dark:text-gray-200 bg-gray-200 text-gray-800 py-1 px-3 flex-shrink-0">
+          <Badge className={`ml-auto md:ml-0 rounded-full px-4 py-1 text-sm font-semibold shadow-sm border-0 ${badgeClass[questionType[question.type as keyof typeof questionType]?.color as keyof typeof badgeClass] || ''} transition-all duration-200`}> 
             {questionType[question.type as keyof typeof questionType]?.label || 'Unknown'}
           </Badge>
         </div>
-        <ul className="space-y-2 max-w-full">
+
+        {/* Options/Content */}
+        <ul className="space-y-2 max-w-full mb-4">
           {(question.type == 'mcq' || question.type == 'multiple_select') && (
             <>
               {question.options
                 ?.filter((option) => option !== '')
-                .map((option, index) => (
+                .map((option, idx) => (
                   <li
-                    key={index}
-                    className={`p-2 rounded-md text-sm md:text-base break-words whitespace-pre-wrap overflow-hidden ${question?.correct_answer.includes(index.toString())
-                        ? 'dark:bg-green-800 dark:text-green-100 bg-green-100 text-green-800'
-                        : 'dark:bg-gray-800 dark:text-gray-400 bg-gray-100 text-gray-800'
-                      }`}
+                    key={idx}
+                    className={`flex items-start gap-2 p-3 rounded-lg text-base font-medium border transition-all duration-200 ${question?.correct_answer.includes(idx.toString())
+                        ? 'bg-green-50 dark:bg-green-900/60 text-green-800 dark:text-green-100 border-green-200 dark:border-green-700 shadow-sm'
+                        : 'bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-300 border-gray-200 dark:border-gray-700'
+                      } hover:scale-[1.02] hover:shadow-md`}
                   >
-                    {String.fromCharCode(65 + index)}. {option}
+                    <span className="inline-block w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200 flex items-center justify-center font-bold mr-2 shadow-sm">
+                      {String.fromCharCode(65 + idx)}
+                    </span>
+                    <span className="break-words whitespace-pre-wrap overflow-hidden flex-1">{option}</span>
                   </li>
                 ))}
             </>
@@ -89,12 +101,9 @@ export const QuestionCard = ({
           {question.meta?.code ? (
             <li
               key="code"
-              className={`p-2 rounded-md text-sm md:text-base max-w-full whitespace-pre-wrap break-all ${question?.correct_answer.includes(index.toString())
-                  ? 'dark:bg-green-800 dark:text-green-100 bg-green-100 text-green-800'
-                  : 'dark:bg-gray-800 dark:text-gray-400 bg-gray-100 text-gray-800'
-                }`}
+              className="p-3 rounded-lg text-base font-mono bg-gray-900 text-green-200 border border-gray-800 shadow-inner overflow-x-auto max-w-full whitespace-pre-wrap break-all mt-2"
             >
-              <pre className="overflow-x-auto max-w-full">{question.meta?.code as string}</pre>
+              <pre className="overflow-x-auto max-w-full text-sm leading-relaxed">{question.meta?.code as string}</pre>
             </li>
           ) : (
             ''
@@ -103,57 +112,58 @@ export const QuestionCard = ({
           {question.meta?.videoToVideo ? (
             <div
               key="video"
-              className="w-full overflow-hidden"
+              className="w-full overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm mt-2"
               dangerouslySetInnerHTML={{ __html: question.meta?.video_url || '' }}
             ></div>
           ) : (
             ''
           )}
         </ul>
-        <div className="flex justify-between items-center mt-4 text-sm">
+
+        {/* Footer */}
+        <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-2 mt-2">
           {isQuestionEditable && (
-            <>
-              <div className="space-x-1">
-                <Button
-                  variant="link"
-                  className="text-blue-500 hover:underline"
-                  onClick={handleEdit}
-                >
-                  Edit
-                </Button>
-                <Button
-                  variant="link"
-                  className="text-red-500 hover:underline"
-                  onClick={() => setIsDeleteModalOpen(true)}
-                >
-                  Delete
-                </Button>
-              </div>
-            </>
+            <div className="flex gap-2">
+              <Button
+                variant="link"
+                className="text-blue-600 dark:text-blue-400 hover:underline hover:text-blue-800 dark:hover:text-blue-200 font-semibold px-2 py-1 rounded-md transition-colors"
+                onClick={handleEdit}
+              >
+                Edit
+              </Button>
+              <Button
+                variant="link"
+                className="text-red-600 dark:text-red-400 hover:underline hover:text-red-800 dark:hover:text-red-200 font-semibold px-2 py-1 rounded-md transition-colors"
+                onClick={() => setIsDeleteModalOpen(true)}
+              >
+                Delete
+              </Button>
+            </div>
           )}
 
           <Badge
-            className={`${badgeClass[difficulties[question.difficulty_level]?.color as keyof typeof badgeClass] || ''} py-1 px-3`}
+            className={`rounded-full px-4 py-1 text-sm font-semibold shadow-sm border-0 ${badgeClass[difficulties[question.difficulty_level]?.color as keyof typeof badgeClass] || ''} transition-all duration-200`}
           >
             {difficulties[question.difficulty_level].label || 'Unknown'}
           </Badge>
         </div>
 
+        {/* Delete Dialog */}
         <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
-          <DialogContent className="sm:max-w-[425px]">
+          <DialogContent className="sm:max-w-[425px] rounded-2xl p-6 border-0 shadow-2xl bg-white dark:bg-gray-900">
             <DialogHeader>
-              <DialogTitle className="text-lg font-semibold text-gray-900 dark:text-white">
+              <DialogTitle className="text-xl font-bold text-red-700 dark:text-red-400 mb-2">
                 Are you sure?
               </DialogTitle>
-              <DialogDescription className="text-sm text-gray-600 dark:text-gray-400">
+              <DialogDescription className="text-base text-gray-600 dark:text-gray-300 mb-4">
                 This action cannot be undone. This will permanently delete the question.
               </DialogDescription>
             </DialogHeader>
-            <DialogFooter>
+            <DialogFooter className="flex gap-2 justify-end">
               <Button
                 variant="outline"
                 onClick={() => setIsDeleteModalOpen(false)}
-                className="text-gray-900 dark:text-white"
+                className="text-gray-900 dark:text-white border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md px-4 py-2 font-semibold"
               >
                 Cancel
               </Button>
@@ -161,8 +171,9 @@ export const QuestionCard = ({
                 variant="destructive"
                 onClick={() => {
                   handleDelete(question.id);
-                  setIsDeleteModalOpen(false); // Close the modal
+                  setIsDeleteModalOpen(false);
                 }}
+                className="rounded-md px-4 py-2 font-semibold"
               >
                 Delete
               </Button>

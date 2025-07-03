@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { TechnologyService } from '../services/technology.services';
 import { generateResponse } from '../utils/generateResponse';
+import { prisma } from '../db/prisma.client';
 const technologyService = new TechnologyService();
 export class TechnologyController {
   create = async (req: Request, res: Response, next: NextFunction) => {
@@ -9,7 +10,7 @@ export class TechnologyController {
       const trimName = name.trim();
       const technology = await technologyService.getTechnologyByName(trimName);
       if (technology && technology.deleted_at) {
-        const newTechnology = await technologyService.updateTechnology(technology.id, {
+        const newTechnology = await technologyService.updateTechnology(technology.id,req.user?.id||'', {
           name: trimName,
           deleted_at: null,
           questions,
@@ -91,24 +92,31 @@ export class TechnologyController {
         }
       }
 
-      for (const question of questions) {
-        if (question.type === 'mcq' || question.type === 'multiple_select') {
-          const existingQuestion = await technologyService.getQuestionByName(
-            question.question.trim()
-          );
-          if (existingQuestion && existingQuestion.id !== question.id) {
-            return generateResponse(
-              res,
-              400,
-              { questionId: question.id || null },
-              false,
-              `Question "${question.question}" already exists in the database. Please change the question name.`
-            );
-          }
-        }
-      }
+      // for (const question of questions) {
+      //   if (question.type === 'mcq' || question.type === 'multiple_select') {
+      //     const existingQuestion = await technologyService.getQuestionByName(
+      //       question.question.trim()
+      //     );
+      //     if (existingQuestion && existingQuestion.id !== question.id) {
+      //       return generateResponse(
+      //         res,
+      //         400,
+      //         { questionId: question.id || null },
+      //         false,
+      //         `Question "${question.question}" already exists in the database. Please change the question name.`
+      //       );
+      //     }
+      //   }
+      // }
+      const questionsArr = await prisma.questions.findMany({ where: { question: { in: questions.map((item: any) => item.question) },technology_id: id} })
 
-      const updatedTechnology = await technologyService.updateTechnology(id, {
+      if (questionsArr.length) {
+        return generateResponse(res, 400, { questions: questionsArr.map(item=>item.question) }, true, 'Questions already exists');
+
+      }
+      console.log(req.user);
+      
+      const updatedTechnology = await technologyService.updateTechnology(id, req.user?.id || '',{
         name: trimName,
         questions,
       });

@@ -35,6 +35,10 @@ export interface UserData {
   id: string;
   email: string;
   name: string;
+  created_by_user?:{
+    name:string
+    deleted_at:string
+  }
   role: {
     id: string;
     name: string;

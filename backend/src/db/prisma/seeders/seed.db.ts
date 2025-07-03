@@ -1250,6 +1250,7 @@ async function seedQuestions(questions: any[], technologyName: string) {
         difficulty_level: question.difficulty_level,
         type: question.type,
         meta: question.meta,
+        created_by:""
       },
     });
   }
@@ -1421,6 +1422,7 @@ async function main() {
         password: hashedPassword,
         role_id: role.id,
         name: 'Super Admin',
+        // created_by:""
       },
     });
   }

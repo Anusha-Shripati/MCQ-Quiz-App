@@ -30,7 +30,10 @@ interface AssessmentItemProps {
   key: string;
   assessmentId: string;
   title: string;
-  createdBy: string;
+  createdBy: {
+    name:string;
+    deleted_at:string
+  };
   createdDate: string;
   duration: string | number;
   pass_criteria: string | number;
@@ -122,7 +125,7 @@ function AssessmentItem({
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
             <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
               <User className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-              <span className="font-medium text-gray-700 dark:text-gray-300">{createdBy}</span>
+              <span className="font-medium text-gray-700 dark:text-gray-300">{createdBy.name} {createdBy.deleted_at ? <span className="text-red-500"> (Deleted)</span> : '' }</span>
             </div>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -545,7 +548,7 @@ export default function AssessmentDetails() {
                 key={assessment.id}
                 assessmentId={assessment.id}
                 title={assessment.name}
-                createdBy={assessment.created_by_user?.name || ''}
+                createdBy={assessment.created_by_user || {}}
                 createdDate={assessment.created_at}
                 duration={assessment.duration}
                 pass_criteria={assessment.pass_criteria}

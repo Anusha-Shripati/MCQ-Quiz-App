@@ -35,6 +35,7 @@ export class CandidateController {
         experience: candidateData.experience,
         phone: candidateData.phone,
         meta: candidateData.meta || {},
+        created_by:req.user?.id || ''
       });
 
       return generateResponse(res, 201, newCandidate, true, 'Candidate created successfully');

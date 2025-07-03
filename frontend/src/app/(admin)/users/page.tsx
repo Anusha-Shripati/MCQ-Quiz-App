@@ -1,6 +1,11 @@
 import { Card} from '@/components/ui/card';
 import Header from '@/components/user/header';
 import UserTable from '@/components/user/user-table';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Users',
+};
 
 const User: React.FC = () => {
   return (

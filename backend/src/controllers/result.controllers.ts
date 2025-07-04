@@ -16,7 +16,6 @@ export class ResultController {
   list = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const params = req.query;
-      console.log('Params:', params);
       const resultData = await resultService.list(params);
       return generateResponse(res, 200, resultData, true, 'Results fetched successfully');
     } catch (error) {

@@ -81,8 +81,6 @@ export class TechnologyService {
     userId:string,
     data: { name: string; deleted_at?: Date | null, questions: Omit<Questions, 'id'>[] }
   ){
-    console.log(userId);
-    
     const result = await prisma.$transaction(async (tx) => {
       const arr = data.questions?.map((item) => ({
         ...item,

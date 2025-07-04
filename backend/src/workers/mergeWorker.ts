@@ -14,16 +14,13 @@ export const registerMergeQueueWorker = () => {
     async (job) => {
       try {
         const { foldername, exam_id, candidate_id, body } = job.data;
-        console.log(body, 'body');
         const file = await uploadService.mergeChunk(foldername, exam_id, body);
-        console.log(body, 'body');
 
         if (file) {
           const exam = await prisma.exam.findFirst({
             where: { id: exam_id },
             include: { results: true },
           });
-          console.log(body, 'body');
 
 
           const res = await candidateExamService.submitAnswer(exam_id, candidate_id, {
@@ -31,7 +28,6 @@ export const registerMergeQueueWorker = () => {
             question_name: body.question_id ? '' : "introduction",
             question_id: body.question_id ? body.question_id : "",
           });
-          console.log(body, 'body');
 
           if (exam && exam.results) {
             await prisma.answers.update({
@@ -39,9 +35,6 @@ export const registerMergeQueueWorker = () => {
               data: { result_id: exam.results.id },
             });
           }
-          console.log(body, 'body');
-
-          console.log('Answer submitted successfully:', res);
         }
       } catch (error) {
         console.error('Error processing mergeChunk job:', error);

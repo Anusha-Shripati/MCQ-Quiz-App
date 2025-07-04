@@ -15,7 +15,6 @@ export const VideoRecorderQuestion: FC<VideoRecorderProps> = React.memo(({ quest
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   useEffect(() => {
     setVideoUrl(answers[question.question_id]?.answer as string);
-    console.log(answers[question.question_id]);
   }, [answers,question.question_id]);
 
   return (

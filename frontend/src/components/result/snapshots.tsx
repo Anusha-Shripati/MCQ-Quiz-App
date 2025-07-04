@@ -99,7 +99,7 @@ function Snapshots(props: SnapshotsProps) {
                         >
                             {props[selected as keyof SnapshotsProps].map((img, idx) => (
                                 <div key={idx} className="flex flex-col items-center">
-                                    <img
+                                    <Image
                                         src={`${process.env.NEXT_PUBLIC_IMGAE_PREFIX}${img.image}`}
 
                                         alt="Snapshot"

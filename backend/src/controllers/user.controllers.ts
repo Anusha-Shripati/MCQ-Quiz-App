@@ -67,8 +67,6 @@ export class UserController {
       if (user) {
         if (user.deleted_at) {
           try {
-            console.log(req.user?.id);
-            
             const updatedUser = await userService.updateUser(user.id, {
               email: payload.email,
               name: payload.name,

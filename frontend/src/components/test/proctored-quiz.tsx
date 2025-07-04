@@ -516,7 +516,6 @@ export default function ProctoredQuiz() {
           .catch(error => {
             console.error('Background video processing failed:', error);
           })
-        console.log(response);
         if (response.success) {
 
           // const userAnswer = response.data?.answer?.user_answer?.[0] as string;

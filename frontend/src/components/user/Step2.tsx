@@ -84,17 +84,17 @@ const ValidateOTP: React.FC<ValidateOTPProps> = ({ onNext, onPrevious, setOtp, e
     };
 
     return (
-        <div className="max-w-md mx-auto text-gray-200">
+        <div className="max-w-md mx-auto text-gray-900 dark:text-gray-200">
             <div className="text-center mb-8">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-900/30 rounded-full mb-4">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-full mb-4">
                     <KeyIcon className="h-8 w-8 text-blue-600" />
                 </div>
-                <h3 className="text-xl font-medium mb-2 text-gray-100">Verify Your Email</h3>
+                <h3 className="text-xl font-medium mb-2 text-gray-900 dark:text-gray-100">Verify Your Email</h3>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="space-y-3">
-                    <Label htmlFor="otp" className="text-base font-medium text-gray-200">Verification Code</Label>
+                    <Label htmlFor="otp" className="text-base font-medium text-gray-900 dark:text-gray-200">Verification Code</Label>
                     <Input
                         id="otp"
                         type="text"
@@ -102,10 +102,10 @@ const ValidateOTP: React.FC<ValidateOTPProps> = ({ onNext, onPrevious, setOtp, e
                         value={otpValue}
                         onChange={(e) => setOtpValue(e.target.value.replace(/[^0-9]/g, '').slice(0, 6))}
                         required
-                        className="h-12 px-4 text-center text-xl tracking-widest bg-gray-800 border-gray-700 text-gray-200 focus:bg-gray-800 focus:border-gray-600 hover:bg-gray-800 focus-visible:ring-gray-700 focus-visible:ring-1 focus-visible:ring-offset-0"
+                        className="h-12 px-4 text-center text-xl tracking-widest bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-200 focus:bg-gray-100 dark:focus:bg-gray-800 focus:border-gray-400 dark:focus:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 focus-visible:ring-gray-300 dark:focus-visible:ring-gray-700 focus-visible:ring-1 focus-visible:ring-offset-0"
                     />
-                    <p className="text-sm text-gray-400 mt-2 text-center">
-                        We have sent a verification code to <span className="font-medium text-gray-300">{email}</span>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-2 text-center">
+                        We have sent a verification code to <span className="font-medium text-gray-700 dark:text-gray-300">{email}</span>
                     </p>
                 </div>
 
@@ -114,7 +114,8 @@ const ValidateOTP: React.FC<ValidateOTPProps> = ({ onNext, onPrevious, setOtp, e
                         type="button"
                         variant="ghost"
                         onClick={onPrevious}
-                        className="px-6 h-12 bg-gray-800 hover:bg-gray-700 text-gray-100 focus:bg-gray-800 focus:ring-1 focus:ring-gray-600"
+                        className="w-full text-lg bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100 focus:bg-gray-200 dark:focus:bg-gray-800 focus:ring-1 focus:ring-gray-400 dark:focus:ring-gray-600"
+
                     >
                         <IoMdArrowRoundBack />
 
@@ -124,14 +125,15 @@ const ValidateOTP: React.FC<ValidateOTPProps> = ({ onNext, onPrevious, setOtp, e
                         variant="ghost"
                         onClick={handleResendOTP}
                         disabled={resendDisabled}
-                        className="h-11 text-gray-300 hover:bg-gray-700 focus:bg-gray-800"
+                        className="h-11 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-800"
                     >
                         {resendDisabled ? `Resend in ${countdown}s` : 'Resend Code'}
                     </Button>
                     <Button
                         type="submit"
                         disabled={isLoading || isMutating}
-                        className="h-11 bg-gray-800 hover:bg-gray-700 text-gray-100 focus:bg-gray-800 focus:ring-1 focus:ring-gray-600"
+                        className="w-full text-lg bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100 focus:bg-gray-200 dark:focus:bg-gray-800 focus:ring-1 focus:ring-gray-400 dark:focus:ring-gray-600"
+
                     >
                         {isLoading || isMutating ? 'Verifying...' : 'Verify'}
                     </Button>

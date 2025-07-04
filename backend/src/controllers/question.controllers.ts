@@ -104,7 +104,7 @@ export class QuestionsController {
       }
       const file = req.file;
       const { technologyId } = req.body;
-      const result = await questionsService.importQuestionsFromXlsx(file.buffer, technologyId,req.user?.id || '');
+      const result = await questionsService.importQuestionsFromXlsx(file.buffer, technologyId, req.user?.id || '');
 
       return generateResponse(
         res,

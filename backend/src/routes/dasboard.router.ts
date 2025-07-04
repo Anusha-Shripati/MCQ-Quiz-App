@@ -8,27 +8,27 @@ const dashboardController = new DashboardController();
 
 dashboardRouter.get(
   '/get-questions-data',
-  // authenticateAndAuthorize(undefined, 'Super Admin'),
+  authenticateAndAuthorize(),
   asyncHandler(dashboardController.questionData)
 );
 dashboardRouter.get(
   '/get-interview-data',
-  // authenticateAndAuthorize(undefined, 'Super Admin'),
+  authenticateAndAuthorize(),
   asyncHandler(dashboardController.interviewData)
 );
 dashboardRouter.get(
   '/get-interview-count',
-  // authenticateAndAuthorize(undefined, 'Super Admin'),
+  authenticateAndAuthorize(),
   asyncHandler(dashboardController.interviewCount)
 );
 dashboardRouter.get(
   '/get-interview-score',
-  // authenticateAndAuthorize(undefined, 'Super Admin'),
+  authenticateAndAuthorize(),
   asyncHandler(dashboardController.interviewScroreData)
 );
 dashboardRouter.get(
   '/get-calendar-data',
-  // authenticateAndAuthorize(undefined, 'Super Admin'),
+  authenticateAndAuthorize(),
   asyncHandler(dashboardController.calendarData)
 );
 

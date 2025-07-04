@@ -26,6 +26,7 @@ model User {
     Candidate       Candidate[]
     childs          User[]        @relation("User")
     created_by_user User?         @relation("User", fields: [created_by], references: [id])
+    User_tokens     User_tokens[]
 
     @@map("users")
 }
@@ -212,14 +213,12 @@ model Answers {
     result    Results?   @relation(fields: [result_id], references: [id])
 }
 
-// model Assessments_technology{
-//     id                  String         @id @default(uuid())
-//     assessment_id       String
-//     technology_id       String
-//     assessment          Assessments     @relation(fields: [assessment_id],references: [id])
-//     technology          Technology      @relation(fields: [technology_id],references: [id])
-
-// }
+model User_tokens {
+    id      String  @id @default(uuid())
+    user_id String?
+    token   String
+    user    User?    @relation(fields: [user_id], references: [id])
+}
 
 // model Profile {
 //     id            String  @id @default(uuid())
@@ -264,6 +263,7 @@ enum ExamStatus {
     pending
     in_progress
     completed
+    expired
 }
 
 enum Difficulty {

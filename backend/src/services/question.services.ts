@@ -363,7 +363,7 @@ export class QuestionService {
 
     // All validations passed, proceed with import using a transaction
     let totalImported = 0;
-
+    let questionsImportArray:any=[]
     try {
       await prisma.$transaction(async (tx) => {
         for (const row of questions) {
@@ -380,9 +380,7 @@ export class QuestionService {
           }
 
           const difficultyLevel = String(row.difficulty_level).toLowerCase();
-
-          await tx.questions.create({
-            data: {
+          questionsImportArray.push({
               technology_id: technologyId, // Use the specified technology ID
               question: String(row.question),
               correct_answer: correctAnswersIndexes,
@@ -392,11 +390,13 @@ export class QuestionService {
               type: 'mcq',
               meta: {},
               created_by:created_by
-            },
           });
 
           totalImported++;
         }
+        console.log(questionsImportArray);
+        
+        await tx.questions.createMany({data:questionsImportArray})
       });
 
       return {

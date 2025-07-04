@@ -59,17 +59,17 @@ const NewPassword: React.FC<NewPasswordProps> = ({ email }) => {
     };
 
     return (
-        <div className="max-w-md mx-auto text-gray-200">
+        <div className="max-w-md mx-auto text-gray-900 dark:text-gray-200">
             <div className="text-center mb-8">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-purple-900/30 rounded-full mb-4">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-purple-100 dark:bg-purple-900/30 rounded-full mb-4">
                     <LockIcon className="h-8 w-8 text-purple-600" />
                 </div>
-                <h3 className="text-xl font-medium mb-2 text-gray-100">Create New Password</h3>
+                <h3 className="text-xl font-medium mb-2 text-gray-900 dark:text-gray-100">Create New Password</h3>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-3">
-                    <Label htmlFor="new-password" className="text-base font-medium text-gray-200">New Password</Label>
+                    <Label htmlFor="new-password" className="text-base font-medium text-gray-900 dark:text-gray-200">New Password</Label>
                     <div className="relative">
                         <Input
                             id="new-password"
@@ -79,12 +79,12 @@ const NewPassword: React.FC<NewPasswordProps> = ({ email }) => {
                             onChange={(e) => setPassword(e.target.value)}
                             onFocus={() => setShowPasswordRequirements(true)}
                             required
-                            className="h-12 pr-12 bg-gray-800 border-gray-700 text-gray-200 focus:bg-gray-800 focus:border-gray-600 hover:bg-gray-800 focus-visible:ring-gray-700 focus-visible:ring-1 focus-visible:ring-offset-0"
+                            className="h-12 pr-12 bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-200 focus:bg-gray-100 dark:focus:bg-gray-800 focus:border-gray-400 dark:focus:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 focus-visible:ring-gray-300 dark:focus-visible:ring-gray-700 focus-visible:ring-1 focus-visible:ring-offset-0"
                         />
                         <Button
                             type="button"
                             variant="ghost"
-                            className="absolute right-0 top-0 h-full px-3 text-gray-400 hover:text-gray-200 focus:bg-transparent"
+                            className="absolute right-0 top-0 h-full px-3 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 focus:bg-transparent"
                             onClick={() => setShowPassword(!showPassword)}
                         >
                             {showPassword ? <EyeOffIcon size={18} /> : <EyeIcon size={18} />}
@@ -94,7 +94,7 @@ const NewPassword: React.FC<NewPasswordProps> = ({ email }) => {
                 </div>
 
                 <div className="space-y-3">
-                    <Label htmlFor="confirm-password" className="text-base font-medium text-gray-200">Confirm Password</Label>
+                    <Label htmlFor="confirm-password" className="text-base font-medium text-gray-900 dark:text-gray-200">Confirm Password</Label>
                     <div className="relative">
                         <Input
                             id="confirm-password"
@@ -103,12 +103,12 @@ const NewPassword: React.FC<NewPasswordProps> = ({ email }) => {
                             value={confirmPassword}
                             onChange={(e) => setConfirmPassword(e.target.value)}
                             required
-                            className="h-12 pr-12 bg-gray-800 border-gray-700 text-gray-200 focus:bg-gray-800 focus:border-gray-600 hover:bg-gray-800 focus-visible:ring-gray-700 focus-visible:ring-1 focus-visible:ring-offset-0"
+                            className="h-12 pr-12 bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-200 focus:bg-gray-100 dark:focus:bg-gray-800 focus:border-gray-400 dark:focus:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 focus-visible:ring-gray-300 dark:focus-visible:ring-gray-700 focus-visible:ring-1 focus-visible:ring-offset-0"
                         />
                         <Button
                             type="button"
                             variant="ghost"
-                            className="absolute right-0 top-0 h-full px-3 text-gray-400 hover:text-gray-200 focus:bg-transparent"
+                            className="absolute right-0 top-0 h-full px-3 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 focus:bg-transparent"
                             onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                         >
                             {showConfirmPassword ? <EyeOffIcon size={18} /> : <EyeIcon size={18} />}
@@ -120,7 +120,7 @@ const NewPassword: React.FC<NewPasswordProps> = ({ email }) => {
                     <Button
                         type="submit"
                         disabled={isLoading || isMutating}
-                        className="px-6 h-12 bg-gray-800 hover:bg-gray-700 text-gray-100 focus:bg-gray-800 focus:ring-1 focus:ring-gray-600 w-full"
+                        className="w-full text-lg bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100 focus:bg-gray-200 dark:focus:bg-gray-800 focus:ring-1 focus:ring-gray-400 dark:focus:ring-gray-600"
                     >
                         {isLoading || isMutating ? 'Resetting...' : 'Reset Password'}
                     </Button>

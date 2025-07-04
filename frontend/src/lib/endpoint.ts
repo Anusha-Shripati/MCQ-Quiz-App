@@ -25,7 +25,8 @@ export const userEndpoint = {
     UPLOAD_IMAGE: "/user/upload-image",
     USER_BY_ID: "/user",
     CHANGE_PASSWORD: "/user/change-password",
-    LOGIN: '/user/login'
+    LOGIN: '/user/login',
+    LOGOUT:"/user/logout"
 }
 export const candidateEndpoint = {
     LIST: "/candidate/list",

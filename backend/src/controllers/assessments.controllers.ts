@@ -376,7 +376,6 @@ export class AssessmentController {
           _all: true,
         },
       });
-      
       const obj: { [key: string]: { easy: {[key: string]:number}; medium: {[key: string]:number}; hard: {[key: string]:number} } } = {};
       results.forEach((result: any) => {
         if (!obj[result?.technology_id as string]) {
@@ -387,7 +386,7 @@ export class AssessmentController {
           }
         }
         if(!obj[result.technology_id][result.difficulty_level as 'easy' | 'medium' | 'hard'][result.type])obj[result.technology_id][result.difficulty_level as 'easy' | 'medium' | 'hard'][result.type]=0
-        obj[result.technology_id][result.difficulty_level as 'easy' | 'medium' | 'hard'][result.type] += 1;
+        obj[result.technology_id][result.difficulty_level as 'easy' | 'medium' | 'hard'][result.type] += result._count._all;
       });
 
       return generateResponse(res, 200, { success: true, results: obj }, true, 'Successfully checked');

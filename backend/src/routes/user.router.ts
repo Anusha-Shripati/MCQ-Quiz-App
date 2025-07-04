@@ -17,6 +17,7 @@ userRouter.post(
 );
 
 userRouter.post('/login', validateRequest(userSchema.login), asyncHandler(userController.login));
+userRouter.get('/logout',  asyncHandler(userController.logout));
 
 userRouter.get(
   '/list',

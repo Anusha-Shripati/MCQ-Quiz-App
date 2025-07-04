@@ -26,32 +26,26 @@ export const CategoryCard = ({ category }: { category: QuestionCategory }) => {
 
   return (
     <Card className="shadow-md hover:shadow-lg transition-all duration-200">
-      <CardHeader className="flex flex-row justify-between items-center border-b pb-2">
+      <CardHeader className="flex flex-row justify-between items-center flex-wrap  border-b pb-2 gap-5">
         <CardTitle className="text-lg font-semibold">{category.name}</CardTitle>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap flex-grow">
           {isQuestionEditable && (
-            <div className="flex items-center justify-center gap-2">
+            <div className="flex items-center flex-grow justify-center gap-2">
               <Button
                 variant="outline"
                 size="default"
-                className="dark:border-gray-600 dark:text-white dark:hover:bg-gray-700"
+                className="dark:border-gray-600 dark:text-white dark:hover:bg-gray-700 w-full"
                 onClick={handleAddQuestion}
               >
                 <Plus className="h-4 w-4" /> Add Questions
               </Button>
             </div>
           )}
-          {/* <CategoryMenu
-              category={category}
-              handleDelete={handleDelete}
-              handleNavigate={handleNavigate}
-            /> */}
-
-          <div className="flex items-center justify-center">
+          <div className="flex items-center justify-center flex-grow">
             <Button
               variant="outline"
               onClick={() => handleNavigate()}
-              className="dark:border-gray-600 dark:text-white dark:hover:bg-gray-700"
+              className="dark:border-gray-600 dark:text-white dark:hover:bg-gray-700 w-full"
             >
               <EyeIcon className="h-4 w-4 text-gray-600 dark:text-gray-300" />
               <span className="text-gray-900 dark:text-gray-200">View all</span>

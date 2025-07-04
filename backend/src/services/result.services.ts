@@ -209,6 +209,7 @@ export class ResultService {
               select: {
                 id: true,
                 name: true,
+                deleted_at:true
               },
             },
             is_completed: true,

@@ -181,6 +181,7 @@ class ExpressAppProvider {
   public async startServer(): Promise<void> {
     try {
       await connectToDatabase();
+      require('../cron/exam-expiry'); 
       registerMergeQueueWorker();
       this.app.listen(this.port, () => {
         // registerCreateArticleWorkerEvents();

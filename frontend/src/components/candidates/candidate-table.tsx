@@ -345,9 +345,10 @@ function CandidateTable() {
             completed: 'bg-green-100 text-green-800',
             in_progress: 'bg-yellow-100 text-yellow-800',
             pending: 'bg-gray-100 text-gray-800',
+            expired:"bg-red-100 text-red-800"
           };
 
-          const status = row.exam?.status as 'completed' | 'in_progress' | 'pending';
+          const status = row.exam?.status as 'completed' | 'in_progress' | 'pending' | 'expired';
           const badgeClass = statusMap[status] || 'bg-gray-100 text-gray-800';
 
           return (
@@ -375,7 +376,7 @@ function CandidateTable() {
         header: 'Share',
         render: (candidate: ICandidate) => (
           <div className="flex items-center gap-2">
-            {candidate.exam?.status !== 'completed' && (
+            {(candidate.exam?.status !== 'completed' && candidate.exam?.status !== 'expired') && (
               <Button
                 onClick={async (e) => {
                   e.stopPropagation();

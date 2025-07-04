@@ -10,15 +10,24 @@ import {
 } from '../ui/dropdown-menu';
 import { LogOut, Settings, User2Icon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { api } from '@/lib/api';
+import toast from 'react-hot-toast';
+import { isAxiosError } from 'axios';
+import { userEndpoint } from '@/lib/endpoint';
 
 const UserAvatar = () => {
   const { user } = useAuthStore();
   const router = useRouter();
   const { logout } = useAuthStore();
 
-  const handleLogout = () => {
-    logout();
-    router.push('/');
+  const handleLogout = async() => {
+    try{
+      await api.get(userEndpoint.LOGOUT)
+      logout();
+      router.push('/');
+    }catch(error){
+      toast.error(isAxiosError(error)? (error?.response?.data?.message || 'Failed'):'Failed')
+    }
   };
 
   const handleProfileNavigate = () => {

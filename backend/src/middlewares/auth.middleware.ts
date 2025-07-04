@@ -46,10 +46,13 @@ export const authenticateAndAuthorize =
       };
 
       const user = await userService.findUserById(decoded.id);
-
+      
       if (!user) {
         generateResponse(res, 401, {}, false, 'User not found.');
         return;
+      }
+      if(user.User_tokens.length == 0){
+        throw new Error()
       }
 
       req.user = decoded;

@@ -101,6 +101,7 @@ const Step1: React.FC<Step1Props> = ({
             id="assessmentName"
             placeholder="Enter a descriptive name"
             {...register('name')}
+            maxLength={234}
             className="bg-white text-gray-900 border-gray-200 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500
                      dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
             error={errors.name?.message}

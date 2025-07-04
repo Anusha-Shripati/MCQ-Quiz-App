@@ -75,11 +75,21 @@ export class QuestionService {
   async getQuestionById(id: string): Promise<Questions | null> {
     const data = await this.cacheService.getKey(`question:${id}`);
     if (data) JSON.stringify(data);
-    const response = prisma.questions.findUnique({ where: { id } });
+
+    const response = await prisma.questions.findUnique({ where: { id } });
     await this.cacheService.setKey(`question:${id}`, response, this.cacheTime);
     return response;
   }
 
+  async getQuestionByName(question: string): Promise<Questions[] | null> {
+    const data = await this.cacheService.getKey(`question-name:${question}`);
+    if (data) JSON.stringify(data);
+
+
+    const response =await  prisma.questions.findMany({ where: { question } });
+    await this.cacheService.setKey(`question:-name${question}`, response, this.cacheTime);
+    return response;
+  }
   async createQuestion(data: QuestionsPayload): Promise<Questions> {
     return prisma.questions.create({ data });
   }
@@ -394,8 +404,15 @@ export class QuestionService {
 
           totalImported++;
         }
-        console.log(questionsImportArray);
-        
+        const existing = await tx.questions.findMany({where: { question:{in:questionsImportArray.map((item:any)=>item.question)}}})
+          if(existing.length){
+            const existingIndex:number[]=[]
+            existing.forEach((element:Questions) => {
+                const idx =  questionsImportArray.findIndex((item:Questions)=>item.question == element.question )
+                if(idx!== -1)existingIndex.push(idx+1)
+            });
+            throw new Error( existingIndex.join(', ')+ ' questions already exists')
+          }
         await tx.questions.createMany({data:questionsImportArray})
       });
 
@@ -405,7 +422,6 @@ export class QuestionService {
         errors: [],
       };
     } catch (error) {
-      console.error('Import transaction failed:', error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error during import';
       return {
         totalImported: 0,

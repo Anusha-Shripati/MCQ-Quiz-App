@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/form/button';
 import Select from 'react-select';
 import { toast } from 'react-hot-toast';
 import { Technology, Assessment } from '@/store/assessmentStore';
-import { Slider } from '../ui/form/slider';
+// import { Slider } from '../ui/form/slider';
 import dayjs from 'dayjs';
 import useSWR, { mutate } from 'swr';
 import { api, isAxiosError } from '@/lib/api';

@@ -75,8 +75,8 @@ export default function ProctoredQuiz() {
   
   const { isMutating: isSubmiting, trigger: submitTrigger } = useSWRMutation(`${examEndpoint.CANDIDATE_EXAM}/${exam?.id}/finish`, (url: string) => examApi.get(url, accessCode))
   const { isMutating: isReseting, trigger: resetTrigger } = useSWRMutation(`${examEndpoint.CANDIDATE_EXAM}/${exam?.id}/reset-answer`, (url: string, { arg }: { arg: { answer_id: string } }) => examApi.post(url, arg, accessCode))
-  console.log(isMutating , isSubmiting , isVideoMutating,'isVideoMutating');
 
+  const {cameraStreamRef} = useExamStore()
   useEffect(() => {
     if (examData) {
       setExam(examData.data);
@@ -324,9 +324,17 @@ export default function ProctoredQuiz() {
   const submitQuiz = async () => {
     if (isSubmitting) return;
     try {
+      
       await handleNextQuestion();
       setIsSubmitting(true);
+
       await submitTrigger();
+      if (document.fullscreenElement) document.exitFullscreen();
+
+      cameraStreamRef?.getTracks().forEach((track)=>{
+        track.stop()
+      })
+
 
       router.push('/thank-you');
     } catch (error) {

@@ -1,14 +1,11 @@
 import { AlertCircle, Clock } from 'lucide-react';
-import { Button } from '../ui/form/button';
 
 interface ExamExpiredProps {
   contactEmail?: string;
-  onRetry?: () => void;
 }
 
 const ExamExpired: React.FC<ExamExpiredProps> = ({ 
   contactEmail = "support@example.com",
-  onRetry
 }) => {
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4 sm:p-6">
@@ -55,14 +52,6 @@ const ExamExpired: React.FC<ExamExpiredProps> = ({
           </div>
           
           <div className="pt-4 space-y-4">
-            {onRetry && (
-              <Button 
-                onClick={onRetry}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg"
-              >
-                Try Again
-              </Button>
-            )}
             
             <div className="text-center">
               <p className="text-gray-500 text-sm">

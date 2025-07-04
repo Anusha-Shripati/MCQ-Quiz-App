@@ -5,6 +5,7 @@ import { createToken, encryptStringCrypt, matchPassword } from '../middlewares/a
 import RoleService from '../services/role.services';
 import { UploadService } from '../services/upload.services';
 import { sendAccountUpdateEmail, sendWelcomeEmail } from '../utils/email.utils';
+import { prisma } from '../db/prisma.client';
 
 const userService = new UserService();
 const roleService = new RoleService();
@@ -38,8 +39,21 @@ export class UserController {
       }
       const role = await roleService.findRoleById(user.role_id);
       const token = createToken(user.id, user.email, role?.name, role?.id);
-
+      await prisma.user_tokens.create({
+        data:{
+          user_id:user.id,
+          token
+        }
+      })
       generateResponse(res, 200, { ...user, token }, true, 'Login Successfully!');
+    } catch (error) {
+      next(error);
+    }
+  };
+  logout = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      await prisma.user_tokens.deleteMany({where:{user_id:req.user?.id}});
+      generateResponse(res, 200, {}, true, 'Logout Successfully!');
     } catch (error) {
       next(error);
     }
@@ -53,6 +67,8 @@ export class UserController {
       if (user) {
         if (user.deleted_at) {
           try {
+            console.log(req.user?.id);
+            
             const updatedUser = await userService.updateUser(user.id, {
               email: payload.email,
               name: payload.name,
@@ -118,6 +134,7 @@ export class UserController {
           let hashPass = user.password;
           if (payload.password) {
             hashPass = await encryptStringCrypt(payload.password);
+            await prisma.user_tokens.deleteMany({where:{user_id:req.user?.id}});
           }
 
           await userService.updateUser(softDeletedUser.id, {
@@ -142,6 +159,7 @@ export class UserController {
 
       let hashPass = user.password;
       if (payload.password) {
+        await prisma.user_tokens.deleteMany({where:{user_id:req.user?.id}});
         hashPass = await encryptStringCrypt(payload.password);
       }
 
@@ -175,7 +193,7 @@ export class UserController {
         isPasswordValid = await matchPassword(oldPassword, user.password);
 
         if (!isPasswordValid) {
-          return generateResponse(res, 400, {}, false, 'Invalid old password!');
+          return generateResponse(res, 400, {}, false, 'Invalid current password!');
         }
       }
       let hashPass = user.password;
@@ -192,6 +210,7 @@ export class UserController {
         }
         hashPass = await encryptStringCrypt(newPassword);
       }
+      await prisma.user_tokens.deleteMany({where:{user_id:req.user?.id}});
 
       const newUser = await userService.changePassword(user.id, hashPass);
 
@@ -348,6 +367,7 @@ export class UserController {
         return;
       }
       const hashedPassword = await encryptStringCrypt(newPassword);
+      await prisma.user_tokens.deleteMany({where:{user_id:req.user?.id}});
       await userService.updateUser(user.id, { password: hashedPassword });
       generateResponse(res, 200, {}, true, 'Password reset successfully');
     } catch (error) {

@@ -83,13 +83,14 @@ export class UserService {
     return response;
   }
 
-  async findUserById(userId: string): Promise<(User & { role: Roles | null }) | null> {
+  async findUserById(userId: string){
     const data = await this.cacheService.getKey(`user:${userId}`);
 
     if (data) return JSON.parse(data);
     const response = await prisma.user.findUnique({
       where: { id: userId, deleted_at: null },
       include: {
+        User_tokens:true,
         role: {
           include: {
             role_permissions: {
@@ -103,6 +104,7 @@ export class UserService {
                 },
               },
             },
+
           },
         },
       },
@@ -112,7 +114,7 @@ export class UserService {
   }
 
   async updateUser(id: string, data: Record<string, any>) {
-    const { role_id, deletedAt, ...restData } = data;
+    const { role_id, deletedAt, created_by, ...restData } = data;
     const updateData: any = { ...restData };
     if (role_id) {
       updateData.role = {
@@ -121,6 +123,9 @@ export class UserService {
     }
     if (deletedAt !== undefined) {
       updateData.deleted_at = deletedAt;
+    }
+    if (created_by) {
+      updateData.created_by_user = { connect: { id: created_by } };
     }
 
     try {
@@ -226,7 +231,7 @@ export class UserService {
           <p>You requested to reset your password. Use the OTP below:</p>
           <h3 style="color: #333;">${otp}</h3>
           <p>This OTP will expire in 10 minutes.</p>
-          <p>If you didn’t request this, you can ignore this email.</p>
+          <p>If you didn't request this, you can ignore this email.</p>
           <br/>
           <p>Thanks,</p>
           <p>LR Dev Team</p>

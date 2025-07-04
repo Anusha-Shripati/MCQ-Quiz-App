@@ -59,7 +59,7 @@ export const sendWelcomeEmail = async (name: string, email: string, password: st
               <td style="padding: 12px 15px; color: #555; font-weight: 600; border-bottom: 1px solid #e0e0ff;">Role:</td>
               <td style="padding: 12px 15px; color: #333; border-bottom: 1px solid #e0e0ff;">${roleName || 'User'}</td>
             </tr>
-            <tr>
+            <tr style="background-color: rgba(74, 0, 224, 0.05);">
               <td style="padding: 12px 15px; color: #555; font-weight: 600; border-bottom: 1px solid #e0e0ff;">Email:</td>
               <td style="padding: 12px 15px; color: #333; border-bottom: 1px solid #e0e0ff;">${email}</td>
             </tr>
@@ -134,7 +134,7 @@ export const sendAccountUpdateEmail = async (name: string, email: string, passwo
               <td style="padding: 12px 15px; color: #555; font-weight: 600; border-bottom: 1px solid #e0e0ff;">Role:</td>
               <td style="padding: 12px 15px; color: #333; border-bottom: 1px solid #e0e0ff;">${roleName || 'User'}</td>
             </tr>
-            <tr>
+            <tr style="background-color: rgba(74, 0, 224, 0.05);">
               <td style="padding: 12px 15px; color: #555; font-weight: 600; border-bottom: 1px solid #e0e0ff;">Email:</td>
               <td style="padding: 12px 15px; color: #333; border-bottom: 1px solid #e0e0ff;">${email}</td>
             </tr>`+

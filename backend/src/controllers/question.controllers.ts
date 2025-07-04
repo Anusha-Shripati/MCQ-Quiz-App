@@ -20,7 +20,10 @@ export class QuestionsController {
       if (!existingQuestion) {
         return generateResponse(res, 404, {}, false, 'Question not found!');
       }
-
+      const question = await questionsService.getQuestionByName(req.body.question)
+      if(question && question?.length && question[0]?.id != id){
+        return generateResponse(res, 404, {}, false, 'Question name already exists!');
+      }
       const updatedQuestion = await questionsService.updateQuestion(id, req.body);
 
       return generateResponse(res, 200, updatedQuestion, true, 'Question updated successfully');

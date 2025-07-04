@@ -22,7 +22,7 @@ const userInfoSchema = z.object({
 
 const passwordChangeSchema = z
   .object({
-    oldPassword: z.string().min(1, 'Old Password is required'),
+    oldPassword: z.string().min(1, 'Current Password is required'),
     newPassword: z
       .string()
       .min(8, 'Password must be at least 8 characters')

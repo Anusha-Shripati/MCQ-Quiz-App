@@ -37,7 +37,6 @@ export class QuestionsController {
 
       const existingQuestion = await questionsService.getQuestionById(id);
       if (!existingQuestion) {
-        console.log('Question not found');
         return generateResponse(res, 404, {}, false, 'Question not found!');
       }
 

@@ -205,16 +205,13 @@ const TestPage = () => {
           // Check for displaySurface property (if available)
           const { displaySurface = '' } = settings;
           if (displaySurface === 'window' || displaySurface === 'browser' || displaySurface === 'application') {
-            console.log('Safari user selected window instead of screen. Showing special error.');
             setShowSafariWindowShareError(true);
             return;
           }
           
           // Otherwise, use heuristics to detect window sharing
           const { width = 0, height = 0 } = settings;
-          console.log('Safari screen share settings:', height);
           if (width > 0 && width < 1200) {
-            console.log('Detected small screen size, likely window sharing in Safari');
             setShowSafariWindowShareError(true);
             return;
           }

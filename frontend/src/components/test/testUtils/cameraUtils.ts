@@ -44,7 +44,6 @@ export const startCamera = async (
       });
     }
 
-    console.log(`Attempting to start camera (attempt ${retryCount + 1}/${maxRetries + 1})`);
     
     // Check if devices are available before requesting
     const devices = await navigator.mediaDevices.enumerateDevices();
@@ -71,7 +70,6 @@ export const startCamera = async (
     
     // Setup track ended handler
     videoTrack.onended = () => {
-      console.log('Camera track ended, attempting reconnection');
       setPermission((prv: { camera: boolean; screen: boolean }) => ({ ...prv, camera: false }));
       // Try to reconnect camera if it disconnects unexpectedly
       startCamera(setCameraStream, setPermission, setCameraError, null, cameraSnapshotRef, 0, maxRetries);
@@ -86,7 +84,6 @@ export const startCamera = async (
     setCameraStream(cameraStream);
     setPermission((prv: { camera: boolean; screen: boolean }) => ({ ...prv, camera: true }));
     
-    console.log('Camera started successfully');
     return true;
   } catch (error) {
     console.error('Camera initialization error:', error);

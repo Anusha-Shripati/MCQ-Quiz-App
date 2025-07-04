@@ -45,7 +45,6 @@ function InterviewScore() {
   const PAGE_SIZE = 5;
 
   const getKey = (pageIndex: number, previousPageData: InterviewScoreResponse) => {
-    console.log('Fetching page:', previousPageData);
     if (previousPageData && !previousPageData.data?.list?.length) return null;
     const params = new URLSearchParams();
     if (filters.language) params.set('language', filters.language);
@@ -67,7 +66,6 @@ function InterviewScore() {
   } = useSWRInfinite(getKey, api.get, {
     revalidateFirstPage: false,
   });
-  console.log('Interview Score Data:', data);
   const observerRef = useRef<HTMLDivElement | null>(null);
   const isLoadingMore = isValidating && size > 0;
 

@@ -219,7 +219,6 @@ export class QuestionService {
           difficulty_level: question.difficulty_level,
         };
       });
-    console.log('Sample Questions Data:', sampleQuestionsData);
     const dataToUse = sampleQuestionsData.length > 0 ? sampleQuestionsData : sampleData;
 
     const worksheet = XLSX.utils.json_to_sheet(dataToUse);
@@ -339,7 +338,6 @@ export class QuestionService {
 
             const ansIndex = parseInt(answer, 10);
             if (ansIndex < 0 || ansIndex >= optionsArray.length) {
-              console.log(ansIndex, optionsArray.length);
               errors.push(
                 `Row ${rowNum}: Correct answer index ${ansIndex} is out of range. Must be between 0 and ${optionsArray.length - 1}.`
               );

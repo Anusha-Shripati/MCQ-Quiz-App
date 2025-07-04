@@ -53,7 +53,6 @@ const ReusableTable = <T extends object>({
 
   // Toggle expandable row
   const toggleRow = (id: number) => {
-    console.log('Toggling row:', id);
     setExpandedRow(expandedRow.includes(id) ? expandedRow.filter(rowId => rowId !== id) : [...expandedRow, id]);
   };
 

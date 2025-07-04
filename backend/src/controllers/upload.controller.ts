@@ -43,7 +43,6 @@ export class UploadController {
           exam_id: fields.examId?.[0],
           filename: fields.filename?.[0],
         };
-        console.log(files);
 
         const file = files.chunk ? files.chunk[0] : {};
         if (!file || !file.filepath) {

@@ -313,6 +313,7 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
                   onChange={(e) => setLocalAssessment({ ...localAssessment, name: e.target.value })}
                   className="mb-4"
                   name="name"
+                  maxLength={234}
                 />
               </div>
               <div className="space-y-2 w-1/2">

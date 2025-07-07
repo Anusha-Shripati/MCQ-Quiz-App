@@ -15,7 +15,7 @@ import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { BROWSER_KEY, PROHIBITED_COMBINATIONS, PROHIBITED_KEYS, QUIZ_CONFIG } from '@/shared/constants/data';
 import { examEndpoint } from '@/lib/endpoint';
 import TestWarning from './error/test-warning';
-import { uploadFileInChunks } from '@/lib/utils';
+import { deleteVideoFromIndexedDB, uploadFileInChunks } from '@/lib/utils';
 
 export default function ProctoredQuiz() {
   const [answers, setAnswers] = useState<Record<string, { question: IExamQuestion, answer: Answer, answer_id?: string }>>({});
@@ -468,17 +468,21 @@ export default function ProctoredQuiz() {
         await resetTrigger({ answer_id: answerId });
       }
     } catch (error) {
-      setShowAlert(true);
-      setAlertMessage(isAxiosError(error)
-        ? error.response?.data.message
-        : 'An error occurred while resetting the answer');
-      return;
+      // setShowAlert(true);
+      // setAlertMessage(isAxiosError(error)
+      //   ? error.response?.data.message
+      //   : 'An error occurred while resetting the answer');
+      // return;
+    }
+    if(current_question.question.type == 'video'){
+      deleteVideoFromIndexedDB(current_question.id,exam?.id || '')
     }
     setAnswers((prv) => {
       const temp = { ...prv }
       delete temp[current_question.question_id];
       return temp
     })
+   
 
 
   }

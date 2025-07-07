@@ -119,6 +119,33 @@ export async function saveVideoToIndexedDB(
     throw error;
   }
 }
+export async function deleteVideoFromIndexedDB(
+  key = 'recordedVideo',
+  examId: string
+): Promise<void> {
+  try {
+    const db = await openVideoDB(examId);
+    
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction('videos', 'readwrite');
+      const store = tx.objectStore('videos');
+      const request = store.delete(key);
+      
+      request.onsuccess = () => {
+        db.close();
+        resolve();
+      };
+
+      request.onerror = () => {
+        db.close();
+        reject(request.error);
+      };
+    });
+  } catch (error) {
+    console.error('Error deleting video from IndexedDB:', error);
+    throw error;
+  }
+}
 
 export async function loadVideoFromIndexedDB(
   key = 'recordedVideo',
@@ -184,7 +211,7 @@ export const formatTestDuration = (startDate: string, endDate: string): string =
   return `${totalMinutes} minutes`;
 };
 
-export const uploadFileInChunks = async (file: Blob, chunkSize: number = 5 * 1024 * 1024, examId: string = ''): Promise<{UploadId:string, fileName: string, parts: { ETag: string, PartNumber: number }[] }> => {
+export const uploadFileInChunks = async (file: Blob, chunkSize: number = 5 * 1024 * 1024, examId: string = ''): Promise<{ UploadId: string, fileName: string, parts: { ETag: string, PartNumber: number }[] }> => {
   const totalChunks = Math.ceil(file.size / chunkSize);
   const fileName = String(Date.now())
   let UploadId;
@@ -206,9 +233,9 @@ export const uploadFileInChunks = async (file: Blob, chunkSize: number = 5 * 102
 
     const response = await api.post(`/upload/chunk?chunkFolder=${fileName}`, formData);
     UploadId = response.data.UploadId
-    if(UploadId){
+    if (UploadId) {
       parts.push({ ETag: JSON.parse(response.data.ETag as string), PartNumber: i + 1 })
     }
   }
-  return {UploadId, fileName, parts }
+  return { UploadId, fileName, parts }
 }

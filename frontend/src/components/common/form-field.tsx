@@ -28,6 +28,7 @@ interface FormFieldProps {
   pattern?: string;
   maxLength?: number;
   onFocus?: (e: React.FocusEvent<HTMLInputElement>) => void;
+  autoFocus?:boolean
 }
 
 interface SelectOption {
@@ -85,6 +86,7 @@ export const FormField = forwardRef<HTMLInputElement, FormFieldProps>(
             {...props}
             placeholder={`${props.placeholder || 'Enter ' + (props.label || '')} `}
             ref={ref}
+            autoFocus
             onKeyDown={handleKeyDown}
           />
         )}

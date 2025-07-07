@@ -58,6 +58,7 @@ const EnterEmail: React.FC<EnterEmailProps> = ({ onNext, setEmail }) => {
                     <Input
                         id="email"
                         type="email"
+                        autoFocus
                         placeholder="Enter your email address"
                         value={emailValue}
                         onChange={(e) => setEmailValue(e.target.value)}

@@ -94,9 +94,9 @@ const TestPage = () => {
             setAccessCode(code);
 
             const data = await examApi.get(examEndpoint.CANDIDATE_EXAM, code);
-            
+
             // Check if exam has expired
-            const isExpired = data.data.exam.status == 'expired';
+            const isExpired = data.data.status == 'expired' || data.data.exam.status == 'expired';
             setExamExpired(isExpired);
             if (isExpired) {
                 return false;

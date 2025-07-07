@@ -238,6 +238,7 @@ export default class ExamService {
         start_time: data.start_time,
         is_completed: data.is_completed,
         meta: data.meta,
+        status:"pending"
       },
       include: {
         user: true,

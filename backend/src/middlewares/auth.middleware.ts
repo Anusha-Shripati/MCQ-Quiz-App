@@ -127,7 +127,7 @@ export const authenticateCandidate: RequestHandler = async (req, res, next) => {
     const now = new Date();
 
     if (now > tokenExpiresAt) {
-      generateResponse(res, 403, {}, false, 'Access code has expired');
+      generateResponse(res, 403, {status :candidate.exam.status}, false, 'Access code has expired');
       return;
     }
 

@@ -38,6 +38,7 @@ import { detectMultipleScreens, isFirefox, isSafari, getBrowser } from '@/compon
 import { startCamera, takeScreenshot, stopMediaStreams } from '@/components/test/testUtils/cameraUtils';
 import { startScreenRecording, handleFirefoxScreenShare, handleSafariScreenShare } from '@/components/test/testUtils/screenShare';
 import { requestFullscreen, setupSecurityEventListeners } from '@/components/test/testUtils/securityUtils';
+import { isAxiosError } from 'axios';
 
 
 const TestPage = () => {
@@ -95,7 +96,7 @@ const TestPage = () => {
 
             const data = await examApi.get(examEndpoint.CANDIDATE_EXAM, code);
 
-            // Check if exam has expired
+            
             const isExpired = data.data.status == 'expired' || data.data.exam.status == 'expired';
             setExamExpired(isExpired);
             if (isExpired) {
@@ -125,6 +126,13 @@ const TestPage = () => {
             setError(null);
             return true;
         } catch (err) {
+            if(isAxiosError(err)){
+                const isExpired = err?.response?.data?.data?.status == 'expired'
+                setExamExpired(isExpired);
+                if (isExpired) {
+                    return false;
+                }
+            }
             setLoading(false);
             console.error('Error fetching candidate:', err);
             setError('Failed to fetch candidate data');

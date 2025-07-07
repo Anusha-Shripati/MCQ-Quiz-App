@@ -26,11 +26,11 @@ export const CategoryCard = ({ category }: { category: QuestionCategory }) => {
 
   return (
     <Card className="shadow-md hover:shadow-lg transition-all duration-200">
-      <CardHeader className="flex flex-row justify-between items-center flex-wrap  border-b pb-2 gap-5">
+      <CardHeader className="flex flex-row justify-between items-center flex-wrap  border-b py-3 px-5 gap-1">
         <CardTitle className="text-lg font-semibold">{category.name}</CardTitle>
         <div className="flex gap-2 flex-wrap lg:flex-grow-0 flex-grow">
           {isQuestionEditable && (
-            <div className="flex items-center lg:flex-grow-0 flex-grow justify-center gap-2">
+            <div className="flex items-center xl:flex-grow-0 flex-grow justify-center gap-2">
               <Button
                 variant="outline"
                 size="default"
@@ -41,7 +41,7 @@ export const CategoryCard = ({ category }: { category: QuestionCategory }) => {
               </Button>
             </div>
           )}
-          <div className="flex items-center justify-center lg:flex-grow-0 flex-grow">
+          <div className="flex items-center justify-center xl:flex-grow-0 flex-grow">
             <Button
               variant="outline"
               onClick={() => handleNavigate()}

@@ -109,6 +109,7 @@ export default function Login() {
                   <FormField
                     label="Password"
                     id="password"
+                    autoComplete={'off'}
                     type={showPassword ? 'text' : 'password'}
                     placeholder="Enter your password"
                     {...register('password')}

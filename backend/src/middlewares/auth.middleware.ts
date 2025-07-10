@@ -13,12 +13,7 @@ type Actions = 'can_read' | 'can_edit';
 declare global {
   namespace Express {
     interface Request {
-      candidateInfo?: {
-        candidateId: string;
-        examId: string;
-        name: string;
-        email: string;  
-      };
+      candidateInfo?: { candidateId: string; examId: string; name: string; email: string };
     }
   }
 }
@@ -35,7 +30,6 @@ export const authenticateAndAuthorize =
       return;
     }
 
-
     const token = authHeader.split(' ')[1] || '';
     try {
       const decoded = jwt.verify(token, process.env.ACCESS_SECRET as string) as {
@@ -46,13 +40,13 @@ export const authenticateAndAuthorize =
       };
 
       const user = await userService.findUserById(decoded.id);
-      
+
       if (!user) {
         generateResponse(res, 401, {}, false, 'User not found.');
         return;
       }
-      if(user.User_tokens.length == 0){
-        throw new Error()
+      if (user.User_tokens.length == 0) {
+        throw new Error();
       }
 
       req.user = decoded;
@@ -69,7 +63,7 @@ export const authenticateAndAuthorize =
           return;
         }
 
-        const modulePermission = permissions.find((p:any) => p.module?.name === moduleName);
+        const modulePermission = permissions.find((p: any) => p.module?.name === moduleName);
         if (!modulePermission || !modulePermission[action as Actions]) {
           generateResponse(res, 403, {}, false, 'Request not allowed.');
           return;
@@ -97,16 +91,8 @@ export const authenticateCandidate: RequestHandler = async (req, res, next) => {
 
   try {
     const candidate = await prisma.candidate.findFirst({
-      where: {
-        meta: {
-          path: ['accessCode'],
-          equals: code,
-        },
-        deleted_at: null,
-      },
-      include: {
-        exam: true,
-      },
+      where: { meta: { path: ['accessCode'], equals: code }, deleted_at: null },
+      include: { exam: true },
     });
 
     if (!candidate || !candidate.exam) {
@@ -127,7 +113,13 @@ export const authenticateCandidate: RequestHandler = async (req, res, next) => {
     const now = new Date();
 
     if (now > tokenExpiresAt) {
-      generateResponse(res, 403, {status :candidate.exam.status}, false, 'Access code has expired');
+      generateResponse(
+        res,
+        403,
+        { status: candidate.exam.status },
+        false,
+        'Access code has expired'
+      );
       return;
     }
 
@@ -146,13 +138,7 @@ export const authenticateCandidate: RequestHandler = async (req, res, next) => {
 };
 
 export const createToken = (id: string, email: string, role_name = '', role_id = '') => {
-  let payload = {
-    id: id,
-    email: email,
-    role_name: role_name,
-    role_id: role_id,
-    token: '',
-  };
+  let payload = { id: id, email: email, role_name: role_name, role_id: role_id, token: '' };
 
   const token = jwt.sign(payload, process.env.ACCESS_SECRET as string, {
     // expiresIn: process.env.ACCESS_EXPIRES || "30d",

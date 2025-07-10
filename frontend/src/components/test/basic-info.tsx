@@ -17,11 +17,7 @@ const InstructionCard = () => {
         </div>
         <p className="text-sm text-gray-600 mt-1">Please read carefully before proceeding</p>
         <p className="text-sm text-red-600 mt-1">
-<<<<<<< HEAD
           Exam will expire on <b>{dayjs(exam?.end_time).format('DD/MM/YYYY hh:mm A')}</b>
-=======
-          Exam will expire on <b>{dayjs(exam?.end_time).format('DD/MM/YYYY h:m A')}</b>
->>>>>>> 4dc9abb (Add Epiry date in cadidate exam page and error handing on expired exam)
         </p>
       </div>
 

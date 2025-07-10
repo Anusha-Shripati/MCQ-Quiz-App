@@ -17,7 +17,7 @@ const InstructionCard = () => {
         </div>
         <p className="text-sm text-gray-600 mt-1">Please read carefully before proceeding</p>
         <p className="text-sm text-red-600 mt-1">
-          Exam will expire on <b>{dayjs(exam?.end_time).format('DD/MM/YYYY hh:mm A')}</b>
+          Exam will expire on <b>{dayjs(exam?.end_time).format('DD/MM/YYYY h:m A')}</b>
         </p>
       </div>
 

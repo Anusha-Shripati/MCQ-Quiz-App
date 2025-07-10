@@ -19,6 +19,7 @@ import { useAuthStore } from '@/store/authStore';
 const questionType = {
   mcq: { label: 'MCQ', color: 'blue' },
   code_snippet: { label: 'Code Snippet', color: 'purple' },
+  code_editor: { label: 'Code Editor', color: 'yellow' },
   text: { label: 'Fill in the blanks', color: 'green' },
   multiple_select: { label: 'Multiple Select', color: 'orange' },
   video: { label: 'Video', color: 'red' },
@@ -66,10 +67,20 @@ export const QuestionCard = ({
               </span>
             </div>
             <div className="mt-1 text-xs text-gray-500 dark:text-gray-400 font-medium">
-              Created by: <span className="font-semibold">{question?.created_by_user?.name || ''} {question?.created_by_user?.deleted_at ? <span className="text-red-500"> (Deleted)</span> : ''}</span>
+              Created by:{' '}
+              <span className="font-semibold">
+                {question?.created_by_user?.name || ''}{' '}
+                {question?.created_by_user?.deleted_at ? (
+                  <span className="text-red-500"> (Deleted)</span>
+                ) : (
+                  ''
+                )}
+              </span>
             </div>
           </div>
-          <Badge className={`ml-auto md:ml-0 rounded-full px-4 py-1 text-sm font-semibold shadow-sm border-0 ${badgeClass[questionType[question.type as keyof typeof questionType]?.color as keyof typeof badgeClass] || ''} transition-all duration-200`}> 
+          <Badge
+            className={`ml-auto md:ml-0 rounded-full px-4 py-1 text-sm font-semibold shadow-sm border-0 ${badgeClass[questionType[question.type as keyof typeof questionType]?.color as keyof typeof badgeClass] || ''} transition-all duration-200`}
+          >
             {questionType[question.type as keyof typeof questionType]?.label || 'Unknown'}
           </Badge>
         </div>
@@ -83,15 +94,18 @@ export const QuestionCard = ({
                 .map((option, idx) => (
                   <li
                     key={idx}
-                    className={`flex items-start gap-2 p-3 rounded-lg text-base font-medium border transition-all duration-200 ${question?.correct_answer.includes(idx.toString())
+                    className={`flex items-start gap-2 p-3 rounded-lg text-base font-medium border transition-all duration-200 ${
+                      question?.correct_answer.includes(idx.toString())
                         ? 'bg-green-50 dark:bg-green-900/60 text-green-800 dark:text-green-100 border-green-200 dark:border-green-700 shadow-sm'
                         : 'bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-300 border-gray-200 dark:border-gray-700'
-                      } hover:scale-[1.02] hover:shadow-md`}
+                    } hover:scale-[1.02] hover:shadow-md`}
                   >
                     <span className="inline-block w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200 flex items-center justify-center font-bold mr-2 shadow-sm">
                       {String.fromCharCode(65 + idx)}
                     </span>
-                    <span className="break-words whitespace-pre-wrap overflow-hidden flex-1">{option}</span>
+                    <span className="break-words whitespace-pre-wrap overflow-hidden flex-1">
+                      {option}
+                    </span>
                   </li>
                 ))}
             </>
@@ -102,7 +116,9 @@ export const QuestionCard = ({
               key="code"
               className="p-3 rounded-lg text-base font-mono bg-gray-900 text-green-200 border border-gray-800 shadow-inner overflow-x-auto max-w-full whitespace-pre-wrap break-all mt-2"
             >
-              <pre className="overflow-x-auto max-w-full text-sm leading-relaxed">{question.meta?.code as string}</pre>
+              <pre className="overflow-x-auto max-w-full text-sm leading-relaxed">
+                {question.meta?.code as string}
+              </pre>
             </li>
           ) : (
             ''

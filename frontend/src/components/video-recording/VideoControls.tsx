@@ -8,14 +8,16 @@ const VideoControls = ({
   onStop,
   onReset,
   onContinue,
-  isLoading
+  isLoading,
+  showNextButton,
 }: {
   status: RecordingStatus;
   onStart: () => void;
   onStop: () => void;
   onReset: () => void;
   onContinue: () => void;
-  isLoading: boolean
+  isLoading: boolean;
+  showNextButton: boolean;
 }) => (
   <div className="flex flex-col md:flex-row justify-center gap-4 mt-8">
     {status === 'idle' && (
@@ -54,7 +56,7 @@ const VideoControls = ({
       </Button>
     )}
 
-    {status === 'preview' && (
+    {status === 'preview' && showNextButton && (
       <div className="flex flex-col md:flex-row gap-4 w-full">
         <Button
           className="border border-gray-200 hover:border-gray-300 bg-white text-gray-700 hover:bg-gray-50
@@ -66,7 +68,7 @@ const VideoControls = ({
           <RefreshCw className="w-5 h-5" />
           <span>Record Again</span>
         </Button>
-        
+
         <Button
           className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 
                     shadow-lg hover:shadow-xl text-white px-6 py-3.5 rounded-full font-medium 

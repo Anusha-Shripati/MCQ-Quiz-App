@@ -3,9 +3,11 @@ import { EXAM_STEP } from '@/types/exam.types';
 import { Camera, FileText, Info, Mail, User, UserCircle } from 'lucide-react';
 import { memo } from 'react';
 import { Button } from '../ui/form/button';
-
+import dayjs from 'dayjs';
 
 const InstructionCard = () => {
+  const { exam } = useExamStore();
+
   return (
     <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100 pb-1">
       <div className="p-6 bg-gradient-to-r from-blue-50 to-indigo-50">
@@ -14,15 +16,15 @@ const InstructionCard = () => {
           <h2 className="text-xl font-bold">Guidelines & Terms</h2>
         </div>
         <p className="text-sm text-gray-600 mt-1">Please read carefully before proceeding</p>
+        <p className="text-sm text-red-600 mt-1">
+          Exam will expire on <b>{dayjs(exam?.end_time).format('DD/MM/YYYY h:m A')}</b>
+        </p>
       </div>
 
       <div className="p-6">
         <div
           className="h-[450px] overflow-y-auto pr-2 text-gray-700 space-y-5"
-          style={{
-            scrollbarWidth: 'thin',
-            scrollbarColor: '#94a3b8 #e2e8f0',
-          }}
+          style={{ scrollbarWidth: 'thin', scrollbarColor: '#94a3b8 #e2e8f0' }}
         >
           <style jsx>{`
             div::-webkit-scrollbar {
@@ -271,7 +273,6 @@ const InstructionCard = () => {
             </p>
           </div>
         </div>
-
       </div>
     </div>
   );
@@ -361,21 +362,21 @@ const BasicInfoForm: React.FC = memo(() => {
                     .join(', ') as string
                 }
               />
-                <Button
-                  onClick={handleBasicInfoSubmit}
-                  className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700
+              <Button
+                onClick={handleBasicInfoSubmit}
+                className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700
                             text-white font-medium py-3.5 px-6 rounded-lg shadow-lg hover:shadow-xl 
                             transform hover:-translate-y-0.5 transition-all duration-200 
                             flex items-center justify-center gap-2"
-                >
-                  <Camera className="w-5 h-5" />
-                  <span>Proceed to Video Recording</span>
-                </Button>
+              >
+                <Camera className="w-5 h-5" />
+                <span>Proceed to Video Recording</span>
+              </Button>
 
-                <p className="text-center text-xs text-gray-500 mt-4">
-                  By clicking &quot;Proceed&quot;, you confirm your details are correct and accept
-                  our terms.
-                </p>
+              <p className="text-center text-xs text-gray-500 mt-4">
+                By clicking &quot;Proceed&quot;, you confirm your details are correct and accept our
+                terms.
+              </p>
             </div>
           </div>
         </div>

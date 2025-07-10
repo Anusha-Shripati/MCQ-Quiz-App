@@ -86,7 +86,10 @@ const NewPassword: React.FC<NewPasswordProps> = ({ email }) => {
               onFocus={() => setShowPasswordRequirements(true)}
               required
               autoFocus
+<<<<<<< HEAD
               autoComplete={'off'}
+=======
+>>>>>>> 9628b7b (Video issue and minor bug solved)
               className="h-12 pr-12 bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-200 focus:bg-gray-100 dark:focus:bg-gray-800 focus:border-gray-400 dark:focus:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 focus-visible:ring-gray-300 dark:focus-visible:ring-gray-700 focus-visible:ring-1 focus-visible:ring-offset-0"
             />
             <Button
@@ -116,7 +119,10 @@ const NewPassword: React.FC<NewPasswordProps> = ({ email }) => {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
+<<<<<<< HEAD
               autoComplete={'off'}
+=======
+>>>>>>> 9628b7b (Video issue and minor bug solved)
               className="h-12 pr-12 bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-200 focus:bg-gray-100 dark:focus:bg-gray-800 focus:border-gray-400 dark:focus:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 focus-visible:ring-gray-300 dark:focus-visible:ring-gray-700 focus-visible:ring-1 focus-visible:ring-offset-0"
             />
             <Button

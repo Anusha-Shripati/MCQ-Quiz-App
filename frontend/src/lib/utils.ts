@@ -24,14 +24,12 @@ export function getShadePerInterviewsCount(
   theme: string = 'light' // Default to "light" theme
 ) {
   if (count <= 0) {
-    return `bg-${defaultColor}-${theme === 'dark' ? '800' : '100'
-      } text-${defaultColor}-${theme === 'dark' ? '400' : '700'}`;
+    return `bg-${defaultColor}-${
+      theme === 'dark' ? '800' : '100'
+    } text-${defaultColor}-${theme === 'dark' ? '400' : '700'}`;
   }
 
-  const lightModeShades = {
-    bg: [100, 200, 300, 400, 500],
-    text: [800, 800, 900, 900, 900],
-  };
+  const lightModeShades = { bg: [100, 200, 300, 400, 500], text: [800, 800, 900, 900, 900] };
 
   const darkModeShades = {
     bg: [700, 600, 500, 400, 300], // Darker for backgrounds in dark mode
@@ -120,6 +118,30 @@ export async function saveVideoToIndexedDB(
   }
 }
 
+export async function removeVideoToIndexedDB(key = 'recordedVideo', examId: string): Promise<void> {
+  try {
+    const db = await openVideoDB(examId);
+    const tx = db.transaction('videos', 'readwrite');
+    const store = tx.objectStore('videos');
+    store.delete(key); // Save the blob with the specified key
+
+    return new Promise((resolve, reject) => {
+      tx.oncomplete = () => {
+        db.close();
+        resolve();
+      };
+
+      tx.onerror = () => {
+        db.close();
+        reject(tx.error);
+      };
+    });
+  } catch (error) {
+    console.error('Error saving video to IndexedDB:', error);
+    throw error;
+  }
+}
+
 export async function loadVideoFromIndexedDB(
   key = 'recordedVideo',
   examId: string,
@@ -184,15 +206,23 @@ export const formatTestDuration = (startDate: string, endDate: string): string =
   return `${totalMinutes} minutes`;
 };
 
-export const uploadFileInChunks = async (file: Blob, chunkSize: number = 5 * 1024 * 1024, examId: string = ''): Promise<{UploadId:string, fileName: string, parts: { ETag: string, PartNumber: number }[] }> => {
+export const uploadFileInChunks = async (
+  file: Blob,
+  chunkSize: number = 5 * 1024 * 1024,
+  examId: string = ''
+): Promise<{
+  UploadId: string;
+  fileName: string;
+  parts: { ETag: string; PartNumber: number }[];
+}> => {
   const totalChunks = Math.ceil(file.size / chunkSize);
-  const fileName = String(Date.now())
+  const fileName = String(Date.now());
   let UploadId;
   const parts = [];
   for (let i = 0; i < totalChunks; i++) {
     const start = i * chunkSize;
     const end = start + chunkSize;
-    const chunk = file.slice(start, end)
+    const chunk = file.slice(start, end);
     const formData = new FormData();
     formData.append('chunk', chunk);
     formData.append('filename', fileName);
@@ -205,10 +235,10 @@ export const uploadFileInChunks = async (file: Blob, chunkSize: number = 5 * 102
     if (examId) formData.append('examId', examId);
 
     const response = await api.post(`/upload/chunk?chunkFolder=${fileName}`, formData);
-    UploadId = response.data.UploadId
-    if(UploadId){
-      parts.push({ ETag: JSON.parse(response.data.ETag as string), PartNumber: i + 1 })
+    UploadId = response.data.UploadId;
+    if (UploadId) {
+      parts.push({ ETag: JSON.parse(response.data.ETag as string), PartNumber: i + 1 });
     }
   }
-  return {UploadId, fileName, parts }
-}
+  return { UploadId, fileName, parts };
+};

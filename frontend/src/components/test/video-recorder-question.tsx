@@ -1,46 +1,61 @@
-import React, { FC ,useEffect, useMemo, useState } from 'react';
-import VideoRecorder  from '../video-recording/VideoRecorder';
+import React, { FC, useEffect, useMemo, useState } from 'react';
+import VideoRecorder from '../video-recording/VideoRecorder';
 import { IExamQuestion } from '@/types/exam.types';
 interface VideoRecorderProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   question: any;
-  answers: Record<string, { question: IExamQuestion, answer: string | Blob | (string | number)[] }>;
-  onRecordingComplete: (blob: Blob,url:string) => void;
-  onRecordingStop?: (blob: Blob | null,url:string) => void;
-  isLoading:boolean
+  answers: Record<
+    string,
+    {
+      question: IExamQuestion;
+      temp_url?: string | Blob | (string | number)[];
+      answer: string | Blob | (string | number)[];
+    }
+  >;
+  onRecordingComplete: (blob: Blob, url: string) => void;
+  onRecordingStop?: (blob: Blob | null, url: string) => void;
+  isLoading: boolean;
 }
 
-export const VideoRecorderQuestion: FC<VideoRecorderProps> = React.memo(({ question,answers,onRecordingComplete,onRecordingStop,isLoading}) => {
-  const iframeHTML = useMemo(() => question.question?.meta?.video_url || '',[question]);
-  const [videoUrl, setVideoUrl] = useState<string | null>(null);
-  useEffect(() => {
-    setVideoUrl(answers[question.question_id]?.answer as string);
-  }, [answers,question.question_id]);
+export const VideoRecorderQuestion: FC<VideoRecorderProps> = React.memo(
+  ({ question, answers, onRecordingComplete, onRecordingStop, isLoading }) => {
+    const iframeHTML = useMemo(() => question.question?.meta?.video_url || '', [question]);
+    const [videoUrl, setVideoUrl] = useState<string | null>(null);
+    useEffect(() => {
+      setVideoUrl(
+        (answers[question.question_id]?.answer as string) ||
+          (answers[question.question_id]?.temp_url as string)
+      );
+    }, [answers, question.question_id]);
+    console.log(videoUrl);
 
-  return (
-    <>
+    return (
+      <>
         {iframeHTML.includes('iframe') ? (
-        <StaticIframe html={iframeHTML} />
-      ) : (
-        (question.question?.meta?.videoToVideo && <video controls className="w-full max-h-[400px] rounded-lg shadow">
-          <source src={iframeHTML} type="video/mp4" />
-        </video>)
-      )}
-      <VideoRecorder 
-        onRecordingComplete={(chunks,url) => {
-          const blob = new Blob(chunks, { type: 'video/webm' });
-          onRecordingComplete && onRecordingComplete(blob,url);
-        }} 
-        maxTime={120} 
-        videoKey={question.id}
-        videoLink={videoUrl}
-        onRecordingStop={(blob,url) => onRecordingStop && onRecordingStop(blob,url)}
-        isLoading={isLoading}
-      />
-
-    </>
-  );
-});
+          <StaticIframe html={iframeHTML} />
+        ) : (
+          question.question?.meta?.videoToVideo && (
+            <video controls className="w-full max-h-[400px] rounded-lg shadow">
+              <source src={iframeHTML} type="video/mp4" />
+            </video>
+          )
+        )}
+        <VideoRecorder
+          onRecordingComplete={(chunks, url) => {
+            const blob = new Blob(chunks, { type: 'video/webm' });
+            onRecordingComplete && onRecordingComplete(blob, url);
+          }}
+          maxTime={120}
+          videoKey={question.id}
+          videoLink={videoUrl}
+          onRecordingStop={(blob, url) => onRecordingStop && onRecordingStop(blob, url)}
+          isLoading={isLoading}
+          showNextButton={false}
+        />
+      </>
+    );
+  }
+);
 
 VideoRecorderQuestion.displayName = 'VideoRecorderQuestion';
 
@@ -48,8 +63,6 @@ const StaticIframe: FC<{ html: string }> = React.memo(({ html }) => {
   return <div dangerouslySetInnerHTML={{ __html: html }} className="flex justify-center" />;
 });
 StaticIframe.displayName = 'StaticIframe';
-
-
 
 // export const VideoRecorderQuestion: FC<VideoRecorderProps> = React.memo(({ handleAnswerChange, question }) => {
 
@@ -69,18 +82,18 @@ StaticIframe.displayName = 'StaticIframe';
 //       }
 
 //       const recorder = new MediaRecorder(stream);
-      
+
 //       setMediaRecorder(recorder);
 
 //       recorder.ondataavailable = (e) => {
-        
+
 //         if (e.data.size > 0) {
 //           recordedChunksRef.current.push(e.data);
 //         }
 //       };
 
 //       recorder.onstop = () => {
-        
+
 //         const blob = new Blob(recordedChunksRef.current, { type: 'video/webm' });
 //         const url = URL.createObjectURL(blob);
 //         setRecordedVideoURL(url);
@@ -112,7 +125,6 @@ StaticIframe.displayName = 'StaticIframe';
 //       timer.current?.start();
 //     }, 1000);
 
-
 //     recordingTimeoutRef.current = setTimeout(() => {
 //       handleStop();
 //     }, 120000);
@@ -124,9 +136,9 @@ StaticIframe.displayName = 'StaticIframe';
 
 //     if (videoRef.current?.srcObject) {
 //       (videoRef.current.srcObject as MediaStream).getTracks().forEach((track) => track.stop());
-//       videoRef.current.srcObject = null; 
+//       videoRef.current.srcObject = null;
 //     }
-    
+
 //   };
 
 //   const [iframeHTML] = useState(() => question.question?.meta?.video_url || '');
@@ -153,11 +165,10 @@ StaticIframe.displayName = 'StaticIframe';
 //         <div className='flex justify-center items-center mb-4'>
 //         <video ref={videoRef} autoPlay muted className="rounded h-[500px] w-[500px]" />
 //         </div>
-        
+
 //       ) : (
 //         ''
 //       )}
-
 
 //       {isRecording && <TimeLeft ref={timer} />}
 

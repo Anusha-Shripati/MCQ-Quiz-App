@@ -5,7 +5,10 @@ import CodeEditor from '@/components/CodeEditor';
 import { FaPlay } from 'react-icons/fa';
 import { FormField } from '@/components/common/form-field';
 
-const EditorPage: React.FC<{onChange: (value: string) => void, value: string}> = ({onChange, value}) => {
+const EditorPage: React.FC<{ onChange: (value: string) => void; value: string }> = ({
+  onChange,
+  value,
+}) => {
   const [language, setLanguage] = useState('javascript');
   const [theme, setTheme] = useState('vs-dark');
   const [output, setOutput] = useState<string>('');
@@ -20,7 +23,7 @@ const EditorPage: React.FC<{onChange: (value: string) => void, value: string}> =
   };
 
   const handleCodeChange = (value: string | undefined) => {
-    onChange(value || '')
+    onChange(value || '');
   };
 
   const handleSubmit = async () => {
@@ -28,7 +31,7 @@ const EditorPage: React.FC<{onChange: (value: string) => void, value: string}> =
     const response = await fetch('/api/code-execution', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ language, code:value }),
+      body: JSON.stringify({ language, code: value }),
     });
     const result = await response.json();
     if (result.success) {
@@ -41,40 +44,40 @@ const EditorPage: React.FC<{onChange: (value: string) => void, value: string}> =
   };
 
   return (
-    <div className="p-0 space-y-6 dark:bg-gray-900">
+    <div className="p-0 space-y-6 ">
       {/* <h1 className="text-3xl font-bold  text-gray-900 dark:text-white">Code Editor</h1> */}
 
       <div className="flex gap-6 ">
         {/* Language Selector */}
         <FormField
-            label="Language"
-            type="select"
-            parentClassName="w-full"
-            className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-300"
-            value={language}
-            onChange={handleLanguageChange}
-            placeholder="Language"
-            options={[
-              { value: 'javascript', label: 'JavaScript' },
-              { value: 'python', label: 'Python' },
-              { value: 'php', label: 'PHP' },
-            ]}
-          />
+          label="Language"
+          type="select"
+          parentClassName="w-full"
+          className="bg-white border-gray-200 dark:border-gray-600 text-gray-900 "
+          value={language}
+          onChange={handleLanguageChange}
+          placeholder="Language"
+          options={[
+            { value: 'javascript', label: 'JavaScript' },
+            { value: 'python', label: 'Python' },
+            { value: 'php', label: 'PHP' },
+          ]}
+        />
 
         {/* Theme Selector */}
         <FormField
-            label="Theme"
-            type="select"
-            parentClassName="w-full"
-            className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-300"
-            value={theme}
-            onChange={handleThemeChange}
-            placeholder="Theme"
-            options={[
-              { value: 'vs-dark', label: 'Dark' },
-              { value: 'light', label: 'Light' },
-            ]}
-          />
+          label="Theme"
+          type="select"
+          parentClassName="w-full"
+          className="bg-white  border-gray-200  text-gray-900 "
+          value={theme}
+          onChange={handleThemeChange}
+          placeholder="Theme"
+          options={[
+            { value: 'vs-dark', label: 'Dark' },
+            { value: 'light', label: 'Light' },
+          ]}
+        />
       </div>
 
       {/* Code Editor */}

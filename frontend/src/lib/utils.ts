@@ -169,30 +169,6 @@ export async function removeVideoToIndexedDB(key = 'recordedVideo', examId: stri
   }
 }
 
-export async function removeVideoToIndexedDB(key = 'recordedVideo', examId: string): Promise<void> {
-  try {
-    const db = await openVideoDB(examId);
-    const tx = db.transaction('videos', 'readwrite');
-    const store = tx.objectStore('videos');
-    store.delete(key); // Save the blob with the specified key
-
-    return new Promise((resolve, reject) => {
-      tx.oncomplete = () => {
-        db.close();
-        resolve();
-      };
-
-      tx.onerror = () => {
-        db.close();
-        reject(tx.error);
-      };
-    });
-  } catch (error) {
-    console.error('Error saving video to IndexedDB:', error);
-    throw error;
-  }
-}
-
 export async function loadVideoFromIndexedDB(
   key = 'recordedVideo',
   examId: string,

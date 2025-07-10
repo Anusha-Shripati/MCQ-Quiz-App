@@ -3,14 +3,12 @@ import { generateResponse } from '../utils/generateResponse';
 import { UploadService } from '../services/upload.services';
 import { CreateMultipartUploadCommand, UploadPartCommand } from '@aws-sdk/client-s3';
 import { s3Client } from '../utils/S3';
-import formidable from 'formidable'
-import fs from 'fs'
-
+import formidable from 'formidable';
+import fs from 'fs';
 
 const uploadService = new UploadService();
 
 export class UploadController {
-
   uploadFile = async (req: Request, res: Response, next: NextFunction) => {
     try {
       if (!req.file) {
@@ -28,14 +26,15 @@ export class UploadController {
   uploadChunk = async (req: any, res: Response, next: NextFunction) => {
     try {
       if (process.env.STORAGE_MODE == 's3') {
-
-        const { fields, files } = await new Promise<{ fields: any; files: any }>((resolve, reject) => {
-          const form = formidable({ multiples: true });
-          form.parse(req, (err, fields, files) => {
-            if (err) reject(err);
-            else resolve({ fields, files });
-          });
-        });
+        const { fields, files } = await new Promise<{ fields: any; files: any }>(
+          (resolve, reject) => {
+            const form = formidable({ multiples: true });
+            form.parse(req, (err, fields, files) => {
+              if (err) reject(err);
+              else resolve({ fields, files });
+            });
+          }
+        );
 
         const obj = {
           UploadId: fields.UploadId?.[0],
@@ -50,7 +49,6 @@ export class UploadController {
           return;
         }
         if (Number(obj.index) == 0) {
-
           const command = new CreateMultipartUploadCommand({
             Bucket: process.env.AWS_BUCKET_NAME,
             Key: `${obj.exam_id}/${obj.filename}.mp4`,
@@ -58,7 +56,7 @@ export class UploadController {
             ContentType: 'video/mp4',
           });
           let res = await s3Client.send(command);
-          obj.UploadId = res.UploadId
+          obj.UploadId = res.UploadId;
         }
         const chunkStream = fs.createReadStream(file.filepath);
 
@@ -67,13 +65,20 @@ export class UploadController {
           Key: `${obj.exam_id}/${obj.filename}.mp4`,
           UploadId: obj.UploadId,
           PartNumber: Number(obj.index) + 1,
-          Body: chunkStream
+          Body: chunkStream,
         });
         const { ETag } = await s3Client.send(uploadPartCommand);
-        generateResponse(res, 200, { ETag, UploadId: obj.UploadId }, true, 'File uploaded successfully');
-        return
-
+        generateResponse(
+          res,
+          200,
+          { ETag, UploadId: obj.UploadId },
+          true,
+          'File uploaded successfully'
+        );
+        return;
       }
+      console.log(req.file);
+
       if (!req.file) {
         generateResponse(res, 400, {}, false, 'No file uploaded');
         return;

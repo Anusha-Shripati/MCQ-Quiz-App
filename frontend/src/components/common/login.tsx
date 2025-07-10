@@ -22,7 +22,6 @@ const loginSchema = z.object({
 export default function Login() {
   const router = useRouter();
 
-
   const { login, isAuthenticated } = useAuthStore();
   const [isLoading, setIsLoading] = useState(true);
 
@@ -37,12 +36,10 @@ export default function Login() {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<z.infer<typeof loginSchema>>({
-    defaultValues: {
-      email: '',
-      password: '',
-    },
+    defaultValues: { email: '', password: '' },
     resolver: zodResolver(loginSchema),
   });
 
@@ -54,6 +51,7 @@ export default function Login() {
     } catch (error) {
       console.error('Login error:', error);
       // if (err instanceof Error) toast.error(err.message);
+      setValue('password', '');
       toast.error('The account sign-in details are incorrect. Please try again.');
     }
   };
@@ -75,11 +73,13 @@ export default function Login() {
 
   return (
     <div className="bg-gray-200 dark:bg-gradient-to-r dark:from-gray-700 dark:to-gray-900 min-h-screen w-full flex flex-col items-center justify-center px-4 py-8">
-      <div className='absolute top-5 right-10'><ThemeToggle/></div>
+      <div className="absolute top-5 right-10">
+        <ThemeToggle />
+      </div>
 
-      <Card className="w-full max-w-[650px] shadow-xl overflow-hidden bg-gray-300 dark:bg-gray-900 text-gray-900 dark:text-gray-200 dark:border-gray-700">
-        <div className="bg-gray-400 dark:bg-gray-800 p-5 border-b border-gray-400 dark:border-gray-700 flex items-center justify-center">
-          <TypographyH2>Welcome To MCQ APP</TypographyH2>
+      <Card className="w-full max-w-[650px] shadow-xl overflow-hidden make dark:bg-gray-900 text-gray-900 dark:text-gray-200 dark:border-gray-700">
+        <div className="bg-white dark:bg-gray-800 p-5 border-b border-gray-700 dark:border-gray-700 flex items-center justify-center">
+          <h2 className="text-3xl font-semibold"> Welcome To MCQ APP</h2>
         </div>
 
         <div className="p-8">
@@ -92,7 +92,7 @@ export default function Login() {
             </CardDescription>
           </CardHeader>
 
-          <CardContent className="px-12">
+          <CardContent className="px-12 pb-2">
             <form onSubmit={handleSubmit(onSubmit)}>
               <div className="grid w-full items-center gap-5">
                 <div className="flex flex-col space-y-1.5">
@@ -127,7 +127,10 @@ export default function Login() {
               </div>
               <div className="mt-4">
                 <div className="flex justify-between text-sm mb-4">
-                  <Link href="/reset-password" className="text-blue-600 dark:text-blue-400 hover:underline">
+                  <Link
+                    href="/reset-password"
+                    className="text-blue-600 dark:text-blue-400 hover:underline"
+                  >
                     Forgot password?
                   </Link>
                 </div>

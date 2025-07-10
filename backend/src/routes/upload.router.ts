@@ -5,10 +5,13 @@ import { upload } from '../utils/fileUpload';
 const router = Router();
 const uploadController = new UploadController();
 
-
-const noop = (req:Request, res:Response, next:NextFunction) => next();
+const noop = (req: Request, res: Response, next: NextFunction) => next();
 
 router.post('/', upload.single('file'), uploadController.uploadFile);
-router.post('/chunk', process.env.STORAGE_MODE == 'local'? upload.single('chunk') : noop ,uploadController.uploadChunk);
+router.post(
+  '/chunk',
+  process.env.STORAGE_MODE == 's3' ? noop : upload.single('chunk'),
+  uploadController.uploadChunk
+);
 
 export default router;

@@ -62,12 +62,12 @@ export default function ProctoredQuiz() {
   const [prvViolations, setPrvViolations] = useState(0);
 
   const displayAlert = (message: string) => {
-    // setAlertMessage(message);
-    // setShowAlert(true);
-    // if (alertTimeoutRef.current) {
-    //   clearTimeout(alertTimeoutRef.current);
-    // }
-    // alertTimeoutRef.current = setTimeout(() => setShowAlert(false), QUIZ_CONFIG.alertTimeout);
+    setAlertMessage(message);
+    setShowAlert(true);
+    if (alertTimeoutRef.current) {
+      clearTimeout(alertTimeoutRef.current);
+    }
+    alertTimeoutRef.current = setTimeout(() => setShowAlert(false), QUIZ_CONFIG.alertTimeout);
   };
 
   const { data: examData, isLoading: isExamLoading } = useSWR(

@@ -20,6 +20,7 @@ export interface CandidateData {
   name: string;
   email: string;
   experience: string;
+  exam_id: string;
   assessment: {
     id: string;
     name: string;

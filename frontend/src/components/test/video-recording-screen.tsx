@@ -16,7 +16,6 @@ import { examEndpoint } from '@/lib/endpoint';
 import { uploadFileInChunks } from '@/lib/utils';
 import FaceVerification from './face-verification';
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from '@/components/ui/card';
-import { useParams } from 'next/navigation';
 
 // Types
 interface VideoRecorderProps {
@@ -32,7 +31,7 @@ export const VideoRecordingScreen = ({ onRecordingComplete, videoLink }: VideoRe
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [faceVerified, setFaceVerified] = useState<boolean>(false);
   const { cameraStreamRef } = useExamStore();
-  const examId = useParams()?.examId;
+  
   const { trigger } = useSWRMutation(`${examEndpoint.CANDIDATE_EXAM}/${exam?.id}/submit-answer`, 
     (url: string, { arg }: { arg: {foldername:string,UploadId:string,parts:{ETag:string,PartNumber:number}[],question_name:string,merge_chunk:boolean} }) => 
       examApi.post(url, arg, accessCode)
@@ -181,7 +180,6 @@ export const VideoRecordingScreen = ({ onRecordingComplete, videoLink }: VideoRe
                 <FaceVerification 
                   onVerificationComplete={handleFaceVerificationComplete}
                   cameraStream={cameraStreamRef}
-                  examId={examId as string}
                 />
               ) : (
                 <VideoRecorder 

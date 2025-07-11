@@ -55,9 +55,9 @@ export class ResultService {
               },
             },
           },
-          orderBy:{
-            created_at:'asc'
-          }
+          orderBy: {
+            created_at: 'asc',
+          },
         },
       },
     });
@@ -78,6 +78,7 @@ export class ResultService {
         ...result,
         is_passed: isPassed,
         pass_criteria: passCriteria,
+        verified_image: result.exam?.verified_image || null,
       };
     }
 
@@ -174,8 +175,8 @@ export class ResultService {
       where,
       skip,
       take: limit,
-      orderBy:{
-        created_at:'desc'  as const
+      orderBy: {
+        created_at: 'desc' as const,
       },
       select: {
         id: true,
@@ -205,11 +206,12 @@ export class ResultService {
             start_time: true,
             end_time: true,
             user_id: true,
+            verified_image: true,
             user: {
               select: {
                 id: true,
                 name: true,
-                deleted_at:true
+                deleted_at: true,
               },
             },
             is_completed: true,
@@ -227,7 +229,6 @@ export class ResultService {
           },
         },
       },
-      
     };
     const results = await prisma.results.findMany(query);
     const total = await prisma.results.count({ where });
@@ -240,6 +241,7 @@ export class ResultService {
         ...result,
         is_passed: isPassed,
         pass_criteria: passCriteria,
+        verified_image: result.exam?.verified_image || null,
       };
     });
 
@@ -253,7 +255,7 @@ export class ResultService {
     try {
       const existingResult = await prisma.results.findFirst({
         where: { id: resultId },
-        include: { exam: true,answers:{include:{ question:true}} },
+        include: { exam: true, answers: { include: { question: true } } },
       });
       const existingAns = await prisma.answers.findFirst({
         where: { question_id: questionId },
@@ -278,8 +280,13 @@ export class ResultService {
 
       tech_score = tech_score.map((item) => {
         if (item.technology_id === existingAns.question?.technology_id) {
-          const allAns  =  existingResult.answers.filter((inner)=>inner.question?.technology_id == item.technology_id);
-          const total = allAns.reduce((sum,ans)=> ans.id !== existingAns.id ? sum+ Number(ans.score) : sum,0 ) 
+          const allAns = existingResult.answers.filter(
+            (inner) => inner.question?.technology_id == item.technology_id
+          );
+          const total = allAns.reduce(
+            (sum, ans) => (ans.id !== existingAns.id ? sum + Number(ans.score) : sum),
+            0
+          );
           const newScore = total + score;
           return {
             ...item,
@@ -319,5 +326,35 @@ export class ResultService {
       throw new Error(error.message || error);
     }
   }
+
+async getFeedback(resultId: string) {
+  const result = await prisma.results.findUnique({
+    where: { id: resultId },
+    select: {
+      candidate_id: true,
+    },
+  });
+
+  if (!result) return null;
+  const candidateFeedback = await prisma.candidate_feedback.findFirst({
+    where: { candidate_id: result.candidate_id },
+    include: {
+      candidate: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+      exam: {
+        select: {
+          id: true,
+        },
+      },
+    },
+  });
+
+  return candidateFeedback;
+}
 
 }

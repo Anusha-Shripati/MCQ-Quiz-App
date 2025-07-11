@@ -13,6 +13,7 @@ export interface IExam extends ITimestamps {
   candidate: ICandidate;
   assessment: IAssessment;
   exam_questions: IExamQuestion[];
+  verified_image?: string | null; // URL to the verified image
   user: {
     id: string;
     name: string;

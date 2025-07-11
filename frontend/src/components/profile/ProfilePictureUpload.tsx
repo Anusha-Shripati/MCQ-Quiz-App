@@ -7,6 +7,7 @@ import { api, isAxiosError } from '@/lib/api';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '@/store/authStore';
 import { userEndpoint } from '@/lib/endpoint';
+import Image from 'next/image';
 
 const ProfilePictureUpload = ({ imageUrl }: { imageUrl: string }) => {
   const [profilePicture, setProfilePicture] = useState<string | null>(imageUrl);
@@ -19,7 +20,6 @@ const ProfilePictureUpload = ({ imageUrl }: { imageUrl: string }) => {
 
   const handleProfilePictureChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    console.log('Selected file:', file);
     if (file) {
       try {
         const formData = new FormData();
@@ -52,7 +52,7 @@ const ProfilePictureUpload = ({ imageUrl }: { imageUrl: string }) => {
       <div className="relative w-24 h-24">
         {/* Display profile picture or placeholder */}
         {profilePicture ? (
-          <img
+          <Image
             src={`${process.env.NEXT_PUBLIC_IMGAE_PREFIX}${profilePicture}`}
             alt="Profile"
             width={96}

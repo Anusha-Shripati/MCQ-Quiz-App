@@ -63,7 +63,6 @@ export class UploadService {
 
     if (!fs.existsSync(chunkDir)) {
       logger.error(`Chunk directory ${chunkDir} does not exist.`);
-      console.log(`Chunk directory ${chunkDir} does not exist.`);
       fs.mkdirSync(chunkDir, { recursive: true });
     }
 
@@ -98,7 +97,6 @@ export class UploadService {
 
   private async mergeChunkS3(filename: string, exam_id: string,  body:MergeChunk) {
     try {
-      console.log(`${exam_id}/${filename}.mp4`,'`${exam_id}/${filename}.mp4`');
       
       const command = new CompleteMultipartUploadCommand({
         Bucket: process.env.AWS_BUCKET_NAME,

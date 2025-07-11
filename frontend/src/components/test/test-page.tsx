@@ -34,11 +34,27 @@ import { QUIZ_CONFIG, SNAPSHOT } from '@/shared/constants/data';
 import { EXAM_STEP } from '@/types/exam.types';
 
 // Utility functions
-import { detectMultipleScreens, isFirefox, isSafari, getBrowser } from '@/components/test/testUtils/screenDetection';
-import { startCamera, takeScreenshot, stopMediaStreams } from '@/components/test/testUtils/cameraUtils';
-import { startScreenRecording, handleFirefoxScreenShare, handleSafariScreenShare } from '@/components/test/testUtils/screenShare';
-import { requestFullscreen, setupSecurityEventListeners } from '@/components/test/testUtils/securityUtils';
-
+import {
+  detectMultipleScreens,
+  isFirefox,
+  isSafari,
+  getBrowser,
+} from '@/components/test/testUtils/screenDetection';
+import {
+  startCamera,
+  takeScreenshot,
+  stopMediaStreams,
+} from '@/components/test/testUtils/cameraUtils';
+import {
+  startScreenRecording,
+  handleFirefoxScreenShare,
+  handleSafariScreenShare,
+} from '@/components/test/testUtils/screenShare';
+import {
+  requestFullscreen,
+  setupSecurityEventListeners,
+} from '@/components/test/testUtils/securityUtils';
+import { isAxiosError } from 'axios';
 
 const TestPage = () => {
   const params = useParams();
@@ -59,7 +75,7 @@ const TestPage = () => {
     cameraStreamRef,
   } = useExamStore();
   const router = useRouter();
-  
+
   const [videoLink, setVideoLink] = useState<string | null>(null);
   const [showFirefoxScreenSharePrompt, setShowFirefoxScreenSharePrompt] = useState(false);
   const [showSafariScreenSharePrompt, setShowSafariScreenSharePrompt] = useState(false);
@@ -80,7 +96,6 @@ const TestPage = () => {
     screen: true,
   });
 
-
   const fetchCandidate = async () => {
     try {
       setLoading(true);
@@ -95,20 +110,19 @@ const TestPage = () => {
 
       const data = await examApi.get(examEndpoint.CANDIDATE_EXAM, code);
 
+      const isExpired = data.data.status == 'expired' || data.data.exam.status == 'expired';
+      setExamExpired(isExpired);
+      if (isExpired) {
+        return false;
+      }
+
       if (!data.success) {
         setError(data.message || 'Access denied. Invalid or expired access code.');
         return false;
       }
-      
+
       if (data.data.exam.status === 'completed') {
         router.push('/thank-you');
-        return false;
-      }
-
-      // Check if exam has expired
-      const isExpired = data.data.exam.status == 'expired';
-      setExamExpired(isExpired);
-      if (isExpired) {
         return false;
       }
 
@@ -116,14 +130,24 @@ const TestPage = () => {
         data.data?.answers?.find(
           (a: { question_name: string }) => a.question_name === 'introduction'
         )?.user_answer[0] || null;
-        
-      setVideoLink(videoLink? process.env.NEXT_PUBLIC_IMGAE_PREFIX + videoLink:videoLink);
+
+      setVideoLink(videoLink ? process.env.NEXT_PUBLIC_IMGAE_PREFIX + videoLink : videoLink);
       setCandidate(data.data);
       setExam(data.data.exam);
       setLoading(false);
       setError(null);
       return true;
     } catch (err) {
+      if (isAxiosError(err)) {
+        const status = err?.response?.data?.data?.status;
+        setExamExpired(status == 'expired');
+        if (status == 'expired') {
+          return false;
+        } else if (status == 'completed') {
+          setError('Exam already compteted');
+          return false;
+        }
+      }
       setLoading(false);
       console.error('Error fetching candidate:', err);
       setError('Failed to fetch candidate data');
@@ -145,19 +169,19 @@ const TestPage = () => {
    */
   const cleanupScreenStream = () => {
     if (screenStream.current) {
-      screenStream.current.getTracks().forEach(track => {
+      screenStream.current.getTracks().forEach((track) => {
         track.stop();
       });
       screenStream.current = null;
     }
-    
+
     // Also clear the video element reference to ensure full reset
     if (screenSnapshotRef.current) {
       screenSnapshotRef.current.srcObject = null;
     }
-    
+
     // Reset permissions state for screen
-    setPermission(prev => ({ ...prev, screen: false }));
+    setPermission((prev) => ({ ...prev, screen: false }));
   };
 
   /**
@@ -166,7 +190,7 @@ const TestPage = () => {
   const handleFirefoxScreenShareClick = async () => {
     // Clean up any existing streams first
     cleanupScreenStream();
-    
+
     await handleFirefoxScreenShare(
       screenStream,
       screenSnapshotRef,
@@ -184,42 +208,42 @@ const TestPage = () => {
       // Reset error states
       setShowScreenShareErrorModal(false);
       setShowSafariWindowShareError(false);
-      
+
       // Clean up any existing streams first
       cleanupScreenStream();
-      
+
       const success = await handleSafariScreenShare(
         screenStream,
         screenSnapshotRef,
         setPermission,
-        setShowSafariScreenSharePrompt,
+        setShowSafariScreenSharePrompt
       );
-      
-      
+
       // Special case for Safari: If screen sharing failed, check if it's due to window selection
       if (!success && screenStream.current) {
         const track = screenStream.current.getVideoTracks()[0];
         if (track) {
           const settings = track.getSettings();
-          
+
           // Check for displaySurface property (if available)
           const { displaySurface = '' } = settings;
-          if (displaySurface === 'window' || displaySurface === 'browser' || displaySurface === 'application') {
-            console.log('Safari user selected window instead of screen. Showing special error.');
+          if (
+            displaySurface === 'window' ||
+            displaySurface === 'browser' ||
+            displaySurface === 'application'
+          ) {
             setShowSafariWindowShareError(true);
             return;
           }
-          
+
           // Otherwise, use heuristics to detect window sharing
-          const { width = 0, height = 0 } = settings;
-          console.log('Safari screen share settings:', height);
+          const { width = 0 } = settings;
           if (width > 0 && width < 1200) {
-            console.log('Detected small screen size, likely window sharing in Safari');
             setShowSafariWindowShareError(true);
             return;
           }
         }
-        
+
         // Default to generic error if no specific condition was met
         setShowScreenShareErrorModal(true);
       }
@@ -247,11 +271,11 @@ const TestPage = () => {
       0,
       3
     );
-    
+
     if (!success) {
       setShowCameraRetry(true);
     }
-    
+
     return success;
   };
 
@@ -262,7 +286,7 @@ const TestPage = () => {
     // Get access code from URL
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get('code') || '';
-    
+
     // Take initial screenshots
     if (cameraSnapshotRef.current && cameraCanvas.current && permission.camera) {
       takeScreenshot(
@@ -292,7 +316,7 @@ const TestPage = () => {
     interval.current = setInterval(() => {
       const randomDelayMsScreen = Math.floor(Math.random() * 61) * 1000;
       const randomDelayMsCamera = Math.floor(Math.random() * 61) * 1000;
-      
+
       setTimeout(() => {
         if (
           screenSnapshotRef.current !== null &&
@@ -310,7 +334,7 @@ const TestPage = () => {
           );
         }
       }, randomDelayMsScreen);
-      
+
       setTimeout(() => {
         if (
           cameraSnapshotRef.current !== null &&
@@ -352,7 +376,7 @@ const TestPage = () => {
 
       const candidateSuccess = await fetchCandidate();
       if (!candidateSuccess) return;
-      
+
       const cameraSuccess = await initCamera();
       if (!cameraSuccess) return;
 
@@ -402,7 +426,7 @@ const TestPage = () => {
   // Initial setup
   useEffect(() => {
     init();
-    
+
     // Clean up function
     return () => {
       if (interval.current) {
@@ -410,19 +434,15 @@ const TestPage = () => {
       }
       stopMediaStreams(screenStream.current, cameraStreamRef);
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isInvalidDevice]);
 
   // Set up security event listeners
   useEffect(() => {
-    const cleanup = setupSecurityEventListeners(
-      setIsFullscreen,
-      !!error,
-      isInvalidDevice
-    );
-    
+    const cleanup = setupSecurityEventListeners(setIsFullscreen, !!error, isInvalidDevice);
+
     return cleanup;
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [error, isInvalidDevice]);
 
   // Render for invalid devices (mobile/tablet)
@@ -433,7 +453,7 @@ const TestPage = () => {
       </div>
     );
   }
-  
+
   return (
     <div className="w-screen min-h-screen bg-gray-50">
       {/* Fullscreen warning banner */}
@@ -460,7 +480,6 @@ const TestPage = () => {
           >
             Enter Fullscreen
           </Button>
-                
         </div>
       )}
 
@@ -471,15 +490,15 @@ const TestPage = () => {
 
       {/* Safari screen share prompt */}
       {showSafariScreenSharePrompt && !hasMultipleScreens && !showSafariWindowShareError && (
-        <SafariScreenSharePrompt 
+        <SafariScreenSharePrompt
           handleSafariScreenShare={handleSafariScreenShareClick}
-          cleanupScreenStream={cleanupScreenStream} 
+          cleanupScreenStream={cleanupScreenStream}
         />
       )}
-      
+
       {/* Safari window share error */}
       {showSafariWindowShareError && !hasMultipleScreens && (
-        <SafariWindowShareError 
+        <SafariWindowShareError
           setShowSafariWindowShareError={setShowSafariWindowShareError}
           setShowSafariScreenSharePrompt={setShowSafariScreenSharePrompt}
           cleanupScreenStream={cleanupScreenStream}
@@ -499,16 +518,13 @@ const TestPage = () => {
       {/* Multiple screens warning */}
       {hasMultipleScreens && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <MultipleScreensWarning 
-            onRetry={handleRetry}
-            isFirefox={isFirefox()}
-          />
+          <MultipleScreensWarning onRetry={handleRetry} isFirefox={isFirefox()} />
         </div>
       )}
 
       {/* Camera retry UI */}
       {showCameraRetry && (
-        <CameraRetry 
+        <CameraRetry
           error={cameraError}
           onRetry={() => {
             setShowCameraRetry(false);
@@ -529,23 +545,24 @@ const TestPage = () => {
           title="Access Denied"
         />
       ) : examExpired ? (
-        <ExamExpired 
-          contactEmail="support@yourexamdomain.com"
-        />
+        <ExamExpired contactEmail="support@yourexamdomain.com" />
       ) : loading || !candidate ? (
         <TestLoading />
-      ) : !permission.camera || (!permission.screen && !showFirefoxScreenSharePrompt && !showSafariScreenSharePrompt) ? (
+      ) : !permission.camera ||
+        (!permission.screen && !showFirefoxScreenSharePrompt && !showSafariScreenSharePrompt) ? (
         <TestWarning
           text={
             <ul>
-              {!permission.screen && !showFirefoxScreenSharePrompt && !showSafariScreenSharePrompt && (
-                <>
-                  <li>
-                    In the screen sharing popup, select <strong>Entire Screen</strong> and then click{' '}
-                    <strong>Share</strong>. You can refresh this page.{' '}
-                  </li>
-                </>
-              )}
+              {!permission.screen &&
+                !showFirefoxScreenSharePrompt &&
+                !showSafariScreenSharePrompt && (
+                  <>
+                    <li>
+                      In the screen sharing popup, select <strong>Entire Screen</strong> and then
+                      click <strong>Share</strong>. You can refresh this page.{' '}
+                    </li>
+                  </>
+                )}
               {!permission.camera && <li>Make sure camera is on</li>}
             </ul>
           }

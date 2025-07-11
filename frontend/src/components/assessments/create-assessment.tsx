@@ -99,8 +99,7 @@ export default function CreateAssessment() {
 
         if (step === 1) {
             try {
-                const response = await assessmentTrigger({ name: formData.name });
-                console.log(response);
+                await assessmentTrigger({ name: formData.name });
             } catch (error) {
                 if (isAxiosError(error) && error.response) {
                     const message =

@@ -98,7 +98,6 @@ const ImportSampleXLSX = ({
     try {
       toast.loading('Importing questions...');
       const result = await uploadFileTrigger(formData);
-      console.log('Import result:', result);
       toast.dismiss();
       
       if (result.success) {

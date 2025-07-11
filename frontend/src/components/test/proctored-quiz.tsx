@@ -1,7 +1,15 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/form/button';
 import { useExamStore } from '@/store/examStore';
-import { Answer, IExamQuestion, LocalAnswer, QuestionType, SubmitAnsPayload, SubmitAnsReponse, Violation } from '@/types/exam.types';
+import {
+  Answer,
+  IExamQuestion,
+  LocalAnswer,
+  QuestionType,
+  SubmitAnsPayload,
+  SubmitAnsReponse,
+  Violation,
+} from '@/types/exam.types';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import TestHeader from './test-header';
 import useSWR from 'swr';
@@ -12,13 +20,23 @@ import AlertWrapper from './error/alert-wrapper';
 import TestLoading from './loading/test-loading';
 import Question from './question';
 import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
-import { BROWSER_KEY, PROHIBITED_COMBINATIONS, PROHIBITED_KEYS, QUIZ_CONFIG } from '@/shared/constants/data';
+import {
+  BROWSER_KEY,
+  PROHIBITED_COMBINATIONS,
+  PROHIBITED_KEYS,
+  QUIZ_CONFIG,
+} from '@/shared/constants/data';
 import { examEndpoint } from '@/lib/endpoint';
 import TestWarning from './error/test-warning';
-import { uploadFileInChunks } from '@/lib/utils';
+import { removeVideoToIndexedDB, uploadFileInChunks } from '@/lib/utils';
 
 export default function ProctoredQuiz() {
-  const [answers, setAnswers] = useState<Record<string, { question: IExamQuestion, answer: Answer, answer_id?: string }>>({});
+  const [answers, setAnswers] = useState<
+    Record<
+      string,
+      { question: IExamQuestion; temp_url?: string; answer: Answer; answer_id?: string }
+    >
+  >({});
   const [timeLeft, setTimeLeft] = useState(0);
   const isSubmittingRef = useRef(false);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -35,17 +53,13 @@ export default function ProctoredQuiz() {
   const screenshotIntervalRef = useRef<NodeJS.Timeout>();
   const fullscreenElementRef = useRef<Element | null>(null);
 
-
-  const originalWindowSize = useRef({
-    width: window.innerWidth,
-    height: window.innerHeight,
-  });
+  const originalWindowSize = useRef({ width: window.innerWidth, height: window.innerHeight });
   const pingIntervalRef = useRef<NodeJS.Timeout>();
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const { exam, accessCode, setExam } = useExamStore();
   const [questions, setQuestions] = useState<IExamQuestion[]>([]);
   const alertTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const [prvViolations, setPrvViolations] = useState(0)
+  const [prvViolations, setPrvViolations] = useState(0);
 
   const displayAlert = (message: string) => {
     setAlertMessage(message);
@@ -56,47 +70,80 @@ export default function ProctoredQuiz() {
     alertTimeoutRef.current = setTimeout(() => setShowAlert(false), QUIZ_CONFIG.alertTimeout);
   };
 
-  const { data: examData, isLoading: isExamLoading } = useSWR(`${examEndpoint.BY_ID}/${exam?.id}`, (url: string) => examApi.get(url, accessCode), {
-    revalidateOnFocus: true,
-    revalidateOnMount: true,
-    revalidateOnReconnect: true,
-    revalidateIfStale: true,
-  })
+  const { data: examData, isLoading: isExamLoading } = useSWR(
+    `${examEndpoint.BY_ID}/${exam?.id}`,
+    (url: string) => examApi.get(url, accessCode),
+    {
+      revalidateOnFocus: true,
+      revalidateOnMount: true,
+      revalidateOnReconnect: true,
+      revalidateIfStale: true,
+    }
+  );
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { isMutating, trigger } = useSWRMutation<SubmitAnsReponse, any, string, SubmitAnsPayload>(
     `${examEndpoint.CANDIDATE_EXAM}/${exam?.id}/submit-answer`,
     (url: string, { arg }) => examApi.post(url, arg, accessCode)
-  )
-  const { trigger:videoTrigger, isMutating:isVideoMutating } = useSWRMutation(`${examEndpoint.CANDIDATE_EXAM}/${exam?.id}/submit-answer`, 
-    (url: string, { arg }: { arg: {foldername:string,UploadId:string,parts:{ETag:string,PartNumber:number}[],question_id:string,merge_chunk:boolean} }) => 
-      examApi.post(url, arg, accessCode)
   );
-  
-  const { isMutating: isSubmiting, trigger: submitTrigger } = useSWRMutation(`${examEndpoint.CANDIDATE_EXAM}/${exam?.id}/finish`, (url: string) => examApi.get(url, accessCode))
-  const { isMutating: isReseting, trigger: resetTrigger } = useSWRMutation(`${examEndpoint.CANDIDATE_EXAM}/${exam?.id}/reset-answer`, (url: string, { arg }: { arg: { answer_id: string } }) => examApi.post(url, arg, accessCode))
+  const { trigger: videoTrigger, isMutating: isVideoMutating } = useSWRMutation(
+    `${examEndpoint.CANDIDATE_EXAM}/${exam?.id}/submit-answer`,
+    (
+      url: string,
+      {
+        arg,
+      }: {
+        arg: {
+          foldername: string;
+          UploadId: string;
+          parts: { ETag: string; PartNumber: number }[];
+          question_id: string;
+          merge_chunk: boolean;
+        };
+      }
+    ) => examApi.post(url, arg, accessCode)
+  );
 
-  const {cameraStreamRef} = useExamStore()
+  const { isMutating: isSubmiting, trigger: submitTrigger } = useSWRMutation(
+    `${examEndpoint.CANDIDATE_EXAM}/${exam?.id}/finish`,
+    (url: string) => examApi.get(url, accessCode)
+  );
+  const { isMutating: isReseting, trigger: resetTrigger } = useSWRMutation(
+    `${examEndpoint.CANDIDATE_EXAM}/${exam?.id}/reset-answer`,
+    (url: string, { arg }: { arg: { answer_id: string } }) => examApi.post(url, arg, accessCode)
+  );
+
+  const { cameraStreamRef } = useExamStore();
   useEffect(() => {
     if (examData) {
       setExam(examData.data);
-      const obj: Record<string, LocalAnswer> = {}
-      examData.data?.answers?.forEach((a: { question_id: string, user_answer: string[], id: string }) => {
-        const question = examData.data?.exam_questions.find((q: IExamQuestion) => q.question_id == a.question_id)
+      const obj: Record<string, LocalAnswer> = {};
+      examData.data?.answers?.forEach(
+        (a: { question_id: string; user_answer: string[]; id: string }) => {
+          const question = examData.data?.exam_questions.find(
+            (q: IExamQuestion) => q.question_id == a.question_id
+          );
 
-        obj[a.question_id as string] = {
-          question: question.question,
-          answer: question.question.type == QuestionType.MULTIPLE_SELECT ? a.user_answer : a.user_answer[0],
-          answer_id: a.id
+          obj[a.question_id as string] = {
+            question: question.question,
+            answer:
+              question.question.type == QuestionType.MULTIPLE_SELECT
+                ? a.user_answer
+                : a.user_answer[0],
+            answer_id: a.id,
+          };
+          obj[a.question_id as string].answer =
+            question.question.type == QuestionType.VIDEO
+              ? (process.env.NEXT_PUBLIC_IMGAE_PREFIX || '') + obj[a.question_id as string].answer
+              : obj[a.question_id as string].answer;
         }
-        obj[a.question_id as string].answer = question.question.type == QuestionType.VIDEO ? (process.env.NEXT_PUBLIC_IMGAE_PREFIX || '')+obj[a.question_id as string].answer : obj[a.question_id as string].answer
-      })
-      setAnswers(obj)
-      localStorage.setItem('quizAnswers', JSON.stringify(obj))
+      );
+      setAnswers(obj);
+      localStorage.setItem('quizAnswers', JSON.stringify(obj));
       setQuestions(examData.data?.exam_questions || []);
       setTimeLeft(examData.data?.assessment?.duration * 60);
       checkExamStatus();
-      setPrvViolations(examData?.data?.violations)
+      setPrvViolations(examData?.data?.violations);
     }
   }, [examData]);
 
@@ -106,13 +153,19 @@ export default function ProctoredQuiz() {
     try {
       setIsLoading(true);
 
-      const { data: statusData } = await examApi.get(`${examEndpoint.CANDIDATE_EXAM}/${exam.id}/status`, accessCode);
+      const { data: statusData } = await examApi.get(
+        `${examEndpoint.CANDIDATE_EXAM}/${exam.id}/status`,
+        accessCode
+      );
       const status = statusData.status;
 
       let startTime: string | null = null;
 
       if (status === 'pending') {
-        const { data: startData } = await examApi.get(`${examEndpoint.CANDIDATE_EXAM}/${exam.id}/start`, accessCode);
+        const { data: startData } = await examApi.get(
+          `${examEndpoint.CANDIDATE_EXAM}/${exam.id}/start`,
+          accessCode
+        );
         startTime = startData.start_time;
       } else if (status === 'in_progress') {
         startTime = statusData.start_time;
@@ -146,8 +199,21 @@ export default function ProctoredQuiz() {
   const handleStopRecording = (blob: Blob | null, url: string) => {
     setRecordingBlob(blob);
     setRecordingUrl(url);
-  }
+    console.log(blob);
 
+    if (questions[currentQuestionIndex].question.type == 'video') {
+      setAnswers((prev) => ({
+        ...prev,
+        [questions[currentQuestionIndex].question_id]: {
+          question: questions[currentQuestionIndex],
+          answer: '',
+          temp_url: url,
+          answer_id: '',
+          pending: true,
+        },
+      }));
+    }
+  };
 
   const getQuestionTypeLabel = (type: QuestionType) => {
     switch (type) {
@@ -169,11 +235,9 @@ export default function ProctoredQuiz() {
   };
 
   const requestFullScreen = async () => {
-
     if (!containerRef.current) return;
 
     try {
-
       if (!document.fullscreenElement) {
         containerRef.current.classList.add('h-screen');
         containerRef.current.classList.add('overflow-auto');
@@ -188,33 +252,30 @@ export default function ProctoredQuiz() {
   const submitViolation = async () => {
     if (violations.current.length === 0) return;
     try {
-      await examApi.post(`${examEndpoint.CANDIDATE_EXAM}/${exam?.id}/submit-violation`, {
-        violations: violations.current,
-      }, accessCode);
-      setPrvViolations((prv) => prv + violations.current.length)
+      await examApi.post(
+        `${examEndpoint.CANDIDATE_EXAM}/${exam?.id}/submit-violation`,
+        { violations: violations.current },
+        accessCode
+      );
+      setPrvViolations((prv) => prv + violations.current.length);
       violations.current = []; // Clear violations after successful submission
     } catch (error) {
       console.error('Error submitting violations:', error);
     }
-  }
+  };
 
   const addViolation = (violation: Omit<Violation, 'timestamp'>) => {
-
     if (audioRef.current) {
-      audioRef.current.play()
+      audioRef.current.play();
     }
-    const newViolation: Violation = {
-      ...violation,
-      timestamp: Date.now(),
-    };
+    const newViolation: Violation = { ...violation, timestamp: Date.now() };
 
     violations.current = [...violations.current, newViolation];
 
-    if ((violations.current.length + prvViolations) >= QUIZ_CONFIG.maxViolations) {
+    if (violations.current.length + prvViolations >= QUIZ_CONFIG.maxViolations) {
       // submitQuiz();
     }
     displayAlert(`Warning: ${violation.details}`);
-
   };
 
   const handleKeyDown = (e: KeyboardEvent) => {
@@ -250,8 +311,7 @@ export default function ProctoredQuiz() {
 
     // Prevent browser shortcuts
 
-    if (
-      (e.ctrlKey || e.metaKey) && BROWSER_KEY.includes(e.key)) {
+    if ((e.ctrlKey || e.metaKey) && BROWSER_KEY.includes(e.key)) {
       e.preventDefault();
       // addViolation({
       //   type: 'BROWSER_SHORTCUT',
@@ -280,68 +340,58 @@ export default function ProctoredQuiz() {
   };
 
   const handleResize = () => {
-
     const { width, height } = originalWindowSize.current;
 
-    if ((Math.abs(window.innerWidth - width) > 20 || Math.abs(window.innerHeight - height) > 20) && fullscreenElementRef.current?.tagName !== 'VIDEO') {
-      addViolation({
-        type: 'WINDOW_RESIZE',
-        details: 'Detected significant window size change',
-      });
+    if (
+      (Math.abs(window.innerWidth - width) > 20 || Math.abs(window.innerHeight - height) > 20) &&
+      fullscreenElementRef.current?.tagName !== 'VIDEO'
+    ) {
+      addViolation({ type: 'WINDOW_RESIZE', details: 'Detected significant window size change' });
     }
   };
 
   const handleFullScreenChange = () => {
     if (!document.fullscreenElement && fullscreenElementRef.current?.tagName !== 'VIDEO') {
-      addViolation({
-        type: 'FULLSCREEN_EXIT',
-        details: 'Exited full screen mode',
-      });
+      addViolation({ type: 'FULLSCREEN_EXIT', details: 'Exited full screen mode' });
     }
     fullscreenElementRef.current = document.fullscreenElement;
-
   };
 
   const handleWindowFocus = () => {
     if (!document.hasFocus()) {
       displayAlert(`WARNING: Tab switching detected!`);
 
-      addViolation({
-        type: 'WINDOW_FOCUS_LOST',
-        details: 'User switched to another window',
-      });
+      addViolation({ type: 'WINDOW_FOCUS_LOST', details: 'User switched to another window' });
     }
   };
 
   // Quiz functions
-  const handleAnswerChange = useCallback((question: IExamQuestion, value: string | Blob | (string | number)[]) => {
-    setAnswers((prev) => ({
-      ...prev,
-      [question.question_id]: { question, answer: value },
-    }));
-  }, [answers]);
+  const handleAnswerChange = useCallback(
+    (question: IExamQuestion, value: string | Blob | (string | number)[]) => {
+      setAnswers((prev) => ({ ...prev, [question.question_id]: { question, answer: value } }));
+    },
+    [answers]
+  );
 
   const submitQuiz = async () => {
     if (isSubmitting) return;
     try {
-      
       await handleNextQuestion();
       setIsSubmitting(true);
 
       await submitTrigger();
       if (document.fullscreenElement) document.exitFullscreen();
 
-      cameraStreamRef?.getTracks().forEach((track)=>{
-        track.stop()
-      })
-
+      cameraStreamRef?.getTracks().forEach((track) => {
+        track.stop();
+      });
 
       router.push('/feedback');
     } catch (error) {
       console.error('Error submitting quiz:', error);
       setIsSubmitting(false);
-      setShowAlert(true)
-      setAlertMessage(isAxiosError(error) ? error.response?.data.message : 'An error occurred')
+      setShowAlert(true);
+      setAlertMessage(isAxiosError(error) ? error.response?.data.message : 'An error occurred');
     }
   };
 
@@ -367,15 +417,12 @@ export default function ProctoredQuiz() {
   const detectMultipleScreens = () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if ((window.screen as any).isExtended) {
-      addViolation({
-        type: 'MULTIPLE_SCREENS',
-        details: 'Multiple screens detected',
-      });
+      addViolation({ type: 'MULTIPLE_SCREENS', details: 'Multiple screens detected' });
     }
-  }
+  };
   // Effects
   useEffect(() => {
-    if (process.env.MODE == 'development') return
+    if (process.env.MODE == 'development') return;
 
     // Request fullscreen after 1 second
     const fullscreenTimeout = setTimeout(() => {
@@ -397,12 +444,8 @@ export default function ProctoredQuiz() {
       detectMultipleScreens();
     }, 5000);
 
-
     // Store original window size
-    originalWindowSize.current = {
-      width: window.innerWidth,
-      height: window.innerHeight,
-    };
+    originalWindowSize.current = { width: window.innerWidth, height: window.innerHeight };
 
     // Handlers
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -419,17 +462,13 @@ export default function ProctoredQuiz() {
 
     const handleContextMenu = (e: MouseEvent) => {
       e.preventDefault();
-      addViolation({
-        type: 'CONTEXT_MENU',
-        details: 'Attempted to open context menu',
-      });
+      addViolation({ type: 'CONTEXT_MENU', details: 'Attempted to open context menu' });
     };
 
     // Add listeners
     window.addEventListener('focus', handleWindowFocus);
     window.addEventListener('blur', handleWindowFocus);
     window.addEventListener('beforeunload', handleBeforeUnload);
-
 
     const fullscreenEventTimeout = setTimeout(() => {
       document.addEventListener('fullscreenchange', handleFullScreenChange);
@@ -459,31 +498,33 @@ export default function ProctoredQuiz() {
     };
   }, []);
 
-
   const handleReset = async () => {
-    const current_question = questions[currentQuestionIndex]
+    const current_question = questions[currentQuestionIndex];
     try {
       const answerId = answers[current_question.question_id]?.answer_id;
-      if (typeof answerId === 'string') {
+      if (typeof answerId === 'string' && answerId) {
         await resetTrigger({ answer_id: answerId });
       }
     } catch (error) {
       setShowAlert(true);
-      setAlertMessage(isAxiosError(error)
-        ? error.response?.data.message
-        : 'An error occurred while resetting the answer');
+      setAlertMessage(
+        isAxiosError(error)
+          ? error.response?.data.message
+          : 'An error occurred while resetting the answer'
+      );
       return;
     }
+    if (current_question.question.type == 'video') {
+      setRecordingUrl(null);
+      await removeVideoToIndexedDB(current_question.id, exam?.id || '');
+    }
     setAnswers((prv) => {
-      const temp = { ...prv }
+      const temp = { ...prv };
       delete temp[current_question.question_id];
-      return temp
-    })
-
-
-  }
+      return temp;
+    });
+  };
   const handleNextQuestion = async () => {
-
     if (!questions.length) return;
 
     const current = questions[currentQuestionIndex];
@@ -497,11 +538,16 @@ export default function ProctoredQuiz() {
       let success = false;
 
       if (questionType === QuestionType.VIDEO) {
+        if (!recordingBlob) return;
         // if (recordingUrl === existingAnswer) {
         //   goToNextQuestion();
         //   return;
         // }
-        const { fileName, parts, UploadId } = await uploadFileInChunks(recordingBlob as Blob, 5 * 1024 * 1024, exam?.id || '');
+        const { fileName, parts, UploadId } = await uploadFileInChunks(
+          recordingBlob as Blob,
+          5 * 1024 * 1024,
+          exam?.id || ''
+        );
 
         // Prepare payload for background processing
         const payload = {
@@ -509,16 +555,13 @@ export default function ProctoredQuiz() {
           UploadId,
           parts,
           merge_chunk: true,
-          question_id: questionId
+          question_id: questionId,
         };
 
-        const response = await videoTrigger(payload)
-          .catch(error => {
-            console.error('Background video processing failed:', error);
-          })
-        console.log(response);
+        const response = await videoTrigger(payload).catch((error) => {
+          console.error('Background video processing failed:', error);
+        });
         if (response.success) {
-
           // const userAnswer = response.data?.answer?.user_answer?.[0] as string;
 
           setAnswers((prev) => ({
@@ -526,18 +569,21 @@ export default function ProctoredQuiz() {
             [questionId]: {
               question: current,
               answer: recordingUrl || '',
-              answer_id: questionId
+              answer_id: questionId,
+              pending: true,
             },
           }));
           success = true;
         }
-
       } else {
         const payload = {
           question_id: questionId,
-          user_answer: (Array.isArray(existingAnswer) ? existingAnswer : [existingAnswer]) as (string | number)[],
+          user_answer: (Array.isArray(existingAnswer) ? existingAnswer : [existingAnswer]) as (
+            | string
+            | number
+          )[],
         };
-        const response = await trigger(payload)
+        const response = await trigger(payload);
 
         setAnswers((prev) => ({
           ...prev,
@@ -551,12 +597,9 @@ export default function ProctoredQuiz() {
       if (success) {
         goToNextQuestion();
       }
-
     } catch (error) {
       setShowAlert(true);
-      setAlertMessage(isAxiosError(error)
-        ? error.response?.data.message
-        : 'An error occurred');
+      setAlertMessage(isAxiosError(error) ? error.response?.data.message : 'An error occurred');
     }
   };
 
@@ -570,9 +613,9 @@ export default function ProctoredQuiz() {
 
     const buttons = new Set<number>();
 
-    [0, 1, 2].forEach(i => i < total && buttons.add(i));
+    [0, 1, 2].forEach((i) => i < total && buttons.add(i));
 
-    [total - 3, total - 2, total - 1].forEach(i => i >= 0 && i < total && buttons.add(i));
+    [total - 3, total - 2, total - 1].forEach((i) => i >= 0 && i < total && buttons.add(i));
 
     // Current ±2
     for (let i = current - 2; i <= current + 2; i++) {
@@ -590,25 +633,36 @@ export default function ProctoredQuiz() {
       className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 p-4 md:p-8"
     >
       {accessError ? (
-        <TestWarning text={<ul>
-          <li>{accessError}</li>
-        </ul>} title="Access Denied" />
-      ) : (isLoading || isExamLoading) ? (
+        <TestWarning
+          text={
+            <ul>
+              <li>{accessError}</li>
+            </ul>
+          }
+          title="Access Denied"
+        />
+      ) : isLoading || isExamLoading ? (
         <TestLoading />
       ) : (
         <>
-          <AlertWrapper showAlert={showAlert} alertMessage={alertMessage} onClose={() => setShowAlert(false)} />
+          <AlertWrapper
+            showAlert={showAlert}
+            alertMessage={alertMessage}
+            onClose={() => setShowAlert(false)}
+          />
 
           <audio src="/assets/alert.wav" ref={audioRef} style={{ display: 'none' }} />
           <Card className="w-[95vw] max-w-[1200px] mx-auto min-h-[70px] mb-3 shadow-xl border-0 rounded-xl text-black overflow-hidden bg-white/95 backdrop-blur-sm">
             <div className="p-4 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span className="text-sm font-medium text-gray-700">Violations:</span>
-                <span className={`text-lg font-bold ${(prvViolations + violations.current.length) >= 4 ? 'text-red-600' : 'text-blue-600'}`}>
+                <span
+                  className={`text-lg font-bold ${prvViolations + violations.current.length >= 4 ? 'text-red-600' : 'text-blue-600'}`}
+                >
                   {prvViolations + violations.current.length} / 5
                 </span>
               </div>
-              {(prvViolations + violations.current.length) >= 3 && (
+              {prvViolations + violations.current.length >= 3 && (
                 <div className="text-sm text-red-600 font-medium">
                   Warning: Quiz will be automatically submitted at 5 violations
                 </div>
@@ -629,10 +683,8 @@ export default function ProctoredQuiz() {
             />
 
             <CardContent className="p-4 md:p-8 space-y-6">
-
               <div className="flex flex-wrap gap-2 justify-center items-center">
                 {buttonIndexes.map((index, i) => {
-
                   const prev = buttonIndexes[i - 1];
                   const isGap = i > 0 && index - prev > 1;
 
@@ -642,11 +694,12 @@ export default function ProctoredQuiz() {
                       <button
                         onClick={() => setCurrentQuestionIndex(index)}
                         className={`h-8 w-8 rounded-full flex items-center justify-center text-sm font-medium transition-all
-                          ${currentQuestionIndex === index
-                            ? 'bg-blue-600 text-white shadow-md'
-                            : answers[questions[index].question_id]
-                              ? 'bg-green-100 text-green-800 border border-green-200'
-                              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                          ${
+                            currentQuestionIndex === index
+                              ? 'bg-blue-600 text-white shadow-md'
+                              : answers[questions[index].question_id]
+                                ? 'bg-green-100 text-green-800 border border-green-200'
+                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                           }`}
                         aria-label={`Go to question ${index + 1}`}
                       >
@@ -657,41 +710,56 @@ export default function ProctoredQuiz() {
                 })}
               </div>
 
-              {questions.length > 0 && <div className="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-gray-200 transition-all hover:shadow-md">
-                <div className="space-y-6">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                    <div className="flex items-center gap-3">
-                      <span className="text-xs font-semibold bg-blue-100 text-blue-800 px-3 py-1 rounded-full">
-                        Question {currentQuestionIndex + 1}
-                      </span>
-                      <span className="text-xs font-semibold bg-purple-100 text-purple-800 px-3 py-1 rounded-full">
-                        {getQuestionTypeLabel(
-                          questions[currentQuestionIndex].question.type as QuestionType
-                        )}
-                      </span>
+              {questions.length > 0 && (
+                <div className="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-gray-200 transition-all hover:shadow-md">
+                  <div className="space-y-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                      <div className="flex items-center gap-3">
+                        <span className="text-xs font-semibold bg-blue-100 text-blue-800 px-3 py-1 rounded-full">
+                          Question {currentQuestionIndex + 1}
+                        </span>
+                        <span className="text-xs font-semibold bg-purple-100 text-purple-800 px-3 py-1 rounded-full">
+                          {getQuestionTypeLabel(
+                            questions[currentQuestionIndex].question.type as QuestionType
+                          )}
+                        </span>
+                      </div>
+                      <div>
+                        <Button
+                          variant="default"
+                          size="lg"
+                          onClick={handleReset}
+                          disabled={isReseting}
+                          className="w-24"
+                        >
+                          {isReseting ? (
+                            <div className="flex flex-col items-center justify-center gap-4">
+                              <Loader2 className="w-8 h-8 animate-spin" />
+                            </div>
+                          ) : (
+                            <>Reset</>
+                          )}
+                        </Button>
+                      </div>
                     </div>
-                    <div>
-                      <Button variant="default" size='lg' onClick={handleReset} disabled={isReseting} className='w-24'>
-                        {(isReseting) ? <div className="flex flex-col items-center justify-center gap-4">
-                          <Loader2 className="w-8 h-8 animate-spin" />
-                        </div>
-                          : <>
-                            Reset
-                          </>
-                        }
-                      </Button>
+
+                    <h2 className="text-xl md:text-2xl font-semibold text-gray-800 leading-relaxed">
+                      {questions[currentQuestionIndex].question.question}
+                    </h2>
+
+                    <div className="pt-2 text-black">
+                      <Question
+                        question={questions[currentQuestionIndex]}
+                        answers={answers}
+                        isLoading={isMutating || isSubmiting || isVideoMutating}
+                        handleAnswerChange={handleAnswerChange}
+                        handleStopRecording={handleStopRecording}
+                        handleNextQuestion={handleNextQuestion}
+                      />
                     </div>
-                  </div>
-
-                  <h2 className="text-xl md:text-2xl font-semibold text-gray-800 leading-relaxed">
-                    {questions[currentQuestionIndex].question.question}
-                  </h2>
-
-                  <div className="pt-2 text-black">
-                    <Question question={questions[currentQuestionIndex]} answers={answers} isLoading={isMutating || isSubmiting || isVideoMutating} handleAnswerChange={handleAnswerChange} handleStopRecording={handleStopRecording} handleNextQuestion={handleNextQuestion} />
                   </div>
                 </div>
-              </div>}
+              )}
 
               {/* Progress and navigation */}
               <div className="flex flex-col md:flex-row gap-6">
@@ -729,26 +797,34 @@ export default function ProctoredQuiz() {
 
                 <Button
                   onClick={() => handleNextQuestion()}
-                  disabled={(answers[questions[currentQuestionIndex].question_id]?.answer ? false : true) || (isMutating || isSubmiting || isVideoMutating)}
+                  disabled={
+                    (answers[questions[currentQuestionIndex].question_id]?.answer ||
+                    answers[questions[currentQuestionIndex].question_id]?.temp_url
+                      ? false
+                      : true) ||
+                    isMutating ||
+                    isSubmiting ||
+                    isVideoMutating
+                  }
                   variant="outline"
                   className="px-6 py-2 flex items-center gap-2 rounded-full transition-all w-40"
                 >
-                  {(isMutating || isSubmiting) ? <div className="flex flex-col items-center justify-center gap-4">
-                    <Loader2 className="w-8 h-8 text-purple-600 animate-spin" />
-                  </div>
-                    : <>
+                  {isMutating || isSubmiting ? (
+                    <div className="flex flex-col items-center justify-center gap-4">
+                      <Loader2 className="w-8 h-8 text-purple-600 animate-spin" />
+                    </div>
+                  ) : (
+                    <>
                       Save {currentQuestionIndex == questions.length - 1 ? '' : ' & Next'}
                       <ChevronRight />
                     </>
-                  }
+                  )}
                 </Button>
               </div>
-
             </CardContent>
           </Card>
-        </>)}
-
+        </>
+      )}
     </div>
   );
-
 }

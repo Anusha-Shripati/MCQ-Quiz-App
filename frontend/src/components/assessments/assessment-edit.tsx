@@ -69,6 +69,16 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
 
   const { trigger, isMutating } = useSWRMutation(`${assessmentEndpoint.ASSESSMENT_BY_ID}/${assessment.id}`, update);
 
+  const { data: questionData } = useSWR(assessmentEndpoint.CHECK_QUESTIONS, () => api.post(assessmentEndpoint.CHECK_QUESTIONS, { technologies: localAssessment.technologies.map((tech) => tech.technology_id) }));
+
+  const getMaxQuestions = (techId: string, difficulty: 'easy' | 'medium' | 'hard', type: Question['type']) => {
+
+    return (
+      questionData?.data?.results?.[techId]?.[difficulty]?.[type] ??
+      0
+    );
+  };
+
   useEffect(() => {
     if (technologyData) {
       setTechnologyOptions(
@@ -107,18 +117,18 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
 
 
 
-  const handleQuestionChange = (techId: string, difficulty: Difficulty, type:Question['type'], value: string) => {
+  const handleQuestionChange = (techId: string, difficulty: Difficulty, type: Question['type'], value: string) => {
     const updatedTechnologies = localTechnologies.map((tech) => {
       if (tech?.technology.id !== techId) return tech;
-      
-      const total =Object.entries(tech[difficulty])
-      .filter(([key]) => key !== 'total')
-      .reduce((sum, [, value]) => sum + Number(value || 0), 0)
 
-      const diff = {...tech[difficulty],[type]:value,total:total+Number(value || 0)};
-      
+      const total = Object.entries(tech[difficulty])
+        .filter(([key]) => key !== 'total')
+        .reduce((sum, [, value]) => sum + Number(value || 0), 0)
+
+      const diff = { ...tech[difficulty], [type]: value, total: total + Number(value || 0) };
+
       const newTech = { ...tech, [difficulty]: diff };
-      
+
       const newTotalForTech = newTech.easy.total + newTech.medium.total + newTech.hard.total;
 
       const otherTechsTotal = localTechnologies.reduce((sum, t) => {
@@ -313,6 +323,7 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
                   onChange={(e) => setLocalAssessment({ ...localAssessment, name: e.target.value })}
                   className="mb-4"
                   name="name"
+                  maxLength={234}
                 />
               </div>
               <div className="space-y-2 w-1/2">
@@ -509,9 +520,12 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
                         />
                         <div className='w-full flex flex-col gap-2 mt-3'>
                           {questionTypeOptions.map((item) => {
+                            const maxAllowed = getMaxQuestions(tech.technology_id  || '', difficulty as 'easy' | 'medium' | 'hard', item.value);
+
                             return <div className='flex justify-between w-full' key={item.value}>
 
-                              <label>{item.label}</label>
+                              <label>{item.label} <span className="text-xs text-gray-400">({maxAllowed})</span></label>
+
 
                               <Input
                                 type="number"

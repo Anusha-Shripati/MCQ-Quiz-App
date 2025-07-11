@@ -16,8 +16,11 @@ import PasswordRequirements from '@/components/profile/PasswordRequirements';
 import { emailRegex, passwordRegex } from '@/shared/constants/data';
 
 const userInfoSchema = z.object({
-  userName: z.string().min(1, 'User Name is required').max(25, 'User Name must be at most 25 characters'),
-  email: z.string().regex(emailRegex,"Invalid email format.")
+  userName: z
+    .string()
+    .min(1, 'User Name is required')
+    .max(25, 'User Name must be at most 25 characters'),
+  email: z.string().regex(emailRegex, 'Invalid email format.'),
 });
 
 const passwordChangeSchema = z
@@ -39,16 +42,9 @@ export default function ProfilePage() {
   const { isEditing, setIsEditing } = useProfileStore();
   const { user } = useAuthStore();
 
-  const [showPassword, setShowPassword] = useState({
-    old: false,
-    new: false,
-    reNew: false,
-  });
+  const [showPassword, setShowPassword] = useState({ old: false, new: false, reNew: false });
   const togglePassword = (type: 'old' | 'new' | 'reNew') => {
-    setShowPassword((prev) => ({
-      ...prev,
-      [type]: !prev[type],
-    }));
+    setShowPassword((prev) => ({ ...prev, [type]: !prev[type] }));
   };
 
   const {
@@ -56,15 +52,12 @@ export default function ProfilePage() {
     handleSubmit: handleUserInfoSubmit,
     formState: { errors: userInfoErrors },
     reset: userReset,
-    setValue
+    setValue,
   } = useForm({
     resolver: zodResolver(userInfoSchema),
-    defaultValues: {
-      userName: user?.name || '',
-      email: user?.email || '',
-    },
+    defaultValues: { userName: user?.name || '', email: user?.email || '' },
   });
-  
+
   useEffect(() => {
     if (user) {
       setValue('userName', user.name || '');
@@ -83,11 +76,7 @@ export default function ProfilePage() {
     watch,
   } = useForm({
     resolver: zodResolver(passwordChangeSchema),
-    defaultValues: {
-      oldPassword: '',
-      newPassword: '',
-      reNewPassword: '',
-    },
+    defaultValues: { oldPassword: '', newPassword: '', reNewPassword: '' },
   });
 
   // Watch the password field to update validation in real-time
@@ -110,10 +99,7 @@ export default function ProfilePage() {
         if (res.success) {
           toast.success('User Info Updated Successfully');
           // Update the form with the returned data
-          userReset({
-            userName: res.data.name,
-            email: res.data.email,
-          });
+          userReset({ userName: res.data.name, email: res.data.email });
         } else {
           toast.error(res.message);
         }
@@ -241,6 +227,7 @@ export default function ProfilePage() {
                     {...registerPassword('oldPassword')}
                     className="w-full dark:bg-gray-800 dark:text-white"
                     error={passwordErrors.oldPassword?.message}
+                    autoComplete={'off'}
                   />
                   <button
                     type="button"
@@ -258,6 +245,7 @@ export default function ProfilePage() {
                     {...registerPassword('newPassword')}
                     className="w-full dark:bg-gray-800 dark:text-white"
                     onFocus={() => setShowPasswordRequirements(true)}
+                    autoComplete={'off'}
                   />
                   <button
                     type="button"
@@ -276,6 +264,7 @@ export default function ProfilePage() {
                     {...registerPassword('reNewPassword')}
                     className="w-full dark:bg-gray-800 dark:text-white"
                     error={passwordErrors.reNewPassword?.message}
+                    autoComplete={'off'}
                   />
                   <button
                     type="button"

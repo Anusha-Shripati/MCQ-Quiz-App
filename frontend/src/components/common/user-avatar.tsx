@@ -14,6 +14,7 @@ import { api } from '@/lib/api';
 import toast from 'react-hot-toast';
 import { isAxiosError } from 'axios';
 import { userEndpoint } from '@/lib/endpoint';
+import Image from 'next/image';
 
 const UserAvatar = () => {
   const { user } = useAuthStore();
@@ -49,7 +50,7 @@ const UserAvatar = () => {
               height={96}
             /> */}
             {user?.image ? (
-              <img
+              <Image
                 src={`${((process.env.NEXT_PUBLIC_IMGAE_PREFIX || '') + (user?.image || ''))}`}
                 className="w-full h-full"
                 alt="User Avatar"

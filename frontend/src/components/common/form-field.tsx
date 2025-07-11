@@ -28,6 +28,8 @@ interface FormFieldProps {
   pattern?: string;
   maxLength?: number;
   onFocus?: (e: React.FocusEvent<HTMLInputElement>) => void;
+  autoFocus?: boolean;
+  autoComplete?: 'on' | 'off';
 }
 
 interface SelectOption {
@@ -63,7 +65,9 @@ export const FormField = forwardRef<HTMLInputElement, FormFieldProps>(
         {props.label && <label className="block text-sm font-medium mb-1">{props.label}</label>}
         {props.type === 'select' ? (
           <Select value={String(props.value)} onValueChange={props.onChange} name={props.name}>
-            <SelectTrigger className={`${props.className} border-gray-200 hover:border-gray-200 dark:hover:border-gray-600 dark:border-gray-600  placeholder-gray-500 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent`}>
+            <SelectTrigger
+              className={`${props.className} border-gray-200 hover:border-gray-200 dark:hover:border-gray-600 dark:border-gray-600  placeholder-gray-500 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent`}
+            >
               <SelectValue placeholder={`Select ${props.placeholder || props.label || ''}`} />
             </SelectTrigger>
             <SelectContent>
@@ -85,7 +89,9 @@ export const FormField = forwardRef<HTMLInputElement, FormFieldProps>(
             {...props}
             placeholder={`${props.placeholder || 'Enter ' + (props.label || '')} `}
             ref={ref}
+            autoFocus={props.autoFocus}
             onKeyDown={handleKeyDown}
+            autoComplete={props.autoComplete == 'off' ? 'off' : 'on'}
           />
         )}
         {props.error && <p className="text-red-500 text-sm mt-1">{props.error}</p>}

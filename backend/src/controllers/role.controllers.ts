@@ -35,9 +35,7 @@ export class RoleController {
   update = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
-      console.log('Update role ID:', id);
       const { name, role_permissions } = req.body;
-      console.log('Update role data:', { name, role_permissions });
       const existingRole = await roleService.findRoleById(id);
       if (!existingRole) {
         return generateResponse(res, 404, {}, false, 'Role not found!');
@@ -74,7 +72,6 @@ delete = async (req: Request, res: Response, next: NextFunction) => {
     }
 
     const totalUserCount = await roleService.countAllUsersByRole(id);
-    console.log('Total users with this role:', totalUserCount);
     if (totalUserCount > 0) {
       return generateResponse(
         res,

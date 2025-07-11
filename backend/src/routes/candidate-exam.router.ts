@@ -14,6 +14,16 @@ const candidateExamService = new CandidateExamService();
 const uploadService = new UploadService();
 const candidateExamController = new CandidateExamController(candidateExamService, uploadService);
 
+router.post("/:examId/submit-verified-image",
+  upload.single('file'),
+  asyncHandler(candidateExamController.submitVerifiedImage)
+);
+router.post(
+  '/:examId/submit-feedback',
+  authenticateCandidate,
+  validateRequest(candidateExamSchema.submitFeedback),
+  asyncHandler(candidateExamController.submitFeedback)
+);
 router.get(
   '/:examId/start',
   authenticateCandidate,

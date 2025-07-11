@@ -28,7 +28,7 @@ import {
 } from '@/shared/constants/data';
 import { examEndpoint } from '@/lib/endpoint';
 import TestWarning from './error/test-warning';
-import { deleteVideoFromIndexedDB, removeVideoToIndexedDB, uploadFileInChunks } from '@/lib/utils';
+import { removeVideoToIndexedDB, uploadFileInChunks } from '@/lib/utils';
 
 export default function ProctoredQuiz() {
   const [answers, setAnswers] = useState<
@@ -62,12 +62,12 @@ export default function ProctoredQuiz() {
   const [prvViolations, setPrvViolations] = useState(0);
 
   const displayAlert = (message: string) => {
-    setAlertMessage(message);
-    setShowAlert(true);
-    if (alertTimeoutRef.current) {
-      clearTimeout(alertTimeoutRef.current);
-    }
-    alertTimeoutRef.current = setTimeout(() => setShowAlert(false), QUIZ_CONFIG.alertTimeout);
+    // setAlertMessage(message);
+    // setShowAlert(true);
+    // if (alertTimeoutRef.current) {
+    //   clearTimeout(alertTimeoutRef.current);
+    // }
+    // alertTimeoutRef.current = setTimeout(() => setShowAlert(false), QUIZ_CONFIG.alertTimeout);
   };
 
   const { data: examData, isLoading: isExamLoading } = useSWR(
@@ -505,11 +505,13 @@ export default function ProctoredQuiz() {
         await resetTrigger({ answer_id: answerId });
       }
     } catch (error) {
-      // setShowAlert(true);
-      // setAlertMessage(isAxiosError(error)
-      //   ? error.response?.data.message
-      //   : 'An error occurred while resetting the answer');
-      // return;
+      setShowAlert(true);
+      setAlertMessage(
+        isAxiosError(error)
+          ? error.response?.data.message
+          : 'An error occurred while resetting the answer'
+      );
+      return;
     }
     if (current_question.question.type == 'video') {
       setRecordingUrl(null);
@@ -518,12 +520,9 @@ export default function ProctoredQuiz() {
     setAnswers((prv) => {
       const temp = { ...prv };
       delete temp[current_question.question_id];
-      return temp
-    })
-   
-
-
-  }
+      return temp;
+    });
+  };
   const handleNextQuestion = async () => {
     if (!questions.length) return;
 

@@ -233,7 +233,15 @@ export const formatTestDuration = (startDate: string, endDate: string): string =
   return `${totalMinutes} minutes`;
 };
 
-export const uploadFileInChunks = async (file: Blob, chunkSize: number = 5 * 1024 * 1024, examId: string = ''): Promise<{ UploadId: string, fileName: string, parts: { ETag: string, PartNumber: number }[] }> => {
+export const uploadFileInChunks = async (
+  file: Blob,
+  chunkSize: number = 5 * 1024 * 1024,
+  examId: string = ''
+): Promise<{
+  UploadId: string;
+  fileName: string;
+  parts: { ETag: string; PartNumber: number }[];
+}> => {
   const totalChunks = Math.ceil(file.size / chunkSize);
   const fileName = String(Date.now());
   let UploadId;
@@ -254,10 +262,10 @@ export const uploadFileInChunks = async (file: Blob, chunkSize: number = 5 * 102
     if (examId) formData.append('examId', examId);
 
     const response = await api.post(`/upload/chunk?chunkFolder=${fileName}`, formData);
-    UploadId = response.data.UploadId
+    UploadId = response.data.UploadId;
     if (UploadId) {
-      parts.push({ ETag: JSON.parse(response.data.ETag as string), PartNumber: i + 1 })
+      parts.push({ ETag: JSON.parse(response.data.ETag as string), PartNumber: i + 1 });
     }
   }
-  return { UploadId, fileName, parts }
-}
+  return { UploadId, fileName, parts };
+};

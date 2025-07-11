@@ -34,4 +34,13 @@ export class ResultController {
       next(error);
     }
   };
+  getFeedback = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { resultId } = req.params;
+      const feedbackData = await resultService.getFeedback(resultId);
+      return generateResponse(res, 200, feedbackData, true, 'Feedback fetched successfully');
+    } catch (error) {
+      next(error);
+    }
+  };
 }

@@ -90,6 +90,14 @@ export const examApi = {
   },
 };
 
+export const Candidate_feedback = {
+  post: async <T>(url: string, data: T, accessCode: string) => {
+    const config = { headers: { 'X-Access-Code': accessCode } };
+    const response = await candidateInstance.post(url, data, config);
+    return response.data;
+  },
+};
+
 export const isAxiosError = (
   error: unknown
 ): error is { response: { data: { message: string } } } => {

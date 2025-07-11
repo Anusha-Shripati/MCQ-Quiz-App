@@ -3,34 +3,22 @@
 import { useState, useRef, useEffect } from 'react';
 import * as faceapi from 'face-api.js';
 import { Button } from '../ui/form/button';
-import { Camera, User, AlertTriangle, RefreshCw, Users, CheckCircle2, XCircle, MoveHorizontal, ShieldAlert, Loader2 } from 'lucide-react';
+import { Camera, User, AlertTriangle, RefreshCw, Users, CheckCircle2, XCircle, MoveHorizontal, ShieldAlert } from 'lucide-react';
 import { loadFaceDetectionModels, checkFaceCentered, checkFaceSize, detectMultipleFaces } from '@/components/test/testUtils/faceApiUtils';
-import useSWRMutation from 'swr/mutation';
-import { examEndpoint } from '@/lib/endpoint';
-import { api } from '@/lib/api';
-
 
 interface FaceVerificationProps {
   onVerificationComplete: () => void;
   cameraStream: MediaStream | null;
-  examId?: string;
 }
-const uploadImage = async (url: string, { arg }: { arg: FormData }) => {
-  console.log('Uploading image to:', url);
-  // Use axios directly for FormData uploads to ensure proper content-type headers
-  const response = await api.post(url, arg);
-  return response.data;
-};
 
 const FaceVerification: React.FC<FaceVerificationProps> = ({
   onVerificationComplete,
-  cameraStream,
-  examId
+  cameraStream
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [modelsLoaded, setModelsLoaded] = useState(false);
-  const [verificationStatus, setVerificationStatus] = useState<'pending' | 'processing' | 'success' | 'failed' | 'loading' | 'multiple-faces' | 'uploading'>('loading');
+  const [verificationStatus, setVerificationStatus] = useState<'pending' | 'processing' | 'success' | 'failed' | 'loading' | 'multiple-faces'>('loading');
   const [faceDetected, setFaceDetected] = useState(false);
   const [multipleFacesDetected, setMultipleFacesDetected] = useState(false);
   const [isCentered, setIsCentered] = useState(false);
@@ -48,6 +36,7 @@ const FaceVerification: React.FC<FaceVerificationProps> = ({
   const requiredSuccessCount = 15;
   const multipleFacesCountRef = useRef(0);
   const multipleFacesThreshold = 10;
+  
   // Load face detection models
   const initModels = async () => {
     setVerificationStatus('loading');
@@ -62,8 +51,7 @@ const FaceVerification: React.FC<FaceVerificationProps> = ({
       setVerificationStatus('failed');
     }
   };
-  const {trigger} = useSWRMutation(`${examEndpoint.CANDIDATE_EXAM}/${examId}/submit-verified-image`, uploadImage)
-
+  
   useEffect(() => {
     initModels();
     
@@ -790,83 +778,9 @@ const FaceVerification: React.FC<FaceVerificationProps> = ({
     ctx.fillText(label, x + iconSize + 10, centerY + 5);
   };
   
-  // Function to capture a frame from the video as a JPEG blob
-  const captureVerifiedImage = (): Promise<Blob> => {
-    return new Promise((resolve, reject) => {
-      if (!videoRef.current) {
-        reject(new Error('Video element not available'));
-        return;
-      }
-
-      // Create a temporary canvas to capture the frame
-      const tempCanvas = document.createElement('canvas');
-      tempCanvas.width = videoRef.current.videoWidth;
-      tempCanvas.height = videoRef.current.videoHeight;
-      
-      // Draw the current video frame to the canvas
-      const ctx = tempCanvas.getContext('2d');
-      if (!ctx) {
-        reject(new Error('Could not get canvas context'));
-        return;
-      }
-
-      // Draw mirrored image to match what the user sees
-      ctx.scale(-1, 1);
-      ctx.drawImage(videoRef.current, -tempCanvas.width, 0, tempCanvas.width, tempCanvas.height);
-      
-      // Convert canvas to blob
-      tempCanvas.toBlob((blob) => {
-        if (blob) {
-          resolve(blob);
-        } else {
-          reject(new Error('Failed to create image blob'));
-        }
-      }, 'image/jpeg', 0.95); // JPEG format with 95% quality
-    });
-  };
-
-  // Function to upload the verified image to the backend
-  const uploadVerifiedImage = async (imageBlob: Blob) => {
-    try {
-      setVerificationStatus('uploading');
-      
-      // Create a FormData object to send the file
-      const formData = new FormData();
-      // Convert Blob to File to ensure proper upload
-      const verifiedFaceFile = new File([imageBlob], 'verified-face.jpg', { type: 'image/jpeg' });
-      formData.append('file', verifiedFaceFile);
-      console.log('Uploading verified image for exam:', formData);
-
-      // Using SWRMutation trigger to upload the image
-      const response = await trigger(formData);
-      
-      console.log('Upload response:', response);
-      setVerificationStatus('success');
-      
-      // Proceed with exam
-      onVerificationComplete();
-    } catch (error) {
-      console.error('Error uploading verified image:', error);
-      setVerificationStatus('success');
-      
-      // Even if upload fails, let user proceed
-      onVerificationComplete();
-    }
-  };
-
-  const handleComplete = async () => {
+  const handleComplete = () => {
     if (verificationStatus === 'success') {
-      try {
-        // Capture the verified face image
-        const imageBlob = await captureVerifiedImage();
-        
-        // Upload the image
-        await uploadVerifiedImage(imageBlob);
-      } catch (error) {
-        console.error('Error in verification process:', error);
-        // If anything fails, still let the user proceed
-        onVerificationComplete();
-      }
+      onVerificationComplete();
     }
   };
 
@@ -893,8 +807,6 @@ const FaceVerification: React.FC<FaceVerificationProps> = ({
     // Start over
     initModels();
   };
-  
-
   
   return (
     <div className="flex flex-col items-center p-6 bg-gradient-to-b from-gray-50 to-gray-100 rounded-xl shadow-md border border-gray-200">
@@ -1204,28 +1116,6 @@ const FaceVerification: React.FC<FaceVerificationProps> = ({
             >
               Continue to Exam
             </Button>
-          </div>
-        )}
-        
-        {verificationStatus === 'uploading' && (
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 p-5 rounded-lg shadow-md">
-            <div className="flex justify-center mb-4">
-              <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center">
-                <Loader2 className="h-10 w-10 text-blue-600 animate-spin" />
-              </div>
-            </div>
-            
-            <h3 className="font-bold text-blue-800 text-center text-lg mb-2">
-              Uploading Verification Image
-            </h3>
-            
-            <p className="text-blue-700 text-center mb-5">
-              Please wait while we securely upload your verification image...
-            </p>
-            
-            <div className="w-full bg-blue-100 h-2 rounded-full overflow-hidden">
-              <div className="bg-blue-600 h-full animate-pulse"></div>
-            </div>
           </div>
         )}
       </div>

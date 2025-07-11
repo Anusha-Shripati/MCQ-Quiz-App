@@ -67,36 +67,4 @@ export const candidateExamSchema = {
       }),
     }),
   },
-
-  // Feedback submission validation schema
-  submitFeedback: {
-    params: Joi.object({
-      examId: Joi.string().uuid().required().messages({
-        'string.empty': 'Exam ID is required',
-        'string.uuid': 'Invalid Exam ID format',
-      }),
-    }),
-    body: Joi.object({
-      experience_rating: Joi.number().min(1).max(5).required().messages({
-        'number.base': 'Experience rating must be a number',
-        'number.min': 'Experience rating must be at least 1',
-        'number.max': 'Experience rating must be at most 5',
-        'any.required': 'Experience rating is required',
-      }),
-      question_clarity: Joi.string().required().messages({
-        'string.empty': 'Question clarity is required',
-        'any.required': 'Question clarity is required',
-      }),
-      difficulty: Joi.string().required().messages({
-        'string.empty': 'Difficulty is required',
-        'any.required': 'Difficulty is required',
-      }),
-      technical_issues: Joi.string().required().messages({
-        'string.empty': 'Technical issues response is required',
-        'any.required': 'Technical issues response is required',
-      }),
-      comments: Joi.string().allow('', null),
-    }),
-  },
 };
-

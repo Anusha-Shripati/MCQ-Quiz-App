@@ -47,7 +47,6 @@ export const resultEndpoint = {
     LIST: "/result/list",
     RESULT_BY_ID: "/result",
     UPDATE_SCORE: "/result/update-score",
-    GET_FEEDBACK: "/result/feedback",
 
 }
 export const moduleEndpoint = {
@@ -55,6 +54,6 @@ export const moduleEndpoint = {
 }
 export const examEndpoint = {
     BY_ID: "/candidate-exam",
-    CANDIDATE_EXAM: "candidate-exam",
+    CANDIDATE_EXAM: "/candidate-exam",
     SEND_THANK_YOU_EMAIL: "/candidate-exam/send-thank-you-email"
 }

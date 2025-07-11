@@ -216,39 +216,4 @@ submitAnswer = async (req: Request, res: Response, next: NextFunction) => {
       next(error);
     }
   };
-  submitVerifiedImage = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const { examId } = req.params;
-      const candidateId = req.candidateInfo?.candidateId;
-
-      // if (!candidateId) throw new Error('Candidate not authenticated');
-
-      // Ensure the file is uploaded
-      if (!req.file) {
-        throw new Error('No file uploaded');
-      }
-      const result = await this.uploadService.saveVerifiedImageToS3(req.file);
-      // console.log('result', result);
-
-      await this.candidateExamService.saveVerifiedImage(examId, result);
-
-      generateResponse(res, 200, result, true, 'Verified image submitted successfully');
-    } catch (error) {
-      next(error);
-    }
-  }
-  submitFeedback = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const { examId } = req.params;
-      const candidateId = req.candidateInfo?.candidateId;
-
-      if (!candidateId) throw new Error('Candidate not authenticated');
-
-      const feedback = await this.candidateExamService.submitFeedback(examId, candidateId, req.body);
-
-      generateResponse(res, 200, feedback, true, 'Feedback submitted successfully');
-    } catch (error) {
-      next(error);
-    }
-  };
 }

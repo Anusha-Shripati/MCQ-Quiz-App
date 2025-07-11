@@ -4,7 +4,6 @@ import { prisma } from '../db/prisma.client';
 import { UploadService } from './upload.services';
 import { Decimal, JsonObject } from '@prisma/client/runtime/library';
 import nodemailer from 'nodemailer';
-import { UploadedFile } from '../types/upload.types';
 interface Violation {
   type: string;
   timestamp: number;
@@ -548,94 +547,4 @@ export class CandidateExamService {
 
     return true;
   }
-  async saveVerifiedImage(examId:string, result:UploadedFile){
-    const exam = await prisma.exam.findUnique({
-      where: { id: examId },
-      select: { verified_image: true },
-    });
-    if (!exam) throw new AppError('Exam not found', 404);
-    await prisma.exam.update({
-      where: { id: examId },
-      data: {
-        verified_image: result.path, // Save only the file path
-      },
-    });
-    return result;
-  }
-
-  async submitFeedback(examId: string, candidateId: string, data: {
-    experience_rating: number;
-    question_clarity: string;
-    difficulty: string;
-    technical_issues: string;
-    comments?: string;
-  }) {
-    const candidate = await this.getCandidate(candidateId);
-    if (!candidate) {
-      throw new AppError('Candidate not found', 404);
-    }
-
-    const exam = await prisma.exam.findUnique({
-      where: { id: examId },
-    });
-    if (!exam) {
-      throw new AppError('Exam not found', 404);
-    }
-
-    try {
-      // Check if feedback already exists
-      const existingFeedback = await prisma.$queryRaw<{id: string}[]>`
-        SELECT id FROM "Candidate_feedback" 
-        WHERE candidate_id = ${candidateId} AND exam_id = ${examId}
-      `;
-
-      if (existingFeedback && existingFeedback.length > 0) {
-        // Update existing feedback
-        await prisma.$executeRaw`
-          UPDATE "Candidate_feedback"
-          SET 
-            experience_rating = ${data.experience_rating},
-            question_clarity = ${data.question_clarity},
-            difficulty = ${data.difficulty},
-            technical_issues = ${data.technical_issues},
-            comments = ${data.comments || null},
-            updated_at = ${new Date()}
-          WHERE id = ${existingFeedback[0].id}
-        `;
-        
-        return {
-          id: existingFeedback[0].id,
-          ...data,
-          updated: true
-        };
-      }
-
-      // Create new feedback
-      const result = await prisma.$executeRaw`
-        INSERT INTO "Candidate_feedback" 
-        (id, candidate_id, exam_id, experience_rating, question_clarity, difficulty, technical_issues, comments, created_at, updated_at)
-        VALUES (
-          gen_random_uuid(), 
-          ${candidateId}, 
-          ${examId}, 
-          ${data.experience_rating}, 
-          ${data.question_clarity}, 
-          ${data.difficulty}, 
-          ${data.technical_issues}, 
-          ${data.comments || null}, 
-          ${new Date()}, 
-          ${new Date()}
-        )
-      `;
-
-      return {
-        ...data,
-        created: true
-      };
-    } catch (error) {
-      console.error('Error submitting feedback:', error);
-      throw new AppError('Failed to submit feedback', 500);
-    }
-  }
-  
 }

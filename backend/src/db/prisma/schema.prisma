@@ -130,46 +130,43 @@ model Questions {
 }
 
 model Candidate {
-    id              String               @id @default(uuid())
+    id              String      @id @default(uuid())
     assessment_id   String
-    exam_id         String               @unique
+    exam_id         String      @unique
     name            String
     email           String
-    experience      Float                @default(0)
+    experience      Float       @default(0)
     phone           String
     meta            Json?
-    created_at      DateTime             @default(now())
-    updated_at      DateTime             @updatedAt
+    created_at      DateTime    @default(now())
+    updated_at      DateTime    @updatedAt
     deleted_at      DateTime?
     created_by      String
-    assessment      Assessments          @relation(fields: [assessment_id], references: [id])
-    exam            Exam                 @relation(fields: [exam_id], references: [id])
+    assessment      Assessments @relation(fields: [assessment_id], references: [id])
+    exam            Exam        @relation(fields: [exam_id], references: [id])
     answers         Answers[]
     result          Results[]
-    feedback        Candidate_feedback[]
-    created_by_user User                 @relation(fields: [created_by], references: [id])
+    created_by_user User        @relation(fields: [created_by], references: [id])
 }
 
 model Exam {
-    id             String               @id @default(uuid())
+    id             String           @id @default(uuid())
     user_id        String
     assessment_id  String
     end_time       DateTime
     start_time     DateTime
-    status         ExamStatus           @default(pending)
-    is_completed   Boolean              @default(false)
+    status         ExamStatus       @default(pending)
+    is_completed   Boolean          @default(false)
     meta           Json?
-    verified_image String?
-    created_at     DateTime             @default(now())
-    updated_at     DateTime             @updatedAt
+    created_at     DateTime         @default(now())
+    updated_at     DateTime         @updatedAt
     deleted_at     DateTime?
-    user           User                 @relation(fields: [user_id], references: [id])
-    assessment     Assessments          @relation(fields: [assessment_id], references: [id])
+    user           User             @relation(fields: [user_id], references: [id])
+    assessment     Assessments      @relation(fields: [assessment_id], references: [id])
     exam_questions Exam_questions[]
     answers        Answers[]
     candidate      Candidate?
     results        Results?
-    feedback       Candidate_feedback[]
 }
 
 model Exam_questions {
@@ -221,23 +218,6 @@ model User_tokens {
     user_id String?
     token   String
     user    User?    @relation(fields: [user_id], references: [id])
-}
-
-model Candidate_feedback {
-    id                String    @id @default(uuid())
-    candidate_id      String
-    exam_id           String
-    experience_rating Int
-    question_clarity  String
-    difficulty        String
-    technical_issues  String
-    comments          String?
-    created_at        DateTime  @default(now())
-    updated_at        DateTime  @updatedAt
-    deleted_at        DateTime?
-    
-    candidate         Candidate @relation(fields: [candidate_id], references: [id])
-    exam              Exam      @relation(fields: [exam_id], references: [id])
 }
 
 // model Profile {

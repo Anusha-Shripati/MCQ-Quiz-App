@@ -14,15 +14,17 @@ export class UploadService {
 
   async processFile(file: Express.Multer.File & S3FileResponse): Promise<UploadedFile> {
     if (process.env.STORAGE_MODE === 's3') {
+      console.log('Processing file for S3 storage mode');
       return {
         originalName: file.originalname,
         mimeType: file.mimetype,
         fileName: file.filename,
         size: file.size,
         path: file.key || '',
-      }
+      };
     };
     let filePath = file.path.split('/uploads/')[1];
+    console.log('filePath', filePath);
 
     if (file.mimetype.includes('webm')) {
       filePath = await convertWebmToMp4(file.path);
@@ -113,6 +115,14 @@ export class UploadService {
       }
     } catch (error) {
       throw error;
+    }
+  }
+  async saveVerifiedImageToS3(file: Express.Multer.File & S3FileResponse): Promise<UploadedFile> {
+    if (storageMode === 's3') {
+      return this.processFile(file);
+    } else {
+      const filePath = await this.processFile(file);
+      return filePath;
     }
   }
 }

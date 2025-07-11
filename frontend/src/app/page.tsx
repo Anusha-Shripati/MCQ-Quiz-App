@@ -14,6 +14,7 @@ import { FormField } from '@/components/common/form-field';
 import { EyeIcon, EyeOffIcon } from 'lucide-react';
 import { ThemeToggle } from '@/components/common/theme-toggle';
 
+
 const loginSchema = z.object({
   email: z.string().email('Invalid email address.'),
   password: z.string().min(6, 'Password must be at least 6 characters.'),
@@ -37,6 +38,7 @@ export default function Home() {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<z.infer<typeof loginSchema>>({
     defaultValues: {
@@ -53,8 +55,10 @@ export default function Home() {
       router.push('/dashboard');
     } catch (error) {
       console.error('Login error:', error);
-      // if (err instanceof Error) toast.error(err.message);
+      // Reset the password field after a failed login
       toast.error('The account sign-in details are incorrect. Please try again.');
+      setValue('password', '');
+      // if (err instanceof Error) toast.error(err.message);
     }
   };
 

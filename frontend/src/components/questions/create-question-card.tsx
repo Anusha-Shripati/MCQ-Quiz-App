@@ -209,7 +209,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
             placeholder="Difficulty"
             options={questionDifficultyOptions}
           />
-          {/* <FormField
+          <FormField
             parentClassName="w-full"
             label="Time (In minutes)"
             type="number"
@@ -222,7 +222,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
                 e.target.value > 0 && e.target.value < 100 ? e.target.value : 0;
               setQuestions(updatedQuestions);
             }}
-          /> */}
+          />
         </div>
 
         {question.type === 'video' ? (

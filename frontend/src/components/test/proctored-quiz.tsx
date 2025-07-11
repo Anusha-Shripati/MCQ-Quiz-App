@@ -172,7 +172,7 @@ export default function ProctoredQuiz() {
       }
 
       if (status === 'completed') {
-        router.push('/thank-you');
+        router.push('/feedback');
         return;
       }
 
@@ -185,7 +185,7 @@ export default function ProctoredQuiz() {
         setTimeLeft(remainingTime);
 
         if (remainingTime <= 0) {
-          router.push('/thank-you');
+          router.push('/feedback');
         }
       }
     } catch (error) {
@@ -386,7 +386,7 @@ export default function ProctoredQuiz() {
         track.stop();
       });
 
-      router.push('/thank-you');
+      router.push('/feedback');
     } catch (error) {
       console.error('Error submitting quiz:', error);
       setIsSubmitting(false);
@@ -407,7 +407,7 @@ export default function ProctoredQuiz() {
       await submitTrigger();
 
 
-      router.push('/thank-you');  // use router if available
+      router.push('/feedback');  // use router if available
     } catch (error) {
       console.error('Auto-submit failed:', error);
       isSubmittingRef.current = false;

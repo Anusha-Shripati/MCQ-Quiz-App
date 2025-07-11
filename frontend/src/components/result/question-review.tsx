@@ -201,7 +201,7 @@ const QuestionReview: React.FC<QuestionReviewProps> = ({ answers }) => {
                   </ul>
                 )}
                 {/* Code Snippet */}
-                {ans.question?.type === 'code_snippet' && ans.question?.meta?.code && (
+                {ans.question?.type === 'code_snippet' && (
                   <div className="mb-4">
                     {ans.question?.meta?.code && (
                       <>

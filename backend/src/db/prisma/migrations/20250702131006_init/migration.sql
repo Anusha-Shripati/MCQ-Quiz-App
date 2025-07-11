@@ -2,7 +2,7 @@
 CREATE TYPE "Role" AS ENUM ('Super_Admin', 'Editor', 'Candidate');
 
 -- CreateEnum
-CREATE TYPE "ExamStatus" AS ENUM ('pending', 'in_progress', 'completed', 'expired');
+CREATE TYPE "ExamStatus" AS ENUM ('pending', 'in_progress', 'completed');
 
 -- CreateEnum
 CREATE TYPE "Difficulty" AS ENUM ('easy', 'medium', 'hard');
@@ -22,7 +22,6 @@ CREATE TABLE "users" (
     "updated_at" TIMESTAMP(3) NOT NULL,
     "deleted_at" TIMESTAMP(3),
     "image" TEXT,
-    "created_by" TEXT,
 
     CONSTRAINT "users_pkey" PRIMARY KEY ("id")
 );
@@ -123,7 +122,6 @@ CREATE TABLE "Questions" (
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
     "deleted_at" TIMESTAMP(3),
-    "created_by" TEXT NOT NULL,
 
     CONSTRAINT "Questions_pkey" PRIMARY KEY ("id")
 );
@@ -141,7 +139,6 @@ CREATE TABLE "Candidate" (
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
     "deleted_at" TIMESTAMP(3),
-    "created_by" TEXT NOT NULL,
 
     CONSTRAINT "Candidate_pkey" PRIMARY KEY ("id")
 );
@@ -156,7 +153,6 @@ CREATE TABLE "Exam" (
     "status" "ExamStatus" NOT NULL DEFAULT 'pending',
     "is_completed" BOOLEAN NOT NULL DEFAULT false,
     "meta" JSONB,
-    "verified_image" TEXT,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
     "deleted_at" TIMESTAMP(3),
@@ -206,32 +202,6 @@ CREATE TABLE "Answers" (
     CONSTRAINT "Answers_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
-CREATE TABLE "User_tokens" (
-    "id" TEXT NOT NULL,
-    "user_id" TEXT,
-    "token" TEXT NOT NULL,
-
-    CONSTRAINT "User_tokens_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "Candidate_feedback" (
-    "id" TEXT NOT NULL,
-    "candidate_id" TEXT NOT NULL,
-    "exam_id" TEXT NOT NULL,
-    "experience_rating" INTEGER NOT NULL,
-    "question_clarity" TEXT NOT NULL,
-    "difficulty" TEXT NOT NULL,
-    "technical_issues" TEXT NOT NULL,
-    "comments" TEXT,
-    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP(3) NOT NULL,
-    "deleted_at" TIMESTAMP(3),
-
-    CONSTRAINT "Candidate_feedback_pkey" PRIMARY KEY ("id")
-);
-
 -- CreateIndex
 CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 
@@ -260,9 +230,6 @@ CREATE UNIQUE INDEX "Results_exam_id_key" ON "Results"("exam_id");
 ALTER TABLE "users" ADD CONSTRAINT "users_role_id_fkey" FOREIGN KEY ("role_id") REFERENCES "Roles"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "users" ADD CONSTRAINT "users_created_by_fkey" FOREIGN KEY ("created_by") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "Role_permissions" ADD CONSTRAINT "Role_permissions_role_id_fkey" FOREIGN KEY ("role_id") REFERENCES "Roles"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -281,16 +248,10 @@ ALTER TABLE "Assessment_technology" ADD CONSTRAINT "Assessment_technology_techno
 ALTER TABLE "Questions" ADD CONSTRAINT "Questions_technology_id_fkey" FOREIGN KEY ("technology_id") REFERENCES "Technology"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Questions" ADD CONSTRAINT "Questions_created_by_fkey" FOREIGN KEY ("created_by") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "Candidate" ADD CONSTRAINT "Candidate_assessment_id_fkey" FOREIGN KEY ("assessment_id") REFERENCES "Assessments"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Candidate" ADD CONSTRAINT "Candidate_exam_id_fkey" FOREIGN KEY ("exam_id") REFERENCES "Exam"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Candidate" ADD CONSTRAINT "Candidate_created_by_fkey" FOREIGN KEY ("created_by") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Exam" ADD CONSTRAINT "Exam_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -321,12 +282,3 @@ ALTER TABLE "Answers" ADD CONSTRAINT "Answers_question_id_fkey" FOREIGN KEY ("qu
 
 -- AddForeignKey
 ALTER TABLE "Answers" ADD CONSTRAINT "Answers_result_id_fkey" FOREIGN KEY ("result_id") REFERENCES "Results"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "User_tokens" ADD CONSTRAINT "User_tokens_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Candidate_feedback" ADD CONSTRAINT "Candidate_feedback_candidate_id_fkey" FOREIGN KEY ("candidate_id") REFERENCES "Candidate"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Candidate_feedback" ADD CONSTRAINT "Candidate_feedback_exam_id_fkey" FOREIGN KEY ("exam_id") REFERENCES "Exam"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

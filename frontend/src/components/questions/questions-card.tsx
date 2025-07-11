@@ -18,7 +18,7 @@ import { useAuthStore } from '@/store/authStore';
 // }
 const questionType = {
   mcq: { label: 'MCQ', color: 'blue' },
-  code_editor: { label: 'Code Snippet', color: 'purple' },
+  code_snippet: { label: 'Code Snippet', color: 'purple' },
   text: { label: 'Fill in the blanks', color: 'green' },
   multiple_select: { label: 'Multiple Select', color: 'orange' },
   video: { label: 'Video', color: 'red' },

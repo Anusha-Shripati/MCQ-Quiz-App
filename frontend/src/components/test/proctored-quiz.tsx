@@ -28,7 +28,7 @@ import {
 } from '@/shared/constants/data';
 import { examEndpoint } from '@/lib/endpoint';
 import TestWarning from './error/test-warning';
-import { removeVideoToIndexedDB, uploadFileInChunks } from '@/lib/utils';
+import { deleteVideoFromIndexedDB, uploadFileInChunks } from '@/lib/utils';
 
 export default function ProctoredQuiz() {
   const [answers, setAnswers] = useState<
@@ -516,7 +516,7 @@ export default function ProctoredQuiz() {
     }
     if (current_question.question.type == 'video') {
       setRecordingUrl(null);
-      await removeVideoToIndexedDB(current_question.id, exam?.id || '');
+      await deleteVideoFromIndexedDB(current_question.id, exam?.id || '');
     }
     setAnswers((prv) => {
       const temp = { ...prv };

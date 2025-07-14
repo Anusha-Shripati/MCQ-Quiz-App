@@ -28,7 +28,7 @@ import {
 } from '@/shared/constants/data';
 import { examEndpoint } from '@/lib/endpoint';
 import TestWarning from './error/test-warning';
-import { removeVideoToIndexedDB, uploadFileInChunks } from '@/lib/utils';
+import { deleteVideoFromIndexedDB, uploadFileInChunks } from '@/lib/utils';
 
 export default function ProctoredQuiz() {
   const [answers, setAnswers] = useState<
@@ -62,12 +62,12 @@ export default function ProctoredQuiz() {
   const [prvViolations, setPrvViolations] = useState(0);
 
   const displayAlert = (message: string) => {
-    setAlertMessage(message);
-    setShowAlert(true);
-    if (alertTimeoutRef.current) {
-      clearTimeout(alertTimeoutRef.current);
-    }
-    alertTimeoutRef.current = setTimeout(() => setShowAlert(false), QUIZ_CONFIG.alertTimeout);
+    // setAlertMessage(message);
+    // setShowAlert(true);
+    // if (alertTimeoutRef.current) {
+    //   clearTimeout(alertTimeoutRef.current);
+    // }
+    // alertTimeoutRef.current = setTimeout(() => setShowAlert(false), QUIZ_CONFIG.alertTimeout);
   };
 
   const { data: examData, isLoading: isExamLoading } = useSWR(
@@ -516,7 +516,7 @@ export default function ProctoredQuiz() {
     }
     if (current_question.question.type == 'video') {
       setRecordingUrl(null);
-      await removeVideoToIndexedDB(current_question.id, exam?.id || '');
+      await deleteVideoFromIndexedDB(current_question.id, exam?.id || '');
     }
     setAnswers((prv) => {
       const temp = { ...prv };

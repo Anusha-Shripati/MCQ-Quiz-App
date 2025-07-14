@@ -101,9 +101,10 @@ function Snapshots(props: SnapshotsProps) {
                                 <div key={idx} className="flex flex-col items-center">
                                     <Image
                                         src={`${process.env.NEXT_PUBLIC_IMGAE_PREFIX}${img.image}`}
-
+                                        height={1000}
+                                        width={1000}
                                         alt="Snapshot"
-                                        className="max-h-[70vh] object-contain rounded-lg shadow-lg"
+                                        className="max-h-[90vh] object-contain rounded-lg shadow-lg"
                                     />
                                     <p className="legend bg-black/70 text-white px-4 py-2 rounded-b-lg " style={{ width: '20%', margin: '0px', left: 'auto' }}>
                                         <span>{renderDateTime(img.timestamp)} </span>

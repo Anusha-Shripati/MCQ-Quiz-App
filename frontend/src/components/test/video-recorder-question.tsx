@@ -27,7 +27,6 @@ export const VideoRecorderQuestion: FC<VideoRecorderProps> = React.memo(
           (answers[question.question_id]?.temp_url as string)
       );
     }, [answers, question.question_id]);
-    console.log(videoUrl);
 
     return (
       <>

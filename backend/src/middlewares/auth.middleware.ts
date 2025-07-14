@@ -96,7 +96,7 @@ export const authenticateCandidate: RequestHandler = async (req, res, next) => {
     });
 
     if (!candidate || !candidate.exam) {
-      generateResponse(res, 404, {}, false, 'Invalid or expired access code');
+      generateResponse(res, 404, {status:'expired'}, false, 'Invalid or expired access code');
       return;
     }
 

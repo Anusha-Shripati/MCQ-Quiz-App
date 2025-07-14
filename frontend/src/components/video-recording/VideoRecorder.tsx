@@ -74,9 +74,12 @@ const VideoRecorder = ({
     if (videoLink) {
       setRecordedVideo(videoLink);
 
-      const blob = new Blob(recordedChunks, { type: 'video/webm' });
+      await loadVideoFromIndexedDB(videoKey, exam?.id as string, signal).then((video) => {
+        if (video) {
+          onRecordingStop && onRecordingStop(video, videoLink);
+        }
+      })
 
-      onRecordingStop && onRecordingStop(blob, videoLink);
       setStatus('preview');
       if (videoRef.current) {
         videoRef.current.pause();

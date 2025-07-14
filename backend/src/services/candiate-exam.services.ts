@@ -289,12 +289,17 @@ export class CandidateExamService {
   }
 
   async resetAnswer(answer_id?: string) {
-    await prisma.answers.delete({
-      where: {
-        id: answer_id,
-      },
-    });
-    return null;
+    try {
+      
+      await prisma.answers.delete({
+        where: {
+          id: answer_id,
+        },
+      });
+      return null;
+    } catch (error) {
+      throw new Error('Please try again after a few moments. The video might still be uploading') 
+    }
   }
 
   // async finishExam(examId: string, candidateId: string) {

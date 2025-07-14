@@ -62,12 +62,12 @@ export default function ProctoredQuiz() {
   const [prvViolations, setPrvViolations] = useState(0);
 
   const displayAlert = (message: string) => {
-    // setAlertMessage(message);
-    // setShowAlert(true);
-    // if (alertTimeoutRef.current) {
-    //   clearTimeout(alertTimeoutRef.current);
-    // }
-    // alertTimeoutRef.current = setTimeout(() => setShowAlert(false), QUIZ_CONFIG.alertTimeout);
+    setAlertMessage(message);
+    setShowAlert(true);
+    if (alertTimeoutRef.current) {
+      clearTimeout(alertTimeoutRef.current);
+    }
+    alertTimeoutRef.current = setTimeout(() => setShowAlert(false), QUIZ_CONFIG.alertTimeout);
   };
 
   const { data: examData, isLoading: isExamLoading } = useSWR(
@@ -206,10 +206,9 @@ export default function ProctoredQuiz() {
         ...prev,
         [questions[currentQuestionIndex].question_id]: {
           question: questions[currentQuestionIndex],
-          answer: '',
+          answer: prev[questions[currentQuestionIndex]?.question_id]?.answer || '',
           temp_url: url,
-          answer_id: '',
-          pending: true,
+          answer_id: prev[questions[currentQuestionIndex]?.question_id]?.answer_id || '',
         },
       }));
     }
@@ -502,6 +501,7 @@ export default function ProctoredQuiz() {
     const current_question = questions[currentQuestionIndex];
     try {
       const answerId = answers[current_question.question_id]?.answer_id;
+      
       if (typeof answerId === 'string' && answerId) {
         await resetTrigger({ answer_id: answerId });
       }
@@ -543,6 +543,8 @@ export default function ProctoredQuiz() {
         //   goToNextQuestion();
         //   return;
         // }
+        console.log(recordingBlob);
+        
         const { fileName, parts, UploadId } = await uploadFileInChunks(
           recordingBlob as Blob,
           5 * 1024 * 1024,
@@ -557,7 +559,6 @@ export default function ProctoredQuiz() {
           merge_chunk: true,
           question_id: questionId,
         };
-
         const response = await videoTrigger(payload).catch((error) => {
           console.error('Background video processing failed:', error);
         });

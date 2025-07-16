@@ -29,7 +29,7 @@ const VideoControls = ({
                   flex items-center justify-center gap-2"
       >
         <Camera className="w-5 h-5" />
-        <span>Start Recording</span>
+        <span className="font-semibold text-lg">Start Recording</span>
       </Button>
     )}
 
@@ -39,7 +39,7 @@ const VideoControls = ({
         className="bg-gray-400 text-white px-8 py-3.5 rounded-full font-medium flex items-center justify-center gap-2 cursor-not-allowed"
       >
         <Loader2 className="w-5 h-5 animate-spin" />
-        <span>Initializing...</span>
+        <span className="font-semibold text-lg">Initializing...</span>
       </Button>
     )}
 
@@ -52,7 +52,7 @@ const VideoControls = ({
                   flex items-center justify-center gap-2"
       >
         <StopCircle className="w-5 h-5" />
-        <span>Stop Recording</span>
+        <span className="font-semibold text-lg">Stop Recording</span>
       </Button>
     )}
 
@@ -66,7 +66,7 @@ const VideoControls = ({
           disabled={isLoading}
         >
           <RefreshCw className="w-5 h-5" />
-          <span>Record Again</span>
+          <span className="font-semibold text-lg">Record Again</span>
         </Button>
 
         <Button
@@ -82,7 +82,7 @@ const VideoControls = ({
           ) : (
             <>
               <Video className="w-5 h-5" />
-              <span className="mr-1">Submit Introduction and Start Exam</span>
+              <span className="mr-1 font-semibold text-lg">Submit Introduction and Start Exam</span>
               <ArrowRight className="w-4 h-4" />
             </>
           )}

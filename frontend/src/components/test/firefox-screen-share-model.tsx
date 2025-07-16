@@ -40,7 +40,7 @@
 
           <button
             onClick={handleFirefoxScreenShare}
-            className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center justify-center"
+            className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors font-semibold flex items-center justify-center"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"

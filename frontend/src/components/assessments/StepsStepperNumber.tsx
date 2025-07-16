@@ -36,7 +36,7 @@ const StepsStepperNumber = ({ steps, currentStep }: StepsStepperNumberProps) => 
           </div>
           <span
             className={`
-              mt-2 text-sm font-medium
+              mt-2 text-sm font-bold
               ${currentStep >= number ? 'text-green-400' : 'text-gray-400'}
             `}
           >

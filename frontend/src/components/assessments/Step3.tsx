@@ -73,13 +73,13 @@ const Step3: React.FC<Step3Props> = ({
           </div>
           <div className="grid gap-2">
             <div>
-              <Label className="text-xs text-gray-500 dark:text-gray-400">Assessment Name</Label>
+              <Label className="text-xs font-bold text-gray-500 dark:text-gray-400">Assessment Name</Label>
               <p className="mt-1 text-sm font-medium text-gray-900 dark:text-white">
                 {formData.name}
               </p>
             </div>
             <div>
-              <Label className="text-xs text-gray-500 dark:text-gray-400">
+              <Label className="text-xs font-bold text-gray-500 dark:text-gray-400">
                 Selected Technologies
               </Label>
               <div className="mt-1 flex flex-wrap gap-1">
@@ -94,7 +94,7 @@ const Step3: React.FC<Step3Props> = ({
               </div>
             </div>
             <div>
-              <Label className="text-xs text-gray-500 dark:text-gray-400">Passing Score</Label>
+              <Label className="text-xs font-bold text-gray-500 dark:text-gray-400">Passing Score</Label>
               <p className="mt-1 text-sm font-medium text-gray-900 dark:text-white">
                 {formData.pass_criteria} Marks
               </p>

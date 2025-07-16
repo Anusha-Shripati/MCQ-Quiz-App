@@ -24,7 +24,7 @@ function QuestionTabs({ currentPage, totalPages, setCurrentQuestionIndex }: { cu
                     key={i}
                     variant={i === currentPage ? 'default' : 'outline'}
                     onClick={() => setCurrentQuestionIndex(i)}
-                    className="mx-1 min-w-[2rem]"
+                    className="mx-1 min-w-[2rem] font-semibold"
                 >
                     {i}
                 </Button>

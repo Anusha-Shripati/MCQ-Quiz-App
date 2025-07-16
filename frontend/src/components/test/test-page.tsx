@@ -476,7 +476,7 @@ const TestPage = () => {
           Fullscreen mode is required for this exam.
           <Button
             onClick={() => requestFullscreen(setIsFullscreen)}
-            className="ml-4 bg-white text-red-600 px-3 py-1 rounded-md font-medium hover:bg-gray-100 transition-colors"
+            className="ml-4 bg-white text-red-600 px-3 py-1 rounded-md font-semibold hover:bg-gray-100 transition-colors"
           >
             Enter Fullscreen
           </Button>

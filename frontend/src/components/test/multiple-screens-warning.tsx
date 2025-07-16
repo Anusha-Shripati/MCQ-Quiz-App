@@ -39,7 +39,7 @@ const MultipleScreensWarning: React.FC<MultipleScreensWarningProps> = ({
         </p>
         {isFirefox ? (
           <div className="bg-amber-50 p-3 rounded border border-amber-200 mb-4">
-            <p className="font-medium text-amber-800 mb-2">Firefox-specific instructions:</p>
+            <p className="font-semibold text-amber-800 mb-2">Firefox-specific instructions:</p>
             <ol className="list-decimal list-inside mb-2 text-amber-800">
               <li>Go to <strong>Settings</strong> {'>'} <strong>System</strong></li>
               <li>Under &quot;Display&quot;, ensure only one display is active</li>

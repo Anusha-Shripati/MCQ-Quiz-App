@@ -25,7 +25,7 @@ const CameraRetry: React.FC<CameraRetryProps> = ({ onRetry, error }) => {
         </p>
         
         <div className="bg-amber-50 border border-amber-200 rounded p-3 mb-5">
-          <p className="text-sm text-amber-800 mb-2 font-medium">Please try the following:</p>
+          <p className="text-sm text-amber-800 mb-2 font-semibold">Please try the following:</p>
           <ul className="text-sm text-amber-800 list-disc list-inside">
             <li>Make sure your camera is not being used by another application</li>
             <li>Check that camera permissions are enabled for this website</li>
@@ -37,7 +37,7 @@ const CameraRetry: React.FC<CameraRetryProps> = ({ onRetry, error }) => {
         <div className="flex justify-center">
           <button 
             onClick={onRetry}
-            className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-md font-medium transition-colors"
+            className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-md font-semibold transition-colors"
           >
             Retry Camera Access
           </button>

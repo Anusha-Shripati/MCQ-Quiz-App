@@ -656,15 +656,15 @@ export default function ProctoredQuiz() {
           <Card className="w-[95vw] max-w-[1200px] mx-auto min-h-[70px] mb-3 shadow-xl border-0 rounded-xl text-black overflow-hidden bg-white/95 backdrop-blur-sm">
             <div className="p-4 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-gray-700">Violations:</span>
+                <span className="text-sm font-semibold text-gray-700">Violations:</span>
                 <span
-                  className={`text-lg font-bold ${prvViolations + violations.current.length >= 4 ? 'text-red-600' : 'text-blue-600'}`}
+                  className={`text-lg font-semibold ${prvViolations + violations.current.length >= 4 ? 'text-red-600' : 'text-blue-600'}`}
                 >
                   {prvViolations + violations.current.length} / 5
                 </span>
               </div>
               {prvViolations + violations.current.length >= 3 && (
-                <div className="text-sm text-red-600 font-medium">
+                <div className="text-sm text-red-600 font-semibold">
                   Warning: Quiz will be automatically submitted at 5 violations
                 </div>
               )}
@@ -694,7 +694,7 @@ export default function ProctoredQuiz() {
                       {isGap && <span className="px-2">...</span>}
                       <button
                         onClick={() => setCurrentQuestionIndex(index)}
-                        className={`h-8 w-8 rounded-full flex items-center justify-center text-sm font-medium transition-all
+                        className={`h-8 w-8 rounded-full flex items-center justify-center text-sm font-semibold transition-all
                           ${
                             currentQuestionIndex === index
                               ? 'bg-blue-600 text-white shadow-md'
@@ -767,7 +767,7 @@ export default function ProctoredQuiz() {
                 <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex-1">
                   <div className="flex flex-col space-y-2">
                     <div className="flex justify-between text-sm text-gray-600 px-1">
-                      <span className="font-medium">Quiz Progress</span>
+                      <span className="font-semibold">Quiz Progress</span>
                       <span>
                         {/* {Object.keys(answers).length} of {questions.length} questions answered */}
                         {currentQuestionIndex + 1} of {questions.length} questions answered
@@ -790,7 +790,7 @@ export default function ProctoredQuiz() {
                   onClick={() => setCurrentQuestionIndex((prev) => Math.max(0, prev - 1))}
                   disabled={currentQuestionIndex === 0}
                   variant="outline"
-                  className="px-6 py-2 flex items-center gap-2 rounded-full transition-all"
+                  className="px-6 py-2 font-semibold flex items-center gap-2 rounded-full transition-all"
                 >
                   <ChevronLeft />
                   Previous
@@ -808,7 +808,7 @@ export default function ProctoredQuiz() {
                     isVideoMutating
                   }
                   variant="outline"
-                  className="px-6 py-2 flex items-center gap-2 rounded-full transition-all w-40"
+                  className="px-6 py-2 flex items-center font-semibold gap-2 rounded-full transition-all w-40"
                 >
                   {isMutating || isSubmiting ? (
                     <div className="flex flex-col items-center justify-center gap-4">

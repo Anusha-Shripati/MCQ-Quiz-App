@@ -58,7 +58,7 @@ const ExamExpired: React.FC<ExamExpiredProps> = ({
                 Need help? Contact us at{' '}
                 <a 
                   href={`mailto:${contactEmail}`}
-                  className="text-blue-600 hover:text-blue-800 font-medium"
+                  className="text-blue-600 hover:text-blue-800 font-semibold"
                 >
                   {contactEmail}
                 </a>

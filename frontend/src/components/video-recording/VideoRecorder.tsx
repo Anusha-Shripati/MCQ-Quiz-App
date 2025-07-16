@@ -360,7 +360,7 @@ const VideoRecorder = ({
               />
               {status === 'idle' && isStreamReady && (
                 <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm opacity-0 hover:opacity-100 transition-opacity duration-300">
-                  <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-3 rounded-full font-medium shadow-lg transform hover:scale-105 transition-transform flex items-center gap-2">
+                  <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-3 rounded-full font-bold text-md shadow-lg transform hover:scale-105 transition-transform flex items-center gap-2">
                     <Camera className="w-5 h-5" />
                     Ready to record
                   </div>

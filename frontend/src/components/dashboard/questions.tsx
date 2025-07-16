@@ -39,9 +39,8 @@ export default function Questions() {
         trigger: 'item',
       },
       legend: {
-        top: 'center',
-        left: 'left',
-        orient: 'vertical',
+        top: 0,
+        orient: 'horizontal',
         textStyle: {
           fontSize: 16,
           color: theme === 'light' ? '#333' : '#fff',
@@ -53,6 +52,7 @@ export default function Questions() {
           name: 'Questions count',
           type: 'pie',
           radius: ['50%', '80%'],
+          center: ['50%', '55%'],
           avoidLabelOverlap: false,
           label: {
             show: true,

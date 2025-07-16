@@ -899,8 +899,8 @@ const FaceVerification: React.FC<FaceVerificationProps> = ({
   return (
     <div className="flex flex-col items-center p-6 bg-gradient-to-b from-gray-50 to-gray-100 rounded-xl shadow-md border border-gray-200">
       <div className="mb-5 flex items-center gap-3">
-        <Camera className="h-6 w-6 text-blue-600" />
-        <h2 className="text-2xl font-bold text-gray-800">Face Verification</h2>
+        <Camera className="h-6 w-6 text-blue-600 self-center" />
+        <h2 className="text-2xl font-bold text-gray-800 align-middle leading-tight">Face Verification</h2>
       </div>
       
       <div className="relative w-full max-w-lg rounded-lg overflow-hidden bg-black mb-6 shadow-lg">
@@ -973,7 +973,7 @@ const FaceVerification: React.FC<FaceVerificationProps> = ({
                 </div>
               )}
               
-              <p className={`font-medium text-base ${verificationStatus === 'multiple-faces' ? 'text-red-300' : verificationStatus === 'success' ? 'text-green-300' : 'text-white'}`}>
+              <p className={`font-semibold text-base ${verificationStatus === 'multiple-faces' ? 'text-red-300' : verificationStatus === 'success' ? 'text-green-300' : 'text-white'}`}>
                 {message}
               </p>
             </div>
@@ -1042,43 +1042,43 @@ const FaceVerification: React.FC<FaceVerificationProps> = ({
         {verificationStatus === 'processing' && (
           <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 p-5 rounded-lg shadow-sm">
             <h3 className="font-semibold text-blue-800 flex items-center gap-2 mb-3">
-              <Camera className="h-5 w-5 text-blue-700" />
-              <span>Face Verification in Progress</span>
+              <Camera className="h-5 w-5 text-blue-700 self-center" />
+              <span className="align-middle leading-tight">Face Verification in Progress</span>
             </h3>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="bg-white/70 rounded-lg p-3 border border-blue-100">
-                <h4 className="font-medium text-blue-800 mb-2">Position Requirements</h4>
+                <h4 className="font-semibold text-blue-800 mb-2">Position Requirements</h4>
                 <ul className="space-y-2 text-sm text-blue-700">
                   <li className="flex items-start gap-2">
-                    <div className="min-w-5 pt-0.5">•</div>
-                    <span>Center your face in the frame</span>
+                    <div className="min-w-5">•</div>
+                    <span className="align-middle">Center your face in the frame</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="min-w-5">•</div>
+                    <span className="align-middle">Hold still for a few seconds</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <div className="min-w-5 pt-0.5">•</div>
-                    <span>Hold still for a few seconds</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <div className="min-w-5 pt-0.5">•</div>
-                    <span>Ensure your face is properly sized</span>
+                    <div className="min-w-5">•</div>
+                    <span className="align-middle">Ensure your face is properly sized</span>
                   </li>
                 </ul>
               </div>
               
               <div className="bg-white/70 rounded-lg p-3 border border-blue-100">
-                <h4 className="font-medium text-blue-800 mb-2">Environment Tips</h4>
+                <h4 className="font-semibold text-blue-800 mb-2">Environment Tips</h4>
                 <ul className="space-y-2 text-sm text-blue-700">
                   <li className="flex items-start gap-2">
-                    <div className="min-w-5 pt-0.5">•</div>
-                    <span>Ensure good lighting on your face</span>
+                    <div className="min-w-5">•</div>
+                    <span className="align-middle">Ensure good lighting on your face</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <div className="min-w-5 pt-0.5">•</div>
-                    <span>Remove glasses or face coverings</span>
+                    <div className="min-w-5">•</div>
+                    <span className="align-middle">Remove glasses or face coverings</span>
                   </li>
-                  <li className="flex items-start gap-2">
-                    <div className="min-w-5 pt-0.5">•</div>
-                    <span>Use a neutral background</span>
+                  <li className="flex items-center gap-2">
+                    <div className="min-w-5">•</div>
+                    <span className="align-middle">Use a neutral background</span>
                   </li>
                 </ul>
               </div>
@@ -1115,7 +1115,7 @@ const FaceVerification: React.FC<FaceVerificationProps> = ({
             </p>
             
             <div className="bg-white/80 rounded-lg p-4 border border-red-200 mb-4">
-              <h4 className="font-medium text-red-800 mb-2">Please ensure:</h4>
+              <h4 className="font-semibold text-red-800 mb-2">Please ensure:</h4>
               <ul className="space-y-2.5 text-sm text-red-700">
                 <li className="flex items-start gap-2">
                   <XCircle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
@@ -1134,7 +1134,7 @@ const FaceVerification: React.FC<FaceVerificationProps> = ({
             
             <Button
               onClick={handleRetry}
-              className="mt-2 w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white py-3 rounded-lg font-medium flex items-center justify-center gap-2 shadow-sm shadow-red-300"
+              className="mt-2 w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white py-3 rounded-lg font-semibold flex items-center justify-center gap-2 shadow-sm shadow-red-300"
             >
               <RefreshCw size={18} />
               Try Again
@@ -1174,7 +1174,7 @@ const FaceVerification: React.FC<FaceVerificationProps> = ({
             
             <Button
               onClick={handleRetry}
-              className="w-full bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white py-3 rounded-lg font-medium flex items-center justify-center gap-2"
+              className="w-full bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white py-3 rounded-lg font-semibold flex items-center justify-center gap-2"
             >
               <RefreshCw size={18} />
               Try Again
@@ -1200,7 +1200,7 @@ const FaceVerification: React.FC<FaceVerificationProps> = ({
             
             <Button
               onClick={handleComplete}
-              className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white py-3 rounded-lg text-lg font-medium shadow-lg shadow-green-200 transition-all transform hover:translate-y-[-2px]"
+              className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white py-3 rounded-lg text-lg font-semibold shadow-lg shadow-green-200 transition-all transform hover:translate-y-[-2px]"
             >
               Continue to Exam
             </Button>

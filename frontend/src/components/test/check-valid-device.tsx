@@ -36,7 +36,7 @@ const CheckValidDevice: React.FC<CheckValidDeviceProps> = ({ isMobile, isTablet 
           </div>
         </div>
 
-        <h1 className="text-xl sm:text-2xl font-bold text-gray-800 mb-2 sm:mb-3">Device Not Supported</h1>
+        <h1 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-2 sm:mb-3">Device Not Supported</h1>
         
         <p className="text-gray-600 mb-5 sm:mb-6 text-sm sm:text-base">
           This exam is designed to be taken on a desktop or laptop computer. 
@@ -46,7 +46,7 @@ const CheckValidDevice: React.FC<CheckValidDeviceProps> = ({ isMobile, isTablet 
         </p>
 
         <div className="bg-gray-100 p-4 rounded-lg mb-5 sm:mb-6 shadow-inner">
-          <h2 className="font-medium text-gray-800 mb-2 text-sm sm:text-base">Please use:</h2>
+          <h2 className="font-semibold text-gray-800 mb-2 text-sm sm:text-base">Please use:</h2>
           <ul className="text-left text-gray-600 space-y-2 text-sm sm:text-base">
             <li className="flex items-center">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-green-600 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">

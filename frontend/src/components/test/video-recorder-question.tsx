@@ -34,7 +34,7 @@ export const VideoRecorderQuestion: FC<VideoRecorderProps> = React.memo(
           <StaticIframe html={iframeHTML} />
         ) : (
           question.question?.meta?.videoToVideo && (
-            <video controls className="w-full max-h-[400px] rounded-lg shadow">
+            <video controls className="w-full max-h-[400px] rounded-lg shadow font-semibold">
               <source src={iframeHTML} type="video/mp4" />
             </video>
           )

@@ -392,7 +392,7 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
                   label: tech?.technology.name,
                 }))}
                 onChange={handleTechnologyChange}
-                className="mb-4 dark:bg-gray-700 dark:text-white"
+                className="mb-4 dark:bg-gray-700"
                 classNamePrefix="react-select"
                 placeholder="Select technologies..."
                 styles={{
@@ -415,19 +415,29 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
                     ...base,
                     color: 'var(--text-color)',
                   }),
-                  multiValueRemove: (base) => ({
-                    ...base,
-                    backgroundColor: 'transparent',
-                    color: 'white', // Ensure contrast
-                    fontWeight: 'bold',
-                    borderRadius: '50%', // Rounded button
-                    padding: '3px',
-                    transition: '0.2s ease-in-out',
-                    ':hover': {
-                      backgroundColor: 'red',
-                      color: 'white',
-                    },
-                  }),
+                  multiValueRemove: (base, state) => {
+                    const isDark = typeof window !== 'undefined' && document.documentElement.classList.contains('dark');
+                    return {
+                      ...base,
+                      backgroundColor: state.isFocused
+                        ? (isDark ? '#374151' : '#e5e7eb')
+                        : (isDark ? '#4b5563' : '#f3f4f6'),
+                      color: state.isFocused
+                        ? (isDark ? '#fff' : '#111827')
+                        : (isDark ? '#fff' : '#374151'),
+                      borderRadius: '50%',
+                      padding: '3px',
+                      fontWeight: 'bold',
+                      cursor: 'pointer',
+                      transition: 'background 0.2s, color 0.2s',
+                      width:'20px',
+                      height:'18px',
+                      minWidth: '20px',
+                      minHeight: '18px',
+                      marginRight: '4px', 
+                      marginTop:'4px'
+                    };
+                  },
                 }}
               />
 
@@ -435,7 +445,7 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
                 {localTechnologies.map((tech) => (
                   <div
                     key={tech.technology?.id}
-                    className="flex items-center bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 
+                    className="flex items-center bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 
                                dark:hover:bg-gray-600 transition-colors rounded-full px-4 py-2"
                   >
                     <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -444,9 +454,19 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
                     <Button
                       variant="ghost"
                       onClick={() => handleRemoveTechnology(tech.technology?.id)}
-                      className="ml-2 text-gray-400 hover:text-gray-600 dark:text-gray-500 
-                                 dark:hover:text-gray-300"
-                    ></Button>
+                      className="
+                        ml-2 p-0 w-6 h-6 flex items-center justify-center rounded-full
+                        bg-gray-200 text-gray-700
+                        hover:bg-red-100 hover:text-red-600
+                        dark:bg-gray-700 dark:text-gray-200
+                        dark:hover:bg-red-900 dark:hover:text-red-200
+                        border border-transparent
+                        transition-colors
+                      "
+                      aria-label="Remove technology"
+                    >
+                      <span className="text-lg font-bold leading-none">×</span>
+                    </Button>
                   </div>
                 ))}
               </div>
@@ -524,7 +544,7 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
 
                             return <div className='flex justify-between w-full' key={item.value}>
 
-                              <label>{item.label} <span className="text-xs text-gray-400">({maxAllowed})</span></label>
+                              <label>{item.label} <span className="text-xs font-bold text-gray-400">({maxAllowed})</span></label>
 
 
                               <Input

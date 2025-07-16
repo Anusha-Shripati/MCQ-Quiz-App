@@ -91,11 +91,11 @@ export const VideoRecordingScreen = ({ onRecordingComplete, videoLink }: VideoRe
         <div className="lg:col-span-2">
           <Card className="bg-white shadow-md overflow-hidden border border-gray-100 h-full">
             <CardHeader className="p-6 bg-gradient-to-r from-blue-50 to-indigo-50">
-              <CardTitle className="flex items-center gap-2 text-blue-700 text-xl font-bold">
-                <Camera className="h-5 w-5" />
-                Recording Instructions
-              </CardTitle>
-              <CardDescription className="text-sm text-gray-600 mt-1">
+              <CardTitle className="flex items-center gap-2 text-blue-700 text-xl font-semibold">
+                <Camera className="h-5 w-5 self-center" />
+                <span className="align-middle leading-tight">Recording Instructions</span>
+              </CardTitle>  
+              <CardDescription className="text-sm text-gray-600 mt-1 font-semibold">
                 Follow these guidelines for the best recording
               </CardDescription>
             </CardHeader>
@@ -103,31 +103,31 @@ export const VideoRecordingScreen = ({ onRecordingComplete, videoLink }: VideoRe
             <CardContent className="p-6 space-y-6">
               <div className="bg-blue-50 rounded-lg p-5 border border-blue-100">
                 <ul className="space-y-4">
-                  <li className="flex items-start gap-3">
+                  <li className="flex items-center gap-3">
                     <div className="bg-blue-100 rounded-full p-2 flex-shrink-0 mt-0.5">
                       <SunIcon className="h-4 w-4 text-blue-600" />
                     </div>
                     <span className="text-gray-700">Ensure good lighting on your face</span>
                   </li>
-                  <li className="flex items-start gap-3">
+                  <li className="flex items-center gap-3">
                     <div className="bg-blue-100 rounded-full p-2 flex-shrink-0 mt-0.5">
                       <MicIcon className="h-4 w-4 text-blue-600" />
                     </div>
                     <span className="text-gray-700">Speak clearly and maintain eye contact</span>
                   </li>
-                  <li className="flex items-start gap-3">
+                  <li className="flex items-center gap-3">
                     <div className="bg-blue-100 rounded-full p-2 flex-shrink-0 mt-0.5">
                       <MonitorIcon className="h-4 w-4 text-blue-600" />
                     </div>
                     <span className="text-gray-700">Keep a professional background</span>
                   </li>
-                  <li className="flex items-start gap-3">
+                  <li className="flex items-center gap-3">
                     <div className="bg-blue-100 rounded-full p-2 flex-shrink-0 mt-0.5">
                       <VideoIcon className="h-4 w-4 text-blue-600" />
                     </div>
                     <span className="text-gray-700">Recording will last for up to 90 seconds</span>
                   </li>
-                  <li className="flex items-start gap-3">
+                  <li className="flex items-center gap-3">
                     <div className="bg-blue-100 rounded-full p-2 flex-shrink-0 mt-0.5">
                       <Camera className="h-4 w-4 text-blue-600" />
                     </div>
@@ -139,19 +139,19 @@ export const VideoRecordingScreen = ({ onRecordingComplete, videoLink }: VideoRe
               <div className="bg-indigo-50 p-5 rounded-lg border border-indigo-100">
                 <h3 className="font-semibold text-indigo-700 mb-3">Tips for a Great Introduction</h3>
                 <ul className="space-y-2 text-indigo-900">
-                  <li className="flex items-start gap-2">
+                  <li className="flex items-center gap-2">
                     <span>•</span>
                     <span>Briefly introduce yourself and your background</span>
                   </li>
-                  <li className="flex items-start gap-2">
+                  <li className="flex items-center gap-2">
                     <span>•</span>
                     <span>Mention your relevant experience and skills</span>
                   </li>
-                  <li className="flex items-start gap-2">
+                  <li className="flex items-center gap-2">
                     <span>•</span>
                     <span>Speak naturally and confidently</span>
                   </li>
-                  <li className="flex items-start gap-2">
+                  <li className="flex items-center gap-2">
                     <span>•</span>
                     <span>Stay focused and concise</span>
                   </li>
@@ -165,11 +165,11 @@ export const VideoRecordingScreen = ({ onRecordingComplete, videoLink }: VideoRe
         <div className="lg:col-span-3">
           <Card className="bg-white shadow-md overflow-hidden border border-gray-100 h-full">
             <CardHeader className="p-6 bg-gradient-to-r from-indigo-50 to-purple-50">
-              <CardTitle className="flex items-center gap-2 text-indigo-700 text-xl font-bold">
-                <Camera className="h-5 w-5" />
-                {!faceVerified ? 'Face Verification Required' : 'Record Your Introduction'}
+              <CardTitle className="flex items-center gap-2 text-indigo-700 text-xl font-semibold">
+                <Camera className="h-5 w-5 self-center" />
+                <span className="align-middle leading-tight">{!faceVerified ? 'Face Verification Required' : 'Record Your Introduction'}</span>
               </CardTitle>
-              <CardDescription className="text-sm text-gray-600 mt-1">
+              <CardDescription className="text-sm text-gray-600 mt-1 font-semibold">
                 {!faceVerified 
                   ? 'Please complete face verification before recording' 
                   : 'Please introduce yourself and your experience'}

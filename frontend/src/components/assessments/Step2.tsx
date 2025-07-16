@@ -114,7 +114,7 @@ const Step2: React.FC<Step2Props> = ({
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="grid grid-cols-[1fr,1fr,1fr,1fr,1fr] gap-4 items-center">
-          <h3 className="text-lg font-medium dark:text-white">Total Questions</h3>
+          <h3 className="text-lg font-bold dark:text-white">Total Questions</h3>
           <div className="text-center font-medium text-gray-700 bg-green-100 rounded-full px-2 py-1">
             Easy
           </div>
@@ -173,7 +173,7 @@ const Step2: React.FC<Step2Props> = ({
                       {questionTypeOptions.map((item) => {
                         const maxAllowed = getMaxQuestions(technology.id, difficulty as 'easy' | 'medium' | 'hard',item.value);
                         return <div className='flex justify-between w-full' key={item.value}>
-                          <label>{item.label} <span className="text-xs text-gray-400">({maxAllowed})</span></label>
+                          <label>{item.label} <span className="text-xs font-bold text-gray-400">({maxAllowed})</span></label>
                           <Input
                             type="number"
                             min="0"

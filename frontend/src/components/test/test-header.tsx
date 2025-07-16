@@ -50,7 +50,7 @@ function TestHeader({
           <div className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center">
             <BookOpenIcon className="h-5 w-5 text-white" />
           </div>
-          <CardTitle className="text-2xl font-bold text-blue-800 tracking-tight">
+          <CardTitle className="text-2xl font-semibold text-blue-800 tracking-tight">
             Proctored Exam
           </CardTitle>
         </div>
@@ -60,7 +60,7 @@ function TestHeader({
             <Button
               onClick={() => submitQuiz()}
               disabled={isMutating || isSubmiting || answeredQuestionsCount < totalQuestion}
-              className="px-8 py-2 mb-2 mt-2 h-12 bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 text-white font-medium rounded-full shadow-sm hover:shadow transition-all flex items-center gap-2 w-40"
+              className="px-8 py-2 mb-2 mt-2 h-12 bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 text-white font-semibold rounded-full shadow-sm hover:shadow transition-all flex items-center gap-2 w-40"
               title={answeredQuestionsCount < totalQuestion ? `Complete all ${totalQuestion} questions to submit` : "Submit your quiz"}
             >
               {isMutating || isSubmiting ? (
@@ -83,7 +83,7 @@ function TestHeader({
           </div>
           <div className="flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-full border border-blue-200 shadow-sm">
             <CalendarRange className="h-4 w-4" />
-            <span className="font-medium">
+            <span className="font-semibold">
               Q{currentQuestionIndex + 1} of {totalQuestion}
             </span>
           </div>

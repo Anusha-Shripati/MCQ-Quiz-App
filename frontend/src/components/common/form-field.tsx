@@ -62,7 +62,7 @@ export const FormField = forwardRef<HTMLInputElement, FormFieldProps>(
 
     return (
       <div className={parentClassName || ''}>
-        {props.label && <label className="block text-sm font-medium mb-1">{props.label}</label>}
+        {props.label && <label className="block text-sm font-bold mb-1">{props.label}</label>}
         {props.type === 'select' ? (
           <Select value={String(props.value)} onValueChange={props.onChange} name={props.name}>
             <SelectTrigger

@@ -31,7 +31,7 @@ function Question({ question, answers, handleAnswerChange, handleStopRecording, 
                             <Radio value={`${idx}`} id={`option-${question.question_id}-${idx}`} />
                             <label
                                 htmlFor={`option-${question.question_id}-${idx}`}
-                                className="text-lg text-gray-800 cursor-pointer"
+                                className="text-lg font-semibold text-gray-800 cursor-pointer"
                             >
                                 {option}
                             </label>
@@ -71,7 +71,7 @@ function Question({ question, answers, handleAnswerChange, handleStopRecording, 
                                 />
                                 <label
                                     htmlFor={`option-${question.question_id}-${idx}`}
-                                    className="text-lg text-gray-800 cursor-pointer"
+                                    className="text-lg font-semibold text-gray-800 cursor-pointer"
                                 >
                                     {option}
                                 </label>

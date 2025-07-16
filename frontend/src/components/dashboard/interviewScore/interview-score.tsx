@@ -150,7 +150,7 @@ function InterviewScore() {
         <div className="flex items-center justify-between space-x-1">
           <div className="space-y-1">
             <CardTitle>Interview Scores</CardTitle>
-            <CardDescription className="text-xs text-gray-600">
+            <CardDescription className="text-sm font-bold">
               Performance of candidates.
             </CardDescription>
           </div>

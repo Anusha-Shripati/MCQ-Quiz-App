@@ -12,8 +12,8 @@ const InstructionCard = () => {
     <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100 pb-1">
       <div className="p-6 bg-gradient-to-r from-blue-50 to-indigo-50">
         <div className="flex items-center gap-2 text-blue-700">
-          <Info className="h-5 w-5" />
-          <h2 className="text-xl font-bold">Guidelines & Terms</h2>
+        <Info className="h-5 w-5 self-center" />
+        <h2 className="text-xl font-bold align-middle leading-tight">Guidelines & Terms</h2>
         </div>
         <p className="text-sm text-gray-600 mt-1">Please read carefully before proceeding</p>
         <p className="text-sm text-red-600 mt-1">
@@ -46,7 +46,7 @@ const InstructionCard = () => {
           <section>
             <h3 className="font-semibold text-blue-800 mb-3 text-lg">Key Requirements</h3>
             <ul className="space-y-3">
-              <li className="flex items-start gap-3">
+              <li className="flex items-center gap-3">
                 <span className="bg-blue-100 text-blue-700 rounded-full h-6 w-6 flex items-center justify-center flex-shrink-0 mt-0.5 font-semibold">
                   1
                 </span>
@@ -63,19 +63,19 @@ const InstructionCard = () => {
                   tabs, your interview will be terminated.
                 </span>
               </li>
-              <li className="flex items-start gap-3">
+              <li className="flex items-center gap-3">
                 <span className="bg-blue-100 text-blue-700 rounded-full h-6 w-6 flex items-center justify-center flex-shrink-0 mt-0.5 font-semibold">
                   3
                 </span>
                 <span>Your device must have a functional webcam and microphone.</span>
               </li>
-              <li className="flex items-start gap-3">
+              <li className="flex items-center gap-3">
                 <span className="bg-blue-100 text-blue-700 rounded-full h-6 w-6 flex items-center justify-center flex-shrink-0 mt-0.5 font-semibold">
                   4
                 </span>
                 <span>Ensure a reliable and uninterrupted internet connection.</span>
               </li>
-              <li className="flex items-start gap-3">
+              <li className="flex items-center gap-3">
                 <span className="bg-blue-100 text-blue-700 rounded-full h-6 w-6 flex items-center justify-center flex-shrink-0 mt-0.5 font-semibold">
                   5
                 </span>
@@ -90,7 +90,7 @@ const InstructionCard = () => {
                   outdated browsers version.)
                 </span>
               </li>
-              <li className="flex items-start gap-3">
+              <li className="flex items-center gap-3">
                 <span className="bg-blue-100 text-blue-700 rounded-full h-6 w-6 flex items-center justify-center flex-shrink-0 mt-0.5 font-semibold">
                   7
                 </span>
@@ -98,19 +98,19 @@ const InstructionCard = () => {
                   Choose a quiet, well-lit room with no background noise or interruptions.
                 </span>
               </li>
-              <li className="flex items-start gap-3">
+              <li className="flex items-center gap-3">
                 <span className="bg-blue-100 text-blue-700 rounded-full h-6 w-6 flex items-center justify-center flex-shrink-0 mt-0.5 font-semibold">
                   8
                 </span>
                 <span>Sit against a neutral background (avoid clutter or distractions).</span>
               </li>
-              <li className="flex items-start gap-3">
+              <li className="flex items-center gap-3">
                 <span className="bg-blue-100 text-blue-700 rounded-full h-6 w-6 flex items-center justify-center flex-shrink-0 mt-0.5 font-semibold">
                   9
                 </span>
                 <span>Ensure your face is clearly visible at all times.</span>
               </li>
-              <li className="flex items-start gap-3">
+              <li className="flex items-center gap-3">
                 <span className="bg-blue-100 text-blue-700 rounded-full h-6 w-6 flex items-center justify-center flex-shrink-0 mt-0.5 font-semibold">
                   10
                 </span>
@@ -119,7 +119,7 @@ const InstructionCard = () => {
                   detected.
                 </span>
               </li>
-              <li className="flex items-start gap-3">
+              <li className="flex items-center gap-3">
                 <span className="bg-blue-100 text-blue-700 rounded-full h-6 w-6 flex items-center justify-center flex-shrink-0 mt-0.5 font-semibold">
                   11
                 </span>
@@ -127,7 +127,7 @@ const InstructionCard = () => {
                   More than 5 violations will lead to automatic termination and disqualification.
                 </span>
               </li>
-              <li className="flex items-start gap-3">
+              <li className="flex items-center gap-3">
                 <span className="bg-blue-100 text-blue-700 rounded-full h-6 w-6 flex items-center justify-center flex-shrink-0 mt-0.5 font-semibold">
                   12
                 </span>
@@ -136,7 +136,7 @@ const InstructionCard = () => {
                   prohibited.
                 </span>
               </li>
-              <li className="flex items-start gap-3">
+              <li className="flex items-center gap-3">
                 <span className="bg-blue-100 text-blue-700 rounded-full h-6 w-6 flex items-center justify-center flex-shrink-0 mt-0.5 font-semibold">
                   13
                 </span>
@@ -153,13 +153,13 @@ const InstructionCard = () => {
                   during the session is not allowed.
                 </span>
               </li>
-              <li className="flex items-start gap-3">
+              <li className="flex items-center gap-3">
                 <span className="bg-blue-100 text-blue-700 rounded-full h-6 w-6 flex items-center justify-center flex-shrink-0 mt-0.5 font-semibold">
                   15
                 </span>
                 <span>Face and voice must be clearly visible and audible at all times.</span>
               </li>
-              <li className="flex items-start gap-3">
+              <li className="flex items-center gap-3">
                 <span className="bg-blue-100 text-blue-700 rounded-full h-6 w-6 flex items-center justify-center flex-shrink-0 mt-0.5 font-semibold">
                   16
                 </span>
@@ -168,7 +168,7 @@ const InstructionCard = () => {
                   interviewer.
                 </span>
               </li>
-              <li className="flex items-start gap-3">
+              <li className="flex items-center gap-3">
                 <span className="bg-blue-100 text-blue-700 rounded-full h-6 w-6 flex items-center justify-center flex-shrink-0 mt-0.5 font-semibold">
                   17
                 </span>
@@ -176,19 +176,19 @@ const InstructionCard = () => {
                   Avoid looking away, reading from other sources, or engaging in side activities.
                 </span>
               </li>
-              <li className="flex items-start gap-3">
+              <li className="flex items-center gap-3">
                 <span className="bg-blue-100 text-blue-700 rounded-full h-6 w-6 flex items-center justify-center flex-shrink-0 mt-0.5 font-semibold">
                   18
                 </span>
                 <span>You cannot retake the interview.</span>
               </li>
-              <li className="flex items-start gap-3">
+              <li className="flex items-center gap-3">
                 <span className="bg-blue-100 text-blue-700 rounded-full h-6 w-6 flex items-center justify-center flex-shrink-0 mt-0.5 font-semibold">
                   19
                 </span>
                 <span>Please be fully prepared before starting.</span>
               </li>
-              <li className="flex items-start gap-3">
+              <li className="flex items-center gap-3">
                 <span className="bg-blue-100 text-blue-700 rounded-full h-6 w-6 flex items-center justify-center flex-shrink-0 mt-0.5 font-semibold">
                   20
                 </span>
@@ -241,11 +241,11 @@ const InstructionCard = () => {
                 above.
               </p>
               <ul className="space-y-2 text-indigo-900">
-                <li className="flex items-start gap-2">
+                <li className="flex items-center gap-2">
                   <span>•</span>
                   <span>Your responses will be stored for evaluation and quality assurance.</span>
                 </li>
-                <li className="flex items-start gap-2">
+                <li className="flex items-center gap-2">
                   <span>•</span>
                   <span>
                     You give consent to use the recording for verification and audit purposes.
@@ -264,7 +264,7 @@ const InstructionCard = () => {
           </section>
 
           <div className="text-center pt-6 pb-2">
-            <p className="font-medium text-blue-700">
+            <p className="font-semibold text-blue-700">
               Please review these guidelines carefully and ensure full compliance to avoid
               disqualification.
             </p>
@@ -290,7 +290,7 @@ const FormField = ({
   type?: string;
 }) => (
   <div className="group">
-    <label className="block text-sm font-medium text-gray-700 mb-1.5">{label}</label>
+    <label className="block text-sm font-semibold text-gray-700 mb-1.5">{label}</label>
     <div className="relative">
       <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-hover:text-indigo-500 transition-colors">
         {icon}
@@ -324,8 +324,8 @@ const BasicInfoForm: React.FC = memo(() => {
           <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100 h-full">
             <div className="p-6 bg-gradient-to-r from-indigo-50 to-purple-50">
               <div className="flex items-center gap-2 text-indigo-700">
-                <User className="h-5 w-5" />
-                <h2 className="text-xl font-bold">Candidate Information</h2>
+                <User className="h-5 w-5 self-center" />
+                <h2 className="text-xl font-bold align-middle leading-tight">Candidate Information</h2>
               </div>
               <p className="text-sm text-gray-600 mt-1">
                 Please verify your details before proceeding
@@ -365,7 +365,7 @@ const BasicInfoForm: React.FC = memo(() => {
               <Button
                 onClick={handleBasicInfoSubmit}
                 className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700
-                            text-white font-medium py-3.5 px-6 rounded-lg shadow-lg hover:shadow-xl 
+                            text-white font-semibold py-3.5 px-6 rounded-lg shadow-lg hover:shadow-xl 
                             transform hover:-translate-y-0.5 transition-all duration-200 
                             flex items-center justify-center gap-2"
               >

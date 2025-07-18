@@ -60,7 +60,7 @@ function TestHeader({
             <Button
               onClick={() => submitQuiz()}
               disabled={isMutating || isSubmiting || answeredQuestionsCount < totalQuestion}
-              className="px-8 py-2 mb-2 mt-2 h-12 bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 text-white font-semibold rounded-full shadow-sm hover:shadow transition-all flex items-center gap-2 w-40"
+              className="px-8 py-2 mb-2 mt-2 h-12 bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 text-white font-bold text-md rounded-full shadow-sm hover:shadow transition-all flex items-center gap-2 w-40"
               title={answeredQuestionsCount < totalQuestion ? `Complete all ${totalQuestion} questions to submit` : "Submit your quiz"}
             >
               {isMutating || isSubmiting ? (

@@ -14,6 +14,10 @@ candidateRouter.post(
   validateRequest(candidateSchema.create),
   asyncHandler(candidateController.create)
 );
+candidateRouter.get(
+  '/reset-all/:id',
+  asyncHandler(candidateController.resetAll)
+);
 
 candidateRouter.put(
   '/:id',

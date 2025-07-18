@@ -156,45 +156,63 @@ const Step2: React.FC<Step2Props> = ({
         <div className="space-y-4">
           {formData.technologies.map((technology, index) => {
             return (
-              <div key={index} className="grid grid-cols-[1fr,1fr,1fr,1fr,1fr] gap-4 items-center">
-                <div className="flex items-center gap-2">
-                  <span className="font-medium dark:text-white">{technology.name}</span>
-                </div>
-                {['easy', 'medium', 'hard'].map((difficulty) => (
-                  <div key={difficulty} className="text-center">
-                    <Input
-                      type="number"
-                      min="0"
-                      value={technology[difficulty as 'easy' | 'medium' | 'hard'].total}
-                      disabled
-                      className="w-24 text-center mx-auto bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                    />
-                    <div className='w-full flex flex-col gap-2 mt-3'>
-                      {questionTypeOptions.map((item) => {
-                        const maxAllowed = getMaxQuestions(technology.id, difficulty as 'easy' | 'medium' | 'hard',item.value);
-                        return <div className='flex justify-between w-full' key={item.value}>
-                          <label>{item.label} <span className="text-xs font-bold text-gray-400">({maxAllowed})</span></label>
-                          <Input
-                            type="number"
-                            min="0"
-                            value={technology[difficulty as 'easy' | 'medium' | 'hard'][item.value]}
-                            onChange={(e) =>
-                              handleQuestionCountChange(
-                                index,
-                                difficulty as 'easy' | 'medium' | 'hard',
-                                item.value,
-                                e.target.value
-                              )
-                            }
-                            className="w-28 m-0 text-center bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                          />
-                        </div>
-                      })}
-                    </div>
+              <div
+                key={index}
+                className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm p-4 mb-4 transition hover:shadow-md"
+              >
+                <div className="grid grid-cols-[1.5fr,1fr,1fr,1fr,1fr] gap-4 items-center">
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-lg dark:text-white">{technology.name}</span>
                   </div>
-                ))}
-                <div className="text-center font-medium dark:text-white">
-                  {technology.easy.total + technology.medium.total + technology.hard.total}
+                  {['easy', 'medium', 'hard'].map((difficulty) => (
+                    <div key={difficulty} className="text-center">
+                      <Input
+                        type="number"
+                        min="0"
+                        value={technology[difficulty as 'easy' | 'medium' | 'hard'].total}
+                        disabled
+                        aria-label={`${technology.name} ${difficulty} total`}
+                        className="w-20 text-center mx-auto bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white font-semibold border-2 border-dashed border-gray-300 dark:border-gray-600"
+                      />
+                      <div className="w-full flex flex-col gap-2 mt-3">
+                        {questionTypeOptions.map((item) => {
+                          const maxAllowed = getMaxQuestions(technology.id, difficulty as 'easy' | 'medium' | 'hard', item.value);
+                          return (
+                            <div className="flex justify-between items-center w-full group" key={item.value}>
+                              <label htmlFor={`tech-${index}-${difficulty}-${item.value}`} className="text-sm font-medium text-gray-700 dark:text-gray-200 flex items-center gap-1">
+                                {item.label}
+                                <span className="ml-1 text-xs font-bold text-gray-400 cursor-pointer relative group-hover:text-blue-500" tabIndex={0}>
+                                  ({maxAllowed})
+                                </span>
+                              </label>
+                              <Input
+                                id={`tech-${index}-${difficulty}-${item.value}`}
+                                type="number"
+                                min="0"
+                                value={technology[difficulty as 'easy' | 'medium' | 'hard'][item.value]}
+                                onChange={(e) =>
+                                  handleQuestionCountChange(
+                                    index,
+                                    difficulty as 'easy' | 'medium' | 'hard',
+                                    item.value,
+                                    e.target.value
+                                  )
+                                }
+                                className="w-20 m-0 text-center bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-400"
+                                aria-label={`${technology.name} ${difficulty} ${item.label}`}
+                              />
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                  <div className="text-center font-bold dark:text-white flex flex-col items-center">
+                    <span className="inline-block px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200 text-base">
+                      {technology.easy.total + technology.medium.total + technology.hard.total}
+                    </span>
+                    <span className="text-xs text-gray-400 mt-1">Total</span>
+                  </div>
                 </div>
               </div>
             );

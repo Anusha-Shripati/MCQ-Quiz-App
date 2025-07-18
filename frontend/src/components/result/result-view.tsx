@@ -127,7 +127,7 @@ function Answer() {
                             />
                           </svg>
                           <span className="text-gray-500 dark:text-gray-400">
-                            Video not available
+                            Video is uploading...
                           </span>
                         </div>
                       )}

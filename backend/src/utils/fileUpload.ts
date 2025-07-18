@@ -96,13 +96,13 @@ export const convertWebmToMp4 = (inputPath: string): Promise<string> => {
     if (ext !== '.webm') return resolve(inputPath);
 
     // Validate file existence and size
+    let stats;
     try {
-      const stats = fs.statSync(inputPath);
+      stats = fs.statSync(inputPath);
       if (stats.size === 0) {
         logger.error(`File is empty: ${inputPath}`);
         return reject(new Error('File is empty'));
       }
-
       logger.info(`Processing valid file: ${inputPath}, size: ${stats.size} bytes`);
     } catch (e) {
       logger.error(`File does not exist or cannot be accessed: ${inputPath}`);
@@ -114,16 +114,20 @@ export const convertWebmToMp4 = (inputPath: string): Promise<string> => {
     ffmpeg(inputPath)
       .output(outputPath)
       .inputOptions([
-        '-f webm', // Force input format to webm
-        '-err_detect ignore_err', // Ignore errors in input
+        '-f webm',
+        '-err_detect ignore_err',
       ])
-      .outputOptions(['-c:v libx264', '-preset ultrafast', '-crf 28', '-c:a aac', '-b:a 128k'])
-      .on('start', (cmd) => {
-        logger.info('Started FFmpeg with command:', cmd);
-      })
-      .on('stderr', (line) => {
-        logger.debug('FFmpeg stderr:', line);
-      })
+      .outputOptions([
+        '-c:v libx264',
+        '-preset ultrafast',
+        '-crf 28',
+        '-c:a aac',
+        '-b:a 128k',
+        '-threads 0', // Use all CPU cores
+      ])
+      .on('start', (cmd) => logger.info('Started FFmpeg with command:', cmd))
+      .on('progress', (progress) => logger.info(`FFmpeg progress: frame: ${progress.frames}, time: ${progress.timemark}`))
+      .on('stderr', (line) => logger.debug('FFmpeg stderr:', line))
       .on('end', () => {
         logger.info(`Conversion finished: ${inputPath} → ${outputPath}`);
         try {
@@ -136,7 +140,6 @@ export const convertWebmToMp4 = (inputPath: string): Promise<string> => {
       })
       .on('error', (err) => {
         logger.error('❌ FFmpeg error:', err.message);
-        // If conversion fails, try to use the original file
         try {
           fs.copyFileSync(inputPath, outputPath);
           logger.info('Using original file as fallback');

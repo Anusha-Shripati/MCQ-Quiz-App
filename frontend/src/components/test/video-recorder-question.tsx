@@ -23,11 +23,10 @@ export const VideoRecorderQuestion: FC<VideoRecorderProps> = React.memo(
     const [videoUrl, setVideoUrl] = useState<string | null>(null);
     useEffect(() => {
       setVideoUrl(
-        (answers[question.question_id]?.answer as string) ||
-          (answers[question.question_id]?.temp_url as string)
+        (answers[question.question_id]?.answer as string)
       );
     }, [answers, question.question_id]);
-
+    
     return (
       <>
         {iframeHTML.includes('iframe') ? (
@@ -41,7 +40,7 @@ export const VideoRecorderQuestion: FC<VideoRecorderProps> = React.memo(
         )}
         <VideoRecorder
           onRecordingComplete={(chunks, url) => {
-            const blob = new Blob(chunks, { type: 'video/webm' });
+            const blob = new Blob(chunks, { type: 'video/mp4' });
             onRecordingComplete && onRecordingComplete(blob, url);
           }}
           maxTime={120}

@@ -134,9 +134,18 @@ const   ViewQuestions = () => {
     setQuestionsData(updatedQuestions);
   };
 
-  const handleReset = () => {
+  const handleReset = (type:'question' |'answer' | 'all') => {
     setQuestionsData((prv) =>
-      prv.map((item, index) => (selectedQuestion == index && prvQuestion ? prvQuestion : item))
+      prv.map((item, index) => (selectedQuestion == index && prvQuestion ? {
+        ...prvQuestion,
+        question: type == 'all' ||  type == 'question' ?prvQuestion.question:item.question,
+        options: type == 'all' ||  type == 'question' ? prvQuestion.options:item.options,
+        correct_answer: type == 'all' ||  type == 'answer'?  prvQuestion.correct_answer:item.correct_answer,
+        time: type == 'all' ?  prvQuestion.time:item.time,
+        difficulty_level: type == 'all'?prvQuestion.difficulty_level:item.difficulty_level,
+        type: type == 'all'?prvQuestion.type:item.type,
+        meta: type == 'all' || type == 'question'?prvQuestion.meta:item.meta,
+      } : item))
     );
   };
   const handleSave = async (question: Question) => {
@@ -150,6 +159,7 @@ const   ViewQuestions = () => {
         difficulty_level: question.difficulty_level,
         type: question.type,
         meta: question.meta,
+        // time: question.time,
       };
       await api.put(`${questionEndpoint.QUESTION_BY_ID}/${question.id}`, payload);
       setSelectedQuestion(null);
@@ -220,7 +230,7 @@ const   ViewQuestions = () => {
                   editQuestion={true}
                   onSave={() => handleSave(question)}
                   onCancel={() => {
-                    handleReset();
+                    handleReset('all');
                     setSelectedQuestion(null)}
                   }
                 />

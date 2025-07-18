@@ -2,7 +2,7 @@
 import { Worker } from 'bullmq';
 import redis from '../lib/redis';
 import { UploadService } from '../services/upload.services';
-import { CandidateExamService } from '../services/candiate-exam.services';
+import { CandidateExamService, ExamMeta } from '../services/candiate-exam.services';
 import { prisma } from '../db/prisma.client';
 
 const uploadService = new UploadService();
@@ -19,29 +19,30 @@ export const registerMergeQueueWorker = () => {
         if (file) {
           const exam = await prisma.exam.findFirst({
             where: { id: exam_id },
-            include: { results: true },
+            include: { results: {include:{answers:true}},exam_questions:true },
           });
 
 
           const res = await candidateExamService.submitAnswer(exam_id, candidate_id, {
             user_answer: [typeof file === 'string' ? file : file?.path],
-            question_name: body.question_id ? '' : "introduction",
-            question_id: body.question_id ? body.question_id : "",
+            question_name: body.question_id ? null : "introduction",
+            question_id: body.question_id ? body.question_id : null,
           });
-
+          
           if (exam && exam.results) {
             await prisma.answers.update({
               where: { id: res.id },
               data: { result_id: exam.results.id },
-            });
+            })
           }
         }
+        console.log('Worker done')
       } catch (error) {
         console.error('Error processing mergeChunk job:', error);
         throw error;
       }
     },
-    { connection: redis }
+    { connection: redis, concurrency: 1 }
   );
 
   worker.on('failed', (job, err) => {

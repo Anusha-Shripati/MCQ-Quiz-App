@@ -104,19 +104,19 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
     }
   }, [technologyId, technologyData]);
 
-  const handleReset = () => {
+  const handleReset = (type:'question' |'answer' | 'all') => {
     setQuestions((prv) => {
       return prv.map((q, index) => {
         if (index != selectedQuestion) return q;
         return {
           ...q,
-          question: '',
-          options: ['', '', '', '', '', ''],
-          correct_answer: [],
-          time: '',
-          difficulty_level: 'easy',
-          type: 'mcq',
-          meta: {},
+          question: type == 'all' ||  type == 'question' ?'':q.question,
+          options: type == 'all' ||  type == 'question' ? ['', '', '', '', '', '']:q.options,
+          correct_answer: type == 'all' ||  type == 'answer'? []:q.correct_answer,
+          // time: type == 'all' ?'':q.time,
+          difficulty_level: type == 'all'?'easy':q.difficulty_level,
+          type: type == 'all'?'mcq':q.type,
+          meta: type == 'all' || type == 'question'?{}:q.meta,
         };
       });
     });
@@ -158,7 +158,7 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
       question: '',
       options: ['', '', '', '', '', ''],
       correct_answer: [],
-      time: '',
+      // time: '',
       difficulty_level: 'easy',
       meta: {},
     };
@@ -184,6 +184,11 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
         hasErrors = true;
         return;
       }
+      // if (q?.time?.trim() === '') {
+      //   errors[index] = 'Time cannot be empty';
+      //   hasErrors = true;
+      //   return;
+      // }
 
       if (q.type === 'mcq' || q.type === 'multiple_select') {
         const nonEmptyOptions = q.options.filter((option) => option.trim() !== '');

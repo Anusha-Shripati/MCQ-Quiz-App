@@ -10,7 +10,6 @@ export function middleware(request: NextRequest) {
 
   const currentPath = request.nextUrl.pathname;
   const currentModule = currentPath.split('/')[1];
-  console.log('Current Module:', currentModule);
 
   // 🔹 Define protected routes
   const PROTECTED_ROUTES = new Set([

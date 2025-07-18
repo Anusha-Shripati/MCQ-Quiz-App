@@ -114,8 +114,6 @@ export class TechnologyController {
         return generateResponse(res, 400, { questions: questionsArr.map(item=>item.question) }, true, 'Questions already exists');
 
       }
-      console.log(req.user);
-      
       const updatedTechnology = await technologyService.updateTechnology(id, req.user?.id || '',{
         name: trimName,
         questions,

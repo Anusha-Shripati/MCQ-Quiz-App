@@ -41,7 +41,7 @@ export interface Question {
   question: string;
   correct_answer: string[]; // use string from API
   options: string[];
-  time: string;
+  time?: string;
   difficulty_level: 'easy' | 'medium' | 'hard';
   type: 'multiple_select' | 'video' | 'text' | 'mcq' | 'code_snippet' | 'code_editor';
   meta?: Record<string, unknown>;

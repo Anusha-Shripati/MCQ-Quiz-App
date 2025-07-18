@@ -26,7 +26,7 @@ interface QuestionCardProps {
   handleQuestionTypeChange: (value: Question['type'], index: number) => void;
   handleDeleteQuestion: (index: number) => void;
   setQuestions: React.Dispatch<React.SetStateAction<Question[] | Required<Question>[]>>;
-  handleReset: () => void;
+  handleReset: (type: 'question' | 'answer' | 'all') => void;
   technologyId: string;
   onSave?: () => void;
   onCancel?: () => void;
@@ -209,7 +209,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
             placeholder="Difficulty"
             options={questionDifficultyOptions}
           />
-          <FormField
+          {/* <FormField
             parentClassName="w-full"
             label="Time (In minutes)"
             type="number"
@@ -222,7 +222,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
                 e.target.value > 0 && e.target.value < 100 ? e.target.value : 0;
               setQuestions(updatedQuestions);
             }}
-          />
+          /> */}
         </div>
 
         {question.type === 'video' ? (
@@ -410,9 +410,15 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
             {onSave && <Button variant="default" className='px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900' onClick={onSave} disabled={isMutating || updating}>
               Save
             </Button>}
-            <Button variant="outline" onClick={handleReset} disabled={isMutating || updating}>
-              Reset
+            <Button variant="outline" onClick={() => handleReset('all')} disabled={isMutating || updating}>
+              Reset All
             </Button>
+            <Button variant="outline" onClick={() => handleReset('question')} disabled={isMutating || updating}>
+              Reset question
+            </Button>
+            {question.type != 'code_editor' && question.type != 'code_snippet' && question.type != 'video' && <Button variant="outline" onClick={() => handleReset('answer')} disabled={isMutating || updating}>
+              Reset answer
+            </Button>}
           </div>
         )}
       </CardFooter>

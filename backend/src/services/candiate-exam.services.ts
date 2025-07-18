@@ -209,7 +209,7 @@ export class CandidateExamService {
   async submitAnswer(
     exam_id: string,
     candidate_id: string,
-    data: { question_id?: string; user_answer: string[]; question_name: string }
+    data: { question_id?: string; user_answer: string[]; question_name: string|null }
   ) {
     let result = {
       score: 0,
@@ -232,7 +232,7 @@ export class CandidateExamService {
 
       const weight = difficulty_level === 'easy' ? 1 : difficulty_level === 'medium' ? 2 : 3;
 
-      result.score = weight;
+      result.score = 0;
       result.weight = weight;
       const userAns = data.user_answer;
 
@@ -256,7 +256,7 @@ export class CandidateExamService {
         question_name: data.question_name,
       },
     });
-
+    
     if (ans) {
       const newAns = await prisma.answers.update({
         where: { id: ans.id },
@@ -380,61 +380,22 @@ export class CandidateExamService {
   }
   async finishExam(examId: string, candidateId: string) {
     try {
-      const existingResult = await prisma.results.findFirst({ where: { exam_id: examId } });
-
-      if (existingResult) {
-        return;
-      }
-
-      let answers = await prisma.answers.findMany({
-        where: { exam_id: examId, question_id: { not: null } },
-        include: {
-          question: true,
+      const {total,score,tech_score} = await this.resultCalculation(examId)
+      
+      const result = await prisma.results.upsert({
+        where: {
+          exam_id: examId,
+          candidate_id: candidateId,
         },
-      });
-      const obj = {
-        score: 0,
-        total: 0,
-      };
-
-      let tech_score: {
-        technology_id: string;
-        score: number;
-        total: number;
-        percentage: number;
-      }[] = [];
-      answers.forEach((answer) => {
-        const { question } = answer;
-
-        const { difficulty_level } = question as Questions;
-
-        const weight = difficulty_level === 'easy' ? 1 : difficulty_level === 'medium' ? 2 : 3;
-
-        obj.total += weight;
-        obj.score += answer.score;
-
-        const technology_score = tech_score.find(
-          (tech) => tech.technology_id == question?.technology_id
-        );
-        if (question?.id && !technology_score) {
-          tech_score.push({
-            technology_id: question.technology_id,
-            score: answer.score,
-            total: answer.weight,
-            percentage: (answer.score * 100) / answer.weight,
-          });
-        } else if (technology_score) {
-          technology_score.score += answer.score;
-          technology_score.total += answer.weight;
-          technology_score.percentage = (technology_score.score * 100) / technology_score.total;
-        }
-      });
-
-      const result = await prisma.results.create({
-        data: {
-          score: obj.score,
-          total: obj.total,
-          percentage: ((obj.score || 0) * 100) / (obj.total||1),
+        update: {
+          score,
+          total,
+          percentage: ((score || 0) * 100) / (total || 1),
+        },
+        create: {
+          score,
+          total,
+          percentage: ((score || 0) * 100) / (total || 1),
           candidate_id: candidateId,
           exam_id: examId,
         },
@@ -463,6 +424,56 @@ export class CandidateExamService {
     }
   }
 
+  async resultCalculation(examId:string){
+    let answers = await prisma.answers.findMany({
+      where: { exam_id: examId, question_id: { not: null } },
+      include: {
+        question: true,
+      },
+    });
+    
+    const obj = {
+      score: 0,
+      total: 0,
+    };
+
+    let tech_score: {
+      technology_id: string;
+      score: number;
+      total: number;
+      percentage: number;
+    }[] = [];
+    answers.forEach((answer) => {
+      const { question } = answer;
+
+      const { difficulty_level } = question as Questions;
+
+      const weight = difficulty_level === 'easy' ? 1 : difficulty_level === 'medium' ? 2 : 3;
+
+      obj.total += weight;
+      obj.score += answer.score;
+
+      const technology_score = tech_score.find(
+        (tech) => tech.technology_id == question?.technology_id
+      );
+      if (question?.id && !technology_score) {
+        tech_score.push({
+          technology_id: question.technology_id,
+          score: answer.score,
+          total: answer.weight,
+          percentage: ((answer.score||0) * 100) / (answer.weight||1),
+        });
+      } else if (technology_score) {
+        technology_score.score += answer.score;
+        technology_score.total += answer.weight;
+        technology_score.percentage = ((technology_score.score || 0) * 100) / (technology_score.total || 1);
+      }
+    });
+    return {
+      ...obj,
+      tech_score
+    }
+  }
 
   async submitViolation(examId: string, data: { violations: Violation[] }) {
     const exam = await prisma.exam.findUnique({
@@ -471,7 +482,10 @@ export class CandidateExamService {
     });
     const updatedMeta: ExamMeta = {
       ...((exam?.meta as ExamMeta) || {}),
-      violations: [...((exam?.meta as ExamMeta)?.violations || []), ...data.violations],
+      violations: [
+        ...(((exam?.meta as ExamMeta)?.violations ?? []) as any[]),
+        ...(data.violations ?? [])
+      ]
     };
 
     if (!exam) throw new AppError('Exam not found', 404);

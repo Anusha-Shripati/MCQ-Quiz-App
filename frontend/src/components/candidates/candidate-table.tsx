@@ -398,7 +398,7 @@ function CandidateTable() {
                 <FiCopy className="h-5 w-5 text-gray-700 dark:text-gray-300" />
               </Button>
             )}
-            <Button
+            {/* <Button
               onClick={async() => {
                 await api.get('/candidate/reset-all/'+candidate.id)  
                 window.location.reload()  
@@ -407,7 +407,7 @@ function CandidateTable() {
               className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all duration-200"
             >
               Reset All
-            </Button>
+            </Button> */}
             <Button
               onClick={(e) => {
                 e.stopPropagation();

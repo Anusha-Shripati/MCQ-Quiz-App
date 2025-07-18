@@ -1,4 +1,4 @@
-import { Prisma, PrismaClient } from '@prisma/client';
+import { Candidate, Prisma, PrismaClient } from '@prisma/client';
 import jwt from 'jsonwebtoken';
 import { AppError } from '../common/errors/AppError';
 import { CreateCandidate, UpdateCandidate } from '../types/candidate.types';
@@ -373,7 +373,7 @@ export default class CandidatesService {
     return response
   }
 
-  async getCandidateById(id: string) {
+  async getCandidateById(id: string)  {
     try {
       const data = await this.cacheService.getKey(`candidate:${id}`)
       if(data) return JSON.parse(data)

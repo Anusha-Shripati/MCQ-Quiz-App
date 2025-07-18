@@ -17,7 +17,7 @@ import {
 import { Button } from '@/components/ui/form/button';
 import { Label } from '@/components/ui/form/label';
 import { ArrowLeft } from 'lucide-react';
-import { AssessmentForm } from '@/types/assessment.types';
+import { AssessmentForm, AssessmentQuestionType } from '@/types/assessment.types';
 import { questionTypeOptions } from '@/shared/constants/data';
 
 interface Step3Props {
@@ -28,6 +28,24 @@ interface Step3Props {
   calculateTotalSum: () => number;
   isMutating: boolean;
 }
+
+// Helper component for difficulty columns
+const DifficultyColumn = ({  data }: {  data: AssessmentQuestionType }) => (
+  <div className="flex flex-col gap-2 w-full">
+    {questionTypeOptions.map((item) => (
+      <div className="flex gap-3 justify-between items-center" key={item.value}>
+        <span className="text-sm text-gray-500 dark:text-gray-400">{item.label}:</span>
+        <span className="inline-block min-w-[24px] text-right rounded bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200 px-2 py-0.5 text-xs font-semibold">
+          {data[item.value] || 0}
+        </span>
+      </div>
+    ))}
+    <div className="flex w-full justify-between mt-3 font-bold text-md border-t-2 pt-2">
+      <span>Total:</span>
+      <span className="text-right">{data.total}</span>
+    </div>
+  </div>
+);
 
 const Step3: React.FC<Step3Props> = ({
   formData,
@@ -135,53 +153,30 @@ const Step3: React.FC<Step3Props> = ({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {formData.technologies.map((tech) => {
+                {formData.technologies.map((tech, idx) => {
                   const total = tech.easy.total + tech.medium.total + tech.hard.total;
                   return (
-                    <TableRow key={tech.name} className="hover:bg-gray-50 dark:hover:bg-gray-600 text-lg">
+                    <TableRow
+                      key={tech.name}
+                      className={`text-lg ${idx % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-700'} hover:bg-blue-50 dark:hover:bg-gray-600`}
+                    >
                       <TableCell className="font-medium p-2 dark:text-white">{tech.name}</TableCell>
-                      <TableCell className="text-center p-2 dark:text-gray-300">
-                        <div className='flex flex-col gap-2 w-3/4 '>
-                          {questionTypeOptions.map((item)=>{
-                            return <div className='flex gap-3 justify-between' key={item.value}>
-                              <label>{item.label}: </label>
-                              <label>{tech.easy[item.value] || 0}</label>
-                            </div>
-                          })}
-                        </div>
-                        <div className='flex w-3/4 justify-between mt-3 font-bold text-md border-t-2  pt-2'> <label >Total:</label> <span> {tech.easy.total}</span></div>
-
+                      <TableCell className="text-center p-2 dark:text-gray-300 align-top">
+                        <DifficultyColumn  data={tech.easy} />
                       </TableCell>
-                      <TableCell className="text-center p-2 dark:text-gray-300">
-                        <div className='flex flex-col gap-2 w-3/4 '>
-                          {questionTypeOptions.map((item)=>{
-                            return <div className='flex gap-3 justify-between' key={item.value}>
-                              <label>{item.label}: </label>
-                              <label>{tech.medium[item.value] || 0}</label>
-                            </div>
-                          })}
-                        </div>
-                        <div className='flex w-3/4 justify-between mt-3 font-bold text-md border-t-2  pt-2'> <label >Total:</label> <span> {tech.medium.total}</span></div>
-
+                      <TableCell className="text-center p-2 dark:text-gray-300 align-top">
+                        <DifficultyColumn  data={tech.medium} />
                       </TableCell>
-                      <TableCell className="text-center p-2 dark:text-gray-300" >
-                        <div className='flex flex-col gap-2 w-3/4 '>
-                          {questionTypeOptions.map((item)=>{
-                            return <div className='flex gap-3 justify-between' key={item.value}>
-                              <label>{item.label}: </label>
-                              <label>{tech.medium[item.value] || 0}</label>
-                            </div>
-                          })}
-                        </div>
-                       <div className='flex w-3/4 justify-between mt-3 font-bold text-md border-t-2 pt-2'> <label >Total:</label> <span> {tech.hard.total}</span></div>
+                      <TableCell className="text-center p-2 dark:text-gray-300 align-top">
+                        <DifficultyColumn  data={tech.hard} />
                       </TableCell>
-                      <TableCell className="text-center p-2 font-semibold dark:text-white">
-                        {total}
+                      <TableCell className="text-center p-2 font-semibold dark:text-white align-top">
+                        <span className="inline-block min-w-[24px] text-right rounded bg-gray-100 dark:bg-gray-900 px-2 py-0.5">{total}</span>
                       </TableCell>
                     </TableRow>
                   );
                 })}
-                <TableRow className="hover:bg-gray-50 dark:hover:bg-gray-600">
+                <TableRow className="bg-blue-50 dark:bg-blue-900 font-bold">
                   <TableCell className="font-medium p-2 dark:text-white">Total</TableCell>
                   <TableCell className="text-center p-2 dark:text-gray-300">
                     {formData.technologies.reduce((sum, tech) => sum + tech.easy.total, 0)}

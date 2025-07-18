@@ -32,7 +32,7 @@ export const questionsSchema = {
         }),
         otherwise: Joi.array().items(Joi.string()).optional(),
       }),
-      // time: Joi.string().required().messages({
+      // time: Joi.number().required().messages({
       //   'string.empty': 'Time is required',
       // }),
       difficulty_level: Joi.string().valid('easy', 'medium', 'hard').required().messages({
@@ -97,7 +97,7 @@ export const questionsSchema = {
         }),
         otherwise: Joi.array().items(Joi.string()).optional(),
       }),
-      // time: Joi.string().required().messages({
+      // time: Joi.number().required().messages({
       //   'string.empty': 'Time is required',
       // }),
       difficulty_level: Joi.string().valid('easy', 'medium', 'hard').required().messages({

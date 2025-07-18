@@ -313,9 +313,11 @@ const QuestionReview: React.FC<QuestionReviewProps> = ({ answers }) => {
                       <p className="text-xs text-purple-600 dark:text-purple-300 mb-1">
                         Candidate Answer
                       </p>
-                      <VideoPreview
+                     { ans.user_answer && ans.user_answer.length ?<VideoPreview
                         videoUrl={(process.env.NEXT_PUBLIC_IMGAE_PREFIX || '') + ans.user_answer[0]}
-                      />
+                      />:<p className="p-3 bg-gradient-to-br from-gray-900 text-lg to-gray-800 min-h-[300px] flex justify-center items-center rounded-xl max-h-96 overflow-auto border border-gray-300 dark:border-gray-600 hover:border-gray-600 dark:hover:border-gray-500 transition-colors duration-300">
+                          Video is uploading...
+                    </p>}
                     </div>
                   </div>
                 )}

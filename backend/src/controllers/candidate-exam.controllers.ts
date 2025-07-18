@@ -5,11 +5,12 @@ import { UploadService } from '../services/upload.services';
 import path from 'path';
 import fs from 'fs'
 import { mergeQueue } from '../queue/mergeQueue';
+import { prisma } from '../db/prisma.client';
 export class CandidateExamController {
   constructor(
     private candidateExamService: CandidateExamService,
     private uploadService: UploadService
-  ) {}
+  ) { }
 
   getExam = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -84,43 +85,67 @@ export class CandidateExamController {
     }
   };
 
-submitAnswer = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const candidate_id = req.candidateInfo?.candidateId;
-    const exam_id = req.candidateInfo?.examId as string;
+  submitAnswer = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const candidate_id = req.candidateInfo?.candidateId;
+      const exam_id = req.candidateInfo?.examId as string;
 
-    if (!candidate_id) throw new Error('Candidate not authenticated');
+      if (!candidate_id) throw new Error('Candidate not authenticated');
 
-    let file;
+      let file;
 
-    if (req.body.merge_chunk) {
-      // Enqueue merge task
-      await mergeQueue.add('mergeChunk', {
-        foldername: req.body.foldername,
-        exam_id,
-        candidate_id,
-        body: req.body,
+      if (req.body.merge_chunk) {
+
+        const updated = await prisma.answers.updateMany({
+          where: {
+            exam_id: exam_id,
+            question_id: req.body.question_id || null,
+            question_name: req.body.question_name || null,
+            candidate_id: candidate_id,
+          },
+          data: {
+            user_answer: [],
+          },
+        });
+
+        if (updated.count === 0) {
+          await prisma.answers.create({
+            data: {
+              exam_id: exam_id,
+              question_id: req.body.question_id || null,
+              question_name: req.body.question_name || null,
+              candidate_id: candidate_id,
+              user_answer: [],
+            },
+          });
+        }
+
+        await mergeQueue.add('mergeChunk', {
+          foldername: req.body.foldername,
+          exam_id,
+          candidate_id,
+          body: req.body,
+        });
+        console.log('Merge task added to queue');
+        return generateResponse(
+          res,
+          202,
+          { message: 'Merging scheduled. Answer will be submitted shortly.' },
+          true
+        );
+      }
+
+      // If no merge required, submit directly
+      const answer = await this.candidateExamService.submitAnswer(exam_id, candidate_id, {
+        ...req.body,
+        file,
       });
-      console.log('Merge task added to queue');
-      return generateResponse(
-        res,
-        202,
-        { message: 'Merging scheduled. Answer will be submitted shortly.' },
-        true
-      );
+
+      generateResponse(res, 200, { message: 'Answer submitted successfully', answer }, true);
+    } catch (error) {
+      next(error);
     }
-
-    // If no merge required, submit directly
-    const answer = await this.candidateExamService.submitAnswer(exam_id, candidate_id, {
-      ...req.body,
-      file,
-    });
-
-    generateResponse(res, 200, { message: 'Answer submitted successfully', answer }, true);
-  } catch (error) {
-    next(error);
-  }
-};
+  };
   resetAnswer = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const candidate_id = req.candidateInfo?.candidateId;

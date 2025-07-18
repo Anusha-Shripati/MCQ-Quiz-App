@@ -4,6 +4,9 @@ import CandidatesService from '../services/candidates.services';
 import ExamService from '../services/exam.services';
 import { CreateCandidate, UpdateCandidate } from '../types/candidate.types';
 import { generateResponse } from '../utils/generateResponse';
+import { prisma } from '../db/prisma.client';
+import { Candidate } from '@prisma/client';
+import { ExamMeta } from '../services/candiate-exam.services';
 
 const candidateService = new CandidatesService();
 const examService = new ExamService();
@@ -35,7 +38,7 @@ export class CandidateController {
         experience: candidateData.experience,
         phone: candidateData.phone,
         meta: candidateData.meta || {},
-        created_by:req.user?.id || ''
+        created_by: req.user?.id || ''
       });
 
       return generateResponse(res, 201, newCandidate, true, 'Candidate created successfully');
@@ -70,42 +73,60 @@ export class CandidateController {
       next(error);
     }
   };
-
-  delete = async (req: Request, res: Response, next: NextFunction) => {
+  resetAll = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
-      const existingCandidate = await candidateService.getCandidateById(id);
-      if (!existingCandidate) {
-        return generateResponse(res, 404, {}, false, 'Candidate not found!');
-      }
+      const candidate = await candidateService.getCandidateById(id)
+      const exam = await prisma.exam.findFirst({where:{id}}) 
+      await prisma.exam.update({
+        where: { id: (candidate as Candidate).exam_id },
+        data: { status: "pending",is_completed:false,meta:{...((exam?.meta as ExamMeta) || {}),violations:[],screenshots:[],camera:[] } }
+      });
+      await prisma.results.deleteMany({where:{candidate_id:id}})
+      await prisma.answers.deleteMany({
+        where: {  candidate_id: id },
+      });
+    return generateResponse(res, 200, {}, true, 'Candidate updated successfully');
+  } catch(error) {
+    next(error);
+  }
+};
 
-      await candidateService.deleteCandidate(id);
-      return generateResponse(res, 200, {}, true, 'Candidate deleted successfully');
-    } catch (error) {
-      next(error);
+delete = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+    const existingCandidate = await candidateService.getCandidateById(id);
+    if (!existingCandidate) {
+      return generateResponse(res, 404, {}, false, 'Candidate not found!');
     }
-  };
 
-  get = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const query = req.query;
-      const candidates = await candidateService.getCandidates(query);
-      return generateResponse(res, 200, candidates, true, 'Candidates fetched successfully');
-    } catch (error) {
-      next(error);
-    }
-  };
+    await candidateService.deleteCandidate(id);
+    return generateResponse(res, 200, {}, true, 'Candidate deleted successfully');
+  } catch (error) {
+    next(error);
+  }
+};
 
-  getCandidateById = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const { id } = req.params;
-      const candidate = await candidateService.getCandidateById(id);
-      if (!candidate) {
-        return generateResponse(res, 404, {}, false, 'Candidate not found!');
-      }
-      return generateResponse(res, 200, candidate, true, 'Candidate fetched successfully');
-    } catch (error) {
-      next(error);
+get = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const query = req.query;
+    const candidates = await candidateService.getCandidates(query);
+    return generateResponse(res, 200, candidates, true, 'Candidates fetched successfully');
+  } catch (error) {
+    next(error);
+  }
+};
+
+getCandidateById = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+    const candidate = await candidateService.getCandidateById(id);
+    if (!candidate) {
+      return generateResponse(res, 404, {}, false, 'Candidate not found!');
     }
-  };
+    return generateResponse(res, 200, candidate, true, 'Candidate fetched successfully');
+  } catch (error) {
+    next(error);
+  }
+};
 }

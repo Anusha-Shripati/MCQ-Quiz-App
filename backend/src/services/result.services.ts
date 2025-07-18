@@ -258,7 +258,7 @@ export class ResultService {
         include: { exam: true, answers: { include: { question: true } } },
       });
       const existingAns = await prisma.answers.findFirst({
-        where: { question_id: questionId },
+        where: { question_id: questionId,result_id:resultId },
         include: { question: true },
       });
 

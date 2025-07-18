@@ -133,7 +133,7 @@ export default function ProctoredQuiz() {
             answer_id: a.id,
           };
           obj[a.question_id as string].answer =
-            question.question.type == QuestionType.VIDEO
+            question.question.type == QuestionType.VIDEO && obj[a.question_id as string].answer
               ? (process.env.NEXT_PUBLIC_IMGAE_PREFIX || '') + obj[a.question_id as string].answer
               : obj[a.question_id as string].answer;
         }
@@ -199,7 +199,6 @@ export default function ProctoredQuiz() {
   const handleStopRecording = (blob: Blob | null, url: string) => {
     setRecordingBlob(blob);
     setRecordingUrl(url);
-    console.log(blob);
 
     if (questions[currentQuestionIndex].question.type == 'video') {
       setAnswers((prev) => ({
@@ -263,19 +262,26 @@ export default function ProctoredQuiz() {
     }
   };
 
-  const addViolation = (violation: Omit<Violation, 'timestamp'>) => {
+  useEffect(()=>{
+    console.log(violations.current,prvViolations);
+    
+    if ((violations.current.length + prvViolations) > QUIZ_CONFIG.maxViolations) {
+      submitViolation()
+      submitQuiz();
+    }
+  },[violations.current,prvViolations])
+
+
+  const addViolation = useCallback((violation: Omit<Violation, 'timestamp'>) => {
     if (audioRef.current) {
       audioRef.current.play();
     }
     const newViolation: Violation = { ...violation, timestamp: Date.now() };
 
     violations.current = [...violations.current, newViolation];
-
-    if (violations.current.length + prvViolations >= QUIZ_CONFIG.maxViolations) {
-      // submitQuiz();
-    }
+    
     displayAlert(`Warning: ${violation.details}`);
-  };
+  },[prvViolations,violations]);
 
   const handleKeyDown = (e: KeyboardEvent) => {
     if (e.key === 'F11') {
@@ -543,7 +549,6 @@ export default function ProctoredQuiz() {
         //   goToNextQuestion();
         //   return;
         // }
-        console.log(recordingBlob);
         
         const { fileName, parts, UploadId } = await uploadFileInChunks(
           recordingBlob as Blob,
@@ -607,7 +612,7 @@ export default function ProctoredQuiz() {
   const goToNextQuestion = () => {
     setCurrentQuestionIndex((prev) => Math.min(prev + 1, questions.length - 1));
   };
-
+  
   const visibleButtons = () => {
     const total = questions.length;
     const current = currentQuestionIndex;
@@ -656,15 +661,15 @@ export default function ProctoredQuiz() {
           <Card className="w-[95vw] max-w-[1200px] mx-auto min-h-[70px] mb-3 shadow-xl border-0 rounded-xl text-black overflow-hidden bg-white/95 backdrop-blur-sm">
             <div className="p-4 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold text-gray-700">Violations:</span>
+                <span className="text-md font-semibold text-gray-700">Violations:</span>
                 <span
-                  className={`text-lg font-semibold ${prvViolations + violations.current.length >= 4 ? 'text-red-600' : 'text-blue-600'}`}
+                  className={`text-lg font-semibold ${prvViolations + violations.current.length >= QUIZ_CONFIG.maxViolations -2 ? 'text-red-600' : 'text-blue-600'}`}
                 >
-                  {prvViolations + violations.current.length} / 5
+                  {prvViolations + violations.current.length} / {QUIZ_CONFIG.maxViolations}
                 </span>
               </div>
               {prvViolations + violations.current.length >= 3 && (
-                <div className="text-sm text-red-600 font-semibold">
+                <div className="text-md text-red-600 font-semibold">
                   Warning: Quiz will be automatically submitted at 5 violations
                 </div>
               )}
@@ -716,22 +721,22 @@ export default function ProctoredQuiz() {
                   <div className="space-y-6">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                       <div className="flex items-center gap-3">
-                        <span className="text-xs font-semibold bg-blue-100 text-blue-800 px-3 py-1 rounded-full">
+                        <span className="text-md font-semibold bg-blue-100 text-blue-800 px-3 py-1 rounded-full">
                           Question {currentQuestionIndex + 1}
                         </span>
-                        <span className="text-xs font-semibold bg-purple-100 text-purple-800 px-3 py-1 rounded-full">
+                        <span className="text-md font-semibold bg-purple-100 text-purple-800 px-3 py-1 rounded-full">
                           {getQuestionTypeLabel(
                             questions[currentQuestionIndex].question.type as QuestionType
                           )}
                         </span>
                       </div>
-                      <div>
+                     { answers[questions[currentQuestionIndex].question_id] && <div>
                         <Button
                           variant="default"
                           size="lg"
                           onClick={handleReset}
                           disabled={isReseting}
-                          className="w-24"
+                          className="w-24 text-md font-bold"
                         >
                           {isReseting ? (
                             <div className="flex flex-col items-center justify-center gap-4">
@@ -741,7 +746,7 @@ export default function ProctoredQuiz() {
                             <>Reset</>
                           )}
                         </Button>
-                      </div>
+                      </div>}
                     </div>
 
                     <h2 className="text-xl md:text-2xl font-semibold text-gray-800 leading-relaxed">
@@ -767,15 +772,15 @@ export default function ProctoredQuiz() {
                 <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex-1">
                   <div className="flex flex-col space-y-2">
                     <div className="flex justify-between text-sm text-gray-600 px-1">
-                      <span className="font-semibold">Quiz Progress</span>
-                      <span>
+                      <span className="font-semibold  text-lg">Quiz Progress</span>
+                      <span className='text-lg'>
                         {/* {Object.keys(answers).length} of {questions.length} questions answered */}
                         {currentQuestionIndex + 1} of {questions.length} questions answered
                       </span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
                       <div
-                        className="bg-blue-600 h-2.5 rounded-full transition-all duration-500 ease-in-out"
+                        className="bg-blue-600 h-2.5 rounded-full transition-all duration-500 ease-in-out "
                         style={{
                           width: `${(Object.keys(answers).length / questions.length) * 100}%`,
                         }}
@@ -790,7 +795,7 @@ export default function ProctoredQuiz() {
                   onClick={() => setCurrentQuestionIndex((prev) => Math.max(0, prev - 1))}
                   disabled={currentQuestionIndex === 0}
                   variant="outline"
-                  className="px-6 py-2 font-semibold flex items-center gap-2 rounded-full transition-all"
+                  className="px-6 py-2 text-lg font-semibold flex items-center gap-2 rounded-full transition-all"
                 >
                   <ChevronLeft />
                   Previous
@@ -808,7 +813,7 @@ export default function ProctoredQuiz() {
                     isVideoMutating
                   }
                   variant="outline"
-                  className="px-6 py-2 flex items-center font-semibold gap-2 rounded-full transition-all w-40"
+                  className="px-6 py-2 flex  text-lg items-center font-semibold gap-2 rounded-full transition-all w-40"
                 >
                   {isMutating || isSubmiting ? (
                     <div className="flex flex-col items-center justify-center gap-4">

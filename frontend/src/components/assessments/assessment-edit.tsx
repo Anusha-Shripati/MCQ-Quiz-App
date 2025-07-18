@@ -430,12 +430,12 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
                       fontWeight: 'bold',
                       cursor: 'pointer',
                       transition: 'background 0.2s, color 0.2s',
-                      width:'20px',
-                      height:'18px',
+                      width: '20px',
+                      height: '18px',
                       minWidth: '20px',
                       minHeight: '18px',
-                      marginRight: '4px', 
-                      marginTop:'4px'
+                      marginRight: '4px',
+                      marginTop: '4px'
                     };
                   },
                 }}
@@ -519,7 +519,7 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
 
               {/* Technology Rows */}
               <div className="space-y-4">
-                {localTechnologies.map((tech) => (
+                {localTechnologies.map((tech,index) => (
                   <div
                     key={tech?.technology?.id}
                     className="grid grid-cols-[1fr,1fr,1fr,1fr,1fr] gap-6 items-center py-3 border-b border-gray-100 last:border-0"
@@ -540,34 +540,46 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
                         />
                         <div className='w-full flex flex-col gap-2 mt-3'>
                           {questionTypeOptions.map((item) => {
-                            const maxAllowed = getMaxQuestions(tech.technology_id  || '', difficulty as 'easy' | 'medium' | 'hard', item.value);
+                            const maxAllowed = getMaxQuestions(tech.technology_id || '', difficulty as 'easy' | 'medium' | 'hard', item.value);
 
                             return <div className='flex justify-between w-full' key={item.value}>
+                              <div className="flex justify-between items-center w-full group" key={item.value}>
+                              <label htmlFor={`tech-${index}-${difficulty}-${item.value}`} className="text-sm font-medium text-gray-700 dark:text-gray-200 flex items-center gap-1">
+                                {item.label}
+                                <span className="ml-1 text-xs font-bold text-gray-400 cursor-pointer relative group-hover:text-blue-500" tabIndex={0}>
+                                  ({maxAllowed})
+                                </span>
+                              </label>
 
-                              <label>{item.label} <span className="text-xs font-bold text-gray-400">({maxAllowed})</span></label>
 
+                                <Input
+                                id={`tech-${index}-${difficulty}-${item.value}`}
 
-                              <Input
-                                type="number"
-                                min="0"
-                                value={tech[difficulty as 'easy' | 'medium' | 'hard'][item.value]}
-                                onChange={(e) =>
-                                  handleQuestionChange(
-                                    tech.technology_id as string,
-                                    difficulty as 'easy' | 'medium' | 'hard',
-                                    item.value,
-                                    e.target.value
-                                  )
-                                }
-                                className="w-28 m-0 text-center bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                              /></div>
+                                  type="number"
+                                  min="0"
+                                  value={tech[difficulty as 'easy' | 'medium' | 'hard'][item.value]}
+                                  onChange={(e) =>
+                                    handleQuestionChange(
+                                      tech.technology_id as string,
+                                      difficulty as 'easy' | 'medium' | 'hard',
+                                      item.value,
+                                      e.target.value
+                                    )
+                                  }
+                                  className="w-20 m-0 text-center bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-400"
+
+                                /></div>
+                            </div>
                           })}
                         </div>
                       </div>
                     ))}
-                    <div className="text-center font-medium text-gray-900 dark:text-gray-300">
+                    <div className="text-center font-bold dark:text-white flex flex-col items-center">
+                    <span className="inline-block px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200 text-base">
                       {tech.easy.total + tech.medium.total + tech.hard.total}
-                    </div>
+                    </span>
+                    <span className="text-xs text-gray-400 mt-1">Total</span>
+                  </div>
                   </div>
                 ))}
 

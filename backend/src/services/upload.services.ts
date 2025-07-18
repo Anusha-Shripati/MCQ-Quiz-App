@@ -23,9 +23,9 @@ export class UploadService {
         path: file.key || '',
       };
     };
-    let filePath = file.path.split('/uploads/')[1];
-    console.log('filePath', filePath);
-
+    let filePath = file.path.split('uploads/')[1];
+    console.log(filePath,file.path,'filePath');
+    
     if (file.mimetype.includes('webm')) {
       filePath = await convertWebmToMp4(file.path);
     }
@@ -49,7 +49,7 @@ export class UploadService {
         path,
         originalname: foldername,
         filename: path.split('/').pop() || foldername,
-        mimetype: 'video/webm',
+        mimetype: 'video/mp4',
         size: fs.statSync(path).size
       } as Express.Multer.File;
 
@@ -86,7 +86,7 @@ export class UploadService {
 
     await new Promise<void>((resolve, reject) => {
       writeStream.on('finish', () => {
-        // fs.rmSync(chunkDir, { recursive: true });
+        fs.rmSync(chunkDir, { recursive: true });
         resolve();
       });
       writeStream.on('error', reject);

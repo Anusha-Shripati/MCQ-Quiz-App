@@ -149,7 +149,7 @@ const VideoRecorder = ({
         throw new Error('No stream available');
       }
 
-      const mediaRecorder = new MediaRecorder(stream);
+      const mediaRecorder = new MediaRecorder(stream,{mimeType:"video/mp4"});
       mediaRecorderRef.current = mediaRecorder;
 
       // Handle data available event
@@ -160,18 +160,17 @@ const VideoRecorder = ({
         }
       };
 
-      // Handle recording stop event
       mediaRecorder.onstop = () => {
         setRecordedChunks(chunks);
-        // Create blob and URL for preview
-        const blob = new Blob(chunks, { type: 'video/webm' });
+        const blob = new Blob(chunks, { type: 'video/mp4' });
+        console.log(blob);
+        
         saveVideoToIndexedDB(blob, videoKey, exam?.id as string);
         const videoUrl = URL.createObjectURL(blob);
         if (onRecordingStop) {
           onRecordingStop(blob, videoUrl);
         }
         setRecordedVideo(videoUrl);
-        // Change status to preview
         setStatus('preview');
       };
 

@@ -77,7 +77,6 @@ export class UploadController {
         );
         return;
       }
-      console.log(req.file);
 
       if (!req.file) {
         generateResponse(res, 400, {}, false, 'No file uploaded');

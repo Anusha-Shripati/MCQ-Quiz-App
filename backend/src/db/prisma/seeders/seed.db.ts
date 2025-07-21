@@ -24,7 +24,14 @@ const TECHNOLOGY_IDS = {
   JAVASCRIPT: 'b35e30a6-3e70-43e7-8c34-558fe5d1b369',
   MEAN_STACK: 'a9346e69-882f-49b4-a00e-3518f4eb4ea1',
   DEVOPS: 'bd0a5e7e-e493-4f8c-9b93-43db5fdd20e3',
+  REACT: '7e83a6e1-7ff2-4478-88e5-ecf46f614e91',
+  NODE: 'fcde8417-d0e2-4729-b1be-4010637dffad',
+  EXPRESS: '20519de6-3a7f-4a34-949e-c442bff2a32f',
+  MONGODB: 'c2043e56-60f3-46a1-86a6-e88e82e1fd8b',
+  ANGULAR: 'ac1f7eb6-74aa-4ae3-8f38-871aa7fa1431',
+  VUE: 'f1c8b2d3-4e5a-4c6b-9f0d-7e8f9b1c2d3e',
 };
+
 
 
 
@@ -1274,6 +1281,12 @@ async function createTechnologies() {
       { id: TECHNOLOGY_IDS.JAVASCRIPT, name: 'JavaScript' },
       { id: TECHNOLOGY_IDS.MEAN_STACK, name: 'MEAN Stack' },
       { id: TECHNOLOGY_IDS.DEVOPS, name: 'Dev ops' },
+      { id: TECHNOLOGY_IDS.MONGODB, name: 'MongoDB' },
+      { id: TECHNOLOGY_IDS.EXPRESS, name: 'Express' },
+      { id: TECHNOLOGY_IDS.REACT, name: 'React' },
+      { id: TECHNOLOGY_IDS.NODE, name: 'Node.js' },
+      { id: TECHNOLOGY_IDS.ANGULAR, name: 'Angular' },
+      { id: TECHNOLOGY_IDS.VUE, name: 'Vue.js' },
     ],
     skipDuplicates: true,
   });

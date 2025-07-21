@@ -30,6 +30,7 @@ const TECHNOLOGY_IDS = {
   MONGODB: 'c2043e56-60f3-46a1-86a6-e88e82e1fd8b',
   ANGULAR: 'ac1f7eb6-74aa-4ae3-8f38-871aa7fa1431',
   VUE: 'f1c8b2d3-4e5a-4c6b-9f0d-7e8f9b1c2d3e',
+  NEXTJS: 'd1e8f1c2-4e5a-4c6b-9f0d-7e8f9b1c2d3e',
 };
 
 
@@ -1287,6 +1288,7 @@ async function createTechnologies() {
       { id: TECHNOLOGY_IDS.NODE, name: 'Node.js' },
       { id: TECHNOLOGY_IDS.ANGULAR, name: 'Angular' },
       { id: TECHNOLOGY_IDS.VUE, name: 'Vue.js' },
+      { id: TECHNOLOGY_IDS.NEXTJS, name: 'Next.js' },
     ],
     skipDuplicates: true,
   });

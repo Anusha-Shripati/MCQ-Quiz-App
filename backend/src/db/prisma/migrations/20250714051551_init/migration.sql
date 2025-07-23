@@ -8,7 +8,7 @@ CREATE TYPE "ExamStatus" AS ENUM ('pending', 'in_progress', 'completed', 'expire
 CREATE TYPE "Difficulty" AS ENUM ('easy', 'medium', 'hard');
 
 -- CreateEnum
-CREATE TYPE "Question_type" AS ENUM ('multiple_select', 'video', 'text', 'mcq', 'code_snippet', 'code_editor');
+CREATE TYPE "Question_type" AS ENUM ('multiple_select', 'video', 'text', 'mcq', 'code_snippet', 'code_editor', 'code_snippet_with_mcq');
 
 -- CreateTable
 CREATE TABLE "users" (

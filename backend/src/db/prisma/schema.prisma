@@ -299,4 +299,5 @@ enum Question_type {
     mcq
     code_snippet
     code_editor
+    code_snippet_with_mcq
 }

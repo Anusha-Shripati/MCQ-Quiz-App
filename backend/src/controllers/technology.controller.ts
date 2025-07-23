@@ -108,11 +108,12 @@ export class TechnologyController {
       //     }
       //   }
       // }
-      const questionsArr = await prisma.questions.findMany({ where: { question: { in: questions.map((item: any) => item.question) },technology_id: id} })
+      // Only check for duplicates for questions that are NOT code_snippet_with_mcq
+      const nonCodeMcqQuestions = questions.filter((item: any) => item.type !== 'code_snippet_with_mcq');
+      const questionsArr = await prisma.questions.findMany({ where: { question: { in: nonCodeMcqQuestions.map((item: any) => item.question) }, technology_id: id } });
 
       if (questionsArr.length) {
-        return generateResponse(res, 400, { questions: questionsArr.map(item=>item.question) }, true, 'Questions already exists');
-
+        return generateResponse(res, 400, { questions: questionsArr.map(item => item.question) }, true, 'Questions already exists');
       }
       const updatedTechnology = await technologyService.updateTechnology(id, req.user?.id || '',{
         name: trimName,

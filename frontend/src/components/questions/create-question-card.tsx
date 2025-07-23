@@ -160,6 +160,57 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
     );
   };
 
+  // Add validation function
+  const validateQuestion = () => {
+    const errors: { [key: number]: string } = {};
+    let hasError = false;
+
+    // Validate question text
+    if (!question.question.trim()) {
+      toast.error('Question text is required');
+      hasError = true;
+    }
+  
+    // Validate code snippet for code_snippet and code_snippet_with_mcq types
+    if (question.type === 'code_snippet' || question.type === 'code_snippet_with_mcq') {
+
+      if (!question.meta?.code || typeof question.meta.code !== 'string' || !question.meta.code.trim()) {
+        toast.error('Code snippet is required');
+        hasError = true;
+      }
+    }
+
+    // Additional validation for code_snippet_with_mcq
+    if (question.type === 'code_snippet_with_mcq') {
+      // Check if at least 4 options are filled
+      const filledOptions = question.options.filter(opt => opt.trim()).length;
+      if (filledOptions < 4) {
+        toast.error('At least 4 options are required');
+        hasError = true;
+      }
+
+      // Check if correct answer is selected
+      if (!question.correct_answer.length) {
+        toast.error('Please select a correct answer');
+        hasError = true;
+      }
+
+      // Check for duplicate options
+      question.options.forEach((option, index) => {
+        if (option.trim()) {
+          const dupIndex = checkDuplicateOption(question.options, option, index);
+          if (dupIndex !== -1) {
+            errors[index] = `Duplicate of option ${dupIndex + 1}`;
+            hasError = true;
+          }
+        }
+      });
+    }
+
+    setOptionErrors(errors);
+    return !hasError;
+  };
+
   return (
     <Card className={validationError ? "border-2 border-red-500" : ""}>
       <CardHeader>
@@ -364,14 +415,95 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
           />
         )}
 
-        {(question.type === 'code_snippet' || question.type === 'code_editor') && (
+        {(question.type === 'code_snippet' || question.type === 'code_editor' || question.type === 'code_snippet_with_mcq') && (
           <textarea
-            placeholder="Enter your code snippet"
+          placeholder={question.type === 'code_snippet_with_mcq' ? `Example:
+            function getAge() {
+              'use strict';
+              age = 21;
+              console.log(age);
+            }
+            getAge();` : "Enter your code snippet"}
             value={(question?.meta?.code || '') as string}
             onChange={handleCodeQuestions}
             className="w-full p-2 border rounded-md dark:bg-gray-700 dark:text-white"
             rows={10}
           />
+        )}
+
+{(question.type === 'code_snippet_with_mcq') && (
+          <div className="space-y-2">
+            {ensureFiveOptions(question.options).map((option, i) => (
+              <div key={i} className="flex items-center gap-2">
+                
+                  <input
+                    type="radio"
+                    name={`radio-${question.id}`}
+                    checked={question.correct_answer.includes(i.toString())}
+                    onChange={(e) => handleCorrectOptionChange(i, selectedQuestion, 'mcq', e)}
+                    disabled={!option.trim()} // Disable radio if option is empty
+                  />
+                
+                <div className="flex-1">
+                  <Input
+                    placeholder={`Option ${i + 1}`}
+                    value={option}
+                    onChange={(e) => {
+                      const updatedQuestions = [...questions];
+                      const newValue = e.target.value;
+                      updatedQuestions[selectedQuestion].options[i] = newValue;
+
+                      // Clear error when typing
+                      if (optionErrors[i]) {
+                        const newErrors = { ...optionErrors };
+                        delete newErrors[i];
+                        setOptionErrors(newErrors);
+                      }
+
+                      setQuestions(updatedQuestions);
+                    }}
+                    onBlur={(e) => {
+                      // Check for duplicate options
+                      const updatedQuestions = [...questions];
+                      const newValue = e.target.value.trim();
+
+                      if (newValue === '') return;
+
+                      const dupIndex = checkDuplicateOption(
+                        updatedQuestions[selectedQuestion].options,
+                        newValue,
+                        i
+                      );
+
+                      if (dupIndex !== -1) {
+                        // Mark as duplicate
+                        updatedQuestions[selectedQuestion].options[i] = '';
+                        e.target.value = '';
+                        setQuestions(updatedQuestions);
+
+                        // Set error for this option
+                        setOptionErrors(prev => ({
+                          ...prev,
+                          [i]: `Duplicate of option ${dupIndex + 1}`
+                        }));
+
+                        toast.error('Option already exists');
+                        return;
+                      }
+                    }}
+                    className={`
+                      ${i >= 4 ? 'border-dashed border-gray-400' : ''} 
+                      ${validationError && i < 4 && !option.trim() ? 'border-red-500 bg-red-50' : ''}
+                      ${optionErrors[i] ? 'border-red-500 bg-red-50' : ''}
+                    `}
+                  />
+                  {optionErrors[i] && (
+                    <p className="text-xs text-red-500 mt-1">{optionErrors[i]}</p>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
         )}
       </CardContent>
       <CardFooter className="mt-auto flex justify-between items-center">
@@ -407,9 +539,21 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
 
         {questions.length !== 0 && (
           <div className="mt-2 flex justify-end gap-4">
-            {onSave && <Button variant="default" className='px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900' onClick={onSave} disabled={isMutating || updating}>
-              Save
-            </Button>}
+            {onSave && (
+              <Button 
+                variant="default" 
+                className='px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900' 
+                onClick={() => {
+                  if (!validateQuestion()) {
+                    return;
+                  }
+                  onSave();
+                }} 
+                disabled={isMutating || updating}
+              >
+                Save
+              </Button>
+            )}
             <Button variant="outline" onClick={() => handleReset('all')} disabled={isMutating || updating}>
               Reset All
             </Button>

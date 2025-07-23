@@ -50,8 +50,9 @@ const Step1: React.FC<Step1Props> = ({
             multiple_select:0,
             mcq:0,
             text:0,
-            code_snippet:0,
+            code_snippet:0, 
             code_editor:0,
+            code_snippet_with_mcq:0,
             video:0,
             total:0
         },
@@ -62,6 +63,7 @@ const Step1: React.FC<Step1Props> = ({
           text:0,
           code_snippet:0,
           code_editor:0,
+          code_snippet_with_mcq:0,
           video:0,
           total:0
         },
@@ -72,6 +74,7 @@ const Step1: React.FC<Step1Props> = ({
           text:0,
           code_snippet:0,
           code_editor:0,
+          code_snippet_with_mcq:0,
           video:0,
           total:0
         },

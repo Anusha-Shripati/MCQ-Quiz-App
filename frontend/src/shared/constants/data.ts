@@ -1253,6 +1253,7 @@ export const questionType: { [key: string]: string } = {
   'mcq': 'Radio Select',
   'code_snippet': 'Code Snippet',
   'code_editor': 'Code Editor',
+  'code_snippet_with_mcq': 'Code Snippet with MCQ',
   'video': 'Video',
   'text': 'Text',
 };
@@ -1269,6 +1270,7 @@ export const questionTypeOptions= [
   { value: 'code_snippet', label: 'Code Snippet' },
   { value: 'code_editor', label: 'Code Editor' },
   { value: 'video', label: 'Video' },
+  { value: 'code_snippet_with_mcq', label: 'Code Snippet with MCQ' }
 ] as { value: Question['type']; label: string }[]
 
 export const commonRoutes: string[] = ['dashboard', 'profile', ''];

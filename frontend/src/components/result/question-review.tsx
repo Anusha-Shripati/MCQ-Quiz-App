@@ -321,6 +321,33 @@ const QuestionReview: React.FC<QuestionReviewProps> = ({ answers }) => {
                     </div>
                   </div>
                 )}
+                {ans.question?.type === 'code_snippet_with_mcq' && (
+                  <div className="mb-4">
+                    {ans.question?.meta?.code && (
+                      <>
+                        <p className="text-xs font-medium text-purple-700 dark:text-purple-300 mb-1">Code Snippet:</p>
+                        <pre className="bg-gradient-to-br from-gray-900 to-gray-800 max-h-96 dark:from-gray-950 dark:to-gray-900 text-gray-100 p-3 rounded-xl text-xs overflow-auto border border-gray-700 dark:border-gray-600 hover:border-gray-600 dark:hover:border-gray-500 transition-colors duration-300 shadow-lg">
+                          <code>{ans.question?.meta.code || 'No code snippet provided.'}</code>
+                        </pre>
+                      </>
+                    )}
+                    <p className="text-xs font-medium text-purple-700 dark:text-purple-300 mb-1 mt-3">Selected Answer:</p>
+                    <div className="space-y-2">
+                      {ans.question.options.map((option, index) => (
+                        <div
+                          key={index}
+                          className={`p-2 rounded-lg ${
+                            ans.user_answer.includes(index.toString())
+                              ? 'bg-blue-100 dark:bg-blue-900'
+                              : 'bg-gray-100 dark:bg-gray-800'
+                          }`}
+                        >
+                          {option}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           );

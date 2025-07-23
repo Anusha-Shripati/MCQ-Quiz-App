@@ -26,7 +26,7 @@ export const candidateExamSchema = {
         'any.only': 'Level must be one of easy, medium, hard',
       }),
       type: Joi.string()
-        .valid('mcq', 'multiple_select', 'text', 'video', 'code_snippet')
+        .valid('mcq', 'multiple_select', 'text', 'video', 'code_snippet', 'code_snippet_with_mcq')
         .required()
         .messages({
           'string.empty': 'Type is required',

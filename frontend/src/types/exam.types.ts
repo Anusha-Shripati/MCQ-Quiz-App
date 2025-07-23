@@ -57,6 +57,7 @@ export enum QuestionType {
   CODE_SNIPPET = 'code_snippet',
   VIDEO = 'video',
   CODE_EDITOR = 'code_editor',
+  CODE_SNIPPET_WITH_MCQ = 'code_snippet_with_mcq',
 }
 
 export interface IExamQuestion {

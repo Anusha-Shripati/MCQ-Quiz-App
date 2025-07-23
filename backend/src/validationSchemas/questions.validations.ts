@@ -25,10 +25,10 @@ export const questionsSchema = {
       }),
       
       options: Joi.when('type', {
-        is: Joi.valid('mcq', 'multiple_select'),
+        is: Joi.valid('mcq', 'multiple_select', 'code_snippet_with_mcq'),
         then: Joi.array().items(Joi.string()).min(4).required().messages({
           'array.min': 'At least 4 options are required',
-          'any.required': 'Options are required for MCQ and Multiple Select types',
+          'any.required': 'Options are required for MCQ, Multiple Select and code_snippet_with_mcq types',
         }),
         otherwise: Joi.array().items(Joi.string()).optional(),
       }),
@@ -40,11 +40,11 @@ export const questionsSchema = {
         'any.only': 'Level must be one of easy, medium, hard',
       }),
       type: Joi.string()
-        .valid('mcq', 'multiple_select', 'text', 'video', 'code_snippet', 'code_editor')
+        .valid('mcq', 'multiple_select', 'text', 'video', 'code_snippet', 'code_editor', 'code_snippet_with_mcq')
         .required()
         .messages({
           'string.empty': 'Type is required',
-          'any.only': 'Type must be one of mcq, multiple_select, text, video, code_snippet, code_editor',
+          'any.only': 'Type must be one of mcq, multiple_select, text, video, code_snippet, code_editor, code_snippet_with_mcq',
         }),
       meta: Joi.object().unknown(true).default({}),
     }).custom((value, helpers) => {
@@ -55,6 +55,12 @@ export const questionsSchema = {
       ) {
         return helpers.error('any.custom', {
           message: 'Either question or meta.video_url is required for video type',
+        });
+      }
+
+      if (value.type === 'code_snippet_with_mcq' && (!value.meta?.code || value.meta.code.trim() === '')) {
+        return helpers.error('any.custom', {
+          message: 'Code snippet is required for code_snippet_with_mcq type',
         });
       }
 
@@ -90,7 +96,7 @@ export const questionsSchema = {
         }),
       }),
       options: Joi.when('type', {
-        is: Joi.valid('mcq', 'multiple_select'),
+        is: Joi.valid('mcq', 'multiple_select', 'code_snippet_with_mcq'),
         then: Joi.array().items(Joi.string()).min(4).required().messages({
           'array.min': 'At least 4 options are required',
           'any.required': 'Options are required for MCQ and Multiple Select types',
@@ -105,11 +111,11 @@ export const questionsSchema = {
         'any.only': 'Level must be one of easy, medium, hard',
       }),
       type: Joi.string()
-        .valid('mcq', 'multiple_select', 'text', 'video', 'code_snippet', 'code_editor')
+        .valid('mcq', 'multiple_select', 'text', 'video', 'code_snippet', 'code_editor', 'code_snippet_with_mcq')
         .required()
         .messages({
           'string.empty': 'Type is required',
-          'any.only': 'Type must be one of mcq, multiple_select, text, video, code_snippet, code_editor',
+          'any.only': 'Type must be one of mcq, multiple_select, text, video, code_snippet, code_editor, code_snippet_with_mcq',
         }),
       meta: Joi.object().unknown(true).default({}),
     }).custom((value, helpers) => {
@@ -120,6 +126,12 @@ export const questionsSchema = {
       ) {
         return helpers.error('any.custom', {
           message: 'Either question or meta.video_url is required for video type',
+        });
+      }
+
+      if (value.type === 'code_snippet_with_mcq' && (!value.meta?.code || value.meta.code.trim() === '')) {
+        return helpers.error('any.custom', {
+          message: 'Code snippet is required for code_snippet_with_mcq type',
         });
       }
 

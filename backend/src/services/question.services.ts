@@ -11,7 +11,7 @@ interface QuestionsPayload {
   options: any;
   time: string;
   difficulty_level: 'easy' | 'medium' | 'hard';
-  type: 'multiple_select' | 'video' | 'text' | 'mcq' | 'code_snippet';
+  type: 'multiple_select' | 'video' | 'text' | 'mcq' | 'code_snippet' | 'code_snippet_with_mcq';
   meta: any;
   created_by:string
 }
@@ -402,7 +402,8 @@ export class QuestionService {
 
           totalImported++;
         }
-        const existing = await tx.questions.findMany({where: { question:{in:questionsImportArray.map((item:any)=>item.question)}}})
+        const existing = await tx.questions.findMany({where: { question:{in:questionsImportArray.filter((item:any) => item.type !== 'code_snippet_with_mcq')
+          .map((item:any)=>item.question)}}})
           if(existing.length){
             const existingIndex:number[]=[]
             existing.forEach((element:Questions) => {

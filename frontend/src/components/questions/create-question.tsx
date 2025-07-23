@@ -141,13 +141,27 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
     updatedQuestions[index].options = ['', '', '', '', '', ''];
     updatedQuestions[index].correct_answer = [];
     updatedQuestions[index].meta = {};
+
     if (value === 'code_snippet' || value === 'code_editor') {
-      updatedQuestions[index].correct_answer = [];
       updatedQuestions[index].options = [];
       if (updatedQuestions[index]?.meta?.code === undefined) {
         updatedQuestions[index].meta = { code: '' };
       }
+    } else if (value === 'code_snippet_with_mcq') {
+      updatedQuestions[index].options = ['', '', '', '', '', ''];
+      updatedQuestions[index].meta = { code: '' };
+      if (updatedQuestions[index]?.meta?.code === undefined) {
+        updatedQuestions[index].meta = { code: '' };
+      }
     }
+
+    // Reset validation errors for this question
+    setValidationErrors(prev => {
+      const newErrors = { ...prev };
+      delete newErrors[index];
+      return newErrors;
+    });
+
     setQuestions(updatedQuestions);
   };
 
@@ -190,12 +204,22 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
       //   return;
       // }
 
-      if (q.type === 'mcq' || q.type === 'multiple_select') {
+      // Validate code snippet
+      if (q.type === 'code_snippet' || q.type === 'code_snippet_with_mcq') {
+        const codeSnippet = (q.meta?.code || '') as string;
+        if (!codeSnippet.trim()) {
+          errors[index] = 'Code snippet cannot be empty';
+          hasErrors = true;
+          return;
+        }
+      }
+
+      // Validate MCQ and multiple select options
+      if (q.type === 'mcq' || q.type === 'multiple_select' || q.type === 'code_snippet_with_mcq') {
         const nonEmptyOptions = q.options.filter((option) => option.trim() !== '');
 
         if (nonEmptyOptions.length < 4) {
-          errors[index] =
-            `This question requires at least 4 options (currently has ${nonEmptyOptions.length})`;
+          errors[index] = `This question requires at least 4 options (currently has ${nonEmptyOptions.length})`;
           hasErrors = true;
         } else {
           const uniqueOptions = new Set(nonEmptyOptions);
@@ -205,7 +229,7 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
           }
         }
 
-        if (q.correct_answer.length === 0 ) {
+        if (q.correct_answer.length === 0) {
           errors[index] = errors[index] || 'Please select at least one correct answer';
           hasErrors = true;
         }
@@ -218,8 +242,10 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
     if (hasErrors) {
       setValidationErrors(errors);
       // Set selected question to the first question with an error
-      const firstErrorIndex = Object.keys(errors)[0];
-      setSelectedQuestion(parseInt(firstErrorIndex));
+      const firstErrorIndex = Object.entries(errors).find(([, error]) => error)?.[0];
+      if (firstErrorIndex) {
+        setSelectedQuestion(parseInt(firstErrorIndex));
+      }
       showSingleToast('Please fix the validation errors before saving.');
       return;
     }
@@ -232,18 +258,26 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
         mutate((key: string) => typeof key === 'string' && key.startsWith('/technology/list'));
       } catch (error) {
         if(isAxiosError(error)){
-          error.response?.data?.data?.questions?.map((item:string)=>{
-            
-            const questionIndex = questions.findIndex((q)=>q.question == item);
-            if(questionIndex!== -1) errors[questionIndex]='Question is already exists'
-          })
-          setValidationErrors(errors)
-          
+          const duplicateQuestions = error.response?.data?.data?.questions;
+          duplicateQuestions?.map((item: string) => {
+            const questionIndex = questions.findIndex((q) => {
+              // Allow duplicate questions for code_snippet_with_mcq type
+              if (q.type === 'code_snippet_with_mcq') {
+                return false;
+              }
+              return q.question === item;
+            });
+            if (questionIndex !== -1) {
+              errors[questionIndex] = 'Question is already exists';
+            }
+          });
+          setValidationErrors(errors);
+
           showSingleToast(error.response?.data?.message || 'Failed to save technology.')
-        }else{ 
-          showSingleToast( 'Failed to save technology.');
-        }
+      }else{ 
+        showSingleToast( 'Failed to save technology.');
       }
+    }
     // } else {
     //   try {
     //     const response = await trigger({ name, questions });

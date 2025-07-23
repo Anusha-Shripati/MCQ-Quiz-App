@@ -39,6 +39,35 @@ function Question({ question, answers, handleAnswerChange, handleStopRecording, 
                     ))}
                 </RadioGroup>
             );
+
+        case QuestionType.CODE_SNIPPET_WITH_MCQ:
+            return (
+                <div className="space-y-4">
+                    {typeof question.question?.meta?.code === 'string' && (
+                        <pre className="max-h-96 bg-gradient-to-br from-gray-900 to-gray-800 dark:from-gray-950 dark:to-gray-900 text-gray-100 p-3 rounded-xl text-xs overflow-x-auto border border-gray-700 dark:border-gray-600 hover:border-gray-600 dark:hover:border-gray-500 transition-colors duration-300 shadow-lg">
+                            <code>{question.question?.meta.code || 'No code snippet provided.'}</code>
+                        </pre>
+                    )}
+                    <RadioGroup
+                        value={answers[question.question_id]?.answer as string || ''}
+                        onValueChange={(value) => handleAnswerChange(question, value)}
+                        className="space-y-4"
+                    >
+                        {question.question.options?.map((option, idx) => (
+                            <div key={idx} className="flex items-center space-x-3">
+                                <Radio value={`${idx}`} id={`option-${question.question_id}-${idx}`} />
+                                <label
+                                    htmlFor={`option-${question.question_id}-${idx}`}
+                                    className="text-lg font-semibold text-gray-800 cursor-pointer"
+                                >
+                                    {option}
+                                </label>
+                            </div>
+                        ))}
+                    </RadioGroup>
+                </div>
+            );
+
         case QuestionType.VIDEO:
             return (
                 <VideoRecorderQuestion isLoading={isLoading} question={question} answers={answers} onRecordingStop={(blob, url) => {

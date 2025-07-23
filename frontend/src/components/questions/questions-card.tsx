@@ -23,6 +23,7 @@ const questionType = {
   text: { label: 'Fill in the blanks', color: 'green' },
   multiple_select: { label: 'Multiple Select', color: 'orange' },
   video: { label: 'Video', color: 'red' },
+  code_snippet_with_mcq: { label: 'Code Snippet with MCQ', color: 'indigo' },
 };
 
 const difficulties: Record<Question['difficulty_level'], { label: string; color: string }> = {

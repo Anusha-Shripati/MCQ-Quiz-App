@@ -153,8 +153,9 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
     multiple_select: 0,
     text: 0,
     video: 0,
-    code_snippet: 0,
+    code_snippet: 0,   
     code_editor: 0,
+    code_snippet_with_mcq: 0,
     total: 0,
   };
 

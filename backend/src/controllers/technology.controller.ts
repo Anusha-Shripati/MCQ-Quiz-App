@@ -60,7 +60,7 @@ export class TechnologyController {
 
       for (const question of questions) {
         if (
-          (question.type === 'mcq' || question.type === 'multiple_select') &&
+          (question.type === 'mcq' || question.type === 'multiple_select' || question.type === 'code_snippet_with_mcq') &&
           (!Array.isArray(question.options) ||
             question.options.filter((opt: string) => opt && opt.trim() !== '').length < 4)
         ) {

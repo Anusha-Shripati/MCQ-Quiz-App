@@ -14,6 +14,7 @@ import { useProfileStore } from '@/store/profileStore';
 import { userEndpoint } from '@/lib/endpoint';
 import PasswordRequirements from '@/components/profile/PasswordRequirements';
 import { emailRegex, passwordRegex } from '@/shared/constants/data';
+import { useRouter } from 'next/navigation';
 
 const userInfoSchema = z.object({
   userName: z
@@ -41,6 +42,7 @@ export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState('emailPassword');
   const { isEditing, setIsEditing } = useProfileStore();
   const { user } = useAuthStore();
+  const router = useRouter();
 
   const [showPassword, setShowPassword] = useState({ old: false, new: false, reNew: false });
   const togglePassword = (type: 'old' | 'new' | 'reNew') => {
@@ -127,8 +129,12 @@ export default function ProfilePage() {
           newPassword: data.newPassword,
         });
         if (res.success) {
-          toast.success('Password Updated Successfully');
+          toast.success('Password has been changed successfully. Kindly login with the new password.');
           passwordReset();
+          // Logout and redirect to login
+          const { logout } = useAuthStore.getState();
+          logout();
+          router.push('/');
         } else {
           toast.error(res.message);
         }

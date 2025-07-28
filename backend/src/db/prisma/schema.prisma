@@ -115,7 +115,7 @@ model Questions {
     question         String
     correct_answer   String[]
     options          Json
-    time             String
+    time             String?
     difficulty_level Difficulty
     type             Question_type
     meta             Json

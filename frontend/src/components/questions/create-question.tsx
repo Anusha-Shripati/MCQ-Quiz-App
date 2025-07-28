@@ -17,6 +17,7 @@ import useSWRMutation from 'swr/mutation';
 import { showSingleToast } from '@/lib/utils';
 import { isAxiosError } from 'axios';
 import { technologyEndpoint } from '@/lib/endpoint';
+import { useQuestionPreferencesStore } from '@/store/questionPreferencesStore';
 
 // import { isValidObjectId } from '@/lib/utils';
 
@@ -31,6 +32,7 @@ async function update(url: string, { arg }: { arg: { name: string; questions: Qu
 }
 
 const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }) => {
+  const { lastSelectedType, lastSelectedDifficulty, setLastSelectedType } = useQuestionPreferencesStore();
   const { data: technologyData } = useSWR(`${technologyEndpoint.LIST}`, api.get);
   const [technologyId, setTechnologyId] = useState<string>(params.technology);
   const [questions, setQuestions] = useState<Question[]>([
@@ -40,8 +42,8 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
       options: ['', '', '', '', '', ''],
       correct_answer: [],
       time: '',
-      difficulty_level: 'easy',
-      type: 'mcq',
+      difficulty_level: lastSelectedDifficulty,
+      type: lastSelectedType,
       meta: {},
     },
   ]);
@@ -84,8 +86,8 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
         options: ['', '', '', '', '', ''],
         correct_answer: [],
         time: '',
-        difficulty_level: 'easy',
-        type: 'mcq',
+        difficulty_level: lastSelectedDifficulty,
+        type: lastSelectedType,
         meta: {},
       },
     ]);
@@ -111,16 +113,15 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
         return {
           ...q,
           question: type == 'all' ||  type == 'question' ?'':q.question,
-          options: type == 'all' ||  type == 'question' ? ['', '', '', '', '', '']:q.options,
+          options: type == 'all' ||  type == 'answer' ? ['', '', '', '', '', '']:q.options,
           correct_answer: type == 'all' ||  type == 'answer'? []:q.correct_answer,
-          // time: type == 'all' ?'':q.time,
           difficulty_level: type == 'all'?'easy':q.difficulty_level,
           type: type == 'all'?'mcq':q.type,
           meta: type == 'all' || type == 'question'?{}:q.meta,
         };
       });
     });
-    toast.success('Questions Reset successfully!');
+    toast.success(type == 'answer' ? 'Answer Reset successfully!' : type == 'question' ? 'Question Reset successfully!' : 'All Reset successfully!');
   };
 
   const handleDeleteQuestion = async (index: number) => {
@@ -155,6 +156,9 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
       }
     }
 
+    // Store the last selected type
+    setLastSelectedType(value);
+
     // Reset validation errors for this question
     setValidationErrors(prev => {
       const newErrors = { ...prev };
@@ -168,12 +172,12 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
   const handleAddQuestion = () => {
     const newQuestion: Question = {
       technology_id: technologyId,
-      type: 'mcq',
+      type: lastSelectedType,
       question: '',
       options: ['', '', '', '', '', ''],
       correct_answer: [],
-      // time: '',
-      difficulty_level: 'easy',
+      time: '',
+      difficulty_level: lastSelectedDifficulty,
       meta: {},
     };
     setQuestions([...questions, newQuestion]);
@@ -384,8 +388,8 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
                       options: ['', '', '', '', '', ''],
                       correct_answer: [],
                       time: '',
-                      difficulty_level: 'easy',
-                      type: 'mcq',
+                      difficulty_level: lastSelectedDifficulty,
+                      type: lastSelectedType,
                       meta: {},
                     };
                     setQuestions([newQuestion]);

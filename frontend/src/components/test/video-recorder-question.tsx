@@ -28,29 +28,36 @@ export const VideoRecorderQuestion: FC<VideoRecorderProps> = React.memo(
     }, [answers, question.question_id]);
     
     return (
-      <>
-        {iframeHTML.includes('iframe') ? (
-          <StaticIframe html={iframeHTML} />
-        ) : (
-          question.question?.meta?.videoToVideo && (
-            <video controls className="w-full max-h-[400px] rounded-lg shadow font-semibold">
-              <source src={iframeHTML} type="video/mp4" />
-            </video>
-          )
-        )}
-        <VideoRecorder
-          onRecordingComplete={(chunks, url) => {
-            const blob = new Blob(chunks, { type: 'video/mp4' });
-            onRecordingComplete && onRecordingComplete(blob, url);
-          }}
-          maxTime={120}
-          videoKey={question.id}
-          videoLink={videoUrl}
-          onRecordingStop={(blob, url) => onRecordingStop && onRecordingStop(blob, url)}
-          isLoading={isLoading}
-          showNextButton={false}
-        />
-      </>
+      <div className="space-y-6">
+        {/* Question Video */}
+        <div className="w-full rounded-lg overflow-hidden shadow-md">
+          {iframeHTML.includes('iframe') ? (
+            <StaticIframe html={iframeHTML} />
+          ) : (
+            question.question?.meta?.videoToVideo && (
+              <video controls className="w-full max-h-[400px] rounded-lg shadow font-semibold">
+                <source src={iframeHTML} type="video/mp4" />
+              </video>
+            )
+          )}
+        </div>
+
+        {/* Video Recorder Input */}
+        <div className="w-full">
+          <VideoRecorder
+            onRecordingComplete={(chunks, url) => {
+              const blob = new Blob(chunks, { type: 'video/mp4' });
+              onRecordingComplete && onRecordingComplete(blob, url);
+            }}
+            maxTime={120}
+            videoKey={question.id}
+            videoLink={videoUrl}
+            onRecordingStop={(blob, url) => onRecordingStop && onRecordingStop(blob, url)}
+            isLoading={isLoading}
+            showNextButton={false}
+          />
+        </div>
+      </div>
     );
   }
 );

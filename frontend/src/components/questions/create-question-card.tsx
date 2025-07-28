@@ -18,6 +18,7 @@ import useSWRMutation from 'swr/mutation';
 import { FormField } from '../common/form-field';
 import { questionEndpoint } from '@/lib/endpoint';
 import { questionTypeOptions } from '@/shared/constants/data';
+import { useQuestionPreferencesStore } from '@/store/questionPreferencesStore';
 
 interface QuestionCardProps {
   question: Question;
@@ -67,6 +68,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
   validationError,
   onSave
 }) => {
+  const { setLastSelectedDifficulty } = useQuestionPreferencesStore();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   // Add state to check if the question field has content
   const hasQuestionContent = useMemo(
@@ -256,6 +258,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
               const updatedQuestions = [...questions];
               updatedQuestions[selectedQuestion].difficulty_level = value;
               setQuestions(updatedQuestions);
+              setLastSelectedDifficulty(value);
             }}
             placeholder="Difficulty"
             options={questionDifficultyOptions}

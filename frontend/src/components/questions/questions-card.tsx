@@ -86,9 +86,29 @@ export const QuestionCard = ({
           </Badge>
         </div>
 
-        {/* Options/Content */}
+        {/* Code or Video Content First */}
         <ul className="space-y-2 max-w-full mb-4">
-          {(question.type == 'mcq' || question.type == 'multiple_select') && (
+          {question.meta?.code ? (
+            <li
+              key="code"
+              className="p-3 rounded-lg text-base font-mono bg-gray-900 text-green-200 border border-gray-800 shadow-inner overflow-x-auto max-w-full whitespace-pre-wrap break-all mt-2"
+            >
+              <pre className="overflow-x-auto max-w-full text-sm leading-relaxed">
+                {question.meta?.code as string}
+              </pre>
+            </li>
+          ) : null}
+
+          {question.meta?.videoToVideo ? (
+            <div
+              key="video"
+              className="w-full overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm mt-2"
+              dangerouslySetInnerHTML={{ __html: question.meta?.video_url || '' }}
+            ></div>
+          ) : null}
+
+          {/* MCQ Options */}
+          {(question.type === 'mcq' || question.type === 'multiple_select' || question.type === 'code_snippet_with_mcq') && (
             <>
               {question.options
                 ?.filter((option) => option !== '')
@@ -110,29 +130,6 @@ export const QuestionCard = ({
                   </li>
                 ))}
             </>
-          )}
-
-          {question.meta?.code ? (
-            <li
-              key="code"
-              className="p-3 rounded-lg text-base font-mono bg-gray-900 text-green-200 border border-gray-800 shadow-inner overflow-x-auto max-w-full whitespace-pre-wrap break-all mt-2"
-            >
-              <pre className="overflow-x-auto max-w-full text-sm leading-relaxed">
-                {question.meta?.code as string}
-              </pre>
-            </li>
-          ) : (
-            ''
-          )}
-
-          {question.meta?.videoToVideo ? (
-            <div
-              key="video"
-              className="w-full overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm mt-2"
-              dangerouslySetInnerHTML={{ __html: question.meta?.video_url || '' }}
-            ></div>
-          ) : (
-            ''
           )}
         </ul>
 

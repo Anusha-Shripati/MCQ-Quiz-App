@@ -559,7 +559,7 @@ const TestPage = () => {
                   <>
                     <li>
                       In the screen sharing popup, select <strong>Entire Screen</strong> and then
-                      click <strong>Share</strong>. You can refresh this page.{' '}
+                      click <strong>Share</strong>.
                     </li>
                   </>
                 )}
@@ -567,6 +567,7 @@ const TestPage = () => {
             </ul>
           }
           title="Permissions"
+          showReloadButton={true}
         />
       ) : (
         <>

@@ -1,12 +1,14 @@
 import React from 'react';
+import { Button } from '@/components/ui/form/button';
 
 interface TestWarningProps {
     title: string;
     text: React.ReactNode;
     onClose?: () => void;
+    showReloadButton?: boolean;
 }
 
-function TestWarning({ title, text, onClose }: TestWarningProps) {
+function TestWarning({ title, text, onClose, showReloadButton }: TestWarningProps) {
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm px-2">
             <div className="w-full max-w-md rounded-xl shadow-2xl bg-white overflow-hidden animate-slide-down border border-red-200">
@@ -25,15 +27,25 @@ function TestWarning({ title, text, onClose }: TestWarningProps) {
                         </svg>
                         <span className="text-white text-xl font-semibold drop-shadow">{title}</span>
                     </div>
-                    {onClose && (
-                        <button
-                            onClick={onClose}
-                            aria-label="Dismiss warning"
-                            className="text-white hover:text-red-100 text-2xl font-bold focus:outline-none transition"
-                        >
-                            &times;
-                        </button>
-                    )}
+                    <div className="flex items-center gap-3">
+                        {showReloadButton && (
+                            <Button
+                                onClick={() => window.location.reload()}
+                                className="bg-white hover:bg-gray-100 text-red-600 px-4 py-2 rounded-md text-sm font-medium"
+                            >
+                                Reload Page
+                            </Button>
+                        )}
+                        {onClose && (
+                            <button
+                                onClick={onClose}
+                                aria-label="Dismiss warning"
+                                className="text-white hover:text-red-100 text-2xl font-bold focus:outline-none transition"
+                            >
+                                &times;
+                            </button>
+                        )}
+                    </div>
                 </div>
                 {/* Content */}
                 <div className="px-6 py-6">

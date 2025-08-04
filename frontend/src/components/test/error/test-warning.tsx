@@ -40,7 +40,7 @@ function TestWarning({ title, text, onClose, showReloadButton }: TestWarningProp
                             <button
                                 onClick={onClose}
                                 aria-label="Dismiss warning"
-                                className="text-white hover:text-red-100 text-2xl font-bold focus:outline-none transition"
+                                className="text-white hover:text-red-100 text-2xl font-bold focus:outline-none transition cursor-pointer"
                             >
                                 &times;
                             </button>

@@ -147,6 +147,7 @@ function Question({ question, answers, handleAnswerChange, handleStopRecording, 
                     <EditorPage
                         onChange={(value) => handleAnswerChange(question, value)}
                         value={(answers[question.question_id]?.answer as string) || ''}
+                        questionId={question.question_id}
                     />
                     <div className="text-sm text-gray-500">
                         Tip: Use proper indentation and comments where necessary

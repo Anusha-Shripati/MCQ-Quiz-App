@@ -24,7 +24,7 @@ const AlertWrapper = ({ showAlert, alertMessage,onClose }: { showAlert: boolean;
             <div className="mt-6 flex justify-end">
               <button
                 onClick={() => onClose()}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200"
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200 cursor-pointer"
               >
                 Dismiss
               </button>

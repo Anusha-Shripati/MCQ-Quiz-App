@@ -117,7 +117,7 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
           correct_answer: type == 'all' ||  type == 'answer'? []:q.correct_answer,
           difficulty_level: type == 'all'?'easy':q.difficulty_level,
           type: type == 'all'?'mcq':q.type,
-          meta: type == 'all' || type == 'question'?{}:q.meta,
+          meta: type == 'all' || type == 'answer'?{}:q.meta,
         };
       });
     });

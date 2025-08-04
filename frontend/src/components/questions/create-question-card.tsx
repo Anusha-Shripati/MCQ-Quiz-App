@@ -563,7 +563,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
             <Button variant="outline" onClick={() => handleReset('question')} disabled={isMutating || updating}>
               Reset question
             </Button>
-            {question.type != 'code_editor' && question.type != 'code_snippet' && question.type != 'video' && <Button variant="outline" onClick={() => handleReset('answer')} disabled={isMutating || updating}>
+            {question.type != 'video' && <Button variant="outline" onClick={() => handleReset('answer')} disabled={isMutating || updating}>
               Reset answer
             </Button>}
           </div>

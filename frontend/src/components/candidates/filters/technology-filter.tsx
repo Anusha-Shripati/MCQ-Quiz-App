@@ -67,10 +67,15 @@ export function TechnologyFilter({ value, onChange, options, className }: Techno
           multiValueRemove: (base) => ({
             ...base,
             color: 'var(--text-color, #111827)',
+            cursor: 'pointer',
             ':hover': {
               backgroundColor: '#ef4444',
               color: 'white',
             },
+          }),
+          clearIndicator: (base) => ({
+            ...base,
+            cursor: 'pointer',
           }),
           placeholder: (base) => ({
             ...base,

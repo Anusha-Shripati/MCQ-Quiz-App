@@ -439,6 +439,10 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
                       marginTop: '4px'
                     };
                   },
+                  clearIndicator: (base) => ({
+                    ...base,
+                    cursor: 'pointer',
+                  }),
                 }}
               />
 

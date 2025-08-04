@@ -138,18 +138,62 @@ const   ViewQuestions = () => {
     setQuestionsData((prv) =>
       prv.map((item, index) => (selectedQuestion == index && prvQuestion ? {
         ...prvQuestion,
-        question: type == 'all' ||  type == 'question' ?prvQuestion.question:item.question,
-        options: type == 'all' ||  type == 'question' ? prvQuestion.options:item.options,
-        correct_answer: type == 'all' ||  type == 'answer'?  prvQuestion.correct_answer:item.correct_answer,
-        time: type == 'all' ?  prvQuestion.time:item.time,
-        difficulty_level: type == 'all'?prvQuestion.difficulty_level:item.difficulty_level,
-        type: type == 'all'?prvQuestion.type:item.type,
-        meta: type == 'all' || type == 'question'?prvQuestion.meta:item.meta,
+        question: type == 'all' ||  type == 'question' ?'':item.question,
+        options: type == 'all' ||  type == 'answer' ? ['', '', '', '', '', '']:item.options,
+        correct_answer: type == 'all' ||  type == 'answer'?  []:item.correct_answer,
+        time: type == 'all' ?  '':item.time,
+        difficulty_level: type == 'all'?'easy':item.difficulty_level,
+        type: type == 'all'?'mcq':item.type,
+        meta: type == 'all' || type == 'answer'?{}:item.meta,
       } : item))
-    );
+    );  
   };
   const handleSave = async (question: Question) => {
     try {
+      // Validate question before saving
+      if (!question.question.trim()) {
+        toast.error('Question cannot be empty');
+        return;
+      }
+
+      // Validate MCQ and multiple select questions
+      if (question.type === 'mcq' || question.type === 'multiple_select' || question.type === 'code_snippet_with_mcq') {
+        const nonEmptyOptions = question.options.filter((option) => option.trim() !== '');
+        
+        if (nonEmptyOptions.length < 4) {
+          toast.error(`This question requires at least 4 options (currently has ${nonEmptyOptions.length})`);
+          return;
+        }
+
+        // Check for duplicate options
+        const uniqueOptions = new Set(nonEmptyOptions);
+        if (uniqueOptions.size !== nonEmptyOptions.length) {
+          toast.error('Duplicate options are not allowed');
+          return;
+        }
+
+        // Check if at least one correct answer is selected
+        if (question.correct_answer.length === 0) {
+          toast.error('Please select at least one correct answer before saving.');
+          return;
+        }
+      }
+
+      // Validate text questions
+      if (question.type === 'text' && question.correct_answer.length === 0) {
+        toast.error('Please provide a correct answer');
+        return;
+      }
+
+      // Validate code snippet questions
+      if (question.type === 'code_snippet' || question.type === 'code_snippet_with_mcq') {
+        const codeSnippet = (question.meta?.code || '') as string;
+        if (!codeSnippet.trim()) {
+          toast.error('Code snippet cannot be empty');
+          return;
+        }
+      }
+
       question.options = question.options.filter((item) => item.trim());
       const payload = {
         options: question.options.filter((item) => item.trim()),
@@ -230,9 +274,17 @@ const   ViewQuestions = () => {
                   editQuestion={true}
                   onSave={() => handleSave(question)}
                   onCancel={() => {
-                    handleReset('all');
-                    setSelectedQuestion(null)}
-                  }
+                    // Reset to original state before closing
+                    if (prvQuestion) {
+                      setQuestionsData((prv) =>
+                        prv.map((item, index) => 
+                          selectedQuestion === index ? { ...prvQuestion } : item
+                        )
+                      );
+                    }
+                    setSelectedQuestion(null);
+                    setPrvQuestion(null);
+                  }}
                 />
               )}
             </React.Fragment>

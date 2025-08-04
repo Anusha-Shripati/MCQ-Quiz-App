@@ -68,10 +68,15 @@ export function AssessmentFilter({ value, onChange, options, className }: Assess
           multiValueRemove: (base) => ({
             ...base,
             color: 'var(--text-color, #111827)',
+            cursor: 'pointer',
             ':hover': {
               backgroundColor: '#ef4444',
               color: 'white',
             },
+          }),
+          clearIndicator: (base) => ({
+            ...base,
+            cursor: 'pointer',
           }),
           placeholder: (base) => ({
             ...base,

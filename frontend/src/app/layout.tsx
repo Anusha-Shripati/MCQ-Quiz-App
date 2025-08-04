@@ -4,7 +4,6 @@ import { ThemeProvider } from '@/components/common/theme-provider';
 import { nunito } from '@/lib/fonts';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { NavigationProgress } from '@/components/ui/navigation-progress';
-
 import { Toaster } from 'react-hot-toast';
 import AuthInitializer from '@/components/common/auth-initializer';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
@@ -27,7 +26,17 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             >
               <NavigationProgress />
               <TooltipProvider>{children}</TooltipProvider>
-              <Toaster position="top-right" />
+              <Toaster 
+                position="top-right"
+                toastOptions={{
+                  duration: 5000,
+                  style: {
+                    padding: '12px 16px',
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                  },
+                }}
+              />
             </ThemeProvider>
           </AuthInitializer>
         </Suspense>

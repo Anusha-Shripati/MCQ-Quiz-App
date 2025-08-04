@@ -65,7 +65,7 @@ export const QuestionCard = ({
               <span className="text-xl font-bold text-blue-700 dark:text-blue-300">{index}.</span>
               <span className="text-lg font-semibold text-gray-900 dark:text-gray-100 whitespace-pre-wrap break-words overflow-hidden">
                 {question.question}
-              </span>
+                  </span>
             </div>
             <div className="mt-1 text-xs text-gray-500 dark:text-gray-400 font-medium">
               Created by:{' '}
@@ -130,6 +130,18 @@ export const QuestionCard = ({
                   </li>
                 ))}
             </>
+          )}
+
+          {/* Text Question Answer */}
+          {question.type === 'text' && (
+            <li className="flex items-start gap-2 p-3 rounded-lg text-base font-medium border bg-green-50 dark:bg-green-900/60 text-green-800 dark:text-green-100 border-green-200 dark:border-green-700 shadow-sm transition-all duration-200">
+              <span className="inline-block w-6 h-6 rounded-full bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-200 flex items-center justify-center font-bold mr-2 shadow-sm">
+                ✓
+              </span>
+              <span className="break-words whitespace-pre-wrap overflow-hidden flex-1">
+                <strong>Correct Answer:</strong> {question.correct_answer[0] || 'No answer provided'}
+              </span>
+            </li>
           )}
         </ul>
 

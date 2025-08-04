@@ -4,22 +4,33 @@ import React, { useState } from 'react';
 import CodeEditor from '@/components/CodeEditor';
 import { FaPlay } from 'react-icons/fa';
 import { FormField } from '@/components/common/form-field';
+import { useEditorPreferencesStore } from '@/store/editorPreferencesStore';
 
-const EditorPage: React.FC<{ onChange: (value: string) => void; value: string }> = ({
+const EditorPage: React.FC<{ 
+  onChange: (value: string) => void; 
+  value: string;
+  questionId: string;
+}> = ({
   onChange,
   value,
+  questionId
 }) => {
-  const [language, setLanguage] = useState('javascript');
-  const [theme, setTheme] = useState('vs-dark');
+  const { getPreference, setPreference } = useEditorPreferencesStore();
+  const savedPreferences = getPreference(questionId);
+  
+  const [language, setLanguage] = useState(savedPreferences.language);
+  const [theme, setTheme] = useState(savedPreferences.theme);
   const [output, setOutput] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const handleLanguageChange = (value: string) => {
     setLanguage(value);
+    setPreference(questionId, value, theme);
   };
 
   const handleThemeChange = (value: string) => {
     setTheme(value);
+    setPreference(questionId, language, value);
   };
 
   const handleCodeChange = (value: string | undefined) => {
@@ -47,37 +58,41 @@ const EditorPage: React.FC<{ onChange: (value: string) => void; value: string }>
     <div className="p-0 space-y-6 ">
       {/* <h1 className="text-3xl font-bold  text-gray-900 dark:text-white">Code Editor</h1> */}
 
-      <div className="flex gap-6 ">
-        {/* Language Selector */}
-        <FormField
-          label="Language"
-          type="select"
-          parentClassName="w-full"
-          className="bg-white border-gray-200 dark:border-gray-600 text-gray-900 "
-          value={language}
-          onChange={handleLanguageChange}
-          placeholder="Language"
-          options={[
-            { value: 'javascript', label: 'JavaScript' },
-            { value: 'python', label: 'Python' },
-            { value: 'php', label: 'PHP' },
-          ]}
-        />
+      <div className="flex gap-6 relative">
+        <div className="w-full">
+          {/* Language Selector */}
+          <FormField
+            label="Language"
+            type="select"
+            parentClassName="w-full"
+            className="bg-white border-gray-200 dark:border-gray-600 text-gray-900"
+            value={language}
+            onChange={handleLanguageChange}
+            placeholder="Language"
+            options={[
+              { value: 'javascript', label: 'JavaScript' },
+              { value: 'python', label: 'Python' },
+              { value: 'php', label: 'PHP' },
+            ]}
+          />
+        </div>
 
-        {/* Theme Selector */}
-        <FormField
-          label="Theme"
-          type="select"
-          parentClassName="w-full"
-          className="bg-white  border-gray-200  text-gray-900 "
-          value={theme}
-          onChange={handleThemeChange}
-          placeholder="Theme"
-          options={[
-            { value: 'vs-dark', label: 'Dark' },
-            { value: 'light', label: 'Light' },
-          ]}
-        />
+        <div className="w-full">
+          {/* Theme Selector */}
+          <FormField
+            label="Theme"
+            type="select"
+            parentClassName="w-full"
+            className="bg-white border-gray-200 text-gray-900"
+            value={theme}
+            onChange={handleThemeChange}
+            placeholder="Theme"
+            options={[
+              { value: 'vs-dark', label: 'Dark' },
+              { value: 'light', label: 'Light' },
+            ]}
+          />
+        </div>
       </div>
 
       {/* Code Editor */}

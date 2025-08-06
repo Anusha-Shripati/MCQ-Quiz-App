@@ -30,13 +30,10 @@ import { examEndpoint } from '@/lib/endpoint';
 import TestWarning from './error/test-warning';
 import { deleteVideoFromIndexedDB, uploadFileInChunks } from '@/lib/utils';
 
+type QuizAnswer = { question: IExamQuestion; temp_url?: string; answer: Answer; answer_id?: string };
+
 export default function ProctoredQuiz() {
-  const [answers, setAnswers] = useState<
-    Record<
-      string,
-      { question: IExamQuestion; temp_url?: string; answer: Answer; answer_id?: string }
-    >
-  >({});
+  const [answers, setAnswers] = useState<Record<string, QuizAnswer>>({});
   const [timeLeft, setTimeLeft] = useState(0);
   const isSubmittingRef = useRef(false);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -52,6 +49,9 @@ export default function ProctoredQuiz() {
   const containerRef = useRef<HTMLDivElement>(null);
   const screenshotIntervalRef = useRef<NodeJS.Timeout>();
   const fullscreenElementRef = useRef<Element | null>(null);
+  const [showTabSwitchModal, setShowTabSwitchModal] = useState(false);
+  const isTabSwitchModalOpen = useRef(false);
+  const isSubmittingFromModal = useRef(false);
 
   const originalWindowSize = useRef({ width: window.innerWidth, height: window.innerHeight });
   const pingIntervalRef = useRef<NodeJS.Timeout>();
@@ -114,6 +114,36 @@ export default function ProctoredQuiz() {
   );
 
   const { cameraStreamRef } = useExamStore();
+
+  // Add validation function for question answers
+  const isQuestionAnswered = (question: IExamQuestion, answer: QuizAnswer | undefined): boolean => {
+    if (!answer) return false;
+
+    switch (question.question.type) {
+      case QuestionType.MCQ:
+      case QuestionType.CODE_SNIPPET_WITH_MCQ:
+        // For MCQ, check if a valid option is selected (not empty string)
+        return typeof answer.answer === 'string' && answer.answer.trim() !== '';
+      
+      case QuestionType.MULTIPLE_SELECT:
+        // For multiple select, check if at least one option is selected
+        return Array.isArray(answer.answer) && answer.answer.length > 0;
+      
+      case QuestionType.TEXT:
+      case QuestionType.CODE_SNIPPET:
+      case QuestionType.CODE_EDITOR:
+        // For text-based questions, check if there's meaningful content
+        return typeof answer.answer === 'string' && answer.answer.trim() !== '';
+      
+      case QuestionType.VIDEO:
+        // For video questions, check if there's a temp_url or answer
+        return !!(answer.temp_url || (typeof answer.answer === 'string' && answer.answer.trim() !== ''));
+      
+      default:
+        return false;
+    }
+  };
+
   useEffect(() => {
     if (examData) {
       setExam(examData.data);
@@ -362,13 +392,19 @@ export default function ProctoredQuiz() {
     fullscreenElementRef.current = document.fullscreenElement;
   };
 
-  const handleWindowFocus = () => {
-    if (!document.hasFocus()) {
-      displayAlert(`WARNING: Tab switching detected!`);
+ const handleWindowFocus = () => {
+  if (!document.hasFocus() && !isTabSwitchModalOpen.current && !isSubmittingFromModal.current) {
+    isTabSwitchModalOpen.current = true;
+    setShowTabSwitchModal(true);
+  }
+};
 
-      addViolation({ type: 'WINDOW_FOCUS_LOST', details: 'User switched to another window' });
-    }
-  };
+const handleVisibilityChange = () => {
+  if (document.hidden && !isTabSwitchModalOpen.current && !isSubmittingFromModal.current) {
+    isTabSwitchModalOpen.current = true;
+    setShowTabSwitchModal(true);
+  }
+};
 
   // Quiz functions
   const handleAnswerChange = useCallback(
@@ -474,6 +510,7 @@ export default function ProctoredQuiz() {
     window.addEventListener('focus', handleWindowFocus);
     window.addEventListener('blur', handleWindowFocus);
     window.addEventListener('beforeunload', handleBeforeUnload);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
 
     const fullscreenEventTimeout = setTimeout(() => {
       document.addEventListener('fullscreenchange', handleFullScreenChange);
@@ -500,6 +537,7 @@ export default function ProctoredQuiz() {
       document.removeEventListener('fullscreenchange', handleFullScreenChange);
       document.removeEventListener('keydown', handleKeyDown, true);
       document.removeEventListener('contextmenu', handleContextMenu, true);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, []);
 
@@ -632,6 +670,63 @@ export default function ProctoredQuiz() {
   };
 
   const buttonIndexes = visibleButtons();
+
+  const TabSwitchConfirmationModal = () => {
+  if (!showTabSwitchModal) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white p-6 rounded-lg shadow-lg max-w-md mx-4">
+        <h3 className="text-lg font-semibold text-red-600 mb-4">
+          Tab Switch Detected!
+        </h3>
+        <p className="text-gray-700 mb-6">
+          You attempted to switch tabs or leave the exam window. This is not allowed during the test.
+        </p>
+        <div className="flex gap-4">
+          <Button
+            onClick={handleConfirmTabSwitch}
+            variant="destructive"
+            className="flex-1"
+          >
+            Confirm & Submit Test
+          </Button>
+          <Button
+            onClick={handleCancelTabSwitch}
+            variant="outline"
+            className="flex-1"
+          >
+            Cancel & Continue
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Add these handler functions
+const handleConfirmTabSwitch = async () => {
+  setShowTabSwitchModal(false);
+  isTabSwitchModalOpen.current = false;
+  isSubmittingFromModal.current = true;
+  
+  addViolation({
+    type: 'TAB_SWITCH_CONFIRMED',
+    details: 'User confirmed tab switch and chose to submit test',
+  });
+  
+  await submitQuiz();
+};
+
+const handleCancelTabSwitch = () => {
+  setShowTabSwitchModal(false);
+  isTabSwitchModalOpen.current = false;
+  
+  addViolation({
+    type: 'TAB_SWITCH_CANCELLED',
+    details: 'User attempted tab switch but chose to continue',
+  });
+};
 
   return (
     <div
@@ -804,10 +899,10 @@ export default function ProctoredQuiz() {
                 <Button
                   onClick={() => handleNextQuestion()}
                   disabled={
-                    (answers[questions[currentQuestionIndex].question_id]?.answer ||
-                    answers[questions[currentQuestionIndex].question_id]?.temp_url
-                      ? false
-                      : true) ||
+                    !isQuestionAnswered(
+                      questions[currentQuestionIndex], 
+                      answers[questions[currentQuestionIndex].question_id]
+                    ) ||
                     isMutating ||
                     isSubmiting ||
                     isVideoMutating
@@ -831,6 +926,7 @@ export default function ProctoredQuiz() {
           </Card>
         </>
       )}
+      <TabSwitchConfirmationModal />
     </div>
   );
 }

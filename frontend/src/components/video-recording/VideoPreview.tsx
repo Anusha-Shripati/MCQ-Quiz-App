@@ -115,13 +115,25 @@ const VideoPreview = ({ videoUrl, onError }: { videoUrl: string, onError?: (err:
 
     const handleFullscreen = () => {
         if (videoRef.current) {
-            if (document.fullscreenElement) {
+            if (document.fullscreenElement === videoRef.current) {
                 document.exitFullscreen();
             } else {
                 videoRef.current.requestFullscreen();
             }
         }
     };
+
+    useEffect(() => {
+        const video = videoRef.current;
+        if (!video) return;
+        const handleFullscreenChange = () => {
+            setIsFullscreen(document.fullscreenElement === video);
+        };
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
+        return () => {
+            document.removeEventListener('fullscreenchange', handleFullscreenChange);
+        };
+    }, []);
 
     const formatTime = (time: number) => {
         if (!isFinite(time) || isNaN(time)) {

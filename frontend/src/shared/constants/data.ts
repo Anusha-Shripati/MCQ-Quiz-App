@@ -1178,7 +1178,7 @@ export const userOptions: StatusOption[] = [
 
 export const QUIZ_CONFIG = {
   screenshotInterval: 60 * 1000,
-  maxViolations: 50,
+  maxViolations: 5,
   alertTimeout: 5000,
 };
 

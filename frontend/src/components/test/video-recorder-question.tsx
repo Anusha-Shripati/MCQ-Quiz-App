@@ -28,22 +28,24 @@ export const VideoRecorderQuestion: FC<VideoRecorderProps> = React.memo(
     }, [answers, question.question_id]);
     
     return (
-      <div className="space-y-6">
+      <div className="space-y-8">
         {/* Question Video */}
-        <div className="w-full rounded-lg overflow-hidden shadow-md">
-          {iframeHTML.includes('iframe') ? (
-            <StaticIframe html={iframeHTML} />
-          ) : (
-            question.question?.meta?.videoToVideo && (
-              <video controls className="w-full max-h-[400px] rounded-lg shadow font-semibold">
-                <source src={iframeHTML} type="video/mp4" />
-              </video>
-            )
-          )}
+        <div className="w-full max-w-4xl mx-auto">
+          <div className="aspect-video rounded-lg overflow-hidden shadow-md">
+            {iframeHTML.includes('iframe') ? (
+              <StaticIframe html={iframeHTML} />
+            ) : (
+              question.question?.meta?.videoToVideo && (
+                <video controls className="w-full h-full object-cover rounded-lg shadow font-semibold">
+                  <source src={iframeHTML} type="video/mp4" />
+                </video>
+              )
+            )}
+          </div>
         </div>
 
         {/* Video Recorder Input */}
-        <div className="w-full">
+        <div className="w-full max-w-4xl mx-auto">
           <VideoRecorder
             onRecordingComplete={(chunks, url) => {
               const blob = new Blob(chunks, { type: 'video/mp4' });
@@ -65,7 +67,7 @@ export const VideoRecorderQuestion: FC<VideoRecorderProps> = React.memo(
 VideoRecorderQuestion.displayName = 'VideoRecorderQuestion';
 
 const StaticIframe: FC<{ html: string }> = React.memo(({ html }) => {
-  return <div dangerouslySetInnerHTML={{ __html: html }} className="flex justify-center" />;
+  return <div dangerouslySetInnerHTML={{ __html: html }} className="flex justify-center w-full h-full" />;
 });
 StaticIframe.displayName = 'StaticIframe';
 

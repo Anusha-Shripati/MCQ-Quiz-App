@@ -76,7 +76,8 @@ const VideoRecorder = ({
 
       await loadVideoFromIndexedDB(videoKey, exam?.id as string, signal).then((video) => {
         if (video) {
-          onRecordingStop && onRecordingStop(video, videoLink);
+          const videoUrl = URL.createObjectURL(video);
+          onRecordingStop && onRecordingStop(video, videoUrl);
         }
       })
 

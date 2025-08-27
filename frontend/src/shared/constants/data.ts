@@ -1186,6 +1186,7 @@ export const SNAPSHOT = {
   screenshot: "screenshot",
   camera: "camera"
 };
+
 export const PROHIBITED_COMBINATIONS = [
   { key: 'Tab', modifier: 'altKey' }, // Alt+Tab
   { key: 'Tab', modifier: 'ctrlKey' }, // Ctrl+Tab
@@ -1223,7 +1224,6 @@ export const PROHIBITED_KEYS = [
   'Insert',
   'Home',
   'PageUp',
-  'Delete',
   'End',
   'PageDown',
 ];

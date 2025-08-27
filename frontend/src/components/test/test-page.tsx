@@ -1,25 +1,25 @@
 'use client';
 // React and Next.js
-import { useEffect, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { useEffect, useRef, useState } from 'react';
 
 // Third-party UI
 import { Button } from '@/components/ui/form/button';
 
 // Internal components
 import { BasicInfoForm } from '@/components/test/basic-info';
-import ProctoredQuiz from '@/components/test/proctored-quiz';
-import TestLoading from '@/components/test/loading/test-loading';
+import CameraRetry from '@/components/test/camera-retry';
+import CheckValidDevice from '@/components/test/check-valid-device';
 import TestWarning from '@/components/test/error/test-warning';
-import { VideoRecordingScreen } from '@/components/test/video-recording-screen';
-import ScreenShareErrorModal from '@/components/test/screen-share-error';
+import ExamExpired from '@/components/test/exam-expired';
 import FirefoxScreenSharePrompt from '@/components/test/firefox-screen-share-model';
+import TestLoading from '@/components/test/loading/test-loading';
+import MultipleScreensWarning from '@/components/test/multiple-screens-warning';
+import ProctoredQuiz from '@/components/test/proctored-quiz';
 import SafariScreenSharePrompt from '@/components/test/safari-screen-share-modal';
 import SafariWindowShareError from '@/components/test/safari-window-share-error';
-import CheckValidDevice from '@/components/test/check-valid-device';
-import MultipleScreensWarning from '@/components/test/multiple-screens-warning';
-import CameraRetry from '@/components/test/camera-retry';
-import ExamExpired from '@/components/test/exam-expired';
+import ScreenShareErrorModal from '@/components/test/screen-share-error';
+import { VideoRecordingScreen } from '@/components/test/video-recording-screen';
 
 // Hooks and Stores
 import useDeviceDetection from '@/hooks/useDeviceDetection';
@@ -35,26 +35,27 @@ import { EXAM_STEP } from '@/types/exam.types';
 
 // Utility functions
 import {
-  detectMultipleScreens,
-  isFirefox,
-  isSafari,
-  getBrowser,
-} from '@/components/test/testUtils/screenDetection';
-import {
   startCamera,
-  takeScreenshot,
   stopMediaStreams,
+  takeScreenshot,
 } from '@/components/test/testUtils/cameraUtils';
 import {
-  startScreenRecording,
+  detectMultipleScreens,
+  getBrowser,
+  isFirefox,
+  isSafari,
+} from '@/components/test/testUtils/screenDetection';
+import {
   handleFirefoxScreenShare,
   handleSafariScreenShare,
+  startScreenRecording,
 } from '@/components/test/testUtils/screenShare';
 import {
   requestFullscreen,
   setupSecurityEventListeners,
 } from '@/components/test/testUtils/securityUtils';
 import { isAxiosError } from 'axios';
+import ExamNotStarted from './exam-not-started';
 
 const TestPage = () => {
   const params = useParams();
@@ -84,6 +85,12 @@ const TestPage = () => {
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [showSafariWindowShareError, setShowSafariWindowShareError] = useState(false);
   const [examExpired, setExamExpired] = useState(false);
+  const [examNotStarted, setExamNotStarted] = useState(false);
+  const [examStartDate, setExamStartDate] = useState<Date | null>(null);
+  const [permission, setPermission] = useState<{ camera: boolean; screen: boolean }>({
+    camera: true,
+    screen: true,
+  });
 
   const screenStream = useRef<MediaStream | null>(null);
   const screenSnapshotRef = useRef<HTMLVideoElement | null>(null);
@@ -91,10 +98,6 @@ const TestPage = () => {
   const cameraCanvas = useRef<HTMLCanvasElement | null>(null);
   const screenCanvas = useRef<HTMLCanvasElement | null>(null);
   const interval = useRef<NodeJS.Timeout | null>(null);
-  const [permission, setPermission] = useState<{ camera: boolean; screen: boolean }>({
-    camera: true,
-    screen: true,
-  });
 
   const fetchCandidate = async () => {
     try {
@@ -134,6 +137,15 @@ const TestPage = () => {
       setVideoLink(videoLink ? process.env.NEXT_PUBLIC_IMGAE_PREFIX + videoLink : videoLink);
       setCandidate(data.data);
       setExam(data.data.exam);
+
+      const startDate = data.data?.exam?.start_time ? new Date(data.data.exam.start_time) : null;
+      setExamStartDate(startDate);
+
+      if (startDate && new Date() < startDate) {
+        setExamNotStarted(true);
+        setLoading(false);
+        return false;
+      }
       setLoading(false);
       setError(null);
       return true;
@@ -457,7 +469,7 @@ const TestPage = () => {
   return (
     <div className="w-screen min-h-screen bg-gray-50">
       {/* Fullscreen warning banner */}
-      {!isFullscreen && !loading && !error && (
+      {!isFullscreen && !loading && !error && !examNotStarted && (
         <div className="fixed top-0 left-0 right-0 bg-red-600 text-white py-2 px-4 text-center z-50 flex items-center justify-center">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -546,6 +558,11 @@ const TestPage = () => {
         />
       ) : examExpired ? (
         <ExamExpired contactEmail="support@yourexamdomain.com" />
+      ) : examNotStarted ? (
+        <ExamNotStarted
+          contactEmail="support@yourexamdomain.com"
+          startTime={examStartDate ? examStartDate.toLocaleString() : undefined}
+        />
       ) : loading || !candidate ? (
         <TestLoading />
       ) : !permission.camera ||

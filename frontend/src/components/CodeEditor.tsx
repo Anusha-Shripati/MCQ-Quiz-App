@@ -6,24 +6,33 @@ type CodeEditorProps = {
   theme: string;
   value: string;
   onChange: (value: string | undefined) => void;
+  readOnly?: boolean;
 };
 
-const CodeEditor: React.FC<CodeEditorProps> = ({ language, theme, value, onChange }) => {
+const CodeEditor: React.FC<CodeEditorProps> = ({ language, theme, value, onChange, readOnly = false }) => {
   return (
-    <Editor
-      height="400px"
-      language={language}
-      theme={theme}
-      value={value}
-      onChange={onChange}
-      options={{
-        fontSize: 14,
-        minimap: { enabled: false },
-        scrollBeyondLastLine: false,
-        automaticLayout: true,
-      }}
-    />
+    <div className="relative">
+      <Editor
+        height="400px"
+        language={language}
+        theme={theme}
+        value={value}
+        onChange={onChange}
+        options={{
+          fontSize: 14,
+          minimap: { enabled: false },
+          scrollBeyondLastLine: false,
+          automaticLayout: true,
+          readOnly,
+        }}
+      />
+
+      {/* Overlay when disabled */}
+      {readOnly && (
+        <div className="absolute inset-0 bg-transparent cursor-not-allowed z-10" />
+      )}
+    </div>
   );
-};
+}
 
 export default CodeEditor;

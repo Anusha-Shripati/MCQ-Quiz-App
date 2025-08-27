@@ -114,7 +114,7 @@ const Step3: React.FC<Step3Props> = ({
             <div>
               <Label className="text-xs font-bold text-gray-500 dark:text-gray-400">Passing Score</Label>
               <p className="mt-1 text-sm font-medium text-gray-900 dark:text-white">
-                {formData.pass_criteria} Marks
+                {formData.pass_criteria}%
               </p>
             </div>
           </div>

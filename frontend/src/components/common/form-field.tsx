@@ -64,26 +64,30 @@ export const FormField = forwardRef<HTMLInputElement, FormFieldProps>(
       <div className={parentClassName || ''}>
         {props.label && <label className="block text-sm font-bold mb-1">{props.label}</label>}
         {props.type === 'select' ? (
-          <Select value={String(props.value)} onValueChange={props.onChange} name={props.name}>
-            <SelectTrigger
-              className={`${props.className} border-gray-200 hover:border-gray-200 dark:hover:border-gray-600 dark:border-gray-600  placeholder-gray-500 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent`}
+            <Select
+              value={String(props.value)}
+              onValueChange={props.onChange}
+              disabled={props.disabled}
             >
-              <SelectValue placeholder={`Select ${props.placeholder || props.label || ''}`} />
-            </SelectTrigger>
-            <SelectContent>
-              {normalizedOptions?.length > 0 ? (
-                normalizedOptions.map((option: SelectOption) => (
-                  <SelectItem key={option.value} value={String(option.value)}>
-                    {option.label}
+              <SelectTrigger
+                className={`${props.className} border-gray-200 hover:border-gray-200 dark:hover:border-gray-600 dark:border-gray-600 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent`}
+              >
+                <SelectValue placeholder={`Select ${props.placeholder || props.label || ''}`} />
+              </SelectTrigger>
+              <SelectContent disablePortal>
+                {normalizedOptions?.length > 0 ? (
+                  normalizedOptions.map((option: SelectOption) => (
+                    <SelectItem key={option.value} value={String(option.value)}>
+                      {option.label}
+                    </SelectItem>
+                  ))
+                ) : (
+                  <SelectItem value="no-options" disabled>
+                    No options available
                   </SelectItem>
-                ))
-              ) : (
-                <SelectItem value="no-options" disabled>
-                  No options available
-                </SelectItem>
-              )}
-            </SelectContent>
-          </Select>
+                )}
+              </SelectContent>
+            </Select>
         ) : (
           <Input
             {...props}

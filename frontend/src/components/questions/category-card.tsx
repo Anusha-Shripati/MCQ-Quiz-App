@@ -37,7 +37,8 @@ export const CategoryCard = ({ category }: { category: QuestionCategory }) => {
                 className="dark:border-gray-600 dark:text-white dark:hover:bg-gray-700 w-full"
                 onClick={handleAddQuestion}
               >
-                <Plus className="h-4 w-4" /> Add Questions
+                <Plus className="h-4 w-4 text-gray-600 dark:text-gray-300" />{' '}
+                <span className="text-gray-900 dark:text-gray-200">Add Questions</span>
               </Button>
             </div>
           )}

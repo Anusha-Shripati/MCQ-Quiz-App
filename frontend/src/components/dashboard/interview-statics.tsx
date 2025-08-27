@@ -176,11 +176,11 @@ const InterviewStatics: React.FC = () => {
   };
 
   return (
-    <div className='max-w-full h-full m-auto'>
+    <div className='max-w-full h-full m-auto mb-4'>
       <StatusWrapper loading={isLoading || isValidating } error={error} reset={mutate} className='w-full h-full'>
         <ReactECharts
           option={options}
-          style={{ height: '450px', width: '100%' }}
+          style={{ height: '520px', width: '100%' }} // prev height 450px
           notMerge={true}
           lazyUpdate={true}
         />

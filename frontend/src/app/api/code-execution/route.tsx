@@ -1,5 +1,6 @@
-import { NextResponse } from 'next/server';
 import { exec } from 'child_process';
+import fs from 'fs/promises';
+import { NextResponse } from 'next/server';
 import util from 'util';
 
 const execPromise = util.promisify(exec);
@@ -37,7 +38,7 @@ export async function POST(req: Request) {
       // Temporarily write code to a .js file and run it using Node.js
       const sanitizedCode = sanitizeCode(code, 'javascript');
       const codeFile = '/tmp/temp_code.js';
-      await execPromise(`echo "${sanitizedCode}" > ${codeFile}`);
+      await execPromise(`echo '${sanitizedCode}' > ${codeFile}`);
 
       // Execute the code using Node.js
       const { stdout, stderr } = await execPromise(`node ${codeFile}`);
@@ -52,7 +53,7 @@ export async function POST(req: Request) {
       // Write Python code to a temporary file
       const sanitizedCode = sanitizeCode(code, 'python');
       const pyFile = `${tempFilePath}.py`;
-      await execPromise(`echo "${sanitizedCode}" > ${pyFile}`);
+      await fs.writeFile(pyFile, sanitizedCode, 'utf-8');
 
       // Execute the Python code
       const { stdout, stderr } = await execPromise(`python3 ${pyFile}`);

@@ -36,12 +36,12 @@ function ResultTable() {
 
   const totalItems = resultCount;
   const pathname = usePathname();
-
+  
   useEffect(() => {
     const params = new URLSearchParams();
 
+    params.set('page', '1');
     params.set('perPage', itemsPerPage.toString());
-    params.set('page', currentPage.toString());
 
     if (resultFilter.technologyFilter.length > 0) {
       const techLabels = resultFilter.technologyFilter.map((item) => item.label);

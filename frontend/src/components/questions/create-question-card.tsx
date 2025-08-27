@@ -70,11 +70,6 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
 }) => {
   const { setLastSelectedDifficulty } = useQuestionPreferencesStore();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  // Add state to check if the question field has content
-  const hasQuestionContent = useMemo(
-    () => Boolean(question.question && question.question.trim()),
-    [question.question]
-  );
 
   const ensureFiveOptions = (options: string[] = []) => {
     while (options.length < 5) {
@@ -246,7 +241,6 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
             }
             placeholder="Question Type"
             options={questionTypeOptions}
-            disabled={!hasQuestionContent}
           />
           <FormField
             label="Difficulty Type"

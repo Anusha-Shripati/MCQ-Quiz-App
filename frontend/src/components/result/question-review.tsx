@@ -1,19 +1,20 @@
 'use client';
-import { AnswerData } from '@/types/exam.types';
-import { questionType } from '@/shared/constants/data';
-import VideoPreview from '../video-recording/VideoPreview';
-import { FC, memo, useState } from 'react';
-import { Button } from '../ui/form/button';
-import { Pencil } from 'lucide-react';
-import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '../ui/dialog';
-import { FormField } from '../common/form-field';
-import { resultEndpoint } from '@/lib/endpoint';
-import useSWRMutation from 'swr/mutation';
 import { api } from '@/lib/api';
-import toast from 'react-hot-toast';
+import { resultEndpoint } from '@/lib/endpoint';
+import { questionType } from '@/shared/constants/data';
+import { AnswerData } from '@/types/exam.types';
 import { isAxiosError } from 'axios';
+import { Pencil } from 'lucide-react';
+import { FC, memo, useState } from 'react';
+import toast from 'react-hot-toast';
 import { mutate } from 'swr';
+import useSWRMutation from 'swr/mutation';
+import { FormField } from '../common/form-field';
+import { QuestionText } from '../common/truncate-question-text';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '../ui/dialog';
+import { Button } from '../ui/form/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
+import VideoPreview from '../video-recording/VideoPreview';
 
 interface QuestionReviewProps {
   answers: AnswerData[] | null;
@@ -172,9 +173,7 @@ const QuestionReview: React.FC<QuestionReviewProps> = ({ answers }) => {
                   </div>
                 </div>
 
-                <p className="text-gray-800 dark:text-gray-200 text-sm mb-4">
-                  {ans.question?.question}
-                </p>
+                <QuestionText text={ans.question?.question || ''} wordLimit={50} charLimit={200} />
 
                 {/* Options */}
                 {ans.question?.options?.length > 0 && (
@@ -205,13 +204,17 @@ const QuestionReview: React.FC<QuestionReviewProps> = ({ answers }) => {
                   <div className="mb-4">
                     {ans.question?.meta?.code && (
                       <>
-                        <p className="text-xs font-medium text-purple-700 dark:text-purple-300 mb-1">Code Snippet:</p>
+                        <p className="text-xs font-medium text-purple-700 dark:text-purple-300 mb-1">
+                          Code Snippet:
+                        </p>
                         <pre className="bg-gradient-to-br from-gray-900 to-gray-800 max-h-96 dark:from-gray-950 dark:to-gray-900 text-gray-100 p-3 rounded-xl text-xs overflow-auto border border-gray-700 dark:border-gray-600 hover:border-gray-600 dark:hover:border-gray-500 transition-colors duration-300 shadow-lg">
                           <code>{ans.question?.meta.code || 'No code snippet provided.'}</code>
                         </pre>
                       </>
                     )}
-                    <p className="text-xs font-medium text-purple-700 dark:text-purple-300 mb-1 mt-3">Ans:</p>
+                    <p className="text-xs font-medium text-purple-700 dark:text-purple-300 mb-1 mt-3">
+                      Ans:
+                    </p>
                     <pre className=" max-h-96 bg-gradient-to-br from-gray-900 to-gray-800 dark:from-gray-950 dark:to-gray-900 text-gray-100 p-3 rounded-xl text-xs overflow-auto border border-gray-700 dark:border-gray-600 hover:border-gray-600 dark:hover:border-gray-500 transition-colors duration-300 shadow-lg">
                       <p>{ans.user_answer.length ? ans.user_answer[0] : 'No answer provided.'}</p>
                     </pre>
@@ -313,11 +316,17 @@ const QuestionReview: React.FC<QuestionReviewProps> = ({ answers }) => {
                       <p className="text-xs text-purple-600 dark:text-purple-300 mb-1">
                         Candidate Answer
                       </p>
-                     { ans.user_answer && ans.user_answer.length ?<VideoPreview
-                        videoUrl={(process.env.NEXT_PUBLIC_IMGAE_PREFIX || '') + ans.user_answer[0]}
-                      />:<p className="p-3 bg-gradient-to-br from-gray-900 text-lg to-gray-800 min-h-[300px] flex justify-center items-center rounded-xl max-h-96 overflow-auto border border-gray-300 dark:border-gray-600 hover:border-gray-600 dark:hover:border-gray-500 transition-colors duration-300">
+                      {ans.user_answer && ans.user_answer.length ? (
+                        <VideoPreview
+                          videoUrl={
+                            (process.env.NEXT_PUBLIC_IMGAE_PREFIX || '') + ans.user_answer[0]
+                          }
+                        />
+                      ) : (
+                        <p className="p-3 bg-gradient-to-br from-gray-900 text-lg to-gray-800 min-h-[300px] flex justify-center items-center rounded-xl max-h-96 overflow-auto border border-gray-300 dark:border-gray-600 hover:border-gray-600 dark:hover:border-gray-500 transition-colors duration-300">
                           Video is uploading...
-                    </p>}
+                        </p>
+                      )}
                     </div>
                   </div>
                 )}
@@ -325,13 +334,17 @@ const QuestionReview: React.FC<QuestionReviewProps> = ({ answers }) => {
                   <div className="mb-4">
                     {ans.question?.meta?.code && (
                       <>
-                        <p className="text-xs font-medium text-purple-700 dark:text-purple-300 mb-1">Code Snippet:</p>
+                        <p className="text-xs font-medium text-purple-700 dark:text-purple-300 mb-1">
+                          Code Snippet:
+                        </p>
                         <pre className="bg-gradient-to-br from-gray-900 to-gray-800 max-h-96 dark:from-gray-950 dark:to-gray-900 text-gray-100 p-3 rounded-xl text-xs overflow-auto border border-gray-700 dark:border-gray-600 hover:border-gray-600 dark:hover:border-gray-500 transition-colors duration-300 shadow-lg">
                           <code>{ans.question?.meta.code || 'No code snippet provided.'}</code>
                         </pre>
                       </>
                     )}
-                    <p className="text-xs font-medium text-purple-700 dark:text-purple-300 mb-1 mt-3">Selected Answer:</p>
+                    <p className="text-xs font-medium text-purple-700 dark:text-purple-300 mb-1 mt-3">
+                      Selected Answer:
+                    </p>
                     <div className="space-y-2">
                       {ans.question.options.map((option, index) => (
                         <div

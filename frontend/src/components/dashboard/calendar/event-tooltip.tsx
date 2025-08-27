@@ -32,65 +32,83 @@ function EventTooltip({ events, dateKey }: { events: CalendarEvent, dateKey: str
                             {events[dateKey].map((item, idx) => {
                                 const baseColor = item.color || '#6b7280';
                                 return (
+                                  <div
+                                    key={idx}
+                                    className="flex flex-row items-stretch rounded-lg border-2 shadow-sm bg-gray-50 dark:bg-gray-800 transition-all duration-200 hover:shadow-lg"
+                                    style={{
+                                      borderColor: baseColor,
+                                      marginBottom: 8,
+                                      minHeight: 90,
+                                    }}
+                                  >
                                     <div
-                                        key={idx}
-                                        className="flex flex-row items-stretch rounded-lg border-2 shadow-sm bg-gray-50 dark:bg-gray-800 transition-all duration-200 hover:shadow-lg"
-                                        style={{
+                                      className="w-2 rounded-l-lg"
+                                      style={{
+                                        background: baseColor,
+                                        minHeight: '100%',
+                                      }}
+                                    />
+                                    <div className="flex-1 px-6 py-4 flex flex-col justify-center">
+                                      <div className="flex flex-row items-center justify-between mb-2">
+                                        <span className="font-semibold text-base text-gray-900 dark:text-white truncate max-w-[60%]">
+                                          {item.meta?.assessment || `Event ${idx + 1}`}
+                                        </span>
+                                        <span
+                                          className="ml-4 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide border"
+                                          style={{
+                                            background: baseColor + '15',
+                                            color: baseColor,
                                             borderColor: baseColor,
-                                            marginBottom: 8,
-                                            minHeight: 90,
-                                        }}
-                                    >
-                                        <div
-                                            className="w-2 rounded-l-lg"
-                                            style={{
-                                                background: baseColor,
-                                                minHeight: '100%',
-                                            }}
-                                        />
-                                        <div className="flex-1 px-6 py-4 flex flex-col justify-center">
-                                            <div className="flex flex-row items-center justify-between mb-2">
-                                                <span className="font-semibold text-base text-gray-900 dark:text-white truncate max-w-[60%]">
-                                                    {item.meta?.assessment || `Event ${idx + 1}`}
-                                                </span>
-                                                <span
-                                                    className="ml-4 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide border"
-                                                    style={{
-                                                        background: baseColor + '15',
-                                                        color: baseColor,
-                                                        borderColor: baseColor,
-                                                    }}
-                                                >
-                                                    {item.meta?.title}
-                                                </span>
-                                            </div>
-                                            <div className="grid grid-cols-2 gap-x-8 gap-y-2 text-sm">
-                                                <div>
-                                                    <span className="font-medium text-gray-700 dark:text-gray-300">Name: </span>
-                                                    <span className="text-gray-900 dark:text-gray-100">
-                                                        {item.meta?.name || <span className="italic text-gray-400">N/A</span>}
-                                                    </span>
-                                                </div>
-                                                <div>
-                                                    <span className="font-medium text-gray-700 dark:text-gray-300">Experience: </span>
-                                                    <span className="text-gray-900 dark:text-gray-100">
-                                                        {item.meta?.experience?item.meta?.experience +'Y.' :'N/A'}
-                                                    </span>
-                                                </div>
-                                                {item.meta?.percentage && <div>
-                                                    <span className="font-medium text-gray-700 dark:text-gray-300">Score: </span>
-                                                    <span className="text-gray-900 dark:text-gray-100">
-                                                        {item.meta.percentage} %
-                                                    </span>
-                                                </div>}
-                                            </div>
-                                            <div className='text-end w-full mt-1'>
-                                                {item.meta?.resultId && <Link className='underline underline-offset-1' href={`/results/${item.meta?.resultId}`} target='_blank'>
-                                                    View result
-                                                </Link>}
-                                            </div>
+                                          }}
+                                        >
+                                          {item.meta?.title}
+                                        </span>
+                                      </div>
+                                      <div className="grid grid-cols-2 gap-x-8 gap-y-2 text-sm">
+                                        <div>
+                                          <span className="font-medium text-gray-700 dark:text-gray-300">
+                                            Name:{' '}
+                                          </span>
+                                          <span className="text-gray-900 dark:text-gray-100">
+                                            {item.meta?.name || (
+                                              <span className="italic text-gray-400">N/A</span>
+                                            )}
+                                          </span>
                                         </div>
+                                        <div>
+                                          <span className="font-medium text-gray-700 dark:text-gray-300">
+                                            Experience:{' '}
+                                          </span>
+                                          <span className="text-gray-900 dark:text-gray-100">
+                                            {item.meta?.experience
+                                              ? item.meta?.experience + 'Y.'
+                                              : 'N/A'}
+                                          </span>
+                                        </div>
+                                        {item.meta?.percentage && (
+                                          <div>
+                                            <span className="font-medium text-gray-700 dark:text-gray-300">
+                                              Score:{' '}
+                                            </span>
+                                            <span className="text-gray-900 dark:text-gray-100">
+                                              {item.meta.percentage} %
+                                            </span>
+                                          </div>
+                                        )}
+                                      </div>
+                                      <div className="text-end w-full mt-1">
+                                        {item.meta?.resultId && (
+                                          <Link
+                                            className="text-blue-600 dark:text-blue-400 underline underline-offset-1"
+                                            href={`/results/${item.meta?.resultId}`}
+                                            target="_blank"
+                                          >
+                                            View result
+                                          </Link>
+                                        )}
+                                      </div>
                                     </div>
+                                  </div>
                                 );
                             })}
                         </div>

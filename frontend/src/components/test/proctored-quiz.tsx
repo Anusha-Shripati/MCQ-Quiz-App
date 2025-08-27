@@ -30,7 +30,12 @@ import { examEndpoint } from '@/lib/endpoint';
 import TestWarning from './error/test-warning';
 import { deleteVideoFromIndexedDB, uploadFileInChunks } from '@/lib/utils';
 
-type QuizAnswer = { question: IExamQuestion; temp_url?: string; answer: Answer; answer_id?: string };
+type QuizAnswer = {
+  question: IExamQuestion;
+  temp_url?: string;
+  answer: Answer;
+  answer_id?: string;
+};
 
 export default function ProctoredQuiz() {
   const [answers, setAnswers] = useState<Record<string, QuizAnswer>>({});
@@ -38,7 +43,6 @@ export default function ProctoredQuiz() {
   const isSubmittingRef = useRef(false);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const router = useRouter();
-  const violations = useRef<Violation[]>([]);
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -46,6 +50,11 @@ export default function ProctoredQuiz() {
   const [accessError, setAccessError] = useState<string | null>(null);
   const [recordingBlob, setRecordingBlob] = useState<Blob | null>(null);
   const [recordingUrl, setRecordingUrl] = useState<string | null>(null);
+  const [liveViolations, setLiveViolations] = useState<Violation[]>([]);
+  const [lockedQuestions, setLockedQuestions] = useState<string[]>([]);
+  const [questions, setQuestions] = useState<IExamQuestion[]>([]);
+  const [prvViolations, setPrvViolations] = useState(0);
+  const violationsRef = useRef<Violation[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
   const screenshotIntervalRef = useRef<NodeJS.Timeout>();
   const fullscreenElementRef = useRef<Element | null>(null);
@@ -57,9 +66,7 @@ export default function ProctoredQuiz() {
   const pingIntervalRef = useRef<NodeJS.Timeout>();
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const { exam, accessCode, setExam } = useExamStore();
-  const [questions, setQuestions] = useState<IExamQuestion[]>([]);
   const alertTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const [prvViolations, setPrvViolations] = useState(0);
 
   const displayAlert = (message: string) => {
     setAlertMessage(message);
@@ -124,21 +131,24 @@ export default function ProctoredQuiz() {
       case QuestionType.CODE_SNIPPET_WITH_MCQ:
         // For MCQ, check if a valid option is selected (not empty string)
         return typeof answer.answer === 'string' && answer.answer.trim() !== '';
-      
+
       case QuestionType.MULTIPLE_SELECT:
         // For multiple select, check if at least one option is selected
         return Array.isArray(answer.answer) && answer.answer.length > 0;
-      
+
       case QuestionType.TEXT:
       case QuestionType.CODE_SNIPPET:
       case QuestionType.CODE_EDITOR:
         // For text-based questions, check if there's meaningful content
         return typeof answer.answer === 'string' && answer.answer.trim() !== '';
-      
+
       case QuestionType.VIDEO:
         // For video questions, check if there's a temp_url or answer
-        return !!(answer.temp_url || (typeof answer.answer === 'string' && answer.answer.trim() !== ''));
-      
+        return !!(
+          answer.temp_url ||
+          (typeof answer.answer === 'string' && answer.answer.trim() !== '')
+        );
+
       default:
         return false;
     }
@@ -146,6 +156,13 @@ export default function ProctoredQuiz() {
 
   useEffect(() => {
     if (examData) {
+      const lockedFromServer =
+        examData.data?.answers?.map(
+          (a: { question_id: string; user_answer: string[]; id: string }) => a.question_id
+        ) || [];
+      localStorage.setItem('lockedQuestions', JSON.stringify(lockedFromServer));
+      setLockedQuestions(lockedFromServer);
+
       setExam(examData.data);
       const obj: Record<string, LocalAnswer> = {};
       examData.data?.answers?.forEach(
@@ -176,6 +193,14 @@ export default function ProctoredQuiz() {
       setPrvViolations(examData?.data?.violations);
     }
   }, [examData]);
+
+  useEffect(() => {
+    const savedAnswers = localStorage.getItem('quizAnswers');
+    const savedLocked = localStorage.getItem('quizLocked');
+
+    if (savedAnswers) setAnswers(JSON.parse(savedAnswers));
+    if (savedLocked) setLockedQuestions(JSON.parse(savedLocked));
+  }, []);
 
   const checkExamStatus = async () => {
     if (!exam?.id || !accessCode || !examData.data?.assessment?.duration) return;
@@ -278,40 +303,51 @@ export default function ProctoredQuiz() {
   };
 
   const submitViolation = async () => {
-    if (violations.current.length === 0) return;
+    if (violationsRef.current.length === 0) return;
     try {
       await examApi.post(
         `${examEndpoint.CANDIDATE_EXAM}/${exam?.id}/submit-violation`,
-        { violations: violations.current },
+        { violations: violationsRef.current },
         accessCode
       );
-      setPrvViolations((prv) => prv + violations.current.length);
-      violations.current = []; // Clear violations after successful submission
+      setPrvViolations((prev) => prev + violationsRef.current.length);
+      violationsRef.current = [];
+      setLiveViolations([]); // Clear violations after successful submission
     } catch (error) {
       console.error('Error submitting violations:', error);
     }
   };
 
-  useEffect(()=>{
-    console.log(violations.current,prvViolations);
-    
-    if ((violations.current.length + prvViolations) > QUIZ_CONFIG.maxViolations) {
-      submitViolation()
+  // Submit the quiz on max violations
+  useEffect(() => {
+    const totalViolations = liveViolations.length + prvViolations;
+
+    if (totalViolations > QUIZ_CONFIG.maxViolations) {
+      submitViolation();
       submitQuiz();
     }
-  },[violations.current,prvViolations])
+  }, [liveViolations, prvViolations]);
 
+  useEffect(() => {
+    if (questions.length) {
+      const unansweredIndex = questions.findIndex((q) => !lockedQuestions.includes(q.question_id));
+      setCurrentQuestionIndex(unansweredIndex === -1 ? 0 : unansweredIndex);
+    }
+  }, [questions, lockedQuestions]);
 
   const addViolation = useCallback((violation: Omit<Violation, 'timestamp'>) => {
-    if (audioRef.current) {
-      audioRef.current.play();
-    }
+    if (audioRef.current) audioRef.current.play();
+
     const newViolation: Violation = { ...violation, timestamp: Date.now() };
 
-    violations.current = [...violations.current, newViolation];
-    
+    // Update state & ref
+    violationsRef.current.push(newViolation);
+
+    // Update the count immediately
+    setLiveViolations([...violationsRef.current]);
+
     displayAlert(`Warning: ${violation.details}`);
-  },[prvViolations,violations]);
+  }, []);
 
   const handleKeyDown = (e: KeyboardEvent) => {
     if (e.key === 'F11') {
@@ -387,32 +423,26 @@ export default function ProctoredQuiz() {
 
   const handleFullScreenChange = () => {
     if (!document.fullscreenElement && fullscreenElementRef.current?.tagName !== 'VIDEO') {
-      addViolation({ type: 'FULLSCREEN_EXIT', details: 'Exited full screen mode' });
+      if (!isSubmittingFromModal.current) {
+        addViolation({ type: 'FULLSCREEN_EXIT', details: 'Exited full screen mode' });
+      }
     }
     fullscreenElementRef.current = document.fullscreenElement;
   };
+  
+  const handleWindowFocus = () => {
+    if (!document.hasFocus() && !isTabSwitchModalOpen.current && !isSubmittingFromModal.current) {
+      isTabSwitchModalOpen.current = true;
+      setShowTabSwitchModal(true);
+    }
+  };
 
- const handleWindowFocus = () => {
-  if (!document.hasFocus() && !isTabSwitchModalOpen.current && !isSubmittingFromModal.current) {
-    isTabSwitchModalOpen.current = true;
-    setShowTabSwitchModal(true);
-  }
-};
-
-const handleVisibilityChange = () => {
-  if (document.hidden && !isTabSwitchModalOpen.current && !isSubmittingFromModal.current) {
-    isTabSwitchModalOpen.current = true;
-    setShowTabSwitchModal(true);
-  }
-};
-
-  // Quiz functions
-  const handleAnswerChange = useCallback(
-    (question: IExamQuestion, value: string | Blob | (string | number)[]) => {
-      setAnswers((prev) => ({ ...prev, [question.question_id]: { question, answer: value } }));
-    },
-    [answers]
-  );
+  const handleVisibilityChange = () => {
+    if (document.hidden && !isTabSwitchModalOpen.current && !isSubmittingFromModal.current) {
+      isTabSwitchModalOpen.current = true;
+      setShowTabSwitchModal(true);
+    }
+  };
 
   const submitQuiz = async () => {
     if (isSubmitting) return;
@@ -420,7 +450,10 @@ const handleVisibilityChange = () => {
       await handleNextQuestion();
       setIsSubmitting(true);
 
+      isSubmittingFromModal.current = true; 
+
       await submitTrigger();
+
       if (document.fullscreenElement) document.exitFullscreen();
 
       cameraStreamRef?.getTracks().forEach((track) => {
@@ -447,8 +480,7 @@ const handleVisibilityChange = () => {
       }
       await submitTrigger();
 
-
-      router.push('/feedback');  // use router if available
+      router.push('/feedback'); // use router if available
     } catch (error) {
       console.error('Auto-submit failed:', error);
       isSubmittingRef.current = false;
@@ -477,7 +509,7 @@ const handleVisibilityChange = () => {
 
     // Interval to auto-submit violations
     const violationInterval = setInterval(() => {
-      if (violations.current.length > 0) submitViolation();
+      if (violationsRef.current.length > 0) submitViolation();
     }, 10000);
 
     detectMultipleScreens();
@@ -541,11 +573,32 @@ const handleVisibilityChange = () => {
     };
   }, []);
 
+  // Handle save answer for Quiz functions
+  const saveAnswer = (question: IExamQuestion, answerValue: Answer) => {
+    const updatedAnswers = {
+      ...answers,
+      [question.question_id]: {
+        question,
+        answer: answerValue,
+      },
+    };
+    setAnswers(updatedAnswers);
+    localStorage.setItem('quizAnswers', JSON.stringify(updatedAnswers));
+  };
+
+  // Lock the question after save
+  const lockQuestion = (questionId: string) => {
+    const locked = JSON.parse(localStorage.getItem('lockedQuestions') || '[]');
+    if (!locked.includes(questionId)) {
+      locked.push(questionId);
+      localStorage.setItem('lockedQuestions', JSON.stringify(locked));
+    }
+  };
+
   const handleReset = async () => {
     const current_question = questions[currentQuestionIndex];
     try {
       const answerId = answers[current_question.question_id]?.answer_id;
-      
       if (typeof answerId === 'string' && answerId) {
         await resetTrigger({ answer_id: answerId });
       }
@@ -587,7 +640,6 @@ const handleVisibilityChange = () => {
         //   goToNextQuestion();
         //   return;
         // }
-        
         const { fileName, parts, UploadId } = await uploadFileInChunks(
           recordingBlob as Blob,
           5 * 1024 * 1024,
@@ -629,16 +681,17 @@ const handleVisibilityChange = () => {
         };
         const response = await trigger(payload);
 
-        setAnswers((prev) => ({
-          ...prev,
-          [questionId]: { ...prev[questionId], answer_id: response.data?.answer?.id },
-        }));
-        success = true;
-
-        if (response.success) success = true;
+        if (response?.success) {
+          setAnswers((prev) => ({
+            ...prev,
+            [questionId]: { ...prev[questionId], answer_id: response.data?.answer?.id },
+          }));
+          success = true;
+        }
       }
 
       if (success) {
+        lockQuestion(questionId);
         goToNextQuestion();
       }
     } catch (error) {
@@ -650,7 +703,7 @@ const handleVisibilityChange = () => {
   const goToNextQuestion = () => {
     setCurrentQuestionIndex((prev) => Math.min(prev + 1, questions.length - 1));
   };
-  
+
   const visibleButtons = () => {
     const total = questions.length;
     const current = currentQuestionIndex;
@@ -674,59 +727,50 @@ const handleVisibilityChange = () => {
   const TabSwitchConfirmationModal = () => {
   if (!showTabSwitchModal) return null;
 
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white p-6 rounded-lg shadow-lg max-w-md mx-4">
-        <h3 className="text-lg font-semibold text-red-600 mb-4">
-          Tab Switch Detected!
-        </h3>
-        <p className="text-gray-700 mb-6">
-          You attempted to switch tabs or leave the exam window. This is not allowed during the test.
-        </p>
-        <div className="flex gap-4">
-          <Button
-            onClick={handleConfirmTabSwitch}
-            variant="destructive"
-            className="flex-1"
-          >
-            Confirm & Submit Test
-          </Button>
-          <Button
-            onClick={handleCancelTabSwitch}
-            variant="outline"
-            className="flex-1"
-          >
-            Cancel & Continue
-          </Button>
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white p-6 rounded-lg shadow-lg max-w-md mx-4">
+          <h3 className="text-lg font-semibold text-red-600 mb-4">Tab Switch Detected!</h3>
+          <p className="text-gray-700 mb-6">
+            You attempted to switch tabs or leave the exam window. This is not allowed during the
+            test.
+          </p>
+          <div className="flex gap-4">
+            <Button onClick={handleConfirmTabSwitch} variant="destructive" className="flex-1">
+              Confirm & Submit Test
+            </Button>
+            <Button onClick={handleCancelTabSwitch} variant="outline" className="flex-1">
+              Cancel & Continue
+            </Button>
+          </div>
         </div>
       </div>
-    </div>
-  );
-};
+    );
+  };
 
-// Add these handler functions
-const handleConfirmTabSwitch = async () => {
-  setShowTabSwitchModal(false);
-  isTabSwitchModalOpen.current = false;
-  isSubmittingFromModal.current = true;
-  
-  addViolation({
-    type: 'TAB_SWITCH_CONFIRMED',
-    details: 'User confirmed tab switch and chose to submit test',
-  });
-  
-  await submitQuiz();
-};
+  // Add these handler functions
+  const handleConfirmTabSwitch = async () => {
+    setShowTabSwitchModal(false);
+    isTabSwitchModalOpen.current = false;
+    isSubmittingFromModal.current = true;
 
-const handleCancelTabSwitch = () => {
-  setShowTabSwitchModal(false);
-  isTabSwitchModalOpen.current = false;
-  
-  addViolation({
-    type: 'TAB_SWITCH_CANCELLED',
-    details: 'User attempted tab switch but chose to continue',
-  });
-};
+    addViolation({
+      type: 'TAB_SWITCH_CONFIRMED',
+      details: 'User confirmed tab switch and chose to submit test',
+    });
+
+    await submitQuiz();
+  };
+
+  const handleCancelTabSwitch = () => {
+    setShowTabSwitchModal(false);
+    isTabSwitchModalOpen.current = false;
+
+    addViolation({
+      type: 'TAB_SWITCH_CANCELLED',
+      details: 'User attempted tab switch but chose to continue',
+    });
+  };
 
   return (
     <div
@@ -758,14 +802,19 @@ const handleCancelTabSwitch = () => {
               <div className="flex items-center gap-2">
                 <span className="text-md font-semibold text-gray-700">Violations:</span>
                 <span
-                  className={`text-lg font-semibold ${prvViolations + violations.current.length >= QUIZ_CONFIG.maxViolations -2 ? 'text-red-600' : 'text-blue-600'}`}
+                  className={`text-lg font-semibold ${
+                    prvViolations + violationsRef.current.length >= QUIZ_CONFIG.maxViolations - 2
+                      ? 'text-red-600'
+                      : 'text-blue-600'
+                  }`}
                 >
-                  {prvViolations + violations.current.length} / {QUIZ_CONFIG.maxViolations}
+                  {prvViolations + liveViolations.length} / {QUIZ_CONFIG.maxViolations}
                 </span>
               </div>
-              {prvViolations + violations.current.length >= 3 && (
+              {prvViolations + violationsRef.current.length >= 3 && (
                 <div className="text-md text-red-600 font-semibold">
-                  Warning: Quiz will be automatically submitted at 5 violations
+                  Warning: Quiz will be automatically submitted after {QUIZ_CONFIG.maxViolations}{' '}
+                  violations
                 </div>
               )}
             </div>
@@ -825,23 +874,28 @@ const handleCancelTabSwitch = () => {
                           )}
                         </span>
                       </div>
-                     { answers[questions[currentQuestionIndex].question_id] && <div>
-                        <Button
-                          variant="default"
-                          size="lg"
-                          onClick={handleReset}
-                          disabled={isReseting}
-                          className="w-24 text-md font-bold"
-                        >
-                          {isReseting ? (
-                            <div className="flex flex-col items-center justify-center gap-4">
-                              <Loader2 className="w-8 h-8 animate-spin" />
-                            </div>
-                          ) : (
-                            <>Reset</>
-                          )}
-                        </Button>
-                      </div>}
+                      {answers[questions[currentQuestionIndex].question_id] && (
+                        <div>
+                          <Button
+                            variant="default"
+                            size="lg"
+                            onClick={handleReset}
+                            disabled={
+                              isReseting ||
+                              lockedQuestions.includes(questions[currentQuestionIndex].question_id)
+                            }
+                            className="w-24 text-md font-bold"
+                          >
+                            {isReseting ? (
+                              <div className="flex flex-col items-center justify-center gap-4">
+                                <Loader2 className="w-8 h-8 animate-spin" />
+                              </div>
+                            ) : (
+                              <>Reset</>
+                            )}
+                          </Button>
+                        </div>
+                      )}
                     </div>
 
                     <h2 className="text-xl md:text-2xl font-semibold text-gray-800 leading-relaxed">
@@ -853,9 +907,12 @@ const handleCancelTabSwitch = () => {
                         question={questions[currentQuestionIndex]}
                         answers={answers}
                         isLoading={isMutating || isSubmiting || isVideoMutating}
-                        handleAnswerChange={handleAnswerChange}
+                        handleAnswerChange={(question, value) => saveAnswer(question, value)}
                         handleStopRecording={handleStopRecording}
                         handleNextQuestion={handleNextQuestion}
+                        isLocked={lockedQuestions.includes(
+                          questions[currentQuestionIndex].question_id
+                        )}
                       />
                     </div>
                   </div>
@@ -868,7 +925,7 @@ const handleCancelTabSwitch = () => {
                   <div className="flex flex-col space-y-2">
                     <div className="flex justify-between text-sm text-gray-600 px-1">
                       <span className="font-semibold  text-lg">Quiz Progress</span>
-                      <span className='text-lg'>
+                      <span className="text-lg">
                         {/* {Object.keys(answers).length} of {questions.length} questions answered */}
                         {currentQuestionIndex + 1} of {questions.length} questions answered
                       </span>
@@ -900,7 +957,7 @@ const handleCancelTabSwitch = () => {
                   onClick={() => handleNextQuestion()}
                   disabled={
                     !isQuestionAnswered(
-                      questions[currentQuestionIndex], 
+                      questions[currentQuestionIndex],
                       answers[questions[currentQuestionIndex].question_id]
                     ) ||
                     isMutating ||

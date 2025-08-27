@@ -62,7 +62,7 @@ const Step2: React.FC<Step2Props> = ({
   const gotoNext = () => {
     const total = calculateTotalSum();
     if (total != formData.targetQuestions) {
-      toast.error('Target questions must be eqla to total question');
+      toast.error('Target questions must be equal to total questions');
       return;
     }
     handleNextStep();
@@ -90,7 +90,7 @@ const Step2: React.FC<Step2Props> = ({
 
     if (parseInt(numValue|| '0') > remainingQuestions) {
       if (remainingQuestions) showError(`You can only allocate ${remainingQuestions} questions.`);
-      else showError('Please enter total questions');
+      else showError('Please update total questions');
 
       return;
     }

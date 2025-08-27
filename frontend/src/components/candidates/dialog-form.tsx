@@ -58,9 +58,8 @@ export default function DialogForm({ candidate, open, setOpen }: CandidateDialog
     assessment: z.string({ message: 'Assessment is required' }).nonempty('Assessment is required'),
     experience: z
       .string()
-      .min(1, 'Experience is required')
-      .max(2, 'Experience must be less than 100 years')
-      .regex(/^[0-9]*$/, 'Experience must be a number'),
+      .nonempty('Experience is required')
+      .regex(/^\d{1,2}-\d{1,2}$/, 'Invalid experience range'),
     timeValue: z
       .number({ message: 'Duration is required' })
       .min(0, 'Duration must be greater than 0')
@@ -104,6 +103,29 @@ export default function DialogForm({ candidate, open, setOpen }: CandidateDialog
     update
   );
   const router = useRouter();
+
+  const rangeToNumber = (range: string) => {
+    const [start] = range.split('-');
+    return Number(start);
+  };
+
+  // Map experience range to a string format
+  const mapExperienceToRange = (num?: number | string) => {
+    if (num == null || num === '') return '';
+    const number = Number(num);
+
+    if (isNaN(number) || number < 0) return '';
+
+    const MAX_YEARS = 20;
+
+    for (let i = 0; i < MAX_YEARS; i++) {
+      if (number < i + 1) return `${i}-${i + 1}`;
+    }
+
+    return `${MAX_YEARS - 1}-${MAX_YEARS}`;
+  };
+
+  // Validate the fields before submitting the form
   const validateAndSubmit = async (values: CandidateFormData) => {
     try {
       let res;
@@ -111,7 +133,7 @@ export default function DialogForm({ candidate, open, setOpen }: CandidateDialog
         name: values.name,
         email: values.email,
         phone: values.phone,
-        experience: values.experience,
+        experience: String(rangeToNumber(values.experience)),
         assessment_id: values.assessment,
         start_date: values.startDate,
         end_date: values.endDate,
@@ -159,7 +181,7 @@ export default function DialogForm({ candidate, open, setOpen }: CandidateDialog
 
   useEffect(() => {
     if (open) {
-      reset(candidate ? { ...candidate, experience: candidate.experience ? candidate.experience.toString() : "" } : formFields);
+      reset(candidate ? { ...candidate, experience: mapExperienceToRange(candidate.experience) } : formFields);
     }
   }, [open, candidate, reset]);
 
@@ -250,18 +272,19 @@ export default function DialogForm({ candidate, open, setOpen }: CandidateDialog
                 </div>
                 {errors?.assessment?.message && <p className="text-red-500 text-sm mt-1">{errors?.assessment?.message}</p>}
               </div>
-            <div className='px-1 py-1'>
-              <FormField
-                label="Experience"
-                id="experience"
-                type="number"
-                min="0"
-                max="99"
-                maxLength={2}
-                inputMode="numeric"
-                {...register('experience')}
-                error={errors.experience?.message as ErrorType}
-              />
+                <div className='px-1 py-1'>
+                  <FormField
+                    label="Experience"
+                    id="experience"
+                    type="select"
+                    options={Array.from({ length: 20 }, (_, i) => ({
+                      value: `${i}-${i + 1}`,
+                      label: `${i}-${i + 1} Year${i + 1 > 1 ? 's' : ''}`,
+                    }))}
+                    value={formData.experience}
+                    onChange={(value) => setValue('experience', value, { shouldValidate: true })}
+                    error={errors.experience?.message as ErrorType}
+                  />
               </div>
             </div>
             <FormField

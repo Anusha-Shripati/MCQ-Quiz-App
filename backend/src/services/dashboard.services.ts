@@ -133,7 +133,8 @@ export class DashboardService {
       return JSON.parse(data)
     }
     const parsedPage = page ? parseInt(page) : 1;
-    const parsedLimit = page ? parseInt(limit) : 1;
+    const parsedLimit = page ? parseInt(limit) : 10;
+    
     const whereClause: any = {
       deleted_at: null,
       exam: {
@@ -141,20 +142,26 @@ export class DashboardService {
       },
     };
 
-    if (min)
-      whereClause.percentage = {
-        gte: parseFloat(min),
-      };
+    const percentage: any = {};
 
-    if (max)
-      whereClause.percentage = {
-        lte: parseFloat(max),
-      };
+    if (min) {
+      percentage.gte = parseFloat(min);
+    }
+
+    if (max) {
+      percentage.lte = parseFloat(max);
+    }
+
+    if (Object.keys(percentage).length > 0) {
+      whereClause.percentage = percentage;
+    }
+
     if (language?.trim()) {
       whereClause.exam.assessment.technologies = {
         some: { technology_id: language },
       };
     }
+
     const results = await prisma.results.findMany({
       where: whereClause,
       select: {

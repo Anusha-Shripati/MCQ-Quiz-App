@@ -239,9 +239,9 @@ export default class CandidatesService {
   }) {
     const where: Prisma.CandidateWhereInput = { deleted_at: null };
 
-    const key = this.cacheService.generateKey('candidate',query)
+    const key = this.cacheService.generateKey('candidate', query);
     const data = await this.cacheService.getKey(key);
-    if(data) return JSON.parse(data)
+    if (data) return JSON.parse(data);
 
     // Handle search query
     if (query.search) {
@@ -330,13 +330,14 @@ export default class CandidatesService {
               select: {
                 id: true,
                 name: true,
-                deleted_at:true
+                deleted_at: true,
               },
             },
             meta: true,
             start_time: true,
             end_time: true,
             status: true,
+            is_completed: true,
           },
         },
         result: {
@@ -350,7 +351,7 @@ export default class CandidatesService {
         created_by_user: {
           select: {
             name: true,
-            deleted_at:true
+            deleted_at: true,
           },
         },
       },
@@ -361,16 +362,32 @@ export default class CandidatesService {
       take: limit,
     });
 
-    const response =  {
-      list: candidates,
+    const modifiedCandidates = candidates.map((candidate) => {
+      const exam = candidate.exam;
+      if (exam) {
+        const current_time = new Date();
+
+        if (!exam.start_time) {
+          exam.status = 'pending';
+        } else if (exam.start_time && !exam.end_time) {
+          exam.status = 'in_progress';
+        } else if (!exam.is_completed && exam.end_time && new Date(exam.end_time) < current_time) {
+          exam.status = 'expired';
+        }
+      }
+      return candidate;
+    }); 
+
+    const response = {
+      list: modifiedCandidates,
       total,
       page,
       limit,
       totalPages: Math.ceil(total / limit),
     };
 
-    await this.cacheService.setKey(key,response,this.cacheTime)
-    return response
+    await this.cacheService.setKey(key, response, this.cacheTime);
+    return response;
   }
 
   async getCandidateById(id: string)  {

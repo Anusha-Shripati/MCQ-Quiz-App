@@ -21,12 +21,11 @@ export const VideoRecorderQuestion: FC<VideoRecorderProps> = React.memo(
   ({ question, answers, onRecordingComplete, onRecordingStop, isLoading }) => {
     const iframeHTML = useMemo(() => question.question?.meta?.video_url || '', [question]);
     const [videoUrl, setVideoUrl] = useState<string | null>(null);
+
     useEffect(() => {
-      setVideoUrl(
-        (answers[question.question_id]?.answer as string)
-      );
+      setVideoUrl(answers[question.question_id]?.answer as string);
     }, [answers, question.question_id]);
-    
+
     return (
       <div className="space-y-8">
         {/* Question Video */}
@@ -36,7 +35,10 @@ export const VideoRecorderQuestion: FC<VideoRecorderProps> = React.memo(
               <StaticIframe html={iframeHTML} />
             ) : (
               question.question?.meta?.videoToVideo && (
-                <video controls className="w-full h-full object-cover rounded-lg shadow font-semibold">
+                <video
+                  controls
+                  className="w-full h-full object-cover rounded-lg shadow font-semibold"
+                >
                   <source src={iframeHTML} type="video/mp4" />
                 </video>
               )
@@ -67,7 +69,19 @@ export const VideoRecorderQuestion: FC<VideoRecorderProps> = React.memo(
 VideoRecorderQuestion.displayName = 'VideoRecorderQuestion';
 
 const StaticIframe: FC<{ html: string }> = React.memo(({ html }) => {
-  return <div dangerouslySetInnerHTML={{ __html: html }} className="flex justify-center w-full h-full" />;
+  const processedHtml = html.replace(
+    /<iframe([^>]*)>/,
+    '<iframe$1 style="width:100%;height:100%;aspect-ratio:16/9;display:block;" allowfullscreen>'
+  );
+  return (
+    <div className="w-full h-full aspect-video flex justify-center items-center">
+      <div
+        className="w-full h-full"
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{ __html: processedHtml }}
+      />
+    </div>
+  );
 });
 StaticIframe.displayName = 'StaticIframe';
 

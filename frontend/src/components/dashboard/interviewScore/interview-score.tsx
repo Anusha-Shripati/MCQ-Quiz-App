@@ -151,7 +151,7 @@ function InterviewScore() {
           <div className="space-y-1">
             <CardTitle>Interview Scores</CardTitle>
             <CardDescription className="text-sm font-bold">
-              Performance of candidates.
+              (Performance of candidates)
             </CardDescription>
           </div>
           <LanguageScoreSelect setFilters={handleSetFilter} filters={filters} />

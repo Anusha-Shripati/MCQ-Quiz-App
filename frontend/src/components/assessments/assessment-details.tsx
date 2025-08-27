@@ -158,7 +158,7 @@ function AssessmentItem({
                 <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                   <BookOpenCheck className="h-4 w-4 text-orange-600 dark:text-green-400" />
                   <span className="font-medium text-gray-700 dark:text-gray-300">
-                    {pass_criteria} marks
+                    {pass_criteria}%
                   </span>
                 </div>
               </TooltipTrigger>
@@ -480,7 +480,7 @@ export default function AssessmentDetails() {
   useEffect(() => {
     const params = new URLSearchParams();
 
-    params.set('page', currentPage.toString());
+    params.set('page', '1');
     params.set('perPage', itemsPerPage.toString());
 
     Object.entries(filters).forEach(([key, value]) => {

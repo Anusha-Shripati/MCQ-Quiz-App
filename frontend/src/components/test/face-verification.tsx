@@ -894,15 +894,14 @@ const FaceVerification: React.FC<FaceVerificationProps> = ({
     initModels();
   };
   
-
-  
   return (
     <div className="flex flex-col items-center p-6 bg-gradient-to-b from-gray-50 to-gray-100 rounded-xl shadow-md border border-gray-200">
       <div className="mb-5 flex items-center gap-3">
-        <Camera className="h-6 w-6 text-blue-600 self-center" />
-        <h2 className="text-2xl font-bold text-gray-800 align-middle leading-tight">Face Verification</h2>
+        <Camera className="h-6 w-6 text-blue-600 self-center transform scale-x-[-1]" />
+        <h2 className="text-2xl font-bold text-gray-800 align-middle leading-tight">
+          Face Verification
+        </h2>
       </div>
-      
       <div className="relative w-full max-w-lg rounded-lg overflow-hidden bg-black mb-6 shadow-lg">
         {/* Show loading overlay during loading/failed states */}
         {(verificationStatus === 'loading' || verificationStatus === 'failed') && (
@@ -929,10 +928,10 @@ const FaceVerification: React.FC<FaceVerificationProps> = ({
                 </div>
                 <h3 className="text-xl font-bold text-red-500 mb-3">Face Detection Failed</h3>
                 <p className="text-gray-300 mb-6 max-w-xs">
-                  We couldn&#39;t initialize the face detection system. This could be due to your browser, 
-                  network connection, or system resources.
+                  We couldn&#39;t initialize the face detection system. This could be due to your
+                  browser, network connection, or system resources.
                 </p>
-                <Button 
+                <Button
                   onClick={handleRetry}
                   className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-6 py-3 rounded-lg flex items-center justify-center gap-2 shadow-lg shadow-red-900/20 transition-all"
                 >
@@ -943,18 +942,12 @@ const FaceVerification: React.FC<FaceVerificationProps> = ({
             )}
           </div>
         )}
-        
-        <video 
-          ref={videoRef}
-          muted
-          playsInline
-          className="w-full h-auto transform scale-x-[-1]"
-        />
-        <canvas 
+
+        <video ref={videoRef} muted playsInline className="w-full h-auto transform scale-x-[-1]" />
+        <canvas
           ref={canvasRef}
           className="absolute top-0 left-0 w-full h-full transform scale-x-[-1]"
         />
-        
         {/* Status overlay */}
         {verificationStatus !== 'loading' && verificationStatus !== 'failed' && (
           <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/70 to-transparent pt-12 pb-4 px-5">
@@ -972,19 +965,20 @@ const FaceVerification: React.FC<FaceVerificationProps> = ({
                   <Camera size={16} className="text-white" />
                 </div>
               )}
-              
-              <p className={`font-semibold text-base ${verificationStatus === 'multiple-faces' ? 'text-red-300' : verificationStatus === 'success' ? 'text-green-300' : 'text-white'}`}>
+
+              <p
+                className={`font-semibold text-base ${verificationStatus === 'multiple-faces' ? 'text-red-300' : verificationStatus === 'success' ? 'text-green-300' : 'text-white'}`}
+              >
                 {message}
               </p>
             </div>
-            
+
             <div className="flex flex-wrap justify-center gap-2 mt-3">
               <StatusBadge
                 icon={<User size={13} />}
-                label={faceDetected ? "Face Detected" : "No Face"}
-                status={faceDetected ? "success" : "error"}
+                label={faceDetected ? 'Face Detected' : 'No Face'}
+                status={faceDetected ? 'success' : 'error'}
               />
-              
               {multipleFacesDetected && (
                 <StatusBadge
                   icon={<Users size={13} />}
@@ -992,41 +986,33 @@ const FaceVerification: React.FC<FaceVerificationProps> = ({
                   status="error"
                 />
               )}
-              
               {!multipleFacesDetected && faceDetected && (
                 <>
                   <StatusBadge
                     icon={<MoveHorizontal size={13} />}
-                    label={isCentered ? "Centered" : "Not Centered"}
-                    status={isCentered ? "success" : "pending"}
+                    label={isCentered ? 'Centered' : 'Not Centered'}
+                    status={isCentered ? 'success' : 'pending'}
                   />
-                  
                   <StatusBadge
                     icon={<ShieldAlert size={13} />}
-                    label={isStable ? "Stable" : "Movement"}
-                    status={isStable ? "success" : "pending"}
+                    label={isStable ? 'Stable' : 'Movement'}
+                    status={isStable ? 'success' : 'pending'}
                   />
-                  
                   <StatusBadge
                     icon={<Camera size={13} />}
-                    label={isProperSize ? "Good Size" : "Adjust Size"}
-                    status={isProperSize ? "success" : "pending"}
+                    label={isProperSize ? 'Good Size' : 'Adjust Size'}
+                    status={isProperSize ? 'success' : 'pending'}
                   />
                 </>
               )}
-              
               {verificationStatus === 'success' && (
-                <StatusBadge
-                  icon={<CheckCircle2 size={13} />}
-                  label="Verified"
-                  status="success"
-                />
+                <StatusBadge icon={<CheckCircle2 size={13} />} label="Verified" status="success" />
               )}
             </div>
           </div>
         )}
       </div>
-      
+
       <div className="w-full max-w-lg">
         {verificationStatus === 'pending' && (
           <div className="flex justify-center">
@@ -1038,14 +1024,12 @@ const FaceVerification: React.FC<FaceVerificationProps> = ({
             </div>
           </div>
         )}
-        
         {verificationStatus === 'processing' && (
           <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 p-5 rounded-lg shadow-sm">
             <h3 className="font-semibold text-blue-800 flex items-center gap-2 mb-3">
               <Camera className="h-5 w-5 text-blue-700 self-center" />
               <span className="align-middle leading-tight">Face Verification in Progress</span>
             </h3>
-            
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="bg-white/70 rounded-lg p-3 border border-blue-100">
                 <h4 className="font-semibold text-blue-800 mb-2">Position Requirements</h4>
@@ -1064,7 +1048,7 @@ const FaceVerification: React.FC<FaceVerificationProps> = ({
                   </li>
                 </ul>
               </div>
-              
+
               <div className="bg-white/70 rounded-lg p-3 border border-blue-100">
                 <h4 className="font-semibold text-blue-800 mb-2">Environment Tips</h4>
                 <ul className="space-y-2 text-sm text-blue-700">
@@ -1083,7 +1067,7 @@ const FaceVerification: React.FC<FaceVerificationProps> = ({
                 </ul>
               </div>
             </div>
-            
+
             {/* Progress bar */}
             {verificationProgress > 0 && (
               <div className="mt-5">
@@ -1092,7 +1076,7 @@ const FaceVerification: React.FC<FaceVerificationProps> = ({
                   <span>{verificationProgress}%</span>
                 </div>
                 <div className="h-2 bg-blue-100 rounded-full overflow-hidden">
-                  <div 
+                  <div
                     className="h-full bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full transition-all duration-300 ease-out"
                     style={{ width: `${verificationProgress}%` }}
                   ></div>
@@ -1101,19 +1085,17 @@ const FaceVerification: React.FC<FaceVerificationProps> = ({
             )}
           </div>
         )}
-        
+
         {verificationStatus === 'multiple-faces' && (
           <div className="bg-gradient-to-r from-red-50 to-red-100 border-2 border-red-200 p-5 rounded-lg shadow-md">
             <h3 className="font-bold text-red-800 flex items-center gap-2 mb-3">
               <Users className="h-5 w-5 text-red-700" />
               <span>Multiple Faces Detected</span>
             </h3>
-            
             <p className="text-red-700 mb-4">
-              We detected more than one person in the camera view. For security purposes, 
-              only one person should be visible during the verification and exam.
+              We detected more than one person in the camera view. For security purposes, only one
+              person should be visible during the verification and exam.
             </p>
-            
             <div className="bg-white/80 rounded-lg p-4 border border-red-200 mb-4">
               <h4 className="font-semibold text-red-800 mb-2">Please ensure:</h4>
               <ul className="space-y-2.5 text-sm text-red-700">
@@ -1131,7 +1113,6 @@ const FaceVerification: React.FC<FaceVerificationProps> = ({
                 </li>
               </ul>
             </div>
-            
             <Button
               onClick={handleRetry}
               className="mt-2 w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white py-3 rounded-lg font-semibold flex items-center justify-center gap-2 shadow-sm shadow-red-300"
@@ -1148,11 +1129,9 @@ const FaceVerification: React.FC<FaceVerificationProps> = ({
               <AlertTriangle className="h-5 w-5 text-red-600" />
               <span>Verification Failed</span>
             </h3>
-            
             <p className="text-red-700 mb-4">
               We couldn&#39;t properly verify your face. This could be due to:
             </p>
-            
             <ul className="space-y-2 text-sm text-red-700 mb-5">
               <li className="flex items-start gap-2">
                 <div className="min-w-5 pt-0.5">•</div>
@@ -1171,7 +1150,6 @@ const FaceVerification: React.FC<FaceVerificationProps> = ({
                 <span>Browser compatibility issues</span>
               </li>
             </ul>
-            
             <Button
               onClick={handleRetry}
               className="w-full bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white py-3 rounded-lg font-semibold flex items-center justify-center gap-2"
@@ -1181,7 +1159,6 @@ const FaceVerification: React.FC<FaceVerificationProps> = ({
             </Button>
           </div>
         )}
-        
         {verificationStatus === 'success' && (
           <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 p-5 rounded-lg shadow-md">
             <div className="flex justify-center mb-4">
@@ -1189,15 +1166,12 @@ const FaceVerification: React.FC<FaceVerificationProps> = ({
                 <CheckCircle2 className="h-10 w-10 text-green-600" />
               </div>
             </div>
-            
             <h3 className="font-bold text-green-800 text-center text-lg mb-2">
               Verification Successful
             </h3>
-            
             <p className="text-green-700 text-center mb-5">
               Your identity has been verified successfully. You can now proceed to the exam.
             </p>
-            
             <Button
               onClick={handleComplete}
               className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white py-3 rounded-lg text-lg font-semibold shadow-lg shadow-green-200 transition-all transform hover:translate-y-[-2px]"
@@ -1206,7 +1180,6 @@ const FaceVerification: React.FC<FaceVerificationProps> = ({
             </Button>
           </div>
         )}
-        
         {verificationStatus === 'uploading' && (
           <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 p-5 rounded-lg shadow-md">
             <div className="flex justify-center mb-4">
@@ -1214,15 +1187,12 @@ const FaceVerification: React.FC<FaceVerificationProps> = ({
                 <Loader2 className="h-10 w-10 text-blue-600 animate-spin" />
               </div>
             </div>
-            
             <h3 className="font-bold text-blue-800 text-center text-lg mb-2">
               Uploading Verification Image
             </h3>
-            
             <p className="text-blue-700 text-center mb-5">
               Please wait while we securely upload your verification image...
             </p>
-            
             <div className="w-full bg-blue-100 h-2 rounded-full overflow-hidden">
               <div className="bg-blue-600 h-full animate-pulse"></div>
             </div>

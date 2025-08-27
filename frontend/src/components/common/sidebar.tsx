@@ -77,8 +77,9 @@ export default function Sidebar() {
   return (
     <aside
       ref={sidebarRef}
-      className={`${isCollapsed ? 'w-16' : 'w-56'
-        } bg-primary text-primary-foreground sticky top-0 left-0 text-white h-screen z-50  transition-all duration-300 relative`}
+      className={`${
+        isCollapsed ? 'w-16' : 'w-56'
+      } bg-primary text-primary-foreground sticky top-0 left-0 text-white h-screen z-50  transition-all duration-300 relative`}
     >
       <div className="overflow-auto flex flex-row justify-center items-center h-full">
         <div className="w-[calc(100%-20px)] space-y-4 h-full">
@@ -98,7 +99,7 @@ export default function Sidebar() {
               <div className="w-full h-full flex justify-center items-center">
                 <Image
                   alt="Logic Rays Logo"
-                  src={ImageLinks.main_logo}
+                  src={ImageLinks.white_logo}
                   className="cursor-pointer"
                   width={170}
                   height={170}
@@ -136,7 +137,6 @@ export default function Sidebar() {
                     label="Questions"
                     isCollapsed={isCollapsed}
                     isActive={pathname.includes('questions')}
-
                   />
                 )}
                 {permissions?.assessments?.can_read && (
@@ -146,7 +146,6 @@ export default function Sidebar() {
                     label="Assessment"
                     isCollapsed={isCollapsed}
                     isActive={pathname.includes('assessments')}
-
                   />
                 )}
                 {permissions?.candidates?.can_read && (
@@ -207,8 +206,9 @@ export default function Sidebar() {
         </div>
         <div
           onClick={toggleSidebar}
-          className={`absolute  bottom-4 -right-[11%] transform -translate-y-1/2 cursor-pointer ${isCollapsed ? 'translate-x-2' : '-translate-x-2'
-            }`}
+          className={`absolute  bottom-4 -right-[11%] transform -translate-y-1/2 cursor-pointer ${
+            isCollapsed ? 'translate-x-2' : '-translate-x-2'
+          }`}
         >
           <Button
             className="bg-white text-gray-800 border border-gray-300 rounded-full shadow-md flex items-center justify-center"

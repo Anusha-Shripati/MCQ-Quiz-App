@@ -67,16 +67,29 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
 
   const { data: technologyData } = useSWR(technologyEndpoint.LIST, api.get);
 
-  const { trigger, isMutating } = useSWRMutation(`${assessmentEndpoint.ASSESSMENT_BY_ID}/${assessment.id}`, update);
+  const { trigger, isMutating } = useSWRMutation(
+    `${assessmentEndpoint.ASSESSMENT_BY_ID}/${assessment.id}`,
+    update
+  );
 
-  const { data: questionData } = useSWR(assessmentEndpoint.CHECK_QUESTIONS, () => api.post(assessmentEndpoint.CHECK_QUESTIONS, { technologies: localAssessment.technologies.map((tech) => tech.technology_id) }));
+  const technologyIds = localTechnologies.map((t) => t.technology?.id).filter(Boolean);
 
-  const getMaxQuestions = (techId: string, difficulty: 'easy' | 'medium' | 'hard', type: Question['type']) => {
+  const { data: questionData } = useSWR(
+    technologyIds.length > 0
+      ? [assessmentEndpoint.CHECK_QUESTIONS, technologyIds]
+      : null,
+    ([url, ids]) =>
+      api.post(url, {
+        technologies: ids,
+      })
+  );
 
-    return (
-      questionData?.data?.results?.[techId]?.[difficulty]?.[type] ??
-      0
-    );
+  const getMaxQuestions = (
+    techId: string,
+    difficulty: 'easy' | 'medium' | 'hard',
+    type: Question['type']
+  ) => {
+    return questionData?.data?.results?.[techId]?.[difficulty]?.[type] ?? 0;
   };
 
   useEffect(() => {
@@ -98,7 +111,9 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
     setLocalAssessment({ ...assessment, totalQuestions });
     const updatedTechnologies = assessment.technologies.map((tech) => ({
       ...tech,
-      percentage: Math.floor(((tech.easy.total + tech.medium.total + tech.hard.total) / totalQuestions) * 100),
+      percentage: Math.floor(
+        ((tech.easy.total + tech.medium.total + tech.hard.total) / totalQuestions) * 100
+      ),
     }));
     setLocalTechnologies(updatedTechnologies);
   }, [assessment]);
@@ -114,31 +129,51 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
     }, 1000);
   };
 
+  const handleQuestionChange = (
+    techId: string,
+    difficulty: Difficulty,
+    type: Question['type'],
+    value: string
+  ) => {
+    const numValue = value as string;
+    const maxAllowedQuestions = getMaxQuestions(techId, difficulty, type);
 
+    if (parseInt(numValue || '0') > maxAllowedQuestions) {
+      showError(`You can only allocate up to ${maxAllowedQuestions} questions for this difficulty.`);
+      return;
+    }
 
-
-  const handleQuestionChange = (techId: string, difficulty: Difficulty, type: Question['type'], value: string) => {
     const updatedTechnologies = localTechnologies.map((tech) => {
       if (tech?.technology.id !== techId) return tech;
 
-      const total = Object.entries(tech[difficulty])
+      // Update difficulty section
+      const updatedDiff = { ...tech[difficulty], [type]: Number(value) || 0 };
+      const newDiffTotal = Object.entries(updatedDiff)
         .filter(([key]) => key !== 'total')
-        .reduce((sum, [, value]) => sum + Number(value || 0), 0)
+        .reduce((sum, [, val]) => sum + Number(val || 0), 0);
 
-      const diff = { ...tech[difficulty], [type]: value, total: total + Number(value || 0) };
+      updatedDiff.total = newDiffTotal;
 
-      const newTech = { ...tech, [difficulty]: diff };
+      const newTech = { ...tech, [difficulty]: updatedDiff };
 
       const newTotalForTech = newTech.easy.total + newTech.medium.total + newTech.hard.total;
 
-      const otherTechsTotal = localTechnologies.reduce((sum, t) => {
-        if (t.technology.id === techId) return sum;
+      const overallTotal = localTechnologies.reduce((sum, t) => {
+        if (t.technology.id === techId) {
+          return sum + newTotalForTech;
+        }
         return sum + t.easy.total + t.medium.total + t.hard.total;
       }, 0);
 
-      if (newTotalForTech + otherTechsTotal > localAssessment?.totalQuestions) {
+      const prevOverallTotal = localTechnologies.reduce(
+        (sum, t) => sum + t.easy.total + t.medium.total + t.hard.total,
+        0
+      );
+      if (
+        overallTotal > (localAssessment?.totalQuestions || 0) &&
+        overallTotal > prevOverallTotal
+      ) {
         showError(`Total questions cannot exceed ${localAssessment?.totalQuestions}`);
-
         return tech;
       }
 
@@ -153,7 +188,7 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
     multiple_select: 0,
     text: 0,
     video: 0,
-    code_snippet: 0,   
+    code_snippet: 0,
     code_editor: 0,
     code_snippet_with_mcq: 0,
     total: 0,
@@ -162,7 +197,7 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
   const handleTechnologyChange = (selectedOptions: readonly Option[]) => {
     // Create mapping of existing techs by ID for quick lookup
     const existingTechMap = Object.fromEntries(
-      localTechnologies.map(tech => [tech.technology?.id, tech])
+      localTechnologies.map((tech) => [tech.technology?.id, tech])
     );
 
     // Map selected options to technologies, preserving existing data when available
@@ -277,7 +312,7 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
   return (
     <div className="min-h-screen dark:bg-gray-800">
       <div className="px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden min-h-[600px]">
           <div className="px-6 py-5 border-b border-gray-200 dark:border-gray-700">
             <div className="flex justify-between items-start">
               <div>
@@ -360,10 +395,7 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
                 />
               </div>
               <div className="space-y-2 w-1/2">
-                <Label
-                  htmlFor="passCriteria"
-                  className="font-bold text-gray-900 dark:text-white"
-                >
+                <Label htmlFor="passCriteria" className="font-bold text-gray-900 dark:text-white">
                   Pass Criteria (%)
                 </Label>
                 <FormField
@@ -417,15 +449,25 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
                     color: 'var(--text-color)',
                   }),
                   multiValueRemove: (base, state) => {
-                    const isDark = typeof window !== 'undefined' && document.documentElement.classList.contains('dark');
+                    const isDark =
+                      typeof window !== 'undefined' &&
+                      document.documentElement.classList.contains('dark');
                     return {
                       ...base,
                       backgroundColor: state.isFocused
-                        ? (isDark ? '#374151' : '#e5e7eb')
-                        : (isDark ? '#4b5563' : '#f3f4f6'),
+                        ? isDark
+                          ? '#374151'
+                          : '#e5e7eb'
+                        : isDark
+                          ? '#4b5563'
+                          : '#f3f4f6',
                       color: state.isFocused
-                        ? (isDark ? '#fff' : '#111827')
-                        : (isDark ? '#fff' : '#374151'),
+                        ? isDark
+                          ? '#fff'
+                          : '#111827'
+                        : isDark
+                          ? '#fff'
+                          : '#374151',
                       borderRadius: '50%',
                       padding: '3px',
                       fontWeight: 'bold',
@@ -436,7 +478,7 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
                       minWidth: '20px',
                       minHeight: '18px',
                       marginRight: '4px',
-                      marginTop: '4px'
+                      marginTop: '4px',
                     };
                   },
                   clearIndicator: (base) => ({
@@ -524,7 +566,7 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
 
               {/* Technology Rows */}
               <div className="space-y-4">
-                {localTechnologies.map((tech,index) => (
+                {localTechnologies.map((tech, index) => (
                   <div
                     key={tech?.technology?.id}
                     className="grid grid-cols-[1fr,1fr,1fr,1fr,1fr] gap-6 items-center py-3 border-b border-gray-100 last:border-0"
@@ -543,48 +585,63 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
                           disabled
                           className="w-24 text-center mx-auto bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                         />
-                        <div className='w-full flex flex-col gap-2 mt-3'>
+                        <div className="w-full flex flex-col gap-2 mt-3">
                           {questionTypeOptions.map((item) => {
-                            const maxAllowed = getMaxQuestions(tech.technology_id || '', difficulty as 'easy' | 'medium' | 'hard', item.value);
+                            const maxAllowed = getMaxQuestions(
+                              tech.technology?.id || '',
+                              difficulty as 'easy' | 'medium' | 'hard',
+                              item.value
+                            );
 
-                            return <div className='flex justify-between w-full' key={item.value}>
-                              <div className="flex justify-between items-center w-full group" key={item.value}>
-                              <label htmlFor={`tech-${index}-${difficulty}-${item.value}`} className="text-sm font-medium text-gray-700 dark:text-gray-200 flex items-center gap-1">
-                                {item.label}
-                                <span className="ml-1 text-xs font-bold text-gray-400 cursor-pointer relative group-hover:text-blue-500" tabIndex={0}>
-                                  ({maxAllowed})
-                                </span>
-                              </label>
+                            return (
+                              <div className="flex justify-between w-full" key={item.value}>
+                                <div
+                                  className="flex justify-between items-center w-full group"
+                                  key={item.value}
+                                >
+                                  <label
+                                    htmlFor={`tech-${index}-${difficulty}-${item.value}`}
+                                    className="text-sm font-medium text-gray-700 dark:text-gray-200 flex items-center gap-1"
+                                  >
+                                    {item.label}
+                                    <span
+                                      className="ml-1 text-xs font-bold text-gray-400 cursor-pointer relative group-hover:text-blue-500"
+                                      tabIndex={0}
+                                    >
+                                      ({maxAllowed})
+                                    </span>
+                                  </label>
 
-
-                                <Input
-                                id={`tech-${index}-${difficulty}-${item.value}`}
-
-                                  type="number"
-                                  min="0"
-                                  value={tech[difficulty as 'easy' | 'medium' | 'hard'][item.value]}
-                                  onChange={(e) =>
-                                    handleQuestionChange(
-                                      tech.technology_id as string,
-                                      difficulty as 'easy' | 'medium' | 'hard',
-                                      item.value,
-                                      e.target.value
-                                    )
-                                  }
-                                  className="w-20 m-0 text-center bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-400"
-
-                                /></div>
-                            </div>
+                                  <Input
+                                    id={`tech-${index}-${difficulty}-${item.value}`}
+                                    type="number"
+                                    min="0"
+                                    value={
+                                      tech[difficulty as 'easy' | 'medium' | 'hard'][item.value]
+                                    }
+                                    onChange={(e) =>
+                                      handleQuestionChange(
+                                        tech.technology?.id as string,
+                                        difficulty as 'easy' | 'medium' | 'hard',
+                                        item.value,
+                                        e.target.value
+                                      )
+                                    }
+                                    className="w-20 m-0 text-center bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-400"
+                                  />
+                                </div>
+                              </div>
+                            );
                           })}
                         </div>
                       </div>
                     ))}
                     <div className="text-center font-bold dark:text-white flex flex-col items-center">
-                    <span className="inline-block px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200 text-base">
-                      {tech.easy.total + tech.medium.total + tech.hard.total}
-                    </span>
-                    <span className="text-xs text-gray-400 mt-1">Total</span>
-                  </div>
+                      <span className="inline-block px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200 text-base">
+                        {tech.easy.total + tech.medium.total + tech.hard.total}
+                      </span>
+                      <span className="text-xs text-gray-400 mt-1">Total</span>
+                    </div>
                   </div>
                 ))}
 

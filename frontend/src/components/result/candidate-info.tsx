@@ -1,9 +1,10 @@
+import { QUIZ_CONFIG } from '@/shared/constants/data'
 import { Assessment } from '@/store/assessmentStore'
 import { ICandidate } from '@/types/candidate.types'
 import { IExam } from '@/types/exam.types'
 import dayjs from 'dayjs'
 import React from 'react'
-import { HiUser, HiMail, HiBriefcase, HiChip, HiCalendar } from 'react-icons/hi'
+import { HiBriefcase, HiCalendar, HiChip, HiMail, HiUser } from 'react-icons/hi'
 
 interface CandidateInfoProps {
   candidate: ICandidate | null
@@ -34,7 +35,17 @@ const CandidateInfo: React.FC<CandidateInfoProps> = ({ candidate, assessment, ex
       <div className="relative">
         <div className="flex items-center gap-3 mb-6">
           <div className="w-2 h-8 bg-gradient-to-b from-indigo-500 to-indigo-400 rounded-full shadow-sm"></div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">Candidate Information</h2>
+          <div className="flex items-center w-full">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">
+              Candidate Information
+            </h2>
+            {Array.isArray(exam?.meta?.violations) &&
+              exam.meta.violations.length > QUIZ_CONFIG.maxViolations && (
+                <span className="ml-auto text-red-600 font-semibold text-sm">
+                  (This candidate has breached the maximum allowed violations)
+                </span>
+              )}
+          </div>
         </div>
         <div className="flex gap-2 flex-wrap">
           {infoFields.map((field) => (
@@ -44,15 +55,19 @@ const CandidateInfo: React.FC<CandidateInfoProps> = ({ candidate, assessment, ex
             >
               <span className="flex-shrink-0 text-xl">{field.icon}</span>
               <div>
-                <p className="text-xs font-semibold text-gray-500 dark:text-gray-300 mb-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition">{field.label}</p>
-                <p className="font-medium text-gray-900 dark:text-gray-100 text-base group-hover:text-indigo-700 dark:group-hover:text-indigo-200 transition break-all">{values[field.key]}</p>
+                <p className="text-xs font-semibold text-gray-500 dark:text-gray-300 mb-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition">
+                  {field.label}
+                </p>
+                <p className="font-medium text-gray-900 dark:text-gray-100 text-base group-hover:text-indigo-700 dark:group-hover:text-indigo-200 transition break-all">
+                  {values[field.key]}
+                </p>
               </div>
             </div>
           ))}
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 export default CandidateInfo

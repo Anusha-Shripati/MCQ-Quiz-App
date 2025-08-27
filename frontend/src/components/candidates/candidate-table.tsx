@@ -6,6 +6,8 @@ import Pagination from '@/components/pagination';
 import { Button } from '@/components/ui/form/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { api, deleteData, isAxiosError } from '@/lib/api';
+import { QUIZ_CONFIG } from '@/shared/constants/data';
+import { useAuthStore } from '@/store/authStore';
 import { useCandidateStore } from '@/store/candidateStore';
 import type {
   AssessmentOption,
@@ -13,9 +15,11 @@ import type {
   ICandidate,
   TechnologyOption,
 } from '@/types/candidate.types';
+import { ExamMetaTech } from '@/types/exam.types';
 import { format } from 'date-fns';
 import dayjs from 'dayjs';
 import { Edit, Trash2 } from 'lucide-react';
+import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import qs from 'query-string';
 import { useEffect, useMemo, useState } from 'react';
@@ -23,9 +27,6 @@ import toast from 'react-hot-toast';
 import { FiCopy, FiMail } from 'react-icons/fi';
 import useSWR, { mutate } from 'swr';
 import StatusWrapper from '../common/status-wrapper';
-import { ExamMetaTech } from '@/types/exam.types';
-import Link from 'next/link';
-import { useAuthStore } from '@/store/authStore';
 
 function CandidateTable() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -50,7 +51,7 @@ function CandidateTable() {
   useEffect(() => {
     const params = new URLSearchParams();
 
-    params.set('page', currentPage.toString());
+    params.set('page', '1');
     params.set('perPage', itemsPerPage.toString());
 
     if (candidateFilter.searchQuery) {
@@ -333,7 +334,12 @@ function CandidateTable() {
         header: 'Created By',
         render: (row) => (
           <span className="text-sm">
-            {row.created_by_user?.name} {row.created_by_user?.deleted_at ? <span className="text-red-500"> (Deleted)</span> : '' }
+            {row.created_by_user?.name}{' '}
+            {row.created_by_user?.deleted_at ? (
+              <span className="text-red-500"> (Deleted)</span>
+            ) : (
+              ''
+            )}
           </span>
         ),
       },
@@ -345,7 +351,7 @@ function CandidateTable() {
             completed: 'bg-green-100 text-green-800',
             in_progress: 'bg-yellow-100 text-yellow-800',
             pending: 'bg-gray-100 text-gray-800',
-            expired:"bg-red-100 text-red-800"
+            expired: 'bg-red-100 text-red-800',
           };
 
           const status = row.exam?.status as 'completed' | 'in_progress' | 'pending' | 'expired';
@@ -376,7 +382,7 @@ function CandidateTable() {
         header: 'Share',
         render: (candidate: ICandidate) => (
           <div className="flex items-center gap-2">
-            {(candidate.exam?.status !== 'completed' && candidate.exam?.status !== 'expired') && (
+            {candidate.exam?.status !== 'completed' && candidate.exam?.status !== 'expired' && (
               <Button
                 onClick={async (e) => {
                   e.stopPropagation();
@@ -411,14 +417,14 @@ function CandidateTable() {
             <Button
               onClick={(e) => {
                 e.stopPropagation();
-                window.location.href = 'mailto:candidate@example.com';
+                  window.location.href = `mailto:${candidate.email}`;
               }}
               variant="ghost"
               className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all duration-200"
             >
               <FiMail className="h-5 w-5 text-gray-700 dark:text-gray-300" />
             </Button>
-            {(candidate.exam?.status !== 'completed' && canEditCandidate) && (
+            {candidate.exam?.status === 'pending' && canEditCandidate &&  (
               <>
                 <Button
                   onClick={(e) => {
@@ -491,6 +497,12 @@ function CandidateTable() {
                     row?.exam?.start_time as string,
                     row?.exam?.end_time as string
                   )}
+                  {Array.isArray(row?.exam?.meta?.violations) &&
+                    row.exam.meta.violations.length > QUIZ_CONFIG.maxViolations && (
+                      <span className="ml-2 text-red-600 font-semibold text-sm">
+                        (Maximum violations detected)
+                      </span>
+                    )}
                 </p>
               </TooltipTrigger>
               <TooltipContent className="bg-gray-800 text-white p-2 rounded shadow-lg">
@@ -506,10 +518,11 @@ function CandidateTable() {
           <div>
             <p className="text-sm text-gray-500 dark:text-gray-300">Created</p>
             <p className="text-lg font-medium text-gray-700 dark:text-gray-300">
-              {row?.exam?.user?.name} {row?.exam?.user?.deleted_at ? <span className="text-red-500"> (Deleted)</span> : '' }
+              {row?.exam?.user?.name}{' '}
+              {row?.exam?.user?.deleted_at ? <span className="text-red-500"> (Deleted)</span> : ''}
             </p>
             <p className="text-sm text-gray-500 dark:text-gray-300">
-              {row?.created_at ? dayjs(row?.created_at).format('DD/MM/YYYY h:m A') : '-'}
+              {row?.created_at ? dayjs(row?.created_at).format('DD/MM/YYYY h:mm A') : '-'}
             </p>
           </div>
         </div>

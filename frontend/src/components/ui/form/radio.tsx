@@ -18,9 +18,9 @@ const Radio = React.forwardRef<
     )}
     {...props}
   >
-    <div className="flex h-full w-full items-center justify-center">
-      <span className="h-2 w-2 rounded-full bg-primary-foreground peer-data-[state=checked]:block hidden" />
-    </div>
+    <RadioGroupPrimitive.Indicator className="flex items-center justify-center">
+      <span className="h-2 w-2 rounded-full bg-primary-foreground" />
+    </RadioGroupPrimitive.Indicator>
   </RadioGroupPrimitive.Item>
 ));
 Radio.displayName = RadioGroupPrimitive.Item.displayName;

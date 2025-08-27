@@ -1,17 +1,18 @@
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/form/button';
 import { Card } from '@/components/ui/card';
-import { Question } from '@/shared/types/app';
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
   DialogDescription,
   DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from '@/components/ui/dialog';
-import { useState } from 'react';
+import { Button } from '@/components/ui/form/button';
+import { Question } from '@/shared/types/app';
 import { useAuthStore } from '@/store/authStore';
+import { useTruncatedText } from '@/utils/useTruncatedText';
+import { useState } from 'react';
 
 // interface QuestionCardProps {
 //   question: Question;
@@ -55,6 +56,11 @@ export const QuestionCard = ({
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const { hasPermissionQuestionEdit } = useAuthStore();
   const isQuestionEditable = hasPermissionQuestionEdit();
+  const { isLong, expanded, displayText, toggle } = useTruncatedText(question.question, {
+    wordLimit: 50,
+    charLimit: 200,
+  });
+
   return (
     <>
       <Card className="relative bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-800 dark:via-gray-900 dark:to-gray-800 rounded-2xl p-6 mb-8 border border-gray-200 dark:border-gray-700 transition-all duration-300">
@@ -63,9 +69,17 @@ export const QuestionCard = ({
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
               <span className="text-xl font-bold text-blue-700 dark:text-blue-300">{index}.</span>
-              <span className="text-lg font-semibold text-gray-900 dark:text-gray-100 whitespace-pre-wrap break-words overflow-hidden">
-                {question.question}
-                  </span>
+              <span className="text-lg font-semibold text-gray-900 dark:text-gray-100 whitespace-pre-wrap break-words max-w-[1400px] overflow-x-auto pr-2 block">
+                {displayText}
+                {isLong && (
+                  <button
+                    className="ml-2 text-blue-600 dark:text-blue-400 underline text-sm font-medium"
+                    onClick={toggle}
+                  >
+                    {expanded ? 'Show less' : 'Show more'}
+                  </button>
+                )}
+              </span> 
             </div>
             <div className="mt-1 text-xs text-gray-500 dark:text-gray-400 font-medium">
               Created by:{' '}
@@ -108,7 +122,9 @@ export const QuestionCard = ({
           ) : null}
 
           {/* MCQ Options */}
-          {(question.type === 'mcq' || question.type === 'multiple_select' || question.type === 'code_snippet_with_mcq') && (
+          {(question.type === 'mcq' ||
+            question.type === 'multiple_select' ||
+            question.type === 'code_snippet_with_mcq') && (
             <>
               {question.options
                 ?.filter((option) => option !== '')
@@ -139,7 +155,8 @@ export const QuestionCard = ({
                 ✓
               </span>
               <span className="break-words whitespace-pre-wrap overflow-hidden flex-1">
-                <strong>Correct Answer:</strong> {question.correct_answer[0] || 'No answer provided'}
+                <strong>Correct Answer:</strong>{' '}
+                {question.correct_answer[0] || 'No answer provided'}
               </span>
             </li>
           )}

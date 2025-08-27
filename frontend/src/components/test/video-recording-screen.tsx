@@ -40,39 +40,47 @@ export const VideoRecordingScreen = ({ onRecordingComplete, videoLink }: VideoRe
   
   const onContinue = async () => {
     // If we're using an existing video, proceed immediately
-    if(recordingUrl == videoLink){
-      onRecordingComplete();
+    if ((recordingUrl && recordingBlob) || (recordingUrl && !recordingBlob) || videoLink) {
+      try {
+        if (!recordingBlob && videoLink) {
+          // If no new recording then get the existing video
+          onRecordingComplete();
+          return;
+        }
+
+        setIsUploading(true);
+
+        // Upload only if we actually recorded a new blob
+        if (recordingBlob) {
+          const { fileName, parts, UploadId } = await uploadFileInChunks(
+            recordingBlob as Blob,
+            5 * 1024 * 1024,
+            exam?.id || ''
+          );
+
+          // Prepare payload for background processing
+          const payload = {
+            foldername: fileName,
+            UploadId,
+            parts,
+            merge_chunk: true,
+            question_name: 'introduction',
+          };
+
+          trigger(payload).catch((error) => {
+            console.error('Background video processing failed:', error);
+          });
+        }
+        onRecordingComplete();
+      } catch (error) {
+        console.error('Error uploading video chunks:', error);
+      } finally {
+        setIsUploading(false);
+      }
       return;
     }
-
-    try {
-      setIsUploading(true);
-      
-      // Upload chunks - this we need to wait for
-      const {fileName,parts,UploadId} = await uploadFileInChunks(recordingBlob as Blob,5 * 1024 * 1024,exam?.id || '');
-      
-      // Prepare payload for background processing
-      const payload = {
-        foldername:fileName,
-        UploadId,
-        parts,
-        merge_chunk: true,
-        question_name: 'introduction'
-      };
-      onRecordingComplete();
-      
-      trigger(payload)
-        .catch(error => {
-          console.error('Background video processing failed:', error);
-        })
-        .finally(() => {
-          setIsUploading(false);
-        });
-    } catch (error) {
-      console.error('Error uploading video chunks:', error);
-      setIsUploading(false);
-      // Show error to user but don't block UI
-    }
+    // No video found please record introduction
+    alert('No video found. Please record your introduction.');
   };
 
   const handleStopRecording = (blob: Blob | null, url: string) => {

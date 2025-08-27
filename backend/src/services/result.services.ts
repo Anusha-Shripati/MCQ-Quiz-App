@@ -266,7 +266,7 @@ export class ResultService {
         throw new Error('Result or Answer not found');
       }
       if (score > existingAns.weight) {
-        throw new Error('Marks should be less than or equal to its weightage');
+        throw new Error('Score should be less than or equal to its weightage');
       }
 
       // Extract and update tech_score

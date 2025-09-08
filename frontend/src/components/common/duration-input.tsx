@@ -3,9 +3,9 @@ import { useMemo } from 'react';
 
 interface DurationInputProps {
   label: string;
-  timeUnit: 'days' | 'hours';
+  timeUnit: 'days' | 'week' | 'hours';
   timeValue: number | '';
-  setTimeUnit: (unit: 'days' | 'hours') => void;
+  setTimeUnit: (unit: 'days' | 'week' | 'hours') => void;
   setTimeValue: (value: number | '') => void;
   error?: string | undefined;
 }
@@ -18,7 +18,14 @@ export const DurationInput = ({
   setTimeValue,
   error,
 }: DurationInputProps) => {
-  const durationOptions = useMemo(() => [{ value: 'days', label: 'Days' }], []);
+  const durationOptions = useMemo(
+    () => [
+      { value: 'days', label: 'Days' },
+      { value: 'week', label: 'Weeks' },
+      { value: 'hours', label: 'Hours' },
+    ],
+    []
+  );
   return (
     <div>
       <label className="block text-sm font-medium mb-1">{label}</label>
@@ -30,11 +37,11 @@ export const DurationInput = ({
           placeholder={`Enter ${timeUnit}`}
         />
         <FormField
-          id="technology"
+          id="duration-unit"
           type="select"
           options={durationOptions}
           value={timeUnit}
-          onChange={(value) => setTimeUnit(value as 'days' | 'hours')}
+          onChange={(value) => setTimeUnit(value as 'days' | 'week' | 'hours')}
         />
       </div>
       {error && <p className="text-red-500 text-sm mt-1">{error}</p>}

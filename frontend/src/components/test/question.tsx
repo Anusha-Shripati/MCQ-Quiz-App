@@ -25,7 +25,7 @@ function Question({
   isLocked,
 }: QuestionProps) {
   return (
-    <div>
+    <div className='break-all whitespace-pre-wrap overflow-hidden flex-1'>
       {isLocked && (
         <div className="mb-4 p-2 text-sm text-gray-600 bg-gray-100 rounded">
           Answer already submitted. No changes allowed.

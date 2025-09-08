@@ -313,6 +313,21 @@ const BasicInfoForm: React.FC = memo(() => {
     setCurrentStep(EXAM_STEP.VIDEO_RECORDING);
   };
 
+  const mapExperienceToRange = (num?: number | string) => {
+    if (num == null || num === '') return '';
+    const number = Number(num);
+
+    if (isNaN(number) || number < 0) return '';
+
+    const MAX_YEARS = 20;
+
+    for (let i = 0; i < MAX_YEARS; i++) {
+      if (number < i + 1) return `${i}-${i + 1}`;
+    }
+
+    return `${MAX_YEARS - 1}-${MAX_YEARS}`;
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex items-center justify-center p-6">
       <div className="max-w-7xl w-full grid grid-cols-1 lg:grid-cols-5 gap-8">
@@ -325,7 +340,9 @@ const BasicInfoForm: React.FC = memo(() => {
             <div className="p-6 bg-gradient-to-r from-indigo-50 to-purple-50">
               <div className="flex items-center gap-2 text-indigo-700">
                 <User className="h-5 w-5 self-center" />
-                <h2 className="text-xl font-bold align-middle leading-tight">Candidate Information</h2>
+                <h2 className="text-xl font-bold align-middle leading-tight">
+                  Candidate Information
+                </h2>
               </div>
               <p className="text-sm text-gray-600 mt-1">
                 Please verify your details before proceeding
@@ -349,8 +366,11 @@ const BasicInfoForm: React.FC = memo(() => {
               <FormField
                 label="Years of Experience"
                 icon={<UserCircle className="h-4 w-4" />}
-                value={candidate?.experience as string}
-                type="number"
+                value={
+                  candidate?.experience !== undefined && candidate?.experience !== null
+                    ? `${mapExperienceToRange(candidate.experience)} Years`
+                    : ''
+                }
               />
 
               <FormField

@@ -60,6 +60,15 @@ export const QuestionCard = ({
     wordLimit: 50,
     charLimit: 200,
   });
+  const {
+    isLong: isAnswerLong,
+    expanded: answerExpanded,
+    displayText: displayAnswer,
+    toggle: toggleAnswer,
+  } = useTruncatedText(question.correct_answer?.[0] || 'No answer provided', {
+    wordLimit: 30,
+    charLimit: 120,
+  });
 
   return (
     <>
@@ -79,7 +88,7 @@ export const QuestionCard = ({
                     {expanded ? 'Show less' : 'Show more'}
                   </button>
                 )}
-              </span> 
+              </span>
             </div>
             <div className="mt-1 text-xs text-gray-500 dark:text-gray-400 font-medium">
               Created by:{' '}
@@ -154,9 +163,16 @@ export const QuestionCard = ({
               <span className="inline-block w-6 h-6 rounded-full bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-200 flex items-center justify-center font-bold mr-2 shadow-sm">
                 ✓
               </span>
-              <span className="break-words whitespace-pre-wrap overflow-hidden flex-1">
-                <strong>Correct Answer:</strong>{' '}
-                {question.correct_answer[0] || 'No answer provided'}
+              <span className="break-all whitespace-pre-wrap overflow-hidden flex-1">
+                <strong>Correct Answer:</strong> {displayAnswer}
+                {isAnswerLong && (
+                  <button
+                    className="ml-2 text-blue-600 dark:text-blue-400 underline text-sm font-medium"
+                    onClick={toggleAnswer}
+                  >
+                    {answerExpanded ? 'Show less' : 'Show more'}
+                  </button>
+                )}
               </span>
             </li>
           )}

@@ -1,5 +1,14 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/form/button';
+import { examApi, isAxiosError } from '@/lib/api';
+import { examEndpoint } from '@/lib/endpoint';
+import { deleteVideoFromIndexedDB, uploadFileInChunks } from '@/lib/utils';
+import {
+  BROWSER_KEY,
+  PROHIBITED_COMBINATIONS,
+  PROHIBITED_KEYS,
+  QUIZ_CONFIG,
+} from '@/shared/constants/data';
 import { useExamStore } from '@/store/examStore';
 import {
   Answer,
@@ -10,25 +19,17 @@ import {
   SubmitAnsReponse,
   Violation,
 } from '@/types/exam.types';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import TestHeader from './test-header';
-import useSWR from 'swr';
-import { examApi, isAxiosError } from '@/lib/api';
+import { useTruncatedText } from '@/utils/useTruncatedText';
+import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import useSWR from 'swr';
 import useSWRMutation from 'swr/mutation';
 import AlertWrapper from './error/alert-wrapper';
+import TestWarning from './error/test-warning';
 import TestLoading from './loading/test-loading';
 import Question from './question';
-import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
-import {
-  BROWSER_KEY,
-  PROHIBITED_COMBINATIONS,
-  PROHIBITED_KEYS,
-  QUIZ_CONFIG,
-} from '@/shared/constants/data';
-import { examEndpoint } from '@/lib/endpoint';
-import TestWarning from './error/test-warning';
-import { deleteVideoFromIndexedDB, uploadFileInChunks } from '@/lib/utils';
+import TestHeader from './test-header';
 
 type QuizAnswer = {
   question: IExamQuestion;
@@ -87,6 +88,17 @@ export default function ProctoredQuiz() {
       revalidateIfStale: true,
     }
   );
+
+
+  const {
+    isLong: isQuestionLong,
+    expanded: questionExpanded,
+    displayText: displayQuestion,
+    toggle: toggleQuestion,
+  } = useTruncatedText(questions[currentQuestionIndex]?.question.question || '', {
+    wordLimit: 50,
+    charLimit: 200,
+  });
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { isMutating, trigger } = useSWRMutation<SubmitAnsReponse, any, string, SubmitAnsPayload>(
@@ -898,8 +910,16 @@ export default function ProctoredQuiz() {
                       )}
                     </div>
 
-                    <h2 className="text-xl md:text-2xl font-semibold text-gray-800 leading-relaxed">
-                      {questions[currentQuestionIndex].question.question}
+                    <h2 className="text-xl md:text-2xl font-semibold text-gray-800 leading-relaxed break-all whitespace-pre-wrap overflow-hidden flex-1">
+                      {displayQuestion}
+                      {isQuestionLong && (
+                        <button
+                          className="ml-2 text-blue-600 underline text-sm font-medium"
+                          onClick={toggleQuestion}
+                        >
+                          {questionExpanded ? 'Show less' : 'Show more'}
+                        </button>
+                      )}
                     </h2>
 
                     <div className="pt-2 text-black">

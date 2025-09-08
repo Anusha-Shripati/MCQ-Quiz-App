@@ -116,7 +116,7 @@ export const authenticateCandidate: RequestHandler = async (req, res, next) => {
       generateResponse(
         res,
         403,
-        { status: candidate.exam.status },
+        { status: 'expired'},
         false,
         'Access code has expired'
       );

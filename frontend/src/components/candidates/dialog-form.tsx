@@ -64,8 +64,8 @@ export default function DialogForm({ candidate, open, setOpen }: CandidateDialog
       .number({ message: 'Duration is required' })
       .min(0, 'Duration must be greater than 0')
       .max(365, 'Duration must be less than 365 days'),
-    timeUnit: z.enum(['days', 'week'], {
-      errorMap: () => ({ message: "Duration must be 'day' or 'week'" }),
+    timeUnit: z.enum(['hours', 'days', 'week'], {
+      errorMap: () => ({ message: "Duration must be 'days', 'weeks', or 'hours'" }),
     }),
     startDate: z.date({ message: 'Start date is required' }),
     endDate: z.date({ message: 'End date is required' }),
@@ -170,7 +170,9 @@ export default function DialogForm({ candidate, open, setOpen }: CandidateDialog
 
       if (formData.timeUnit === 'days') {
         newEndDate.setDate(newEndDate.getDate() + numericValue);
-      } else {
+      } else if (formData.timeUnit === 'week') {
+        newEndDate.setDate(newEndDate.getDate() + numericValue * 7);
+      } else if (formData.timeUnit === 'hours') {
         newEndDate.setHours(newEndDate.getHours() + numericValue);
       }
       setValue('endDate', newEndDate);

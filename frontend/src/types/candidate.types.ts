@@ -9,7 +9,7 @@ export type CandidateFormData = {
   experience: string;
   assessment: string;
   phone: string;
-  timeUnit: 'days' | 'hours';
+  timeUnit: 'days' | 'week' | 'hours';
   startDate: Date | undefined;
   endDate: Date | undefined;
   timeValue: number | '';

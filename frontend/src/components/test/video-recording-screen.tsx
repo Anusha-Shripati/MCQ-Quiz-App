@@ -94,7 +94,7 @@ export const VideoRecordingScreen = ({ onRecordingComplete, videoLink }: VideoRe
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex items-center justify-center p-6">
-      <div className="max-w-7xl w-full grid grid-cols-1 lg:grid-cols-5 gap-8">
+      <div className="max-w-7xl w-full grid grid-cols-1 lg:grid-cols-5 gap-8 mt-6">
         {/* Instructions Card */}
         <div className="lg:col-span-2">
           <Card className="bg-white shadow-md overflow-hidden border border-gray-100 h-full">
@@ -102,12 +102,11 @@ export const VideoRecordingScreen = ({ onRecordingComplete, videoLink }: VideoRe
               <CardTitle className="flex items-center gap-2 text-blue-700 text-xl font-semibold">
                 <Camera className="h-5 w-5 self-center" />
                 <span className="align-middle leading-tight">Recording Instructions</span>
-              </CardTitle>  
+              </CardTitle>
               <CardDescription className="text-sm text-gray-600 mt-1 font-semibold">
                 Follow these guidelines for the best recording
               </CardDescription>
             </CardHeader>
-            
             <CardContent className="p-6 space-y-6">
               <div className="bg-blue-50 rounded-lg p-5 border border-blue-100">
                 <ul className="space-y-4">
@@ -143,9 +142,11 @@ export const VideoRecordingScreen = ({ onRecordingComplete, videoLink }: VideoRe
                   </li>
                 </ul>
               </div>
-              
+
               <div className="bg-indigo-50 p-5 rounded-lg border border-indigo-100">
-                <h3 className="font-semibold text-indigo-700 mb-3">Tips for a Great Introduction</h3>
+                <h3 className="font-semibold text-indigo-700 mb-3">
+                  Tips for a Great Introduction
+                </h3>
                 <ul className="space-y-2 text-indigo-900">
                   <li className="flex items-center gap-2">
                     <span>•</span>
@@ -175,29 +176,31 @@ export const VideoRecordingScreen = ({ onRecordingComplete, videoLink }: VideoRe
             <CardHeader className="p-6 bg-gradient-to-r from-indigo-50 to-purple-50">
               <CardTitle className="flex items-center gap-2 text-indigo-700 text-xl font-semibold">
                 <Camera className="h-5 w-5 self-center" />
-                <span className="align-middle leading-tight">{!faceVerified ? 'Face Verification Required' : 'Record Your Introduction'}</span>
+                <span className="align-middle leading-tight">
+                  {!faceVerified ? 'Face Verification Required' : 'Record Your Introduction'}
+                </span>
               </CardTitle>
               <CardDescription className="text-sm text-gray-600 mt-1 font-semibold">
-                {!faceVerified 
-                  ? 'Please complete face verification before recording' 
+                {!faceVerified
+                  ? 'Please complete face verification before recording'
                   : 'Please introduce yourself and your experience'}
               </CardDescription>
             </CardHeader>
-            
+
             <CardContent className="p-6">
               {!faceVerified ? (
-                <FaceVerification 
+                <FaceVerification
                   onVerificationComplete={handleFaceVerificationComplete}
                   cameraStream={cameraStreamRef}
                   examId={examId as string}
                 />
               ) : (
-                <VideoRecorder 
-                  videoKey='introduction' 
-                  onRecordingComplete={onContinue} 
-                  onRecordingStop={handleStopRecording} 
-                  maxTime={90} 
-                  videoLink={videoLink} 
+                <VideoRecorder
+                  videoKey="introduction"
+                  onRecordingComplete={onContinue}
+                  onRecordingStop={handleStopRecording}
+                  maxTime={90}
+                  videoLink={videoLink}
                   isLoading={isUploading}
                 />
               )}

@@ -78,7 +78,7 @@ export const QuestionCard = ({
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
               <span className="text-xl font-bold text-blue-700 dark:text-blue-300">{index}.</span>
-              <span className="text-lg font-semibold text-gray-900 dark:text-gray-100 whitespace-pre-wrap break-words max-w-[1400px] overflow-x-auto pr-2 block">
+              <span className="text-lg font-semibold text-gray-900 dark:text-gray-100 break-all whitespace-pre-wrap max-w-[1400px] overflow-hidden flex-1">
                 {displayText}
                 {isLong && (
                   <button

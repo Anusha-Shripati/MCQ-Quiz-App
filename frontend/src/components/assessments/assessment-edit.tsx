@@ -595,13 +595,10 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
 
                             return (
                               <div className="flex justify-between w-full" key={item.value}>
-                                <div
-                                  className="flex justify-between items-center w-full group"
-                                  key={item.value}
-                                >
+                                <div className="flex items-center w-full gap-3" key={item.value}>
                                   <label
                                     htmlFor={`tech-${index}-${difficulty}-${item.value}`}
-                                    className="text-sm font-medium text-gray-700 dark:text-gray-200 flex items-center gap-1"
+                                    className="flex-1 text-sm font-medium text-gray-700 dark:text-gray-200 flex items-center gap-1"
                                   >
                                     {item.label}
                                     <span
@@ -627,7 +624,7 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
                                         e.target.value
                                       )
                                     }
-                                    className="w-20 m-0 text-center bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-400"
+                                    className="w-16 sm:w-20 text-center bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white border border-gray-300 focus:ring-2 focus:ring-blue-400"
                                   />
                                 </div>
                               </div>

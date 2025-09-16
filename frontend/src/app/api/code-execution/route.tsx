@@ -25,6 +25,15 @@ function sanitizeCode(code: string, language: string): string {
   return code;
 }
 
+function stripAnsi(str: string): string {
+  // Regex to match ANSI escape codes
+  return str.replace(
+    // eslint-disable-next-line no-control-regex
+    /\x1b\[[0-9;]*m/g,
+    ''
+  );
+}
+
 export async function POST(req: Request) {
   try {
     const { language, code } = await req.json();
@@ -35,19 +44,19 @@ export async function POST(req: Request) {
     let result: unknown = {};
     const tempFilePath = `/tmp/temp_code`;
     if (language === 'javascript') {
-      // Temporarily write code to a .js file and run it using Node.js
-      const sanitizedCode = sanitizeCode(code, 'javascript');
+      // Write code to a .js file using fs
+      const sanitizedCode = code;
       const codeFile = '/tmp/temp_code.js';
-      await execPromise(`echo '${sanitizedCode}' > ${codeFile}`);
+      await fs.writeFile(codeFile, sanitizedCode, 'utf-8');
 
       // Execute the code using Node.js
       const { stdout, stderr } = await execPromise(`node ${codeFile}`);
-
+        
       // Check if there's an error
       if (stderr) {
-        result = { success: false, error: stderr };
+        result = { success: false, error: stripAnsi(stderr) };
       } else {
-        result = { success: true, output: stdout };
+        result = { success: true, output: stripAnsi(stdout) };
       }
     } else if (language === 'python') {
       // Write Python code to a temporary file

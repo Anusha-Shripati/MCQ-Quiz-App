@@ -186,7 +186,7 @@ const ImportSampleXLSX = ({
             {/* Upload area with improved visual feedback */}
             <div
               className={cn(
-                'border-2 border-dashed rounded-lg p-8 transition-all duration-200 ease-in-out',
+                'border-2 border-dashed rounded-lg p-6 transition-all duration-200 ease-in-out',
                 isDragging
                   ? 'border-blue-500 bg-blue-50 dark:bg-gray-700 dark:border-blue-400'
                   : selectedFile
@@ -315,7 +315,7 @@ const ImportSampleXLSX = ({
             </div>
 
             {/* Action buttons with improved styling */}
-            <div className="flex justify-between pt-2">
+            <div className="flex justify-between">
               <Button
                 variant="outline"
                 onClick={() => setImportOpen(false)}

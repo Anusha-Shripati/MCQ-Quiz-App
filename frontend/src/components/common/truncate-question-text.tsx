@@ -16,7 +16,9 @@ export const QuestionText = ({
     charLimit,
   });
   return (
-    <p className={`text-gray-800 dark:text-gray-200 text-sm mb-4 ${className}`}>
+    <p
+      className={`text-gray-800 dark:text-gray-200 text-sm mb-4 break-all whitespace-pre-wrap overflow-hidden flex-1 ${className}`}
+    >
       {displayText}
       {isLong && (
         <button

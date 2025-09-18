@@ -744,8 +744,8 @@ export default function ProctoredQuiz() {
         <div className="bg-white p-6 rounded-lg shadow-lg max-w-md mx-4">
           <h3 className="text-lg font-semibold text-red-600 mb-4">Tab Switch Detected!</h3>
           <p className="text-gray-700 mb-6">
-            You attempted to switch tabs or leave the exam window. This is not allowed during the
-            test.
+            You tried to switch tabs or leave the exam window. This action is not permitted. After 2
+            such attempts, your test will be automatically submitted.
           </p>
           <div className="flex gap-4">
             <Button onClick={handleConfirmTabSwitch} variant="destructive" className="flex-1">

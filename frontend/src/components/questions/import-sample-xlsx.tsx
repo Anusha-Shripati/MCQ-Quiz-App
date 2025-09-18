@@ -169,7 +169,7 @@ const ImportSampleXLSX = ({
               Import Questions
             </DialogTitle>
           </DialogHeader>
-          <div className="space-y-6">
+          <div className="space-y-4">
             {/* Technology selection dropdown */}
             <FormField
               type="select"
@@ -186,7 +186,7 @@ const ImportSampleXLSX = ({
             {/* Upload area with improved visual feedback */}
             <div
               className={cn(
-                'border-2 border-dashed rounded-lg p-6 transition-all duration-200 ease-in-out',
+                'border-2 border-dashed rounded-lg p-4 transition-all duration-200 ease-in-out',
                 isDragging
                   ? 'border-blue-500 bg-blue-50 dark:bg-gray-700 dark:border-blue-400'
                   : selectedFile

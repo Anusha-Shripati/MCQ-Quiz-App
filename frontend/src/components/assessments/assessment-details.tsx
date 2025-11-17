@@ -31,8 +31,8 @@ interface AssessmentItemProps {
   assessmentId: string;
   title: string;
   createdBy: {
-    name:string;
-    deleted_at:string
+    name: string;
+    deleted_at: string;
   };
   createdDate: string;
   duration: string | number;
@@ -84,7 +84,9 @@ function AssessmentItem({
   const calculateTechPer = useCallback(
     (technology: Technology) => {
       const totalTech =
-        (technology?.easy.total || 0) + (technology?.medium.total || 0) + (technology?.hard.total || 0);
+        (technology?.easy.total || 0) +
+        (technology?.medium.total || 0) +
+        (technology?.hard.total || 0);
       if (!totalTech) return '0.00%';
       return `${Math.round((totalTech / total) * 100)}%`;
     },
@@ -125,7 +127,10 @@ function AssessmentItem({
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
             <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
               <User className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-              <span className="font-medium text-gray-700 dark:text-gray-300">{createdBy.name} {createdBy.deleted_at ? <span className="text-red-500"> (Deleted)</span> : '' }</span>
+              <span className="font-medium text-gray-700 dark:text-gray-300">
+                {createdBy.name}{' '}
+                {createdBy.deleted_at ? <span className="text-red-500"> (Deleted)</span> : ''}
+              </span>
             </div>
             <Tooltip>
               <TooltipTrigger asChild>

@@ -14,6 +14,7 @@ import ReusableTable from '../common/reusable-table';
 import StatusWrapper from '../common/status-wrapper';
 import { userEndpoint } from '@/lib/endpoint';
 import { DeleteDialog } from '../common/delete-dialog';
+import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
 
 function UserTable() {
   const [user, setUser] = useState<UserData | null>(null);
@@ -24,15 +25,15 @@ function UserTable() {
   };
   const { userFilter, setUserListData, userList, permissions, paramsLoading } = useAuthStore();
 
-  const [deleteId, setDeleteId] = useState<string | null>(null)
-  const [deleteOpen, setDeleteOpen] = useState<boolean>(false)
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [deleteOpen, setDeleteOpen] = useState<boolean>(false);
 
   const {
     data: users,
     isLoading,
     error,
     mutate,
-    isValidating
+    isValidating,
   } = useSWR(paramsLoading ? null : `${userEndpoint.LIST}?search=${userFilter}`, fetcher);
 
   useEffect(() => {
@@ -40,9 +41,9 @@ function UserTable() {
   }, [setUserListData, users]);
 
   const onDelete = (id: string) => {
-    setDeleteId(id)
-    setDeleteOpen(true)
-  }
+    setDeleteId(id);
+    setDeleteOpen(true);
+  };
 
   const handleUserDelete = async (id: string) => {
     try {
@@ -64,34 +65,70 @@ function UserTable() {
     { key: 'name', header: 'User Name', render: (row: UserData) => row.name },
     { key: 'email', header: 'Email', render: (row: UserData) => row.email },
     { key: 'role', header: 'Role', render: (row: UserData) => row.role?.name },
-    { key: 'created_by', header: 'Creted By', render: (row: UserData) => row.created_by_user?.name || '-' },
+    {
+      key: 'created_by',
+      header: 'Creted By',
+      render: (row: UserData) => row.created_by_user?.name || '-',
+    },
     {
       key: 'action',
       header: 'Action',
       render: (row: UserData) => (
         <div className="flex space-x-2">
           {permissions?.users.can_edit && (
-            <Button variant="ghost" size="icon" onClick={() => handleEditUser(row)}>
-              <FiEdit className="h-4 w-4" />
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handleEditUser(row)}
+                  className="hover:bg-gray-200
+                dark:hover:bg-gray-900">
+                  <FiEdit className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent sideOffset={4}>
+                <p>Edit User</p>
+              </TooltipContent>
+            </Tooltip>
           )}
+
           {row.role?.name !== 'Super Admin' && permissions?.users.can_edit && (
-            <Button variant="ghost" size="icon" onClick={() => onDelete(row.id)}>
-              <FiTrash2 className="h-4 w-4 text-destructive" />
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" onClick={() => onDelete(row.id)}>
+                  <FiTrash2 className="h-4 w-4 text-destructive" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent sideOffset={4}>
+                <p>Delete User</p>
+              </TooltipContent>
+            </Tooltip>
           )}
         </div>
       ),
     },
   ];
   return (
-    <StatusWrapper className="min-h-[74vh]" error={error} loading={isLoading || isValidating} reset={mutate}>
-      <ReusableTable columns={columns} rows={userList} rowKey="id"
+    <StatusWrapper
+      className="min-h-[74vh]"
+      error={error}
+      loading={isLoading || isValidating}
+      reset={mutate}
+    >
+      <ReusableTable
+        columns={columns}
+        rows={userList}
+        rowKey="id"
         className="h-[550px] animate-in fade-in duration-300"
       />
 
       <UserForm open={open} userData={user} onClose={() => setOpen(false)} />
-      <DeleteDialog onDelete={() => handleUserDelete(deleteId as string)} setOpen={setDeleteOpen} isOpen={deleteOpen} />
+      <DeleteDialog
+        onDelete={() => handleUserDelete(deleteId as string)}
+        setOpen={setDeleteOpen}
+        isOpen={deleteOpen}
+      />
     </StatusWrapper>
   );
 }

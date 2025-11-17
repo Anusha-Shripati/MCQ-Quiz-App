@@ -18,6 +18,7 @@ import { useAuthStore } from '@/store/authStore';
 import StatusWrapper from '../common/status-wrapper';
 import { roleEndpoint } from '@/lib/endpoint';
 import { DeleteDialog } from '../common/delete-dialog';
+import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
 
 function RoleTable() {
   const [role, setRole] = useState<RoleData | null>(null);
@@ -29,14 +30,14 @@ function RoleTable() {
   };
   const { rolesFilter, setRolesListData, rolesList } = useRoleStore();
 
-  const [deleteId, setDeleteId] = useState<string | null>(null)
-  const [deleteOpen, setDeleteOpen] = useState<boolean>(false)
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [deleteOpen, setDeleteOpen] = useState<boolean>(false);
   const {
     data: users,
     isLoading,
     error,
     mutate,
-    isValidating
+    isValidating,
   } = useSWR(paramsLoading ? null : `${roleEndpoint.LIST}?search=${rolesFilter}`, fetcher);
 
   useEffect(() => {
@@ -60,9 +61,9 @@ function RoleTable() {
   };
 
   const onDelete = (id: string) => {
-    setDeleteId(id)
-    setDeleteOpen(true)
-  }
+    setDeleteId(id);
+    setDeleteOpen(true);
+  };
   const columns = [
     { key: 'name', header: 'Name', render: (row: RoleData) => row.name },
     {
@@ -89,15 +90,31 @@ function RoleTable() {
       header: 'Action',
       render: (row: RoleData) => (
         <>
-          {user?.role?.name == 'Super Admin' && (
+          {user?.role?.name === 'Super Admin' && (
             <div className="flex space-x-2">
-              <Button variant="ghost" size="icon" onClick={() => handleEditRole(row)}>
-                <FiEdit className="h-4 w-4" />
-              </Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="icon" onClick={() => handleEditRole(row)} className='hover:bg-gray-200
+                dark:hover:bg-gray-900'>
+                    <FiEdit className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent sideOffset={4}>
+                  <p>Edit Role</p>
+                </TooltipContent>
+              </Tooltip>
+
               {row.name !== 'Super Admin' && (
-                <Button variant="ghost" size="icon" onClick={() => onDelete(row.id)}>
-                  <FiTrash2 className="h-4 w-4 text-destructive" />
-                </Button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="ghost" size="icon" onClick={() => onDelete(row.id)}>
+                      <FiTrash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent sideOffset={4}>
+                    <p>Delete Role</p>
+                  </TooltipContent>
+                </Tooltip>
               )}
             </div>
           )}
@@ -106,11 +123,19 @@ function RoleTable() {
     },
   ];
   return (
-    <StatusWrapper loading={isLoading || isValidating} error={error} className="min-h-[76vh]" reset={mutate}>
-      <ReusableTable columns={columns} rows={rolesList} rowKey="id" className="min-h-[550px]"/>
+    <StatusWrapper
+      loading={isLoading || isValidating}
+      error={error}
+      className="min-h-[76vh]"
+      reset={mutate}
+    >
+      <ReusableTable columns={columns} rows={rolesList} rowKey="id" className="min-h-[550px]" />
       <RoleForm open={open} roleData={role} onClose={() => setOpen(false)} />
-      <DeleteDialog onDelete={() => handleDeleteRole(deleteId as string)} setOpen={setDeleteOpen} isOpen={deleteOpen} />
-
+      <DeleteDialog
+        onDelete={() => handleDeleteRole(deleteId as string)}
+        setOpen={setDeleteOpen}
+        isOpen={deleteOpen}
+      />
     </StatusWrapper>
   );
 }

@@ -1,4 +1,4 @@
-import { Prisma, Questions, Technology } from '@prisma/client';
+import { Prisma, Question_type, Questions, Technology } from '@prisma/client';
 import { prisma } from '../db/prisma.client';
 import * as XLSX from 'xlsx';
 import { allTechnologiesWorldwide, docData, sampleData } from '../utils/dateUtils';
@@ -13,7 +13,7 @@ interface QuestionsPayload {
   difficulty_level: 'easy' | 'medium' | 'hard';
   type: 'multiple_select' | 'video' | 'text' | 'mcq' | 'code_snippet' | 'code_snippet_with_mcq';
   meta: any;
-  created_by:string
+  created_by: string;
 }
 
 interface ImportedQuestion {
@@ -85,8 +85,7 @@ export class QuestionService {
     const data = await this.cacheService.getKey(`question-name:${question}`);
     if (data) JSON.stringify(data);
 
-
-    const response =await  prisma.questions.findMany({ where: { question } });
+    const response = await prisma.questions.findMany({ where: { question } });
     await this.cacheService.setKey(`question:-name${question}`, response, this.cacheTime);
     return response;
   }
@@ -165,13 +164,13 @@ export class QuestionService {
     const questions = await prisma.questions.findMany({
       where: { ...query },
       orderBy: { created_at: 'asc' },
-      include:{
-        created_by_user:{
-          select:{
-            name:true,
-            deleted_at:true
-          }
-        }
+      include: {
+        created_by_user: {
+          select: {
+            name: true,
+            deleted_at: true,
+          },
+        },
       },
       skip: (page - 1) * limit,
       take: limit,
@@ -217,6 +216,7 @@ export class QuestionService {
           correct_answer: question.correct_answer.join(','),
           options: Array.isArray(question.options) ? question.options.join(',') : question.options,
           difficulty_level: question.difficulty_level,
+          type: question.type,
         };
       });
     const dataToUse = sampleQuestionsData.length > 0 ? sampleQuestionsData : sampleData;
@@ -228,6 +228,7 @@ export class QuestionService {
       { wch: 15 }, // correct_answer
       { wch: 50 }, // options
       { wch: 15 }, // difficulty_level
+      { wch: 15 }, // type
     ];
 
     worksheet['!cols'] = wscols;
@@ -249,18 +250,21 @@ export class QuestionService {
   async importQuestionsFromXlsx(
     fileBuffer: Buffer,
     technologyId: string,
-    created_by:string
+    created_by: string
   ): Promise<{
     totalImported: number;
     errors: string[];
     technologyName?: string;
   }> {
+    const VALID_TYPES = Object.values(Question_type); // includes "mcq", "multi_select", "text"
+
+    const detectType = (answers: string[]) => (answers.length > 1 ? 'multi_select' : 'mcq');
+
+    // ----------- READ EXCEL FILE -------------
     const workbook = XLSX.read(fileBuffer, { type: 'buffer' });
     const sheetName = workbook.SheetNames[0];
     const worksheet = workbook.Sheets[sheetName];
-
-    // Convert sheet to JSON
-    const questions = XLSX.utils.sheet_to_json<ImportedQuestion>(worksheet);
+    const questions = XLSX.utils.sheet_to_json<any>(worksheet);
 
     if (questions.length === 0) {
       return {
@@ -282,86 +286,118 @@ export class QuestionService {
 
     const errors: string[] = [];
 
+    // -------------------------------------------------------
+    // ------------------- VALIDATION LOOP -------------------
+    // -------------------------------------------------------
     for (const [index, row] of questions.entries()) {
       const rowNum = index + 2;
 
       try {
+        // REQUIRED QUESTION
         if (!row.question || String(row.question).trim() === '') {
-          errors.push(`Row ${rowNum}: Missing question. This field is required.`);
+          errors.push(`Row ${rowNum}: Missing question.`);
         }
 
-        if (!row.options || String(row.options).trim() === '') {
-          errors.push(`Row ${rowNum}: Missing options. This field is required.`);
-        }
-
+        // REQUIRED correct_answer
         if (row.correct_answer == null || String(row.correct_answer).trim() === '') {
-          errors.push(`Row ${rowNum}: Missing correct answer. This field is required.`);
+          errors.push(`Row ${rowNum}: Missing correct answer.`);
         }
 
+        // REQUIRED difficulty
         if (!row.difficulty_level || String(row.difficulty_level).trim() === '') {
-          errors.push(`Row ${rowNum}: Missing difficulty level. This field is required.`);
+          errors.push(`Row ${rowNum}: Missing difficulty level.`);
         }
 
-        let optionsArray: string[] = [];
-        let originalOptionsArray: string[] = [];
-        if (row.options) {
-          const optionsString = String(row.options);
-          originalOptionsArray = optionsString.split(',').map((opt) => opt.trim());
+        const difficulty = String(row.difficulty_level).toLowerCase();
+        if (!['easy', 'medium', 'hard'].includes(difficulty)) {
+          errors.push(`Row ${rowNum}: Invalid difficulty level.`);
+        }
 
-          // Process options for storage
-          optionsArray = optionsString
+        // --------------------------------------------
+        // HANDLE TYPE
+        // --------------------------------------------
+        let questionType = row.type ? String(row.type).trim().toLowerCase() : '';
+
+        if (questionType === '') {
+          questionType = detectType(
+            String(row.correct_answer).includes(',')
+              ? String(row.correct_answer).split(',')
+              : [String(row.correct_answer)]
+          );
+        }
+
+        // VALIDATE TYPE
+        if (!VALID_TYPES.includes(questionType as Question_type)) {
+          errors.push(
+            `Row ${rowNum}: Invalid question type "${row.type}". Supported types: ${VALID_TYPES.join(
+              ', '
+            )}`
+          );
+        }
+
+        // ------------------------------------------------
+        // TYPE-SPECIFIC VALIDATION
+        // ------------------------------------------------
+
+        if (questionType === 'text') {
+          // FILL IN THE BLANK — NO OPTIONS REQUIRED
+          row.__finalType = 'text';
+
+          // correct_answer stays as string or comma list
+          row.__correctArr = String(row.correct_answer)
             .split(',')
-            .map((opt) => opt.trim().toLowerCase().replace(/\s+/g, ' '));
+            .map((a: string) => a.trim());
 
-          if (optionsArray.length < 4) {
-            errors.push(`Row ${rowNum}: Options must contain at least 4 comma-separated values.`);
-          }
+          continue; // skip MCQ validations
         }
 
-        // Validate correct_answer contains valid indexes
-        if (row.correct_answer && optionsArray.length > 0) {
-          const correctAnswer = String(row.correct_answer);
-          let correctAnswersArray: string[];
-
-          if (correctAnswer.includes(',')) {
-            correctAnswersArray = correctAnswer.split(',').map((ans) => ans.trim());
-          } else {
-            correctAnswersArray = [correctAnswer.trim()];
-          }
-
-          for (const answer of correctAnswersArray) {
-            // Check if the answer is a valid number
-            if (!/^\d+$/.test(answer)) {
-              errors.push(`Row ${rowNum}: Correct answer "${answer}" is not a valid index number.`);
-              continue;
-            }
-
-            const ansIndex = parseInt(answer, 10);
-            if (ansIndex < 0 || ansIndex >= optionsArray.length) {
-              errors.push(
-                `Row ${rowNum}: Correct answer index ${ansIndex} is out of range. Must be between 0 and ${optionsArray.length - 1}.`
-              );
-            }
-          }
+        // --------------------------------------------
+        // MCQ & MULTI-SELECT VALIDATIONS
+        // --------------------------------------------
+        if (!row.options || String(row.options).trim() === '') {
+          errors.push(`Row ${rowNum}: Missing options.`);
         }
 
-        if (row.difficulty_level) {
-          const validDifficultyLevels = ['easy', 'medium', 'hard'];
-          const difficultyLevel = String(row.difficulty_level).toLowerCase();
+        const optionsArray = String(row.options)
+          .split(',')
+          .map((o: string) => o.trim());
 
-          if (!validDifficultyLevels.includes(difficultyLevel)) {
+        if (optionsArray.length < 2) {
+          errors.push(`Row ${rowNum}: Options must contain at least 2 values.`);
+        }
+
+        const correctArr = String(row.correct_answer).includes(',')
+          ? String(row.correct_answer)
+              .split(',')
+              .map((a: string) => a.trim())
+          : [String(row.correct_answer).trim()];
+
+        // Correct answers must be numeric index
+        for (const ans of correctArr) {
+          if (!/^\d+$/.test(ans)) {
+            errors.push(`Row ${rowNum}: Correct answer "${ans}" must be a number index.`);
+            continue;
+          }
+
+          const idx = Number(ans);
+          if (idx < 0 || idx >= optionsArray.length) {
             errors.push(
-              `Row ${rowNum}: Invalid difficulty level "${row.difficulty_level}". Must be one of: easy, medium, hard`
+              `Row ${rowNum}: Correct answer index ${idx} out of range (0-${optionsArray.length - 1}).`
             );
           }
         }
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown validation error';
-        errors.push(`Row ${rowNum}: ${errorMessage}`);
+
+        row.__finalType = questionType;
+        row.__correctArr = correctArr;
+        row.__optionsArray = optionsArray;
+      } catch (err) {
+        errors.push(`Row ${rowNum}: ${err instanceof Error ? err.message : 'Unknown error'}`);
       }
     }
 
-    // If any validation errors were found, return them without creating anything
+    // -------------------------------------------------------
+    // STOP IF ANY ERRORS
+    // -------------------------------------------------------
     if (errors.length > 0) {
       return {
         totalImported: 0,
@@ -369,62 +405,67 @@ export class QuestionService {
       };
     }
 
-    // All validations passed, proceed with import using a transaction
+    // -------------------------------------------------------
+    // INSERT INTO DATABASE
+    // -------------------------------------------------------
     let totalImported = 0;
-    let questionsImportArray:any=[]
+    const questionsImportArray: any[] = [];
+
     try {
       await prisma.$transaction(async (tx) => {
         for (const row of questions) {
-          const optionsString = String(row.options);
-          const optionsArray = optionsString.split(',').map((opt) => opt.trim());
+          const difficulty = String(row.difficulty_level).toLowerCase();
 
-          const correctAnswer = String(row.correct_answer);
-          let correctAnswersIndexes: string[];
-
-          if (correctAnswer.includes(',')) {
-            correctAnswersIndexes = correctAnswer.split(',').map((ans) => ans.trim());
-          } else {
-            correctAnswersIndexes = [correctAnswer.trim()];
-          }
-
-          const difficultyLevel = String(row.difficulty_level).toLowerCase();
           questionsImportArray.push({
-              technology_id: technologyId, // Use the specified technology ID
-              question: String(row.question),
-              correct_answer: correctAnswersIndexes,
-              options: optionsArray,
-              time: '60',
-              difficulty_level: difficultyLevel as 'easy' | 'medium' | 'hard',
-              type: 'mcq',
-              meta: {},
-              created_by:created_by
+            technology_id: technologyId,
+            question: String(row.question),
+
+            correct_answer: row.__correctArr,
+            options: row.__finalType === 'text' ? [] : row.__optionsArray,
+
+            time: '60',
+            difficulty_level: difficulty as 'easy' | 'medium' | 'hard',
+            type: row.__finalType,
+            meta: {},
+            created_by,
           });
 
           totalImported++;
         }
-        const existing = await tx.questions.findMany({where: { question:{in:questionsImportArray.filter((item:any) => item.type !== 'code_snippet_with_mcq')
-          .map((item:any)=>item.question)}}})
-          if(existing.length){
-            const existingIndex:number[]=[]
-            existing.forEach((element:Questions) => {
-                const idx =  questionsImportArray.findIndex((item:Questions)=>item.question == element.question )
-                if(idx!== -1)existingIndex.push(idx+1)
-            });
-            throw new Error( existingIndex.join(', ')+ ' questions already exists')
-          }
-        await tx.questions.createMany({data:questionsImportArray})
+
+        // DUPLICATE CHECK
+        const existing = await tx.questions.findMany({
+          where: {
+            question: {
+              in: questionsImportArray.map((q) => q.question),
+            },
+          },
+        });
+
+        if (existing.length) {
+          const indexes: number[] = [];
+          existing.forEach((e) => {
+            const idx = questionsImportArray.findIndex((q) => q.question === e.question);
+            if (idx !== -1) indexes.push(idx + 1);
+          });
+
+          throw new Error(indexes.join(', ') + ' questions already exist.');
+        }
+
+        await tx.questions.createMany({
+          data: questionsImportArray,
+        });
       });
 
       return {
         totalImported,
-        technologyName: technology.name, // Include technology name in successful response
+        technologyName: technology.name,
         errors: [],
       };
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error during import';
+    } catch (err) {
       return {
         totalImported: 0,
-        errors: [`Transaction failed: ${errorMessage}`],
+        errors: [`Transaction failed: ${err instanceof Error ? err.message : err}`],
       };
     }
   }

@@ -36,7 +36,7 @@ function ResultTable() {
 
   const totalItems = resultCount;
   const pathname = usePathname();
-  
+
   useEffect(() => {
     const params = new URLSearchParams();
 
@@ -53,14 +53,18 @@ function ResultTable() {
       params.set('assessmentFilter', JSON.stringify(assessmentLabels));
     }
 
-    if (resultFilter.search) params.set('search', resultFilter.search)
+    if (resultFilter.search) params.set('search', resultFilter.search);
     if (resultFilter.startDate) params.set('startDate', JSON.stringify(resultFilter.startDate));
     if (resultFilter.endDate) params.set('endDate', JSON.stringify(resultFilter.endDate));
     if (resultFilter.days) params.set('days', JSON.stringify(resultFilter.days));
-    if (resultFilter.percentageFrom) params.set('percentageFrom', JSON.stringify(resultFilter.percentageFrom));
-    if (resultFilter.percentageTo) params.set('percentageTo', JSON.stringify(resultFilter.percentageTo));
-    if (resultFilter.experienceTo) params.set('experienceTo', JSON.stringify(resultFilter.experienceTo));
-    if (resultFilter.experienceFrom) params.set('experienceFrom', JSON.stringify(resultFilter.experienceFrom));
+    if (resultFilter.percentageFrom)
+      params.set('percentageFrom', JSON.stringify(resultFilter.percentageFrom));
+    if (resultFilter.percentageTo)
+      params.set('percentageTo', JSON.stringify(resultFilter.percentageTo));
+    if (resultFilter.experienceTo)
+      params.set('experienceTo', JSON.stringify(resultFilter.experienceTo));
+    if (resultFilter.experienceFrom)
+      params.set('experienceFrom', JSON.stringify(resultFilter.experienceFrom));
 
     window.history.replaceState(null, '', `${pathname}?${params.toString()}`);
   }, [currentPage, itemsPerPage, resultFilter, pathname]);
@@ -74,22 +78,30 @@ function ResultTable() {
       search: params.get('search') || '',
       technologyFilter: params.get('technologyFilter')
         ? JSON.parse(params.get('technologyFilter') as string).map((label: string) => {
-          const found = technologyOptions.find((opt) => opt.label === label);
-          return found || { value: '', label };
-        })
+            const found = technologyOptions.find((opt) => opt.label === label);
+            return found || { value: '', label };
+          })
         : [],
       assessmentFilter: params.get('assessmentFilter')
         ? JSON.parse(params.get('assessmentFilter') as string).map((label: string) => {
-          const found = assessmentOptions.find((opt) => opt.label === label);
-          return found || { value: '', label };
-        })
+            const found = assessmentOptions.find((opt) => opt.label === label);
+            return found || { value: '', label };
+          })
         : [],
       startDate: params.get('startDate') ? JSON.parse(params.get('startDate') as string) : '',
       endDate: params.get('endDate') ? JSON.parse(params.get('endDate') as string) : '',
-      percentageFrom: params.get('percentageFrom') ? Number(JSON.parse(params.get('percentageFrom') as string)) : null,
-      percentageTo: params.get('percentageTo') ? Number(JSON.parse(params.get('percentageTo') as string)) : null,
-      experienceFrom: params.get('experienceFrom') ? Number(JSON.parse(params.get('experienceFrom') as string)) : null,
-      experienceTo: params.get('experienceTo') ? Number(JSON.parse(params.get('experienceTo') as string)) : null,
+      percentageFrom: params.get('percentageFrom')
+        ? Number(JSON.parse(params.get('percentageFrom') as string))
+        : null,
+      percentageTo: params.get('percentageTo')
+        ? Number(JSON.parse(params.get('percentageTo') as string))
+        : null,
+      experienceFrom: params.get('experienceFrom')
+        ? Number(JSON.parse(params.get('experienceFrom') as string))
+        : null,
+      experienceTo: params.get('experienceTo')
+        ? Number(JSON.parse(params.get('experienceTo') as string))
+        : null,
       days: params.get('days') ? JSON.parse(params.get('days') as string) : '',
     };
     setResultFilter(filterParams);
@@ -100,12 +112,8 @@ function ResultTable() {
       page: currentPage || 1,
       limit: itemsPerPage || 10,
       search: resultFilter.search,
-      technology_ids: resultFilter.technologyFilter.map(
-        (item: StatusOption) => item.value
-      ),
-      assessment_ids: resultFilter.assessmentFilter.map(
-        (item: StatusOption) => item.value
-      ),
+      technology_ids: resultFilter.technologyFilter.map((item: StatusOption) => item.value),
+      assessment_ids: resultFilter.assessmentFilter.map((item: StatusOption) => item.value),
       ...(resultFilter.startDate && { startDate: dayjs(resultFilter.startDate).toISOString() }),
       ...(resultFilter.endDate && { endDate: dayjs(resultFilter.endDate).toISOString() }),
       ...(resultFilter.percentageFrom && { percentageFrom: resultFilter.percentageFrom }),
@@ -130,7 +138,7 @@ function ResultTable() {
     error,
     isLoading,
     isValidating,
-    mutate
+    mutate,
   } = useSWR(`${resultEndpoint.LIST}?${cleanedQuery}`, api.get);
 
   useEffect(() => {
@@ -158,7 +166,6 @@ function ResultTable() {
   };
 
   const handleRowClick = (result: Result) => {
-
     setExpandedRowId(expandedRowId === Number(result.id) ? null : Number(result.id));
   };
 
@@ -181,34 +188,51 @@ function ResultTable() {
             : '-',
       },
       { key: 'name', header: 'Name', render: (row) => row.exam?.candidate?.name || '-' },
-      { key: 'email', header: 'Email', render: (row) => row.exam?.candidate?.email || '-', },
+      { key: 'email', header: 'Email', render: (row) => row.exam?.candidate?.email || '-' },
       {
         key: 'technology',
         header: 'Technology',
         render: (row) => {
           const technologies = row?.exam?.assessment?.technologies || [];
           const totalTechnologies = technologies.length;
-          const displayTechnologies = technologies.slice(0, 2).map(item => item?.technology?.name).filter(Boolean);
+          const displayTechnologies = technologies
+            .slice(0, 2)
+            .map((item) => item?.technology?.name)
+            .filter(Boolean);
           const remainingCount = totalTechnologies > 2 ? ` +${totalTechnologies - 2}` : '';
 
-          const allTechnologies = technologies.map(item => item?.technology?.name).filter(Boolean).join(', ');
+          const allTechnologies = technologies
+            .map((item) => item?.technology?.name)
+            .filter(Boolean)
+            .join(', ');
 
           return totalTechnologies > 0 ? (
             <Tooltip>
-              <TooltipTrigger>
+              <TooltipTrigger asChild>
                 <span>
-                  {displayTechnologies.join(', ')}{remainingCount}
+                  {displayTechnologies.join(', ')}
+                  {remainingCount}
                 </span>
               </TooltipTrigger>
               <TooltipContent className="bg-gray-800 text-white p-2 rounded shadow-lg">
                 <p>{allTechnologies}</p>
               </TooltipContent>
             </Tooltip>
-          ) : '-';
+          ) : (
+            '-'
+          );
         },
       },
-      { key: 'experience', header: 'Exp. (Year)', render: (row) => row.exam?.candidate?.experience || '-' },
-      { key: 'assessment.name', header: 'Assessment', render: (row) => row.exam?.assessment?.name || '-' },
+      {
+        key: 'experience',
+        header: 'Exp. (Year)',
+        render: (row) => row.exam?.candidate?.experience || '-',
+      },
+      {
+        key: 'assessment.name',
+        header: 'Assessment',
+        render: (row) => row.exam?.assessment?.name || '-',
+      },
       {
         key: 'created_at',
         header: 'Created At',
@@ -227,31 +251,45 @@ function ResultTable() {
 
           return (
             <Tooltip>
-              <TooltipTrigger>
+              <TooltipTrigger asChild>
                 <span className={`px-3 py-1 text-sm font-medium rounded-full ${badgeClass} `}>
                   {row?.percentage?.toFixed(2)} % ({row?.is_passed ? 'Pass' : 'Failed'})
                 </span>
               </TooltipTrigger>
               <TooltipContent className="bg-gray-800 text-white p-2 rounded shadow-lg">
-                <p className='font-semibold'>Passing Criteria:</p>
+                <p className="font-semibold">Passing Criteria:</p>
                 <p>{row?.pass_criteria} %</p>
               </TooltipContent>
             </Tooltip>
           );
-        }
+        },
       },
       {
         key: 'actions',
         header: '',
         render: (result: Result) => (
-          <Link
-            href={`/results/${result.id}`}
-            className="p-2 rounded-lg transition-all duration-200"
-            target='_blank'
-            onClick={(e) => e.stopPropagation()} // Prevent row click when clicking the arrow
-          >
-            <ArrowRight className="h-4 w-4 text-gray-600 dark:text-gray-300" />
-          </Link>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Link
+                href={`/results/${result.id}`}
+                target="_blank"
+                onClick={(e) => e.stopPropagation()}
+                className="rounded-lg transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-800 group"
+              >
+                <div className="p-2 flex items-center justify-center 
+                rounded-lg group-hover:bg-gray-200 dark:group-hover:bg-gray-900">
+                  <ArrowRight
+                    className="w-4 h-4 text-gray-500 dark:text-gray-400 transition-colors duration-200 
+              group-hover:text-black dark:group-hover:text-white"
+                  />
+                </div>
+              </Link>
+            </TooltipTrigger>
+
+            <TooltipContent sideOffset={4}>
+              <p>Open result details</p>
+            </TooltipContent>
+          </Tooltip>
         ),
       },
     ],
@@ -259,11 +297,18 @@ function ResultTable() {
   );
 
   const expandableRow: ExpandableRow<Result> = {
-    render: (row: Result) => <ResultExpandableRow row={row} technologyOptions={technologyOptions} />
+    render: (row: Result) => (
+      <ResultExpandableRow row={row} technologyOptions={technologyOptions} />
+    ),
   };
 
   return (
-    <StatusWrapper loading={isLoading || isValidating } reset={mutate} className="min-h-[68vh] flex" error={error}>
+    <StatusWrapper
+      loading={isLoading || isValidating}
+      reset={mutate}
+      className="min-h-[68vh] flex"
+      error={error}
+    >
       <Pagination
         className="flex-grow"
         currentPageStart={currentPageStart}
@@ -274,7 +319,7 @@ function ResultTable() {
         currentPage={currentPage}
         onPageChange={handlePageChange}
       >
-          <div className="h-[60vh]">
+        <div className="h-[60vh]">
           <ReusableTable
             columns={columns}
             rows={currentItems}
@@ -286,7 +331,6 @@ function ResultTable() {
         </div>
       </Pagination>
     </StatusWrapper>
-
   );
 }
 

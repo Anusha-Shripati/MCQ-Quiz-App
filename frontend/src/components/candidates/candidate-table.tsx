@@ -260,7 +260,7 @@ function CandidateTable() {
           const visiblePart = localPart.slice(0, 5);
           return (
             <Tooltip>
-              <TooltipTrigger>
+              <TooltipTrigger asChild>
                 <span className="text-sm">
                   {visiblePart}...@{domain}
                 </span>
@@ -288,7 +288,7 @@ function CandidateTable() {
 
           return totalTechnologies > 0 ? (
             <Tooltip>
-              <TooltipTrigger>
+              <TooltipTrigger asChild>
                 <span className="text-sm">
                   {displayTechnologies.map((tech, index) => (
                     <span key={index} className="mr-1">
@@ -359,7 +359,7 @@ function CandidateTable() {
 
           return (
             <Tooltip>
-              <TooltipTrigger>
+              <TooltipTrigger asChild>
                 <div
                   className={`inline-block px-3 py-1 text-sm font-medium rounded-md ${badgeClass} text-center min-w-[100px]`}
                   style={{ minWidth: 100, display: 'inline-block' }}
@@ -383,26 +383,32 @@ function CandidateTable() {
         render: (candidate: ICandidate) => (
           <div className="flex items-center gap-2">
             {candidate.exam?.status !== 'completed' && candidate.exam?.status !== 'expired' && (
-              <Button
-                onClick={async (e) => {
-                  e.stopPropagation();
-                  try {
-                    navigator.clipboard.writeText(candidate.meta.examLink as string);
-                    const expiresAt = new Date(candidate.meta.tokenExpiresAt as string);
-                    const formattedExpiration = expiresAt.toLocaleString();
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    onClick={async (e) => {
+                      e.stopPropagation();
+                      try {
+                        navigator.clipboard.writeText(candidate.meta.examLink as string);
+                        const expiresAt = new Date(candidate.meta.tokenExpiresAt as string);
+                        const formattedExpiration = expiresAt.toLocaleString();
 
-                    toast.success(`Exam link copied! Valid until ${formattedExpiration}`);
-                  } catch (error) {
-                    console.error('Error getting exam link:', error);
-                    toast.error('Failed to get exam link');
-                  }
-                }}
-                variant="ghost"
-                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all duration-200"
-                title="Copy exam access link"
-              >
-                <FiCopy className="h-5 w-5 text-gray-700 dark:text-gray-300" />
-              </Button>
+                        toast.success(`Exam link copied! Valid until ${formattedExpiration}`);
+                      } catch (error) {
+                        console.error('Error getting exam link:', error);
+                        toast.error('Failed to get exam link');
+                      }
+                    }}
+                    variant="ghost"
+                    className="p-2 hover:bg-gray-200 dark:hover:bg-gray-900 rounded-lg transition-all duration-200 group"
+                  >
+                    <FiCopy className="h-5 w-5 text-gray-700 dark:text-gray-300 group-hover:text-black dark:group-hover:text-white transition-colors" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Copy exam link</p>
+                </TooltipContent>
+              </Tooltip>
             )}
             {/* <Button
               onClick={async() => {
@@ -414,39 +420,60 @@ function CandidateTable() {
             >
               Reset All
             </Button> */}
-            <Button
-              onClick={(e) => {
-                e.stopPropagation();
-                  window.location.href = `mailto:${candidate.email}`;
-              }}
-              variant="ghost"
-              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all duration-200"
-            >
-              <FiMail className="h-5 w-5 text-gray-700 dark:text-gray-300" />
-            </Button>
-            {candidate.exam?.status === 'pending' && canEditCandidate &&  (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    window.location.href = `mailto:${candidate.email}`;
+                  }}
+                  variant="ghost"
+                  className="p-2 hover:bg-gray-200 dark:hover:bg-gray-900 rounded-lg transition-all duration-200 group"
+                >
+                  <FiMail className="h-5 w-5 text-gray-700 dark:text-gray-300 group-hover:text-black dark:group-hover:text-white transition-colors" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Send email to candidate</p>
+              </TooltipContent>
+            </Tooltip>
+            {candidate.exam?.status === 'pending' && canEditCandidate && (
               <>
-                <Button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleEdit(candidate);
-                  }}
-                  variant="ghost"
-                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all duration-200"
-                >
-                  <Edit className="h-4 w-4 text-gray-600 dark:text-gray-300" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="hover:bg-red-50 hover:text-red-600"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDelete(candidate.id as string);
-                  }}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEdit(candidate);
+                      }}
+                      variant="ghost"
+                      className="p-2 hover:bg-gray-200 dark:hover:bg-gray-900 rounded-lg transition-all duration-200 group"
+                    >
+                      <Edit className="h-4 w-4 text-gray-600 dark:text-gray-300 group-hover:text-black dark:group-hover:text-white transition-colors" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Edit candidate</p>
+                  </TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="hover:bg-red-50 hover:text-red-600 group"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(candidate.id as string);
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4 transition-colors" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Delete candidate</p>
+                  </TooltipContent>
+                </Tooltip>
               </>
             )}
           </div>
@@ -491,7 +518,7 @@ function CandidateTable() {
           <div>
             <p className="text-sm text-gray-500 dark:text-gray-300">Test Time</p>
             <Tooltip>
-              <TooltipTrigger>
+              <TooltipTrigger asChild>
                 <p className="text-lg font-medium text-gray-700 dark:text-gray-300">
                   {formatTestDuration(
                     row?.exam?.start_time as string,

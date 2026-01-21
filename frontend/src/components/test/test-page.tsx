@@ -44,6 +44,7 @@ import {
   getBrowser,
   isFirefox,
   isSafari,
+  setupScreenChangeListener,
 } from '@/components/test/testUtils/screenDetection';
 import {
   handleFirefoxScreenShare,
@@ -378,6 +379,8 @@ const TestPage = () => {
    */
   const init = async () => {
     try {
+      // Request fullscreen automatically on init
+
       // Don't initialize if on mobile or tablet
       if (isInvalidDevice) return;
 
@@ -429,10 +432,11 @@ const TestPage = () => {
   };
 
   const handleRetry = () => {
+    window.location.reload();
     setTimeout(() => {
       setHasMultipleScreens(false);
       checkMultipleScreens();
-    }, 2000);
+    }, 500);
   };
 
   // Initial setup
@@ -456,6 +460,23 @@ const TestPage = () => {
     return cleanup;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [error, isInvalidDevice]);
+
+  // Set up continuous screen monitoring to detect when monitors are plugged in during exam
+  useEffect(() => {
+    // Only set up monitoring if exam has started and user is not on invalid device
+    if (isInvalidDevice || loading || error || examNotStarted || examExpired) {
+      return;
+    }
+
+    // Set up listener to detect screen changes
+    const cleanup = setupScreenChangeListener(() => {
+      console.log('Multiple screens detected during exam');
+      setHasMultipleScreens(true);
+    });
+
+    return cleanup;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isInvalidDevice, loading, error, examNotStarted, examExpired]);
 
   // Render for invalid devices (mobile/tablet)
   if (isInvalidDevice) {
@@ -588,7 +609,9 @@ const TestPage = () => {
         />
       ) : (
         <>
-          {current_step === EXAM_STEP.BASIC_INFO && <BasicInfoForm />}
+          {current_step === EXAM_STEP.BASIC_INFO && (
+            <BasicInfoForm setIsFullscreen={setIsFullscreen} />
+          )}
           {current_step === EXAM_STEP.VIDEO_RECORDING && (
             <VideoRecordingScreen
               onRecordingComplete={handleRecordingComplete}

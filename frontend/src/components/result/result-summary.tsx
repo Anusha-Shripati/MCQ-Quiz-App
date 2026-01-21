@@ -139,8 +139,8 @@ const ResultSummary: React.FC<ResultSummaryProps> = ({
                   <th className="px-6 py-3 font-semibold">Technology</th>
                   <th className="px-6 py-3 font-semibold">Score</th>
                   <th className="px-6 py-3 font-semibold">Correctly answered</th>
-                  <th className="px-6 py-3 font-semibold">Total marks</th>
                   <th className="px-6 py-3 font-semibold">Total questions</th>
+                  <th className="px-6 py-3 font-semibold">Total marks</th>
                   <th className="px-6 py-3 font-semibold">Percentage</th>
                 </tr>
               </thead>
@@ -160,8 +160,8 @@ const ResultSummary: React.FC<ResultSummaryProps> = ({
                       <td className="px-6 py-3 font-semibold">{tech?.name || 'Unknown'}</td>
                       <td className="px-6 py-3">{tech.score}</td>
                       <td className="px-6 py-3">{tech.correctly_answered_in_technology}</td>
-                      <td className="px-6 py-3">{tech.total}</td>
                       <td className="px-6 py-3">{tech.total_questions_in_technology}</td>
+                      <td className="px-6 py-3">{tech.total}</td>
                       <td className="px-6 py-3">{tech.percentage?.toFixed(2)}%</td>
                     </tr>
                   ))

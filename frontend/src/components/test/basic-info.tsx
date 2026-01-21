@@ -4,6 +4,7 @@ import { Camera, FileText, Info, Mail, User, UserCircle } from 'lucide-react';
 import { memo } from 'react';
 import { Button } from '../ui/form/button';
 import dayjs from 'dayjs';
+import { requestFullscreen } from './testUtils/securityUtils';
 
 const InstructionCard = () => {
   const { exam } = useExamStore();
@@ -307,9 +308,10 @@ const FormField = ({
   </div>
 );
 
-const BasicInfoForm: React.FC = memo(() => {
+const BasicInfoForm = memo(({ setIsFullscreen }: { setIsFullscreen: (value: boolean) => void }) => {
   const { candidate, setCurrentStep } = useExamStore();
   const handleBasicInfoSubmit = () => {
+    requestFullscreen(setIsFullscreen);
     setCurrentStep(EXAM_STEP.VIDEO_RECORDING);
   };
 

@@ -370,10 +370,10 @@ export default function ProctoredQuiz() {
 
     if (PROHIBITED_KEYS.includes(e.key)) {
       e.preventDefault();
-      // addViolation({
-      //   type: 'PROHIBITED_KEY',
-      //   details: `Attempted to use ${e.key} key`,
-      // });
+      addViolation({
+        type: 'PROHIBITED_KEY',
+        details: `Attempted to use ${e.key} key`,
+      });
       return;
     }
 

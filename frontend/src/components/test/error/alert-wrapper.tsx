@@ -10,12 +10,15 @@ const AlertWrapper = ({ showAlert, alertMessage,onClose }: { showAlert: boolean;
             <div className="flex items-center gap-3 mb-4">
               <div className="flex-shrink-0">
                 <div className="h-10 w-10 rounded-full bg-red-100 flex items-center justify-center">
-                  <TriangleAlert  className="h-6 w-6 text-red-600" />
+                  <TriangleAlert className="h-6 w-6 text-red-600" />
                 </div>
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-gray-900">Warning</h3>
                 <p className="text-sm text-gray-500">Please review the following message</p>
+                <p className="text-sm text-red-600">
+                  Exam will be auto submitted if you have exceeded the maximum violation limit(5)
+                </p>
               </div>
             </div>
             <div className="bg-red-50 border border-red-200 rounded-lg p-4">

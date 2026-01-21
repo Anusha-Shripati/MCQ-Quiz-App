@@ -422,35 +422,15 @@ export class QuestionService {
     // INSERT INTO DATABASE
     // -------------------------------------------------------
     let totalImported = 0;
-    const questionsImportArray: any[] = [];
 
     try {
       await prisma.$transaction(async (tx) => {
-        for (const row of questions) {
-          const difficulty = String(row.difficulty_level).toLowerCase();
-
-          questionsImportArray.push({
-            technology_id: technologyId,
-            question: String(row.question),
-
-            correct_answer: row.__correctArr,
-            options: row.__finalType === 'text' ? [] : row.__optionsArray,
-
-            time: '60',
-            difficulty_level: difficulty as 'easy' | 'medium' | 'hard',
-            type: row.__finalType,
-            meta: row.__meta || {},
-            created_by,
-          });
-
-          totalImported++;
-        }
-
+        // First check for duplicates
         const existing = await tx.questions.findMany({
           where: {
             technology_id: technologyId,
             question: {
-              in: questionsImportArray.map((q) => q.question),
+              in: questions.map((q) => String(q.question)),
             },
           },
         });
@@ -458,16 +438,37 @@ export class QuestionService {
         if (existing.length) {
           const indexes: number[] = [];
           existing.forEach((e) => {
-            const idx = questionsImportArray.findIndex((q) => q.question === e.question);
+            const idx = questions.findIndex((q) => String(q.question) === e.question);
             if (idx !== -1) indexes.push(idx + 2);
           });
 
           throw new Error(`question already exists at row ${indexes.join(', ')}`);
         }
 
-        await tx.questions.createMany({
-          data: questionsImportArray,
-        });
+        // Insert questions one by one with proper relations
+        for (const row of questions) {
+          const difficulty = String(row.difficulty_level).toLowerCase();
+
+          await tx.questions.create({
+            data: {
+              question: String(row.question),
+              correct_answer: row.__correctArr,
+              options: row.__finalType === 'text' ? [] : row.__optionsArray,
+              time: '60',
+              difficulty_level: difficulty as 'easy' | 'medium' | 'hard',
+              type: row.__finalType,
+              meta: row.__meta || {},
+              technology: {
+                connect: { id: technologyId },
+              },
+              created_by_user: {
+                connect: { id: created_by },
+              },
+            },
+          });
+
+          totalImported++;
+        }
       });
 
       return {

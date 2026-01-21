@@ -117,7 +117,7 @@ export class TechnologyService {
       await tx.questions.updateMany({
         where: {
           technology_id: id,
-          deleted_at: null,
+          deleted_at: currentDate,
         },
         data: {
           deleted_at: currentDate,

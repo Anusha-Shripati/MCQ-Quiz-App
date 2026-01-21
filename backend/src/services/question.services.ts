@@ -141,6 +141,7 @@ export class QuestionService {
     limit?: string;
     difficulty_level?: string;
     search?: string;
+    type?: string;
   }) {
     const key = this.cacheService.generateKey('questions:technology', filters);
     const data = await this.cacheService.getKey(key);
@@ -150,6 +151,9 @@ export class QuestionService {
       technology_id: filters.technology_id ? filters.technology_id : undefined,
       difficulty_level: filters.difficulty_level
         ? { in: filters.difficulty_level.split(',') as QuestionsPayload['difficulty_level'][] }
+        : undefined,
+      type: filters.type
+        ? { in: filters.type.split(',') as QuestionsPayload['type'][] }
         : undefined,
       question: filters.search ? { contains: filters.search, mode: 'insensitive' } : undefined,
       deleted_at: null,
@@ -433,9 +437,9 @@ export class QuestionService {
           totalImported++;
         }
 
-        // DUPLICATE CHECK
         const existing = await tx.questions.findMany({
           where: {
+            technology_id: technologyId,
             question: {
               in: questionsImportArray.map((q) => q.question),
             },
@@ -446,10 +450,10 @@ export class QuestionService {
           const indexes: number[] = [];
           existing.forEach((e) => {
             const idx = questionsImportArray.findIndex((q) => q.question === e.question);
-            if (idx !== -1) indexes.push(idx + 1);
+            if (idx !== -1) indexes.push(idx + 2);
           });
 
-          throw new Error(indexes.join(', ') + ' questions already exist.');
+          throw new Error(`question already exists at row ${indexes.join(', ')}`);
         }
 
         await tx.questions.createMany({

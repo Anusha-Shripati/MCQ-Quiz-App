@@ -7,7 +7,14 @@ interface Questions {
   options: [string, string, string, string, string, string];
   time: string;
   difficulty_level: 'easy' | 'medium' | 'hard';
-  type: 'multiple_select' | 'video' | 'text' | 'mcq';
+  type:
+    | 'multiple_select'
+    | 'video'
+    | 'text'
+    | 'mcq'
+    | 'code_snippet'
+    | 'code_snippet_with_mcq'
+    | 'code_editor';
   meta: Record<string, unknown>;
 }
 
@@ -15,11 +22,16 @@ interface QuestionStore {
   questionFilter: {
     search: string;
     difficulty: Questions['difficulty_level'][];
+    type: Questions['type'][];
   };
   technologyFilter: string;
   questionCount: number;
   questionList: Questions[];
-  setQuestionFilter: (search: string, difficulty: Questions['difficulty_level'][]) => void;
+  setQuestionFilter: (
+    search: string,
+    difficulty: Questions['difficulty_level'][],
+    type: Questions['type'][]
+  ) => void;
   setTechnologyFilter: (filter: string) => void;
   setQuestionListData: (count: number, list: Questions[]) => void;
 }
@@ -28,12 +40,17 @@ export const useQuestionStore = create<QuestionStore>((set) => ({
   questionFilter: {
     search: '',
     difficulty: ['easy', 'medium', 'hard'],
+    type: ['multiple_select', 'video', 'text', 'mcq', 'code_snippet', 'code_snippet_with_mcq'],
   },
   technologyFilter: '',
   questionCount: 0,
   questionList: [],
-  setQuestionFilter: (search: string, difficulty: Questions['difficulty_level'][]) => {
-    set({ questionFilter: { search, difficulty } });
+  setQuestionFilter: (
+    search: string,
+    difficulty: Questions['difficulty_level'][],
+    type: Questions['type'][]
+  ) => {
+    set({ questionFilter: { search, difficulty, type } });
   },
   setTechnologyFilter: (filter: string) => {
     set({ technologyFilter: filter });

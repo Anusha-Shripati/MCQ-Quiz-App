@@ -45,6 +45,11 @@ export class ResultService {
               },
             },
             candidate: true,
+            exam_questions: {
+              include: {
+                question: true,
+              },
+            },
           },
         },
         answers: {
@@ -73,6 +78,35 @@ export class ResultService {
           );
         }
       });
+
+      // Enrich tech_score with total questions and correctly answered counts
+      let tech_score: any[] = [];
+      if (result.exam?.meta && (result.exam.meta as any).tech_score) {
+        tech_score = (result.exam.meta as any).tech_score.map((tech: any) => {
+          const totalQuestions =
+            result.exam?.exam_questions?.filter(
+              (eq) => eq.question?.technology_id === tech.technology_id
+            ).length || 0;
+
+          const correctAnswers =
+            result.answers?.filter(
+              (ans) =>
+                ans.question?.technology_id === tech.technology_id &&
+                ans.score >= ans.weight &&
+                ans.weight > 0
+            ).length || 0;
+
+          return {
+            ...tech,
+            total_questions_in_technology: totalQuestions,
+            correctly_answered_in_technology: correctAnswers,
+          };
+        });
+
+        if (result.exam.meta) {
+          (result.exam.meta as any).tech_score = tech_score;
+        }
+      }
 
       return {
         ...result,

@@ -4,7 +4,6 @@ import { validateRequest } from '../middlewares/validation.middleware';
 import { ResultController } from '../controllers/result.controllers';
 import { asyncHandler } from '../utils/asyncHandler';
 import { authenticateAndAuthorize } from '../middlewares/auth.middleware';
-import router from '.';
 
 const resultRouter = express.Router();
 const resultController = new ResultController()

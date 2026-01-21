@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/form/button';
 import { useParams, useSearchParams } from 'next/navigation';
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { FilterBar } from '@/components/questions/filter-bar';
 import { QuestionCard } from '@/components/questions/questions-card';
@@ -27,6 +27,14 @@ const   ViewQuestions = () => {
       ? (difficulty.split(',') as Question['difficulty_level'][])
       : ['easy', 'medium', 'hard']
   );
+  const [selectedQuestionTypes, setSelectedQuestionTypes] = useState<Question['type'][]>([
+    'multiple_select',
+    'video',
+    'text',
+    'mcq',
+    'code_snippet',
+    'code_snippet_with_mcq',
+  ]);
   const [searchQuery, setSearchQuery] = useState('');
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -35,9 +43,10 @@ const   ViewQuestions = () => {
   const [selectedQuestion, setSelectedQuestion] = useState<null | number>(null);
   const [prvQuestion, setPrvQuestion] = useState<null | Required<Question>>(null);
   const { setQuestionFilter, questionFilter } = useQuestionStore();
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const { data, isLoading, mutate } = useSWR(
-    `/question/list?technology_id=${technology}&search=${questionFilter.search}&difficulty_level=${questionFilter.difficulty}&page=${currentPage}&limit=${itemsPerPage}`,
+    `/question/list?technology_id=${technology}&search=${questionFilter.search}&difficulty_level=${questionFilter.difficulty}&type=${questionFilter.type}&page=${currentPage}&limit=${itemsPerPage}`,
     api.get
   );
 
@@ -51,9 +60,17 @@ const   ViewQuestions = () => {
   const handlePerPageChange = (value: string) => {
     setItemsPerPage(Number(value));
     setCurrentPage(1);
+    // Scroll to top of the scrollable container when per page changes
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
+    // Scroll to top of the scrollable container when pagination changes
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+    }
     // updateQueryParams({ page: page.toString() });
   };
 
@@ -69,11 +86,11 @@ const   ViewQuestions = () => {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      setQuestionFilter(searchQuery, selectedDifficulties);
+      setQuestionFilter(searchQuery, selectedDifficulties, selectedQuestionTypes);
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [searchQuery, selectedDifficulties]);
+  }, [searchQuery, selectedDifficulties, selectedQuestionTypes]);
 
   const handleDifficultyChange = (difficulties: Question['difficulty_level'][]) => {
     setSelectedDifficulties(difficulties);
@@ -81,6 +98,10 @@ const   ViewQuestions = () => {
     //   ? `?difficulty_level=${difficulties.join(",")}`
     //   : "";
     // router.push(queryParam);
+  };
+
+  const handleQuestionTypeFilterChange = (types: Question['type'][]) => {
+    setSelectedQuestionTypes(types);
   };
 
   const handleDelete = async (id: string) => {
@@ -234,18 +255,21 @@ const   ViewQuestions = () => {
 
         <div className="sticky z-10 px-6 py-4">
           <FilterBar
-            totalQuestions={questionsData.length}
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
             selectedDifficulties={selectedDifficulties}
             onDifficultyChange={handleDifficultyChange}
+            selectedQuestionTypes={selectedQuestionTypes}
+            onQuestionTypeChange={handleQuestionTypeFilterChange}
             technology={technology as string}
           />
         </div>
 
-        <div className="flex-grow overflow-y-auto px-4 py-2 space-y-4">
+        <div ref={scrollContainerRef} className="flex-grow overflow-y-auto px-4 py-2 space-y-4">
           {questionsData.length === 0 && (
-            <div className="flex justify-center items-center h-80 dark:text-white-500">No questions found. Please add some questions.</div>
+            <div className="flex justify-center items-center h-80 dark:text-white-500">
+              No questions found. Please add some questions.
+            </div>
           )}
           {questionsData.map((question: Required<Question>, index) => (
             <React.Fragment key={index}>
@@ -277,7 +301,7 @@ const   ViewQuestions = () => {
                     // Reset to original state before closing
                     if (prvQuestion) {
                       setQuestionsData((prv) =>
-                        prv.map((item, index) => 
+                        prv.map((item, index) =>
                           selectedQuestion === index ? { ...prvQuestion } : item
                         )
                       );

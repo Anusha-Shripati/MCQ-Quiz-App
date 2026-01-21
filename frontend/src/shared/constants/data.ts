@@ -977,205 +977,6 @@ export const userOptions: StatusOption[] = [
   { value: 'john', label: 'John' },
 ];
 
-// export const questionsDataStatic: Question[] = [
-//   {
-//     type: "multiple-choice",
-//     id: 1,
-//     question: "What is React?",
-//     options: [
-//       "A JavaScript library for building user interfaces",
-//       "A programming language",
-//       "A backend framework",
-//       "A database management system",
-//     ],
-//     correctOptions: ["A JavaScript library for building user interfaces"],
-//     difficulty: "easy",
-//   },
-//   {
-//     type: "multiple-choice",
-//     id: 2,
-//     question:
-//       "What is the correct syntax to import React in a JavaScript file?",
-//     options: [
-//       "import React from 'react';",
-//       "import { React } from 'react';",
-//       "include React from 'react';",
-//       "require('React');",
-//     ],
-//     correctOptions: ["import React from 'react';"],
-//     difficulty: "easy",
-//   },
-//   {
-//     type: "fill-in-the-blanks",
-//     id: 3,
-//     question: "How do you create context in React?",
-//     answer: "by using React.createContext.",
-//     difficulty: "easy",
-//   },
-//   {
-//     type: "code-snippet",
-//     id: 4,
-//     question: "Find the issue in it",
-//     code: `import React from 'react';
-// function App() {
-//   const name = ['a', 'b', 'c'];
-//   int i, new 'name' = ['i', 'b', 'c'];
-//   int j, new 'name' = ['j', 'c'];
-//   return i;
-//   const instance = items.map(item, indent) + ui;
-//   apply(map(items.map(i+0)));
-//   return end-list(instance.class);
-// }
-// export default App;`,
-//     difficulty: "medium",
-//   },
-//   {
-//     type: "multiple-choice",
-//     id: 5,
-//     question: "What is the default port number for a React development server?",
-//     options: ["3000", "8000", "8080", "5000"],
-//     correctOptions: ["3000"],
-//     difficulty: "easy",
-//   },
-//   {
-//     type: "multiple-choice",
-//     id: 6,
-//     question: "Which lifecycle method is deprecated in React?",
-//     options: [
-//       "componentDidMount",
-//       "componentWillReceiveProps",
-//       "componentDidUpdate",
-//       "componentWillUnmount",
-//     ],
-//     correctOptions: ["componentWillReceiveProps"],
-//     difficulty: "medium",
-//   },
-//   {
-//     type: "multiple-choice",
-//     id: 7,
-//     question: "What is a controlled component in React?",
-//     options: [
-//       "A component that controls its own state internally",
-//       "A component that takes its state from props",
-//       "A component whose form data is controlled by React state",
-//       "A component that is connected to a Redux store",
-//     ],
-//     correctOptions: [
-//       "A component whose form data is controlled by React state",
-//     ],
-//     difficulty: "medium",
-//   },
-//   {
-//     type: "multiple-choice",
-//     id: 8,
-//     question: "How can you improve the performance of a React application?",
-//     options: [
-//       "Avoid using hooks",
-//       "Use memoization techniques like React.memo",
-//       "Use only class components",
-//       "Avoid using keys in lists",
-//     ],
-//     correctOptions: ["Use memoization techniques like React.memo"],
-//     difficulty: "medium",
-//   },
-//   {
-//     type: "multiple-choice",
-//     id: 9,
-//     question: "What is the difference between state and props in React?",
-//     options: [
-//       "State is used to manage data inside a component, props are used to pass data to other components",
-//       "Props can change within a component, state is immutable",
-//       "Both are immutable and cannot be modified",
-//       "State is used in class components only, props are used in functional components",
-//     ],
-//     correctOptions: [
-//       "State is used to manage data inside a component, props are used to pass data to other components",
-//     ],
-//     difficulty: "easy",
-//   },
-//   {
-//     type: "multiple-choice",
-//     id: 10,
-//     question: "What is the purpose of the React.Fragment component?",
-//     options: [
-//       "To add CSS styles to React components",
-//       "To group multiple children elements without adding an extra node to the DOM",
-//       "To manage state for components",
-//       "To create context in React",
-//     ],
-//     correctOptions: [
-//       "To group multiple children elements without adding an extra node to the DOM",
-//     ],
-//     difficulty: "easy",
-//   },
-//   {
-//     type: "multiple-choice",
-//     id: 11,
-//     question: "How does React's key prop help with rendering lists?",
-//     options: [
-//       "It helps React identify which items have changed, are added, or removed",
-//       "It automatically sorts the list",
-//       "It makes the list immutable",
-//       "It improves the visual appearance of the list",
-//     ],
-//     correctOptions: [
-//       "It helps React identify which items have changed, are added, or removed",
-//     ],
-//     difficulty: "easy",
-//   },
-//   {
-//     type: "multiple-choice",
-//     id: 12,
-//     question: "What is React.StrictMode used for?",
-//     options: [
-//       "To enable additional checks and warnings for components",
-//       "To disable prop types validation",
-//       "To create strict component hierarchies",
-//       "To enforce specific coding standards",
-//     ],
-//     correctOptions: ["To enable additional checks and warnings for components"],
-//     difficulty: "medium",
-//   },
-//   {
-//     type: "multiple-choice",
-//     id: 13,
-//     question: "Which hook is used to access the DOM in functional components?",
-//     options: ["useState", "useEffect", "useRef", "useContext"],
-//     correctOptions: ["useRef"],
-//     difficulty: "medium",
-//   },
-//   {
-//     type: "multiple-choice",
-//     id: 14,
-//     question: "What is the purpose of the React.PureComponent?",
-//     options: [
-//       "To always render the component when its state changes",
-//       "To avoid unnecessary renders by doing a shallow comparison of props and state",
-//       "To create complex components",
-//       "To define reusable UI components",
-//     ],
-//     correctOptions: [
-//       "To avoid unnecessary renders by doing a shallow comparison of props and state",
-//     ],
-//     difficulty: "hard",
-//   },
-//   {
-//     type: "multiple-choice",
-//     id: 15,
-//     question: "What does lifting state up in React mean?",
-//     options: [
-//       "Moving the state from a child component to a parent component to make it shared",
-//       "Creating state in a Redux store",
-//       "Sharing state between sibling components directly",
-//       "Converting state into props",
-//     ],
-//     correctOptions: [
-//       "Moving the state from a child component to a parent component to make it shared",
-//     ],
-//     difficulty: "medium",
-//   },
-// ];
-
 export const QUIZ_CONFIG = {
   screenshotInterval: 60 * 1000,
   maxViolations: 5,
@@ -1193,7 +994,7 @@ export const PROHIBITED_COMBINATIONS = [
   { key: 'w', modifier: 'ctrlKey' }, // Ctrl+W (close tab)
   { key: 't', modifier: 'ctrlKey' }, // Ctrl+T (new tab)
   { key: 'n', modifier: 'ctrlKey' }, // Ctrl+N (new window)
-  // { key: 'r', modifier: 'ctrlKey' }, // Ctrl+R (refresh)
+  { key: 'r', modifier: 'ctrlKey' }, // Ctrl+R (refresh)
   { key: 'l', modifier: 'ctrlKey' }, // Ctrl+L (address bar)
   { key: 'f', modifier: 'ctrlKey' }, // Ctrl+F (find)
   { key: 'c', modifier: 'ctrlKey' }, // Ctrl+C (copy)
@@ -1216,8 +1017,8 @@ export const PROHIBITED_KEYS = [
   'F8',
   'F9',
   'F10',
-  // 'F11',
-  // 'F12',
+  'F11',
+  'F12',
   'PrintScreen',
   'ScrollLock',
   'Pause',

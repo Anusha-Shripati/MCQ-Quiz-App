@@ -5,12 +5,19 @@ import React, { useEffect } from "react";
 import useSWR from "swr";
 
 interface ResultSummaryProps {
-    score: number
-    total: number
-    percentage: number
-    technologies: { technology_id: string; score: number; total: number; percentage: number }[]
-    passCriteria: number
-    is_passed: boolean
+  score: number;
+  total: number;
+  percentage: number;
+  technologies: {
+    technology_id: string;
+    score: number;
+    total: number;
+    percentage: number;
+    correctly_answered_in_technology: number;
+    total_questions_in_technology: number;
+  }[];
+  passCriteria: number;
+  is_passed: boolean;
 }
 
 const ResultSummary: React.FC<ResultSummaryProps> = ({
@@ -28,7 +35,15 @@ const ResultSummary: React.FC<ResultSummaryProps> = ({
     staleWhileRevalidate: true,
   });
   const [techListWithScores, setTechListWithScores] = React.useState<
-    { technology_id: string; score: number; total: number; percentage: number; name: string }[]
+    {
+      technology_id: string;
+      score: number;
+      total: number;
+      percentage: number;
+      name: string;
+      correctly_answered_in_technology: number;
+      total_questions_in_technology: number;
+    }[]
   >([]);
   useEffect(() => {
     if (technology) {
@@ -41,6 +56,8 @@ const ResultSummary: React.FC<ResultSummaryProps> = ({
           score: tech.score,
           total: tech.total,
           percentage: tech.percentage,
+          correctly_answered_in_technology: tech.correctly_answered_in_technology,
+          total_questions_in_technology: tech.total_questions_in_technology,
         };
       });
       setTechListWithScores(score);
@@ -121,7 +138,9 @@ const ResultSummary: React.FC<ResultSummaryProps> = ({
                 <tr className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
                   <th className="px-6 py-3 font-semibold">Technology</th>
                   <th className="px-6 py-3 font-semibold">Score</th>
-                  <th className="px-6 py-3 font-semibold">Total</th>
+                  <th className="px-6 py-3 font-semibold">Correctly answered</th>
+                  <th className="px-6 py-3 font-semibold">Total marks</th>
+                  <th className="px-6 py-3 font-semibold">Total questions</th>
                   <th className="px-6 py-3 font-semibold">Percentage</th>
                 </tr>
               </thead>
@@ -140,7 +159,9 @@ const ResultSummary: React.FC<ResultSummaryProps> = ({
                     >
                       <td className="px-6 py-3 font-semibold">{tech?.name || 'Unknown'}</td>
                       <td className="px-6 py-3">{tech.score}</td>
+                      <td className="px-6 py-3">{tech.correctly_answered_in_technology}</td>
                       <td className="px-6 py-3">{tech.total}</td>
+                      <td className="px-6 py-3">{tech.total_questions_in_technology}</td>
                       <td className="px-6 py-3">{tech.percentage?.toFixed(2)}%</td>
                     </tr>
                   ))

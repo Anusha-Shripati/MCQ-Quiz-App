@@ -81,6 +81,8 @@ export interface ExamMetaTech {
   score: number;
   total: number;
   percentage: number;
+  correctly_answered_in_technology: number;
+  total_questions_in_technology: number;
 }
 export interface LocalAnswer {
   question: IExamQuestion;

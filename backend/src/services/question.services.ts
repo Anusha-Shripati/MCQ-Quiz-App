@@ -391,18 +391,9 @@ export class QuestionService {
           }
         }
 
-        // REQUIRED code for code_snippet_with_mcq
-        if (
-          questionType === 'code_snippet_with_mcq' &&
-          (!row.code || String(row.code).trim() === '')
-        ) {
-          errors.push(`Row ${rowNum}: Missing code for code_snippet_with_mcq.`);
-        }
-
         row.__finalType = questionType;
         row.__correctArr = correctArr;
         row.__optionsArray = optionsArray;
-        row.__meta = questionType === 'code_snippet_with_mcq' ? { code: String(row.code) } : {};
       } catch (err) {
         errors.push(`Row ${rowNum}: ${err instanceof Error ? err.message : 'Unknown error'}`);
       }

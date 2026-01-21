@@ -384,10 +384,10 @@ export default function ProctoredQuiz() {
         e[combo.modifier as keyof KeyboardEvent]
       ) {
         e.preventDefault();
-        // addViolation({
-        //   type: 'PROHIBITED_KEY_COMBO',
-        //   details: `Attempted to use ${combo.modifier.replace('Key', '')}+${combo.key}`,
-        // });
+        addViolation({
+          type: 'PROHIBITED_KEY_COMBO',
+          details: `Attempted to use ${combo.modifier.replace('Key', '')}+${combo.key}`,
+        });
         return;
       }
     }
@@ -396,28 +396,28 @@ export default function ProctoredQuiz() {
 
     if ((e.ctrlKey || e.metaKey) && BROWSER_KEY.includes(e.key)) {
       e.preventDefault();
-      // addViolation({
-      //   type: 'BROWSER_SHORTCUT',
-      //   details: `Attempted to use ${e.ctrlKey ? 'Ctrl' : 'Cmd'}+${e.key}`,
-      // });
+      addViolation({
+        type: 'BROWSER_SHORTCUT',
+        details: `Attempted to use ${e.ctrlKey ? 'Ctrl' : 'Cmd'}+${e.key}`,
+      });
       return;
     }
 
     // Prevent Alt key combinations (menu shortcuts)
     if (e.altKey) {
       e.preventDefault();
-      // addViolation({
-      //   type: 'ALT_SHORTCUT',
-      //   details: `Attempted to use Alt+${e.key}`,
-      // });
+      addViolation({
+        type: 'ALT_SHORTCUT',
+        details: `Attempted to use Alt+${e.key}`,
+      });
       return;
     }
     if (e.ctrlKey && e.shiftKey && e.key === 'I') {
       e.preventDefault();
-      // addViolation({
-      //   type: 'INSPECT_ELEMENT',
-      //   details: `Attempted to inspect element`,
-      // });
+      addViolation({
+        type: 'INSPECT_ELEMENT',
+        details: `Attempted to inspect element`,
+      });
       return;
     }
   };

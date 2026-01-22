@@ -30,14 +30,14 @@ import { examApi } from '@/lib/api';
 import { examEndpoint } from '@/lib/endpoint';
 
 // Constants and Types
-import { QUIZ_CONFIG, SNAPSHOT } from '@/shared/constants/data';
+import { SNAPSHOT } from '@/shared/constants/data';
 import { EXAM_STEP } from '@/types/exam.types';
 
 // Utility functions
 import {
   startCamera,
   stopMediaStreams,
-  takeScreenshot,
+  takeSynchronizedScreenshots,
 } from '@/components/test/testUtils/cameraUtils';
 import {
   detectMultipleScreens,
@@ -294,83 +294,98 @@ const TestPage = () => {
 
   /**
    * Sets up screenshot interval for proctoring
+   * Takes 2 random screenshots per minute: one in first 30s, one in second 30s
+   * Random times are regenerated each minute
    */
   const setupScreenshotInterval = () => {
     // Get access code from URL
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get('code') || '';
 
-    // Take initial screenshots
-    if (cameraSnapshotRef.current && cameraCanvas.current && permission.camera) {
-      takeScreenshot(
-        cameraSnapshotRef.current,
-        cameraCanvas.current,
-        SNAPSHOT.camera,
-        examApi,
-        examEndpoint,
-        params.examId as string,
-        code
-      );
-    }
+    // Store timeout IDs to clear them later
+    const timeouts: NodeJS.Timeout[] = [];
 
-    if (screenSnapshotRef.current && screenCanvas.current && permission.screen) {
-      takeScreenshot(
-        screenSnapshotRef.current,
-        screenCanvas.current,
-        SNAPSHOT.screenshot,
-        examApi,
-        examEndpoint,
-        params.examId as string,
-        code
-      );
-    }
+    /**
+     * Schedules both screenshots for the current minute with new random times
+     */
+    const scheduleMinuteScreenshots = () => {
+      // Clear any existing timeouts
+      timeouts.forEach(timeout => clearTimeout(timeout));
+      timeouts.length = 0;
 
-    // Set up interval for random screenshots
-    interval.current = setInterval(() => {
-      const randomDelayMsScreen = Math.floor(Math.random() * 61) * 1000;
-      const randomDelayMsCamera = Math.floor(Math.random() * 61) * 1000;
-
-      setTimeout(() => {
+      const takeIfReady = () => {
         if (
-          screenSnapshotRef.current !== null &&
-          screenCanvas.current !== null &&
+          cameraSnapshotRef.current &&
+          cameraCanvas.current &&
+          screenSnapshotRef.current &&
+          screenCanvas.current &&
+          permission.camera &&
           permission.screen
         ) {
-          takeScreenshot(
-            screenSnapshotRef.current,
-            screenCanvas.current,
-            SNAPSHOT.screenshot,
-            examApi,
-            examEndpoint,
-            params.examId as string,
-            code
-          );
-        }
-      }, randomDelayMsScreen);
-
-      setTimeout(() => {
-        if (
-          cameraSnapshotRef.current !== null &&
-          cameraCanvas.current !== null &&
-          permission.camera
-        ) {
-          takeScreenshot(
+          takeSynchronizedScreenshots(
             cameraSnapshotRef.current,
             cameraCanvas.current,
-            SNAPSHOT.camera,
+            screenSnapshotRef.current,
+            screenCanvas.current,
             examApi,
             examEndpoint,
             params.examId as string,
-            code
+            code,
+            SNAPSHOT.camera,
+            SNAPSHOT.screenshot
           );
         }
-      }, randomDelayMsCamera);
-    }, QUIZ_CONFIG.screenshotInterval);
+      };
+
+      // Generate random delays
+      const delays = [
+        Math.floor(Math.random() * 30000),                // 0–30s
+        30000 + Math.floor(Math.random() * 30000),        // 30–60s
+      ];
+
+      delays.forEach(delay => {
+        const timeout = setTimeout(takeIfReady, delay);
+        timeouts.push(timeout);
+      });
+    };
+
+
+    // Take initial screenshot immediately
+    if (
+      cameraSnapshotRef.current &&
+      cameraCanvas.current &&
+      screenSnapshotRef.current &&
+      screenCanvas.current &&
+      permission.camera &&
+      permission.screen
+    ) {
+      takeSynchronizedScreenshots(
+        cameraSnapshotRef.current,
+        cameraCanvas.current,
+        screenSnapshotRef.current,
+        screenCanvas.current,
+        examApi,
+        examEndpoint,
+        params.examId as string,
+        code,
+        SNAPSHOT.camera,
+        SNAPSHOT.screenshot
+      );
+    }
+
+    // Schedule first minute's screenshots
+    scheduleMinuteScreenshots();
+
+    // Set up interval to schedule new random screenshots every minute
+    interval.current = setInterval(() => {
+      scheduleMinuteScreenshots();
+    }, 60000); // Every 60 seconds
 
     return () => {
       if (interval.current) {
         clearInterval(interval.current);
       }
+      timeouts.forEach(timeout => clearTimeout(timeout));
     };
   };
 

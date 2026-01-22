@@ -112,6 +112,7 @@ export const startCamera = async (
  * @param examEndpoint - API endpoint
  * @param examId - Exam ID
  * @param accessCode - Access code
+ * @param timestamp - Optional timestamp to use (for synchronized captures)
  */
 export const takeScreenshot = async (
   ref: HTMLVideoElement | null,
@@ -120,7 +121,8 @@ export const takeScreenshot = async (
   examApi: { post: (url: string, data: FormData, accessCode: string) => Promise<unknown> },
   examEndpoint: { CANDIDATE_EXAM: string },
   examId: string,
-  accessCode: string
+  accessCode: string,
+  timestamp?: number
 ): Promise<void> => {
   if (!ref || !canvas) return;
 
@@ -138,7 +140,7 @@ export const takeScreenshot = async (
 
   const formData = new FormData();
   formData.append('file', blob);
-  formData.append('timestamp', Date.now().toString());
+  formData.append('timestamp', (timestamp || Date.now()).toString());
 
   try {
     await examApi.post(
@@ -149,6 +151,41 @@ export const takeScreenshot = async (
   } catch (error) {
     console.error('Error taking screenshot:', error);
   }
+};
+
+/**
+ * Takes synchronized screenshots from both camera and screen at the same timestamp
+ * @param cameraRef - Camera video element reference
+ * @param cameraCanvas - Camera canvas element reference
+ * @param screenRef - Screen video element reference
+ * @param screenCanvas - Screen canvas element reference
+ * @param examApi - API instance
+ * @param examEndpoint - API endpoint
+ * @param examId - Exam ID
+ * @param accessCode - Access code
+ * @param cameraType - Type identifier for camera snapshot
+ * @param screenType - Type identifier for screen snapshot
+ */
+export const takeSynchronizedScreenshots = async (
+  cameraRef: HTMLVideoElement | null,
+  cameraCanvas: HTMLCanvasElement | null,
+  screenRef: HTMLVideoElement | null,
+  screenCanvas: HTMLCanvasElement | null,
+  examApi: { post: (url: string, data: FormData, accessCode: string) => Promise<unknown> },
+  examEndpoint: { CANDIDATE_EXAM: string },
+  examId: string,
+  accessCode: string,
+  cameraType: string,
+  screenType: string
+): Promise<void> => {
+  // Use the same timestamp for both captures
+  const timestamp = Date.now();
+
+  // Take both screenshots simultaneously with the same timestamp
+  await Promise.all([
+    takeScreenshot(cameraRef, cameraCanvas, cameraType, examApi, examEndpoint, examId, accessCode, timestamp),
+    takeScreenshot(screenRef, screenCanvas, screenType, examApi, examEndpoint, examId, accessCode, timestamp)
+  ]);
 };
 
 /**

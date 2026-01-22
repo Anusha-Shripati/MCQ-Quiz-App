@@ -1,3 +1,5 @@
+'use client';
+
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { formatTestDuration } from '@/lib/utils';
 import { QUIZ_CONFIG } from '@/shared/constants/data';
@@ -5,8 +7,9 @@ import { StatusOption } from '@/types/common.types';
 import { ExamMetaTech, Result } from '@/types/exam.types';
 import { format } from 'date-fns';
 import dayjs from 'dayjs';
-import Link from 'next/link';
 import React from 'react';
+import { Button } from '../ui/form/button';
+import { useRouter } from 'next/navigation';
 
 interface ResultExpandableRowProps {
   row: Result;
@@ -14,6 +17,8 @@ interface ResultExpandableRowProps {
 }
 
 const ResultExpandableRow: React.FC<ResultExpandableRowProps> = ({ row, technologyOptions }) => {
+  const router = useRouter();
+
   const formatTestDateRange = (startDate: string, endDate: string): string => {
     const start = new Date(startDate);
     const end = new Date(endDate);
@@ -82,10 +87,12 @@ const ResultExpandableRow: React.FC<ResultExpandableRowProps> = ({ row, technolo
               style={{ width: `${Math.min(row?.percentage || 0, 100)}%` }}
             />
           </div>
-          <Link
-            href={`/results/${row.id}`}
-            target="_blank"
-            className="mt-3 inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+          <Button
+            onClick={() => {
+              router.push(`/results/${row.id}`);
+            }}
+            variant="outline"
+            className="bg-blue-600 text-white font-medium px-6 py-2 rounded-lg shadow-md hover:text-white hover:bg-blue-700 hover:shadow-lg focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800 transition-all duration-200 mt-3"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -108,7 +115,7 @@ const ResultExpandableRow: React.FC<ResultExpandableRowProps> = ({ row, technolo
               />
             </svg>{' '}
             View Detailed Report
-          </Link>
+          </Button>
         </div>
 
         {/* Test Time Card */}

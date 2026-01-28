@@ -32,6 +32,24 @@ export interface SnapShot {
   image: string;
   timestamp: number;
 }
+
+export interface IntegrityEvidenceSnapshot {
+  image: string;
+  timestamp: number;
+  eventType: string;
+  headPose?: {
+    yaw: number;
+    pitch: number;
+    roll: number;
+  };
+  duration?: number;
+}
+export interface Violations {
+  type: string;
+  timestamp: number;
+  details?: string;
+}
+
 export interface IExamMeta {
   examLink: string;
   accessCode: string;
@@ -41,6 +59,11 @@ export interface IExamMeta {
   tech_score?: ExamMetaTech[];
   screenshots?: SnapShot[];
   camera?: SnapShot[];
+  integrityEvidence?: {
+    camera?: IntegrityEvidenceSnapshot[];
+    screenshot?: IntegrityEvidenceSnapshot[];
+  };
+  violations?: Violations[];
   [key: string]: unknown;
 }
 

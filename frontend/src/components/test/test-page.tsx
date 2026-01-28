@@ -55,6 +55,10 @@ import {
   requestFullscreen,
   setupSecurityEventListeners,
 } from '@/components/test/testUtils/securityUtils';
+import {
+  initializeFaceTracking,
+  startFaceTracking,
+} from '@/components/test/testUtils/faceTracking';
 import { isAxiosError } from 'axios';
 import ExamNotStarted from './exam-not-started';
 
@@ -99,6 +103,7 @@ const TestPage = () => {
   const cameraCanvas = useRef<HTMLCanvasElement | null>(null);
   const screenCanvas = useRef<HTMLCanvasElement | null>(null);
   const interval = useRef<NodeJS.Timeout | null>(null);
+  const faceTrackingCleanup = useRef<(() => void) | null>(null);
 
   const fetchCandidate = async () => {
     try {
@@ -390,6 +395,68 @@ const TestPage = () => {
   };
 
   /**
+   * Sets up face tracking to detect when candidate looks away
+   */
+  const setupFaceTracking = async () => {
+    // Get access code from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get('code') || '';
+
+    // Wait for camera video to be ready
+    if (!cameraSnapshotRef.current) {
+      console.error('Camera video element not available');
+      return;
+    }
+
+    // Wait for video to be playing
+    const waitForVideo = new Promise<void>((resolve) => {
+      const checkVideo = () => {
+        if (
+          cameraSnapshotRef.current &&
+          cameraSnapshotRef.current.readyState >= 2 &&
+          cameraSnapshotRef.current.videoWidth > 0
+        ) {
+          resolve();
+        } else {
+          setTimeout(checkVideo, 100);
+        }
+      };
+      checkVideo();
+    });
+
+    await waitForVideo;
+    // Initialize face tracking models
+    const initialized = await initializeFaceTracking();
+    if (!initialized) {
+      console.error('Failed to initialize face tracking');
+      return;
+    }
+
+    // Start face tracking
+    if (cameraSnapshotRef.current) {
+      const cleanup = startFaceTracking(
+        cameraSnapshotRef.current,
+        cameraSnapshotRef.current,
+        cameraCanvas.current,
+        screenSnapshotRef.current,
+        screenCanvas.current,
+        examApi,
+        examEndpoint,
+        params.examId as string,
+        code,
+        {
+          checkInterval: 1000,
+          lookAwayThreshold: 30,
+          lookAwayDuration: 1000,
+        }
+      );
+
+      faceTrackingCleanup.current = cleanup;
+      console.log('Face tracking started successfully');
+    }
+  };
+
+  /**
    * Main initialization function
    */
   const init = async () => {
@@ -432,6 +499,11 @@ const TestPage = () => {
 
       // Set up screenshot interval
       setupScreenshotInterval();
+
+      // Set up face tracking for cheating detection (after a small delay to ensure camera is stable)
+      setTimeout(() => {
+        setupFaceTracking();
+      }, 2000); // Wait 2 seconds for camera to stabilize
     } catch (error) {
       console.error('Initialization error:', error);
     }
@@ -462,6 +534,9 @@ const TestPage = () => {
     return () => {
       if (interval.current) {
         clearInterval(interval.current);
+      }
+      if (faceTrackingCleanup.current) {
+        faceTrackingCleanup.current();
       }
       stopMediaStreams(screenStream.current, cameraStreamRef);
     };

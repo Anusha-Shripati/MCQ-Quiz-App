@@ -81,6 +81,13 @@ router.post(
   asyncHandler(candidateExamController.saveSnapshot)
 );
 
+router.post(
+  '/:examId/integrity-evidence',
+  authenticateCandidate,
+  upload.single('file'),
+  asyncHandler(candidateExamController.saveIntegrityEvidence)
+);
+
 router.get(
   '/',
   authenticateCandidate,

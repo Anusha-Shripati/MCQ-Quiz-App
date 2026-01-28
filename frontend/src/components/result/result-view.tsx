@@ -100,109 +100,103 @@ function Answer() {
             <Content value="introduction">
               <div className="flex items-center mb-8 gap-5">
                 <div>
-                {introduction ? (
-                  <div className="flex flex-col items-center bg-white dark:bg-gray-800 p-8 rounded-xl shadow-md w-full max-w-2xl mx-auto">
-                    <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                      Introduction Video
-                    </h3>
-                  
-                    <div className="w-full aspect-video max-w-xl mb-4 relative">
-                      {introduction.user_answer?.[0] ? (
-                        <VideoPreview
-                          videoUrl={`${process.env.NEXT_PUBLIC_IMGAE_PREFIX}${introduction.user_answer[0]}`}
-                        />
-                      ) : (
-                        <div className="flex flex-col items-center justify-center h-full bg-gray-100 dark:bg-gray-700 rounded">
-                          <svg
-                            className="w-16 h-16 text-gray-400 mb-2"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M4 6v12a2 2 0 002 2h8a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2z"
-                            />
-                          </svg>
-                          <span className="text-gray-500 dark:text-gray-400">
-                            Video is uploading...
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
-                      {/* eslint-disable-next-line react/no-unescaped-entities */}
-                      This video was recorded as part of the candidate's introduction.
-                    </p>
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center justify-center bg-white dark:bg-gray-800 p-8 rounded-xl shadow-md w-full max-w-2xl mx-auto">
-                    <svg
-                      className="w-16 h-16 text-gray-400 mb-2"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M4 6v12a2 2 0 002 2h8a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2z"
-                      />
-                    </svg>
+                  {introduction ? (
+                    <div className="flex flex-col items-center bg-white dark:bg-gray-800 p-8 rounded-xl shadow-md w-full max-w-2xl mx-auto">
+                      <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                        Introduction Video
+                      </h3>
 
-                    <p className="text-gray-500 dark:text-gray-400">No introduction available.</p>
-                  </div>
-                )}
+                      <div className="w-full aspect-video max-w-xl mb-4 relative">
+                        {introduction.user_answer?.[0] ? (
+                          <VideoPreview
+                            videoUrl={`${process.env.NEXT_PUBLIC_IMGAE_PREFIX}${introduction.user_answer[0]}`}
+                          />
+                        ) : (
+                          <div className="flex flex-col items-center justify-center h-full bg-gray-100 dark:bg-gray-700 rounded">
+                            <svg
+                              className="w-16 h-16 text-gray-400 mb-2"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M4 6v12a2 2 0 002 2h8a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2z"
+                              />
+                            </svg>
+                            <span className="text-gray-500 dark:text-gray-400">
+                              Video is uploading...
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                      <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
+                        {/* eslint-disable-next-line react/no-unescaped-entities */}
+                        This video was recorded as part of the candidate's introduction.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center bg-white dark:bg-gray-800 p-8 rounded-xl shadow-md w-full max-w-2xl mx-auto">
+                      <svg
+                        className="w-16 h-16 text-gray-400 mb-2"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M4 6v12a2 2 0 002 2h8a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2z"
+                        />
+                      </svg>
+
+                      <p className="text-gray-500 dark:text-gray-400">No introduction available.</p>
+                    </div>
+                  )}
                 </div>
                 <div className="flex flex-col items-center bg-white dark:bg-gray-800 p-7 rounded-xl shadow-md w-full max-w-2xl mx-auto ">
-                    <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                      Verified Image
-                    </h3>
+                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                    Verified Image
+                  </h3>
 
-                {exam?.verified_image ? (
-                  <div className="w-full aspect-video max-w-xl mb-4 relative">
-                
-
-                    <Image
-                      src={`${process.env.NEXT_PUBLIC_IMGAE_PREFIX}${exam.verified_image}`}
-                      alt="Verified Image"
-                      className="w-full object-cover rounded-lg shadow-md"
-                      height={190}
-                      width={270}
-                    />
-                     <p className="text-sm text-gray-500 dark:text-gray-400 text-center mt-3">
-                      {/* eslint-disable-next-line react/no-unescaped-entities */}
-                     This image was verified during the verification process.
-                    </p>
-                  </div>
-                  
-                ) : (
-                  <div className="flex flex-col items-center justify-center w-full aspect-video max-w-xl mb-4 bg-gray-100 dark:bg-gray-700 rounded-lg">
-                    <svg
-                      className="w-16 h-16 text-gray-400 mb-2"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M4 6v12a2 2 0 002 2h8a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2z"
+                  {exam?.verified_image ? (
+                    <div className="w-full aspect-video max-w-xl mb-4 relative">
+                      <Image
+                        src={`${process.env.NEXT_PUBLIC_IMGAE_PREFIX}${exam.verified_image}`}
+                        alt="Verified Image"
+                        className="w-full object-cover rounded-lg shadow-md"
+                        height={190}
+                        width={270}
                       />
-                    </svg>
-                    <span className="text-gray-500 dark:text-gray-400">
-                      No verified image available
-                    </span>
-                    
-                  </div>
-                  
-                )}
-              </div>
-              
+                      <p className="text-sm text-gray-500 dark:text-gray-400 text-center mt-3">
+                        {/* eslint-disable-next-line react/no-unescaped-entities */}
+                        This image was verified during the verification process.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center w-full aspect-video max-w-xl mb-4 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                      <svg
+                        className="w-16 h-16 text-gray-400 mb-2"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M4 6v12a2 2 0 002 2h8a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2z"
+                        />
+                      </svg>
+                      <span className="text-gray-500 dark:text-gray-400">
+                        No verified image available
+                      </span>
+                    </div>
+                  )}
+                </div>
               </div>
             </Content>
 
@@ -214,6 +208,8 @@ function Answer() {
               <Snapshots
                 camera={exam?.meta?.camera || []}
                 screenshots={exam?.meta?.screenshots || []}
+                integrityEvidence={exam?.meta?.integrityEvidence}
+                violations={exam?.meta?.violations || []}
               />
             </Content>
             <Content value="feedback">

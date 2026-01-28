@@ -227,6 +227,25 @@ export class CandidateExamController {
       next(error);
     }
   };
+
+  saveIntegrityEvidence = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { examId } = req.params;
+      const candidateId = req.candidateInfo?.candidateId;
+
+      if (!candidateId) throw new Error('Candidate not authenticated');
+
+      const evidence = await this.candidateExamService.saveIntegrityEvidence(
+        examId,
+        req.file as Express.Multer.File,
+        { ...req.body, ...req.query }
+      );
+
+      generateResponse(res, 200, evidence, true, 'Integrity evidence saved successfully');
+    } catch (error) {
+      next(error);
+    }
+  };
   sendThankYouEmail = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { examId } = req.params;

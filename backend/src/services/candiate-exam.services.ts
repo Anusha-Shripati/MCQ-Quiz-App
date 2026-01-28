@@ -537,6 +537,73 @@ export class CandidateExamService {
     return uploadedFile;
   }
 
+  async saveIntegrityEvidence(
+    examId: string,
+    file: Express.Multer.File,
+    { 
+      timestamp, 
+      fileType, 
+      eventType, 
+      headPose, 
+      duration 
+    }: { 
+      timestamp: number; 
+      fileType: 'screenshot' | 'camera';
+      eventType?: string;
+      headPose?: string;
+      duration?: string;
+    }
+  ) {
+    const exam = await prisma.exam.findUnique({
+      where: { id: examId },
+      select: { meta: true },
+    });
+    if (!exam) throw new AppError('Exam not found', 404);
+
+    const uploadedFile = await this.uploadService.processFile(file);
+
+    let parsedHeadPose;
+    try {
+      parsedHeadPose = headPose ? JSON.parse(headPose) : undefined;
+    } catch (e) {
+      parsedHeadPose = undefined;
+    }
+
+    const evidenceEntry = {
+      timestamp: Number(timestamp),
+      image: uploadedFile.path,
+      eventType: eventType || 'lookAway',
+      headPose: parsedHeadPose,
+      duration: duration ? parseInt(duration) : undefined,
+    };
+
+    const currentMeta = (exam?.meta as ExamMeta) || {};
+    const integrityEvidence = (currentMeta.integrityEvidence as any) || {
+      camera: [],
+      screenshot: [],
+    };
+
+    if (fileType === 'screenshot') {
+      integrityEvidence.screenshot = [...(integrityEvidence.screenshot || []), evidenceEntry];
+    } else {
+      integrityEvidence.camera = [...(integrityEvidence.camera || []), evidenceEntry];
+    }
+
+    const updatedMeta: ExamMeta = {
+      ...currentMeta,
+      integrityEvidence,
+    };
+
+    await prisma.exam.update({
+      where: { id: examId },
+      data: {
+        meta: updatedMeta,
+      },
+    });
+
+    return uploadedFile;
+  }
+
   async sendThankYouEmail(candidateId: string, examId: string) {
     const candidate = await this.getCandidate(candidateId, examId);
     if (!candidate.email) throw new AppError('Candidate email not found', 404);

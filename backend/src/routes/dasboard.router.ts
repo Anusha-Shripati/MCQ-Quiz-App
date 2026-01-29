@@ -31,6 +31,21 @@ dashboardRouter.get(
   authenticateAndAuthorize(),
   asyncHandler(dashboardController.calendarData)
 );
+dashboardRouter.get(
+  '/get-top-assessments',
+  authenticateAndAuthorize(),
+  asyncHandler(dashboardController.topAssignedAssessments)
+);
+dashboardRouter.get(
+  '/get-question-type-performance',
+  authenticateAndAuthorize(),
+  asyncHandler(dashboardController.questionTypePerformance)
+);
+dashboardRouter.get(
+  '/get-exam-duration-performance',
+  authenticateAndAuthorize(),
+  asyncHandler(dashboardController.examDurationVsPerformance)
+);
 
 
 export default dashboardRouter;

@@ -3,7 +3,10 @@ export const dashboardEndpoint = {
     CALENDAR_DATA: '/dashboard/get-calendar-data',
     INTERVIEW_COUNT: '/dashboard/get-interview-count',
     INTERVIEW_SCORE: '/dashboard/get-interview-score',
-    QUESTIONS_DATA: '/dashboard/get-questions-data'
+    QUESTIONS_DATA: '/dashboard/get-questions-data',
+    TOP_ASSESSMENTS: '/dashboard/get-top-assessments',
+    QUESTION_TYPE_PERFORMANCE: '/dashboard/get-question-type-performance',
+    EXAM_DURATION_PERFORMANCE: '/dashboard/get-exam-duration-performance'
 }
 export const assessmentEndpoint = {
     LIST: "/assessment/list",

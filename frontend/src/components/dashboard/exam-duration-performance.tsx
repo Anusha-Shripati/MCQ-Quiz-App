@@ -6,7 +6,6 @@ import { api } from '@/lib/api';
 import { dashboardEndpoint } from '@/lib/endpoint';
 import useSWR from 'swr';
 import StatusWrapper from '../common/status-wrapper';
-import { Clock } from 'lucide-react';
 
 interface DurationPerformanceData {
   durationRange: string;
@@ -26,12 +25,12 @@ export default function ExamDurationPerformance() {
 
   const performanceData: DurationPerformanceData[] = data?.data || [];
 
-  const getPerformanceColor = (percentage: number) => {
-    if (percentage >= 75) return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
-    if (percentage >= 60) return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
-    if (percentage >= 50) return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
-    return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
-  };
+  // const getPerformanceColor = (percentage: number) => {
+  //   if (percentage >= 75) return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+  //   if (percentage >= 60) return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+  //   if (percentage >= 50) return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
+  //   return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+  // };
 
   const getPassRateColor = (passRate: number) => {
     if (passRate >= 75) return 'text-green-600 dark:text-green-400';

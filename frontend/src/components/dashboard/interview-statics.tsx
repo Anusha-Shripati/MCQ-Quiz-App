@@ -19,6 +19,20 @@ interface InterviewData {
   groupBy: 'day' | 'month';
 }
 
+interface EChartsFormatterParam {
+  componentType: 'series';
+  seriesType: string;
+  seriesIndex: number;
+  seriesName: string;
+  name: string;
+  dataIndex: number;
+  data: number;
+  value: number;
+  color: string;
+  axisValue: string;
+  axisValueLabel: string;
+}
+
 type FilterType = 'today' | 'last7days' | 'month' | 'year' | 'custom';
 
 const InterviewStatics: React.FC = () => {
@@ -126,7 +140,7 @@ const InterviewStatics: React.FC = () => {
       textStyle: {
         color: theme === 'light' ? '#333' : '#fff',
       },
-      formatter: (params: any) => {
+      formatter: (params: EChartsFormatterParam[]) => {
         const date = params[0].axisValue;
         const passed = params[0].value;
         const failed = params[1].value;

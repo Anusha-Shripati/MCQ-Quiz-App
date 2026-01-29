@@ -46,7 +46,7 @@ export default function TopAssessments() {
           loading={isLoading || isValidating}
           reset={mutate}
           error={error}
-          className="min-h-[300px]"
+          className="max-h-[300px]"
         >
           <div className="space-y-3">
             {assessments.length === 0 ? (

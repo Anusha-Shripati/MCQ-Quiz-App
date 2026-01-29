@@ -15,7 +15,7 @@ function InterviewCount() {
   const { data, isLoading, error ,mutate,isValidating} = useSWR(dashboardEndpoint.INTERVIEW_COUNT, api.get);
 
   const [interviewData, setInterviewData] = useState<InterviewCountData[]>([
-    { label: 'Last Month', value: 0, color: 'blue' },
+    { label: 'This Month', value: 0, color: 'blue' },
     { label: 'Today', value: 0, color: 'green' },
     { label: 'Upcoming', value: 0, color: 'yellow' },
   ]);
@@ -24,7 +24,7 @@ function InterviewCount() {
     if (data) {
       setInterviewData((prv: InterviewCountData[]) => {
         const newData = [...prv];
-        newData[0].value = data.data.lastMonth;
+        newData[0].value = data.data.thisMonth;
         newData[1].value = data.data.today;
         newData[2].value = data.data.upcoming;
         return newData;

@@ -36,7 +36,12 @@ export class DashboardController {
 
   interviewData = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const questionData = await dashboardService.getInterviewData();
+      const { filter, customStart, customEnd } = req.query;
+      const questionData = await dashboardService.getInterviewData(
+        filter as string,
+        customStart as string,
+        customEnd as string
+      );
       return generateResponse(
         res,
         200,
@@ -74,6 +79,54 @@ export class DashboardController {
         interviewData,
         true,
         'Calendar data retrieved successfully'
+      );
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  topAssignedAssessments = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { limit } = req.query;
+      const topAssessments = await dashboardService.getTopAssignedAssessments(
+        limit ? parseInt(limit as string) : 5
+      );
+      return generateResponse(
+        res,
+        200,
+        topAssessments,
+        true,
+        'Top assigned assessments retrieved successfully'
+      );
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  questionTypePerformance = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const questionTypeData = await dashboardService.getQuestionTypePerformance();
+      return generateResponse(
+        res,
+        200,
+        questionTypeData,
+        true,
+        'Question type performance retrieved successfully'
+      );
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  examDurationVsPerformance = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const durationPerformanceData = await dashboardService.getExamDurationVsPerformance();
+      return generateResponse(
+        res,
+        200,
+        durationPerformanceData,
+        true,
+        'Exam duration vs performance retrieved successfully'
       );
     } catch (error) {
       next(error);

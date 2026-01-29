@@ -21,6 +21,8 @@ interface ScoreData {
   name: string;
   score: string;
   pass_criteria: number;
+  assessmentName: string;
+  technologies: string[];
 }
 
 interface InterviewScoreResponse {
@@ -115,7 +117,6 @@ function InterviewScore() {
   }
 
   const columns = [
-    { key: 'date', header: 'Date', render: (row: ScoreData) => row.date },
     {
       key: 'name',
       header: 'Name',
@@ -126,19 +127,42 @@ function InterviewScore() {
       ),
     },
     {
+      key: 'assessment_name',
+      header: 'Assessment Name',
+      render: (row: ScoreData) => {
+        return (
+          <Tooltip>
+            <TooltipTrigger>
+              <div className="flex items-center space-x-2">
+                <span>{row.assessmentName}</span>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>
+              <span>{row.technologies}</span>
+            </TooltipContent>
+          </Tooltip>
+        );
+      },
+    },
+    { key: 'date', header: 'Date', render: (row: ScoreData) => row.date },
+    {
       key: 'score',
       header: 'Score',
       render: (row: ScoreData) => (
         <Tooltip>
           <TooltipTrigger>
             <div className="flex items-center space-x-2">
-              <Progress value={parseInt(row.score)} pass_criteria={row.pass_criteria} className="w-32" />
+              <Progress
+                value={parseInt(row.score)}
+                pass_criteria={row.pass_criteria}
+                className="w-32"
+              />
               <span>{row.score}</span>
             </div>
           </TooltipTrigger>
           <TooltipContent>
             <span>Pass Criteria: {row.pass_criteria}%</span>
-          </TooltipContent> 
+          </TooltipContent>
         </Tooltip>
       ),
     },
@@ -157,7 +181,12 @@ function InterviewScore() {
           <LanguageScoreSelect setFilters={handleSetFilter} filters={filters} />
         </div>
       </CardHeader>
-      <StatusWrapper loading={isLoading} reset={mutate} error={error} className="w-full h-full flex flex-col">
+      <StatusWrapper
+        loading={isLoading}
+        reset={mutate}
+        error={error}
+        className="w-full h-full flex flex-col"
+      >
         <CardContent className="h-full flex-grow">
           <ReusableTable
             columns={columns}

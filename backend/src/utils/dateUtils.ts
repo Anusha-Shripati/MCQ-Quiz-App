@@ -1,39 +1,41 @@
 import { Result } from '../common/types/types';
 
-export const getDateBoundaries = (now: Date = new Date()) => {
-  const startOfToday = new Date(now);
-  startOfToday.setHours(0, 0, 0, 0);
+export const getDateBoundaries = () => {
+  const now = new Date();
 
-  const endOfToday = new Date(now);
-  endOfToday.setHours(23, 59, 59, 999);
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const startOfTomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+  const endOfTomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 2);
 
-  const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-  const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
 
   return {
     startOfToday,
-    endOfToday,
-    startOfLastMonth,
-    endOfLastMonth,
+    startOfTomorrow,
+    endOfTomorrow,
+    startOfMonth,
+    endOfMonth,
   };
 };
 
-export const categorizeExamDate = (
-  examDate: Date,
-  boundaries: ReturnType<typeof getDateBoundaries>
-) => {
-  const { startOfToday, endOfToday, startOfLastMonth, endOfLastMonth } = boundaries;
 
-  if (examDate >= startOfLastMonth && examDate <= endOfLastMonth) {
-    return 'lastMonth';
-  } else if (examDate >= startOfToday && examDate <= endOfToday) {
+export const categorizeExamDate = (date: Date, boundaries: ReturnType<typeof getDateBoundaries>) => {
+  const { startOfToday, startOfTomorrow, startOfMonth, endOfMonth } = boundaries;
+
+  if (date >= startOfToday && date < startOfTomorrow) {
     return 'today';
-  } else if (examDate > endOfToday) {
+  }
+  if (date >= startOfToday) {
     return 'upcoming';
+  }
+  if (date >= startOfMonth && date < endOfMonth) {
+    return 'thisMonth';
   }
 
   return null;
 };
+
 
 export const formatToISTDate = (dateString: string | Date): string => {
   const utcDate = new Date(dateString);

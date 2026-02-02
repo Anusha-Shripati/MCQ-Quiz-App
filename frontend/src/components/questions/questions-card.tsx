@@ -19,7 +19,7 @@ import { useState } from 'react';
 // }
 const questionType = {
   mcq: { label: 'MCQ', color: 'blue' },
-  code_snippet: { label: 'Code Snippet', color: 'purple' },
+  code_snippet: { label: 'Code Snippet with Multiple Answers', color: 'purple' },
   code_editor: { label: 'Code Editor', color: 'yellow' },
   text: { label: 'Fill in the blanks', color: 'green' },
   multiple_select: { label: 'Multiple Select', color: 'orange' },
@@ -133,6 +133,7 @@ export const QuestionCard = ({
           {/* MCQ Options */}
           {(question.type === 'mcq' ||
             question.type === 'multiple_select' ||
+            question.type === 'code_snippet' ||
             question.type === 'code_snippet_with_mcq') && (
             <>
               {question.options

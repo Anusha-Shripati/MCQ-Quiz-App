@@ -6,9 +6,11 @@
 import * as faceapi from 'face-api.js';
 export interface FaceTrackingConfig {
   checkInterval: number; // How often to check face position (ms)
-  lookAwayThreshold: number; // Degrees of head rotation to consider "looking away"
+  lookAwayThreshold: number; // Degrees of head rotation to consider "looking away" (horizontal)
+  lookAwayThresholdVertical?: number; // Degrees of head rotation for up/down (defaults to lookAwayThreshold if not set)
   lookAwayDuration: number; // How long to look away before triggering (ms)
 }
+
 
 export interface LookAwayEvent {
   timestamp: number;
@@ -23,8 +25,10 @@ export interface LookAwayEvent {
 const DEFAULT_CONFIG: FaceTrackingConfig = {
   checkInterval: 1000, // Check every second
   lookAwayThreshold: 30, // 30 degrees rotation
+  lookAwayThresholdVertical: 30, // Default to same as horizontal
   lookAwayDuration: 2000, // 2 seconds of looking away
 };
+
 
 /**
  * Initialize face-api.js models
@@ -52,13 +56,13 @@ export const initializeFaceTracking = async (): Promise<boolean> => {
  */
 const calculateHeadPose = (landmarks: faceapi.FaceLandmarks68): { yaw: number; pitch: number; roll: number } => {
   const positions = landmarks.positions;
-  
+
   // Key facial landmarks
   const noseTip = positions[30]; // Nose tip
   const leftEye = positions[36]; // Left eye outer corner
   const rightEye = positions[45]; // Right eye outer corner
   const chin = positions[8]; // Chin
-  
+
   // Calculate yaw (left-right rotation)
   const eyeCenter = {
     x: (leftEye.x + rightEye.x) / 2,
@@ -67,29 +71,36 @@ const calculateHeadPose = (landmarks: faceapi.FaceLandmarks68): { yaw: number; p
   const noseToEyeCenter = noseTip.x - eyeCenter.x;
   const eyeDistance = Math.abs(rightEye.x - leftEye.x);
   const yaw = (noseToEyeCenter / eyeDistance) * 90; // Approximate angle in degrees
-  
+
   // Calculate pitch (up-down rotation)
   const faceHeight = Math.abs(chin.y - eyeCenter.y);
   const noseToEyeVertical = noseTip.y - eyeCenter.y;
-  const pitch = (noseToEyeVertical / faceHeight) * 45; // Approximate angle in degrees
-  
+  const pitch = (noseToEyeVertical / faceHeight) * 60; // Increased sensitivity (was 45)
+
   // Calculate roll (tilt)
   const eyeSlope = (rightEye.y - leftEye.y) / (rightEye.x - leftEye.x);
   const roll = Math.atan(eyeSlope) * (180 / Math.PI); // Convert to degrees
-  
+
   return { yaw, pitch, roll };
 };
 
 /**
  * Check if candidate is looking away based on head pose
  */
-const isLookingAway = (headPose: { yaw: number; pitch: number; roll: number }, threshold: number): boolean => {
+const isLookingAway = (
+  headPose: { yaw: number; pitch: number; roll: number },
+  config: FaceTrackingConfig
+): boolean => {
+  const horizontalThreshold = config.lookAwayThreshold;
+  const verticalThreshold = config.lookAwayThresholdVertical ?? config.lookAwayThreshold;
+
   return (
-    Math.abs(headPose.yaw) > threshold ||
-    Math.abs(headPose.pitch) > threshold ||
-    Math.abs(headPose.roll) > threshold * 1.5 // Allow more tilt
+    Math.abs(headPose.yaw) > horizontalThreshold ||
+    Math.abs(headPose.pitch) > verticalThreshold ||
+    Math.abs(headPose.roll) > horizontalThreshold * 1.5 // Allow more tilt
   );
 };
+
 
 /**
  * Capture evidence when candidate looks away
@@ -254,13 +265,13 @@ export const startFaceTracking = (
   config: Partial<FaceTrackingConfig> = {}
 ): (() => void) => {
   const finalConfig = { ...DEFAULT_CONFIG, ...config };
-  
+
   let isTracking = true;
   let lookAwayStartTime: number | null = null;
   let lastCaptureTime = 0;
-  const MIN_CAPTURE_INTERVAL = 30000; // Minimum 30 seconds between captures
+  const MIN_CAPTURE_INTERVAL = 10000; // Minimum 5 seconds between captures
   let consecutiveErrors = 0;
-  const MAX_CONSECUTIVE_ERRORS = 5;
+  const MAX_CONSECUTIVE_ERRORS = 3;
 
   const checkFace = async () => {
     if (!isTracking || !videoElement) return;
@@ -271,7 +282,7 @@ export const startFaceTracking = (
       if (consecutiveErrors <= MAX_CONSECUTIVE_ERRORS) {
         console.warn('Video not ready for face detection, retrying...', {
           readyState: videoElement.readyState,
-          videoWidth: videoElement.videoWidth
+          videoWidth: videoElement.videoWidth,
         });
         setTimeout(checkFace, finalConfig.checkInterval);
         return;
@@ -295,9 +306,9 @@ export const startFaceTracking = (
         if (!lookAwayStartTime) {
           lookAwayStartTime = Date.now();
         }
-        
+
         const lookAwayDuration = Date.now() - lookAwayStartTime;
-        
+
         if (lookAwayDuration >= finalConfig.lookAwayDuration) {
           const now = Date.now();
           if (now - lastCaptureTime >= MIN_CAPTURE_INTERVAL) {
@@ -327,7 +338,13 @@ export const startFaceTracking = (
       } else {
         // Face detected - check head pose
         const headPose = calculateHeadPose(detection.landmarks);
-        const lookingAway = isLookingAway(headPose, finalConfig.lookAwayThreshold);
+
+        // Debug logging to help tune thresholds
+        console.log(
+          `Face Tracking - Yaw: ${headPose.yaw.toFixed(1)}°, Pitch: ${headPose.pitch.toFixed(1)}°`
+        );
+
+        const lookingAway = isLookingAway(headPose, finalConfig as FaceTrackingConfig);
 
         if (lookingAway) {
           if (!lookAwayStartTime) {
@@ -342,6 +359,10 @@ export const startFaceTracking = (
               console.log('Candidate looking away detected', {
                 headPose,
                 duration: lookAwayDuration,
+                reason:
+                  Math.abs(headPose.yaw) > (finalConfig as FaceTrackingConfig).lookAwayThreshold
+                    ? 'Yaw'
+                    : 'Pitch/Roll',
               });
 
               // Capture immediately with the current timestamp to ensure synchronization
@@ -373,7 +394,7 @@ export const startFaceTracking = (
     } catch (error) {
       consecutiveErrors++;
       console.error('Error in face tracking:', error);
-      
+
       if (consecutiveErrors > MAX_CONSECUTIVE_ERRORS) {
         console.error('Too many consecutive errors, stopping face tracking');
         return;

@@ -143,7 +143,10 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
     updatedQuestions[index].correct_answer = [];
     updatedQuestions[index].meta = {};
 
-    if (value === 'code_snippet' || value === 'code_editor') {
+    if (value === 'code_snippet') {
+      updatedQuestions[index].options = ['', '', '', '', '', ''];
+      updatedQuestions[index].meta = { code: '' };
+    } else if (value === 'code_editor') {
       updatedQuestions[index].options = [];
       if (updatedQuestions[index]?.meta?.code === undefined) {
         updatedQuestions[index].meta = { code: '' };
@@ -219,11 +222,12 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
       }
 
       // Validate MCQ and multiple select options
-      if (q.type === 'mcq' || q.type === 'multiple_select' || q.type === 'code_snippet_with_mcq') {
+      if (q.type === 'mcq' || q.type === 'multiple_select' || q.type === 'code_snippet' || q.type === 'code_snippet_with_mcq') {
         const nonEmptyOptions = q.options.filter((option) => option.trim() !== '');
+        const minOptions = q.type === 'code_snippet' ? 2 : 4;
 
-        if (nonEmptyOptions.length < 4) {
-          errors[index] = `This question requires at least 4 options (currently has ${nonEmptyOptions.length})`;
+        if (nonEmptyOptions.length < minOptions) {
+          errors[index] = `This question requires at least ${minOptions} options (currently has ${nonEmptyOptions.length})`;
           hasErrors = true;
         } else {
           const uniqueOptions = new Set(nonEmptyOptions);
@@ -265,8 +269,8 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
           const duplicateQuestions = error.response?.data?.data?.questions;
           duplicateQuestions?.map((item: string) => {
             const questionIndex = questions.findIndex((q) => {
-              // Allow duplicate questions for code_snippet_with_mcq type
-              if (q.type === 'code_snippet_with_mcq') {
+              // Allow duplicate questions for code_snippet_with_mcq and code_snippet types
+              if (q.type === 'code_snippet_with_mcq' || q.type === 'code_snippet') {
                 return false;
               }
               return q.question === item;

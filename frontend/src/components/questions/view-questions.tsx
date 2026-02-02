@@ -178,11 +178,12 @@ const   ViewQuestions = () => {
       }
 
       // Validate MCQ and multiple select questions
-      if (question.type === 'mcq' || question.type === 'multiple_select' || question.type === 'code_snippet_with_mcq') {
+      if (question.type === 'mcq' || question.type === 'multiple_select' || question.type === 'code_snippet' || question.type === 'code_snippet_with_mcq') {
         const nonEmptyOptions = question.options.filter((option) => option.trim() !== '');
+        const minOptions = question.type === 'code_snippet' ? 2 : 4;
         
-        if (nonEmptyOptions.length < 4) {
-          toast.error(`This question requires at least 4 options (currently has ${nonEmptyOptions.length})`);
+        if (nonEmptyOptions.length < minOptions) {
+          toast.error(`This question requires at least ${minOptions} options (currently has ${nonEmptyOptions.length})`);
           return;
         }
 

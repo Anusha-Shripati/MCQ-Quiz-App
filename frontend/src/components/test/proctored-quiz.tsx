@@ -145,11 +145,11 @@ export default function ProctoredQuiz() {
         return typeof answer.answer === 'string' && answer.answer.trim() !== '';
 
       case QuestionType.MULTIPLE_SELECT:
-        // For multiple select, check if at least one option is selected
+      case QuestionType.CODE_SNIPPET:
+        // For multiple select and code_snippet, check if at least one option is selected
         return Array.isArray(answer.answer) && answer.answer.length > 0;
 
       case QuestionType.TEXT:
-      case QuestionType.CODE_SNIPPET:
       case QuestionType.CODE_EDITOR:
         // For text-based questions, check if there's meaningful content
         return typeof answer.answer === 'string' && answer.answer.trim() !== '';

@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Card,
   CardHeader,
@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/form/input';
 import { Button } from '@/components/ui/form/button';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { ArrowLeft, ArrowRight, ChevronDown, ChevronUp } from 'lucide-react';
 import { FieldErrors, UseFormRegister, UseFormSetValue } from 'react-hook-form';
 import { AssessmentForm } from '@/types/assessment.types';
 import toast from 'react-hot-toast';
@@ -18,6 +18,8 @@ import { Question } from '@/shared/types/app';
 import useSWR from 'swr';
 import { assessmentEndpoint } from '@/lib/endpoint';
 import { api } from '@/lib/api';
+import { distributeQuestions } from '@/utils/question-distribution';
+import { AssessmentsDistributionSlider } from './AssessmentsDistributionSlider';
 
 type Step2Props = {
   formData: AssessmentForm;
@@ -39,14 +41,74 @@ const Step2: React.FC<Step2Props> = ({
   calculateTotalSum,
 }) => {
   const errorTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [expandedTypes, setExpandedTypes] = useState<Record<number, boolean>>({});
+  const [distribution, setDistribution] = useState([30, 70]);
+  const { data: technologyData } = useSWR(assessmentEndpoint.CHECK_QUESTIONS, () =>
+    api.post(assessmentEndpoint.CHECK_QUESTIONS, {
+      technologies: formData.technologies.map((tech) => tech.id),
+    })
+  );
 
-  const { data: technologyData } = useSWR(assessmentEndpoint.CHECK_QUESTIONS, ()=>api.post(assessmentEndpoint.CHECK_QUESTIONS, {technologies: formData.technologies.map((tech)=>tech.id)}));
+  // Automatic distribution effect
+  useEffect(() => {
+    if (!technologyData || !formData.targetQuestions) return;
 
-  const getMaxQuestions = (techId: string, difficulty: 'easy' | 'medium' | 'hard',type:Question['type']) => {
+    const result = distributeQuestions({
+      totalTarget: formData.targetQuestions,
+      difficultyDist: {
+        easy: distribution[0],
+        medium: distribution[1] - distribution[0],
+        hard: 100 - distribution[1],
+      },
+      technologies: formData.technologies,
+      limits: technologyData,
+    });
 
+    const newTechnologies = formData.technologies.map((tech) => {
+      const dist = result[tech.id];
+      if (!dist) return tech;
+
+      return {
+        ...tech,
+        easy: { ...tech.easy, ...dist.easy },
+        medium: { ...tech.medium, ...dist.medium },
+        hard: { ...tech.hard, ...dist.hard },
+      };
+    });
+
+    // Only update if questions counts are different to avoid loops/renders
+    // We check specific fields relevant to distribution
+    const isDifferent = newTechnologies.some((newTech, i) => {
+      const oldTech = formData.technologies[i];
+      return (
+        newTech.easy.total !== oldTech.easy.total ||
+        newTech.medium.total !== oldTech.medium.total ||
+        newTech.hard.total !== oldTech.hard.total ||
+        // Deep check categories if needed, but total check is a good proxy mostly
+        // Actually we should check category content because distribution might change just categories
+        JSON.stringify(newTech.easy) !== JSON.stringify(oldTech.easy) ||
+        JSON.stringify(newTech.medium) !== JSON.stringify(oldTech.medium) ||
+        JSON.stringify(newTech.hard) !== JSON.stringify(oldTech.hard)
+      );
+    });
+
+    if (isDifferent) {
+      setValue('technologies', newTechnologies);
+    }
+  }, [
+    distribution,
+    formData.targetQuestions,
+    technologyData,
+    formData.technologies.map((t) => t.id).join(','),
+  ]);
+
+  const getMaxQuestions = (
+    techId: string,
+    difficulty: 'easy' | 'medium' | 'hard',
+    type: Question['type']
+  ) => {
     return (
-      technologyData?.data?.results?.[techId]?.[difficulty]?.[type] ??
-      0 // fallback if not loaded yet
+      technologyData?.data?.results?.[techId]?.[difficulty]?.[type] ?? 0 // fallback if not loaded yet
     );
   };
 
@@ -59,6 +121,7 @@ const Step2: React.FC<Step2Props> = ({
       errorTimeoutRef.current = null;
     }, 1000);
   };
+
   const gotoNext = () => {
     const total = calculateTotalSum();
     if (total != formData.targetQuestions) {
@@ -68,7 +131,6 @@ const Step2: React.FC<Step2Props> = ({
     handleNextStep();
   };
 
-
   const handleQuestionCountChange = (
     index: number,
     difficulty: 'easy' | 'medium' | 'hard',
@@ -77,162 +139,225 @@ const Step2: React.FC<Step2Props> = ({
   ) => {
     const numValue = value as string;
     const techId = formData.technologies[index].id;
-    const maxAllowed = getMaxQuestions(techId, difficulty,type);
+    const maxAllowed = getMaxQuestions(techId, difficulty, type);
 
     if (parseInt(numValue || '0') > maxAllowed) {
       showError(`You can only allocate up to ${maxAllowed} questions for this difficulty.`);
       return;
     }
 
-    const totalSum = calculateTotalSum();
-    const remainingQuestions =
-      formData.targetQuestions - totalSum + parseInt(formData.technologies[index][difficulty][type] as string  || "0" );
+    // Calculate pending total excluding current change to verify limits
+    const currentTotal = calculateTotalSum();
+    const currentVal = parseInt((formData.technologies[index][difficulty][type] as string) || '0');
+    const newVal = parseInt(numValue || '0');
 
-    if (parseInt(numValue|| '0') > remainingQuestions) {
-      if (remainingQuestions) showError(`You can only allocate ${remainingQuestions} questions.`);
-      else showError('Please update total questions');
+    // We want to check: (currentTotal - oldVal + newVal) <= targetQuestions
+    const projectedTotal = currentTotal - currentVal + newVal;
 
+    if (projectedTotal > formData.targetQuestions) {
+      showError(`Total questions cannot exceed ${formData.targetQuestions}.`);
       return;
     }
 
-    const updatedTechnologies = formData.technologies;
-    updatedTechnologies[index][difficulty][type] = numValue ? parseInt(numValue):"";
-    updatedTechnologies[index][difficulty].total = Object.entries(updatedTechnologies[index][difficulty])
+    const updatedTechnologies = [...formData.technologies]; // create shallow copy
+    updatedTechnologies[index][difficulty][type] = numValue ? parseInt(numValue) : '';
+
+    // Update total for this difficulty
+    updatedTechnologies[index][difficulty].total = Object.entries(
+      updatedTechnologies[index][difficulty]
+    )
       .filter(([key]) => key !== 'total')
-      .reduce((sum, [, value]) => sum + Number(value || 0), 0);
+      .reduce((sum, [, val]) => sum + Number(val || 0), 0);
 
     setValue('technologies', updatedTechnologies);
   };
 
-  return (
-    <Card className="dark:bg-gray-800 dark:border-gray-700">
-      <CardHeader>
-        <CardTitle className="font-bold dark:text-white">Question Distribution</CardTitle>
-        <CardDescription className="dark:text-gray-300">
-          Set the number of questions for each difficulty level
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="grid grid-cols-[1fr,1fr,1fr,1fr,1fr] gap-4 items-center">
-          <h3 className="text-lg font-bold dark:text-white">Total Questions</h3>
-          <div className="text-center font-medium text-gray-700 bg-green-100 rounded-full px-2 py-1">
-            Easy
-          </div>
-          <div className="text-center font-medium text-gray-700 bg-blue-100 rounded-full px-2 py-1">
-            Medium
-          </div>
-          <div className="text-center font-medium text-gray-700 bg-red-100 rounded-full px-2 py-1">
-            Hard
-          </div>
-          <div className='flex justify-center'>
-            <Input
-              type="number"
-              {...register('targetQuestions')}
-              className="w-24 text-center dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-              min="0"
-            />
-          </div>
-        </div>
-        <div className="grid grid-cols-[1fr,1fr,1fr,1fr,1fr] gap-4 items-center">
-          <div className="dark:text-gray-300">Technology</div>
-          {['easy', 'medium', 'hard'].map((difficulty) => {
-            const totalForDifficulty = formData.technologies.reduce(
-              (sum, tech) => sum + tech[difficulty as 'easy' | 'medium' | 'hard'].total,
-              0
-            );
-            const percentage =
-              formData.targetQuestions > 0
-                ? Math.round((totalForDifficulty / formData.targetQuestions) * 100)
-                : 0;
+  const toggleExpandedTypes = (index: number) => {
+    setExpandedTypes((prev) => ({ ...prev, [index]: !prev[index] }));
+  };
 
-            return (
-              <div key={difficulty} className="text-center">
-                <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">{percentage}%</div>
-              </div>
-            );
-          })}
-          <div className="text-center dark:text-gray-300">Total</div>
-        </div>
-        <div className="space-y-4">
-          {formData.technologies.map((technology, index) => {
-            return (
-              <div
-                key={index}
-                className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm p-4 mb-4 transition hover:shadow-md"
-              >
-                <div className="grid grid-cols-[1.5fr,1fr,1fr,1fr,1fr] gap-4 items-center">
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold text-lg dark:text-white">{technology.name}</span>
-                  </div>
-                  {['easy', 'medium', 'hard'].map((difficulty) => (
-                    <div key={difficulty} className="text-center">
-                      <Input
-                        type="number"
-                        min="0"
-                        value={technology[difficulty as 'easy' | 'medium' | 'hard'].total}
-                        disabled
-                        aria-label={`${technology.name} ${difficulty} total`}
-                        className="w-20 text-center mx-auto bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white font-semibold border-2 border-dashed border-gray-300 dark:border-gray-600"
-                      />
-                      <div className="w-full flex flex-col gap-2 mt-3">
-                        {questionTypeOptions.map((item) => {
-                          const maxAllowed = getMaxQuestions(technology.id, difficulty as 'easy' | 'medium' | 'hard', item.value);
+  const getRowTotal = (techIndex: number, type: Question['type']) => {
+    const tech = formData.technologies[techIndex];
+    const easy = Number(tech.easy[type] || 0);
+    const medium = Number(tech.medium[type] || 0);
+    const hard = Number(tech.hard[type] || 0);
+    return easy + medium + hard;
+  };
+
+  const getColumnTotal = (techIndex: number, difficulty: 'easy' | 'medium' | 'hard') => {
+    return formData.technologies[techIndex][difficulty].total;
+  };
+
+  const getGrandTotal = (techIndex: number) => {
+    const tech = formData.technologies[techIndex];
+    return tech.easy.total + tech.medium.total + tech.hard.total;
+  };
+
+  return (
+    <div className="space-y-6">
+      <Card className="dark:bg-gray-800 dark:border-gray-700">
+        <CardHeader>
+          <div className="flex justify-between items-center mb-6">
+            <div>
+              <CardTitle className="font-bold dark:text-white">Question Distribution</CardTitle>
+              <CardDescription className="dark:text-gray-300">
+                Allocated:{' '}
+                <span
+                  className={
+                    calculateTotalSum() === formData.targetQuestions
+                      ? 'text-green-500 font-bold'
+                      : 'text-blue-500 font-bold'
+                  }
+                >
+                  {calculateTotalSum()}
+                </span>{' '}
+                / {formData.targetQuestions} target questions
+              </CardDescription>
+            </div>
+            <div className="flex items-center gap-2">
+              <label className="text-sm font-medium dark:text-gray-300">Target:</label>
+              <Input
+                type="number"
+                {...register('targetQuestions', { valueAsNumber: true })}
+                className="w-20 text-center dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                min="0"
+              />
+            </div>
+          </div>
+          <div className="px-4 py-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg border dark:border-gray-700">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-sm font-semibold dark:text-gray-200">Difficulty Distribution</h3>
+              <span className="text-xs text-muted-foreground">
+                Adjust sliders to auto-distribute questions
+              </span>
+            </div>
+            <AssessmentsDistributionSlider value={distribution} onValueChange={setDistribution} />
+          </div>
+        </CardHeader>
+      </Card>
+
+      {formData.technologies.map((technology, techIndex) => {
+        const isExpanded = expandedTypes[techIndex];
+        // Filter options to only show specific categories
+        // From here enable all question types.
+        const allowedTypes = ['mcq', 'multiple_select', 'code_snippet', 'code_snippet_with_mcq'];
+        const filteredOptions = questionTypeOptions.filter((opt) =>
+          allowedTypes.includes(opt.value)
+        );
+        const visibleOptions = isExpanded ? filteredOptions : filteredOptions.slice(0, 4);
+        return (
+          <Card
+            key={technology.id}
+            className="dark:bg-gray-800 dark:border-gray-700 overflow-hidden"
+          >
+            <CardHeader className="bg-gray-50 dark:bg-gray-900/50 py-4">
+              <CardTitle className="text-lg font-bold dark:text-white">{technology.name}</CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm text-left">
+                  <thead className="text-xs text-gray-700 uppercase bg-primary/5 dark:bg-gray-900/50 dark:text-gray-400">
+                    <tr>
+                      <th className="px-6 py-4 font-semibold text-gray-500">Question Type</th>
+                      <th className="px-6 py-4 font-semibold text-gray-500 text-center">Easy</th>
+                      <th className="px-6 py-4 font-semibold text-gray-500 text-center">Medium</th>
+                      <th className="px-6 py-4 font-semibold text-gray-500 text-center">Hard</th>
+                      <th className="px-6 py-4 font-semibold text-gray-500 text-center">Total</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                    {visibleOptions.map((option) => (
+                      <tr
+                        key={option.value}
+                        className="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                      >
+                        <td className="px-6 py-4 font-medium text-gray-700 dark:text-white">
+                          {option.label}
+                        </td>
+                        {(['easy', 'medium', 'hard'] as const).map((difficulty) => {
+                          const maxAllowed = getMaxQuestions(
+                            technology.id,
+                            difficulty,
+                            option.value
+                          );
                           return (
-                            <div className="flex justify-between items-center w-full group" key={item.value}>
-                              <label htmlFor={`tech-${index}-${difficulty}-${item.value}`} className="text-sm font-medium text-gray-700 dark:text-gray-200 flex items-center gap-1">
-                                {item.label}
-                                <span className="ml-1 text-xs font-bold text-gray-400 cursor-pointer relative group-hover:text-blue-500" tabIndex={0}>
-                                  ({maxAllowed})
-                                </span>
-                              </label>
+                            <td key={difficulty} className="px-6 py-4 text-center">
                               <Input
-                                id={`tech-${index}-${difficulty}-${item.value}`}
                                 type="number"
                                 min="0"
-                                value={technology[difficulty as 'easy' | 'medium' | 'hard'][item.value]}
+                                placeholder="-"
+                                value={technology[difficulty][option.value] || ''}
                                 onChange={(e) =>
                                   handleQuestionCountChange(
-                                    index,
-                                    difficulty as 'easy' | 'medium' | 'hard',
-                                    item.value,
+                                    techIndex,
+                                    difficulty,
+                                    option.value,
                                     e.target.value
                                   )
                                 }
-                                className="w-20 m-0 text-center bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-400"
-                                aria-label={`${technology.name} ${difficulty} ${item.label}`}
+                                className="w-full max-w-[100px] mx-auto text-center h-9 bg-white dark:bg-gray-700 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500"
                               />
-                            </div>
+                              <div className="text-sm text-gray-400 mt-1 font-bold">
+                                Max: {maxAllowed}
+                              </div>
+                            </td>
                           );
                         })}
-                      </div>
-                    </div>
-                  ))}
-                  <div className="text-center font-bold dark:text-white flex flex-col items-center">
-                    <span className="inline-block px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200 text-base">
-                      {technology.easy.total + technology.medium.total + technology.hard.total}
-                    </span>
-                    <span className="text-xs text-gray-400 mt-1">Total</span>
-                  </div>
-                </div>
+                        <td className="px-6 py-4 text-center font-medium text-gray-700 dark:text-gray-300">
+                          {getRowTotal(techIndex, option.value)}
+                        </td>
+                      </tr>
+                    ))}
+
+                    {/* Toggle Row */}
+                    {filteredOptions.length > 4 && (
+                      <tr>
+                        <td colSpan={5} className="px-6 py-3 bg-white dark:bg-gray-800">
+                          <button
+                            onClick={() => toggleExpandedTypes(techIndex)}
+                            className="flex items-center text-sm font-medium text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 focus:outline-none transition-colors"
+                          >
+                            {isExpanded ? (
+                              <>
+                                Less types <ChevronUp className="ml-1 h-4 w-4" />
+                              </>
+                            ) : (
+                              <>
+                                More types <ChevronDown className="ml-1 h-4 w-4" />
+                              </>
+                            )}
+                          </button>
+                        </td>
+                      </tr>
+                    )}
+
+                    {/* Totals Row */}
+                    <tr className="bg-white dark:bg-gray-900/50 border-t">
+                      <td className="px-6 py-4 font-semibold text-gray-900 dark:text-white">
+                        Total
+                      </td>
+                      <td className="px-6 py-4 text-center font-semibold text-gray-900 dark:text-gray-white">
+                        {getColumnTotal(techIndex, 'easy')}
+                      </td>
+                      <td className="px-6 py-4 text-center font-semibold text-gray-900 dark:text-gray-white">
+                        {getColumnTotal(techIndex, 'medium')}
+                      </td>
+                      <td className="px-6 py-4 text-center font-semibold text-gray-900 dark:text-gray-white">
+                        {getColumnTotal(techIndex, 'hard')}
+                      </td>
+                      <td className="px-6 py-4 text-center font-semibold text-gray-900 dark:text-gray-white">
+                        {getGrandTotal(techIndex)}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
-            );
-          })}
-          <div className="grid grid-cols-[1fr,1fr,1fr,1fr,,1fr] gap-4 items-center">
-            <div className="font-medium text-gray-900 dark:text-gray-300">Total</div>
-            <div className="text-end pr-8 font-medium text-gray-900 dark:text-gray-300">
-              {formData.technologies.reduce((sum, tech) => sum + tech.easy.total, 0)}
-            </div>
-            <div className="text-end pr-8 font-medium text-gray-900 dark:text-gray-300">
-              {formData.technologies.reduce((sum, tech) => sum + tech.medium.total, 0)}
-            </div>
-            <div className="text-end pr-8 font-medium text-gray-900 dark:text-gray-300">
-              {formData.technologies.reduce((sum, tech) => sum + tech.hard.total, 0)}
-            </div>
-            <div className="text-center font-medium text-blue-600">{calculateTotalSum()}</div>
-          </div>
-        </div>
-      </CardContent>
-      <CardFooter className="flex flex-col sm:flex-row justify-end gap-4">
+            </CardContent>
+          </Card>
+        );
+      })}
+
+      <CardFooter className="flex flex-col sm:flex-row justify-end gap-4 border-t dark:border-gray-700 pt-6 px-0">
         <Button
           variant="outline"
           onClick={handlePreviousStep}
@@ -246,7 +371,7 @@ const Step2: React.FC<Step2Props> = ({
           <ArrowRight className="ml-2 h-4 w-4" />
         </Button>
       </CardFooter>
-    </Card>
+    </div>
   );
 };
 

@@ -446,8 +446,9 @@ const TestPage = () => {
         code,
         {
           checkInterval: 1000,
-          lookAwayThreshold: 30,
-          lookAwayDuration: 1000,
+          lookAwayThreshold: 30, // Relaxed from 30
+          lookAwayThresholdVertical: 20, // Relaxed from 20
+          lookAwayDuration: 1500, // Relaxed from 1s to 2s
         }
       );
 

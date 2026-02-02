@@ -21,6 +21,7 @@ interface QuestionReviewProps {
 }
 type Answer = Omit<Required<AnswerData>, 'score'> & { result_id: string; score: string };
 const QuestionReview: React.FC<QuestionReviewProps> = ({ answers }) => {
+  console.log(answers);
   const [selectedAns, setSelectedAns] = useState<Answer | null>(null);
   const [updatedScore, setUpdatedScore] = useState<number>(0);
   const [scoreError, setScoreError] = useState('');
@@ -178,19 +179,22 @@ const QuestionReview: React.FC<QuestionReviewProps> = ({ answers }) => {
                 {/* MCQ and Multiple Select - Show options with visual indicators */}
                 {(ans.question?.type === 'mcq' ||
                   ans.question?.type === 'multiple_select' ||
-                  ans.question?.type === 'code_snippet_with_mcq') && (
+                  ans.question?.type === 'code_snippet_with_mcq' ||
+                  ans.question?.type === 'code_snippet') && (
                   <>
                     {/* Code snippet for code_snippet_with_mcq */}
-                    {ans.question?.type === 'code_snippet_with_mcq' && ans.question?.meta?.code && (
-                      <div className="mb-4">
-                        <p className="text-xs font-medium text-purple-700 dark:text-purple-300 mb-1">
-                          Code Snippet:
-                        </p>
-                        <pre className="bg-gradient-to-br from-gray-900 to-gray-800 max-h-96 dark:from-gray-950 dark:to-gray-900 text-gray-100 p-3 rounded-xl text-xs overflow-auto border border-gray-700 dark:border-gray-600 hover:border-gray-600 dark:hover:border-gray-500 transition-colors duration-300 shadow-lg">
-                          <code>{ans.question.meta.code}</code>
-                        </pre>
-                      </div>
-                    )}
+                    {(ans.question?.type === 'code_snippet_with_mcq' ||
+                      ans.question?.type === 'code_snippet') &&
+                      ans.question?.meta?.code && (
+                        <div className="mb-4">
+                          <p className="text-xs font-medium text-purple-700 dark:text-purple-300 mb-1">
+                            Code Snippet:
+                          </p>
+                          <pre className="bg-gradient-to-br from-gray-900 to-gray-800 max-h-96 dark:from-gray-950 dark:to-gray-900 text-gray-100 p-3 rounded-xl text-xs overflow-auto border border-gray-700 dark:border-gray-600 hover:border-gray-600 dark:hover:border-gray-500 transition-colors duration-300 shadow-lg">
+                            <code>{ans.question.meta.code}</code>
+                          </pre>
+                        </div>
+                      )}
 
                     {/* Options with clear visual indicators */}
                     <div className="mb-4">
@@ -246,7 +250,7 @@ const QuestionReview: React.FC<QuestionReviewProps> = ({ answers }) => {
                 )}
 
                 {/* Code Snippet (without MCQ) */}
-                {ans.question?.type === 'code_snippet' && (
+                {/* {ans.question?.type === 'code_snippet' && (
                   <div className="mb-4 space-y-3">
                     {ans.question?.meta?.code && (
                       <div>
@@ -269,7 +273,7 @@ const QuestionReview: React.FC<QuestionReviewProps> = ({ answers }) => {
                       </pre>
                     </div>
                   </div>
-                )}
+                )} */}
 
                 {/* Code Editor */}
                 {ans.question?.type === 'code_editor' && (

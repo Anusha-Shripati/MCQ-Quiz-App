@@ -150,21 +150,41 @@ function Question({
 
           case QuestionType.CODE_SNIPPET:
             return (
-              <div className="space-y-2">
+              <div className="space-y-4">
                 {typeof question.question?.meta?.code === 'string' && (
                   <pre className="max-h-96 bg-gradient-to-br from-gray-900 to-gray-800 dark:from-gray-950 dark:to-gray-900 text-gray-100 p-3 rounded-xl text-xs overflow-x-auto border border-gray-700 dark:border-gray-600 hover:border-gray-600 dark:hover:border-gray-500 transition-colors duration-300 shadow-lg">
                     <code>{question.question?.meta.code || 'No code snippet provided.'}</code>
                   </pre>
                 )}
-                <Textarea
-                  value={(answers[question.question_id]?.answer as string) || ''}
-                  onChange={(e) => !isLocked && handleAnswerChange(question, e.target.value)}
-                  placeholder="Write your code here..."
-                  className="min-h-[200px] font-mono text-black text-base"
-                  disabled={isLocked}
-                />
-                <div className="text-sm text-gray-500">
-                  Tip: Use proper indentation and comments where necessary
+                <div className="space-y-4">
+                  {question.question.options?.map((option, idx) => {
+                    const currentAnswers = answers[question.question_id]
+                      ? (answers[question.question_id]?.answer as (string | number)[])
+                      : [];
+
+                    return (
+                      <div key={idx} className="flex items-center space-x-3">
+                        <Checkbox
+                          id={`option-${question.question_id}-${idx}`}
+                          checked={currentAnswers.includes(idx.toString())}
+                          onCheckedChange={(checked) => {
+                            if (isLocked) return;
+                            const newAnswers: (string | number)[] = checked
+                              ? [...currentAnswers, idx.toString()]
+                              : currentAnswers.filter((a) => a !== idx.toString());
+                            handleAnswerChange(question, newAnswers);
+                          }}
+                          disabled={isLocked}
+                        />
+                        <label
+                          htmlFor={`option-${question.question_id}-${idx}`}
+                          className="text-lg font-semibold text-gray-800 cursor-pointer"
+                        >
+                          {option}
+                        </label>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             );

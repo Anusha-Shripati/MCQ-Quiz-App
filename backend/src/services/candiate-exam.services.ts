@@ -237,7 +237,7 @@ export class CandidateExamService {
       const userAns = data.user_answer;
 
       if (Array.isArray(correct_answer) && Array.isArray(userAns) && correct_answer.length) {
-        if (type == 'multiple_select') {
+        if (type == 'multiple_select' || type == 'code_snippet') {
           const correctCount = userAns.filter((ans) => correct_answer.includes(ans)).length;
           const falseCount = userAns.length - correctCount;
           const score = ((correctCount - falseCount) * weight) / correct_answer.length;

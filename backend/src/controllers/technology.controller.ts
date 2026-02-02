@@ -60,16 +60,16 @@ export class TechnologyController {
 
       for (const question of questions) {
         if (
-          (question.type === 'mcq' || question.type === 'multiple_select' || question.type === 'code_snippet_with_mcq') &&
+          (question.type === 'mcq' || question.type === 'multiple_select' || question.type === 'code_snippet' || question.type === 'code_snippet_with_mcq') &&
           (!Array.isArray(question.options) ||
-            question.options.filter((opt: string) => opt && opt.trim() !== '').length < 4)
+            question.options.filter((opt: string) => opt && opt.trim() !== '').length < (question.type === 'code_snippet' ? 2 : 4))
         ) {
           return generateResponse(
             res,
             400,
             { questionId: question.id || null },
             false,
-            `Question "${question.question}" must have at least 4 non-empty options`
+            `Question "${question.question}" must have at least ${question.type === 'code_snippet' ? 2 : 4} non-empty options`
           );
         }
       }
@@ -108,8 +108,8 @@ export class TechnologyController {
       //     }
       //   }
       // }
-      // Only check for duplicates for questions that are NOT code_snippet_with_mcq
-      const nonCodeMcqQuestions = questions.filter((item: any) => item.type !== 'code_snippet_with_mcq');
+      // Only check for duplicates for questions that are NOT code_snippet_with_mcq or code_snippet
+      const nonCodeMcqQuestions = questions.filter((item: any) => item.type !== 'code_snippet_with_mcq' && item.type !== 'code_snippet');
       const questionsArr = await prisma.questions.findMany({ where: { question: { in: nonCodeMcqQuestions.map((item: any) => item.question) }, technology_id: id } });
 
       if (questionsArr.length) {

@@ -42,7 +42,7 @@ export default function ExamDurationPerformance() {
     <Card className="shadow-lg col-span-12 md:col-span-6">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg">Duration vs Performance</CardTitle>
-        <CardDescription className="text-sm">
+        <CardDescription className="text-sm font-bold">
           How exam duration affects candidate performance
         </CardDescription>
       </CardHeader>

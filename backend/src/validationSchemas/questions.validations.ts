@@ -17,18 +17,21 @@ export const questionsSchema = {
         //   }),
         // }),
       correct_answer: Joi.when('type', {
-        is: 'code_snippet',
-        then: Joi.any().optional(),
+        is: Joi.valid('code_snippet', 'code_editor'),
+        then: Joi.array().items(Joi.string()).min(1).required().messages({
+          'array.min': 'At least one correct answer is required',
+          'any.required': 'Correct answer is required for code_snippet and code_editor types',
+        }),
         otherwise: Joi.array().items(Joi.string()).required().messages({
           'string.empty': 'Correct answer is required',
         }),
       }),
       
       options: Joi.when('type', {
-        is: Joi.valid('mcq', 'multiple_select', 'code_snippet_with_mcq'),
-        then: Joi.array().items(Joi.string()).min(4).required().messages({
-          'array.min': 'At least 4 options are required',
-          'any.required': 'Options are required for MCQ, Multiple Select and code_snippet_with_mcq types',
+        is: Joi.valid('mcq', 'multiple_select', 'code_snippet', 'code_snippet_with_mcq'),
+        then: Joi.array().items(Joi.string()).min(Joi.ref('...minOptions')).required().messages({
+          'array.min': 'Minimum options required',
+          'any.required': 'Options are required for this question type',
         }),
         otherwise: Joi.array().items(Joi.string()).optional(),
       }),
@@ -58,10 +61,28 @@ export const questionsSchema = {
         });
       }
 
-      if (value.type === 'code_snippet_with_mcq' && (!value.meta?.code || value.meta.code.trim() === '')) {
+      if ((value.type === 'code_snippet' || value.type === 'code_snippet_with_mcq') && (!value.meta?.code || value.meta.code.trim() === '')) {
         return helpers.error('any.custom', {
-          message: 'Code snippet is required for code_snippet_with_mcq type',
+          message: 'Code snippet is required for code_snippet and code_snippet_with_mcq types',
         });
+      }
+
+      if (value.type === 'code_snippet') {
+        const filledOptions = (value.options || []).filter((opt: string) => opt.trim()).length;
+        if (filledOptions < 2) {
+          return helpers.error('any.custom', {
+            message: 'At least 2 options are required for code_snippet type',
+          });
+        }
+      }
+
+      if (value.type === 'code_snippet_with_mcq') {
+        const filledOptions = (value.options || []).filter((opt: string) => opt.trim()).length;
+        if (filledOptions < 4) {
+          return helpers.error('any.custom', {
+            message: 'At least 4 options are required for code_snippet_with_mcq type',
+          });
+        }
       }
 
       return value;
@@ -89,17 +110,20 @@ export const questionsSchema = {
         //   }),
         // }),
       correct_answer: Joi.when('type', {
-        is: 'code_snippet',
-        then: Joi.any().optional(),
+        is: Joi.valid('code_snippet', 'code_editor'),
+        then: Joi.array().items(Joi.string()).min(1).required().messages({
+          'array.min': 'At least one correct answer is required',
+          'any.required': 'Correct answer is required for code_snippet and code_editor types',
+        }),
         otherwise: Joi.array().items(Joi.string()).required().messages({
           'string.empty': 'Correct answer is required',
         }),
       }),
       options: Joi.when('type', {
-        is: Joi.valid('mcq', 'multiple_select', 'code_snippet_with_mcq'),
-        then: Joi.array().items(Joi.string()).min(4).required().messages({
-          'array.min': 'At least 4 options are required',
-          'any.required': 'Options are required for MCQ and Multiple Select types',
+        is: Joi.valid('mcq', 'multiple_select', 'code_snippet', 'code_snippet_with_mcq'),
+        then: Joi.array().items(Joi.string()).min(Joi.ref('...minOptions')).required().messages({
+          'array.min': 'Minimum options required',
+          'any.required': 'Options are required for this question type',
         }),
         otherwise: Joi.array().items(Joi.string()).optional(),
       }),
@@ -129,14 +153,32 @@ export const questionsSchema = {
         });
       }
 
-      if (value.type === 'code_snippet_with_mcq' && (!value.meta?.code || value.meta.code.trim() === '')) {
+      if ((value.type === 'code_snippet' || value.type === 'code_snippet_with_mcq') && (!value.meta?.code || value.meta.code.trim() === '')) {
         return helpers.error('any.custom', {
-          message: 'Code snippet is required for code_snippet_with_mcq type',
+          message: 'Code snippet is required for code_snippet and code_snippet_with_mcq types',
         });
       }
 
+      if (value.type === 'code_snippet') {
+        const filledOptions = (value.options || []).filter((opt: string) => opt.trim()).length;
+        if (filledOptions < 2) {
+          return helpers.error('any.custom', {
+            message: 'At least 2 options are required for code_snippet type',
+          });
+        }
+      }
+
+      if (value.type === 'code_snippet_with_mcq') {
+        const filledOptions = (value.options || []).filter((opt: string) => opt.trim()).length;
+        if (filledOptions < 4) {
+          return helpers.error('any.custom', {
+            message: 'At least 4 options are required for code_snippet_with_mcq type',
+          });
+        }
+      }
+
       return value;
-    }, 'Custom validation for video type'),
+    }, 'Custom validation for update'),
   },
 
   delete: {

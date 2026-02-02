@@ -204,12 +204,39 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
       });
     }
 
+    // Additional validation for code_snippet
+    if (question.type === 'code_snippet') {
+      // Check if at least 2 options are filled
+      const filledOptions = question.options.filter(opt => opt.trim()).length;
+      if (filledOptions < 2) {
+        toast.error('At least 2 options are required');
+        hasError = true;
+      }
+
+      // Check if at least one correct answer is selected
+      if (!question.correct_answer.length) {
+        toast.error('Please select at least one correct answer');
+        hasError = true;
+      }
+
+      // Check for duplicate options
+      question.options.forEach((option, index) => {
+        if (option.trim()) {
+          const dupIndex = checkDuplicateOption(question.options, option, index);
+          if (dupIndex !== -1) {
+            errors[index] = `Duplicate of option ${dupIndex + 1}`;
+            hasError = true;
+          }
+        }
+      });
+    }
+
     setOptionErrors(errors);
     return !hasError;
   };
 
   return (
-    <Card className={validationError ? "border-2 border-red-500" : ""}>
+    <Card className={validationError ? 'border-2 border-red-500' : ''}>
       <CardHeader>
         <CardTitle className="text-xl font-bold flex justify-between text-gray-900 dark:text-white">
           Question {selectedQuestion + 1}
@@ -297,7 +324,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
             updatedQuestions[selectedQuestion].question = e.target.value;
             setQuestions(updatedQuestions);
           }}
-          className={`mb-4 ${validationError && !question.question.trim() ? "border-red-500" : ""}`}
+          className={`mb-4 ${validationError && !question.question.trim() ? 'border-red-500' : ''}`}
         />
 
         {question.type === 'video' && question.meta?.videoToVideo ? (
@@ -376,9 +403,9 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
                         setQuestions(updatedQuestions);
 
                         // Set error for this option
-                        setOptionErrors(prev => ({
+                        setOptionErrors((prev) => ({
                           ...prev,
-                          [i]: `Duplicate of option ${dupIndex + 1}`
+                          [i]: `Duplicate of option ${dupIndex + 1}`,
                         }));
 
                         toast.error('Option already exists');
@@ -412,35 +439,113 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
           />
         )}
 
-        {(question.type === 'code_snippet' || question.type === 'code_editor' || question.type === 'code_snippet_with_mcq') && (
+        {(question.type === 'code_snippet' ||
+          question.type === 'code_editor' ||
+          question.type === 'code_snippet_with_mcq') && (
           <textarea
-          placeholder={question.type === 'code_snippet_with_mcq' ? `Example:
+            rows={8}
+            placeholder={
+              question.type === 'code_snippet_with_mcq' || question.type === 'code_snippet'
+                ? `Example:
             function getAge() {
               'use strict';
               age = 21;
               console.log(age);
             }
-            getAge();` : "Enter your code snippet"}
+            getAge();`
+                : 'Enter your code snippet'
+            }
             value={(question?.meta?.code || '') as string}
             onChange={handleCodeQuestions}
             className="w-full p-2 border rounded-md dark:bg-gray-700 dark:text-white"
-            rows={10}
           />
         )}
 
-{(question.type === 'code_snippet_with_mcq') && (
+        {question.type === 'code_snippet' && (
+          <div className="space-y-2 mt-4">
+            <label className="block text-sm font-medium mb-2">
+              Correct Answers (Select all that apply)
+            </label>
+            {ensureFiveOptions(question.options).map((option, i) => (
+              <div key={i} className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={question.correct_answer.includes(i.toString())}
+                  onChange={(e) =>
+                    handleCorrectOptionChange(i, selectedQuestion, 'multiple_select', e)
+                  }
+                  disabled={!option.trim()}
+                />
+                <div className="flex-1">
+                  <Input
+                    placeholder={`Option ${i + 1}`}
+                    value={option}
+                    onChange={(e) => {
+                      const updatedQuestions = [...questions];
+                      const newValue = e.target.value;
+                      updatedQuestions[selectedQuestion].options[i] = newValue;
+
+                      if (optionErrors[i]) {
+                        const newErrors = { ...optionErrors };
+                        delete newErrors[i];
+                        setOptionErrors(newErrors);
+                      }
+
+                      setQuestions(updatedQuestions);
+                    }}
+                    onBlur={(e) => {
+                      const updatedQuestions = [...questions];
+                      const newValue = e.target.value.trim();
+
+                      if (newValue === '') return;
+
+                      const dupIndex = checkDuplicateOption(
+                        updatedQuestions[selectedQuestion].options,
+                        newValue,
+                        i
+                      );
+
+                      if (dupIndex !== -1) {
+                        updatedQuestions[selectedQuestion].options[i] = '';
+                        e.target.value = '';
+                        setQuestions(updatedQuestions);
+
+                        setOptionErrors((prev) => ({
+                          ...prev,
+                          [i]: `Duplicate of option ${dupIndex + 1}`,
+                        }));
+
+                        toast.error('Option already exists');
+                        return;
+                      }
+                    }}
+                    className={`
+                      ${i >= 4 ? 'border-dashed border-gray-400' : ''} 
+                      ${validationError && i < 4 && !option.trim() ? 'border-red-500 bg-red-50' : ''}
+                      ${optionErrors[i] ? 'border-red-500 bg-red-50' : ''}
+                    `}
+                  />
+                  {optionErrors[i] && (
+                    <p className="text-xs text-red-500 mt-1">{optionErrors[i]}</p>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {question.type === 'code_snippet_with_mcq' && (
           <div className="space-y-2">
             {ensureFiveOptions(question.options).map((option, i) => (
               <div key={i} className="flex items-center gap-2">
-                
-                  <input
-                    type="radio"
-                    name={`radio-${question.id}`}
-                    checked={question.correct_answer.includes(i.toString())}
-                    onChange={(e) => handleCorrectOptionChange(i, selectedQuestion, 'mcq', e)}
-                    disabled={!option.trim()} // Disable radio if option is empty
-                  />
-                
+                <input
+                  type="radio"
+                  name={`radio-${question.id}`}
+                  checked={question.correct_answer.includes(i.toString())}
+                  onChange={(e) => handleCorrectOptionChange(i, selectedQuestion, 'mcq', e)}
+                  disabled={!option.trim()} // Disable radio if option is empty
+                />
+
                 <div className="flex-1">
                   <Input
                     placeholder={`Option ${i + 1}`}
@@ -479,9 +584,9 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
                         setQuestions(updatedQuestions);
 
                         // Set error for this option
-                        setOptionErrors(prev => ({
+                        setOptionErrors((prev) => ({
                           ...prev,
-                          [i]: `Duplicate of option ${dupIndex + 1}`
+                          [i]: `Duplicate of option ${dupIndex + 1}`,
                         }));
 
                         toast.error('Option already exists');
@@ -537,29 +642,43 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
         {questions.length !== 0 && (
           <div className="mt-2 flex justify-end gap-4">
             {onSave && (
-              <Button 
-                variant="default" 
-                className='px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900' 
+              <Button
+                variant="default"
+                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
                 onClick={() => {
                   if (!validateQuestion()) {
                     return;
                   }
                   onSave();
-                }} 
+                }}
                 disabled={isMutating || updating}
               >
                 Save
               </Button>
             )}
-            <Button variant="outline" onClick={() => handleReset('all')} disabled={isMutating || updating}>
+            <Button
+              variant="outline"
+              onClick={() => handleReset('all')}
+              disabled={isMutating || updating}
+            >
               Reset All
             </Button>
-            <Button variant="outline" onClick={() => handleReset('question')} disabled={isMutating || updating}>
+            <Button
+              variant="outline"
+              onClick={() => handleReset('question')}
+              disabled={isMutating || updating}
+            >
               Reset question
             </Button>
-            {question.type != 'video' && <Button variant="outline" onClick={() => handleReset('answer')} disabled={isMutating || updating}>
-              Reset answer
-            </Button>}
+            {question.type != 'video' && (
+              <Button
+                variant="outline"
+                onClick={() => handleReset('answer')}
+                disabled={isMutating || updating}
+              >
+                Reset answer
+              </Button>
+            )}
           </div>
         )}
       </CardFooter>

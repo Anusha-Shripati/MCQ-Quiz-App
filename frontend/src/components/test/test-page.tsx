@@ -572,7 +572,7 @@ const TestPage = () => {
   // Render for invalid devices (mobile/tablet)
   if (isInvalidDevice) {
     return (
-      <div className="w-screen min-h-screen bg-gray-50 flex items-center justify-center p-4 sm:p-6">
+      <div className="w-screen min-h-screen bg-gray-50">
         <CheckValidDevice isMobile={isMobile} isTablet={isTablet} />
       </div>
     );

@@ -54,7 +54,7 @@ export default function ProctoredQuiz() {
   const [recordingBlob, setRecordingBlob] = useState<Blob | null>(null);
   const [recordingUrl, setRecordingUrl] = useState<string | null>(null);
   const [liveViolations, setLiveViolations] = useState<Violation[]>([]);
-  const [lockedQuestions, setLockedQuestions] = useState<string[]>([]);
+  // const [lockedQuestions, setLockedQuestions] = useState<string[]>([]);
   const [questions, setQuestions] = useState<IExamQuestion[]>([]);
   const [prvViolations, setPrvViolations] = useState(0);
   const violationsRef = useRef<Violation[]>([]);
@@ -170,13 +170,6 @@ export default function ProctoredQuiz() {
 
   useEffect(() => {
     if (examData) {
-      const lockedFromServer =
-        examData.data?.answers?.map(
-          (a: { question_id: string; user_answer: string[]; id: string }) => a.question_id
-        ) || [];
-      localStorage.setItem('lockedQuestions', JSON.stringify(lockedFromServer));
-      setLockedQuestions(lockedFromServer);
-
       setExam(examData.data);
       const obj: Record<string, LocalAnswer> = {};
       examData.data?.answers?.forEach(
@@ -210,10 +203,8 @@ export default function ProctoredQuiz() {
 
   useEffect(() => {
     const savedAnswers = localStorage.getItem('quizAnswers');
-    const savedLocked = localStorage.getItem('quizLocked');
 
     if (savedAnswers) setAnswers(JSON.parse(savedAnswers));
-    if (savedLocked) setLockedQuestions(JSON.parse(savedLocked));
   }, []);
 
   const checkExamStatus = async () => {
@@ -333,21 +324,23 @@ export default function ProctoredQuiz() {
   };
 
   // Submit the quiz on max violations
-  useEffect(() => {
-    const totalViolations = liveViolations.length + prvViolations;
+  // useEffect(() => {
+  //   const totalViolations = liveViolations.length + prvViolations;
 
-    if (totalViolations > QUIZ_CONFIG.maxViolations) {
-      submitViolation();
-      submitQuiz();
-    }
-  }, [liveViolations, prvViolations]);
+  //   if (totalViolations > QUIZ_CONFIG.maxViolations) {
+  //     submitViolation();
+  //     submitQuiz();
+  //   }
+  // }, [liveViolations, prvViolations]);
 
   useEffect(() => {
-    if (questions.length) {
-      const unansweredIndex = questions.findIndex((q) => !lockedQuestions.includes(q.question_id));
-      setCurrentQuestionIndex(unansweredIndex === -1 ? 0 : unansweredIndex);
+    if (questions.length && Object.keys(answers).length === 0) {
+      const unansweredIndex = questions.findIndex((q) => !answers[q.question_id]);
+      if (unansweredIndex !== -1) {
+        setCurrentQuestionIndex(unansweredIndex);
+      }
     }
-  }, [questions, lockedQuestions]);
+  }, [questions]);
 
   // Track visited questions
   useEffect(() => {
@@ -613,11 +606,7 @@ export default function ProctoredQuiz() {
 
   // Lock the question after save
   const lockQuestion = (questionId: string) => {
-    const locked = JSON.parse(localStorage.getItem('lockedQuestions') || '[]');
-    if (!locked.includes(questionId)) {
-      locked.push(questionId);
-      localStorage.setItem('lockedQuestions', JSON.stringify(locked));
-    }
+    // Removed locking - users can change answers anytime
   };
 
   const handleReset = async () => {
@@ -652,7 +641,8 @@ export default function ProctoredQuiz() {
     const current = questions[currentQuestionIndex];
     const questionId = current.question_id;
     const questionType = current.question.type;
-    const existingAnswer = answers[questionId]?.answer;
+    const currentAnswer = answers[questionId];
+    const existingAnswer = currentAnswer?.answer;
 
     if (!existingAnswer && questionType !== QuestionType.VIDEO) return;
 
@@ -661,17 +651,12 @@ export default function ProctoredQuiz() {
 
       if (questionType === QuestionType.VIDEO) {
         if (!recordingBlob) return;
-        // if (recordingUrl === existingAnswer) {
-        //   goToNextQuestion();
-        //   return;
-        // }
         const { fileName, parts, UploadId } = await uploadFileInChunks(
           recordingBlob as Blob,
           5 * 1024 * 1024,
           exam?.id || ''
         );
 
-        // Prepare payload for background processing
         const payload = {
           foldername: fileName,
           UploadId,
@@ -683,14 +668,12 @@ export default function ProctoredQuiz() {
           console.error('Background video processing failed:', error);
         });
         if (response.success) {
-          // const userAnswer = response.data?.answer?.user_answer?.[0] as string;
-
           setAnswers((prev) => ({
             ...prev,
             [questionId]: {
               question: current,
               answer: recordingUrl || '',
-              answer_id: questionId,
+              answer_id: response.data?.answer?.id || questionId,
               pending: true,
             },
           }));
@@ -710,6 +693,10 @@ export default function ProctoredQuiz() {
           setAnswers((prev) => ({
             ...prev,
             [questionId]: { ...prev[questionId], answer_id: response.data?.answer?.id },
+          }));
+          localStorage.setItem('quizAnswers', JSON.stringify({
+            ...answers,
+            [questionId]: { ...answers[questionId], answer_id: response.data?.answer?.id },
           }));
           success = true;
         }
@@ -747,7 +734,7 @@ export default function ProctoredQuiz() {
     return Array.from(buttons).sort((a, b) => a - b);
   };
 
-  const buttonIndexes = visibleButtons();
+  // const buttonIndexes = visibleButtons();
 
   const TabSwitchConfirmationModal = () => {
   if (!showTabSwitchModal) return null;
@@ -800,7 +787,7 @@ export default function ProctoredQuiz() {
   return (
     <div
       ref={containerRef}
-      className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 p-4 md:p-8"
+      className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 py-4 md:py-8"
     >
       {accessError ? (
         <TestWarning
@@ -822,95 +809,40 @@ export default function ProctoredQuiz() {
           />
 
           <audio src="/assets/alert.wav" ref={audioRef} style={{ display: 'none' }} />
-          <Card className="w-[95vw] max-w-[1200px] mx-auto min-h-[70px] mb-3 shadow-xl border-0 rounded-xl text-black overflow-hidden bg-white/95 backdrop-blur-sm">
-            <div className="p-4 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="text-md font-semibold text-gray-700">Violations:</span>
-                <span
-                  className={`text-lg font-semibold ${
-                    prvViolations + violationsRef.current.length >= QUIZ_CONFIG.maxViolations - 2
-                      ? 'text-red-600'
-                      : 'text-blue-600'
-                  }`}
-                >
-                  {prvViolations + liveViolations.length} / {QUIZ_CONFIG.maxViolations}
-                </span>
-              </div>
-              {prvViolations + violationsRef.current.length >= 3 && (
-                <div className="text-md text-red-600 font-semibold">
-                  Warning: Quiz will be automatically submitted after {QUIZ_CONFIG.maxViolations}{' '}
-                  violations
-                </div>
-              )}
-            </div>
-          </Card>
 
-          <Card className="w-[95vw] max-w-[1200px] mx-auto min-h-[85vh] shadow-xl border-0 rounded-xl overflow-hidden bg-white/95 backdrop-blur-sm">
-            <TestHeader
-              submitQuiz={submitQuiz}
-              timeLeft={timeLeft}
+          <div className="flex gap-6 w-full mx-auto px-4 md:px-8">
+            {/* Left Sidebar - Question Navigation */}
+            <QuestionTabs
+              questions={questions}
               currentQuestionIndex={currentQuestionIndex}
-              totalQuestion={questions.length || 0}
-              handleTimerEnd={handleTimerEnd}
-              isSubmiting={isSubmiting}
-              isMutating={isMutating}
-              answeredQuestionsCount={Object.keys(answers).length}
+              setCurrentQuestionIndex={setCurrentQuestionIndex}
+              answeredQuestions={answers}
+              visitedQuestions={visitedQuestions}
+              violations={prvViolations + liveViolations.length}
+              maxViolations={QUIZ_CONFIG.maxViolations}
+              totalAnswered={Object.keys(answers).length}
             />
 
-            <CardContent className="p-4 md:p-8 space-y-6">
-              {/* Question Navigation - Mobile: Top, Desktop: Left Sidebar */}
-              <div className="flex flex-col md:flex-row gap-6">
-                {/* Left Sidebar - Question Navigation */}
-                <QuestionTabs
-                  questions={questions}
-                  currentQuestionIndex={currentQuestionIndex}
-                  setCurrentQuestionIndex={setCurrentQuestionIndex}
-                  answeredQuestions={answers}
-                  visitedQuestions={visitedQuestions}
-                />
+            {/* Main Content Card */}
+            <Card className="flex-1 min-h-[85vh] shadow-xl border-0 rounded-xl overflow-hidden bg-white/95 backdrop-blur-sm">
+              <TestHeader
+                submitQuiz={submitQuiz}
+                timeLeft={timeLeft}
+                currentQuestionIndex={currentQuestionIndex}
+                totalQuestion={questions.length || 0}
+                handleTimerEnd={handleTimerEnd}
+                isSubmiting={isSubmiting}
+                isMutating={isMutating}
+                answeredQuestionsCount={Object.keys(answers).length}
+              />
 
-                {/* Main Content Area */}
-                <div className="flex-1 space-y-6">
+              <CardContent className="p-4 md:p-8 space-y-6 pt-2 md:pt-4">
 
                 {questions.length > 0 && (
                   <div className="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-gray-200 transition-all hover:shadow-md">
                     <div className="space-y-6">
-                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                        <div className="flex items-center gap-3">
-                          <span className="text-md font-semibold bg-blue-100 text-blue-800 px-3 py-1 rounded-full">
-                            Question {currentQuestionIndex + 1}
-                          </span>
-                          <span className="text-md font-semibold bg-purple-100 text-purple-800 px-3 py-1 rounded-full">
-                            {getQuestionTypeLabel(
-                              questions[currentQuestionIndex].question.type as QuestionType
-                            )}
-                          </span>
-                        </div>
-                        {answers[questions[currentQuestionIndex].question_id] && (
-                          <div>
-                            <Button
-                              variant="default"
-                              size="lg"
-                              onClick={handleReset}
-                              disabled={
-                                isReseting ||
-                                lockedQuestions.includes(questions[currentQuestionIndex].question_id)
-                              }
-                              className="w-24 text-md font-bold"
-                            >
-                              {isReseting ? (
-                                <div className="flex flex-col items-center justify-center gap-4">
-                                  <Loader2 className="w-8 h-8 animate-spin" />
-                                </div>
-                              ) : (
-                                <>Reset</>
-                              )}
-                            </Button>
-                          </div>
-                        )}
-                      </div>
-
                       <h2 className="text-xl md:text-2xl font-semibold text-gray-800 leading-relaxed break-all whitespace-pre-wrap overflow-hidden flex-1">
+                        <span className="text-blue-600">Q{currentQuestionIndex + 1}.</span>{' '}
                         {displayQuestion}
                         {isQuestionLong && (
                           <button
@@ -920,9 +852,14 @@ export default function ProctoredQuiz() {
                             {questionExpanded ? 'Show less' : 'Show more'}
                           </button>
                         )}
+                        <span className="ml-3 text-sm font-medium text-gray-600">
+                          ({getQuestionTypeLabel(
+                            questions[currentQuestionIndex].question.type as QuestionType
+                          )})
+                        </span>
                       </h2>
 
-                      <div className="pt-2 text-black">
+                      <div className=" text-black">
                         <Question
                           question={questions[currentQuestionIndex]}
                           answers={answers}
@@ -930,9 +867,7 @@ export default function ProctoredQuiz() {
                           handleAnswerChange={(question, value) => saveAnswer(question, value)}
                           handleStopRecording={handleStopRecording}
                           handleNextQuestion={handleNextQuestion}
-                          isLocked={lockedQuestions.includes(
-                            questions[currentQuestionIndex].question_id
-                          )}
+                          isLocked={false}
                         />
                       </div>
                     </div>
@@ -940,46 +875,40 @@ export default function ProctoredQuiz() {
                 )}
 
                 {/* Progress and navigation */}
-                <div className="flex flex-col md:flex-row gap-6">
-                  <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex-1">
-                    <div className="flex flex-col space-y-2">
-                      <div className="flex justify-between text-sm text-gray-600 px-1">
-                        <span className="font-semibold  text-lg">Quiz Progress</span>
-                        <span className="text-lg">
-                          {Object.keys(answers).length} of {questions.length} questions answered
-                        </span>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
-                        <div
-                          className="bg-blue-600 h-2.5 rounded-full transition-all duration-500 ease-in-out "
-                          style={{
-                            width: `${(Object.keys(answers).length / questions.length) * 100}%`,
-                          }}
-                        ></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex gap-3">
-                  <Button
-                    onClick={() => setCurrentQuestionIndex((prev) => Math.max(0, prev - 1))}
-                    disabled={currentQuestionIndex === 0}
-                    variant="outline"
-                    className="px-6 py-2 text-lg font-semibold flex items-center gap-2 rounded-full transition-all"
-                  >
-                    <ChevronLeft />
-                    Previous
-                  </Button>
+                <div className="flex gap-3 justify-end">
+                  {answers[questions[currentQuestionIndex].question_id] && (
+                    <Button
+                      variant="outline"
+                      onClick={handleReset}
+                      disabled={isReseting}
+                      className="px-5 py-2.5 text-base font-semibold rounded-lg border-2 border-gray-300 bg-white text-gray-700 hover:border-gray-400 hover:bg-gray-50 hover:text-gray-900"
+                    >
+                      {isReseting ? (
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                      ) : (
+                        'Reset'
+                      )}
+                    </Button>
+                  )}
 
                   <Button
                     onClick={() => setCurrentQuestionIndex((prev) => Math.min(prev + 1, questions.length - 1))}
                     disabled={currentQuestionIndex === questions.length - 1}
                     variant="outline"
-                    className="px-6 py-2 text-lg font-semibold flex items-center gap-2 rounded-full transition-all"
+                    className="px-5 py-2.5 text-base font-semibold flex items-center gap-2 rounded-lg border-2 border-gray-300 bg-white text-gray-700 hover:border-gray-400 hover:bg-gray-50 hover:text-gray-900"
                   >
                     Skip
-                    <ChevronRight />
+                    <ChevronRight className="w-5 h-5" />
+                  </Button>
+
+                  <Button
+                    onClick={() => setCurrentQuestionIndex((prev) => Math.max(0, prev - 1))}
+                    disabled={currentQuestionIndex === 0}
+                    variant="outline"
+                    className="px-5 py-2.5 text-base font-semibold flex items-center gap-2 rounded-lg border-2 border-gray-300 bg-white text-gray-700 hover:border-gray-400 hover:bg-gray-50 hover:text-gray-900"
+                  >
+                    <ChevronLeft className="w-5 h-5" />
+                    Previous
                   </Button>
 
                   <Button
@@ -991,27 +920,24 @@ export default function ProctoredQuiz() {
                       ) ||
                       isMutating ||
                       isSubmiting ||
-                      isVideoMutating
+                      isVideoMutating ||
+                      currentQuestionIndex === questions.length - 1
                     }
-                    variant="default"
-                    className="px-6 py-2 flex text-lg items-center font-semibold gap-2 rounded-full transition-all w-40 bg-blue-600 hover:bg-blue-700"
+                    className="px-6 py-2.5 flex text-base items-center font-semibold gap-2 rounded-lg transition-all min-w-[120px] bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-md hover:shadow-lg"
                   >
                     {isMutating || isSubmiting ? (
-                      <div className="flex flex-col items-center justify-center gap-4">
-                        <Loader2 className="w-8 h-8 text-white animate-spin" />
-                      </div>
+                      <Loader2 className="w-5 h-5 text-white animate-spin mx-auto" />
                     ) : (
                       <>
-                        Save {currentQuestionIndex == questions.length - 1 ? '' : ' & Next'}
-                        <ChevronRight />
+                        Next
+                        <ChevronRight className="w-5 h-5" />
                       </>
                     )}
                   </Button>
                 </div>
-              </div>
-            </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
         </>
       )}
       <TabSwitchConfirmationModal />

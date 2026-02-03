@@ -25,6 +25,23 @@ export class TechnologyController {
       next(error);
     }
   };
+
+  createTechnologyOnly = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { name } = req.body;
+      const trimName = name.trim();
+      
+      const existingTechnology = await technologyService.getTechnologyByName(trimName);
+      if (existingTechnology && !existingTechnology.deleted_at) {
+        return generateResponse(res, 400, {}, false, 'Technology name already exists');
+      }
+      
+      const newTechnology = await technologyService.createTechnologyOnly({ name: trimName });
+      return generateResponse(res, 201, newTechnology, true, 'Technology created successfully');
+    } catch (error) {
+      next(error);
+    }
+  };
   getTechnologyById = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
@@ -120,6 +137,30 @@ export class TechnologyController {
         questions,
       });
       return generateResponse(res, 200, updatedTechnology, true, 'Technology updated successfully');
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  updateTechnologyName = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { id } = req.params;
+      const { name } = req.body;
+      const trimName = name.trim();
+
+      const existingTechnology = await technologyService.getTechnologyById(id);
+      if (!existingTechnology) {
+        return generateResponse(res, 404, {}, false, 'Technology not found');
+      }
+
+      // Check if name already exists (excluding current technology)
+      const duplicateTechnology = await technologyService.getTechnologyByName(trimName);
+      if (duplicateTechnology && duplicateTechnology.id !== id && !duplicateTechnology.deleted_at) {
+        return generateResponse(res, 400, {}, false, 'Technology name already exists');
+      }
+
+      const updatedTechnology = await technologyService.updateTechnologyName(id, { name: trimName });
+      return generateResponse(res, 200, updatedTechnology, true, 'Technology name updated successfully');
     } catch (error) {
       next(error);
     }

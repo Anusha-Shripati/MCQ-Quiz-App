@@ -15,6 +15,13 @@ technologyRouter.post(
   asyncHandler(technologyController.create)
 );
 
+technologyRouter.post(
+  '/create-only',
+  validateRequest(teachnologySchema.createOnly),
+  authenticateAndAuthorize(),
+  asyncHandler(technologyController.createTechnologyOnly)
+);
+
 technologyRouter.get(
   '/list',
   // authenticateAndAuthorize('assessments.can_read'),
@@ -41,9 +48,16 @@ technologyRouter.put(
   asyncHandler(technologyController.update)
 );
 
+technologyRouter.put(
+  '/:id/name',
+  authenticateAndAuthorize(),
+  validateRequest(teachnologySchema.updateName),
+  asyncHandler(technologyController.updateTechnologyName)
+);
+
 technologyRouter.delete(
   '/:id',
-  // authenticateAndAuthorize('assessments.can_edit'),
+  authenticateAndAuthorize(),
   validateRequest(teachnologySchema.delete),
   asyncHandler(technologyController.delete)
 );

@@ -59,21 +59,27 @@ export class TechnologyService {
     
     return response
   }
-  async createTechnology(data: { name: string, questions: Omit<Questions, 'id'>[] }) {
-
+  async createTechnology(data: { name: string, questions?: Omit<Questions, 'id'>[] }) {
     const result = await prisma.$transaction(async (tx) => {
       const technology = await tx.technology.create({ data: { name: data.name } });
-      const arr = data.questions?.map((item) => ({
-        ...item,
-        technology_id: technology.id,
-        options: item.options as Prisma.InputJsonValue,
-        meta: item.meta as Prisma.InputJsonValue
-      }))
-      const questions = await tx.questions.createMany({ data: arr })
-      return questions
+      
+      if (data.questions && data.questions.length > 0) {
+        const arr = data.questions.map((item) => ({
+          ...item,
+          technology_id: technology.id,
+          options: item.options as Prisma.InputJsonValue,
+          meta: item.meta as Prisma.InputJsonValue
+        }))
+        await tx.questions.createMany({ data: arr })
+      }
+      
+      return technology
     })
     return result
+  }
 
+  async createTechnologyOnly(data: { name: string }) {
+    return await prisma.technology.create({ data: { name: data.name } });
   }
 
   async updateTechnology(
@@ -93,6 +99,13 @@ export class TechnologyService {
       return questions
     })
     return result
+  }
+
+  async updateTechnologyName(id: string, data: { name: string }) {
+    return await prisma.technology.update({
+      where: { id },
+      data: { name: data.name }
+    });
   }
   async getTechnologyById(id: string) {
     const data = await this.cacheService.getKey(`technology:${id}`);
@@ -114,10 +127,10 @@ export class TechnologyService {
     const currentDate = new Date();
 
     return await prisma.$transaction(async (tx) => {
+      // Fix: Remove deleted_at condition from where clause
       await tx.questions.updateMany({
         where: {
           technology_id: id,
-          deleted_at: currentDate,
         },
         data: {
           deleted_at: currentDate,

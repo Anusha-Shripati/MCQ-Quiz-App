@@ -545,13 +545,15 @@ export class CandidateExamService {
       fileType, 
       eventType, 
       headPose, 
-      duration 
+      duration,
+      faceCount
     }: { 
       timestamp: number; 
       fileType: 'screenshot' | 'camera';
       eventType?: string;
       headPose?: string;
       duration?: string;
+      faceCount?: string;
     }
   ) {
     const exam = await prisma.exam.findUnique({
@@ -575,6 +577,7 @@ export class CandidateExamService {
       eventType: eventType || 'lookAway',
       headPose: parsedHeadPose,
       duration: duration ? parseInt(duration) : undefined,
+      faceCount: faceCount ? parseInt(faceCount) : undefined,
     };
 
     const currentMeta = (exam?.meta as ExamMeta) || {};

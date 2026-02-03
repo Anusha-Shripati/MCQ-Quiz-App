@@ -90,7 +90,7 @@ export default function ExamDurationPerformance() {
                       </p>
                     </div>
                     <div className="bg-muted p-2 rounded">
-                      <p className="text-xs text-muted-foreground mb-1">Pass/Fail</p>
+                      <p className="text-xs text-muted-foreground mb-1">Pass / Fail</p>
                       <p className="text-sm font-semibold">
                         <span className="text-green-600 dark:text-green-400">{item.passCount}</span>
                         <span className="text-muted-foreground mx-1">/</span>

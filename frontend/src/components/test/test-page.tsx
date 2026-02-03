@@ -57,8 +57,11 @@ import {
 } from '@/components/test/testUtils/securityUtils';
 import {
   initializeFaceTracking,
+  FaceTrackingStatus,
   startFaceTracking,
 } from '@/components/test/testUtils/faceTracking';
+import { FaceViolationPopup } from '@/components/test/face-violation-popup';
+import { FaceTrackingOverlay } from '@/components/test/face-tracking-overlay';
 import { isAxiosError } from 'axios';
 import ExamNotStarted from './exam-not-started';
 
@@ -96,6 +99,18 @@ const TestPage = () => {
     camera: true,
     screen: true,
   });
+  const [faceViolationPopup, setFaceViolationPopup] = useState<{
+    isOpen: boolean;
+    details: {
+      timestamp: number;
+      duration: number;
+      headPose: { yaw: number; pitch: number; roll: number };
+      violationType: 'lookAway' | 'noFaceDetected' | 'multipleFaces';
+      faceCount?: number;
+      thresholds: { yawThreshold: number; pitchThreshold: number; rollThreshold: number };
+    } | null;
+  }>({ isOpen: false, details: null });
+  const [faceTrackingStatus, setFaceTrackingStatus] = useState<FaceTrackingStatus | null>(null);
 
   const screenStream = useRef<MediaStream | null>(null);
   const screenSnapshotRef = useRef<HTMLVideoElement | null>(null);
@@ -172,6 +187,23 @@ const TestPage = () => {
       stopMediaStreams(screenStream.current, cameraStreamRef);
       return false;
     }
+  };
+
+  /**
+   * Handle face violation detection
+   */
+  const handleFaceViolation = (violationDetails: {
+    timestamp: number;
+    duration: number;
+    headPose: { yaw: number; pitch: number; roll: number };
+    violationType: 'lookAway' | 'noFaceDetected' | 'multipleFaces';
+    faceCount?: number;
+    thresholds: { yawThreshold: number; pitchThreshold: number; rollThreshold: number };
+  }) => {
+    setFaceViolationPopup({
+      isOpen: true,
+      details: violationDetails
+    });
   };
 
   /**
@@ -447,8 +479,10 @@ const TestPage = () => {
         {
           checkInterval: 1000,
           lookAwayThreshold: 30, // Relaxed from 30
-          lookAwayThresholdVertical: 20, // Relaxed from 20
-          lookAwayDuration: 1500, // Relaxed from 1s to 2s
+          lookAwayThresholdVertical: 25, // Relaxed from 20
+          lookAwayDuration: 2000, // Relaxed from 1s to 2s
+          onViolationDetected: handleFaceViolation,
+          onTrackingUpdate: setFaceTrackingStatus,
         }
       );
 
@@ -572,7 +606,7 @@ const TestPage = () => {
   // Render for invalid devices (mobile/tablet)
   if (isInvalidDevice) {
     return (
-      <div className="w-screen min-h-screen bg-gray-50 flex items-center justify-center p-4 sm:p-6">
+      <div className="w-screen min-h-screen bg-gray-50">
         <CheckValidDevice isMobile={isMobile} isTablet={isTablet} />
       </div>
     );
@@ -713,11 +747,24 @@ const TestPage = () => {
         </>
       )}
 
+      {current_step === EXAM_STEP.QUIZ && (
+        <FaceTrackingOverlay stream={cameraStreamRef} tracking={faceTrackingStatus} />
+      )}
+
       {/* Hidden elements for video capture */}
       <video ref={screenSnapshotRef} className="hidden"></video>
       <video ref={cameraSnapshotRef} className="hidden"></video>
       <canvas ref={cameraCanvas} className="hidden"></canvas>
       <canvas ref={screenCanvas} className="hidden"></canvas>
+
+      {/* Face Violation Popup */}
+      {faceViolationPopup.details && (
+        <FaceViolationPopup
+          isOpen={faceViolationPopup.isOpen}
+          onClose={() => setFaceViolationPopup({ isOpen: false, details: null })}
+          violationDetails={faceViolationPopup.details}
+        />
+      )}
     </div>
   );
 };

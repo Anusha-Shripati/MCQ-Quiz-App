@@ -23,13 +23,14 @@ interface MergedSnapshot {
     cameraImage: string | null;
     screenshotImage: string | null;
     isIntegrityEvidence: boolean;
-    eventType?: string;
+    eventType?: 'lookAway' | 'noFaceDetected' | 'multipleFaces';
     headPose?: {
         yaw: number;
         pitch: number;
         roll: number;
     };
     duration?: number;
+    faceCount?: number;
 }
 
 function Snapshots(props: SnapshotsProps) {
@@ -93,6 +94,7 @@ function Snapshots(props: SnapshotsProps) {
                 existing.eventType = cam.eventType;
                 existing.headPose = cam.headPose;
                 existing.duration = cam.duration;
+                existing.faceCount = cam.faceCount;
             } else {
                 // Create new entry
                 snapshotMap.set(timestamp, {
@@ -102,7 +104,8 @@ function Snapshots(props: SnapshotsProps) {
                     isIntegrityEvidence: true,
                     eventType: cam.eventType,
                     headPose: cam.headPose,
-                    duration: cam.duration
+                    duration: cam.duration,
+                    faceCount: cam.faceCount
                 });
             }
         });
@@ -118,6 +121,7 @@ function Snapshots(props: SnapshotsProps) {
                 existing.eventType = screen.eventType;
                 existing.headPose = screen.headPose;
                 existing.duration = screen.duration;
+                existing.faceCount = screen.faceCount;
             } else {
                 snapshotMap.set(timestamp, {
                     timestamp: timestamp,
@@ -126,7 +130,8 @@ function Snapshots(props: SnapshotsProps) {
                     isIntegrityEvidence: true,
                     eventType: screen.eventType,
                     headPose: screen.headPose,
-                    duration: screen.duration
+                    duration: screen.duration,
+                    faceCount: screen.faceCount
                 });
             }
         });
@@ -177,8 +182,7 @@ function Snapshots(props: SnapshotsProps) {
                     {integrityEvidenceCount === 1 ? 'Instance' : 'Instances'}
                   </h4>
                   <p className="text-sm text-red-600 dark:text-red-400 leading-relaxed">
-                    Snapshots with red borders indicate the candidate was looking away from the
-                    screen.
+                    Snapshots with red borders indicate potential cheating: looking away from screen, no face detected, or multiple faces detected.
                   </p>
                 </div>
               </div>
@@ -350,9 +354,21 @@ function Snapshots(props: SnapshotsProps) {
                                 </div>
                               )} */}
 
-                    {snapshot.isIntegrityEvidence && snapshot.duration && (
-                      <div className="text-xs text-red-600 dark:text-red-400 font-medium">
-                        Duration: {(snapshot.duration / 1000).toFixed(1)}s
+                    {/* Show violation details */}
+                    {snapshot.isIntegrityEvidence && (
+                      <div className="text-xs text-red-600 dark:text-red-400 font-medium space-y-1">
+                        {snapshot.eventType === 'multipleFaces' && snapshot.faceCount && (
+                          <div>Multiple Faces: {snapshot.faceCount} detected</div>
+                        )}
+                        {snapshot.eventType === 'noFaceDetected' && (
+                          <div>No Face Detected</div>
+                        )}
+                        {snapshot.eventType === 'lookAway' && (
+                          <div>Looking Away</div>
+                        )}
+                        {snapshot.duration && (
+                          <div>Duration: {(snapshot.duration / 1000).toFixed(1)}s</div>
+                        )}
                       </div>
                     )}
                   </div>
@@ -406,8 +422,22 @@ function Snapshots(props: SnapshotsProps) {
                           />
                         </svg>
                         <div className="text-left">
-                          <div className="font-bold text-lg">POTENTIAL CHEATING DETECTED</div>
-                          {snapshot.headPose && (
+                          <div className="font-bold text-lg">
+                            {snapshot.eventType === 'multipleFaces' && 'MULTIPLE FACES DETECTED'}
+                            {snapshot.eventType === 'noFaceDetected' && 'NO FACE DETECTED'}
+                            {snapshot.eventType === 'lookAway' && 'LOOKING AWAY DETECTED'}
+                          </div>
+                          {snapshot.eventType === 'multipleFaces' && snapshot.faceCount && (
+                            <div className="text-sm">
+                              {snapshot.faceCount} faces detected in camera frame
+                            </div>
+                          )}
+                          {snapshot.eventType === 'noFaceDetected' && (
+                            <div className="text-sm">
+                              Candidate face not visible in camera frame
+                            </div>
+                          )}
+                          {snapshot.eventType === 'lookAway' && snapshot.headPose && (
                             <div className="text-sm">
                               Head Pose - Yaw: {snapshot.headPose.yaw.toFixed(1)}° | Pitch:{' '}
                               {snapshot.headPose.pitch.toFixed(1)}° | Roll:{' '}
@@ -416,7 +446,9 @@ function Snapshots(props: SnapshotsProps) {
                           )}
                           {snapshot.duration && (
                             <div className="text-sm">
-                              Looking away for: {(snapshot.duration / 1000).toFixed(1)} seconds
+                              {snapshot.eventType === 'multipleFaces' && `Multiple faces detected for: ${(snapshot.duration / 1000).toFixed(1)} seconds`}
+                              {snapshot.eventType === 'noFaceDetected' && `No face detected for: ${(snapshot.duration / 1000).toFixed(1)} seconds`}
+                              {snapshot.eventType === 'lookAway' && `Looking away for: ${(snapshot.duration / 1000).toFixed(1)} seconds`}
                             </div>
                           )}
                         </div>

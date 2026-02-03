@@ -36,13 +36,14 @@ export interface SnapShot {
 export interface IntegrityEvidenceSnapshot {
   image: string;
   timestamp: number;
-  eventType: string;
+  eventType: 'lookAway' | 'noFaceDetected' | 'multipleFaces';
   headPose?: {
     yaw: number;
     pitch: number;
     roll: number;
   };
   duration?: number;
+  faceCount?: number;
 }
 export interface Violations {
   type: string;

@@ -26,12 +26,6 @@ function Question({
 }: QuestionProps) {
   return (
     <div className='break-all whitespace-pre-wrap overflow-hidden flex-1'>
-      {isLocked && (
-        <div className="mb-4 p-2 text-sm text-gray-600 bg-gray-100 rounded">
-          Answer already submitted. No changes allowed.
-        </div>
-      )}
-
       {(() => {
         switch (question.question.type) {
           case QuestionType.MCQ:
@@ -87,21 +81,13 @@ function Question({
 
           case QuestionType.VIDEO:
             return (
-              <>
-                {isLocked ? (
-                  <p className="text-gray-500 italic">
-                    Video answer already submitted. Recording disabled.
-                  </p>
-                ) : (
-                  <VideoRecorderQuestion
-                    isLoading={isLoading}
-                    question={question}
-                    answers={answers}
-                    onRecordingStop={(blob, url) => !isLocked && handleStopRecording(blob, url)}
-                    onRecordingComplete={() => !isLocked && handleNextQuestion()}
-                  />
-                )}
-              </>
+              <VideoRecorderQuestion
+                isLoading={isLoading}
+                question={question}
+                answers={answers}
+                onRecordingStop={(blob, url) => handleStopRecording(blob, url)}
+                onRecordingComplete={() => handleNextQuestion()}
+              />
             );
           case QuestionType.MULTIPLE_SELECT:
             return (

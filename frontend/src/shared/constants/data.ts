@@ -1067,10 +1067,10 @@ export const questionDifficulty: { [key: string]: string } = {
 export const questionTypeOptions= [
   { value: 'multiple_select', label: 'Multiple Choice' },
   { value: 'mcq', label: 'Radio Select' },
-  { value: 'text', label: 'Fill in the Blanks' },
+  // { value: 'text', label: 'Fill in the Blanks' },
   { value: 'code_snippet', label: 'Code Snippet with Multiple Answers' },
-  { value: 'code_editor', label: 'Code Editor' },
-  { value: 'video', label: 'Video' },
+  // { value: 'code_editor', label: 'Code Editor' },
+  // { value: 'video', label: 'Video' },
   { value: 'code_snippet_with_mcq', label: 'Code Snippet with MCQ' }
 ] as { value: Question['type']; label: string }[]
 

@@ -9,6 +9,13 @@ export const teachnologySchema = {
       questions:Joi.array().items(Joi.any()).optional(),
     }),
   },
+  createOnly: {
+    body: Joi.object({
+      name: Joi.string().required().messages({
+        'string.empty': 'Technology name is required',
+      }),
+    }),
+  },
   update: {
     params: Joi.object({
       id: Joi.string().uuid().required().messages({
@@ -19,6 +26,19 @@ export const teachnologySchema = {
     body: Joi.object({
       name: Joi.string().optional(),
       questions:Joi.array().items(Joi.any()).optional(),
+    }),
+  },
+  updateName: {
+    params: Joi.object({
+      id: Joi.string().uuid().required().messages({
+        'string.empty': 'Technology Id is required',
+        'string.uuid': 'Invalid Technology Id format',
+      }),
+    }),
+    body: Joi.object({
+      name: Joi.string().required().messages({
+        'string.empty': 'Technology name is required',
+      }),
     }),
   },
 

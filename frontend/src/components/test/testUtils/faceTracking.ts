@@ -9,8 +9,31 @@ export interface FaceTrackingConfig {
   lookAwayThreshold: number; // Degrees of head rotation to consider "looking away" (horizontal)
   lookAwayThresholdVertical?: number; // Degrees of head rotation for up/down (defaults to lookAwayThreshold if not set)
   lookAwayDuration: number; // How long to look away before triggering (ms)
+  onViolationDetected?: (violationDetails: {
+    timestamp: number;
+    duration: number;
+    headPose: { yaw: number; pitch: number; roll: number };
+    violationType: 'lookAway' | 'noFaceDetected' | 'multipleFaces';
+    faceCount?: number;
+    thresholds: { yawThreshold: number; pitchThreshold: number; rollThreshold: number };
+  }) => void;
+  onTrackingUpdate?: (status: FaceTrackingStatus) => void;
 }
 
+export interface FaceTrackingStatus {
+  timestamp: number;
+  hasFace: boolean;
+  faceCount: number;
+  hasMultipleFaces: boolean;
+  headPose: { yaw: number; pitch: number; roll: number };
+  faceBox: { x: number; y: number; width: number; height: number } | null;
+  faceBoxes: { x: number; y: number; width: number; height: number }[];
+  isLookingAway: boolean;
+  lookAwayDuration: number;
+  noFaceDuration: number;
+  multipleFaceDuration: number;
+  thresholds: { yawThreshold: number; pitchThreshold: number; rollThreshold: number };
+}
 
 export interface LookAwayEvent {
   timestamp: number;
@@ -24,9 +47,9 @@ export interface LookAwayEvent {
 
 const DEFAULT_CONFIG: FaceTrackingConfig = {
   checkInterval: 1000, // Check every second
-  lookAwayThreshold: 30, // 30 degrees rotation
-  lookAwayThresholdVertical: 30, // Default to same as horizontal
-  lookAwayDuration: 2000, // 2 seconds of looking away
+  lookAwayThreshold: 30, // Increased from 30 to 45 degrees
+  lookAwayThresholdVertical: 25, // Increased from 30 to 35 degrees
+  lookAwayDuration: 2000, // Increased from 2 to 3 seconds
 };
 
 
@@ -97,7 +120,7 @@ const isLookingAway = (
   return (
     Math.abs(headPose.yaw) > horizontalThreshold ||
     Math.abs(headPose.pitch) > verticalThreshold ||
-    Math.abs(headPose.roll) > horizontalThreshold * 1.5 // Allow more tilt
+    Math.abs(headPose.roll) > horizontalThreshold * 1.2 // Reduced tilt sensitivity
   );
 };
 
@@ -115,7 +138,7 @@ const captureIntegrityEvidence = async (
   examEndpoint: { CANDIDATE_EXAM: string },
   examId: string,
   accessCode: string,
-  event: LookAwayEvent
+  event: LookAwayEvent & { faceCount?: number }
 ): Promise<void> => {
   if (!cameraRef || !cameraCanvas || !screenRef || !screenCanvas) {
     console.error('Missing refs for capturing evidence');
@@ -199,17 +222,31 @@ const captureIntegrityEvidence = async (
     const cameraFormData = new FormData();
     cameraFormData.append('file', cameraBlob, 'camera.jpg');
     cameraFormData.append('timestamp', timestamp.toString());
-    cameraFormData.append('eventType', 'lookAway');
+    // Determine event type based on faceCount
+    let eventType = 'lookAway'; // default
+    if (event.faceCount === 0) {
+      eventType = 'noFaceDetected';
+    } else if (event.faceCount && event.faceCount > 1) {
+      eventType = 'multipleFaces';
+    }
+    
+    cameraFormData.append('eventType', eventType);
     cameraFormData.append('headPose', JSON.stringify(event.headPose));
     cameraFormData.append('duration', event.duration.toString());
+    if (event.faceCount !== undefined) {
+      cameraFormData.append('faceCount', event.faceCount.toString());
+    }
 
     // Create form data for screen with THE SAME timestamp
     const screenFormData = new FormData();
     screenFormData.append('file', screenBlob, 'screen.jpg');
     screenFormData.append('timestamp', timestamp.toString());
-    screenFormData.append('eventType', 'lookAway');
+    screenFormData.append('eventType', eventType);
     screenFormData.append('headPose', JSON.stringify(event.headPose));
     screenFormData.append('duration', event.duration.toString());
+    if (event.faceCount !== undefined) {
+      screenFormData.append('faceCount', event.faceCount.toString());
+    }
 
     // Upload images sequentially to avoid backend race conditions on meta update
     const cameraResult = await examApi.post(
@@ -268,6 +305,7 @@ export const startFaceTracking = (
 
   let isTracking = true;
   let lookAwayStartTime: number | null = null;
+  let lookAwayReason: 'noFace' | 'lookAway' | 'multipleFaces' | null = null;
   let lastCaptureTime = 0;
   const MIN_CAPTURE_INTERVAL = 10000; // Minimum 5 seconds between captures
   let consecutiveErrors = 0;
@@ -296,23 +334,63 @@ export const startFaceTracking = (
       // Reset error counter on successful check
       consecutiveErrors = 0;
 
-      // Detect face with landmarks
-      const detection = await faceapi
-        .detectSingleFace(videoElement, new faceapi.TinyFaceDetectorOptions())
+      // Detect multiple faces with landmarks
+      const detections = await faceapi
+        .detectAllFaces(videoElement, new faceapi.TinyFaceDetectorOptions())
         .withFaceLandmarks();
 
-      if (!detection) {
+      const faceCount = detections.length;
+
+      if (faceCount === 0) {
         // No face detected - candidate might have left
-        if (!lookAwayStartTime) {
-          lookAwayStartTime = Date.now();
+        const now = Date.now();
+        if (!lookAwayStartTime || lookAwayReason !== 'noFace') {
+          lookAwayStartTime = now;
+          lookAwayReason = 'noFace';
         }
 
-        const lookAwayDuration = Date.now() - lookAwayStartTime;
+        const lookAwayDuration = lookAwayStartTime ? now - lookAwayStartTime : 0;
+
+        if (finalConfig.onTrackingUpdate) {
+          finalConfig.onTrackingUpdate({
+            timestamp: now,
+            hasFace: false,
+            faceCount: 0,
+            hasMultipleFaces: false,
+            headPose: { yaw: 0, pitch: 0, roll: 0 },
+            faceBox: null,
+            faceBoxes: [],
+            isLookingAway: false,
+            lookAwayDuration: 0,
+            noFaceDuration: lookAwayDuration,
+            multipleFaceDuration: 0,
+            thresholds: {
+              yawThreshold: finalConfig.lookAwayThreshold,
+              pitchThreshold: finalConfig.lookAwayThresholdVertical ?? finalConfig.lookAwayThreshold,
+              rollThreshold: finalConfig.lookAwayThreshold * 1.2,
+            },
+          });
+        }
 
         if (lookAwayDuration >= finalConfig.lookAwayDuration) {
-          const now = Date.now();
           if (now - lastCaptureTime >= MIN_CAPTURE_INTERVAL) {
             console.log('No face detected for extended period');
+
+            // Trigger popup if callback provided
+            if (finalConfig.onViolationDetected) {
+              finalConfig.onViolationDetected({
+                timestamp: now,
+                duration: lookAwayDuration,
+                headPose: { yaw: 0, pitch: 0, roll: 0 },
+                violationType: 'noFaceDetected',
+                faceCount: 0,
+                thresholds: {
+                  yawThreshold: finalConfig.lookAwayThreshold,
+                  pitchThreshold: finalConfig.lookAwayThresholdVertical ?? finalConfig.lookAwayThreshold,
+                  rollThreshold: finalConfig.lookAwayThreshold * 1.2
+                }
+              });
+            }
 
             // Capture immediately with the current timestamp to ensure synchronization
             captureIntegrityEvidence(
@@ -328,15 +406,101 @@ export const startFaceTracking = (
                 timestamp: now,
                 duration: lookAwayDuration,
                 headPose: { yaw: 0, pitch: 0, roll: 0 },
+                faceCount: 0,
               }
             );
 
             lastCaptureTime = now;
             lookAwayStartTime = null;
+            lookAwayReason = null;
+          }
+        }
+      } else if (faceCount > 1) {
+        // Multiple faces detected - potential cheating
+        const now = Date.now();
+        if (!lookAwayStartTime || lookAwayReason !== 'multipleFaces') {
+          lookAwayStartTime = now;
+          lookAwayReason = 'multipleFaces';
+        }
+
+        const multipleFaceDuration = lookAwayStartTime ? now - lookAwayStartTime : 0;
+        const primaryDetection = detections[0]; // Use first detected face for head pose
+        const headPose = calculateHeadPose(primaryDetection.landmarks);
+        
+        const faceBoxes = detections.map(detection => ({
+          x: detection.detection.box.x,
+          y: detection.detection.box.y,
+          width: detection.detection.box.width,
+          height: detection.detection.box.height,
+        }));
+
+        if (finalConfig.onTrackingUpdate) {
+          finalConfig.onTrackingUpdate({
+            timestamp: now,
+            hasFace: true,
+            faceCount,
+            hasMultipleFaces: true,
+            headPose,
+            faceBox: faceBoxes[0],
+            faceBoxes,
+            isLookingAway: false,
+            lookAwayDuration: 0,
+            noFaceDuration: 0,
+            multipleFaceDuration,
+            thresholds: {
+              yawThreshold: finalConfig.lookAwayThreshold,
+              pitchThreshold: finalConfig.lookAwayThresholdVertical ?? finalConfig.lookAwayThreshold,
+              rollThreshold: finalConfig.lookAwayThreshold * 1.2,
+            },
+          });
+        }
+
+        if (multipleFaceDuration >= finalConfig.lookAwayDuration) {
+          if (now - lastCaptureTime >= MIN_CAPTURE_INTERVAL) {
+            console.log('Multiple faces detected for extended period', { faceCount });
+
+            // Trigger popup if callback provided
+            if (finalConfig.onViolationDetected) {
+              finalConfig.onViolationDetected({
+                timestamp: now,
+                duration: multipleFaceDuration,
+                headPose,
+                violationType: 'multipleFaces',
+                faceCount,
+                thresholds: {
+                  yawThreshold: finalConfig.lookAwayThreshold,
+                  pitchThreshold: finalConfig.lookAwayThresholdVertical ?? finalConfig.lookAwayThreshold,
+                  rollThreshold: finalConfig.lookAwayThreshold * 1.2
+                }
+              });
+            }
+
+            // Capture immediately with the current timestamp to ensure synchronization
+            captureIntegrityEvidence(
+              cameraRef,
+              cameraCanvas,
+              screenRef,
+              screenCanvas,
+              examApi,
+              examEndpoint,
+              examId,
+              accessCode,
+              {
+                timestamp: now,
+                duration: multipleFaceDuration,
+                headPose,
+                faceCount,
+              }
+            );
+
+            lastCaptureTime = now;
+            lookAwayStartTime = null;
+            lookAwayReason = null;
           }
         }
       } else {
-        // Face detected - check head pose
+        // Single face detected - check head pose
+        const detection = detections[0];
         const headPose = calculateHeadPose(detection.landmarks);
 
         // Debug logging to help tune thresholds
@@ -347,14 +511,47 @@ export const startFaceTracking = (
         const lookingAway = isLookingAway(headPose, finalConfig as FaceTrackingConfig);
 
         if (lookingAway) {
-          if (!lookAwayStartTime) {
-            lookAwayStartTime = Date.now();
+          const now = Date.now();
+          if (!lookAwayStartTime || lookAwayReason !== 'lookAway') {
+            lookAwayStartTime = now;
+            lookAwayReason = 'lookAway';
           }
 
-          const lookAwayDuration = Date.now() - lookAwayStartTime;
+          const lookAwayDuration = lookAwayStartTime ? now - lookAwayStartTime : 0;
+
+          if (finalConfig.onTrackingUpdate) {
+            finalConfig.onTrackingUpdate({
+              timestamp: now,
+              hasFace: true,
+              faceCount: 1,
+              hasMultipleFaces: false,
+              headPose,
+              faceBox: {
+                x: detection.detection.box.x,
+                y: detection.detection.box.y,
+                width: detection.detection.box.width,
+                height: detection.detection.box.height,
+              },
+              faceBoxes: [{
+                x: detection.detection.box.x,
+                y: detection.detection.box.y,
+                width: detection.detection.box.width,
+                height: detection.detection.box.height,
+              }],
+              isLookingAway: true,
+              lookAwayDuration,
+              noFaceDuration: 0,
+              multipleFaceDuration: 0,
+              thresholds: {
+                yawThreshold: finalConfig.lookAwayThreshold,
+                pitchThreshold:
+                  finalConfig.lookAwayThresholdVertical ?? finalConfig.lookAwayThreshold,
+                rollThreshold: finalConfig.lookAwayThreshold * 1.2,
+              },
+            });
+          }
 
           if (lookAwayDuration >= finalConfig.lookAwayDuration) {
-            const now = Date.now();
             if (now - lastCaptureTime >= MIN_CAPTURE_INTERVAL) {
               console.log('Candidate looking away detected', {
                 headPose,
@@ -364,6 +561,22 @@ export const startFaceTracking = (
                     ? 'Yaw'
                     : 'Pitch/Roll',
               });
+
+              // Trigger popup if callback provided
+              if (finalConfig.onViolationDetected) {
+                finalConfig.onViolationDetected({
+                  timestamp: now,
+                  duration: lookAwayDuration,
+                  headPose,
+                  violationType: 'lookAway',
+                  faceCount: 1,
+                  thresholds: {
+                    yawThreshold: finalConfig.lookAwayThreshold,
+                    pitchThreshold: finalConfig.lookAwayThresholdVertical ?? finalConfig.lookAwayThreshold,
+                    rollThreshold: finalConfig.lookAwayThreshold * 1.2
+                  }
+                });
+              }
 
               // Capture immediately with the current timestamp to ensure synchronization
               captureIntegrityEvidence(
@@ -379,16 +592,51 @@ export const startFaceTracking = (
                   timestamp: now,
                   duration: lookAwayDuration,
                   headPose,
+                  faceCount: 1,
                 }
               );
 
               lastCaptureTime = now;
               lookAwayStartTime = null;
+              lookAwayReason = null;
             }
           }
         } else {
           // Looking at screen - reset timer
           lookAwayStartTime = null;
+          lookAwayReason = null;
+
+          if (finalConfig.onTrackingUpdate) {
+            finalConfig.onTrackingUpdate({
+              timestamp: Date.now(),
+              hasFace: true,
+              faceCount: 1,
+              hasMultipleFaces: false,
+              headPose,
+              faceBox: {
+                x: detection.detection.box.x,
+                y: detection.detection.box.y,
+                width: detection.detection.box.width,
+                height: detection.detection.box.height,
+              },
+              faceBoxes: [{
+                x: detection.detection.box.x,
+                y: detection.detection.box.y,
+                width: detection.detection.box.width,
+                height: detection.detection.box.height,
+              }],
+              isLookingAway: false,
+              lookAwayDuration: 0,
+              noFaceDuration: 0,
+              multipleFaceDuration: 0,
+              thresholds: {
+                yawThreshold: finalConfig.lookAwayThreshold,
+                pitchThreshold:
+                  finalConfig.lookAwayThresholdVertical ?? finalConfig.lookAwayThreshold,
+                rollThreshold: finalConfig.lookAwayThreshold * 1.2,
+              },
+            });
+          }
         }
       }
     } catch (error) {

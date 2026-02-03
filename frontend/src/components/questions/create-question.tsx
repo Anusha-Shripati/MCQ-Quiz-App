@@ -32,7 +32,8 @@ async function update(url: string, { arg }: { arg: { name: string; questions: Qu
 }
 
 const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }) => {
-  const { lastSelectedType, lastSelectedDifficulty, setLastSelectedType } = useQuestionPreferencesStore();
+  const { lastSelectedType, lastSelectedDifficulty, setLastSelectedType } =
+    useQuestionPreferencesStore();
   const { data: technologyData } = useSWR(`${technologyEndpoint.LIST}`, api.get);
   const [technologyId, setTechnologyId] = useState<string>(params.technology);
   const [questions, setQuestions] = useState<Question[]>([
@@ -106,25 +107,32 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
     }
   }, [technologyId, technologyData]);
 
-  const handleReset = (type:'question' |'answer' | 'all') => {
+  const handleReset = (type: 'question' | 'answer' | 'all') => {
     setQuestions((prv) => {
       return prv.map((q, index) => {
         if (index != selectedQuestion) return q;
         return {
           ...q,
-          question: type == 'all' ||  type == 'question' ?'':q.question,
-          options: type == 'all' ||  type == 'answer' ? ['', '', '', '', '', '']:q.options,
-          correct_answer: type == 'all' ||  type == 'answer'? []:q.correct_answer,
-          difficulty_level: type == 'all'?'easy':q.difficulty_level,
-          type: type == 'all'?'mcq':q.type,
-          meta: type == 'all' || type == 'answer'?{}:q.meta,
+          question: type == 'all' || type == 'question' ? '' : q.question,
+          options: type == 'all' || type == 'answer' ? ['', '', '', '', '', ''] : q.options,
+          correct_answer: type == 'all' || type == 'answer' ? [] : q.correct_answer,
+          difficulty_level: type == 'all' ? 'easy' : q.difficulty_level,
+          type: type == 'all' ? 'mcq' : q.type,
+          meta: type == 'all' || type == 'answer' ? {} : q.meta,
         };
       });
     });
-    toast.success(type == 'answer' ? 'Answer Reset successfully!' : type == 'question' ? 'Question Reset successfully!' : 'All Reset successfully!');
+    toast.success(
+      type == 'answer'
+        ? 'Answer Reset successfully!'
+        : type == 'question'
+          ? 'Question Reset successfully!'
+          : 'All Reset successfully!'
+    );
   };
 
   const handleDeleteQuestion = async (index: number) => {
+<<<<<<< HEAD
     setQuestions((prev) => {
       const addedQuestionList = prev.filter((_, i) => i !== index)
     if(addedQuestionList.length === 0){
@@ -139,7 +147,16 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
     })
     
     setSelectedQuestion(selectedQuestion == 0? 0:selectedQuestion-1)
+=======
+    setQuestions((prev) => prev.filter((_, i) => i !== index));
+    setValidationErrors((prv) => {
+      const temp = { ...prv };
+      delete temp[index];
+      return temp;
+    });
+>>>>>>> d530f035e5dc3add2d3e01b7f44d42d19f93bc4f
 
+    setSelectedQuestion(selectedQuestion == 0 ? 0 : selectedQuestion - 1);
   };
 
   const handleQuestionTypeChange = (value: Question['type'], index: number) => {
@@ -169,7 +186,7 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
     setLastSelectedType(value);
 
     // Reset validation errors for this question
-    setValidationErrors(prev => {
+    setValidationErrors((prev) => {
       const newErrors = { ...prev };
       delete newErrors[index];
       return newErrors;
@@ -228,12 +245,18 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
       }
 
       // Validate MCQ and multiple select options
-      if (q.type === 'mcq' || q.type === 'multiple_select' || q.type === 'code_snippet' || q.type === 'code_snippet_with_mcq') {
+      if (
+        q.type === 'mcq' ||
+        q.type === 'multiple_select' ||
+        q.type === 'code_snippet' ||
+        q.type === 'code_snippet_with_mcq'
+      ) {
         const nonEmptyOptions = q.options.filter((option) => option.trim() !== '');
         const minOptions = q.type === 'code_snippet' ? 2 : 4;
 
         if (nonEmptyOptions.length < minOptions) {
-          errors[index] = `This question requires at least ${minOptions} options (currently has ${nonEmptyOptions.length})`;
+          errors[index] =
+            `This question requires at least ${minOptions} options (currently has ${nonEmptyOptions.length})`;
           hasErrors = true;
         } else {
           const uniqueOptions = new Set(nonEmptyOptions);
@@ -265,31 +288,31 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
     }
 
     // if (isValidTechnology) {
-      try {
-        const response = await updateTrigger({ name, questions });
-        toast.success(response.message || 'Technology saved successfully!');
-        router.push('/questions');
-        mutate((key: string) => typeof key === 'string' && key.startsWith('/technology/list'));
-      } catch (error) {
-        if(isAxiosError(error)){
-          const duplicateQuestions = error.response?.data?.data?.questions;
-          duplicateQuestions?.map((item: string) => {
-            const questionIndex = questions.findIndex((q) => {
-              // Allow duplicate questions for code_snippet_with_mcq and code_snippet types
-              if (q.type === 'code_snippet_with_mcq' || q.type === 'code_snippet') {
-                return false;
-              }
-              return q.question === item;
-            });
-            if (questionIndex !== -1) {
-              errors[questionIndex] = 'Question is already exists';
+    try {
+      const response = await updateTrigger({ name, questions });
+      toast.success(response.message || 'Technology saved successfully!');
+      router.replace(`/questions/category/${technologyId}`);
+      mutate((key: string) => typeof key === 'string' && key.startsWith('/technology/list'));
+    } catch (error) {
+      if (isAxiosError(error)) {
+        const duplicateQuestions = error.response?.data?.data?.questions;
+        duplicateQuestions?.map((item: string) => {
+          const questionIndex = questions.findIndex((q) => {
+            // Allow duplicate questions for code_snippet_with_mcq and code_snippet types
+            if (q.type === 'code_snippet_with_mcq' || q.type === 'code_snippet') {
+              return false;
             }
+            return q.question === item;
           });
-          setValidationErrors(errors);
+          if (questionIndex !== -1) {
+            errors[questionIndex] = 'Question is already exists';
+          }
+        });
+        setValidationErrors(errors);
 
-          showSingleToast(error.response?.data?.message || 'Failed to save technology.')
-      }else{ 
-        showSingleToast( 'Failed to save technology.');
+        showSingleToast(error.response?.data?.message || 'Failed to save technology.');
+      } else {
+        showSingleToast('Failed to save technology.');
       }
     }
     // } else {
@@ -314,7 +337,7 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
     const selectedTech = technologyData?.data?.list.find(
       (tech: { id: string; name: string }) => tech.id === value
     );
-    
+
     if (selectedTech) {
       setName(selectedTech.name);
       window.history.replaceState(null, '', `/questions/create-question/${selectedTech.id}`);
@@ -350,7 +373,7 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
               type="select"
               placeholder="Technology"
               className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-300 w-full"
-              value={ technology}
+              value={technology}
               onChange={(value: string) => {
                 handleSelectTechnology(value);
               }}
@@ -360,7 +383,7 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
           <Button
             className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
             onClick={handleSave}
-            disabled={ updating}
+            disabled={updating}
           >
             Save
           </Button>

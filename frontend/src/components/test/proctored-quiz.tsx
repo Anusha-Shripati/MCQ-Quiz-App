@@ -30,6 +30,7 @@ import TestWarning from './error/test-warning';
 import TestLoading from './loading/test-loading';
 import Question from './question';
 import TestHeader from './test-header';
+import QuestionTabs from './questions-tabs';
 
 type QuizAnswer = {
   question: IExamQuestion;
@@ -43,6 +44,7 @@ export default function ProctoredQuiz() {
   const [timeLeft, setTimeLeft] = useState(0);
   const isSubmittingRef = useRef(false);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [visitedQuestions, setVisitedQuestions] = useState<Set<string>>(new Set());
   const router = useRouter();
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
@@ -346,6 +348,17 @@ export default function ProctoredQuiz() {
       setCurrentQuestionIndex(unansweredIndex === -1 ? 0 : unansweredIndex);
     }
   }, [questions, lockedQuestions]);
+
+  // Track visited questions
+  useEffect(() => {
+    if (questions[currentQuestionIndex]) {
+      setVisitedQuestions((prev) => {
+        const newSet = new Set(prev);
+        newSet.add(questions[currentQuestionIndex].question_id);
+        return newSet;
+      });
+    }
+  }, [currentQuestionIndex, questions]);
 
   const addViolation = useCallback((violation: Omit<Violation, 'timestamp'>) => {
     if (audioRef.current) audioRef.current.play();
@@ -845,160 +858,158 @@ export default function ProctoredQuiz() {
             />
 
             <CardContent className="p-4 md:p-8 space-y-6">
-              <div className="flex flex-wrap gap-2 justify-center items-center">
-                {buttonIndexes.map((index, i) => {
-                  const prev = buttonIndexes[i - 1];
-                  const isGap = i > 0 && index - prev > 1;
+              {/* Question Navigation - Mobile: Top, Desktop: Left Sidebar */}
+              <div className="flex flex-col md:flex-row gap-6">
+                {/* Left Sidebar - Question Navigation */}
+                <QuestionTabs
+                  questions={questions}
+                  currentQuestionIndex={currentQuestionIndex}
+                  setCurrentQuestionIndex={setCurrentQuestionIndex}
+                  answeredQuestions={answers}
+                  visitedQuestions={visitedQuestions}
+                />
 
-                  return (
-                    <React.Fragment key={index}>
-                      {isGap && <span className="px-2">...</span>}
-                      <button
-                        onClick={() => setCurrentQuestionIndex(index)}
-                        className={`h-8 w-8 rounded-full flex items-center justify-center text-sm font-semibold transition-all
-                          ${
-                            currentQuestionIndex === index
-                              ? 'bg-blue-600 text-white shadow-md'
-                              : answers[questions[index].question_id]
-                                ? 'bg-green-100 text-green-800 border border-green-200'
-                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                          }`}
-                        aria-label={`Go to question ${index + 1}`}
-                      >
-                        {index + 1}
-                      </button>
-                    </React.Fragment>
-                  );
-                })}
-              </div>
+                {/* Main Content Area */}
+                <div className="flex-1 space-y-6">
 
-              {questions.length > 0 && (
-                <div className="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-gray-200 transition-all hover:shadow-md">
-                  <div className="space-y-6">
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                      <div className="flex items-center gap-3">
-                        <span className="text-md font-semibold bg-blue-100 text-blue-800 px-3 py-1 rounded-full">
-                          Question {currentQuestionIndex + 1}
-                        </span>
-                        <span className="text-md font-semibold bg-purple-100 text-purple-800 px-3 py-1 rounded-full">
-                          {getQuestionTypeLabel(
-                            questions[currentQuestionIndex].question.type as QuestionType
+                {questions.length > 0 && (
+                  <div className="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-gray-200 transition-all hover:shadow-md">
+                    <div className="space-y-6">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                        <div className="flex items-center gap-3">
+                          <span className="text-md font-semibold bg-blue-100 text-blue-800 px-3 py-1 rounded-full">
+                            Question {currentQuestionIndex + 1}
+                          </span>
+                          <span className="text-md font-semibold bg-purple-100 text-purple-800 px-3 py-1 rounded-full">
+                            {getQuestionTypeLabel(
+                              questions[currentQuestionIndex].question.type as QuestionType
+                            )}
+                          </span>
+                        </div>
+                        {answers[questions[currentQuestionIndex].question_id] && (
+                          <div>
+                            <Button
+                              variant="default"
+                              size="lg"
+                              onClick={handleReset}
+                              disabled={
+                                isReseting ||
+                                lockedQuestions.includes(questions[currentQuestionIndex].question_id)
+                              }
+                              className="w-24 text-md font-bold"
+                            >
+                              {isReseting ? (
+                                <div className="flex flex-col items-center justify-center gap-4">
+                                  <Loader2 className="w-8 h-8 animate-spin" />
+                                </div>
+                              ) : (
+                                <>Reset</>
+                              )}
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+
+                      <h2 className="text-xl md:text-2xl font-semibold text-gray-800 leading-relaxed break-all whitespace-pre-wrap overflow-hidden flex-1">
+                        {displayQuestion}
+                        {isQuestionLong && (
+                          <button
+                            className="ml-2 text-blue-600 underline text-sm font-medium"
+                            onClick={toggleQuestion}
+                          >
+                            {questionExpanded ? 'Show less' : 'Show more'}
+                          </button>
+                        )}
+                      </h2>
+
+                      <div className="pt-2 text-black">
+                        <Question
+                          question={questions[currentQuestionIndex]}
+                          answers={answers}
+                          isLoading={isMutating || isSubmiting || isVideoMutating}
+                          handleAnswerChange={(question, value) => saveAnswer(question, value)}
+                          handleStopRecording={handleStopRecording}
+                          handleNextQuestion={handleNextQuestion}
+                          isLocked={lockedQuestions.includes(
+                            questions[currentQuestionIndex].question_id
                           )}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Progress and navigation */}
+                <div className="flex flex-col md:flex-row gap-6">
+                  <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex-1">
+                    <div className="flex flex-col space-y-2">
+                      <div className="flex justify-between text-sm text-gray-600 px-1">
+                        <span className="font-semibold  text-lg">Quiz Progress</span>
+                        <span className="text-lg">
+                          {Object.keys(answers).length} of {questions.length} questions answered
                         </span>
                       </div>
-                      {answers[questions[currentQuestionIndex].question_id] && (
-                        <div>
-                          <Button
-                            variant="default"
-                            size="lg"
-                            onClick={handleReset}
-                            disabled={
-                              isReseting ||
-                              lockedQuestions.includes(questions[currentQuestionIndex].question_id)
-                            }
-                            className="w-24 text-md font-bold"
-                          >
-                            {isReseting ? (
-                              <div className="flex flex-col items-center justify-center gap-4">
-                                <Loader2 className="w-8 h-8 animate-spin" />
-                              </div>
-                            ) : (
-                              <>Reset</>
-                            )}
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-
-                    <h2 className="text-xl md:text-2xl font-semibold text-gray-800 leading-relaxed break-all whitespace-pre-wrap overflow-hidden flex-1">
-                      {displayQuestion}
-                      {isQuestionLong && (
-                        <button
-                          className="ml-2 text-blue-600 underline text-sm font-medium"
-                          onClick={toggleQuestion}
-                        >
-                          {questionExpanded ? 'Show less' : 'Show more'}
-                        </button>
-                      )}
-                    </h2>
-
-                    <div className="pt-2 text-black">
-                      <Question
-                        question={questions[currentQuestionIndex]}
-                        answers={answers}
-                        isLoading={isMutating || isSubmiting || isVideoMutating}
-                        handleAnswerChange={(question, value) => saveAnswer(question, value)}
-                        handleStopRecording={handleStopRecording}
-                        handleNextQuestion={handleNextQuestion}
-                        isLocked={lockedQuestions.includes(
-                          questions[currentQuestionIndex].question_id
-                        )}
-                      />
+                      <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
+                        <div
+                          className="bg-blue-600 h-2.5 rounded-full transition-all duration-500 ease-in-out "
+                          style={{
+                            width: `${(Object.keys(answers).length / questions.length) * 100}%`,
+                          }}
+                        ></div>
+                      </div>
                     </div>
                   </div>
                 </div>
-              )}
 
-              {/* Progress and navigation */}
-              <div className="flex flex-col md:flex-row gap-6">
-                <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex-1">
-                  <div className="flex flex-col space-y-2">
-                    <div className="flex justify-between text-sm text-gray-600 px-1">
-                      <span className="font-semibold  text-lg">Quiz Progress</span>
-                      <span className="text-lg">
-                        {/* {Object.keys(answers).length} of {questions.length} questions answered */}
-                        {currentQuestionIndex + 1} of {questions.length} questions answered
-                      </span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
-                      <div
-                        className="bg-blue-600 h-2.5 rounded-full transition-all duration-500 ease-in-out "
-                        style={{
-                          width: `${(Object.keys(answers).length / questions.length) * 100}%`,
-                        }}
-                      ></div>
-                    </div>
-                  </div>
+                <div className="flex gap-3">
+                  <Button
+                    onClick={() => setCurrentQuestionIndex((prev) => Math.max(0, prev - 1))}
+                    disabled={currentQuestionIndex === 0}
+                    variant="outline"
+                    className="px-6 py-2 text-lg font-semibold flex items-center gap-2 rounded-full transition-all"
+                  >
+                    <ChevronLeft />
+                    Previous
+                  </Button>
+
+                  <Button
+                    onClick={() => setCurrentQuestionIndex((prev) => Math.min(prev + 1, questions.length - 1))}
+                    disabled={currentQuestionIndex === questions.length - 1}
+                    variant="outline"
+                    className="px-6 py-2 text-lg font-semibold flex items-center gap-2 rounded-full transition-all"
+                  >
+                    Skip
+                    <ChevronRight />
+                  </Button>
+
+                  <Button
+                    onClick={() => handleNextQuestion()}
+                    disabled={
+                      !isQuestionAnswered(
+                        questions[currentQuestionIndex],
+                        answers[questions[currentQuestionIndex].question_id]
+                      ) ||
+                      isMutating ||
+                      isSubmiting ||
+                      isVideoMutating
+                    }
+                    variant="default"
+                    className="px-6 py-2 flex text-lg items-center font-semibold gap-2 rounded-full transition-all w-40 bg-blue-600 hover:bg-blue-700"
+                  >
+                    {isMutating || isSubmiting ? (
+                      <div className="flex flex-col items-center justify-center gap-4">
+                        <Loader2 className="w-8 h-8 text-white animate-spin" />
+                      </div>
+                    ) : (
+                      <>
+                        Save {currentQuestionIndex == questions.length - 1 ? '' : ' & Next'}
+                        <ChevronRight />
+                      </>
+                    )}
+                  </Button>
                 </div>
               </div>
-
-              <div className="flex gap-3">
-                <Button
-                  onClick={() => setCurrentQuestionIndex((prev) => Math.max(0, prev - 1))}
-                  disabled={currentQuestionIndex === 0}
-                  variant="outline"
-                  className="px-6 py-2 text-lg font-semibold flex items-center gap-2 rounded-full transition-all"
-                >
-                  <ChevronLeft />
-                  Previous
-                </Button>
-
-                <Button
-                  onClick={() => handleNextQuestion()}
-                  disabled={
-                    !isQuestionAnswered(
-                      questions[currentQuestionIndex],
-                      answers[questions[currentQuestionIndex].question_id]
-                    ) ||
-                    isMutating ||
-                    isSubmiting ||
-                    isVideoMutating
-                  }
-                  variant="outline"
-                  className="px-6 py-2 flex  text-lg items-center font-semibold gap-2 rounded-full transition-all w-40"
-                >
-                  {isMutating || isSubmiting ? (
-                    <div className="flex flex-col items-center justify-center gap-4">
-                      <Loader2 className="w-8 h-8 text-purple-600 animate-spin" />
-                    </div>
-                  ) : (
-                    <>
-                      Save {currentQuestionIndex == questions.length - 1 ? '' : ' & Next'}
-                      <ChevronRight />
-                    </>
-                  )}
-                </Button>
-              </div>
+            </div>
             </CardContent>
           </Card>
         </>

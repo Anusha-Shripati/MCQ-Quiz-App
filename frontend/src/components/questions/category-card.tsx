@@ -21,7 +21,7 @@ export const CategoryCard = ({ category }: { category: QuestionCategory }) => {
 
   const handleNavigateDifficulty = (event: React.MouseEvent, difficulty: string) => {
     event.stopPropagation();
-    router.push(`/questions/category/${category.id}?difficulty=${difficulty}`);
+    router.push(`/questions/category/${category.id}?difficulty_level=${difficulty}`);
   };
 
   return (

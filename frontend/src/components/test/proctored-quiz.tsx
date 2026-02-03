@@ -605,9 +605,9 @@ export default function ProctoredQuiz() {
   };
 
   // Lock the question after save
-  const lockQuestion = (questionId: string) => {
-    // Removed locking - users can change answers anytime
-  };
+  // const lockQuestion = (questionId: string) => {
+  //   // Removed locking - users can change answers anytime
+  // };
 
   const handleReset = async () => {
     const current_question = questions[currentQuestionIndex];
@@ -703,7 +703,7 @@ export default function ProctoredQuiz() {
       }
 
       if (success) {
-        lockQuestion(questionId);
+        // lockQuestion(questionId);
         goToNextQuestion();
       }
     } catch (error) {
@@ -716,23 +716,23 @@ export default function ProctoredQuiz() {
     setCurrentQuestionIndex((prev) => Math.min(prev + 1, questions.length - 1));
   };
 
-  const visibleButtons = () => {
-    const total = questions.length;
-    const current = currentQuestionIndex;
+  // const visibleButtons = () => {
+  //   const total = questions.length;
+  //   const current = currentQuestionIndex;
 
-    const buttons = new Set<number>();
+  //   const buttons = new Set<number>();
 
-    [0, 1, 2].forEach((i) => i < total && buttons.add(i));
+  //   [0, 1, 2].forEach((i) => i < total && buttons.add(i));
 
-    [total - 3, total - 2, total - 1].forEach((i) => i >= 0 && i < total && buttons.add(i));
+  //   [total - 3, total - 2, total - 1].forEach((i) => i >= 0 && i < total && buttons.add(i));
 
-    // Current ±2
-    for (let i = current - 2; i <= current + 2; i++) {
-      if (i >= 0 && i < total) buttons.add(i);
-    }
+  //   // Current ±2
+  //   for (let i = current - 2; i <= current + 2; i++) {
+  //     if (i >= 0 && i < total) buttons.add(i);
+  //   }
 
-    return Array.from(buttons).sort((a, b) => a - b);
-  };
+  //   return Array.from(buttons).sort((a, b) => a - b);
+  // };
 
   // const buttonIndexes = visibleButtons();
 

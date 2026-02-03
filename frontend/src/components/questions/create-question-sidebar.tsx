@@ -29,7 +29,6 @@ const QuestionSidebar: React.FC<QuestionSidebarProps> = ({
   const [questionToDelete, setQuestionToDelete] = useState<number|null>(null);
   const searchParams = useSearchParams();
   const pathname = usePathname();
-
   const updateQueryParams = useCallback(
     (params: { ques?: string }) => {
       const newParams = new URLSearchParams(searchParams.toString());

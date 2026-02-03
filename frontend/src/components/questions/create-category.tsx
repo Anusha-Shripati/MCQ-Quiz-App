@@ -82,7 +82,6 @@ const CreateCategory: React.FC<CreateCategoryProps> = ({ categoriesArray = [] })
     // Refresh the technology list after successful import
     mutate(`/technology/list?search=${technologyFilter}`);
   };
-
   return (
     <>
       <div className="flex gap-4">

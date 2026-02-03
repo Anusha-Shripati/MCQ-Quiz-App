@@ -125,7 +125,13 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
   };
 
   const handleDeleteQuestion = async (index: number) => {
-    setQuestions((prev) => prev.filter((_, i) => i !== index));
+    setQuestions((prev) => {
+      const addedQuestionList = prev.filter((_, i) => i !== index)
+    if(addedQuestionList.length === 0){
+      router.push("/questions")
+    }
+    return addedQuestionList
+    });
     setValidationErrors((prv)=>{
       const temp = {...prv}
       delete temp[index]
@@ -331,7 +337,6 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
       })) || []
     );
   };
-
   return (
     <div className="px-2 py-6 flex flex-col h-screen">
       {/* Header with back button and technology selection */}

@@ -324,14 +324,14 @@ export default function ProctoredQuiz() {
   };
 
   // Submit the quiz on max violations
-  // useEffect(() => {
-  //   const totalViolations = liveViolations.length + prvViolations;
+  useEffect(() => {
+    const totalViolations = liveViolations.length + prvViolations;
 
-  //   if (totalViolations > QUIZ_CONFIG.maxViolations) {
-  //     submitViolation();
-  //     submitQuiz();
-  //   }
-  // }, [liveViolations, prvViolations]);
+    if (totalViolations > QUIZ_CONFIG.maxViolations) {
+      submitViolation();
+      submitQuiz();
+    }
+  }, [liveViolations, prvViolations]);
 
   useEffect(() => {
     if (questions.length && Object.keys(answers).length === 0) {

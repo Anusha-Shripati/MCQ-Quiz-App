@@ -12,7 +12,7 @@ interface TechnologyFilterProps {
 
 export function TechnologyFilter({ value, onChange, options, className }: TechnologyFilterProps) {
   return (
-    <div className={cn('w-full md:w-64 shrink-0', className)}>
+    <div className={cn('w-full md:w-60 shrink-0', className)}>
       <Select
         isMulti
         value={value}
@@ -23,7 +23,7 @@ export function TechnologyFilter({ value, onChange, options, className }: Techno
         blurInputOnSelect={true}
         classNames={{
           control: () =>
-            'dark:bg-background border-gray-200 hover:border-gray-300 dark:hover:border-gray-600 dark:border-border  placeholder-gray-500 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent',
+            'dark:bg-background border border-gray-200 dark:border-border hover:border-gray-300 dark:hover:border-gray-600 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent !border-solid',
         }}
         styles={{
           control: (base) => ({
@@ -31,6 +31,7 @@ export function TechnologyFilter({ value, onChange, options, className }: Techno
             backgroundColor: 'var(--bg-color, white)',
             color: 'var(--text-color, #111827)',
             minHeight: '2.5rem',
+            height: '2.5rem',
             borderRadius: '0.5rem',
           }),
           valueContainer: (base) => ({

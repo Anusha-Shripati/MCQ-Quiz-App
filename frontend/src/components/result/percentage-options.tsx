@@ -144,10 +144,10 @@ export function PercentageFilter({
             <Button
               variant="outline"
               className={cn(
-                'h-11 text-sm font-medium gap-2 whitespace-nowrap',
+                'h-10 text-sm font-medium gap-2 whitespace-nowrap',
                 'bg-white dark:bg-background border-gray-200 dark:border-border',
                 'hover:bg-gray-50 dark:hover:bg-gray-800',
-                'transition-all duration-200 w-40',
+                'transition-all duration-200 w-32',
                 activeFilter && 'border-blue-500 dark:border-blue-400'
               )}
             >

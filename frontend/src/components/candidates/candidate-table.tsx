@@ -18,7 +18,7 @@ import type {
 import { ExamMetaTech } from '@/types/exam.types';
 import { format } from 'date-fns';
 import dayjs from 'dayjs';
-import { Edit, Trash2 } from 'lucide-react';
+import { Edit, Trash2, CheckCircle2, Clock, HourglassIcon, XCircle } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import qs from 'query-string';
@@ -265,7 +265,7 @@ function CandidateTable() {
                   {visiblePart}...@{domain}
                 </span>
               </TooltipTrigger>
-              <TooltipContent className="bg-gray-800 text-white p-2 rounded shadow-lg">
+              <TooltipContent className="bg-popover text-popover-foreground p-2 rounded shadow-lg">
                 {email}
               </TooltipContent>
             </Tooltip>
@@ -298,7 +298,7 @@ function CandidateTable() {
                   {remainingCount}
                 </span>
               </TooltipTrigger>
-              <TooltipContent className="bg-gray-800 text-white p-2 rounded shadow-lg">
+              <TooltipContent className="bg-popover text-popover-foreground p-2 rounded shadow-lg">
                 {allTechnologies || 'No technologies available'}
               </TooltipContent>
             </Tooltip>
@@ -347,32 +347,49 @@ function CandidateTable() {
         key: 'status',
         header: 'Status',
         render: (row) => {
-          const statusMap = {
-            completed: 'bg-green-100 text-green-800',
-            in_progress: 'bg-yellow-100 text-yellow-800',
-            pending: 'bg-gray-100 text-gray-800',
-            expired: 'bg-red-100 text-red-800',
+          const statusConfig = {
+            completed: {
+              icon: CheckCircle2,
+              iconColor: 'text-green-600',
+              label: 'Completed',
+            },
+            in_progress: {
+              icon: Clock,
+              iconColor: 'text-yellow-600',
+              label: 'In Progress',
+            },
+            pending: {
+              icon: HourglassIcon,
+              iconColor: 'text-gray-600',
+              label: 'Pending',
+            },
+            expired: {
+              icon: XCircle,
+              iconColor: 'text-red-600',
+              label: 'Expired',
+            },
           };
 
           const status = row.exam?.status as 'completed' | 'in_progress' | 'pending' | 'expired';
-          const badgeClass = statusMap[status] || 'bg-gray-100 text-gray-800';
+          const config = statusConfig[status] || statusConfig.pending;
+          const StatusIcon = config.icon;
 
           return (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div
-                  className={`inline-block px-3 py-1 text-sm font-medium rounded-md ${badgeClass} text-center min-w-[100px]`}
-                  style={{ minWidth: 100, display: 'inline-block' }}
-                >
-                  <div>{status?.replace('_', ' ') || 'Unknown'}</div>
-                </div>
-              </TooltipTrigger>
-              <TooltipContent className="bg-gray-800 text-white p-2 rounded shadow-lg">
-                {row?.result?.length
-                  ? `(${row?.result[0]?.percentage?.toFixed(2)}) %`
-                  : 'Exam not started'}
-              </TooltipContent>
-            </Tooltip>
+            <div className="flex items-center justify-center">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="cursor-pointer">
+                    <StatusIcon className={`h-5 w-5 ${config.iconColor}`} />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent className="bg-popover text-popover-foreground p-2 rounded shadow-lg">
+                  <div className="font-medium">{config.label}</div>
+                  {row?.result?.length
+                    ? `${row?.result[0]?.percentage?.toFixed(2)}%`
+                    : 'Exam not started'}
+                </TooltipContent>
+              </Tooltip>
+            </div>
           );
         },
       },
@@ -400,7 +417,7 @@ function CandidateTable() {
                       }
                     }}
                     variant="ghost"
-                    className="p-2 hover:bg-gray-200 dark:hover:bg-gray-900 rounded-lg transition-all duration-200 group"
+                    className="p-2 hover:bg-gray-200 dark:hover:bg-secondary rounded-lg transition-all duration-200 group"
                   >
                     <FiCopy className="h-5 w-5 text-gray-700 dark:text-gray-300 group-hover:text-black dark:group-hover:text-white transition-colors" />
                   </Button>
@@ -428,7 +445,7 @@ function CandidateTable() {
                     window.location.href = `mailto:${candidate.email}`;
                   }}
                   variant="ghost"
-                  className="p-2 hover:bg-gray-200 dark:hover:bg-gray-900 rounded-lg transition-all duration-200 group"
+                  className="p-2 hover:bg-gray-200 dark:hover:bg-secondary rounded-lg transition-all duration-200 group"
                 >
                   <FiMail className="h-5 w-5 text-gray-700 dark:text-gray-300 group-hover:text-black dark:group-hover:text-white transition-colors" />
                 </Button>
@@ -447,7 +464,7 @@ function CandidateTable() {
                         handleEdit(candidate);
                       }}
                       variant="ghost"
-                      className="p-2 hover:bg-gray-200 dark:hover:bg-gray-900 rounded-lg transition-all duration-200 group"
+                      className="p-2 hover:bg-gray-200 dark:hover:bg-secondary rounded-lg transition-all duration-200 group"
                     >
                       <Edit className="h-4 w-4 text-gray-600 dark:text-gray-300 group-hover:text-black dark:group-hover:text-white transition-colors" />
                     </Button>
@@ -532,7 +549,7 @@ function CandidateTable() {
                     )}
                 </p>
               </TooltipTrigger>
-              <TooltipContent className="bg-gray-800 text-white p-2 rounded shadow-lg">
+              <TooltipContent className="bg-popover text-popover-foreground p-2 rounded shadow-lg">
                 {formatTestDateRange(
                   row?.exam?.start_time as string,
                   row?.exam?.end_time as string
@@ -607,7 +624,7 @@ function CandidateTable() {
   };
 
   return (
-    <StatusWrapper loading={isLoading} className="min-h-[74vh]" error={error}>
+    <StatusWrapper loading={isLoading} className="min-h-[83vh] flex" error={error}>
       <Pagination
         className="flex-grow"
         currentPageStart={currentPageStart}
@@ -618,12 +635,12 @@ function CandidateTable() {
         currentPage={currentPage}
         onPageChange={handlePageChange}
       >
-        <div className="min-h-[500px]">
+        <div className="flex-1 overflow-hidden">
           <ReusableTable
             columns={columns}
             rows={currentItems}
             expandableRow={expandableRow}
-            className="mb-6 h-[65vh] animate-in fade-in duration-300"
+            className="mb-6 h-full animate-in fade-in duration-300"
             rowKey="id"
           />
         </div>

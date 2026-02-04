@@ -372,7 +372,7 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
             <FormField
               type="select"
               placeholder="Technology"
-              className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-300 w-full"
+              className="bg-white dark:bg-primary border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-300 w-full"
               value={technology}
               onChange={(value: string) => {
                 handleSelectTechnology(value);
@@ -389,7 +389,7 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
           </Button>
         </div>
       </div>
-      <StatusWrapper className="p-6 dark:bg-gray-900 min-h-[500px] transition-all duration-300">
+      <StatusWrapper className="p-6 dark:bg-background min-h-[500px] transition-all duration-300">
         <div className="flex gap-6">
           {/* Sidebar for questions no. list */}
           {questions.length ? (

@@ -55,7 +55,7 @@ const ResetPasswordPage = () => {
 
   if (isLoading) {
     return (
-      <div className="h-screen w-screen flex items-center justify-center bg-white dark:bg-gray-900">
+      <div className="h-screen w-screen flex items-center justify-center bg-white dark:bg-background">
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-t-primary rounded-full animate-spin mx-auto"></div>
           <p className="mt-4 text-gray-500 dark:text-gray-300">Loading...</p>
@@ -70,14 +70,14 @@ const ResetPasswordPage = () => {
         <ThemeToggle />
       </div>
 
-      <Card className="w-full max-w-[650px] shadow-xl overflow-hidden bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-200 dark:border-gray-700">
-        <div className="bg-white dark:bg-gray-800 p-5 border-b border-gray-700 dark:border-gray-700 flex items-center justify-center">
+      <Card className="w-full max-w-[650px] shadow-xl overflow-hidden bg-white dark:bg-background text-gray-900 dark:text-gray-200 dark:border-border">
+        <div className="bg-white dark:bg-primary p-5 border-b border-gray-700 dark:border-border flex items-center justify-center">
           <TypographyH2>Reset Your Password</TypographyH2>
         </div>
 
         <div className="p-8">
           <div className="mb-12 relative">
-            <div className="absolute top-4 left-0 right-0 h-[2px] bg-gray-700 dark:bg-gray-700 z-0">
+            <div className="absolute top-4 left-0 right-0 h-[2px] bg-gray-700 dark:bg-secondary z-0">
               <div
                 className="h-full bg-black transition-all duration-300"
                 style={{ width: `${(currentStep - 1) * 50}%` }}
@@ -91,7 +91,7 @@ const ResetPasswordPage = () => {
                   className={`w-9 h-9 rounded-full flex items-center justify-center border-2 relative z-20 shadow-md transition-all duration-300 ${
                     currentStep >= 1
                       ? 'bg-black text-gray-100 border-black'
-                      : 'bg-gray-300 dark:bg-gray-800 text-gray-400 border-gray-400 dark:border-gray-600'
+                      : 'bg-gray-300 dark:bg-primary text-gray-400 border-gray-400 dark:border-gray-600'
                   }`}
                 >
                   1
@@ -110,7 +110,7 @@ const ResetPasswordPage = () => {
                   className={`w-9 h-9 rounded-full flex items-center justify-center border-2 relative z-20 shadow-md transition-all duration-300 ${
                     currentStep >= 2
                       ? 'bg-black text-gray-100 border-black'
-                      : 'bg-gray-100 dark:bg-gray-800 text-red border-red border-black  dark:border-gray-600'
+                      : 'bg-gray-100 dark:bg-primary text-red border-red border-black  dark:border-gray-600'
                   }`}
                 >
                   2
@@ -129,7 +129,7 @@ const ResetPasswordPage = () => {
                   className={`w-9 h-9 rounded-full flex items-center justify-center border-2 relative z-20 shadow-md transition-all duration-300 ${
                     currentStep >= 3
                       ? 'bg-black text-gray-100 border-black'
-                      : 'bg-gray-100 dark:bg-gray-800 text-red border-red border-black  dark:border-gray-600'
+                      : 'bg-gray-100 dark:bg-primary text-red border-red border-black  dark:border-gray-600'
                   }`}
                 >
                   3

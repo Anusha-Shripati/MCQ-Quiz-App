@@ -107,7 +107,7 @@ const ValidateOTP: React.FC<ValidateOTPProps> = ({ onNext, onPrevious, setOtp, e
             onChange={(e) => setOtpValue(e.target.value.replace(/[^0-9]/g, '').slice(0, 6))}
             required
             autoFocus
-            className="h-12 px-4 text-center text-xl tracking-widest bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-200 focus:bg-gray-100 dark:focus:bg-gray-800 focus:border-gray-400 dark:focus:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 focus-visible:ring-gray-300 dark:focus-visible:ring-gray-700 focus-visible:ring-1 focus-visible:ring-offset-0"
+            className="h-12 px-4 text-center text-xl tracking-widest bg-gray-100 dark:bg-primary border-gray-300 dark:border-border text-gray-900 dark:text-gray-200 focus:bg-gray-100 dark:focus:bg-gray-800 focus:border-gray-400 dark:focus:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 focus-visible:ring-gray-300 dark:focus-visible:ring-gray-700 focus-visible:ring-1 focus-visible:ring-offset-0"
           />
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-2 text-center">
             We have sent a verification code to{' '}
@@ -120,7 +120,7 @@ const ValidateOTP: React.FC<ValidateOTPProps> = ({ onNext, onPrevious, setOtp, e
             type="button"
             variant="ghost"
             onClick={onPrevious}
-            className="w-full text-lg bg-black dark:bg-gray-800 hover:bg-gray-900 dark:hover:bg-gray-700 text-white dark:text-gray-100 focus:bg-black dark:focus:bg-gray-800 focus:ring-1 focus:ring-gray-600 dark:focus:ring-gray-600"
+            className="w-full text-lg bg-black dark:bg-primary hover:bg-gray-900 dark:hover:bg-gray-700 text-white dark:text-gray-100 focus:bg-black dark:focus:bg-gray-800 focus:ring-1 focus:ring-gray-600 dark:focus:ring-gray-600"
           >
             <IoMdArrowRoundBack />
           </Button>
@@ -136,7 +136,7 @@ const ValidateOTP: React.FC<ValidateOTPProps> = ({ onNext, onPrevious, setOtp, e
           <Button
             type="submit"
             disabled={isLoading || isMutating}
-            className="w-full text-lg bg-black dark:bg-gray-800 hover:bg-gray-900 dark:hover:bg-gray-700 text-white dark:text-gray-100 focus:bg-black dark:focus:bg-gray-800 focus:ring-1 focus:ring-gray-600 dark:focus:ring-gray-600"
+            className="w-full text-lg bg-black dark:bg-primary hover:bg-gray-900 dark:hover:bg-gray-700 text-white dark:text-gray-100 focus:bg-black dark:focus:bg-gray-800 focus:ring-1 focus:ring-gray-600 dark:focus:ring-gray-600"
           >
             {isLoading || isMutating ? 'Verifying...' : 'Verify'}
           </Button>

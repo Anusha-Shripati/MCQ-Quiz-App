@@ -38,7 +38,7 @@ export const DatePickerInput = ({ label, date, setDate, error }: DatePickerInput
             }}
             selected={date}
             onSelect={setDate}
-            className="rounded-md border dark:bg-gray-900 bg-gray-50"
+            className="rounded-md border dark:bg-background bg-gray-50"
             initialFocus
           />
         </PopoverContent>

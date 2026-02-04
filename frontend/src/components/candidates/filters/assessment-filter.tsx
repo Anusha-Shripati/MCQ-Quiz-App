@@ -12,36 +12,56 @@ interface AssessmentFilterProps {
 
 export function AssessmentFilter({ value, onChange, options, className }: AssessmentFilterProps) {
   return (
-    <div className={cn('w-full md:w-72 lg:w-80 shrink-0', className)}>
+    <div className={cn('w-full md:w-60 shrink-0', className)}>
       <Select
         isMulti
         value={value}
         onChange={(newValue) => onChange(newValue as StatusOption[])}
         options={options}
-        placeholder="Select assessments"
+        placeholder={value.length > 1 ? `${value.length} selected` : 'Select assessments'}
         classNamePrefix="react-select"
         tabIndex={-1}
         blurInputOnSelect={true}
+        hideSelectedOptions={false}
+        controlShouldRenderValue={value.length <= 1}
         classNames={{
-          control: () => 'dark:bg-gray-900 border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 border-1 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent',
+          control: () =>
+            'dark:bg-background border border-gray-200 dark:border-border hover:border-gray-300 dark:hover:border-gray-600 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent !border-solid',
         }}
         styles={{
-          control: (base) => ({
+          control: (base, state) => ({
             ...base,
             backgroundColor: 'var(--bg-color, white)',
             color: 'var(--text-color, #111827)',
-            minHeight: '2.75rem',
+            minHeight: '2.5rem',
+            height: '2.5rem',
             borderRadius: '0.5rem',
+            borderWidth: '1px',
+            borderStyle: 'solid',
+            boxShadow: state.isFocused
+              ? document.documentElement.classList.contains('dark')
+                ? '0 0 0 2px white'
+                : '0 0 0 2px #3b82f6'
+              : 'none',
+            borderColor: state.isFocused ? 'transparent' : base.borderColor,
+          }),
+          valueContainer: (base) => ({
+            ...base,
+            maxHeight: '2.5rem',
+            overflow: 'hidden',
+            flexWrap: 'nowrap',
           }),
           menu: (base) => ({
             ...base,
             backgroundColor: 'var(--bg-color, white)',
             zIndex: 50,
-
+            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+            border: '1px solid var(--border-color, #e5e7eb)',
           }),
           input: (base) => ({
             ...base,
             color: 'var(--text-color, #111827)',
+            fontSize: '0.875rem',
           }),
           singleValue: (base) => ({
             ...base,
@@ -80,7 +100,9 @@ export function AssessmentFilter({ value, onChange, options, className }: Assess
           }),
           placeholder: (base) => ({
             ...base,
-            color: 'var(--placeholder-color, #6b7280)',
+            color:
+              value.length > 1 ? 'var(--text-color, #111827)' : 'var(--placeholder-color, #6b7280)',
+            fontSize: '0.875rem',
           }),
         }}
       />

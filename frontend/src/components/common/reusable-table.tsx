@@ -73,14 +73,14 @@ const ReusableTable = <T extends object>({
             {columns.map((column) => (
               <TableHead
                 key={column.key.toString()}
-                className={`sticky top-0 bg-blue-50 dark:bg-gray-700 text-gray-900 dark:text-white font-bold py-3 ${column.className}`}
+                className={`sticky top-0 bg-blue-50 dark:bg-secondary text-gray-900 dark:text-white font-bold py-3 ${column.className}`}
               >
                 {column.header}
               </TableHead>
             ))}
             {/* Add a column for the expand/collapse icon if expandableRow is provided */}
             {expandableRow && (
-              <TableHead className="sticky top-0 bg-blue-50 dark:bg-gray-700 text-gray-900 dark:text-white font-bold py-3"></TableHead>
+              <TableHead className="sticky top-0 bg-blue-50 dark:bg-secondary text-gray-900 dark:text-white font-bold py-3"></TableHead>
             )}
           </TableRow>
         </TableHeader>
@@ -129,7 +129,7 @@ const ReusableTable = <T extends object>({
                 <TableRow>
                   <TableCell
                     colSpan={columns.length + (expandableRow ? 1 : 0)}
-                    className="bg-gray-50 dark:bg-gray-700 p-4"
+                    className="bg-gray-50 dark:bg-secondary p-4"
                   >
                     {expandableRow.render(row)}
                   </TableCell>

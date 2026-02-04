@@ -57,11 +57,9 @@ import {
 } from '@/components/test/testUtils/securityUtils';
 import {
   initializeFaceTracking,
-  FaceTrackingStatus,
   startFaceTracking,
 } from '@/components/test/testUtils/faceTracking';
 import { FaceViolationPopup } from '@/components/test/face-violation-popup';
-import { FaceTrackingOverlay } from '@/components/test/face-tracking-overlay';
 import { isAxiosError } from 'axios';
 import ExamNotStarted from './exam-not-started';
 
@@ -82,6 +80,7 @@ const TestPage = () => {
     setExam,
     setCameraStream,
     cameraStreamRef,
+    setFaceTrackingStatus,
   } = useExamStore();
   const router = useRouter();
 
@@ -110,7 +109,6 @@ const TestPage = () => {
       thresholds: { yawThreshold: number; pitchThreshold: number; rollThreshold: number };
     } | null;
   }>({ isOpen: false, details: null });
-  const [faceTrackingStatus, setFaceTrackingStatus] = useState<FaceTrackingStatus | null>(null);
 
   const screenStream = useRef<MediaStream | null>(null);
   const screenSnapshotRef = useRef<HTMLVideoElement | null>(null);
@@ -747,9 +745,7 @@ const TestPage = () => {
         </>
       )}
 
-      {current_step === EXAM_STEP.QUIZ && (
-        <FaceTrackingOverlay stream={cameraStreamRef} tracking={faceTrackingStatus} />
-      )}
+      {/* Remove the fixed positioned face tracking overlay since it's now in the sidebar */}
 
       {/* Hidden elements for video capture */}
       <video ref={screenSnapshotRef} className="hidden"></video>

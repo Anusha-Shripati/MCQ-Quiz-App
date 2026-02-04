@@ -189,6 +189,7 @@ const Filters = () => {
         <SearchFilter
           searchQuery={formData.search}
           setSearchQuery={(value) => setValue('search', value)}
+          // className="w-48"
         />
 
         <TechnologyFilter
@@ -197,15 +198,17 @@ const Filters = () => {
             setValue('technologyFilter', value);
           }}
           options={technologyOptions}
+          className="w-48"
         />
 
         <AssessmentFilter
           value={formData.assessmentFilter}
           onChange={(value: StatusOption[]) => setValue('assessmentFilter', value)}
           options={assessmentOptions}
+          className="w-48"
         />
 
-        <div className='flex flex-col w-40'>
+        <div className='flex flex-col w-32'>
           <PercentageFilter
             filterName='Percentage'
             formData={formData}
@@ -222,7 +225,7 @@ const Filters = () => {
           }
         </div>
 
-        <div className='flex flex-col w-40'>
+        <div className='flex flex-col w-32'>
           <PercentageFilter
             filterName='Experience'
             formData={formData}
@@ -239,26 +242,30 @@ const Filters = () => {
           }
         </div>
 
-        <PercentageFilter
-          filterName='Exam Date'
-          formData={formData}
-          setValue={setValue}
-        />
-        <div className="flex justify-end items-center gap-4 flex-wrap mt-1 ml-2">
-          {isFilter && (
+        <div className='w-32'>
+          <PercentageFilter
+            filterName='Exam Date'
+            formData={formData}
+            setValue={setValue}
+          />
+        </div>
+        
+        {isFilter && (
+          <div className='w-32'>
             <Button
-              variant="destructive"
+              variant="outline"
               onClick={clearAllFilters}
               className={cn(
-                'h-10 px-4 text-sm font-medium whitespace-nowrap',
-                'bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700',
-                'focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800'
+                'h-10 text-sm font-medium gap-2 whitespace-nowrap',
+                'bg-white dark:bg-background border-gray-200 dark:border-border',
+                'hover:bg-gray-50 dark:hover:bg-gray-800 text-red-600 dark:text-red-400',
+                'transition-all duration-200 w-32'
               )}
             >
               Clear All
             </Button>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
     </section>

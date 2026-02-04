@@ -64,9 +64,9 @@ const ResultSummary: React.FC<ResultSummaryProps> = ({
     }
   }, [technology, technologies]);
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-2xl p-0 mb-10 text-gray-900 dark:text-gray-100 shadow-lg border border-gray-200 dark:border-gray-800 overflow-hidden">
+    <div className="bg-white dark:bg-primary rounded-2xl p-0 mb-10 text-gray-900 dark:text-gray-100 shadow-lg border border-gray-200 dark:border-border overflow-hidden">
       {/* Score Summary Card */}
-      <div className="flex flex-col md:flex-row items-center justify-between gap-6 px-8 py-8 border-b border-gray-100 dark:border-gray-800 bg-gradient-to-r from-blue-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900">
+      <div className="flex flex-col md:flex-row items-center justify-between gap-6 px-8 py-8 border-b border-gray-100 dark:border-border bg-gradient-to-r from-blue-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900">
         <div className="flex items-center gap-6 w-full md:w-auto">
           <div className="bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 rounded-full p-4">
             <Layers />
@@ -88,7 +88,7 @@ const ResultSummary: React.FC<ResultSummaryProps> = ({
           <span className="text-2xl font-bold text-blue-600 dark:text-blue-300">
             {percentage.toFixed(2)}%
           </span>
-          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mt-2">
+          <div className="w-full bg-gray-200 dark:bg-secondary rounded-full h-2 mt-2">
             <div
               className={`h-2 rounded-full ${percentage >= passCriteria ? 'bg-green-500 dark:bg-green-400' : 'bg-red-500 dark:bg-red-400'}`}
               style={{ width: `${Math.min(percentage, 100)}%` }}
@@ -127,7 +127,7 @@ const ResultSummary: React.FC<ResultSummaryProps> = ({
           </svg>
           Technology Breakdown
         </h4>
-        <div className="overflow-x-auto rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900">
+        <div className="overflow-x-auto rounded-xl shadow-sm border border-gray-100 dark:border-border bg-white dark:bg-background">
           {isLoading ? (
             <div className="flex justify-center items-center h-32">
               <span className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-400 dark:border-blue-600"></span>
@@ -135,7 +135,7 @@ const ResultSummary: React.FC<ResultSummaryProps> = ({
           ) : (
             <table className="min-w-full text-sm text-left">
               <thead>
-                <tr className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
+                <tr className="bg-gray-100 dark:bg-primary text-gray-700 dark:text-gray-300">
                   <th className="px-6 py-3 font-semibold">Technology</th>
                   <th className="px-6 py-3 font-semibold">Score</th>
                   <th className="px-6 py-3 font-semibold">Correctly answered</th>

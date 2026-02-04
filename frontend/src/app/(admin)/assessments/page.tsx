@@ -1,5 +1,5 @@
 import AssessmentHeader from '@/components/assessments/assessment-header';
-import AssessmentDetails from '@/components/assessments/assessment-details';
+import AssessmentList from '@/components/assessments/assessment-list';
 import { Card } from '@/components/ui/card';
 import { Metadata } from 'next';
 
@@ -14,7 +14,7 @@ export default function AssessmentPage() {
         
         <AssessmentHeader />
         <div className="overflow-y-auto mt-2">
-          <AssessmentDetails />
+          <AssessmentList />
         </div>
       </Card>
     </div >

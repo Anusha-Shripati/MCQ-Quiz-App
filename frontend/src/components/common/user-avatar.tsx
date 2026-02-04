@@ -15,8 +15,9 @@ import toast from 'react-hot-toast';
 import { isAxiosError } from 'axios';
 import { userEndpoint } from '@/lib/endpoint';
 import Image from 'next/image';
+import { Button } from '@/components/ui/form/button';
 
-const UserAvatar = () => {
+const UserAvatar = ({ isCollapsed }: { isCollapsed: boolean }) => {
   const { user } = useAuthStore();
   const router = useRouter();
   const { logout } = useAuthStore();
@@ -38,52 +39,37 @@ const UserAvatar = () => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <div
-          className={`flex items-center rounded-sm cursor-pointer gap-3`}
+        <Button
+          variant="ghost"
+          className={`w-full text-base relative h-10 flex ${isCollapsed ? 'justify-center' : 'justify-start'} items-center gap-4  rounded-lg transition-colors hover:bg-secondary hover:text-secondary-foreground`}
         >
-          <Avatar className="w-9 h-9 rounded-full">
-            {/* <img
-              src={`${((process.env.NEXT_PUBLIC_IMGAE_PREFIX || '') + (user?.image || ''))}`}
-              className="w-full h-full"
-              alt="User Avatar"
-              width={96}
-              height={96}
-            /> */}
+          <span className="h-5 w-5">
             {user?.image ? (
               <Image
                 src={`${((process.env.NEXT_PUBLIC_IMGAE_PREFIX || '') + (user?.image || ''))}`}
-                className="w-full h-full"
+                className="w-[30px] h-[30px] rounded-full"
                 alt="User Avatar"
-                width={96}
-                height={96}
+                width={30}
+                height={30}
                 onError={(e) => {
                   e.currentTarget.onerror = null;
                   e.currentTarget.src = '/fallback.png';
                 }}
               />
             ) : (
-              <div
-                className="w-9 h-9 rounded-full border-2 border-gray-200 dark:border-gray-700 flex items-center justify-center bg-gray-100 dark:bg-gray-800"
-                aria-label="Default profile picture"
-              >
-                <User2Icon className="text-gray-400 dark:text-gray-500 text-xl" />
-              </div>
+              <User2Icon className="w-[30px] h-[30px]" />
             )}
-          </Avatar>
-
-          {/* <div>
-            <p className="text-md">{user?.name}</p>
-            <p className="text-sm text-gray-500">{user?.role?.name}</p>
-          </div> */}
-        </div>
+          </span>
+          {!isCollapsed && <span>{user?.name}</span>}
+        </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="start"
-        className="w-40 flex flex-col space-y-1 p-2 bg-white dark:bg-gray-800 rounded-md shadow-md dark:shadow-lg"
+        className="w-40 flex flex-col space-y-1 p-2 bg-white dark:bg-primary rounded-md shadow-md dark:shadow-lg"
       >
         <DropdownMenuItem
           // onClick={handleProfileNavigate}
-          className="flex items-center space-x-2 p-2 justify-center rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"
+          className="flex items-center space-x-2 p-2 justify-center rounded-md hover:bg-gray-100 dark:hover:bg-secondary"
         >
           <div>
             <p className="text-md">{user?.name}</p>
@@ -92,14 +78,14 @@ const UserAvatar = () => {
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={handleProfileNavigate}
-          className="flex items-center justify-start space-x-2 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+          className="flex items-center justify-start space-x-2 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-secondary cursor-pointer"
         >
           <Settings className="h-4 w-4 text-gray-600 dark:text-gray-300" />
           <span className="text-gray-900 dark:text-gray-200">Profile</span>
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={handleLogout}
-          className="flex items-center space-x-2 p-2 justify-start rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+          className="flex items-center space-x-2 p-2 justify-start rounded-md hover:bg-gray-100 dark:hover:bg-secondary cursor-pointer"
         >
           <LogOut className="h-4 w-4 text-gray-600 dark:text-gray-300" />
           <span className="text-gray-900 dark:text-gray-200">Logout</span>

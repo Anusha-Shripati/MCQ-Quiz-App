@@ -143,7 +143,7 @@ const EditorPage: React.FC<{
         </div>
 
         {/* Output Section */}
-        <div className="mt-6 p-6 border border-gray-300 rounded-lg bg-gray-100 dark:bg-gray-800">
+        <div className="mt-6 p-6 border border-gray-300 rounded-lg bg-gray-100 dark:bg-primary">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Output</h2>
           <pre className="text-sm text-gray-800 dark:text-gray-100">{output}</pre>
         </div>

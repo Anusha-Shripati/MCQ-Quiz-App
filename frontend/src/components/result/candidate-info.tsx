@@ -30,7 +30,7 @@ const CandidateInfo: React.FC<CandidateInfoProps> = ({ candidate, assessment, ex
   }
 
   return (
-    <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 mb-6 border border-gray-100 dark:border-gray-900 overflow-hidden">
+    <div className="relative bg-white dark:bg-primary rounded-2xl shadow-xl p-8 mb-6 border border-gray-100 dark:border-gray-900 overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/60 to-indigo-100/30 dark:from-gray-900/30 dark:to-indigo-900/20 opacity-60 pointer-events-none"></div>
       <div className="relative">
         <div className="flex items-center gap-3 mb-6">
@@ -51,7 +51,7 @@ const CandidateInfo: React.FC<CandidateInfoProps> = ({ candidate, assessment, ex
           {infoFields.map((field) => (
             <div
               key={field.key}
-              className="flex flex-grow items-center gap-4 bg-white/80 dark:bg-gray-700/80 backdrop-blur p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-300 group"
+              className="flex flex-grow items-center gap-4 bg-white/90 dark:bg-card backdrop-blur p-4 rounded-xl border border-gray-200 dark:border-border hover:shadow-lg transition-all duration-300 group"
             >
               <span className="flex-shrink-0 text-xl">{field.icon}</span>
               <div>

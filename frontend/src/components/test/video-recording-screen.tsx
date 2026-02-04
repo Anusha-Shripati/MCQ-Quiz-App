@@ -18,6 +18,25 @@ import FaceVerification from './face-verification';
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from '@/components/ui/card';
 import { useParams } from 'next/navigation';
 
+// Configuration
+const VIDEO_CONFIG = {
+  instructions: [
+    { icon: SunIcon, text: 'Ensure good lighting on your face' },
+    { icon: MicIcon, text: 'Speak clearly and maintain eye contact' },
+    { icon: MonitorIcon, text: 'Keep a professional background' },
+    { icon: VideoIcon, text: 'Recording will last for up to 90 seconds' },
+    { icon: Camera, text: 'You can re-record if needed' },
+  ],
+  tips: [
+    'Briefly introduce yourself and your background',
+    'Mention your relevant experience and skills',
+    'Speak naturally and confidently',
+    'Stay focused and concise',
+  ],
+  maxTime: 90,
+  questionName: 'introduction',
+};
+
 // Types
 interface VideoRecorderProps {
   onRecordingComplete: () => void;
@@ -64,7 +83,7 @@ export const VideoRecordingScreen = ({ onRecordingComplete, videoLink }: VideoRe
             UploadId,
             parts,
             merge_chunk: true,
-            question_name: 'introduction',
+            question_name: VIDEO_CONFIG.questionName,
           };
 
           trigger(payload).catch((error) => {
@@ -110,36 +129,17 @@ export const VideoRecordingScreen = ({ onRecordingComplete, videoLink }: VideoRe
             <CardContent className="p-6 space-y-6">
               <div className="bg-blue-50 rounded-lg p-5 border border-blue-100">
                 <ul className="space-y-4">
-                  <li className="flex items-center gap-3">
-                    <div className="bg-blue-100 rounded-full p-2 flex-shrink-0 mt-0.5">
-                      <SunIcon className="h-4 w-4 text-blue-600" />
-                    </div>
-                    <span className="text-gray-700">Ensure good lighting on your face</span>
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <div className="bg-blue-100 rounded-full p-2 flex-shrink-0 mt-0.5">
-                      <MicIcon className="h-4 w-4 text-blue-600" />
-                    </div>
-                    <span className="text-gray-700">Speak clearly and maintain eye contact</span>
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <div className="bg-blue-100 rounded-full p-2 flex-shrink-0 mt-0.5">
-                      <MonitorIcon className="h-4 w-4 text-blue-600" />
-                    </div>
-                    <span className="text-gray-700">Keep a professional background</span>
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <div className="bg-blue-100 rounded-full p-2 flex-shrink-0 mt-0.5">
-                      <VideoIcon className="h-4 w-4 text-blue-600" />
-                    </div>
-                    <span className="text-gray-700">Recording will last for up to 90 seconds</span>
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <div className="bg-blue-100 rounded-full p-2 flex-shrink-0 mt-0.5">
-                      <Camera className="h-4 w-4 text-blue-600" />
-                    </div>
-                    <span className="text-gray-700">You can re-record if needed</span>
-                  </li>
+                  {VIDEO_CONFIG.instructions.map((item, index) => {
+                    const Icon = item.icon;
+                    return (
+                      <li key={index} className="flex items-center gap-3">
+                        <div className="bg-blue-100 rounded-full p-2 flex-shrink-0 mt-0.5">
+                          <Icon className="h-4 w-4 text-blue-600" />
+                        </div>
+                        <span className="text-gray-700">{item.text}</span>
+                      </li>
+                    );
+                  })}
                 </ul>
               </div>
 
@@ -148,22 +148,12 @@ export const VideoRecordingScreen = ({ onRecordingComplete, videoLink }: VideoRe
                   Tips for a Great Introduction
                 </h3>
                 <ul className="space-y-2 text-indigo-900">
-                  <li className="flex items-center gap-2">
-                    <span>•</span>
-                    <span>Briefly introduce yourself and your background</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <span>•</span>
-                    <span>Mention your relevant experience and skills</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <span>•</span>
-                    <span>Speak naturally and confidently</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <span>•</span>
-                    <span>Stay focused and concise</span>
-                  </li>
+                  {VIDEO_CONFIG.tips.map((tip, index) => (
+                    <li key={index} className="flex items-center gap-2">
+                      <span>•</span>
+                      <span>{tip}</span>
+                    </li>
+                  ))}
                 </ul>
               </div>
             </CardContent>
@@ -199,7 +189,7 @@ export const VideoRecordingScreen = ({ onRecordingComplete, videoLink }: VideoRe
                   videoKey="introduction"
                   onRecordingComplete={onContinue}
                   onRecordingStop={handleStopRecording}
-                  maxTime={90}
+                  maxTime={VIDEO_CONFIG.maxTime}
                   videoLink={videoLink}
                   isLoading={isUploading}
                 />

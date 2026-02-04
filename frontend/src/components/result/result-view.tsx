@@ -48,7 +48,7 @@ function Answer() {
   }, [data]);
 
   return (
-    <div className="min-h-screen dark:bg-gray-900 py-6 px-9 sm:px-6 lg:px-8">
+    <div className="min-h-screen dark:bg-background py-6 px-9 sm:px-6 lg:px-8">
       <div className="max-w-10xl mx-auto">
         <StatusWrapper
           loading={isLoading || isValidating}
@@ -70,7 +70,7 @@ function Answer() {
           )}
 
           <Tabs className="mt-8" value={activeTab} onValueChange={setActiveTab}>
-            <List className="flex border-b border-gray-200 dark:border-gray-700 mb-6">
+            <List className="flex border-b border-gray-200 dark:border-border mb-6">
               <Trigger
                 className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 data-[state=active]:border-b-2 data-[state=active]:border-blue-600 dark:data-[state=active]:border-blue-400"
                 value="introduction"
@@ -101,7 +101,7 @@ function Answer() {
               <div className="flex items-center mb-8 gap-5">
                 <div>
                   {introduction ? (
-                    <div className="flex flex-col items-center bg-white dark:bg-gray-800 p-8 rounded-xl shadow-md w-full max-w-2xl mx-auto">
+                    <div className="flex flex-col items-center bg-white dark:bg-primary p-8 rounded-xl shadow-md w-full max-w-2xl mx-auto">
                       <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
                         Introduction Video
                       </h3>
@@ -112,7 +112,7 @@ function Answer() {
                             videoUrl={`${process.env.NEXT_PUBLIC_IMGAE_PREFIX}${introduction.user_answer[0]}`}
                           />
                         ) : (
-                          <div className="flex flex-col items-center justify-center h-full bg-gray-100 dark:bg-gray-700 rounded">
+                          <div className="flex flex-col items-center justify-center h-full bg-gray-100 dark:bg-secondary rounded">
                             <svg
                               className="w-16 h-16 text-gray-400 mb-2"
                               fill="none"
@@ -138,7 +138,7 @@ function Answer() {
                       </p>
                     </div>
                   ) : (
-                    <div className="flex flex-col items-center justify-center bg-white dark:bg-gray-800 p-8 rounded-xl shadow-md w-full max-w-2xl mx-auto">
+                    <div className="flex flex-col items-center justify-center bg-white dark:bg-primary p-8 rounded-xl shadow-md w-full max-w-2xl mx-auto">
                       <svg
                         className="w-16 h-16 text-gray-400 mb-2"
                         fill="none"
@@ -157,7 +157,7 @@ function Answer() {
                     </div>
                   )}
                 </div>
-                <div className="flex flex-col items-center bg-white dark:bg-gray-800 p-7 rounded-xl shadow-md w-full max-w-2xl mx-auto ">
+                <div className="flex flex-col items-center bg-white dark:bg-primary p-7 rounded-xl shadow-md w-full max-w-2xl mx-auto ">
                   <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
                     Verified Image
                   </h3>
@@ -177,7 +177,7 @@ function Answer() {
                       </p>
                     </div>
                   ) : (
-                    <div className="flex flex-col items-center justify-center w-full aspect-video max-w-xl mb-4 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                    <div className="flex flex-col items-center justify-center w-full aspect-video max-w-xl mb-4 bg-gray-100 dark:bg-secondary rounded-lg">
                       <svg
                         className="w-16 h-16 text-gray-400 mb-2"
                         fill="none"

@@ -75,7 +75,7 @@ function RoleTable() {
             return (
               <React.Fragment key={item.id}>
                 {(item.can_edit || item.can_read) && (
-                  <Badge key={item.id} variant="default">
+                  <Badge key={item.id} variant="secondary" className="bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-200">
                     {item.module?.name}
                   </Badge>
                 )}
@@ -126,10 +126,12 @@ function RoleTable() {
     <StatusWrapper
       loading={isLoading || isValidating}
       error={error}
-      className="min-h-[76vh]"
+      className="min-h-[83vh] flex"
       reset={mutate}
     >
-      <ReusableTable columns={columns} rows={rolesList} rowKey="id" className="min-h-[550px]" />
+      <div className="flex-1 overflow-hidden">
+        <ReusableTable columns={columns} rows={rolesList} rowKey="id" className="h-full" />
+      </div>
       <RoleForm open={open} roleData={role} onClose={() => setOpen(false)} />
       <DeleteDialog
         onDelete={() => handleDeleteRole(deleteId as string)}

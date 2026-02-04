@@ -45,11 +45,11 @@ const ResultExpandableRow: React.FC<ResultExpandableRowProps> = ({ row, technolo
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 border dark:border-gray-700 p-6 rounded-xl shadow-sm space-y-6 transition-all duration-300 ease-in-out animate-in fade-in zoom-in-95">
+    <div className="bg-white dark:bg-primary border dark:border-border p-6 rounded-xl shadow-sm space-y-6 transition-all duration-300 ease-in-out animate-in fade-in zoom-in-95">
       {/* Result Overview */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Result Score Card */}
-        <div className="bg-gray-50 dark:bg-gray-700 rounded-xl p-4 flex flex-col shadow-sm border border-gray-200 dark:border-gray-600">
+        <div className="bg-gray-50 dark:bg-secondary rounded-xl p-4 flex flex-col shadow-sm border border-gray-200 dark:border-gray-600">
           <div className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
             Result Score
           </div>
@@ -79,7 +79,7 @@ const ResultExpandableRow: React.FC<ResultExpandableRowProps> = ({ row, technolo
               Passing Score: {row?.pass_criteria}
             </span>
           </div>
-          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mt-1">
+          <div className="w-full bg-gray-200 dark:bg-secondary rounded-full h-2 mt-1">
             <div
               className={`w-full rounded-full h-2 ${
                 row?.is_passed ? 'bg-green-500 dark:bg-green-400' : 'bg-red-500 dark:bg-red-400'
@@ -119,7 +119,7 @@ const ResultExpandableRow: React.FC<ResultExpandableRowProps> = ({ row, technolo
         </div>
 
         {/* Test Time Card */}
-        <div className="bg-gray-50 dark:bg-gray-700 rounded-xl p-4 flex flex-col shadow-sm border border-gray-200 dark:border-gray-600">
+        <div className="bg-gray-50 dark:bg-secondary rounded-xl p-4 flex flex-col shadow-sm border border-gray-200 dark:border-gray-600">
           <div className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
             Test Duration
           </div>
@@ -188,7 +188,7 @@ const ResultExpandableRow: React.FC<ResultExpandableRowProps> = ({ row, technolo
         </div>
 
         {/* Created By Card */}
-        <div className="bg-gray-50 dark:bg-gray-700 rounded-xl p-4 flex flex-col shadow-sm border border-gray-200 dark:border-gray-600">
+        <div className="bg-gray-50 dark:bg-secondary rounded-xl p-4 flex flex-col shadow-sm border border-gray-200 dark:border-gray-600">
           <div className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
             Created By
           </div>
@@ -245,7 +245,7 @@ const ResultExpandableRow: React.FC<ResultExpandableRowProps> = ({ row, technolo
       </div>
 
       {/* Technology Scores */}
-      <div className="bg-gray-50 dark:bg-gray-700 rounded-xl p-5 shadow-sm border border-gray-200 dark:border-gray-600">
+      <div className="bg-gray-50 dark:bg-secondary rounded-xl p-5 shadow-sm border border-gray-200 dark:border-gray-600">
         <h4 className="font-medium text-gray-700 dark:text-gray-200 mb-3 flex items-center text-sm">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -266,7 +266,7 @@ const ResultExpandableRow: React.FC<ResultExpandableRowProps> = ({ row, technolo
 
         <div className="overflow-hidden rounded-md border border-gray-200 dark:border-gray-600">
           {/* Simple Header Row */}
-          <div className="grid grid-cols-12 bg-gray-100 dark:bg-gray-800 text-xs font-medium text-gray-700 dark:text-gray-300 p-2">
+          <div className="grid grid-cols-12 bg-gray-100 dark:bg-primary text-xs font-medium text-gray-700 dark:text-gray-300 p-2">
             <div className="col-span-5 pl-2">Technology</div>
             <div className="col-span-2 text-center">Score</div>
             <div className="col-span-3 text-center">Percentage</div>
@@ -274,7 +274,7 @@ const ResultExpandableRow: React.FC<ResultExpandableRowProps> = ({ row, technolo
           </div>
 
           {/* Overall Score Row */}
-          <div className="grid grid-cols-12 items-center p-3 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+          <div className="grid grid-cols-12 items-center p-3 bg-white dark:bg-primary border-b border-gray-200 dark:border-border">
             <div className="col-span-5 font-medium text-gray-800 dark:text-gray-200 pl-2">
               Overall
             </div>
@@ -284,7 +284,7 @@ const ResultExpandableRow: React.FC<ResultExpandableRowProps> = ({ row, technolo
             <div className="col-span-3">
               <div className="flex items-center justify-center">
                 <span className="mr-2 font-medium">{row?.percentage?.toFixed(2)}%</span>
-                <div className="w-16 bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+                <div className="w-16 bg-gray-200 dark:bg-secondary rounded-full h-1.5">
                   <div
                     className={`h-1.5 rounded-full ${
                       row?.is_passed ? 'bg-green-500' : 'bg-red-500'
@@ -311,7 +311,7 @@ const ResultExpandableRow: React.FC<ResultExpandableRowProps> = ({ row, technolo
           {row?.exam?.meta?.tech_score?.map((technology: ExamMetaTech) => (
             <div
               key={technology.technology_id}
-              className="grid grid-cols-12 items-center p-3 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 last:border-0"
+              className="grid grid-cols-12 items-center p-3 bg-white dark:bg-primary border-b border-gray-200 dark:border-border last:border-0"
             >
               <div className="col-span-5 text-gray-700 dark:text-gray-300 pl-2 truncate">
                 {getTechnology(technology.technology_id)}
@@ -322,7 +322,7 @@ const ResultExpandableRow: React.FC<ResultExpandableRowProps> = ({ row, technolo
               <div className="col-span-3">
                 <div className="flex items-center justify-center">
                   <span className="mr-2 font-medium">{technology.percentage?.toFixed(2)}%</span>
-                  <div className="w-16 bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+                  <div className="w-16 bg-gray-200 dark:bg-secondary rounded-full h-1.5">
                     <div
                       className={`h-1.5 rounded-full ${
                         technology.percentage >= (row?.pass_criteria || 60)

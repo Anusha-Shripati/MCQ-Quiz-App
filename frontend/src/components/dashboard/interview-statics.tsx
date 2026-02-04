@@ -257,14 +257,14 @@ const InterviewStatics: React.FC = () => {
   };
 
   return (
-    <div className="max-w-full h-full m-auto mb-4">
+    <div className="max-w-full h-full m-auto">
       <StatusWrapper
         loading={isLoading || isValidating}
         error={error}
         reset={mutate}
         className="w-full h-full"
       >
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-4">
+        <div className="bg-white dark:bg-primary rounded-lg p-4">
           {/* Filter Buttons */}
           <div className="flex flex-wrap items-center gap-2 mb-4">
             {filterButtons.map((btn) => (
@@ -274,14 +274,14 @@ const InterviewStatics: React.FC = () => {
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                   selectedFilter === btn.value
                     ? 'bg-blue-600 text-white shadow-md'
-                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                    : 'bg-gray-100 dark:bg-secondary text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                 }`}
               >
                 {btn.label}
               </button>
             ))}
             {showCustomPicker && (
-              <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600">
+              <div className="bg-gray-50 dark:bg-secondary/50 rounded-lg border border-gray-200 dark:border-gray-600">
                 <div className="flex flex-wrap items-center gap-3">
                   <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
                     <PopoverTrigger asChild>
@@ -289,7 +289,7 @@ const InterviewStatics: React.FC = () => {
                         className={`flex items-center gap-2 px-4 py-2 border rounded-lg text-sm transition-all ${
                           dateRange?.from
                             ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-gray-900 dark:text-gray-100'
-                            : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400'
+                            : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-primary text-gray-500 dark:text-gray-400'
                         } hover:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
                       >
                         <CalendarIcon className="w-4 h-4" />

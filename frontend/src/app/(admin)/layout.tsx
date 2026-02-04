@@ -4,7 +4,6 @@ import Sidebar from '@/components/common/sidebar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import AdminAuth from '@/components/common/admin-auth';
 import { SWRConfig } from 'swr';
-import  HeaderPage from '@/components/common/header';
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   return (
@@ -12,11 +11,9 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       <AdminAuth>
         <Sidebar />
         <div className="flex flex-col w-full">
-          <HeaderPage />
           <div
             className="flex-grow bg-secondary border overflow-y flex justify-center"
           >
-            {/* <ScrollArea className="px-6 w-full xl:max-w-[1600px]"> */}
             <ScrollArea  className="px-6 w-full">
               <SWRConfig value={{ dedupingInterval: 10000,revalidateOnFocus:false }}>{children}</SWRConfig>
             </ScrollArea>

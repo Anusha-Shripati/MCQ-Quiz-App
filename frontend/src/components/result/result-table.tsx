@@ -8,7 +8,7 @@ import { StatusOption } from '@/types/common.types';
 import { Result } from '@/types/exam.types';
 import { format } from 'date-fns';
 import dayjs from 'dayjs';
-import { ArrowRight } from 'lucide-react';
+import { CheckCircle, XCircle, ExternalLink } from 'lucide-react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import qs from 'query-string';
 import { useEffect, useMemo, useState } from 'react';
@@ -182,10 +182,22 @@ function ResultTable() {
       {
         key: 'exam.start_time',
         header: 'Test Date',
-        render: (row) =>
-          row.exam?.start_time
-            ? format(new Date(row.exam.start_time), 'MMM dd, yyyy hh:mm a')
-            : '-',
+        render: (row) => {
+          if (!row.exam?.start_time) return '-';
+          const date = new Date(row.exam.start_time);
+          return (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span>
+                  {format(date, 'MMM dd, yyyy')}
+                </span>
+              </TooltipTrigger>
+              <TooltipContent className="bg-gray-800 text-white p-2 rounded shadow-lg">
+                <p>{format(date, 'MMM dd, yyyy hh:mm a')}</p>
+              </TooltipContent>
+            </Tooltip>
+          );
+        },
       },
       { key: 'name', header: 'Name', render: (row) => row.exam?.candidate?.name || '-' },
       { key: 'email', header: 'Email', render: (row) => row.exam?.candidate?.email || '-' },
@@ -236,29 +248,52 @@ function ResultTable() {
       {
         key: 'created_at',
         header: 'Created At',
-        render: (row) => format(new Date(row.exam?.created_at), 'MMM dd, yyyy hh:mm a'),
+        render: (row) => {
+          if (!row.exam?.created_at) return '-';
+          const date = new Date(row.exam.created_at);
+          return (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span>
+                  {format(date, 'MMM dd, yyyy')}
+                </span>
+              </TooltipTrigger>
+              <TooltipContent className="bg-gray-800 text-white p-2 rounded shadow-lg">
+                <p>{format(date, 'MMM dd, yyyy hh:mm a')}</p>
+              </TooltipContent>
+            </Tooltip>
+          );
+        },
       },
       {
         key: 'percentage',
         header: 'Result',
         render: (row) => {
-          const statusMap = {
-            pass: 'bg-green-100 text-green-800',
-            failed: 'bg-red-100 text-red-800',
-          };
-
-          const badgeClass = row?.is_passed ? statusMap.pass : statusMap.failed;
-
+          const isPassed = row?.is_passed;
+          const percentage = row?.percentage?.toFixed(2);
+          
           return (
             <Tooltip>
               <TooltipTrigger asChild>
-                <span className={`px-3 py-1 text-sm font-medium rounded-full ${badgeClass} `}>
-                  {row?.percentage?.toFixed(2)} % ({row?.is_passed ? 'Pass' : 'Failed'})
-                </span>
+                <div className="flex items-center gap-2">
+                  {isPassed ? (
+                    <CheckCircle className="w-4 h-4 text-green-600" />
+                  ) : (
+                    <XCircle className="w-4 h-4 text-red-600" />
+                  )}
+                  <span className="text-sm font-medium">
+                    {percentage}%
+                  </span>
+                </div>
               </TooltipTrigger>
               <TooltipContent className="bg-gray-800 text-white p-2 rounded shadow-lg">
-                <p className="font-semibold">Passing Criteria:</p>
-                <p>{row?.pass_criteria} %</p>
+                <div className="space-y-1">
+                  <p className="font-semibold">
+                    Status: {isPassed ? 'Pass' : 'Failed'}
+                  </p>
+                  <p>Score: {percentage}%</p>
+                  <p>Passing Criteria: {row?.pass_criteria}%</p>
+                </div>
               </TooltipContent>
             </Tooltip>
           );
@@ -278,7 +313,7 @@ function ResultTable() {
               >
                 <div className="p-2 flex items-center justify-center 
                 rounded-lg group-hover:bg-gray-200 dark:group-hover:bg-gray-900">
-                  <ArrowRight
+                  <ExternalLink
                     className="w-4 h-4 text-gray-500 dark:text-gray-400 transition-colors duration-200 
               group-hover:text-black dark:group-hover:text-white"
                   />
@@ -287,7 +322,7 @@ function ResultTable() {
             </TooltipTrigger>
 
             <TooltipContent sideOffset={4}>
-              <p>Open result details</p>
+              <p>Open result details in new tab</p>
             </TooltipContent>
           </Tooltip>
         ),
@@ -306,7 +341,7 @@ function ResultTable() {
     <StatusWrapper
       loading={isLoading || isValidating}
       reset={mutate}
-      className="min-h-[68vh] flex"
+      className="min-h-[83vh] flex"
       error={error}
     >
       <Pagination
@@ -319,12 +354,12 @@ function ResultTable() {
         currentPage={currentPage}
         onPageChange={handlePageChange}
       >
-        <div className="h-[60vh]">
+        <div className="flex-1 overflow-hidden">
           <ReusableTable
             columns={columns}
             rows={currentItems}
             expandableRow={expandableRow}
-            className="h-[60vh] animate-in fade-in duration-300"
+            className="h-full animate-in fade-in duration-300"
             rowKey="id"
             onRowClick={handleRowClick}
           />

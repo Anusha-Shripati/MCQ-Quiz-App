@@ -67,7 +67,7 @@ const EnterEmail: React.FC<EnterEmailProps> = ({ onNext, setEmail }) => {
             value={emailValue}
             onChange={(e) => setEmailValue(e.target.value)}
             required
-            className="h-12 px-4 bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-200 focus:bg-gray-100 dark:focus:bg-gray-800 focus:border-gray-400 dark:focus:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 focus-visible:ring-gray-300 dark:focus-visible:ring-gray-700 focus-visible:ring-1 focus-visible:ring-offset-0"
+            className="h-12 px-4 bg-gray-100 dark:bg-primary border-gray-300 dark:border-border text-gray-900 dark:text-gray-200 focus:bg-gray-100 dark:focus:bg-gray-800 focus:border-gray-400 dark:focus:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 focus-visible:ring-gray-300 dark:focus-visible:ring-gray-700 focus-visible:ring-1 focus-visible:ring-offset-0"
           />
           <div className="flex justify-between text-sm">
             <Link href="/" className="text-blue-600 dark:text-blue-400 hover:underline">
@@ -77,7 +77,7 @@ const EnterEmail: React.FC<EnterEmailProps> = ({ onNext, setEmail }) => {
         </div>
         <Button
           type="submit"
-          className="w-full text-lg bg-black dark:bg-gray-800 hover:bg-gray-900 dark:hover:bg-gray-700 text-white dark:text-gray-100 focus:bg-black dark:focus:bg-gray-800 focus:ring-1 focus:ring-gray-600 dark:focus:ring-gray-600"
+          className="w-full text-lg bg-black dark:bg-primary hover:bg-gray-900 dark:hover:bg-gray-700 text-white dark:text-gray-100 focus:bg-black dark:focus:bg-gray-800 focus:ring-1 focus:ring-gray-600 dark:focus:ring-gray-600"
           disabled={isMutating}
         >
           {isMutating ? 'Sending...' : 'Send Verification Code'}

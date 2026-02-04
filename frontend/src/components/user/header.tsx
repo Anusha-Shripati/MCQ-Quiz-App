@@ -6,6 +6,7 @@ import { Button } from '../ui/form/button';
 import { useAuthStore } from '@/store/authStore';
 import UserForm from './user-form';
 import { usePathname } from 'next/navigation';
+import { PlusCircle } from 'lucide-react';
 
 function Header() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -42,21 +43,22 @@ function Header() {
   }, []);
 
   return (
-    <div className="flex justify-end w-full mb-4">
+    <div className="flex justify-between w-full mb-4">
+      <Input
+        type="search"
+        placeholder="Search Users..."
+        className="w-64"
+        value={searchTerm}
+        onChange={handleSearch}
+        autoComplete="off"
+      />
       <div className="flex space-x-4 items-center">
-        <Input
-          type="search"
-          placeholder="Search Users..."
-          className="w-64"
-          value={searchTerm}
-          onChange={handleSearch}
-          autoComplete="off"
-        />
         {permissions?.users?.can_edit && (
           <Button
             onClick={handleCreateUser}
-            className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
+            className="bg-foreground text-secondary hover:bg-foreground/90 shadow-sm"
           >
+            <PlusCircle className="h-4 w-4" />
             Create User
           </Button>
         )}

@@ -111,17 +111,19 @@ function UserTable() {
   ];
   return (
     <StatusWrapper
-      className="min-h-[74vh]"
+      className="min-h-[83vh] flex"
       error={error}
       loading={isLoading || isValidating}
       reset={mutate}
     >
-      <ReusableTable
-        columns={columns}
-        rows={userList}
-        rowKey="id"
-        className="h-[550px] animate-in fade-in duration-300"
-      />
+      <div className="flex-1 overflow-hidden">
+        <ReusableTable
+          columns={columns}
+          rows={userList}
+          rowKey="id"
+          className="h-full animate-in fade-in duration-300"
+        />
+      </div>
 
       <UserForm open={open} userData={user} onClose={() => setOpen(false)} />
       <DeleteDialog

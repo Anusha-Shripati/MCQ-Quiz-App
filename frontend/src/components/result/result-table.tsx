@@ -341,7 +341,7 @@ function ResultTable() {
     <StatusWrapper
       loading={isLoading || isValidating}
       reset={mutate}
-      className="min-h-[68vh] flex"
+      className="min-h-[83vh] flex"
       error={error}
     >
       <Pagination
@@ -354,12 +354,12 @@ function ResultTable() {
         currentPage={currentPage}
         onPageChange={handlePageChange}
       >
-        <div className="h-[60vh]">
+        <div className="flex-1 overflow-hidden">
           <ReusableTable
             columns={columns}
             rows={currentItems}
             expandableRow={expandableRow}
-            className="h-[60vh] animate-in fade-in duration-300"
+            className="h-full animate-in fade-in duration-300"
             rowKey="id"
             onRowClick={handleRowClick}
           />

@@ -624,7 +624,7 @@ function CandidateTable() {
   };
 
   return (
-    <StatusWrapper loading={isLoading} className="min-h-[74vh]" error={error}>
+    <StatusWrapper loading={isLoading} className="min-h-[83vh] flex" error={error}>
       <Pagination
         className="flex-grow"
         currentPageStart={currentPageStart}
@@ -635,12 +635,12 @@ function CandidateTable() {
         currentPage={currentPage}
         onPageChange={handlePageChange}
       >
-        <div className="min-h-[500px]">
+        <div className="flex-1 overflow-hidden">
           <ReusableTable
             columns={columns}
             rows={currentItems}
             expandableRow={expandableRow}
-            className="mb-6 h-[65vh] animate-in fade-in duration-300"
+            className="mb-6 h-full animate-in fade-in duration-300"
             rowKey="id"
           />
         </div>

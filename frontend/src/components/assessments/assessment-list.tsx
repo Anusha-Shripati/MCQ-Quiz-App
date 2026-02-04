@@ -215,7 +215,7 @@ function AssessmentCard({ assessment, onView, onEdit, onDelete }: AssessmentCard
 
 export default function AssessmentList() {
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [itemsPerPage, setItemsPerPage] = useState<number>(12);
+  const [itemsPerPage, setItemsPerPage] = useState<number>(10);
   const [currentPageStart, setCurrentPageStart] = useState<number>(1);
   const [currentPageEnd, setCurrentPageEnd] = useState<number>(1);
   const [assessments, setAssessments] = useState<Required<Assessment>[]>([]);
@@ -229,7 +229,7 @@ export default function AssessmentList() {
 
   const queryObj = {
     page: currentPage || 1,
-    limit: itemsPerPage || 12,
+    limit: itemsPerPage || 10,
     name: filters.name !== 'all' ? filters.name : undefined,
     created_by: filters.created_by !== 'all' ? filters.created_by : undefined,
     created_from: filters.created_duation?.from,
@@ -343,7 +343,7 @@ export default function AssessmentList() {
         error={error}
         loading={isLoading || isValidating}
         reset={assessmentMutate}
-        className="min-h-[74vh] flex"
+        className="min-h-[83vh] flex"
       >
         <Pagination
           className="flex-grow"

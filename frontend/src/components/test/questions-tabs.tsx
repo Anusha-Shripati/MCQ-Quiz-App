@@ -45,8 +45,8 @@ function QuestionTabs({
   const strokeDashoffset = circumference - (percentage / 100) * circumference;
 
   return (
-    <div className="md:w-64 flex-shrink-0">
-      <div className="bg-gradient-to-br from-white to-blue-50/30 p-6 rounded-3xl shadow-xl border-2 border-gray-200/50 sticky top-4 space-y-4">
+    <div className="w-full">
+      <div className="bg-gradient-to-br from-white to-blue-50/30 p-6 rounded-3xl shadow-xl border-2 border-gray-200/50 space-y-4">
         {/* Violations Section */}
         <div className="bg-white/80 px-4 rounded-2xl">
           <div className="flex items-center justify-between">

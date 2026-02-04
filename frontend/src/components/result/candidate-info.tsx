@@ -51,7 +51,7 @@ const CandidateInfo: React.FC<CandidateInfoProps> = ({ candidate, assessment, ex
           {infoFields.map((field) => (
             <div
               key={field.key}
-              className="flex flex-grow items-center gap-4 bg-white/80 dark:bg-secondary/80 backdrop-blur p-4 rounded-xl border border-gray-200 dark:border-border hover:shadow-lg transition-all duration-300 group"
+              className="flex flex-grow items-center gap-4 bg-white/90 dark:bg-card backdrop-blur p-4 rounded-xl border border-gray-200 dark:border-border hover:shadow-lg transition-all duration-300 group"
             >
               <span className="flex-shrink-0 text-xl">{field.icon}</span>
               <div>

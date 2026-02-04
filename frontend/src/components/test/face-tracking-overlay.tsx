@@ -108,7 +108,7 @@ export const FaceTrackingOverlay = ({ stream, tracking }: FaceTrackingOverlayPro
   if (!stream) return null;
 
   return (
-    <div className="fixed top-24 right-6 z-40 w-64 md:w-72">
+    <div className="w-full">
       <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
         <div className="px-3 py-2 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
           <span className="text-xs font-semibold text-slate-700">Live Face Monitor</span>

@@ -31,6 +31,7 @@ import TestLoading from './loading/test-loading';
 import Question from './question';
 import TestHeader from './test-header';
 import QuestionTabs from './questions-tabs';
+import { FaceTrackingOverlay } from './face-tracking-overlay';
 
 type QuizAnswer = {
   question: IExamQuestion;
@@ -68,7 +69,7 @@ export default function ProctoredQuiz() {
   const originalWindowSize = useRef({ width: window.innerWidth, height: window.innerHeight });
   const pingIntervalRef = useRef<NodeJS.Timeout>();
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const { exam, accessCode, setExam } = useExamStore();
+  const { exam, accessCode, setExam, cameraStreamRef, faceTrackingStatus } = useExamStore();
   const alertTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const displayAlert = (message: string) => {
@@ -133,8 +134,6 @@ export default function ProctoredQuiz() {
     `${examEndpoint.CANDIDATE_EXAM}/${exam?.id}/reset-answer`,
     (url: string, { arg }: { arg: { answer_id: string } }) => examApi.post(url, arg, accessCode)
   );
-
-  const { cameraStreamRef } = useExamStore();
 
   // Add validation function for question answers
   const isQuestionAnswered = (question: IExamQuestion, answer: QuizAnswer | undefined): boolean => {
@@ -811,20 +810,26 @@ export default function ProctoredQuiz() {
           <audio src="/assets/alert.wav" ref={audioRef} style={{ display: 'none' }} />
 
           <div className="flex gap-6 w-full mx-auto px-4 md:px-8">
-            {/* Left Sidebar - Question Navigation */}
-            <QuestionTabs
-              questions={questions}
-              currentQuestionIndex={currentQuestionIndex}
-              setCurrentQuestionIndex={setCurrentQuestionIndex}
-              answeredQuestions={answers}
-              visitedQuestions={visitedQuestions}
-              violations={prvViolations + liveViolations.length}
-              maxViolations={QUIZ_CONFIG.maxViolations}
-              totalAnswered={Object.keys(answers).length}
-            />
+            {/* Left Sidebar - Face Tracking and Question Navigation */}
+            <div className="md:w-64 flex-shrink-0 space-y-4">
+              {/* Face Tracking Overlay */}
+              <FaceTrackingOverlay stream={cameraStreamRef} tracking={faceTrackingStatus} />
+              
+              {/* Question Navigation */}
+              <QuestionTabs
+                questions={questions}
+                currentQuestionIndex={currentQuestionIndex}
+                setCurrentQuestionIndex={setCurrentQuestionIndex}
+                answeredQuestions={answers}
+                visitedQuestions={visitedQuestions}
+                violations={prvViolations + liveViolations.length}
+                maxViolations={QUIZ_CONFIG.maxViolations}
+                totalAnswered={Object.keys(answers).length}
+              />
+            </div>
 
             {/* Main Content Card */}
-            <Card className="flex-1 min-h-[85vh] shadow-xl border-0 rounded-xl overflow-hidden bg-white/95 backdrop-blur-sm">
+            <Card className="flex-1 min-h-[85vh] shadow-xl border-0 rounded-xl overflow-hidden bg-white/95 backdrop-blur-sm flex flex-col">
               <TestHeader
                 submitQuiz={submitQuiz}
                 timeLeft={timeLeft}
@@ -836,10 +841,10 @@ export default function ProctoredQuiz() {
                 answeredQuestionsCount={Object.keys(answers).length}
               />
 
-              <CardContent className="p-4 md:p-8 space-y-6 pt-2 md:pt-4">
+              <CardContent className="p-4 md:p-8 space-y-6 pt-2 md:pt-4 flex-1 flex flex-col min-h-[85vh]">
 
                 {questions.length > 0 && (
-                  <div className="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-gray-200 transition-all hover:shadow-md">
+                  <div className="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-gray-200 transition-all hover:shadow-md flex-1">
                     <div className="space-y-6">
                       <h2 className="text-xl md:text-2xl font-semibold text-gray-800 leading-relaxed break-all whitespace-pre-wrap overflow-hidden flex-1">
                         <span className="text-blue-600">Q{currentQuestionIndex + 1}.</span>{' '}
@@ -874,66 +879,74 @@ export default function ProctoredQuiz() {
                   </div>
                 )}
 
-                {/* Progress and navigation */}
-                <div className="flex gap-3 justify-end">
-                  {answers[questions[currentQuestionIndex].question_id] && (
-                    <Button
-                      variant="outline"
-                      onClick={handleReset}
-                      disabled={isReseting}
-                      className="px-5 py-2.5 text-base font-semibold rounded-lg border-2 border-gray-300 bg-white text-gray-700 hover:border-gray-400 hover:bg-gray-50 hover:text-gray-900"
-                    >
-                      {isReseting ? (
-                        <Loader2 className="w-5 h-5 animate-spin" />
-                      ) : (
-                        'Reset'
+                {/* Fixed Bottom Navigation */}
+                <div className="sticky bottom-0 bg-white border-t border-gray-200 p-4 mt-auto">
+                  <div className="flex justify-between items-center">
+                    {/* Left side buttons */}
+                    <div className="flex gap-3">
+                      {answers[questions[currentQuestionIndex].question_id] && (
+                        <Button
+                          variant="outline"
+                          onClick={handleReset}
+                          disabled={isReseting}
+                          className="px-5 py-2.5 text-base font-semibold rounded-lg border-2 border-gray-300 bg-white text-gray-700 hover:border-gray-400 hover:bg-gray-50 hover:text-gray-900"
+                        >
+                          {isReseting ? (
+                            <Loader2 className="w-5 h-5 animate-spin" />
+                          ) : (
+                            'Reset'
+                          )}
+                        </Button>
                       )}
-                    </Button>
-                  )}
 
-                  <Button
-                    onClick={() => setCurrentQuestionIndex((prev) => Math.min(prev + 1, questions.length - 1))}
-                    disabled={currentQuestionIndex === questions.length - 1}
-                    variant="outline"
-                    className="px-5 py-2.5 text-base font-semibold flex items-center gap-2 rounded-lg border-2 border-gray-300 bg-white text-gray-700 hover:border-gray-400 hover:bg-gray-50 hover:text-gray-900"
-                  >
-                    Skip
-                    <ChevronRight className="w-5 h-5" />
-                  </Button>
-
-                  <Button
-                    onClick={() => setCurrentQuestionIndex((prev) => Math.max(0, prev - 1))}
-                    disabled={currentQuestionIndex === 0}
-                    variant="outline"
-                    className="px-5 py-2.5 text-base font-semibold flex items-center gap-2 rounded-lg border-2 border-gray-300 bg-white text-gray-700 hover:border-gray-400 hover:bg-gray-50 hover:text-gray-900"
-                  >
-                    <ChevronLeft className="w-5 h-5" />
-                    Previous
-                  </Button>
-
-                  <Button
-                    onClick={() => handleNextQuestion()}
-                    disabled={
-                      !isQuestionAnswered(
-                        questions[currentQuestionIndex],
-                        answers[questions[currentQuestionIndex].question_id]
-                      ) ||
-                      isMutating ||
-                      isSubmiting ||
-                      isVideoMutating ||
-                      currentQuestionIndex === questions.length - 1
-                    }
-                    className="px-6 py-2.5 flex text-base items-center font-semibold gap-2 rounded-lg transition-all min-w-[120px] bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-md hover:shadow-lg"
-                  >
-                    {isMutating || isSubmiting ? (
-                      <Loader2 className="w-5 h-5 text-white animate-spin mx-auto" />
-                    ) : (
-                      <>
-                        Next
+                      <Button
+                        onClick={() => setCurrentQuestionIndex((prev) => Math.min(prev + 1, questions.length - 1))}
+                        disabled={currentQuestionIndex === questions.length - 1}
+                        variant="outline"
+                        className="px-5 py-2.5 text-base font-semibold flex items-center gap-2 rounded-lg border-2 border-gray-300 bg-white text-gray-700 hover:border-gray-400 hover:bg-gray-50 hover:text-gray-900"
+                      >
+                        Skip
                         <ChevronRight className="w-5 h-5" />
-                      </>
-                    )}
-                  </Button>
+                      </Button>
+                    </div>
+
+                    {/* Right side buttons */}
+                    <div className="flex gap-3">
+                      <Button
+                        onClick={() => setCurrentQuestionIndex((prev) => Math.max(0, prev - 1))}
+                        disabled={currentQuestionIndex === 0}
+                        variant="outline"
+                        className="px-5 py-2.5 text-base font-semibold flex items-center gap-2 rounded-lg border-2 border-gray-300 bg-white text-gray-700 hover:border-gray-400 hover:bg-gray-50 hover:text-gray-900"
+                      >
+                        <ChevronLeft className="w-5 h-5" />
+                        Previous
+                      </Button>
+
+                      <Button
+                        onClick={() => handleNextQuestion()}
+                        disabled={
+                          !isQuestionAnswered(
+                            questions[currentQuestionIndex],
+                            answers[questions[currentQuestionIndex].question_id]
+                          ) ||
+                          isMutating ||
+                          isSubmiting ||
+                          isVideoMutating ||
+                          currentQuestionIndex === questions.length - 1
+                        }
+                        className="px-6 py-2.5 flex text-base items-center font-semibold gap-2 rounded-lg transition-all min-w-[120px] bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-md hover:shadow-lg"
+                      >
+                        {isMutating || isSubmiting ? (
+                          <Loader2 className="w-5 h-5 text-white animate-spin mx-auto" />
+                        ) : (
+                          <>
+                            Next
+                            <ChevronRight className="w-5 h-5" />
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>

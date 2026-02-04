@@ -63,7 +63,7 @@ function AssessmentCard({ assessment, onView, onEdit, onDelete }: AssessmentCard
         setOpen={setDeleteOpen}
         isOpen={deleteOpen}
       />
-      <Card className="group relative overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-300 hover:shadow-lg hover:shadow-blue-100 dark:hover:shadow-blue-900/20 hover:-translate-y-1">
+      <Card className="group relative overflow-hidden bg-white dark:bg-background border border-gray-200 dark:border-border hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-300 hover:shadow-lg hover:shadow-blue-100 dark:hover:shadow-blue-900/20 hover:-translate-y-1">
         <CardContent className="p-6">
           {/* Header */}
           <div className="flex items-start justify-between mb-4">

@@ -1,9 +1,10 @@
+'use client';
+
 import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/form/button';
 import Select from 'react-select';
 import { toast } from 'react-hot-toast';
 import { Technology, Assessment } from '@/store/assessmentStore';
-// import { Slider } from '../ui/form/slider';
 import dayjs from 'dayjs';
 import useSWR, { mutate } from 'swr';
 import { api, isAxiosError } from '@/lib/api';
@@ -15,16 +16,18 @@ import { z } from 'zod';
 import { Input } from '../ui/form/input';
 import { questionTypeOptions } from '@/shared/constants/data';
 import { Question } from '@/shared/types/app';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 interface Option {
   value: string;
   label: string;
 }
 
-interface AssessmentEditProps {
-  assessment: Assessment;
+interface AssessmentEditModalProps {
+  assessment: Assessment | null;
+  isOpen: boolean;
+  onClose: () => void;
   onSave: () => void;
-  onCancel: () => void;
 }
 
 type Difficulty = 'easy' | 'medium' | 'hard';
@@ -56,7 +59,11 @@ const validation = z.object({
     .max(90, 'Passing score must not exceed 90.'),
 });
 
-export default function AssessmentEdit({ assessment, onSave, onCancel }: AssessmentEditProps) {
+function AssessmentEditForm({ assessment, onSave, onCancel }: {
+  assessment: Assessment;
+  onSave: () => void;
+  onCancel: () => void;
+}) {
   const [localAssessment, setLocalAssessment] = useState<Assessment & { totalQuestions: number }>(
     assessment
   );
@@ -309,6 +316,7 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
   const handleDurationChange = (selectedOption: string) => {
     setLocalAssessment((prev) => ({ ...prev, duration: parseInt(selectedOption) || 0 }));
   };
+
   return (
     <div className="min-h-screen dark:bg-gray-800">
       <div className="px-4 sm:px-6 lg:px-8 py-8">
@@ -539,20 +547,6 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
                   return (
                     <div key={difficulty} className="text-center">
                       <div className="mb-2 capitalize">{difficulty}</div>
-                      {/* <div
-                        className="relative h-2 bg-gray-200 rounded-full cursor-pointer"
-                        onClick={(e) => sliderClick(e, difficulty)}
-                      >
-                        <div
-                          className={`h-full ${colors[difficulty as keyof typeof colors]} rounded-full transition-all duration-300`}
-                          style={{ width: `${percentage >100 ? 0 : percentage }%` }}
-                        />
-                        <div
-                          className="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-white border-2 border-blue-600 rounded-full cursor-grab"
-                          style={{ left: `${percentage >100 ? 0 : percentage}%`, transform: `translate(-50%, -50%)` }}
-                          onMouseDown={(e) => slideChange(e, difficulty)}
-                        />
-                      </div> */}
                       <div className="mt-1 text-xs text-gray-500">
                         {percentage > 100 ? 0 : percentage}%
                       </div>
@@ -662,5 +656,22 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
         </div>
       </div>
     </div>
+  );
+}
+
+export default function AssessmentEditModal({ assessment, isOpen, onClose, onSave }: AssessmentEditModalProps) {
+  if (!assessment) return null;
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="w-full max-w-7xl max-h-[95vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="text-xl font-semibold text-gray-900 dark:text-white">
+            Edit Assessment: {assessment.name}
+          </DialogTitle>
+        </DialogHeader>
+        <AssessmentEditForm assessment={assessment} onSave={onSave} onCancel={onClose} />
+      </DialogContent>
+    </Dialog>
   );
 }

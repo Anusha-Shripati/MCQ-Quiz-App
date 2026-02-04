@@ -134,10 +134,11 @@ export default function AssessmentHeader() {
 
 
   return (
-    <div className="flex flex-col md:flex-row items-center gap-6">
-      <div className="flex flex-wrap items-center gap-4 ml-auto">
+    <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+      {/* Left side - Filters */}
+      <div className="flex flex-wrap items-center gap-4">
         <FormField
-          className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-300 min-w-[200px] h-10"
+          className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-300 min-w-[300px] h-10"
           type="search"
           value={allFields.name}
           placeholder="Search by name"
@@ -194,15 +195,17 @@ export default function AssessmentHeader() {
             Clear All
           </Button>
         )}
-        {isAssessmentEditable && (
-          <Link href="/assessments/create-assessment">
-            <Button className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm">
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Create Assessment
-            </Button>
-          </Link>
-        )}
       </div>
+      
+      {/* Right side - Create Assessment Button */}
+      {isAssessmentEditable && (
+        <Link href="/assessments/create-assessment">
+          <Button className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm">
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Create Assessment
+          </Button>
+        </Link>
+      )}
     </div>
   );
 }

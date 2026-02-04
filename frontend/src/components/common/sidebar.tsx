@@ -83,14 +83,14 @@ export default function Sidebar() {
       } bg-primary text-primary-foreground sticky top-0 left-0 h-screen z-50 transition-all duration-300 relative shadow-sm`}
     >
       <div className="overflow-auto flex flex-row justify-center items-center h-full bg-primary">
-        <div className="w-[calc(100%-20px)] flex flex-col justify-between h-full py-4">
+        <div className="w-[calc(100%-20px)] flex flex-col justify-between h-full pb-4 pt-4">
           <div className="space-y-4 flex-shrink-0">
-            <div className="flex items-center justify-center w-full h-20 flex-shrink-0">
+            <div className="flex items-center justify-center w-full pt-3 flex-shrink-0 pb-3">
               {isCollapsed ? (
                 <div className="w-full h-full flex justify-center items-center">
                   <Image
                     alt="Logic Rays Logo"
-                    src={ImageLinks.logicrays_logo_bg}
+                    src={ImageLinks.logicrays_logo_bg_white}
                     className="cursor-pointer"
                     width={200}
                     height={200}
@@ -113,7 +113,7 @@ export default function Sidebar() {
 
             {!isLoading && permissions && (
               <div className="flex flex-col justify-center">
-                <nav className="flex-1 flex flex-col gap-4">
+                <nav className="flex-1 flex flex-col gap-3">
                   <NavItem
                     href="/dashboard"
                     icon={<FiHome size={30} />}
@@ -181,7 +181,7 @@ export default function Sidebar() {
             )}
           </div>
 
-          <div className="flex flex-col items-center justify-center gap-3 mt-4 flex-shrink-0">
+          <div className="flex flex-col items-center justify-center gap-2 mt-4 flex-shrink-0">
             <ThemeToggle isCollapsed={isCollapsed} />
             <UserAvatar isCollapsed={isCollapsed} />
             {isCollapsed && (
@@ -243,7 +243,7 @@ function NavItem({
               <Button
                 variant="ghost"
                 onMouseEnter={handleMouseEnter}
-                className={`w-full text-base relative h-12 flex justify-center items-center gap-4 p-3 rounded-lg transition-colors ${isActive
+                className={`w-full text-base relative h-8 flex justify-center items-center gap-4 p-3 rounded-lg transition-colors ${isActive
                   ? 'bg-secondary text-secondary-foreground'
                   : 'hover:bg-secondary hover:text-secondary-foreground'
                   }`}
@@ -259,7 +259,7 @@ function NavItem({
           <Button
             variant="ghost"
             onMouseEnter={handleMouseEnter}
-            className={`w-full text-base relative h-12 flex justify-start items-center gap-4 p-3 rounded-lg transition-colors ${isActive
+            className={`w-full text-base relative h-10 flex justify-start items-center gap-4 p-3 rounded-lg transition-colors ${isActive
               ? 'bg-secondary text-secondary-foreground'
               : 'hover:bg-secondary hover:text-secondary-foreground'
               }`}

@@ -8,6 +8,7 @@ import {
 import Link from 'next/link';
 import { Question } from '@/shared/types/app';
 import { useAuthStore } from '@/store/authStore';
+import { PlusCircle } from 'lucide-react';
 
 interface FilterBarProps {
   searchQuery: string;
@@ -127,8 +128,9 @@ export const FilterBar = ({
           <Link
             href="/questions/create-question/[QuestionSlug]"
             as={`/questions/create-question/${technology}`}
-            className="px-4 py-3 text-sm font-medium text-white bg-blue-600 rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
+            className="px-4 py-3 text-sm font-medium bg-foreground text-secondary rounded-md shadow-sm hover:bg-foreground/90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 inline-flex items-center"
           >
+            <PlusCircle className="mr-2 h-4 w-4" />
             Create Questions
           </Link>
         )}

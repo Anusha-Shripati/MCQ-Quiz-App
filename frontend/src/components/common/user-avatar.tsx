@@ -41,7 +41,7 @@ const UserAvatar = ({ isCollapsed }: { isCollapsed: boolean }) => {
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
-          className={`w-full text-base relative h-12 flex ${isCollapsed ? 'justify-center' : 'justify-start'} items-center gap-4 p-3 rounded-lg transition-colors hover:bg-secondary hover:text-secondary-foreground`}
+          className={`w-full text-base relative h-10 flex ${isCollapsed ? 'justify-center' : 'justify-start'} items-center gap-4  rounded-lg transition-colors hover:bg-secondary hover:text-secondary-foreground`}
         >
           <span className="h-5 w-5">
             {user?.image ? (

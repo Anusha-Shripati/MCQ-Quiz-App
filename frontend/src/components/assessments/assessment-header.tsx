@@ -149,7 +149,7 @@ export default function AssessmentHeader() {
           control={control}
           render={({ field }) => (
             <FormField
-              className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-300 min-w-[200px] h-10"
+              className="bg-white dark:bg-primary border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-300 min-w-[200px] h-10"
               type="select"
               onChange={field.onChange}
               value={field.value}
@@ -159,12 +159,12 @@ export default function AssessmentHeader() {
           )}
         />
         {/* View Mode Buttons */}
-        <div className="flex bg-white dark:bg-gray-800 rounded-lg p-1 shadow-sm border border-gray-200 dark:border-gray-600">
+        <div className="flex bg-white dark:bg-primary rounded-lg p-1 shadow-sm border border-gray-200 dark:border-gray-600">
           <Button
             variant={allFields.view === 'today' ? 'secondary' : 'ghost'}
             size="sm"
             className={`${
-              allFields.view === 'today' ? 'bg-gray-100 dark:bg-gray-700' : ''
+              allFields.view === 'today' ? 'bg-gray-100 dark:bg-secondary' : ''
             } text-gray-900 dark:text-gray-300`}
             onClick={() => handleViewChange('today')}
           >
@@ -174,7 +174,7 @@ export default function AssessmentHeader() {
             variant={allFields.view === 'week' ? 'secondary' : 'ghost'}
             size="sm"
             className={`${
-              allFields.view === 'week' ? 'bg-gray-100 dark:bg-gray-700' : ''
+              allFields.view === 'week' ? 'bg-gray-100 dark:bg-secondary' : ''
             } text-gray-900 dark:text-gray-300`}
             onClick={() => handleViewChange('week')}
           >

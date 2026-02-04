@@ -180,28 +180,29 @@ const Filters = () => {
 
   return (
     <section className="w-full">
-      <div className="flex flex-col justify-end md:flex-row md:items-center gap-2 flex-wrap mb-2">
-        <SearchFilter
-          searchQuery={formData.searchQuery}
-          setSearchQuery={(value) => setValue('searchQuery', value)}
-        />
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-2">
+        <div className="flex flex-col md:flex-row md:items-center gap-2 flex-wrap">
+          <SearchFilter
+            searchQuery={formData.searchQuery}
+            setSearchQuery={(value) => setValue('searchQuery', value)}
+          />
 
-        <TechnologyFilter
-          value={formData.technologyFilter}
-          onChange={(value: TechnologyOption[]) => {
-            setValue('technologyFilter', value);
-          }}
-          options={technologyOptions}
-        />
+          <TechnologyFilter
+            value={formData.technologyFilter}
+            onChange={(value: TechnologyOption[]) => {
+              setValue('technologyFilter', value);
+            }}
+            options={technologyOptions}
+          />
 
-        <AssessmentFilter
-          value={formData.assessmentFilter}
-          onChange={(value: AssessmentOption[]) => setValue('assessmentFilter', value)}
-          options={assessmentOptions}
-        />
+          <AssessmentFilter
+            value={formData.assessmentFilter}
+            onChange={(value: AssessmentOption[]) => setValue('assessmentFilter', value)}
+            options={assessmentOptions}
+          />
 
-        <FilterOptions formData={formData} setValue={setValue} register={register} />
-        <div className="flex justify-end items-center gap-4 flex-wrap ml-2">
+          <FilterOptions formData={formData} setValue={setValue} register={register} />
+          
           {isFilter && (
             <Button
               variant="destructive"
@@ -216,6 +217,7 @@ const Filters = () => {
             </Button>
           )}
         </div>
+        
         {canCreateCandidate && (
           <CreateCandidateDialog />
         )}

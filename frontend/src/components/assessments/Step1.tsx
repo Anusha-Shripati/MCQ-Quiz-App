@@ -88,7 +88,7 @@ const Step1: React.FC<Step1Props> = ({
   };
 
   return (
-    <Card className="bg-white dark:bg-gray-800">
+    <Card className="bg-white dark:bg-primary">
       <CardHeader>
         <CardTitle className="font-bold text-gray-900 dark:text-white">
           Assessment Details
@@ -106,7 +106,7 @@ const Step1: React.FC<Step1Props> = ({
             {...register('name')}
             maxLength={234}
             className="bg-white text-gray-900 border-gray-200 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500
-                     dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                     dark:bg-primary dark:text-white dark:border-gray-600 dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
             error={errors.name?.message}
           />
         </div>
@@ -217,7 +217,7 @@ const Step1: React.FC<Step1Props> = ({
             error={errors.pass_criteria?.message}
             {...register('pass_criteria', { valueAsNumber: true })}
             className="bg-white text-gray-900 border-gray-200 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500
-                     dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                     dark:bg-primary dark:text-white dark:border-gray-600 dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
           />
         </div>
       </CardContent>

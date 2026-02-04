@@ -147,7 +147,7 @@ function Snapshots(props: SnapshotsProps) {
 
     return (
       <div>
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow text-gray-600 dark:text-gray-300">
+        <div className="bg-white dark:bg-primary p-6 rounded-xl shadow text-gray-600 dark:text-gray-300">
           <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
             Proctoring Snapshots
           </h3>
@@ -252,7 +252,7 @@ function Snapshots(props: SnapshotsProps) {
                     className={`bg-card flex gap-2 mb-2 rounded-md p-3 ${
                       snapshot.isIntegrityEvidence
                         ? 'bg-red-50 dark:bg-red-950'
-                        : 'bg-gray-200 dark:bg-gray-700'
+                        : 'bg-gray-200 dark:bg-secondary'
                     }`}
                   >
                     <div
@@ -278,7 +278,7 @@ function Snapshots(props: SnapshotsProps) {
                           }}
                         />
                       ) : (
-                        <div className="h-[140px] w-[200px] bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                        <div className="h-[140px] w-[200px] bg-gray-200 dark:bg-secondary flex items-center justify-center">
                           <span className="text-xs text-gray-500">No camera</span>
                         </div>
                       )}
@@ -317,7 +317,7 @@ function Snapshots(props: SnapshotsProps) {
                           }}
                         />
                       ) : (
-                        <div className="h-[140px] w-[200px] bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                        <div className="h-[140px] w-[200px] bg-gray-200 dark:bg-secondary flex items-center justify-center">
                           <span className="text-xs text-gray-500">No screen</span>
                         </div>
                       )}
@@ -339,7 +339,7 @@ function Snapshots(props: SnapshotsProps) {
                       className={`inline-block text-xs font-semibold px-3 py-1 rounded-full ${
                         snapshot.isIntegrityEvidence
                           ? 'bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200'
-                          : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200'
+                          : 'bg-gray-100 dark:bg-secondary text-gray-700 dark:text-gray-200'
                       }`}
                     >
                       {renderDateTime(snapshot.timestamp)}

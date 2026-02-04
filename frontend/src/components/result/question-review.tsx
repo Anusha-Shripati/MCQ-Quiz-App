@@ -122,7 +122,7 @@ const QuestionReview: React.FC<QuestionReviewProps> = ({ answers }) => {
           return (
             <div
               key={ans.id}
-              className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-4 border border-gray-100 dark:border-gray-700 hover:shadow-xl hover:border-purple-100 dark:hover:border-purple-900 transition-all duration-300 transform hover:scale-[1.01] overflow-hidden"
+              className="relative bg-white dark:bg-primary rounded-2xl shadow-lg p-4 border border-gray-100 dark:border-border hover:shadow-xl hover:border-purple-100 dark:hover:border-purple-900 transition-all duration-300 transform hover:scale-[1.01] overflow-hidden"
             >
               <div className="absolute inset-0 bg-gradient-to-br from-purple-50/50 to-indigo-50/50 dark:from-purple-900/20 dark:to-indigo-900/20 opacity-50"></div>
               <div className="relative">
@@ -139,13 +139,13 @@ const QuestionReview: React.FC<QuestionReviewProps> = ({ answers }) => {
                     </span>
                   </div>
 
-                  <span className="text-xs font-semibold text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-3 py-1 rounded-full shadow-sm">
+                  <span className="text-xs font-semibold text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-secondary px-3 py-1 rounded-full shadow-sm">
                     {questionType[ans.question?.type]}
                   </span>
 
                   <div className="flex items-center gap-3 flex-wrap justify-start md:justify-end">
                     {ans.question?.technology?.name && (
-                      <span className="text-xs font-semibold text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded shadow">
+                      <span className="text-xs font-semibold text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-primary px-2 py-0.5 rounded shadow">
                         {ans.question.technology.name}
                       </span>
                     )}
@@ -216,7 +216,7 @@ const QuestionReview: React.FC<QuestionReviewProps> = ({ answers }) => {
                                     ? 'border-green-500 bg-green-50 dark:bg-green-900/30 dark:border-green-400'
                                     : isSelected
                                       ? 'border-red-500 bg-red-50 dark:bg-red-900/30 dark:border-red-400'
-                                      : 'border-gray-200 bg-gray-50 dark:bg-gray-800 dark:border-gray-700'
+                                      : 'border-gray-200 bg-gray-50 dark:bg-primary dark:border-border'
                               }`}
                             >
                               <div className="flex items-start gap-2">
@@ -354,7 +354,7 @@ const QuestionReview: React.FC<QuestionReviewProps> = ({ answers }) => {
                           />
                         </div>
                       ) : (
-                        <div className="bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 min-h-[300px] flex justify-center items-center rounded-xl border-2 border-gray-300 dark:border-gray-600">
+                        <div className="bg-gray-100 dark:bg-primary text-gray-600 dark:text-gray-400 min-h-[300px] flex justify-center items-center rounded-xl border-2 border-gray-300 dark:border-gray-600">
                           Video is uploading...
                         </div>
                       )}
@@ -377,7 +377,7 @@ const QuestionReview: React.FC<QuestionReviewProps> = ({ answers }) => {
             label="Score"
             value={updatedScore}
             placeholder="Enter Score"
-            className="dark:bg-gray-700"
+            className="dark:bg-secondary"
             error={scoreError}
             onChange={handleScoreChange}
           />

@@ -66,7 +66,7 @@ const CategoryMenu = ({
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="start"
-        className="w-48 flex flex-col space-y-1 p-2 bg-white dark:bg-gray-800 rounded-md shadow-md dark:shadow-lg"
+        className="w-48 flex flex-col space-y-1 p-2 bg-white dark:bg-primary rounded-md shadow-md dark:shadow-lg"
       >
         {/* <DropdownMenuItem
           onClick={() => handleEditCategory(category.id)}

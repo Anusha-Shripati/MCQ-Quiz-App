@@ -12,7 +12,7 @@ interface TechnologyFilterProps {
 
 export function TechnologyFilter({ value, onChange, options, className }: TechnologyFilterProps) {
   return (
-    <div className={cn('w-full md:w-72 lg:w-80 shrink-0', className)}>
+    <div className={cn('w-full md:w-64 shrink-0', className)}>
       <Select
         isMulti
         value={value}
@@ -22,21 +22,27 @@ export function TechnologyFilter({ value, onChange, options, className }: Techno
         classNamePrefix="react-select"
         blurInputOnSelect={true}
         classNames={{
-          control: () => 'dark:bg-gray-900 border-gray-200 hover:border-gray-300 dark:hover:border-gray-600 dark:border-gray-700  placeholder-gray-500 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent',
+          control: () =>
+            'dark:bg-background border-gray-200 hover:border-gray-300 dark:hover:border-gray-600 dark:border-border  placeholder-gray-500 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent',
         }}
         styles={{
           control: (base) => ({
             ...base,
             backgroundColor: 'var(--bg-color, white)',
             color: 'var(--text-color, #111827)',
-            minHeight: '2.75rem',
+            minHeight: '2.5rem',
             borderRadius: '0.5rem',
+          }),
+          valueContainer: (base) => ({
+            ...base,
+            maxHeight: '2.5rem',
+            overflow: 'hidden',
+            flexWrap: 'nowrap',
           }),
           menu: (base) => ({
             ...base,
             backgroundColor: 'var(--bg-color, white)',
             zIndex: 50,
-
           }),
           input: (base) => ({
             ...base,

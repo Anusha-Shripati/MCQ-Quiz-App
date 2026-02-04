@@ -167,7 +167,7 @@ function UserForm({ open, onClose, userData = null }: UserFormProps) {
 
   return (
     <Dialog open={open} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-md dark:bg-gray-800" aria-describedby="dialog-description">
+      <DialogContent className="sm:max-w-md dark:bg-primary" aria-describedby="dialog-description">
         <DialogHeader>
           <DialogTitle>{userData !== null ? 'Edit' : 'Create'} User</DialogTitle>
         </DialogHeader>
@@ -178,7 +178,7 @@ function UserForm({ open, onClose, userData = null }: UserFormProps) {
                 label="Name"
                 {...register('name')}
                 placeholder="User Name"
-                className="dark:bg-gray-700"
+                className="dark:bg-secondary"
                 error={errors.name?.message}
               />
             </div>
@@ -188,7 +188,7 @@ function UserForm({ open, onClose, userData = null }: UserFormProps) {
                 label="Email"
                 {...register('email')}
                 placeholder="Email"
-                className="dark:bg-gray-700"
+                className="dark:bg-secondary"
                 error={errors.email?.message}
               />
             </div>
@@ -200,7 +200,7 @@ function UserForm({ open, onClose, userData = null }: UserFormProps) {
                     type="select"
                     value={userFoms.role}
                     label="Role"
-                    className="dark:bg-gray-700"
+                    className="dark:bg-secondary"
                     options={rolesOptions}
                   />
                 </div>
@@ -237,7 +237,7 @@ function UserForm({ open, onClose, userData = null }: UserFormProps) {
                     label="Password"
                     {...register('password')}
                     placeholder="Password"
-                    className="dark:bg-gray-700"
+                    className="dark:bg-secondary"
                     type={showPassword.password ? 'text' : 'password'}
                     error={errors.password?.message}
                     onChange={(e) => {
@@ -259,7 +259,7 @@ function UserForm({ open, onClose, userData = null }: UserFormProps) {
                     label="Confirm Password"
                     {...register('confirmPassword')}
                     placeholder="Confirm Password"
-                    className="dark:bg-gray-700"
+                    className="dark:bg-secondary"
                     type={showPassword.confirmPassword ? 'text' : 'password'}
                     error={errors.confirmPassword?.message}
                   />

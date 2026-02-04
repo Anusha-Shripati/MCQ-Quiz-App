@@ -76,8 +76,8 @@ export default function Login() {
         <ThemeToggle />
       </div>
 
-      <Card className="w-full max-w-[650px] shadow-xl overflow-hidden make dark:bg-gray-900 text-gray-900 dark:text-gray-200 dark:border-gray-700">
-        <div className="bg-white dark:bg-gray-800 p-5 border-b border-gray-700 dark:border-gray-700 flex items-center justify-center">
+      <Card className="w-full max-w-[650px] shadow-xl overflow-hidden make dark:bg-background text-gray-900 dark:text-gray-200 dark:border-border">
+        <div className="bg-white dark:bg-primary p-5 border-b border-gray-700 dark:border-border flex items-center justify-center">
           <h2 className="text-3xl font-semibold"> Welcome To MCQ APP</h2>
         </div>
 
@@ -101,7 +101,7 @@ export default function Login() {
                     autoFocus
                     placeholder="Enter your email"
                     {...register('email')}
-                    className="h-10 bg-gray-300 dark:bg-gray-800 border-gray-400 dark:border-gray-700 text-gray-900 dark:text-gray-200 focus:bg-gray-300 dark:focus:bg-gray-800 focus:border-gray-500 dark:focus:border-gray-600 hover:bg-gray-300 dark:hover:bg-gray-800 focus-visible:ring-gray-500 dark:focus-visible:ring-gray-700 focus-visible:ring-1 focus-visible:ring-offset-0"
+                    className="h-10 bg-gray-300 dark:bg-primary border-gray-400 dark:border-border text-gray-900 dark:text-gray-200 focus:bg-gray-300 dark:focus:bg-gray-800 focus:border-gray-500 dark:focus:border-gray-600 hover:bg-gray-300 dark:hover:bg-gray-800 focus-visible:ring-gray-500 dark:focus-visible:ring-gray-700 focus-visible:ring-1 focus-visible:ring-offset-0"
                     error={errors.email?.message}
                   />
                 </div>
@@ -113,7 +113,7 @@ export default function Login() {
                     type={showPassword ? 'text' : 'password'}
                     placeholder="Enter your password"
                     {...register('password')}
-                    className="h-10 bg-gray-300 dark:bg-gray-800 border-gray-400 dark:border-gray-700 text-gray-900 dark:text-gray-200 focus:bg-gray-300 dark:focus:bg-gray-800 focus:border-gray-500 dark:focus:border-gray-600 hover:bg-gray-300 dark:hover:bg-gray-800 focus-visible:ring-gray-500 dark:focus-visible:ring-gray-700 focus-visible:ring-1 focus-visible:ring-offset-0"
+                    className="h-10 bg-gray-300 dark:bg-primary border-gray-400 dark:border-border text-gray-900 dark:text-gray-200 focus:bg-gray-300 dark:focus:bg-gray-800 focus:border-gray-500 dark:focus:border-gray-600 hover:bg-gray-300 dark:hover:bg-gray-800 focus-visible:ring-gray-500 dark:focus-visible:ring-gray-700 focus-visible:ring-1 focus-visible:ring-offset-0"
                     error={errors.password?.message}
                   />
                   <Button
@@ -137,7 +137,7 @@ export default function Login() {
                 <Button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full text-lg bg-black dark:bg-gray-800 hover:bg-gray-900 dark:hover:bg-gray-700 text-white dark:text-gray-100 focus:bg-black dark:focus:bg-gray-800 focus:ring-1 focus:ring-gray-600 dark:focus:ring-gray-600"
+                  className="w-full text-lg bg-black dark:bg-primary hover:bg-gray-900 dark:hover:bg-gray-700 text-white dark:text-gray-100 focus:bg-black dark:focus:bg-gray-800 focus:ring-1 focus:ring-gray-600 dark:focus:ring-gray-600"
                 >
                   {isSubmitting ? 'Signing in...' : 'Sign In'}
                 </Button>

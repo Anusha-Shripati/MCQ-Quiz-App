@@ -5,7 +5,7 @@ import React from 'react'
 
 function EventTooltip({ events, dateKey }: { events: CalendarEvent, dateKey: string }) {
     return (
-        <TooltipContent className="bg-white dark:bg-gray-950 text-gray-900 dark:text-white p-5 rounded-2xl shadow-2xl w-[420px] max-h-[520px] border border-gray-200 dark:border-gray-800 overflow-auto custom-scrollbar">
+        <TooltipContent className="bg-white dark:bg-gray-950 text-gray-900 dark:text-white p-5 rounded-2xl shadow-2xl w-[420px] max-h-[520px] border border-gray-200 dark:border-border overflow-auto custom-scrollbar">
             <div className="w-full">
                 {events[dateKey]?.length === 0 ? (
                     <div className="text-gray-400 dark:text-gray-500 italic text-center py-10 flex flex-col items-center justify-center">
@@ -34,7 +34,7 @@ function EventTooltip({ events, dateKey }: { events: CalendarEvent, dateKey: str
                                 return (
                                   <div
                                     key={idx}
-                                    className="flex flex-row items-stretch rounded-lg border-2 shadow-sm bg-gray-50 dark:bg-gray-800 transition-all duration-200 hover:shadow-lg"
+                                    className="flex flex-row items-stretch rounded-lg border-2 shadow-sm bg-gray-50 dark:bg-primary transition-all duration-200 hover:shadow-lg"
                                     style={{
                                       borderColor: baseColor,
                                       marginBottom: 8,

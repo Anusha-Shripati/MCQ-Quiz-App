@@ -145,7 +145,7 @@ export function PercentageFilter({
               variant="outline"
               className={cn(
                 'h-11 text-sm font-medium gap-2 whitespace-nowrap',
-                'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700',
+                'bg-white dark:bg-background border-gray-200 dark:border-border',
                 'hover:bg-gray-50 dark:hover:bg-gray-800',
                 'transition-all duration-200 w-40',
                 activeFilter && 'border-blue-500 dark:border-blue-400'
@@ -160,8 +160,8 @@ export function PercentageFilter({
           <Popover.Content className="z-10">
             <div
               className={cn(
-                'mt-2 w-72 bg-white dark:bg-gray-900',
-                'border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg',
+                'mt-2 w-72 bg-white dark:bg-background',
+                'border border-gray-200 dark:border-border rounded-lg shadow-lg',
                 'p-4 transform origin-top'
               )}
             >

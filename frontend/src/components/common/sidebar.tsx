@@ -11,11 +11,12 @@ import { useAuthStore } from '@/store/authStore';
 import useSWR from 'swr';
 import { fetcher } from '@/lib/api';
 import { Module, Permissions } from '@/types/common.types';
-// import { Avatar, AvatarImage } from "../ui/avatar";
 import { useRouter } from 'next/navigation';
 import { ChevronLeft, ChevronRight, Layers } from 'lucide-react';
 import Image from 'next/image';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
+import UserAvatar from './user-avatar';
+import { ThemeToggle } from './theme-toggle';
 
 export default function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -79,144 +80,135 @@ export default function Sidebar() {
       ref={sidebarRef}
       className={`${
         isCollapsed ? 'w-16' : 'w-56'
-      } bg-primary text-primary-foreground sticky top-0 left-0 text-white h-screen z-50  transition-all duration-300 relative`}
+      } bg-primary text-primary-foreground sticky top-0 left-0 h-screen z-50 transition-all duration-300 relative shadow-sm`}
     >
-      <div className="overflow-auto flex flex-row justify-center items-center h-full">
-        <div className="w-[calc(100%-20px)] space-y-4 h-full">
-          <div className="flex items-center justify-center w-full h-20 text-white">
-            {isCollapsed ? (
-              <div className="w-full h-full flex justify-center items-center">
-                <Image
-                  alt="Logic Rays Logo"
-                  src={ImageLinks.logicrays_logo_bg}
-                  className="cursor-pointer"
-                  width={200}
-                  height={200}
-                  onClick={() => router.push('/dashboard')}
-                />
-              </div>
-            ) : (
-              <div className="w-full h-full flex justify-center items-center">
-                <Image
-                  alt="Logic Rays Logo"
-                  src={ImageLinks.white_logo}
-                  className="cursor-pointer"
-                  width={170}
-                  height={170}
-                  onClick={() => router.push('/dashboard')}
-                />
+      <div className="overflow-auto flex flex-row justify-center items-center h-full bg-primary">
+        <div className="w-[calc(100%-20px)] flex flex-col justify-between h-full py-4">
+          <div className="space-y-4 flex-shrink-0">
+            <div className="flex items-center justify-center w-full h-20 flex-shrink-0">
+              {isCollapsed ? (
+                <div className="w-full h-full flex justify-center items-center">
+                  <Image
+                    alt="Logic Rays Logo"
+                    src={ImageLinks.logicrays_logo_bg}
+                    className="cursor-pointer"
+                    width={200}
+                    height={200}
+                    onClick={() => router.push('/dashboard')}
+                  />
+                </div>
+              ) : (
+                <div className="w-full h-full flex justify-center items-center">
+                  <Image
+                    alt="Logic Rays Logo"
+                    src={ImageLinks.white_logo}
+                    className="cursor-pointer"
+                    width={170}
+                    height={170}
+                    onClick={() => router.push('/dashboard')}
+                  />
+                </div>
+              )}
+            </div>
+
+            {!isLoading && permissions && (
+              <div className="flex flex-col justify-center">
+                <nav className="flex-1 flex flex-col gap-4">
+                  <NavItem
+                    href="/dashboard"
+                    icon={<FiHome size={30} />}
+                    label="Dashboard"
+                    isCollapsed={isCollapsed}
+                    isActive={pathname.includes('dashboard')}
+                  />
+
+                  {permissions?.questions?.can_read && (
+                    <NavItem
+                      href="/questions"
+                      icon={<FiHelpCircle size={30} />}
+                      label="Questions"
+                      isCollapsed={isCollapsed}
+                      isActive={pathname.includes('questions')}
+                    />
+                  )}
+                  {permissions?.assessments?.can_read && (
+                    <NavItem
+                      href="/assessments"
+                      icon={<FiFileText size={30} />}
+                      label="Assessment"
+                      isCollapsed={isCollapsed}
+                      isActive={pathname.includes('assessments')}
+                    />
+                  )}
+                  {permissions?.candidates?.can_read && (
+                    <NavItem
+                      href="/candidates"
+                      icon={<FiUsers size={30} />}
+                      label="Candidates"
+                      isCollapsed={isCollapsed}
+                      isActive={pathname.includes('candidates')}
+                    />
+                  )}
+                  {permissions?.results?.can_read && (
+                    <NavItem
+                      href="/results"
+                      icon={<Layers size={30} />}
+                      label="Results"
+                      isCollapsed={isCollapsed}
+                      isActive={pathname.includes('results')}
+                    />
+                  )}
+                  {permissions?.users?.can_read && (
+                    <NavItem
+                      href="/users"
+                      icon={<FaUserAlt size={30} />}
+                      label="Users"
+                      isCollapsed={isCollapsed}
+                      isActive={pathname.includes('users')}
+                    />
+                  )}
+                  {user?.role?.name == 'Super Admin' && (
+                    <NavItem
+                      href="/roles"
+                      icon={<FaUserSecret size={30} />}
+                      label="Roles"
+                      isCollapsed={isCollapsed}
+                      isActive={pathname.includes('roles')}
+                    />
+                  )}
+                </nav>
               </div>
             )}
-            {/* <Button
-            onClick={toggleSidebar}
-            className="absolute top-1/2 -right-2 -translate-y-1/2 bg-white text-gray-800 border border-gray-300 rounded-full shadow-md flex items-center justify-center z-50"
-          >
-            {!isCollapsed ? (
-              <ChevronLeft size={16} />
-            ) : (
-              <ChevronRight size={16} />
-            )}
-          </Button> */}
           </div>
 
-          {!isLoading && permissions && (
-            <div className="flex flex-col justify-center">
-              <nav className="flex-1 flex flex-col gap-4">
-                <NavItem
-                  href="/dashboard"
-                  icon={<FiHome size={30} />}
-                  label="Dashboard"
-                  isCollapsed={isCollapsed}
-                  isActive={pathname.includes('dashboard')}
-                />
-
-                {permissions?.questions?.can_read && (
-                  <NavItem
-                    href="/questions"
-                    icon={<FiHelpCircle size={30} />}
-                    label="Questions"
-                    isCollapsed={isCollapsed}
-                    isActive={pathname.includes('questions')}
-                  />
-                )}
-                {permissions?.assessments?.can_read && (
-                  <NavItem
-                    href="/assessments"
-                    icon={<FiFileText size={30} />}
-                    label="Assessment"
-                    isCollapsed={isCollapsed}
-                    isActive={pathname.includes('assessments')}
-                  />
-                )}
-                {permissions?.candidates?.can_read && (
-                  <NavItem
-                    href="/candidates"
-                    icon={<FiUsers size={30} />}
-                    label="Candidates"
-                    isCollapsed={isCollapsed}
-                    isActive={pathname.includes('candidates')}
-                  />
-                )}
-                {/* <NavItem
-                href="/profile"
-                icon={<FiSettings size={30} />}
-                label="Profile"
-                isCollapsed={isCollapsed}
-                isActive={pathname === "/profile"}
-              /> */}
-                {/* {!isCollapsed && (
-                  <div className="relative flex py-1 items-center">
-                    <div className="flex-grow border-t border-gray-400"></div>
-                    <span className="flex align-center justify-center mx-4 text-gray-400 text-sm font-semibold">
-                      Users Info
-                    </span>
-                    <div className="flex-grow border-t border-gray-400"></div>
-                  </div>
-                )} */}
-                {permissions?.results?.can_read && (
-                  <NavItem
-                    href="/results"
-                    icon={<Layers size={30} />}
-                    label="Results"
-                    isCollapsed={isCollapsed}
-                    isActive={pathname.includes('results')}
-                  />
-                )}
-                {permissions?.users?.can_read && (
-                  <NavItem
-                    href="/users"
-                    icon={<FaUserAlt size={30} />}
-                    label="Users"
-                    isCollapsed={isCollapsed}
-                    isActive={pathname.includes('users')}
-                  />
-                )}
-                {user?.role?.name == 'Super Admin' && (
-                  <NavItem
-                    href="/roles"
-                    icon={<FaUserSecret size={30} />}
-                    label="Roles"
-                    isCollapsed={isCollapsed}
-                    isActive={pathname.includes('roles')}
-                  />
-                )}
-              </nav>
-            </div>
-          )}
+          <div className="flex flex-col items-center justify-center gap-3 mt-4 flex-shrink-0">
+            <ThemeToggle isCollapsed={isCollapsed} />
+            <UserAvatar isCollapsed={isCollapsed} />
+            {isCollapsed && (
+              <Button
+                onClick={toggleSidebar}
+                variant="ghost"
+                size="icon"
+                className="hover:bg-secondary hover:text-secondary-foreground rounded-lg w-10 h-10 transition-all duration-200"
+              >
+                <ChevronRight size={16} />
+              </Button>
+            )}
+          </div>
         </div>
-        <div
-          onClick={toggleSidebar}
-          className={`absolute  bottom-4 -right-[11%] transform -translate-y-1/2 cursor-pointer ${
-            isCollapsed ? 'translate-x-2' : '-translate-x-2'
-          }`}
-        >
-          <Button
-            className="bg-white text-gray-800 border border-gray-300 rounded-full shadow-md flex items-center justify-center"
-            size="icon"
+        {!isCollapsed && (
+          <div
+            onClick={toggleSidebar}
+            className="absolute bottom-4 -right-[13%] transform -translate-y-1/2 cursor-pointer -translate-x-2"
           >
-            {!isCollapsed ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
-          </Button>
-        </div>
+            <Button
+              variant="ghost"
+              className="bg-background text-foreground border border-border rounded-full shadow-md flex items-center justify-center w-8 h-8"
+            >
+              <ChevronLeft size={14} />
+            </Button>
+          </div>
+        )}
       </div>
     </aside>
   );
@@ -249,6 +241,7 @@ function NavItem({
           <>
             <TooltipTrigger asChild>
               <Button
+                variant="ghost"
                 onMouseEnter={handleMouseEnter}
                 className={`w-full text-base relative h-12 flex justify-center items-center gap-4 p-3 rounded-lg transition-colors ${isActive
                   ? 'bg-secondary text-secondary-foreground'
@@ -264,6 +257,7 @@ function NavItem({
           </>
         ) : (
           <Button
+            variant="ghost"
             onMouseEnter={handleMouseEnter}
             className={`w-full text-base relative h-12 flex justify-start items-center gap-4 p-3 rounded-lg transition-colors ${isActive
               ? 'bg-secondary text-secondary-foreground'

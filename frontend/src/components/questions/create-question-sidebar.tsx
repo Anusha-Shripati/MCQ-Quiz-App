@@ -63,7 +63,7 @@ const QuestionSidebar: React.FC<QuestionSidebarProps> = ({
   return (
     <Card className="w-full md:w-1/4 h-[calc(100vh-12rem)] flex flex-col overflow-hidden shadow-lg  gap-2">
       {/* Header */}
-      <CardHeader className="border-b border-gray-200 dark:border-gray-700 p-2 sm:p-4 flex flex-row justify-between items-center">
+      <CardHeader className="border-b border-gray-200 dark:border-border p-2 sm:p-4 flex flex-row justify-between items-center">
         <CardTitle className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
           Questions
         </CardTitle>
@@ -88,7 +88,7 @@ const QuestionSidebar: React.FC<QuestionSidebarProps> = ({
                   validationErrors[index] ? 'border-red-500' : '',
                   selectedQuestion === index
                     ? 'bg-blue-500 text-white hover:bg-blue-600 shadow-md'
-                    : 'bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 shadow-sm'
+                    : 'bg-gray-50 dark:bg-primary text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 shadow-sm'
                 )}
                 onClick={() => handleQuestionChange(index)}
               >

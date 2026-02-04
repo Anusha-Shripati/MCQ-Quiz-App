@@ -35,7 +35,7 @@ export function ThemeToggle({ isCollapsed }: { isCollapsed: boolean }) {
           <Button
             variant="ghost"
             onClick={toggleTheme}
-            className={`w-full text-base relative h-12 flex ${isCollapsed ? 'justify-center' : 'justify-start'} items-center gap-4 p-3 rounded-lg transition-colors hover:bg-secondary hover:text-secondary-foreground`}
+            className={`w-full text-base relative h-10 flex ${isCollapsed ? 'justify-center' : 'justify-start'} items-center gap-4 p-3 rounded-lg transition-colors hover:bg-secondary hover:text-secondary-foreground`}
             aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`}
           >
             <span className="h-5 w-5 relative flex items-center justify-center overflow-hidden">

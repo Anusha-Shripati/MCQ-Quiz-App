@@ -18,7 +18,7 @@ import type {
 import { ExamMetaTech } from '@/types/exam.types';
 import { format } from 'date-fns';
 import dayjs from 'dayjs';
-import { Edit, Trash2 } from 'lucide-react';
+import { Edit, Trash2, CheckCircle2, Clock, HourglassIcon, XCircle } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import qs from 'query-string';
@@ -347,32 +347,49 @@ function CandidateTable() {
         key: 'status',
         header: 'Status',
         render: (row) => {
-          const statusMap = {
-            completed: 'bg-green-100 text-green-800',
-            in_progress: 'bg-yellow-100 text-yellow-800',
-            pending: 'bg-gray-100 text-gray-800',
-            expired: 'bg-red-100 text-red-800',
+          const statusConfig = {
+            completed: {
+              icon: CheckCircle2,
+              iconColor: 'text-green-600',
+              label: 'Completed',
+            },
+            in_progress: {
+              icon: Clock,
+              iconColor: 'text-yellow-600',
+              label: 'In Progress',
+            },
+            pending: {
+              icon: HourglassIcon,
+              iconColor: 'text-gray-600',
+              label: 'Pending',
+            },
+            expired: {
+              icon: XCircle,
+              iconColor: 'text-red-600',
+              label: 'Expired',
+            },
           };
 
           const status = row.exam?.status as 'completed' | 'in_progress' | 'pending' | 'expired';
-          const badgeClass = statusMap[status] || 'bg-gray-100 text-gray-800';
+          const config = statusConfig[status] || statusConfig.pending;
+          const StatusIcon = config.icon;
 
           return (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div
-                  className={`inline-block px-3 py-1 text-sm font-medium rounded-md ${badgeClass} text-center min-w-[100px]`}
-                  style={{ minWidth: 100, display: 'inline-block' }}
-                >
-                  <div>{status?.replace('_', ' ') || 'Unknown'}</div>
-                </div>
-              </TooltipTrigger>
-              <TooltipContent className="bg-popover text-popover-foreground p-2 rounded shadow-lg">
-                {row?.result?.length
-                  ? `(${row?.result[0]?.percentage?.toFixed(2)}) %`
-                  : 'Exam not started'}
-              </TooltipContent>
-            </Tooltip>
+            <div className="flex items-center justify-center">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="cursor-pointer">
+                    <StatusIcon className={`h-5 w-5 ${config.iconColor}`} />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent className="bg-popover text-popover-foreground p-2 rounded shadow-lg">
+                  <div className="font-medium">{config.label}</div>
+                  {row?.result?.length
+                    ? `${row?.result[0]?.percentage?.toFixed(2)}%`
+                    : 'Exam not started'}
+                </TooltipContent>
+              </Tooltip>
+            </div>
           );
         },
       },

@@ -2,7 +2,6 @@ import { Input } from '../../ui/form/input';
 import { Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-
 interface SearchFilterProps {
   searchQuery: string;
   setSearchQuery: (query: string) => void;
@@ -18,9 +17,9 @@ export function SearchFilter({ searchQuery, setSearchQuery }: SearchFilterProps)
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
         className={cn(
-          'pl-10 pr-4 h-10 w-full bg-white dark:bg-background border-gray-200 dark:border-border',
-          'focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent',
-          'placeholder-gray-400 dark:placeholder-gray-500',
+          'pl-10 pr-4 h-10 w-full bg-white dark:bg-primary border-gray-200 dark:border-border',
+          'focus:ring-2 focus:ring-blue-500 dark:focus:ring-white focus:border-transparent',
+          'placeholder:text-gray-500 text-sm',
           'rounded-lg shadow-sm transition-all duration-200',
           'hover:border-gray-300 dark:hover:border-gray-600'
         )}

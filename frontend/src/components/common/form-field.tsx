@@ -70,11 +70,11 @@ export const FormField = forwardRef<HTMLInputElement, FormFieldProps>(
               disabled={props.disabled}
             >
               <SelectTrigger
-                className={`${props.className} border-gray-200 hover:border-gray-200 dark:hover:border-gray-600 dark:border-gray-600 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent`}
+                className={`${props.className} border-gray-200 hover:border-gray-200 dark:hover:border-gray-600 dark:border-gray-600 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 dark:focus:ring-white focus:border-transparent`}
               >
                 <SelectValue placeholder={`Select ${props.placeholder || props.label || ''}`} />
               </SelectTrigger>
-              <SelectContent disablePortal>
+              <SelectContent>
                 {normalizedOptions?.length > 0 ? (
                   normalizedOptions.map((option: SelectOption) => (
                     <SelectItem key={option.value} value={String(option.value)}>

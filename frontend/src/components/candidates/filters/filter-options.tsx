@@ -116,10 +116,11 @@ export function FilterOptions({
                 variant="outline"
                 className={cn(
                   'h-10 text-sm font-medium gap-2 whitespace-nowrap',
-                  'bg-white dark:bg-background border-gray-200 dark:border-border',
+                  'bg-white dark:bg-primary border-gray-200 dark:border-border',
                   'hover:bg-gray-50 dark:hover:bg-gray-800',
                   'transition-all duration-200',
-                  activeFilter === filter.toLowerCase() && 'border-blue-500 dark:border-blue-400'
+                  'focus-visible:ring-0 focus-visible:ring-offset-0',
+                  activeFilter === filter.toLowerCase() && 'border-white dark:border-white'
                 )}
               >
                 {filter}
@@ -135,9 +136,10 @@ export function FilterOptions({
             <Popover.Content className="z-10">
               <div
                 className={cn(
-                  'mt-2 w-72 bg-white dark:bg-background',
-                  'border border-gray-200 dark:border-border rounded-lg shadow-lg',
-                  'p-4 transform origin-top'
+                  'mt-2 w-72 bg-white dark:bg-primary',
+                  'border border-gray-200 dark:border-border rounded-lg shadow-2xl',
+                  'p-4 transform origin-top',
+                  'ring-1 ring-black ring-opacity-5'
                 )}
               >
                 {renderFilterContent(filter.toLowerCase())}

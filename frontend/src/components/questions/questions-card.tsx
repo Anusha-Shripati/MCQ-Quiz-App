@@ -72,7 +72,7 @@ export const QuestionCard = ({
 
   return (
     <>
-      <Card className="relative bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-800 dark:via-gray-900 dark:to-gray-800 rounded-2xl p-6 mb-8 border border-gray-200 dark:border-gray-700 transition-all duration-300">
+      <Card className="relative bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-800 dark:via-gray-900 dark:to-gray-800 rounded-2xl p-6 mb-8 border border-gray-200 dark:border-border transition-all duration-300">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-4">
           <div className="flex-1 min-w-0">
@@ -125,7 +125,7 @@ export const QuestionCard = ({
           {question.meta?.videoToVideo ? (
             <div
               key="video"
-              className="w-full overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm mt-2"
+              className="w-full overflow-hidden rounded-lg border border-gray-200 dark:border-border shadow-sm mt-2"
               dangerouslySetInnerHTML={{ __html: question.meta?.video_url || '' }}
             ></div>
           ) : null}
@@ -144,7 +144,7 @@ export const QuestionCard = ({
                     className={`flex items-start gap-2 p-3 rounded-lg text-base font-medium border transition-all duration-200 ${
                       question?.correct_answer.includes(idx.toString())
                         ? 'bg-green-50 dark:bg-green-900/60 text-green-800 dark:text-green-100 border-green-200 dark:border-green-700 shadow-sm'
-                        : 'bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-300 border-gray-200 dark:border-gray-700'
+                        : 'bg-white dark:bg-primary text-gray-800 dark:text-gray-300 border-gray-200 dark:border-border'
                     } hover:scale-[1.02] hover:shadow-md`}
                   >
                     <span className="inline-block w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200 flex items-center justify-center font-bold mr-2 shadow-sm">
@@ -209,7 +209,7 @@ export const QuestionCard = ({
 
         {/* Delete Dialog */}
         <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
-          <DialogContent className="sm:max-w-[425px] rounded-2xl p-6 border-0 shadow-2xl bg-white dark:bg-gray-900">
+          <DialogContent className="sm:max-w-[425px] rounded-2xl p-6 border-0 shadow-2xl bg-white dark:bg-background">
             <DialogHeader>
               <DialogTitle className="text-xl font-bold text-red-700 dark:text-red-400 mb-2">
                 Are you sure?
@@ -222,7 +222,7 @@ export const QuestionCard = ({
               <Button
                 variant="outline"
                 onClick={() => setIsDeleteModalOpen(false)}
-                className="text-gray-900 dark:text-white border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md px-4 py-2 font-semibold"
+                className="text-gray-900 dark:text-white border-gray-300 dark:border-border hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md px-4 py-2 font-semibold"
               >
                 Cancel
               </Button>

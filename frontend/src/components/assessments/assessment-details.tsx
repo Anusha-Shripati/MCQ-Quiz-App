@@ -290,8 +290,8 @@ function AssessmentItem({
             Technology Breakdown {title ? `(${title})` : ''}
           </h4>
 
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-600 overflow-hidden">
-            <div className="grid grid-cols-6 gap-4 p-4 bg-gray-100 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
+          <div className="bg-white dark:bg-primary rounded-xl shadow-sm border border-gray-200 dark:border-gray-600 overflow-hidden">
+            <div className="grid grid-cols-6 gap-4 p-4 bg-gray-100 dark:bg-secondary border-b border-gray-200 dark:border-gray-600">
               <div className="font-semibold text-gray-700 dark:text-gray-300">Technology</div>
               <div className="text-center font-semibold text-gray-700 dark:text-gray-300">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm">
@@ -323,7 +323,7 @@ function AssessmentItem({
               <div
                 key={tech.id}
                 className={`grid grid-cols-6 gap-4 p-4 dark:hover:bg-gray-750 transition-colors duration-150 ${
-                  index % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-25 dark:bg-gray-775'
+                  index % 2 === 0 ? 'bg-white dark:bg-primary' : 'bg-gray-25 dark:bg-gray-775'
                 }`}
               >
                 <div className="font-medium text-gray-800 dark:text-gray-200 flex items-center gap-2">

@@ -261,7 +261,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
             label="Type"
             type="select"
             parentClassName="w-full"
-            className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-300"
+            className="bg-white dark:bg-primary border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-300"
             value={question.type}
             onChange={(value: Question['type']) =>
               handleQuestionTypeChange(value, selectedQuestion)
@@ -273,7 +273,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
             label="Difficulty Type"
             type="select"
             parentClassName="w-full"
-            className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-300"
+            className="bg-white dark:bg-primary border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-300"
             value={question.difficulty_level}
             onChange={(value: Question['difficulty_level']) => {
               const updatedQuestions = [...questions];
@@ -288,7 +288,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
             parentClassName="w-full"
             label="Time (In minutes)"
             type="number"
-            className="bg-white dark:bg-gray-800 min-w-[100px] border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-300"
+            className="bg-white dark:bg-primary min-w-[100px] border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-300"
             placeholder="Enter time in minutes"
             value={question.time}
             onChange={(e) => {
@@ -336,7 +336,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
               placeholder="Enter video url"
               value={(question.meta?.video_url || '') as string}
               onChange={handleQuestionURL}
-              className="w-full p-2 border rounded-md dark:bg-gray-700 dark:text-white"
+              className="w-full p-2 border rounded-md dark:bg-secondary dark:text-white"
             />
           </>
         ) : (
@@ -457,7 +457,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
             }
             value={(question?.meta?.code || '') as string}
             onChange={handleCodeQuestions}
-            className="w-full p-2 border rounded-md dark:bg-gray-700 dark:text-white"
+            className="w-full p-2 border rounded-md dark:bg-secondary dark:text-white"
           />
         )}
 

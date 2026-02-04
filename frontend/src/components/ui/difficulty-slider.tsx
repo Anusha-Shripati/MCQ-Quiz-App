@@ -22,7 +22,7 @@ export function DifficultySlider({
   return (
     <div className="space-y-2">
       <div className="text-sm font-medium text-gray-700 dark:text-gray-300">{label}</div>
-      <div className="relative h-2 bg-gray-200 dark:bg-gray-700 rounded-full">
+      <div className="relative h-2 bg-gray-200 dark:bg-secondary rounded-full">
         <div
           className={`absolute h-full rounded-full transition-all ${colorStyles[color]}`}
           style={{ width: `${value}%` }}

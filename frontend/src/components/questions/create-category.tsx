@@ -89,7 +89,7 @@ const CreateCategory: React.FC<CreateCategoryProps> = ({ categoriesArray = [] })
         <Input
           type="search"
           placeholder="Search Technology..."
-          className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-300 min-w-[200px]"
+          className="bg-white dark:bg-primary border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-300 min-w-[200px]"
           value={searchTerm}
           onChange={handleSearch}
         />

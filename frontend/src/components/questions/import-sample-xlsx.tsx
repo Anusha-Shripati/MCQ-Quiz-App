@@ -162,7 +162,7 @@ const ImportSampleXLSX = ({
   return (
     <div>
       <Dialog open={importOpen} onOpenChange={setImportOpen}>
-        <DialogContent className="sm:max-w-md dark:bg-gray-800 dark:border-gray-700">
+        <DialogContent className="sm:max-w-md dark:bg-primary dark:border-border">
           <DialogHeader>
             <DialogTitle className="text-xl font-semibold flex items-center gap-2 dark:text-gray-100">
               <BsUpload className="text-blue-500 dark:text-blue-400" />
@@ -188,9 +188,9 @@ const ImportSampleXLSX = ({
               className={cn(
                 'border-2 border-dashed rounded-lg p-4 transition-all duration-200 ease-in-out',
                 isDragging
-                  ? 'border-blue-500 bg-blue-50 dark:bg-gray-700 dark:border-blue-400'
+                  ? 'border-blue-500 bg-blue-50 dark:bg-secondary dark:border-blue-400'
                   : selectedFile
-                    ? 'border-green-500 bg-green-50 dark:bg-gray-700 dark:border-green-400'
+                    ? 'border-green-500 bg-green-50 dark:bg-secondary dark:border-green-400'
                     : 'border-gray-300 hover:border-blue-400 dark:border-gray-600 dark:hover:border-gray-500',
                 'flex flex-col items-center justify-center cursor-pointer'
               )}
@@ -227,7 +227,7 @@ const ImportSampleXLSX = ({
                     </span>
                     <button
                       onClick={clearSelectedFile}
-                      className="p-1 rounded-full bg-red-100 text-red-500 hover:bg-red-200 dark:bg-gray-700 dark:text-red-300 dark:hover:bg-gray-600 transition-colors"
+                      className="p-1 rounded-full bg-red-100 text-red-500 hover:bg-red-200 dark:bg-secondary dark:text-red-300 dark:hover:bg-gray-600 transition-colors"
                     >
                       <BsX />
                     </button>
@@ -244,7 +244,7 @@ const ImportSampleXLSX = ({
                   <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
                     Drag & Drop your XLSX file here
                   </p>
-                  <button className="px-4 py-2 text-sm bg-blue-100 text-blue-600 rounded-md hover:bg-blue-200 dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600 transition-colors">
+                  <button className="px-4 py-2 text-sm bg-blue-100 text-blue-600 rounded-md hover:bg-blue-200 dark:bg-secondary dark:text-gray-100 dark:hover:bg-gray-600 transition-colors">
                     Choose file
                   </button>
                 </div>
@@ -260,7 +260,7 @@ const ImportSampleXLSX = ({
             </div>
 
             {/* File format info with better visual design */}
-            <div className="bg-amber-50 border border-amber-200 rounded-md p-3 flex items-start gap-3 dark:bg-gray-700 dark:border-gray-600">
+            <div className="bg-amber-50 border border-amber-200 rounded-md p-3 flex items-start gap-3 dark:bg-secondary dark:border-gray-600">
               <div className="text-amber-500 dark:text-amber-300 mt-0.5">
                 <FiInfo size={18} />
               </div>
@@ -285,7 +285,7 @@ const ImportSampleXLSX = ({
               </div>
             </div>
 
-            <div className="bg-gradient-to-r bg-blue-100 dark:bg-gray-700 dark:border dark:border-gray-600 rounded-lg p-4 shadow-sm">
+            <div className="bg-gradient-to-r bg-blue-100 dark:bg-secondary dark:border dark:border-gray-600 rounded-lg p-4 shadow-sm">
               <div className="flex items-center gap-2 mb-3">
                 <div className="w-8 h-8 bg-blue-500 dark:bg-gray-600 rounded-md flex items-center justify-center text-white">
                   <BsFiletypeXlsx size={20} />

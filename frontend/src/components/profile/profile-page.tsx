@@ -154,7 +154,7 @@ export default function ProfilePage() {
         <h1 className="text-3xl font-bold mb-8 dark:text-white flex align-center justify-center">
           User Profile
         </h1>
-        <div className="max-w-4xl mx-auto p-7 bg-white dark:bg-gray-700 m-4 rounded-lg shadow-md">
+        <div className="max-w-4xl mx-auto p-7 bg-white dark:bg-secondary m-4 rounded-lg shadow-md">
           {/* Tabs */}
           <div className="flex border-b dark:border-gray-600 bg">
             <button
@@ -185,21 +185,21 @@ export default function ProfilePage() {
               <ProfilePictureUpload imageUrl={user?.image || ''} />
               <div className="space-y-4 mb-4 mt-4">
                 <form onSubmit={handleUserInfoSubmit(onSaveUserInfo)}>
-                  <div className="pb-4 dark:border-gray-700">
+                  <div className="pb-4 dark:border-border">
                     <FormField
                       label="User Name"
                       {...registerUserInfo('userName')}
-                      className="w-full mt-2 dark:bg-gray-800 dark:text-white"
+                      className="w-full mt-2 dark:bg-primary dark:text-white"
                       error={userInfoErrors.userName?.message}
                       disabled={!isEditing}
                     />
                   </div>
 
-                  <div className="pb-2 dark:border-gray-700">
+                  <div className="pb-2 dark:border-border">
                     <FormField
                       label="Email"
                       {...registerUserInfo('email')}
-                      className="w-full mt-2 dark:bg-gray-800 dark:text-white"
+                      className="w-full mt-2 dark:bg-primary dark:text-white"
                       // error={userInfoErrors.email?.message}
                       disabled={!isEditing}
                     />
@@ -231,7 +231,7 @@ export default function ProfilePage() {
                     type={showPassword.old ? 'text' : 'password'}
                     label="Current Password"
                     {...registerPassword('oldPassword')}
-                    className="w-full dark:bg-gray-800 dark:text-white"
+                    className="w-full dark:bg-primary dark:text-white"
                     error={passwordErrors.oldPassword?.message}
                     autoComplete={'off'}
                   />
@@ -249,7 +249,7 @@ export default function ProfilePage() {
                     label="New Password"
                     type={showPassword.new ? 'text' : 'password'}
                     {...registerPassword('newPassword')}
-                    className="w-full dark:bg-gray-800 dark:text-white"
+                    className="w-full dark:bg-primary dark:text-white"
                     onFocus={() => setShowPasswordRequirements(true)}
                     autoComplete={'off'}
                   />
@@ -268,7 +268,7 @@ export default function ProfilePage() {
                     type={showPassword.reNew ? 'text' : 'password'}
                     label="Re-New Password"
                     {...registerPassword('reNewPassword')}
-                    className="w-full dark:bg-gray-800 dark:text-white"
+                    className="w-full dark:bg-primary dark:text-white"
                     error={passwordErrors.reNewPassword?.message}
                     autoComplete={'off'}
                   />

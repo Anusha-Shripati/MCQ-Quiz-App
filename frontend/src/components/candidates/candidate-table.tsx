@@ -265,7 +265,7 @@ function CandidateTable() {
                   {visiblePart}...@{domain}
                 </span>
               </TooltipTrigger>
-              <TooltipContent className="bg-gray-800 text-white p-2 rounded shadow-lg">
+              <TooltipContent className="bg-popover text-popover-foreground p-2 rounded shadow-lg">
                 {email}
               </TooltipContent>
             </Tooltip>
@@ -298,7 +298,7 @@ function CandidateTable() {
                   {remainingCount}
                 </span>
               </TooltipTrigger>
-              <TooltipContent className="bg-gray-800 text-white p-2 rounded shadow-lg">
+              <TooltipContent className="bg-popover text-popover-foreground p-2 rounded shadow-lg">
                 {allTechnologies || 'No technologies available'}
               </TooltipContent>
             </Tooltip>
@@ -367,7 +367,7 @@ function CandidateTable() {
                   <div>{status?.replace('_', ' ') || 'Unknown'}</div>
                 </div>
               </TooltipTrigger>
-              <TooltipContent className="bg-gray-800 text-white p-2 rounded shadow-lg">
+              <TooltipContent className="bg-popover text-popover-foreground p-2 rounded shadow-lg">
                 {row?.result?.length
                   ? `(${row?.result[0]?.percentage?.toFixed(2)}) %`
                   : 'Exam not started'}
@@ -400,7 +400,7 @@ function CandidateTable() {
                       }
                     }}
                     variant="ghost"
-                    className="p-2 hover:bg-gray-200 dark:hover:bg-gray-900 rounded-lg transition-all duration-200 group"
+                    className="p-2 hover:bg-gray-200 dark:hover:bg-secondary rounded-lg transition-all duration-200 group"
                   >
                     <FiCopy className="h-5 w-5 text-gray-700 dark:text-gray-300 group-hover:text-black dark:group-hover:text-white transition-colors" />
                   </Button>
@@ -428,7 +428,7 @@ function CandidateTable() {
                     window.location.href = `mailto:${candidate.email}`;
                   }}
                   variant="ghost"
-                  className="p-2 hover:bg-gray-200 dark:hover:bg-gray-900 rounded-lg transition-all duration-200 group"
+                  className="p-2 hover:bg-gray-200 dark:hover:bg-secondary rounded-lg transition-all duration-200 group"
                 >
                   <FiMail className="h-5 w-5 text-gray-700 dark:text-gray-300 group-hover:text-black dark:group-hover:text-white transition-colors" />
                 </Button>
@@ -447,7 +447,7 @@ function CandidateTable() {
                         handleEdit(candidate);
                       }}
                       variant="ghost"
-                      className="p-2 hover:bg-gray-200 dark:hover:bg-gray-900 rounded-lg transition-all duration-200 group"
+                      className="p-2 hover:bg-gray-200 dark:hover:bg-secondary rounded-lg transition-all duration-200 group"
                     >
                       <Edit className="h-4 w-4 text-gray-600 dark:text-gray-300 group-hover:text-black dark:group-hover:text-white transition-colors" />
                     </Button>
@@ -532,7 +532,7 @@ function CandidateTable() {
                     )}
                 </p>
               </TooltipTrigger>
-              <TooltipContent className="bg-gray-800 text-white p-2 rounded shadow-lg">
+              <TooltipContent className="bg-popover text-popover-foreground p-2 rounded shadow-lg">
                 {formatTestDateRange(
                   row?.exam?.start_time as string,
                   row?.exam?.end_time as string

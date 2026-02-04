@@ -99,7 +99,7 @@ export default function ExamDurationPerformance() {
                     </div>
                   </div>
 
-                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                  <div className="w-full bg-gray-200 dark:bg-secondary rounded-full h-2">
                     <div
                       className="h-2 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all"
                       style={{ width: `${item.avgPercentage}%` }}

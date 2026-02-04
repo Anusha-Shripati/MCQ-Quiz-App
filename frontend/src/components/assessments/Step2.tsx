@@ -195,7 +195,7 @@ const Step2: React.FC<Step2Props> = ({
 
   return (
     <div className="space-y-6">
-      <Card className="dark:bg-gray-800 dark:border-gray-700">
+      <Card className="dark:bg-primary dark:border-border">
         <CardHeader>
           <div className="flex justify-between items-center mb-6">
             <div>
@@ -219,12 +219,12 @@ const Step2: React.FC<Step2Props> = ({
               <Input
                 type="number"
                 {...register('targetQuestions', { valueAsNumber: true })}
-                className="w-20 text-center dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                className="w-20 text-center dark:bg-secondary dark:border-gray-600 dark:text-white"
                 min="0"
               />
             </div>
           </div>
-          <div className="px-4 py-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg border dark:border-gray-700">
+          <div className="px-4 py-4 bg-gray-50 dark:bg-background/50 rounded-lg border dark:border-border">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-sm font-semibold dark:text-gray-200">Difficulty Distribution</h3>
               <span className="text-xs text-muted-foreground">
@@ -248,15 +248,15 @@ const Step2: React.FC<Step2Props> = ({
         return (
           <Card
             key={technology.id}
-            className="dark:bg-gray-800 dark:border-gray-700 overflow-hidden"
+            className="dark:bg-primary dark:border-border overflow-hidden"
           >
-            <CardHeader className="bg-gray-50 dark:bg-gray-900/50 py-4">
+            <CardHeader className="bg-gray-50 dark:bg-background/50 py-4">
               <CardTitle className="text-lg font-bold dark:text-white">{technology.name}</CardTitle>
             </CardHeader>
             <CardContent className="p-0">
               <div className="overflow-x-auto">
                 <table className="w-full text-sm text-left">
-                  <thead className="text-xs text-gray-700 uppercase bg-primary/5 dark:bg-gray-900/50 dark:text-gray-400">
+                  <thead className="text-xs text-gray-700 uppercase bg-primary/5 dark:bg-background/50 dark:text-gray-400">
                     <tr>
                       <th className="px-6 py-4 font-semibold text-gray-500">Question Type</th>
                       <th className="px-6 py-4 font-semibold text-gray-500 text-center">Easy</th>
@@ -269,7 +269,7 @@ const Step2: React.FC<Step2Props> = ({
                     {visibleOptions.map((option) => (
                       <tr
                         key={option.value}
-                        className="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                        className="bg-white dark:bg-primary hover:bg-gray-50 dark:hover:bg-gray-700/50"
                       >
                         <td className="px-6 py-4 font-medium text-gray-700 dark:text-white">
                           {option.label}
@@ -295,7 +295,7 @@ const Step2: React.FC<Step2Props> = ({
                                     e.target.value
                                   )
                                 }
-                                className="w-full max-w-[100px] mx-auto text-center h-9 bg-white dark:bg-gray-700 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500"
+                                className="w-full max-w-[100px] mx-auto text-center h-9 bg-white dark:bg-secondary dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500"
                               />
                               <div className="text-sm text-gray-400 mt-1 font-bold">
                                 Max: {maxAllowed}
@@ -312,7 +312,7 @@ const Step2: React.FC<Step2Props> = ({
                     {/* Toggle Row */}
                     {filteredOptions.length > 4 && (
                       <tr>
-                        <td colSpan={5} className="px-6 py-3 bg-white dark:bg-gray-800">
+                        <td colSpan={5} className="px-6 py-3 bg-white dark:bg-primary">
                           <button
                             onClick={() => toggleExpandedTypes(techIndex)}
                             className="flex items-center text-sm font-medium text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 focus:outline-none transition-colors"
@@ -332,7 +332,7 @@ const Step2: React.FC<Step2Props> = ({
                     )}
 
                     {/* Totals Row */}
-                    <tr className="bg-white dark:bg-gray-900/50 border-t">
+                    <tr className="bg-white dark:bg-background/50 border-t">
                       <td className="px-6 py-4 font-semibold text-gray-900 dark:text-white">
                         Total
                       </td>
@@ -357,7 +357,7 @@ const Step2: React.FC<Step2Props> = ({
         );
       })}
 
-      <CardFooter className="flex flex-col sm:flex-row justify-end gap-4 border-t dark:border-gray-700 pt-6 px-0">
+      <CardFooter className="flex flex-col sm:flex-row justify-end gap-4 border-t dark:border-border pt-6 px-0">
         <Button
           variant="outline"
           onClick={handlePreviousStep}

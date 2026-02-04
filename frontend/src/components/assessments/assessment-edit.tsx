@@ -310,10 +310,10 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
     setLocalAssessment((prev) => ({ ...prev, duration: parseInt(selectedOption) || 0 }));
   };
   return (
-    <div className="min-h-screen dark:bg-gray-800">
+    <div className="min-h-screen dark:bg-primary">
       <div className="px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden min-h-[600px]">
-          <div className="px-6 py-5 border-b border-gray-200 dark:border-gray-700">
+        <div className="bg-white dark:bg-background rounded-xl shadow-sm border border-gray-200 dark:border-border overflow-hidden min-h-[600px]">
+          <div className="px-6 py-5 border-b border-gray-200 dark:border-border">
             <div className="flex justify-between items-start">
               <div>
                 <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
@@ -389,7 +389,7 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
                   value={localAssessment.totalQuestions ?? 0}
                   onChange={handleTotalQuestionsChange}
                   className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 
-                        hover:border-gray-400 transition-colors dark:bg-gray-800 dark:border-gray-600 
+                        hover:border-gray-400 transition-colors dark:bg-primary dark:border-gray-600 
                         dark:text-gray-100 dark:hover:border-gray-500 dark:focus:ring-blue-600"
                   min="1"
                 />
@@ -409,7 +409,7 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
                     })
                   }
                   className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500
-                        hover:border-gray-400 transition-colors dark:bg-gray-800 dark:border-gray-600
+                        hover:border-gray-400 transition-colors dark:bg-primary dark:border-gray-600
                         dark:text-gray-100 dark:hover:border-gray-500 dark:focus:ring-blue-600"
                 />
               </div>
@@ -425,7 +425,7 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
                   label: tech?.technology.name,
                 }))}
                 onChange={handleTechnologyChange}
-                className="mb-4 dark:bg-gray-700"
+                className="mb-4 dark:bg-secondary"
                 classNamePrefix="react-select"
                 placeholder="Select technologies..."
                 styles={{
@@ -492,7 +492,7 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
                 {localTechnologies.map((tech) => (
                   <div
                     key={tech.technology?.id}
-                    className="flex items-center bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 
+                    className="flex items-center bg-gray-200 dark:bg-secondary hover:bg-gray-300 
                                dark:hover:bg-gray-600 transition-colors rounded-full px-4 py-2"
                   >
                     <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -505,7 +505,7 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
                         ml-2 p-0 w-6 h-6 flex items-center justify-center rounded-full
                         bg-gray-200 text-gray-700
                         hover:bg-red-100 hover:text-red-600
-                        dark:bg-gray-700 dark:text-gray-200
+                        dark:bg-secondary dark:text-gray-200
                         dark:hover:bg-red-900 dark:hover:text-red-200
                         border border-transparent
                         transition-colors
@@ -583,7 +583,7 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
                           min="0"
                           value={tech[difficulty as 'easy' | 'medium' | 'hard'].total}
                           disabled
-                          className="w-24 text-center mx-auto bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                          className="w-24 text-center mx-auto bg-gray-50 dark:bg-secondary dark:border-gray-600 dark:text-white"
                         />
                         <div className="w-full flex flex-col gap-2 mt-3">
                           {questionTypeOptions.map((item) => {
@@ -624,7 +624,7 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
                                         e.target.value
                                       )
                                     }
-                                    className="w-16 sm:w-20 text-center bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white border border-gray-300 focus:ring-2 focus:ring-blue-400"
+                                    className="w-16 sm:w-20 text-center bg-gray-50 dark:bg-secondary dark:border-gray-600 dark:text-white border border-gray-300 focus:ring-2 focus:ring-blue-400"
                                   />
                                 </div>
                               </div>
@@ -643,7 +643,7 @@ export default function AssessmentEdit({ assessment, onSave, onCancel }: Assessm
                 ))}
 
                 {/* Totals Row */}
-                <div className="grid grid-cols-[2fr,1fr,1fr,1fr,1fr] gap-6 items-center pt-4 border-t border-gray-200 dark:border-gray-700">
+                <div className="grid grid-cols-[2fr,1fr,1fr,1fr,1fr] gap-6 items-center pt-4 border-t border-gray-200 dark:border-border">
                   <div className="font-medium text-gray-900 dark:text-gray-300">Total</div>
                   <div className="text-center font-medium text-gray-900 dark:text-gray-300">
                     {localTechnologies.reduce((sum, tech) => sum + tech.easy.total, 0)}

@@ -66,7 +66,7 @@ const Step3: React.FC<Step3Props> = ({
   };
 
   return (
-    <Card className="max-h-[80vh] overflow-y-auto dark:bg-gray-800 dark:border-gray-700">
+    <Card className="max-h-[80vh] overflow-y-auto dark:bg-primary dark:border-border">
       <CardHeader className="p-4">
         <CardTitle className="font-bold text-lg dark:text-white">Assessment Summary</CardTitle>
         <CardDescription className="text-sm dark:text-gray-300">
@@ -138,7 +138,7 @@ const Step3: React.FC<Step3Props> = ({
           <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-600">
             <Table className="text-sm">
               <TableHeader>
-                <TableRow className="bg-gray-50 dark:bg-gray-700">
+                <TableRow className="bg-gray-50 dark:bg-secondary">
                   <TableHead className="w-[30%] p-2 dark:text-white">Technology</TableHead>
                   <TableHead className="text-center p-2">
                     Easy ({calculateDifficultyPercentage('easy')}%)
@@ -158,7 +158,7 @@ const Step3: React.FC<Step3Props> = ({
                   return (
                     <TableRow
                       key={tech.name}
-                      className={`text-lg ${idx % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-700'} hover:bg-blue-50 dark:hover:bg-gray-600`}
+                      className={`text-lg ${idx % 2 === 0 ? 'bg-white dark:bg-primary' : 'bg-gray-50 dark:bg-secondary'} hover:bg-blue-50 dark:hover:bg-gray-600`}
                     >
                       <TableCell className="font-medium p-2 dark:text-white">{tech.name}</TableCell>
                       <TableCell className="text-center p-2 dark:text-gray-300 align-top">
@@ -171,7 +171,7 @@ const Step3: React.FC<Step3Props> = ({
                         <DifficultyColumn  data={tech.hard} />
                       </TableCell>
                       <TableCell className="text-center p-2 font-semibold dark:text-white align-top">
-                        <span className="inline-block min-w-[24px] text-right rounded bg-gray-100 dark:bg-gray-900 px-2 py-0.5">{total}</span>
+                        <span className="inline-block min-w-[24px] text-right rounded bg-gray-100 dark:bg-background px-2 py-0.5">{total}</span>
                       </TableCell>
                     </TableRow>
                   );
@@ -197,7 +197,7 @@ const Step3: React.FC<Step3Props> = ({
         </div>
 
         {/* Target & Selected Questions Section */}
-        <div className="flex flex-col sm:flex-row items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+        <div className="flex flex-col sm:flex-row items-center justify-between p-3 bg-gray-50 dark:bg-secondary rounded-lg">
           <div className="space-y-1 mb-2 sm:mb-0">
             <p className="text-xs text-gray-500 dark:text-gray-400">Target Questions</p>
             <p className="text-sm font-semibold text-gray-900 dark:text-white">

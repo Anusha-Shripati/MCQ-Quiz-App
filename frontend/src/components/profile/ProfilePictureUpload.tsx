@@ -57,7 +57,7 @@ const ProfilePictureUpload = ({ imageUrl }: { imageUrl: string }) => {
             alt="Profile"
             width={96}
             height={96}
-            className="w-24 h-24 rounded-full object-cover border-2 border-gray-200 dark:border-gray-700"
+            className="w-24 h-24 rounded-full object-cover border-2 border-gray-200 dark:border-border"
             onError={(e) => {
               e.currentTarget.onerror = null;
               e.currentTarget.src = '/fallback.png';
@@ -65,7 +65,7 @@ const ProfilePictureUpload = ({ imageUrl }: { imageUrl: string }) => {
           />
         ) : (
           <div
-            className="w-24 h-24 rounded-full border-2 border-gray-200 dark:border-gray-700 flex items-center justify-center bg-gray-100 dark:bg-gray-800"
+            className="w-24 h-24 rounded-full border-2 border-gray-200 dark:border-border flex items-center justify-center bg-gray-100 dark:bg-primary"
             aria-label="Default profile picture"
           >
             <User2Icon className="text-gray-400 dark:text-gray-500 text-xl" />

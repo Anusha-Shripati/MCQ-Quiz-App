@@ -164,7 +164,7 @@ function RoleForm({
 
   return (
     <Dialog open={open} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-md dark:bg-gray-800" aria-describedby="dialog-description">
+      <DialogContent className="sm:max-w-md dark:bg-primary" aria-describedby="dialog-description">
         <DialogHeader>
           <DialogTitle>{roleData ? 'Edit' : 'Create'} Role</DialogTitle>
         </DialogHeader>
@@ -175,7 +175,7 @@ function RoleForm({
                 label="Name"
                 {...register('name')}
                 placeholder="Role Name"
-                className="dark:bg-gray-700"
+                className="dark:bg-secondary"
                 error={errors.name?.message}
               />
             </div>

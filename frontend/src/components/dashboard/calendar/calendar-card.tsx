@@ -67,7 +67,7 @@ export default function CalendarCard() {
 
       const dayClasses = [
         'h-full w-full justify-start flex flex-col items-center px-2 py-1 rounded transition',
-        isCurrentMonth ? 'dark:bg-gray-700' : 'text-gray-400 dark:text-gray-500',
+        isCurrentMonth ? 'dark:bg-secondary' : 'text-gray-400 dark:text-gray-500',
         day === today && dateMonth === todayMonth
           ? 'border-2 border-gray dark:border-blue-400'
           : 'border-2 border-transparent',

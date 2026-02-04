@@ -257,7 +257,7 @@ const InterviewStatics: React.FC = () => {
   };
 
   return (
-    <div className="max-w-full h-full m-auto mb-4">
+    <div className="max-w-full h-full m-auto">
       <StatusWrapper
         loading={isLoading || isValidating}
         error={error}

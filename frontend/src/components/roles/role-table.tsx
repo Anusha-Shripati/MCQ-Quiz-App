@@ -75,7 +75,7 @@ function RoleTable() {
             return (
               <React.Fragment key={item.id}>
                 {(item.can_edit || item.can_read) && (
-                  <Badge key={item.id} variant="default">
+                  <Badge key={item.id} variant="secondary" className="bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-200">
                     {item.module?.name}
                   </Badge>
                 )}

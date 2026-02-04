@@ -7,6 +7,7 @@ import RoleForm from './role-form';
 import { useRoleStore } from '@/store/roleStore';
 import { useAuthStore } from '@/store/authStore';
 import { usePathname } from 'next/navigation';
+import { PlusCircle } from 'lucide-react';
 
 function Header() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -44,21 +45,22 @@ function Header() {
   }, []);
 
   return (
-    <div className="flex justify-end w-full">
+    <div className="flex justify-between w-full mb-4">
+      <Input
+        type="search"
+        placeholder="Search Roles..."
+        className="w-64 focus:ring-2 focus:ring-blue-500 dark:focus:ring-white focus:border-transparent"
+        value={searchTerm}
+        onChange={handleSearch}
+        autoComplete="off"
+      />
       <div className="flex space-x-4 items-center">
-        <Input
-          type="search"
-          placeholder="Search Roles..."
-          className="w-64"
-          value={searchTerm}
-          onChange={handleSearch}
-          autoComplete="off"
-        />
         {user?.role?.name == 'Super Admin' && (
           <Button
             onClick={handleCreateRole}
-            className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
+            className="bg-foreground text-secondary hover:bg-foreground/90 shadow-sm"
           >
+            <PlusCircle className=" h-4 w-4" />
             Create Role
           </Button>
         )}

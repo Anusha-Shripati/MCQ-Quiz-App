@@ -7,14 +7,19 @@ import { NavigationProgress } from '@/components/ui/navigation-progress';
 import { Toaster } from 'react-hot-toast';
 import AuthInitializer from '@/components/common/auth-initializer';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'MCQ Quiz Application',
+  description: 'A full-stack MCQ quiz application with Node.js backend and Next.js frontend',
+  icons: {
+    icon: '/favicon.ico',
+  },
+};
 
 export default function RootLayout({ children }: { children: ReactNode }) {
-  
   return (
     <html lang="en" suppressHydrationWarning={true}>
-      <head>
-        <link rel="icon" type="image/png" href="/favicon.ico" />
-      </head>
       <body className={`flex min-h-screen relative hide-scroller ${nunito.className}`}>
         <Suspense fallback={<LoadingSpinner/>}>
           <AuthInitializer>

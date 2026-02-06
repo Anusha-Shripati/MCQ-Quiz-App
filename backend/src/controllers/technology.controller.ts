@@ -10,11 +10,15 @@ export class TechnologyController {
       const trimName = name.trim();
       const technology = await technologyService.getTechnologyByName(trimName);
       if (technology && technology.deleted_at) {
-        const newTechnology = await technologyService.updateTechnology(technology.id,req.user?.id||'', {
-          name: trimName,
-          deleted_at: null,
-          questions,
-        });
+        const newTechnology = await technologyService.updateTechnology(
+          technology.id,
+          req.user?.id || '',
+          {
+            name: trimName,
+            deleted_at: null,
+            questions,
+          }
+        );
         return generateResponse(res, 200, newTechnology, true, 'Technology created successfully');
       } else if (technology) {
         return generateResponse(res, 400, {}, false, 'Technology name already exists');
@@ -30,12 +34,12 @@ export class TechnologyController {
     try {
       const { name } = req.body;
       const trimName = name.trim();
-      
+
       const existingTechnology = await technologyService.getTechnologyByName(trimName);
       if (existingTechnology && !existingTechnology.deleted_at) {
         return generateResponse(res, 400, {}, false, 'Technology name already exists');
       }
-      
+
       const newTechnology = await technologyService.createTechnologyOnly({ name: trimName });
       return generateResponse(res, 201, newTechnology, true, 'Technology created successfully');
     } catch (error) {
@@ -77,9 +81,13 @@ export class TechnologyController {
 
       for (const question of questions) {
         if (
-          (question.type === 'mcq' || question.type === 'multiple_select' || question.type === 'code_snippet' || question.type === 'code_snippet_with_mcq') &&
+          (question.type === 'mcq' ||
+            question.type === 'multiple_select' ||
+            question.type === 'code_snippet' ||
+            question.type === 'code_snippet_with_mcq') &&
           (!Array.isArray(question.options) ||
-            question.options.filter((opt: string) => opt && opt.trim() !== '').length < (question.type === 'code_snippet' ? 2 : 4))
+            question.options.filter((opt: string) => opt && opt.trim() !== '').length <
+              (question.type === 'code_snippet' ? 2 : 4))
         ) {
           return generateResponse(
             res,
@@ -126,13 +134,26 @@ export class TechnologyController {
       //   }
       // }
       // Only check for duplicates for questions that are NOT code_snippet_with_mcq or code_snippet
-      const nonCodeMcqQuestions = questions.filter((item: any) => item.type !== 'code_snippet_with_mcq' && item.type !== 'code_snippet');
-      const questionsArr = await prisma.questions.findMany({ where: { question: { in: nonCodeMcqQuestions.map((item: any) => item.question) }, technology_id: id } });
+      const nonCodeMcqQuestions = questions.filter(
+        (item: any) => item.type !== 'code_snippet_with_mcq' && item.type !== 'code_snippet'
+      );
+      const questionsArr = await prisma.questions.findMany({
+        where: {
+          question: { in: nonCodeMcqQuestions.map((item: any) => item.question) },
+          technology_id: id,
+        },
+      });
 
       if (questionsArr.length) {
-        return generateResponse(res, 400, { questions: questionsArr.map(item => item.question) }, true, 'Questions already exists');
+        return generateResponse(
+          res,
+          400,
+          { questions: questionsArr.map((item) => item.question) },
+          true,
+          'Questions already exists'
+        );
       }
-      const updatedTechnology = await technologyService.updateTechnology(id, req.user?.id || '',{
+      const updatedTechnology = await technologyService.updateTechnology(id, req.user?.id || '', {
         name: trimName,
         questions,
       });
@@ -159,8 +180,16 @@ export class TechnologyController {
         return generateResponse(res, 400, {}, false, 'Technology name already exists');
       }
 
-      const updatedTechnology = await technologyService.updateTechnologyName(id, { name: trimName });
-      return generateResponse(res, 200, updatedTechnology, true, 'Technology name updated successfully');
+      const updatedTechnology = await technologyService.updateTechnologyName(id, {
+        name: trimName,
+      });
+      return generateResponse(
+        res,
+        200,
+        updatedTechnology,
+        true,
+        'Technology name updated successfully'
+      );
     } catch (error) {
       next(error);
     }
@@ -183,6 +212,7 @@ export class TechnologyController {
   };
   list = async (req: Request, res: Response, next: NextFunction) => {
     try {
+      console.log('this list technologies is called');
       const { search } = req.query;
       const technologies = await technologyService.getTechnologies({
         name: search as string,

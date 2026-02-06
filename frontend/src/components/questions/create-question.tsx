@@ -132,29 +132,18 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
   };
 
   const handleDeleteQuestion = async (index: number) => {
-<<<<<<< HEAD
     setQuestions((prev) => {
-      const addedQuestionList = prev.filter((_, i) => i !== index)
-    if(addedQuestionList.length === 0){
-      router.push("/questions")
-    }
-    return addedQuestionList
+      const addedQuestionList = prev.filter((_, i) => i !== index);
+      if (addedQuestionList.length === 0) {
+        router.push('/questions');
+      }
+      return addedQuestionList;
     });
-    setValidationErrors((prv)=>{
-      const temp = {...prv}
-      delete temp[index]
-      return temp
-    })
-    
-    setSelectedQuestion(selectedQuestion == 0? 0:selectedQuestion-1)
-=======
-    setQuestions((prev) => prev.filter((_, i) => i !== index));
     setValidationErrors((prv) => {
       const temp = { ...prv };
       delete temp[index];
       return temp;
     });
->>>>>>> d530f035e5dc3add2d3e01b7f44d42d19f93bc4f
 
     setSelectedQuestion(selectedQuestion == 0 ? 0 : selectedQuestion - 1);
   };

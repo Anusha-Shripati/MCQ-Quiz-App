@@ -7,14 +7,14 @@ export class TechnologyController {
   create = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { name, questions } = req.body;
-      const trimName = name.trim();
-      const technology = await technologyService.getTechnologyByName(trimName);
+      const normalizeName = name.trim().toLowerCase();
+      const technology = await technologyService.getTechnologyByName(normalizeName);
       if (technology && technology.deleted_at) {
         const newTechnology = await technologyService.updateTechnology(
           technology.id,
           req.user?.id || '',
           {
-            name: trimName,
+            name: normalizeName,
             deleted_at: null,
             questions,
           }
@@ -23,7 +23,10 @@ export class TechnologyController {
       } else if (technology) {
         return generateResponse(res, 400, {}, false, 'Technology name already exists');
       }
-      const newTechnology = await technologyService.createTechnology({ name: trimName, questions });
+      const newTechnology = await technologyService.createTechnology({
+        name: normalizeName,
+        questions,
+      });
       return generateResponse(res, 200, newTechnology, true, 'Technology created successfully');
     } catch (error) {
       next(error);
@@ -33,16 +36,17 @@ export class TechnologyController {
   createTechnologyOnly = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { name } = req.body;
-      const trimName = name.trim();
+      const normalizeName = name.trim().toLowerCase();
 
-      const existingTechnology = await technologyService.getTechnologyByName(trimName);
+      const existingTechnology = await technologyService.getTechnologyByName(normalizeName);
       if (existingTechnology && !existingTechnology.deleted_at) {
         return generateResponse(res, 400, {}, false, 'Technology name already exists');
       }
 
-      const newTechnology = await technologyService.createTechnologyOnly({ name: trimName });
+      const newTechnology = await technologyService.createTechnologyOnly({ name: normalizeName });
       return generateResponse(res, 201, newTechnology, true, 'Technology created successfully');
     } catch (error) {
+      console.log('creae Technology err', error);
       next(error);
     }
   };
@@ -63,14 +67,14 @@ export class TechnologyController {
     try {
       const { id } = req.params;
       const { name, questions } = req.body;
-      const trimName = name.trim();
+      const normalizeName = name.trim().toLowerCase();
 
       const existingTechnology = await technologyService.getTechnologyById(id);
       if (!existingTechnology) {
         return generateResponse(res, 400, {}, false, 'Technology not found');
       }
-      // if (existingTechnology.name.trim() != trimName) {
-      //   const duplicateTechnology = await technologyService.getTechnologyByName(trimName);
+      // if (existingTechnology.name.trim() != normalizeName) {
+      //   const duplicateTechnology = await technologyService.getTechnologyByName(normalizeName);
       //   if (duplicateTechnology && !duplicateTechnology.deleted_at) {
       //     return generateResponse(res, 400, {}, false, 'Technology name already exists');
       //   } else if (duplicateTechnology) {
@@ -154,7 +158,7 @@ export class TechnologyController {
         );
       }
       const updatedTechnology = await technologyService.updateTechnology(id, req.user?.id || '', {
-        name: trimName,
+        name: normalizeName,
         questions,
       });
       return generateResponse(res, 200, updatedTechnology, true, 'Technology updated successfully');
@@ -167,7 +171,7 @@ export class TechnologyController {
     try {
       const { id } = req.params;
       const { name } = req.body;
-      const trimName = name.trim();
+      const normalizeName = name.trim().toLowerCase();
 
       const existingTechnology = await technologyService.getTechnologyById(id);
       if (!existingTechnology) {
@@ -175,13 +179,13 @@ export class TechnologyController {
       }
 
       // Check if name already exists (excluding current technology)
-      const duplicateTechnology = await technologyService.getTechnologyByName(trimName);
+      const duplicateTechnology = await technologyService.getTechnologyByName(normalizeName);
       if (duplicateTechnology && duplicateTechnology.id !== id && !duplicateTechnology.deleted_at) {
         return generateResponse(res, 400, {}, false, 'Technology name already exists');
       }
 
       const updatedTechnology = await technologyService.updateTechnologyName(id, {
-        name: trimName,
+        name: normalizeName,
       });
       return generateResponse(
         res,
@@ -212,7 +216,6 @@ export class TechnologyController {
   };
   list = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      console.log('this list technologies is called');
       const { search } = req.query;
       const technologies = await technologyService.getTechnologies({
         name: search as string,

@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { logger } from '../config/logger';
 import { AppError } from '../common/errors/AppError';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import { error } from 'console';
 
 export const errorHandler = (
   err: Error | AppError,
@@ -23,6 +24,12 @@ export const errorHandler = (
       status: 404,
       message: 'Parent not found!',
       isOperation: true,
+    });
+  } else if (err instanceof PrismaClientKnownRequestError && err.code === 'P2002') {
+    res.status(409).json({
+      success: false,
+      status: 409,
+      message: 'Technology name is already exist',
     });
   } else {
     res.status(500).json({

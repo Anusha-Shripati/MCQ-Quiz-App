@@ -15,16 +15,15 @@ export const assessmentEndpoint = {
   CHECK_UNIQUE: '/assessment/check-unique',
   CHECK_QUESTIONS: '/assessment/check-question',
 };
-
 export const technologyEndpoint = {
   LIST: '/technology/list',
-  TECHNOLOGY_BY_ID: '/technology',
+  // TECHNOLOGY_BY_ID: '/technology',
   CREATE: '/technology/create',
   DOWNLOAD_TEMPLATE: '/question/download-template',
   CREATE_ONLY: '/technology/create-only',
-  GET_TECHNOLOGY_BY_ID: (id: string) => `/technology/${id}`,
-  UPDATE: (id: string) => `/technology/${id}/name`,
-  DELETE: (id: string) => `/technology/${id}`,
+  GET_TECHNOLOGY_BY_ID: '/technology',
+  UPDATE: '/technology/:id/name',
+  DELETE: '/technology',
 };
 export const userEndpoint = {
   LIST: '/user/list',

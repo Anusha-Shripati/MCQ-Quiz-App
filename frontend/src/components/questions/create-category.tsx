@@ -16,10 +16,6 @@ import { useAuthStore } from '@/store/authStore';
 import { QuestionCategory } from '@/shared/types/app';
 import CreateTechnologyModal from '../ui/create-technology-modal';
 
-// async function createCategory(url: string, { arg }: { arg: { name: string } }) {
-//   const response = await api.post(url, arg);
-//   return response.data;
-// }
 //  SWR mutation fetcher for function create a technology.
 async function createTechnology(url: string, { arg }: { arg: { name: string } }) {
   return await api.post(url, arg);
@@ -36,7 +32,6 @@ const CreateCategory: React.FC<CreateCategoryProps> = ({ categoriesArray = [] })
   const { hasPermissionQuestionEdit } = useAuthStore();
   const isQuestionEditable = hasPermissionQuestionEdit();
   const { setTechnologyFilter, technologyFilter } = useQuestionStore();
-
   useEffect(() => {
     const timer = setTimeout(() => {
       const params = new URLSearchParams();
@@ -78,9 +73,8 @@ const CreateCategory: React.FC<CreateCategoryProps> = ({ categoriesArray = [] })
     }
 
     try {
-      const data = await createTrigger({ name: categoryName.trim() });
-      if (data?.success === true || data?.status === 201 || data?.status === 200) {
-        console.log(data);
+      const data = await createTrigger({ name: categoryName });
+      if (data) {
         setCategoryName('');
         setOpen(false);
 
@@ -90,7 +84,6 @@ const CreateCategory: React.FC<CreateCategoryProps> = ({ categoriesArray = [] })
         toast.error(data?.message || 'Failed to create technology');
       }
     } catch (error) {
-      console.log(error);
       const axiosError = error as AxiosError<{ message: string }>;
       toast.error(axiosError.response?.data?.message || 'Something went wrong.');
     }
@@ -169,6 +162,7 @@ const CreateCategory: React.FC<CreateCategoryProps> = ({ categoriesArray = [] })
             value={categoryName}
             onChange={(e) => setCategoryName(e.target.value)}
           />
+          {/* {error ? 'Technology is already exist' : ''} */}
         </CreateTechnologyModal>
       )}
       {/* Add/Edit Category Modal */}

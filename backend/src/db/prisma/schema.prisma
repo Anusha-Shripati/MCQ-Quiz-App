@@ -1,303 +1,151 @@
 generator client {
-    provider = "prisma-client-js"
+  provider = "prisma-client-js"
+  output   = "./generated/client"
 }
 
 datasource db {
-    provider = "postgresql"
-    url      = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
-model User {
-    id              String        @id @default(uuid())
-    role_id         String?
-    name            String
-    email           String        @unique
-    password        String
-    token           String?
-    created_at      DateTime      @default(now())
-    updated_at      DateTime      @updatedAt
-    deleted_at      DateTime?
-    role            Roles?        @relation(fields: [role_id], references: [id], name: "UserRole", onDelete: SetNull)
-    image           String?
-    created_by      String?
-    assessments     Assessments[]
-    questions       Questions[]
-    exams           Exam[]
-    Candidate       Candidate[]
-    childs          User[]        @relation("User")
-    created_by_user User?         @relation("User", fields: [created_by], references: [id])
-    User_tokens     User_tokens[]
+// Platform Admin Users
+model Platform_admins {
+  id                String              @id @default(uuid())
+  email             String              @unique
+  password          String
+  name              String
+  role_id           String?
+  is_active         Boolean             @default(true)
+  last_login        DateTime?
+  created_by        String?
+  created_at        DateTime            @default(now())
+  updated_at        DateTime            @updatedAt
+  deleted_at        DateTime?
+  role              Platform_roles?     @relation(fields: [role_id], references: [id], onDelete: SetNull)
+  created_by_admin  Platform_admins?    @relation("AdminCreatedBy", fields: [created_by], references: [id], onDelete: SetNull)
+  created_admins    Platform_admins[]   @relation("AdminCreatedBy")
+  created_tenants   Tenants[]           @relation("TenantCreatedBy")
+  created_plans     Plans[]             @relation("PlanCreatedBy")
 
-    @@map("users")
+  @@map("platform_admins")
 }
 
-model Reset_password {
-    id         String   @id @default(uuid())
-    email      String   @unique
-    otp        String
-    expires_at DateTime
-    created_at DateTime @default(now())
+// Platform Roles
+model Platform_roles {
+  id                  String                     @id @default(uuid())
+  name                String                     @unique
+  description         String?
+  created_at          DateTime                   @default(now())
+  updated_at          DateTime                   @updatedAt
+  admins              Platform_admins[]
+  role_permissions    Platform_role_permissions[]
 
-    @@map("password_resets")
+  @@map("platform_roles")
 }
 
-model Roles {
-    id               String             @id @default(uuid())
-    name             String             @unique
-    users            User[]             @relation("UserRole")
-    role_permissions Role_permissions[]
+// Platform Modules
+model Platform_modules {
+  id          String                     @id @default(uuid())
+  name        String                     @unique
+  key         String                     @unique
+  description String?
+  created_at  DateTime                   @default(now())
+  updated_at  DateTime                   @updatedAt
+  permissions Platform_role_permissions[]
+
+  @@map("platform_modules")
 }
 
-model Modules {
-    id          String             @id @default(uuid())
-    name        String             @unique
-    permissions Role_permissions[]
+// Platform Role Permissions
+model Platform_role_permissions {
+  id        String           @id @default(uuid())
+  role_id   String
+  module_id String
+  can_read  Boolean          @default(false)
+  can_edit  Boolean          @default(false)
+  role      Platform_roles   @relation(fields: [role_id], references: [id], onDelete: Cascade)
+  module    Platform_modules @relation(fields: [module_id], references: [id], onDelete: Cascade)
+
+  @@unique([role_id, module_id])
+  @@index([role_id])
+  @@map("platform_role_permissions")
 }
 
-model Role_permissions {
-    id        String  @id @default(uuid())
-    role_id   String
-    role      Roles   @relation(fields: [role_id], references: [id])
-    module_id String
-    module    Modules @relation(fields: [module_id], references: [id])
-    can_read  Boolean @default(false)
-    can_edit  Boolean @default(false)
+// Subscription Plans
+model Plans {
+  id          String              @id @default(uuid())
+  name        String              @unique
+  description String?
+  price       Float               @default(0)
+  limits      Json                // { candidates: 100, assessments: 50, storage_gb: 10 }
+  features    Json                // { custom_branding: true, api_access: false }
+  is_active   Boolean             @default(true)
+  created_by  String?
+  created_at  DateTime            @default(now())
+  updated_at  DateTime            @updatedAt
+  tenants     Tenants[]
+  created_by_admin Platform_admins? @relation("PlanCreatedBy", fields: [created_by], references: [id], onDelete: SetNull)
 
-    @@index([role_id])
+  @@map("plans")
 }
 
-model Assessments {
-    id               String                  @id @default(uuid())
-    name             String
-    created_by       String
-    easy             Int                     @default(0)
-    medium           Int                     @default(0)
-    hard             Int                     @default(0)
-    difficulty_score Int                     @default(0)
-    duration         Int                     @default(0)
-    pass_criteria    Int                     @default(0)
-    created_at       DateTime                @default(now())
-    updated_at       DateTime                @updatedAt
-    deleted_at       DateTime?
-    technologies     Assessment_technology[]
-    created_by_user  User                    @relation(fields: [created_by], references: [id])
-    candidates       Candidate[]
-    exams            Exam[]
+// Tenants (Organizations)
+model Tenants {
+  id                   String              @id @default(uuid())
+  name                 String
+  slug                 String              @unique // subdomain
+  status               TenantStatus        @default(active)
+  plan_id              String
+  db_name              String              @unique
+  db_url               String              // Connection string for tenant DB
+  admin_email          String
+  admin_name           String
+  trial_ends_at        DateTime?
+  subscription_ends_at DateTime?
+  created_by           String?
+  created_at           DateTime            @default(now())
+  updated_at           DateTime            @updatedAt
+  deleted_at           DateTime?
+  plan                 Plans               @relation(fields: [plan_id], references: [id])
+  usage                Tenant_usage[]
+  created_by_admin     Platform_admins?    @relation("TenantCreatedBy", fields: [created_by], references: [id], onDelete: SetNull)
+
+  @@index([slug])
+  @@index([status])
+  @@map("tenants")
 }
 
-model Assessment_technology {
-    id            String      @id @default(uuid())
-    technology_id String
-    assessment_id String
-    easy          Json
-    medium        Json
-    hard          Json
-    assessments   Assessments @relation(fields: [assessment_id], references: [id])
-    technology    Technology  @relation(fields: [technology_id], references: [id])
-    created_at    DateTime    @default(now())
-    updated_at    DateTime    @updatedAt
-    deleted_at    DateTime?
+// Tenant Usage Tracking
+model Tenant_usage {
+  id            String   @id @default(uuid())
+  tenant_id     String
+  metric_type   UsageMetric
+  current_value Int      @default(0)
+  limit_value   Int
+  period_start  DateTime
+  period_end    DateTime
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+  tenant        Tenants  @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+
+  @@unique([tenant_id, metric_type, period_start])
+  @@index([tenant_id])
+  @@map("tenant_usage")
 }
 
-model Technology {
-    id                    String                  @id @default(uuid())
-    name                  String                  @unique
-    created_at            DateTime                @default(now())
-    updated_at            DateTime                @updatedAt
-    deleted_at            DateTime?
-    assessment_technology Assessment_technology[]
-    questions             Questions[]
+// Enums
+enum TenantStatus {
+  active
+  suspended
+  trial
+  expired
+  cancelled
 }
 
-model Questions {
-    id               String           @id @default(uuid())
-    technology_id    String
-    question         String
-    correct_answer   String[]
-    options          Json
-    time             String?
-    difficulty_level Difficulty
-    type             Question_type
-    meta             Json
-    created_at       DateTime         @default(now())
-    updated_at       DateTime         @updatedAt
-    deleted_at       DateTime?
-    created_by       String
-    technology       Technology       @relation(fields: [technology_id], references: [id])
-    exam_questions   Exam_questions[]
-    answers          Answers[]
-    created_by_user  User             @relation(fields: [created_by], references: [id])
-}
-
-model Candidate {
-    id              String               @id @default(uuid())
-    assessment_id   String
-    exam_id         String               @unique
-    name            String
-    email           String
-    experience      Float                @default(0)
-    phone           String
-    meta            Json?
-    created_at      DateTime             @default(now())
-    updated_at      DateTime             @updatedAt
-    deleted_at      DateTime?
-    created_by      String
-    assessment      Assessments          @relation(fields: [assessment_id], references: [id])
-    exam            Exam                 @relation(fields: [exam_id], references: [id])
-    answers         Answers[]
-    result          Results[]
-    feedback        Candidate_feedback[]
-    created_by_user User                 @relation(fields: [created_by], references: [id])
-}
-
-model Exam {
-    id             String               @id @default(uuid())
-    user_id        String
-    assessment_id  String
-    end_time       DateTime
-    start_time     DateTime
-    status         ExamStatus           @default(pending)
-    is_completed   Boolean              @default(false)
-    meta           Json?
-    verified_image String?
-    created_at     DateTime             @default(now())
-    updated_at     DateTime             @updatedAt
-    deleted_at     DateTime?
-    user           User                 @relation(fields: [user_id], references: [id])
-    assessment     Assessments          @relation(fields: [assessment_id], references: [id])
-    exam_questions Exam_questions[]
-    answers        Answers[]
-    candidate      Candidate?
-    results        Results?
-    feedback       Candidate_feedback[]
-}
-
-model Exam_questions {
-    id          String    @id @default(uuid())
-    exam_id     String
-    question_id String
-    exam        Exam      @relation(fields: [exam_id], references: [id])
-    question    Questions @relation(fields: [question_id], references: [id])
-}
-
-model Results {
-    id           String @id @default(uuid())
-    exam_id      String @unique
-    candidate_id String
-    score        Float  @default(0)
-    total        Float  @default(0)
-    percentage   Float  @default(0)
-
-    created_at DateTime  @default(now())
-    updated_at DateTime  @updatedAt
-    deleted_at DateTime?
-    exam       Exam      @relation(fields: [exam_id], references: [id])
-    candidate  Candidate @relation(fields: [candidate_id], references: [id])
-    answers    Answers[]
-}
-
-model Answers {
-    id            String   @id @default(uuid())
-    exam_id       String
-    candidate_id  String
-    question_id   String?
-    result_id     String?
-    user_answer   String[]
-    is_correct    Boolean?
-    question_name String?
-    created_at    DateTime @default(now())
-    updated_at    DateTime @updatedAt
-    score         Float    @default(0)
-    weight        Float    @default(0)
-
-    exam      Exam       @relation(fields: [exam_id], references: [id])
-    candidate Candidate  @relation(fields: [candidate_id], references: [id])
-    question  Questions? @relation(fields: [question_id], references: [id])
-    result    Results?   @relation(fields: [result_id], references: [id])
-}
-
-model User_tokens {
-    id      String  @id @default(uuid())
-    user_id String?
-    token   String
-    user    User?    @relation(fields: [user_id], references: [id])
-}
-
-model Candidate_feedback {
-    id                String    @id @default(uuid())
-    candidate_id      String
-    exam_id           String
-    experience_rating Int
-    question_clarity  String
-    difficulty        String
-    technical_issues  String
-    comments          String?
-    created_at        DateTime  @default(now())
-    updated_at        DateTime  @updatedAt
-    deleted_at        DateTime?
-    
-    candidate         Candidate @relation(fields: [candidate_id], references: [id])
-    exam              Exam      @relation(fields: [exam_id], references: [id])
-}
-
-// model Profile {
-//     id            String  @id @default(uuid())
-//     firstName     String
-//     lastName      String
-//     contactNumber String?
-//     street        String?
-//     city          String?
-//     state         String?
-//     zipCode       String?
-//     country       String?
-//     user          User    @relation(fields: [userId], references: [id])
-//     userId        String  @unique
-// }
-
-// model CandidateDetails {
-//     id           String        @id @default(uuid())
-//     languages    String[]
-//     frameworks   String[]
-//     examAttempts ExamAttempt[]
-//     user         User          @relation("UserToCandidateDetails", fields: [userId], references: [id]) // Define fields and references here
-//     userId       String        @unique
-// }
-
-// model ExamAttempt {
-//     id                 String           @id @default(uuid())
-//     examId             String
-//     score              Float?
-//     status             ExamStatus
-//     candidateDetails   CandidateDetails @relation(fields: [candidateDetailsId], references: [id])
-//     candidateDetailsId String
-//     createdAt          DateTime         @default(now())
-// }
-
-enum Role {
-    Super_Admin
-    Editor
-    Candidate
-}
-
-enum ExamStatus {
-    pending
-    in_progress
-    completed
-    expired
-}
-
-enum Difficulty {
-    easy
-    medium
-    hard
-}
-
-enum Question_type {
-    multiple_select
-    video
-    text
-    mcq
-    code_snippet
-    code_editor
-    code_snippet_with_mcq
+enum UsageMetric {
+  candidates
+  assessments
+  questions
+  storage_mb
+  api_calls
 }

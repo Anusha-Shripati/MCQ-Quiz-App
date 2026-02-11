@@ -7,7 +7,7 @@ services:
     environment:
       POSTGRESQL_USERNAME: postgres
       POSTGRESQL_PASSWORD: root
-      POSTGRESQL_DATABASE: app_db
+      POSTGRESQL_DATABASE: platform_db  # Platform database created automatically
     ports:
       - "5432:5432"
     volumes:

@@ -63,6 +63,8 @@ Thumbs.db
 # Prisma
 backend/prisma/*.db
 backend/prisma/migrations/
+backend/src/db/prisma/generated/
+backend/src/db/tenant/generated/
 
 # Temporary files
 *.tmp

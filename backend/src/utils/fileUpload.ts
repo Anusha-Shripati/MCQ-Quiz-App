@@ -11,21 +11,20 @@ import { s3Client } from './S3';
 const storageMode = process.env.STORAGE_MODE || 'local';
 
 let storage: multer.StorageEngine;
-type ExamFileUploadRequest = Request<{ examId?: string }, any, any, { fileType?: string }>;
+type ExamFileUploadRequest = Request<{ examId?: string }, any, any, { fileType?: string; chunkFolder?: string }>;
 
 if (storageMode === 's3') {
-
-
   storage = multerS3({
     s3:s3Client,
     bucket: process.env.AWS_BUCKET_NAME as string,
     acl: 'public-read',
     key: (req: ExamFileUploadRequest, file, cb) => {
-      let folderPath = '';
+      const tenantId = req.context?.tenant?.id || 'unknown';
+      let folderPath = `/${tenantId}`;
       if (req.params.examId) folderPath += `/${req.params.examId}`;
       if (req.query.fileType) folderPath += `/${req.query.fileType}`;
       const filename = `${uuidv4()}-${file.originalname.replace(/\s+/g, '-')}`;
-      cb(null, `${folderPath ? folderPath + '/' : ''}${filename}`);
+      cb(null, `${folderPath}/${filename}`);
     },
   });
 } else {
@@ -36,23 +35,23 @@ if (storageMode === 's3') {
 
   storage = multer.diskStorage({
     destination: (req, file, cb) => {
-      let path = uploadPath;
+      const tenantId = req.context?.tenant?.id || 'unknown';
+      let path = uploadPath + `/${tenantId}`;
       if (req.params.examId) path += `/${req.params.examId}`;
       if (req.query.fileType) path += `/${req.query.fileType}`;
       if (req.query.chunkFolder) path += `/${req.query.chunkFolder}`;
-
 
       if (!fs.existsSync(path)) {
         fs.mkdirSync(path, { recursive: true });
       }
       cb(null, path);
     },
-    filename: (req: Express.Request, file: Express.Multer.File, cb) => {
+    filename: (req: ExamFileUploadRequest, file: Express.Multer.File, cb) => {
       const ext = path.extname(file.originalname) || `.${file.mimetype.split('/')[1]}`;
       const baseName = path.basename(file.originalname, ext);
       cb(
         null,
-        req.body.index && req.query.chunkFolder
+        req.body?.index && req.query?.chunkFolder
           ? `${req.body.index}`
           : `${baseName}-${Date.now()}${ext}`
       );

@@ -1,12 +1,9 @@
 import { Request, Response, NextFunction, RequestHandler } from 'express';
 import jwt from 'jsonwebtoken';
-import { UserService } from '../services/user.services';
+import { UserService } from '../tenant/services/user.services';
 import bcrypt from 'bcryptjs';
 import { generateResponse } from '../utils/generateResponse';
-import RoleService from '../services/role.services';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import RoleService from '../tenant/services/role.services';
 
 type Actions = 'can_read' | 'can_edit';
 
@@ -22,8 +19,6 @@ export const authenticateAndAuthorize =
   (rights?: string, role?: string): RequestHandler =>
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const authHeader = req.headers.authorization || '';
-    const userService = new UserService();
-    const roleService = new RoleService();
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       generateResponse(res, 401, {}, false, 'Authorization token is required.');
@@ -39,6 +34,7 @@ export const authenticateAndAuthorize =
         role_name: string;
       };
 
+      const userService = new UserService(req.context!.prisma);
       const user = await userService.findUserById(decoded.id);
 
       if (!user) {
@@ -56,6 +52,7 @@ export const authenticateAndAuthorize =
           generateResponse(res, 400, {}, false, 'Invalid rights format.');
           return;
         }
+        const roleService = new RoleService(req.context!.prisma);
         const permissions = await roleService.getPermissionByRole(decoded.role_id);
 
         if (!permissions) {
@@ -90,7 +87,7 @@ export const authenticateCandidate: RequestHandler = async (req, res, next) => {
   }
 
   try {
-    const candidate = await prisma.candidate.findFirst({
+    const candidate = await req.context!.prisma.candidate.findFirst({
       where: { meta: { path: ['accessCode'], equals: code }, deleted_at: null },
       include: { exam: true },
     });

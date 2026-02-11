@@ -1,15 +1,36 @@
-import { PrismaClient } from '@prisma/client';
 import { logger } from '../config/logger';
+import { getPrisma, disconnectPrisma } from './prisma/client';
+import { disconnectAllTenantPrisma } from './tenant/client';
 
-const prisma = new PrismaClient();
+// Export platform prisma as default
+export const prisma = getPrisma();
 
+/**
+ * Connect to platform database
+ * Tenant databases are connected on-demand via tenant resolver
+ */
 async function connectToDatabase() {
   try {
-    await prisma.$connect(); // Explicitly connect to the database
-    logger.info('Database connected successfully!');
+    await prisma.$connect();
+    logger.info('✅ Platform database connected successfully!');
+    logger.info('ℹ️  Tenant databases will connect on-demand');
   } catch (error) {
-    logger.error('Failed to connect to the database:', error);
+    logger.error('❌ Failed to connect to platform database:', error);
+    throw error;
   }
 }
 
-export { prisma, connectToDatabase };
+/**
+ * Disconnect all databases (for graceful shutdown)
+ */
+export async function disconnectFromDatabase() {
+  try {
+    await disconnectPrisma();
+    await disconnectAllTenantPrisma();
+    logger.info('✅ All databases disconnected');
+  } catch (error) {
+    logger.error('❌ Failed to disconnect databases:', error);
+  }
+}
+
+export { connectToDatabase };

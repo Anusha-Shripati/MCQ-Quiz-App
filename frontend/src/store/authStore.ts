@@ -3,6 +3,7 @@ import { Module, Permissions, UserData } from '@/types/common.types';
 import { api, isAxiosError } from '@/lib/api';
 import { userEndpoint } from '@/lib/endpoint';
 import Cookies from 'js-cookie';
+import { getTenantContext } from '@/lib/tenant-utils';
 
 interface User {
   id?: string;
@@ -18,8 +19,21 @@ interface User {
   token: string;
 }
 
+interface TenantInfo {
+  id: string;
+  name: string;
+  slug: string;
+  status: string;
+  plan?: {
+    id: string;
+    name: string;
+  };
+}
+
 interface AuthState {
   user: User | null;
+  tenant: TenantInfo | null;
+  tenantType: 'PLATFORM' | 'TENANT' | null;
   initializing: boolean;
   loading: boolean;
   error?: string | null;
@@ -40,17 +54,20 @@ interface AuthState {
     user: User | null
   ) => Promise<void>;
   setUser: (user: User | null) => void;
+  setTenant: (tenant: TenantInfo | null) => void;
+  setTenantType: (type: 'PLATFORM' | 'TENANT' | null) => void;
   isAuthenticated: () => boolean;
   hasPermissionCandidateEdit: () => boolean;
   hasPermissionQuestionEdit: () => boolean;
   hasPermissionAssessmentEdit: () => boolean;
   hasPermissionUserEdit: () => boolean;
   hasPermissionResultEdit: () => boolean;
-
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
+  tenant: null,
+  tenantType: null,
   initializing: true,
   loading: false,
   userFilter: '',
@@ -63,6 +80,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
   setUser: (user: User | null) => {
     set({ user });
+  },
+  setTenant: (tenant: TenantInfo | null) => {
+    set({ tenant });
+  },
+  setTenantType: (type: 'PLATFORM' | 'TENANT' | null) => {
+    set({ tenantType: type });
   },
   login: async ({ email, password }: { email: string; password: string }) => {
     set({ loading: true });
@@ -114,6 +137,26 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ userList: list, userCount: count });
   },
   initializeAuth: () => {
+    // Extract tenant from current URL using tenant-utils
+    if (typeof window !== 'undefined') {
+      const tenantContext = getTenantContext(window.location.hostname);
+      
+      if (tenantContext.type === 'TENANT' && tenantContext.slug) {
+        set({ 
+          tenant: { 
+            id: '', 
+            name: '', 
+            slug: tenantContext.slug, 
+            status: '' 
+          },
+          tenantType: 'TENANT'
+        });
+      } else if (tenantContext.type === 'PLATFORM') {
+        set({ tenant: null, tenantType: 'PLATFORM' });
+      }
+    }
+    
+    // Initialize user from localStorage
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
       try {

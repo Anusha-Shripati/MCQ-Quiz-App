@@ -5,12 +5,14 @@ export const generateResponse = (
   status: number,
   data: any,
   success: boolean = true,
-  message: string = 'success'
+  message: string = 'success',
+  error?: string
 ) => {
   return res.status(status).json({
     success: success,
     status,
     message,
     data,
+    ...(error && { error }),
   });
 };

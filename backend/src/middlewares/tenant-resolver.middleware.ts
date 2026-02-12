@@ -7,34 +7,87 @@ import { generateResponse } from '../utils/generateResponse';
 import { logger } from '../config/logger';
 
 /**
- * Extract subdomain from hostname
+ * Validate if hostname matches expected domain pattern
+ */
+const isValidDomain = (hostname: string): boolean => {
+  // Allow localhost for development
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    return true;
+  }
+  
+  const baseDomain = process.env.BASE_DOMAIN || 'lr-mcq.local';
+  const parts = hostname.split('.');
+  
+  // Must be exactly: subdomain.basedomain (e.g., admin.lr-mcq.local)
+  if (parts.length < 2) return false;
+  
+  // Get remaining domain after subdomain
+  const domain = parts.slice(1).join('.');
+  
+  // Domain must exactly match base domain
+  return domain === baseDomain;
+};
+
+/**
+ * Extract subdomain from Origin or Referer header
+ * These headers contain the frontend URL with subdomain
+ */
+const extractSubdomainFromOrigin = (req: Request): string | null => {
+  // Try Origin header first (sent on CORS requests)
+  const origin = req.headers.origin;
+  if (origin) {
+    try {
+      const url = new URL(origin);
+      return extractSubdomain(url.hostname);
+    } catch (error) {
+      logger.warn(`Failed to parse Origin header: ${origin}`);
+    }
+  }
+
+  // Fallback to Referer header
+  const referer = req.headers.referer;
+  if (referer) {
+    try {
+      const url = new URL(referer);
+      return extractSubdomain(url.hostname);
+    } catch (error) {
+      logger.warn(`Failed to parse Referer header: ${referer}`);
+    }
+  }
+
+  return null;
+};
+
+/**
+ * Extract subdomain from hostname with strict validation
  * Examples:
- *   - abc.lr-mcq.com -> abc
- *   - admin.lr-mcq.com -> admin
+ *   - abc.lr-mcq.local -> abc
+ *   - admin.lr-mcq.local -> admin
+ *   - admin.fake.lr-mcq.local -> null (invalid)
  *   - localhost:3001 -> localhost (for development)
  */
-const extractSubdomain = (hostname: string): string => {
+const extractSubdomain = (hostname: string): string | null => {
   // Handle localhost for development
-  if (hostname.includes('localhost') || hostname.includes('127.0.0.1')) {
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
     return process.env.DEV_TENANT_SLUG || 'localhost';
+  }
+
+  // Validate domain first
+  if (!isValidDomain(hostname)) {
+    logger.warn(`Invalid domain: ${hostname}`);
+    return null;
   }
 
   // Extract subdomain from hostname
   const parts = hostname.split('.');
-  
-  // If hostname has at least 3 parts (subdomain.domain.tld)
-  if (parts.length >= 3) {
-    return parts[0];
-  }
-
-  // Default to first part
   return parts[0];
 };
 
 /**
  * Tenant Resolver Middleware
  * 
- * Resolves tenant from subdomain and injects tenant context into request
+ * Resolves tenant from x-tenant-slug header (sent by frontend)
+ * Falls back to Origin/Referer headers if x-tenant-slug not present
  * This middleware should be applied to all tenant routes (not platform routes)
  */
 export const tenantResolver = async (
@@ -43,10 +96,31 @@ export const tenantResolver = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const hostname = req.hostname;
-    const subdomain = extractSubdomain(hostname);
+    console.log('Tenant resolver invoked for URL:', req.originalUrl);
+    
+    // Priority 1: Read from x-tenant-slug header (sent by frontend)
+    let subdomain = req.headers['x-tenant-slug'] as string;
+    
+    // Priority 2: Fallback to Origin/Referer headers (contain frontend URL)
+    if (!subdomain) {
+      subdomain = extractSubdomainFromOrigin(req) || '';
+      logger.info(`Tenant slug from Origin/Referer: ${subdomain}`);
+    }
+    
+    // If still no subdomain found, return error
+    if (!subdomain) {
+      generateResponse(
+        res,
+        400,
+        { headers: { origin: req.headers.origin, referer: req.headers.referer } },
+        false,
+        'Tenant slug not found. Please provide x-tenant-slug header or valid Origin/Referer.',
+        'TENANT_SLUG_MISSING'
+      );
+      return;
+    }
 
-    logger.info(`Tenant resolution: hostname=${hostname}, subdomain=${subdomain}`);
+    logger.info(`Tenant resolution: x-tenant-slug=${req.headers['x-tenant-slug']}, origin=${req.headers.origin}, resolved=${subdomain}`);
 
     // Check if this is a platform admin request
     if (subdomain === 'admin') {
@@ -82,7 +156,8 @@ export const tenantResolver = async (
         404,
         { subdomain },
         false,
-        'Organization not found. Please check your URL.'
+        'Organization not found. Please check your URL.',
+        'TENANT_NOT_FOUND'
       );
       return;
     }
@@ -94,7 +169,8 @@ export const tenantResolver = async (
         403,
         { status: tenant.status },
         false,
-        'Your account has been suspended. Please contact support.'
+        'Your account has been suspended. Please contact support.',
+        'TENANT_SUSPENDED'
       );
       return;
     }
@@ -105,7 +181,8 @@ export const tenantResolver = async (
         403,
         { status: tenant.status },
         false,
-        'Your subscription has expired. Please renew to continue.'
+        'Your subscription has expired. Please renew to continue.',
+        'TENANT_EXPIRED'
       );
       return;
     }
@@ -116,7 +193,8 @@ export const tenantResolver = async (
         403,
         { status: tenant.status },
         false,
-        'Your account has been cancelled.'
+        'Your account has been cancelled.',
+        'TENANT_CANCELLED'
       );
       return;
     }

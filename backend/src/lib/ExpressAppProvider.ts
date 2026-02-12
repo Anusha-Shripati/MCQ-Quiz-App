@@ -37,7 +37,7 @@ class ExpressAppProvider {
       cors({
         origin: '*', // No trailing
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-        allowedHeaders: ['Content-Type', 'Authorization', 'x-access-code'],
+        allowedHeaders: ['Content-Type', 'Authorization', 'x-access-code', 'x-tenant-slug', 'x-tenant-type'],
         // credentials: true,
         exposedHeaders: ['Content-Range', 'X-Content-Range'],
       })
@@ -65,7 +65,7 @@ class ExpressAppProvider {
             process.env.FRONTEND_URL || 'http://localhost:3000'
           );
           res.set('Access-Control-Allow-Credentials', 'true');
-          res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-access-code');
+          res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-access-code, x-tenant-slug, x-tenant-type');
         },
       })
     );

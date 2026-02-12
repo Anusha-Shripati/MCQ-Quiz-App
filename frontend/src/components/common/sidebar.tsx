@@ -12,7 +12,7 @@ import useSWR from 'swr';
 import { fetcher } from '@/lib/api';
 import { Module, Permissions } from '@/types/common.types';
 import { useRouter } from 'next/navigation';
-import { ChevronLeft, ChevronRight, Layers } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Layers, Building2 } from 'lucide-react';
 import Image from 'next/image';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
 import UserAvatar from './user-avatar';
@@ -21,7 +21,7 @@ import { ThemeToggle } from './theme-toggle';
 export default function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const sidebarRef = useRef<HTMLDivElement | null>(null);
-  const { setPermissions, user, setParamsLoading } = useAuthStore();
+  const { setPermissions, user, setParamsLoading, tenant, tenantType } = useAuthStore();
 
   const router = useRouter();
 
@@ -78,9 +78,8 @@ export default function Sidebar() {
   return (
     <aside
       ref={sidebarRef}
-      className={`${
-        isCollapsed ? 'w-16' : 'w-56'
-      } bg-primary text-primary-foreground sticky top-0 left-0 h-screen z-50 transition-all duration-300 relative shadow-sm`}
+      className={`${isCollapsed ? 'w-16' : 'w-56'
+        } bg-primary text-primary-foreground sticky top-0 left-0 h-screen z-50 transition-all duration-300 relative shadow-sm`}
     >
       <div className="overflow-auto flex flex-row justify-center items-center h-full bg-primary">
         <div className="w-[calc(100%-20px)] flex flex-col justify-between h-full pb-4 pt-4">
@@ -98,7 +97,7 @@ export default function Sidebar() {
                   />
                 </div>
               ) : (
-                <div className="w-[170px] h-[50px] flex justify-center items-center">
+                <div className="w-[170px] h-[50px] flex justify-center items-center mx-auto">
                   <Image
                     alt="Logic Rays Logo"
                     src={ImageLinks.white_logo}
@@ -182,6 +181,75 @@ export default function Sidebar() {
           </div>
 
           <div className="flex flex-col items-center justify-center gap-2 mt-4 flex-shrink-0">
+            {/* Tenant Badge - Above Theme Toggle */}
+            {tenantType === 'TENANT' && tenant?.slug && (
+              <Tooltip delayDuration={0}>
+                {isCollapsed ? (
+                  <>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="hover:bg-secondary hover:text-secondary-foreground rounded-lg w-10 h-10 transition-all duration-200"
+                      >
+                        <Building2 size={20} />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="right" align="center">
+                      organization: {tenant.slug}
+                    </TooltipContent>
+                  </>
+                ) : (
+                  <>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        className="w-full h-10 flex justify-start items-center gap-3 px-3 rounded-lg hover:bg-secondary hover:text-secondary-foreground transition-all duration-200"
+                      >
+                        <Building2 size={20} />
+                        <span className="text-sm font-medium capitalize truncate">
+                          {tenant.slug}
+                        </span>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="right" align="center">
+                      organization: {tenant.slug}
+                    </TooltipContent>
+                  </>
+                )}
+              </Tooltip>
+            )}
+            {tenantType === 'PLATFORM' && (
+              <Tooltip delayDuration={0}>
+                {isCollapsed ? (
+                  <>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="hover:bg-secondary hover:text-secondary-foreground rounded-lg w-10 h-10 transition-all duration-200"
+                      >
+                        <Building2 size={20} />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="right" align="center">
+                      Platform Admin
+                    </TooltipContent>
+                  </>
+                ) : (
+                  <Button
+                    variant="ghost"
+                    className="w-full h-10 flex justify-start items-center gap-3 px-3 rounded-lg hover:bg-secondary hover:text-secondary-foreground transition-all duration-200"
+                  >
+                    <Building2 size={20} />
+                    <span className="text-sm font-medium truncate">
+                      Platform Admin
+                    </span>
+                  </Button>
+                )}
+              </Tooltip>
+            )}
+
             <ThemeToggle isCollapsed={isCollapsed} />
             <UserAvatar isCollapsed={isCollapsed} />
             {isCollapsed && (

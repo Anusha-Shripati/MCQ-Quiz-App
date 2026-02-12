@@ -1,4 +1,5 @@
-import { PrismaClient, Difficulty, Question_type } from '@prisma/client';
+import { PrismaClient } from '../generated/client';
+import { Difficulty, Question_type } from '../generated/client';
 import bcrypt from 'bcryptjs';
 import dotenv from 'dotenv';
 const prisma = new PrismaClient();
@@ -81,23 +82,40 @@ async function createTechnologies() {
 
 
 const resetDB = async () => {
-  await prisma.$executeRawUnsafe(`
-    TRUNCATE TABLE 
-      "Answers",
-      "Results",
-      "Exam_questions",
-      "Exam",
-      "Candidate",
-      "Questions",
-      "Assessment_technology",
-      "Assessments",
-      "Technology",
-      "Role_permissions",
-      "Modules",
-      "users",
-      "Roles"
-    CASCADE;
-  `);
+  try {
+    // Check if tables exist before truncating
+    const tableCheck: any = await prisma.$queryRaw`
+      SELECT COUNT(*) as count 
+      FROM information_schema.tables 
+      WHERE table_schema = 'public' AND table_name = 'Answers';
+    `;
+    
+    // Only truncate if tables exist
+    if (tableCheck && tableCheck[0]?.count > 0) {
+      await prisma.$executeRawUnsafe(`
+        TRUNCATE TABLE 
+          "Answers",
+          "Results",
+          "Exam_questions",
+          "Exam",
+          "Candidate",
+          "Questions",
+          "Assessment_technology",
+          "Assessments",
+          "Technology",
+          "Role_permissions",
+          "Modules",
+          "users",
+          "Roles"
+        CASCADE;
+      `);
+      console.log('✓ Database tables truncated');
+    } else {
+      console.log('⚠ Tables do not exist yet. Run migrations first: npx prisma migrate deploy');
+    }
+  } catch (error) {
+    console.log('⚠ Could not truncate tables. They may not exist yet. Continuing with seeding...');
+  }
 };
 
 async function main() {
@@ -160,7 +178,7 @@ async function main() {
 
   // Create technologies first, before questions reference them
   await createTechnologies();
-
+  console.log('\n🎉 Tenant database seeding completed successfully!');
 }
 
 main()

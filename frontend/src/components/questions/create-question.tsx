@@ -75,7 +75,7 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
   // const { trigger, isMutating } = useSWRMutation(`${technologyEndpoint.CREATE}`, create);
 
   const { trigger: updateTrigger, isMutating: updating } = useSWRMutation(
-    `${technologyEndpoint.TECHNOLOGY_BY_ID}/${technologyId}`,
+    `${technologyEndpoint.GET_TECHNOLOGY_BY_ID}/${technologyId}`,
     update
   );
 

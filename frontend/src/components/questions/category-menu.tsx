@@ -45,7 +45,7 @@ const CategoryMenu = ({
   //   router.push(`/questions/create-question/${category}`);
   // };
   const { trigger } = useSWRMutation(
-    `${technologyEndpoint.TECHNOLOGY_BY_ID}/${category.id}`,
+    `${technologyEndpoint.GET_TECHNOLOGY_BY_ID}/${category.id}`,
     deleteCategory
   );
   const handleDeleteCategory = async () => {

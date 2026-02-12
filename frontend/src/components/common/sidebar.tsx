@@ -87,24 +87,24 @@ export default function Sidebar() {
           <div className="space-y-4 flex-shrink-0">
             <div className="flex items-center justify-center w-full pt-3 flex-shrink-0 pb-3">
               {isCollapsed ? (
-                <div className="w-full h-full flex justify-center items-center">
+                <div className="w-10 h-10 flex justify-center items-center">
                   <Image
                     alt="Logic Rays Logo"
                     src={ImageLinks.logicrays_logo_bg_white}
                     className="cursor-pointer"
-                    width={200}
-                    height={200}
+                    width={40}
+                    height={40}
                     onClick={() => router.push('/dashboard')}
                   />
                 </div>
               ) : (
-                <div className="w-full h-full flex justify-center items-center">
+                <div className="w-[170px] h-[50px] flex justify-center items-center">
                   <Image
                     alt="Logic Rays Logo"
                     src={ImageLinks.white_logo}
                     className="cursor-pointer"
                     width={170}
-                    height={170}
+                    height={50}
                     onClick={() => router.push('/dashboard')}
                   />
                 </div>

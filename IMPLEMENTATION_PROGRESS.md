@@ -132,6 +132,53 @@ export class SomeController {
 
 ---
 
+## Phase 3.5: Subscription Expiry Detection ⚠️ PARTIALLY COMPLETE
+
+### What Was Done:
+1. ✅ Platform schema has `subscription_ends_at` and `trial_ends_at` fields
+2. ✅ Platform schema has `status` enum (active, suspended, trial, expired, cancelled)
+3. ✅ Tenant resolver middleware checks `tenant.status === 'expired'`
+4. ✅ Exam expiry cron pattern exists (`src/cron/exam-expiry.ts`)
+5. ✅ Multi-tenant cron pattern implemented
+
+### What Needs to Be Done:
+1. ❌ Create subscription expiry cron job
+2. ❌ Add date-based expiry check in tenant-resolver middleware
+3. ❌ Implement email notifications for expiring subscriptions
+4. ❌ Add usage limit enforcement logic
+
+### How Expiry Works:
+
+**Two-Layer Detection:**
+
+**Layer 1: Cron Job (Proactive)**
+```typescript
+// Daily at 1 AM
+- Compare subscription_ends_at < now()
+- Update status = 'expired'
+- Send warning emails (7 days before)
+```
+
+**Layer 2: Middleware (Reactive)**
+```typescript
+// On every request
+if (tenant.status === 'expired') {
+  block access
+}
+```
+
+### Files to Create:
+- `src/cron/subscription-expiry.ts` - Daily cron to mark expired subscriptions
+
+### Pattern Reference:
+Follow existing `src/cron/exam-expiry.ts` pattern:
+1. Get all tenants from platform DB
+2. Check expiry dates
+3. Update status
+4. Log events
+
+---
+
 ## Phase 4: Platform Admin APIs ⏳ NOT STARTED
 
 ### What Needs to Be Done:
@@ -143,8 +190,11 @@ export class SomeController {
    - Run migrations
    - Seed default data
    - Store tenant in platform DB
+   - Set subscription dates
 5. Create usage tracking APIs
 6. Create tenant suspension/activation
+7. Create subscription expiry cron job
+8. Implement usage limit enforcement
 
 ### Files to Create:
 - `src/platform/controllers/tenant.controller.ts`
@@ -155,6 +205,7 @@ export class SomeController {
 - `src/platform/services/provisioning.service.ts`
 - `src/platform/routes/index.ts`
 - `src/platform/middlewares/platform-auth.middleware.ts`
+- `src/cron/subscription-expiry.ts`
 
 ---
 
@@ -171,6 +222,46 @@ export class SomeController {
 - `frontend/src/middleware.ts` - Add subdomain detection
 - `frontend/src/app/(admin)/` - Platform admin UI
 - `frontend/src/store/authStore.ts` - Add tenant context
+
+---
+
+## ⚠️ CRITICAL WARNINGS
+
+### Platform Database Not Applied
+
+**Status**: Platform schema exists but migration NOT applied to database
+
+**Impact**: 
+- Tenant resolver will fail (tenants table doesn't exist)
+- Application will crash on startup
+- Cron jobs will fail
+- Cannot create tenants
+
+**Fix Required**:
+```bash
+# 1. Apply platform migration
+npx prisma migrate deploy --schema=./src/db/prisma/schema.prisma
+
+# 2. Run platform seeder
+npm run seed:platform
+
+# 3. Create tenant record for existing app_db
+# See "Next Steps" section for SQL
+```
+
+### Subscription Expiry Not Implemented
+
+**Status**: Infrastructure exists but logic not implemented
+
+**Impact**:
+- Subscriptions never expire automatically
+- Users can use expired subscriptions
+- No billing enforcement
+
+**Fix Required**:
+- Create `src/cron/subscription-expiry.ts`
+- Follow pattern from `src/cron/exam-expiry.ts`
+- Register cron in `src/index.ts`
 
 ---
 
@@ -216,10 +307,23 @@ export class SomeController {
 
 ## Next Steps (Continue Here)
 
-1. **Refactor RoleService and RoleController** (Next immediate task)
-2. Continue with remaining services in order
-3. Test each service after refactoring
-4. Move to Phase 4 after all services are done
+1. **⚠️ CRITICAL: Apply platform database migration** (Must do before anything else)
+   ```bash
+   npx prisma migrate deploy --schema=./src/db/prisma/schema.prisma
+   npm run seed:platform
+   ```
+
+2. **Create first tenant record** (Map existing app_db)
+   ```sql
+   INSERT INTO tenants (id, name, slug, status, plan_id, db_name, db_url, admin_email, admin_name)
+   VALUES (gen_random_uuid(), 'Default', 'localhost', 'active', '<plan_id>', 'app_db', 'postgresql://...', 'admin@example.com', 'Admin');
+   ```
+
+3. **Implement subscription expiry cron** (Follow exam-expiry.ts pattern)
+
+4. **Start Phase 4: Platform Admin APIs**
+
+5. **Test tenant isolation thoroughly**
 
 ---
 

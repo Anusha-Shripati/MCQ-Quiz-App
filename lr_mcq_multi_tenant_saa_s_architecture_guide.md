@@ -70,14 +70,20 @@ Tables:
 id
 name
 slug
-status
+status (active, suspended, trial, expired, cancelled)
 plan_id
 db_name
 db_url
+admin_email
+admin_name
+trial_ends_at
+subscription_ends_at
 created_at
+updated_at
+deleted_at
 ```
 
-Maps subdomain → tenant DB.
+Maps subdomain → tenant DB and tracks subscription lifecycle.
 
 ---
 
@@ -86,12 +92,32 @@ Maps subdomain → tenant DB.
 ```
 id
 name
-limits
-features
+description
 price
+limits (JSON: candidates, assessments, questions, storage_mb, api_calls)
+features (JSON: custom_branding, api_access, priority_support)
+is_active
+created_at
 ```
 
-Defines SaaS pricing tiers.
+Defines SaaS pricing tiers with usage limits.
+
+---
+
+### tenant_usage
+
+```
+id
+tenant_id
+metric_type (candidates, assessments, questions, storage_mb, api_calls)
+current_value
+limit_value
+period_start
+period_end
+created_at
+```
+
+Tracks tenant usage against plan limits for billing and enforcement.
 
 ---
 
@@ -311,9 +337,75 @@ When platform admin creates a tenant:
 2. Run schema migrations
 3. Seed default admin + roles
 4. Store tenant mapping in platform DB
-5. Activate subdomain
+5. Set subscription dates (trial_ends_at or subscription_ends_at)
+6. Initialize usage tracking records
+7. Activate subdomain
 
 Automation is required.
+
+---
+
+# 5.1 Subscription Lifecycle Management
+
+## Expiry Detection (Two-Layer Approach)
+
+### Layer 1: Cron Job (Proactive)
+
+Daily cron job runs to identify and mark expired subscriptions:
+
+```typescript
+// Runs at 1 AM daily
+- Check subscription_ends_at < now()
+- Update status to 'expired'
+- Check trial_ends_at < now()
+- Update trial status to 'expired'
+- Find subscriptions expiring in 7 days
+- Send warning emails
+```
+
+Pattern follows existing `exam-expiry.ts` cron:
+- Iterate through all tenants
+- Update status in platform DB
+- Log expiry events
+
+### Layer 2: Middleware (Reactive)
+
+Tenant resolver middleware validates on every request:
+
+```typescript
+// Real-time validation
+if (tenant.status === 'expired') {
+  return 403 'Subscription expired'
+}
+
+if (tenant.subscription_ends_at < now()) {
+  // Auto-update status
+  update status to 'expired'
+  return 403 'Subscription expired'
+}
+```
+
+This provides:
+- Immediate blocking after expiry
+- Catches edge cases between cron runs
+- Real-time enforcement
+
+## Usage Limit Enforcement
+
+Before creating resources, check tenant_usage:
+
+```typescript
+const usage = await checkUsageLimit(tenantId, 'candidates');
+
+if (usage.current_value >= usage.limit_value) {
+  throw new Error('Limit reached. Upgrade plan.');
+}
+
+// Create resource
+// Increment usage counter
+```
+
+This prevents abuse and enables upselling.
 
 ---
 
@@ -414,14 +506,95 @@ Backend resolves tenant using request host.
 Recommended order:
 
 1. Create platform DB
-2. Implement tenant resolver middleware
-3. Dynamic Prisma injection
-4. Refactor services to DI
-5. Add platform admin APIs
-6. Add frontend routing
-7. Automate tenant provisioning
+2. Run platform migrations
+3. Seed platform data (admins, plans, modules)
+4. Implement tenant resolver middleware
+5. Dynamic Prisma injection
+6. Refactor services to DI
+7. Add platform admin APIs
+8. Implement subscription expiry cron
+9. Add usage tracking logic
+10. Add frontend routing
+11. Automate tenant provisioning
 
 Avoid rewriting business logic — reuse tenant schema.
+
+---
+
+# 10.1 Critical Setup Steps
+
+## Before Running Application:
+
+### 1. Platform Database Setup
+
+```bash
+# Create platform database
+createdb platform_db
+
+# Update .env
+DATABASE_URL="postgresql://user:pass@localhost:5432/platform_db"
+
+# Apply migrations
+npx prisma migrate deploy --schema=./src/db/prisma/schema.prisma
+
+# Seed platform data
+ts-node src/db/prisma/seeders/platform-seed.ts
+```
+
+### 2. Create First Tenant Record
+
+For existing app_db, create tenant mapping:
+
+```sql
+INSERT INTO tenants (
+  id, name, slug, status, plan_id, 
+  db_name, db_url, admin_email, admin_name
+) VALUES (
+  gen_random_uuid(),
+  'Default Tenant',
+  'localhost', -- or 'default'
+  'active',
+  '<plan_id_from_plans_table>',
+  'app_db',
+  'postgresql://user:pass@localhost:5432/app_db',
+  'admin@example.com',
+  'Admin'
+);
+```
+
+### 3. Environment Variables
+
+```env
+# Platform DB (central)
+DATABASE_URL="postgresql://user:pass@localhost:5432/platform_db"
+
+# Development tenant slug
+DEV_TENANT_SLUG="localhost"
+
+# Optional: Default tenant DB
+TENANT_DB_URL="postgresql://user:pass@localhost:5432/app_db"
+```
+
+### 4. Register Cron Jobs
+
+In `src/index.ts`:
+
+```typescript
+// Import cron jobs
+import './cron/exam-expiry';
+import './cron/subscription-expiry';
+```
+
+## Common Issues:
+
+**Issue**: `relation "tenants" does not exist`
+**Fix**: Run platform migration (step 1)
+
+**Issue**: `Tenant not found`
+**Fix**: Create tenant record (step 2)
+
+**Issue**: Subscriptions never expire
+**Fix**: Implement subscription-expiry cron (step 4)
 
 ---
 

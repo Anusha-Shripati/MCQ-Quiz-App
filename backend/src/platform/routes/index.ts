@@ -2,6 +2,7 @@ import express from 'express';
 import platformAdminRoutes from './platform-admin.routes';
 import planRoutes from './plan.routes';
 import tenantRoutes from './tenant.routes';
+import provisioningRoutes from './provisioning.routes';
 
 const router = express.Router();
 
@@ -13,5 +14,6 @@ router.use('/auth', platformAdminRoutes);
 router.use('/admins', platformAdminRoutes);
 router.use('/plans', planRoutes);
 router.use('/tenants', tenantRoutes);
+router.use('/provision', provisioningRoutes);
 
 export default router;

@@ -10,6 +10,7 @@ router.get('/health', (req, res) => {
 });
 
 router.use('/auth', platformAdminRoutes);
+router.use('/admins', platformAdminRoutes);
 router.use('/plans', planRoutes);
 router.use('/tenants', tenantRoutes);
 

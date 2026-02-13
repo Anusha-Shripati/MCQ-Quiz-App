@@ -61,4 +61,79 @@ export class PlatformAdminService {
       data: { last_login: new Date() },
     });
   }
+
+  async createAdmin(data: {
+    email: string;
+    password: string;
+    name: string;
+    role_id: string;
+    created_by?: string;
+  }) {
+    return await this.prisma.platform_admins.create({
+      data: {
+        ...data,
+        is_active: true,
+      },
+      include: {
+        role: true,
+      },
+    });
+  }
+
+  async findManyAdmins(filter?: { search?: string; is_active?: boolean }) {
+    const where: any = { deleted_at: null };
+
+    if (filter?.is_active !== undefined) {
+      where.is_active = filter.is_active;
+    }
+
+    if (filter?.search) {
+      where.OR = [
+        { email: { contains: filter.search, mode: 'insensitive' } },
+        { name: { contains: filter.search, mode: 'insensitive' } },
+      ];
+    }
+
+    return await this.prisma.platform_admins.findMany({
+      where,
+      include: {
+        role: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+      orderBy: { created_at: 'desc' },
+    });
+  }
+
+  async updateAdmin(id: string, data: {
+    email?: string;
+    name?: string;
+    role_id?: string;
+    is_active?: boolean;
+  }) {
+    return await this.prisma.platform_admins.update({
+      where: { id },
+      data,
+      include: {
+        role: true,
+      },
+    });
+  }
+
+  async deleteAdmin(id: string) {
+    return await this.prisma.platform_admins.update({
+      where: { id },
+      data: { deleted_at: new Date() },
+    });
+  }
+
+  async changePassword(id: string, password: string) {
+    return await this.prisma.platform_admins.update({
+      where: { id },
+      data: { password },
+    });
+  }
 }

@@ -44,7 +44,8 @@ export default function Login() {
 
   const onSubmit = async (data: z.infer<typeof loginSchema>) => {
     try {
-      await login({ email: data.email, password: data.password });
+      const email = data.email.replace(/^mailto:/i, '').trim();
+      await login({ email, password: data.password });
       toast.success('Login successful');
       router.push('/dashboard');
     } catch (error) {

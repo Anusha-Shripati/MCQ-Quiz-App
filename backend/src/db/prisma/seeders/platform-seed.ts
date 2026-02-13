@@ -50,7 +50,7 @@ async function seedPlatform() {
     for (const module of MODULES) {
       const created = await platformPrisma.platform_modules.upsert({
         where: { key: module.key },
-        update: {},
+        update: module,
         create: module,
       });
       modules.push(created);
@@ -79,7 +79,10 @@ async function seedPlatform() {
             module_id: module.id,
           },
         },
-        update: {},
+        update: {
+          can_read: true,
+          can_edit: true,
+        },
         create: {
           role_id: superAdminRole.id,
           module_id: module.id,
@@ -106,7 +109,10 @@ async function seedPlatform() {
     const hashedPassword = await bcrypt.hash('Admin@123', 10);
     await platformPrisma.platform_admins.upsert({
       where: { email: 'admin@logicrays.com' },
-      update: {},
+      update: {
+        role_id: superAdminRole.id,
+        is_active: true,
+      },
       create: {
         email: 'admin@logicrays.com',
         password: hashedPassword,

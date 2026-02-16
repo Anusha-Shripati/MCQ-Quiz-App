@@ -1,15 +1,19 @@
 import express from 'express';
+import platformAdminRoutes from './platform-admin.routes';
+import planRoutes from './plan.routes';
+import tenantRoutes from './tenant.routes';
+import provisioningRoutes from './provisioning.routes';
 
 const router = express.Router();
-
-// TODO: Add platform admin routes in Phase 3
-// - Tenant management
-// - Plan management
-// - Platform admin authentication
-// - Usage tracking
 
 router.get('/health', (req, res) => {
   res.json({ status: 'ok', message: 'Platform API is running' });
 });
+
+router.use('/auth', platformAdminRoutes);
+router.use('/admins', platformAdminRoutes);
+router.use('/plans', planRoutes);
+router.use('/tenants', tenantRoutes);
+router.use('/provision', provisioningRoutes);
 
 export default router;

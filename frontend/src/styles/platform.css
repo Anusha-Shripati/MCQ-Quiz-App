@@ -1,0 +1,249 @@
+/* Platform Admin Styles - Indigo/Violet Theme */
+
+/* Platform Theme Variables - Scoped to avoid conflicts */
+.platform-theme {
+  --platform-primary: #6366f1;
+  --platform-primary-dark: #4f46e5;
+  --platform-primary-light: #818cf8;
+  --platform-secondary: #8b5cf6;
+  --platform-accent: #06b6d4;
+  --platform-bg: #f8fafc;
+  --platform-surface: #ffffff;
+  --platform-border: #e2e8f0;
+  --platform-text-primary: #0f172a;
+  --platform-text-secondary: #64748b;
+  --platform-sidebar-from: #6366f1;
+  --platform-sidebar-to: #8b5cf6;
+}
+
+.dark .platform-theme {
+  --platform-bg: #0f172a;
+  --platform-surface: #1e293b;
+  --platform-border: #334155;
+  --platform-text-primary: #f1f5f9;
+  --platform-text-secondary: #94a3b8;
+  --platform-sidebar-from: #4338ca;
+  --platform-sidebar-to: #6d28d9;
+}
+
+/* Sidebar Styles */
+.platform-sidebar {
+  @apply sticky top-0 left-0 h-screen z-50 transition-all duration-300 shadow-sm relative;
+  background: linear-gradient(to bottom, var(--platform-sidebar-from), var(--platform-sidebar-to));
+}
+
+.platform-sidebar-collapsed {
+  @apply w-16;
+}
+
+.platform-sidebar-expanded {
+  @apply w-56;
+}
+
+.platform-sidebar-header {
+  @apply flex items-center justify-center w-full pt-3 pb-3 flex-shrink-0;
+}
+
+.platform-sidebar-logo {
+  @apply text-2xl font-bold bg-gradient-to-r from-white to-indigo-100 bg-clip-text text-transparent;
+}
+
+.platform-sidebar-nav {
+  @apply flex flex-col gap-3;
+}
+
+.platform-sidebar-item {
+  @apply w-full text-base relative h-10 flex items-center gap-4 p-3 rounded-lg transition-colors text-white/90;
+}
+
+.platform-sidebar-item:hover {
+  @apply bg-white/10 text-white;
+}
+
+.platform-sidebar-item-active {
+  @apply bg-white/20 text-white;
+}
+
+.platform-sidebar-icon {
+  @apply h-5 w-5;
+}
+
+.platform-sidebar-text {
+  @apply text-base;
+}
+
+.platform-sidebar-footer {
+  @apply flex flex-col items-center justify-center gap-2 mt-4 flex-shrink-0;
+}
+
+/* Main Content Area */
+.platform-main {
+  @apply min-h-screen transition-all duration-300;
+  background-color: var(--platform-bg);
+}
+
+.platform-main-collapsed {
+  @apply ml-16;
+}
+
+.platform-main-expanded {
+  @apply ml-56;
+}
+
+.platform-content {
+  @apply p-8;
+}
+
+/* Page Header */
+.platform-page-header {
+  @apply mb-8;
+}
+
+.platform-page-title {
+  @apply text-4xl font-bold mb-2;
+  color: var(--platform-text-primary);
+}
+
+.platform-page-description {
+  @apply text-lg;
+  color: var(--platform-text-secondary);
+}
+
+/* Cards */
+.platform-card {
+  @apply rounded-xl shadow-xl p-8 transition-shadow hover:shadow-2xl;
+  background-color: var(--platform-surface);
+  border: 1px solid var(--platform-border);
+}
+
+.platform-card-header {
+  @apply mb-6 pb-4;
+  border-bottom: 1px solid var(--platform-border);
+}
+
+.platform-card-title {
+  @apply text-2xl font-bold;
+  color: var(--platform-text-primary);
+}
+
+/* Buttons */
+.platform-btn-primary {
+  @apply h-11 px-6 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-medium rounded-lg shadow-md hover:shadow-lg transition-all duration-200;
+}
+
+.platform-btn-secondary {
+  @apply h-11 px-6 font-medium rounded-lg transition-all duration-200;
+  background-color: var(--platform-border);
+  color: var(--platform-text-primary);
+}
+
+.platform-btn-secondary:hover {
+  @apply opacity-80;
+}
+
+.platform-btn-outline {
+  @apply h-11 px-6 border-2 font-medium rounded-lg transition-all duration-200;
+  border-color: var(--platform-primary);
+  color: var(--platform-primary);
+}
+
+.platform-btn-outline:hover {
+  @apply bg-indigo-50 dark:bg-indigo-950;
+}
+
+/* Inputs */
+.platform-input {
+  @apply h-11 px-4 rounded-lg transition-all duration-200;
+  background-color: var(--platform-surface);
+  border: 1px solid var(--platform-border);
+  color: var(--platform-text-primary);
+}
+
+.platform-input:focus {
+  @apply outline-none ring-2 ring-opacity-20;
+  border-color: var(--platform-primary);
+  ring-color: var(--platform-primary);
+}
+
+/* Tables */
+.platform-table {
+  @apply w-full border-collapse;
+}
+
+.platform-table-header {
+  border-bottom: 2px solid var(--platform-border);
+  background-color: var(--platform-bg);
+}
+
+.platform-table-header-cell {
+  @apply px-6 py-4 text-left text-sm font-semibold;
+  color: var(--platform-text-secondary);
+}
+
+.platform-table-row {
+  @apply transition-colors duration-150;
+  border-bottom: 1px solid var(--platform-border);
+}
+
+.platform-table-row:hover {
+  @apply bg-indigo-50 dark:bg-slate-800;
+}
+
+.platform-table-cell {
+  @apply px-6 py-4 text-sm;
+  color: var(--platform-text-primary);
+}
+
+/* Badges */
+.platform-badge {
+  @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium;
+}
+
+.platform-badge-success {
+  @apply bg-gradient-to-r from-emerald-500 to-emerald-600 text-white;
+}
+
+.platform-badge-warning {
+  @apply bg-gradient-to-r from-amber-500 to-amber-600 text-white;
+}
+
+.platform-badge-error {
+  @apply bg-gradient-to-r from-red-500 to-red-600 text-white;
+}
+
+.platform-badge-info {
+  @apply bg-gradient-to-r from-blue-500 to-blue-600 text-white;
+}
+
+/* Stats Cards */
+.platform-stat-card {
+  @apply rounded-xl p-6 shadow-lg;
+  background: linear-gradient(to bottom right, var(--platform-surface), var(--platform-bg));
+  border: 1px solid var(--platform-border);
+}
+
+.platform-stat-value {
+  @apply text-3xl font-bold;
+  color: var(--platform-text-primary);
+}
+
+.platform-stat-label {
+  @apply text-sm mt-1;
+  color: var(--platform-text-secondary);
+}
+
+/* Animations */
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.platform-sidebar {
+  animation: slideInLeft 0.3s ease-out;
+}

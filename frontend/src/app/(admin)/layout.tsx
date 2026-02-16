@@ -3,11 +3,12 @@ import { ReactNode } from 'react';
 import Sidebar from '@/components/common/sidebar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import AdminAuth from '@/components/common/admin-auth';
+import AuthInitializer from '@/components/common/auth-initializer';
 import { SWRConfig } from 'swr';
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   return (
-    <>
+    <AuthInitializer>
       <AdminAuth>
         <Sidebar />
         <div className="flex flex-col w-full">
@@ -20,6 +21,6 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
           </div>
         </div>
       </AdminAuth>
-    </>
+    </AuthInitializer>
   );
 }

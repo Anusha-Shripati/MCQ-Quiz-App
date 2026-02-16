@@ -1,0 +1,312 @@
+import { api, isAxiosError } from '@/lib/api';
+import React, { useEffect, useMemo, useState } from 'react';
+import toast from 'react-hot-toast';
+import useSWR, { mutate } from 'swr';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { FormField } from '@/components/common/form-field';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { Role } from '@/types/common.types';
+import { EyeIcon, EyeOffIcon } from 'lucide-react';
+import { Button } from '@/components/ui/form/button';
+import { UserData } from '@/types/common.types';
+import useSWRMutation from 'swr/mutation';
+import RoleForm from '../roles/role-form';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { roleEndpoint, userEndpoint } from '@/lib/endpoint';
+import { passwordRegex } from '@/shared/constants/data';
+import PasswordRequirements from '@/components/profile/PasswordRequirements';
+
+const adminSchema = z
+  .object({
+    name: z.string().min(1, 'Name is required').max(50, 'Name must be less than 50 characters'),
+    email: z.string().email('Invalid email address'),
+    password: z
+      .string()
+      .min(8, 'Match the below password requirements.')
+      .regex(passwordRegex, 'Invalid password format')
+      .nullable(),
+    confirmPassword: z
+      .string()
+      .min(8, 'Confirm Password must match Password.')
+      .nullable(),
+    role: z.string().min(1, 'Role is required'),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: 'Passwords do not match',
+    path: ['confirmPassword'],
+  });
+
+type AdminFormValues = {
+  name: string;
+  email: string;
+  password: string | null;
+  confirmPassword: string | null;
+  role: string;
+};
+
+const defaultAdmin: AdminFormValues = {
+  name: '',
+  email: '',
+  password: '',
+  confirmPassword: '',
+  role: '',
+};
+
+interface AdminFormProps {
+  open: boolean;
+  onClose: () => void;
+  adminData?: UserData | null;
+}
+
+async function create(url: string, { arg }: { arg: Partial<AdminFormValues> }) {
+  const response = await api.post(url, arg);
+  return response;
+}
+
+async function update(url: string, { arg }: { arg: Partial<AdminFormValues> }) {
+  const response = await api.put(url, arg);
+  return response;
+}
+
+function AdminForm({ open, onClose, adminData = null }: AdminFormProps) {
+  const {
+    handleSubmit,
+    reset,
+    setValue,
+    watch,
+    register,
+    formState: { errors },
+  } = useForm<AdminFormValues>({
+    resolver: zodResolver(adminSchema),
+    defaultValues: defaultAdmin,
+  });
+  
+  const [openRoleForm, setOpenRole] = useState(false);
+  const [passwordChange, setPasswordChange] = useState(false);
+  const [showPassword, setShowPassword] = useState({ password: false, confirmPassword: false });
+  const [passchange, setPassChange] = useState('');
+  const [isBlank, setIsBlank] = useState(false);
+  const [showPasswordRequirements, setShowPasswordRequirements] = useState(false);
+  
+  const togglePassword = (name: keyof typeof showPassword) =>
+    setShowPassword((prv) => ({ ...prv, [name]: !prv[name] }));
+
+  const adminForms = watch();
+  const { data: roles } = useSWR(roleEndpoint.LIST, api.get);
+  const { trigger, isMutating } = useSWRMutation(userEndpoint.CREATE, create);
+  const { trigger: updateTrigger, isMutating: updating } = useSWRMutation(
+    `/user/${adminData?.id}`,
+    update
+  );
+
+  const rolesOptions = useMemo(() => {
+    if (roles?.data?.list) {
+      return roles.data.list.map((item: Role) => ({ value: item.id, label: item.name }));
+    }
+  }, [roles]);
+
+  const handleCreateOrUpdateAdmin = async (data: AdminFormValues) => {
+    const payload = {
+      name: data.name,
+      email: data.email,
+      password: data.password,
+      role_id: data.role,
+    };
+    
+    try {
+      let res;
+      if (adminData) {
+        res = await updateTrigger(payload);
+      } else {
+        res = await trigger(payload);
+      }
+      
+      if (res.success) {
+        toast.success(adminData ? 'Platform admin updated successfully' : 'Platform admin created successfully');
+        mutate((key) => typeof key === 'string' && key.startsWith('/user/list'));
+      } else {
+        toast.error(res.message);
+      }
+      onClose();
+    } catch (error) {
+      if (isAxiosError(error)) {
+        toast.error(error.response.data.message || 'An unexpected error occurred');
+      } else {
+        toast.error('An unexpected error occurred');
+      }
+    }
+  };
+
+  const handleClose = () => {
+    reset(defaultAdmin);
+    onClose();
+  };
+
+  useEffect(() => {
+    if (open) {
+      const formData = {
+        name: adminData?.name || '',
+        email: adminData?.email || '',
+        password: null,
+        confirmPassword: null,
+        role: adminData?.role?.id || '',
+      };
+      reset(formData);
+      setPasswordChange(adminData ? false : true);
+    }
+  }, [open, reset, adminData]);
+
+  useEffect(() => {
+    if (passchange.length > 0) {
+      setIsBlank(false);
+    } else {
+      setPassChange('');
+      setIsBlank(true);
+    }
+  }, [passchange]);
+
+  return (
+    <Dialog open={open} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="sm:max-w-md dark:bg-primary" aria-describedby="dialog-description">
+        <DialogHeader>
+          <DialogTitle>{adminData !== null ? 'Edit' : 'Create'} Platform Admin</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit(handleCreateOrUpdateAdmin)}>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <FormField
+                label="Name"
+                {...register('name')}
+                placeholder="Admin Name"
+                className="dark:bg-secondary"
+                error={errors.name?.message}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <FormField
+                label="Email"
+                {...register('email')}
+                placeholder="Email"
+                className="dark:bg-secondary"
+                error={errors.email?.message}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <div className="flex items-end gap-2">
+                <div className="flex-grow">
+                  <FormField
+                    onChange={(e) => setValue('role', e)}
+                    type="select"
+                    value={adminForms.role}
+                    label="Role"
+                    className="dark:bg-secondary"
+                    options={rolesOptions}
+                  />
+                </div>
+
+                <Tooltip delayDuration={0}>
+                  <TooltipTrigger asChild>
+                    <Button variant="outline" type="button" onClick={() => setOpenRole(true)}>
+                      +
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent className="bg-gray-800 text-white p-2 rounded shadow-lg">
+                    Create a new role
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+              {errors.role?.message && (
+                <p className="text-red-500 text-sm mt-1">{errors.role?.message}</p>
+              )}
+            </div>
+            
+            {adminData && (
+              <div className="space-y-2">
+                <input
+                  type="checkbox"
+                  className="h-3"
+                  onChange={(e) => setPasswordChange(e.target.checked)}
+                />{' '}
+                Change password ?
+              </div>
+            )}
+            
+            {passwordChange && (
+              <>
+                <div className="space-y-2 relative">
+                  <FormField
+                    label="Password"
+                    {...register('password')}
+                    placeholder="Password"
+                    className="dark:bg-secondary"
+                    type={showPassword.password ? 'text' : 'password'}
+                    error={errors.password?.message}
+                    onChange={(e) => {
+                      setPassChange(e.target.value);
+                    }}
+                    onFocus={() => setShowPasswordRequirements(true)}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => togglePassword('password')}
+                    className="absolute right-3 top-[34px] transform -translate-y-1/2 text-gray-400"
+                  >
+                    {showPassword.password ? <EyeOffIcon size={20} /> : <EyeIcon size={20} />}
+                  </button>
+                  {showPasswordRequirements && <PasswordRequirements password={passchange} />}
+                </div>
+                
+                <div className="space-y-2 relative">
+                  <FormField
+                    label="Confirm Password"
+                    {...register('confirmPassword')}
+                    placeholder="Confirm Password"
+                    className="dark:bg-secondary"
+                    type={showPassword.confirmPassword ? 'text' : 'password'}
+                    error={errors.confirmPassword?.message}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => togglePassword('confirmPassword')}
+                    className="absolute right-3 top-[34px] transform -translate-y-1/2 text-gray-400"
+                  >
+                    {showPassword.confirmPassword ? (
+                      <EyeOffIcon size={20} />
+                    ) : (
+                      <EyeIcon size={20} />
+                    )}
+                  </button>
+                </div>
+              </>
+            )}
+
+            <div className="flex justify-end space-x-2">
+              <Button
+                type="reset"
+                variant="destructive"
+                onClick={handleClose}
+                disabled={isMutating || updating}
+              >
+                Close
+              </Button>
+              <Button
+                type="submit"
+                className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700"
+                disabled={isMutating || updating || (isBlank && passwordChange)}
+              >
+                {adminData ? 'Update' : 'Save'}
+              </Button>
+            </div>
+          </div>
+        </form>
+      </DialogContent>
+      <RoleForm open={openRoleForm} onClose={() => setOpenRole(false)} />
+    </Dialog>
+  );
+}
+
+export default AdminForm;

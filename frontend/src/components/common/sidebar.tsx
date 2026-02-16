@@ -21,7 +21,7 @@ import { ThemeToggle } from './theme-toggle';
 export default function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const sidebarRef = useRef<HTMLDivElement | null>(null);
-  const { setPermissions, user, setParamsLoading, tenant, tenantType } = useAuthStore();
+  const { setPermissions, user, setParamsLoading, tenant } = useAuthStore();
 
   const router = useRouter();
 
@@ -182,7 +182,7 @@ export default function Sidebar() {
 
           <div className="flex flex-col items-center justify-center gap-2 mt-4 flex-shrink-0">
             {/* Tenant Badge - Above Theme Toggle */}
-            {tenantType === 'TENANT' && tenant?.slug && (
+            {/* {tenantType === 'TENANT' && tenant?.slug && (
               <Tooltip delayDuration={0}>
                 {isCollapsed ? (
                   <>
@@ -218,36 +218,14 @@ export default function Sidebar() {
                   </>
                 )}
               </Tooltip>
-            )}
-            {tenantType === 'PLATFORM' && (
-              <Tooltip delayDuration={0}>
-                {isCollapsed ? (
-                  <>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="hover:bg-secondary hover:text-secondary-foreground rounded-lg w-10 h-10 transition-all duration-200"
-                      >
-                        <Building2 size={20} />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent side="right" align="center">
-                      Platform Admin
-                    </TooltipContent>
-                  </>
-                ) : (
-                  <Button
-                    variant="ghost"
-                    className="w-full h-10 flex justify-start items-center gap-3 px-3 rounded-lg hover:bg-secondary hover:text-secondary-foreground transition-all duration-200"
-                  >
-                    <Building2 size={20} />
-                    <span className="text-sm font-medium truncate">
-                      Platform Admin
-                    </span>
-                  </Button>
-                )}
-              </Tooltip>
+            )} */}
+
+            {!isCollapsed && tenant?.slug && (
+              <div className="mb-4 pb-4 border-b border-white/10 w-full flex gap-4 p-3 rounded-lg">
+                <Building2 size={20} />
+                <p className="text-white text-base">{tenant?.slug}</p>
+                {/* <p className="text-xs text-white/70">{platformAdmin.role?.name}</p> */}
+              </div>
             )}
 
             <ThemeToggle isCollapsed={isCollapsed} />

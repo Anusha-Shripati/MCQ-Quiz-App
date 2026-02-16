@@ -11,7 +11,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 
-export function ThemeToggle({ isCollapsed }: { isCollapsed: boolean }) {
+export function ThemeToggle({ isCollapsed = true }: { isCollapsed?: boolean }) {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = React.useState(false);
 

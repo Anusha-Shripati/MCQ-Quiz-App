@@ -17,16 +17,39 @@ export async function middleware(request: NextRequest) {
 
   // Platform admin routes (admin.lr-mcq.local)
   if (tenantContext.isPlatform) {
-    // TODO: Add platform admin authentication and routing in Phase 4
-    // For now, show coming soon or redirect
-    if (request.nextUrl.pathname.startsWith('/platform')) {
+    const platformToken = request.cookies.get('platformToken')?.value;
+    const currentPath = request.nextUrl.pathname;
+
+    // Allow platform-auth routes without token
+    if (currentPath.startsWith('/platform-auth')) {
+      // If already authenticated, redirect to platform dashboard
+      if (platformToken) {
+        return NextResponse.redirect(new URL('/platform/dashboard', request.url));
+      }
       return response;
     }
-    // Redirect platform admin to platform routes
-    return NextResponse.redirect(new URL('/platform', request.url));
+
+    // Protect platform routes - require platformToken
+    if (currentPath.startsWith('/platform')) {
+      if (!platformToken) {
+        return NextResponse.redirect(new URL('/platform-auth/login', request.url));
+      }
+      return response;
+    }
+
+    // Redirect to platform dashboard if authenticated, otherwise to login
+    return NextResponse.redirect(
+      new URL(platformToken ? '/platform/dashboard' : '/platform-auth/login', request.url)
+    );
   }
 
-  // Tenant routes - no cookie needed
+  // Tenant routes - prevent platform users from accessing
+  const platformToken = request.cookies.get('platformToken')?.value;
+  if (platformToken) {
+    // Platform user trying to access tenant routes - redirect to platform
+    return NextResponse.redirect(new URL('https://admin.lr-mcq.local:3000/platform/dashboard'));
+  }
+
   // Frontend extracts tenant from URL directly in axios interceptor
   // Backend validates tenant on API calls
 
@@ -36,6 +59,18 @@ export async function middleware(request: NextRequest) {
 
   const currentPath = request.nextUrl.pathname;
   const currentModule = currentPath.split('/')[1];
+
+  // 🔹 Block tenant users from accessing platform routes
+  if (currentPath.startsWith('/platform') || currentPath.startsWith('/platform-auth')) {
+    // Tenant user trying to access platform routes
+    if (token) {
+      // Authenticated tenant user - redirect to tenant dashboard
+      return NextResponse.redirect(new URL('/dashboard', request.url));
+    } else {
+      // Unauthenticated tenant user - redirect to tenant login
+      return NextResponse.redirect(new URL('/', request.url));
+    }
+  }
 
   // 🔹 Define protected routes
   const PROTECTED_ROUTES = new Set([
@@ -103,6 +138,7 @@ export const config = {
     '/roles/:path*',
     '/users/:path*',
     '/test/:path*',
-    '/platform/:path*', // Platform admin routes
+    '/platform/:path*',
+    '/platform-auth/:path*',
   ],
 };

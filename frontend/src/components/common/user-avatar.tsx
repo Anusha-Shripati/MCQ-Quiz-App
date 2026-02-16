@@ -1,6 +1,5 @@
 "use client";
 
-import { Avatar } from '@/components/ui/avatar';
 import { useAuthStore } from '@/store/authStore';
 import {
   DropdownMenu,

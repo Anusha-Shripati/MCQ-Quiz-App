@@ -8,25 +8,43 @@ import { platformAuth } from '../middlewares/platform-auth.middleware';
 const router = express.Router();
 const controller = new PlatformAdminController();
 
+// Public routes (no auth required)
 router.post(
   '/login',
   validateRequest(platformAdminSchema.login),
   asyncHandler(controller.login)
 );
 
-router.post('/logout', platformAuth(), asyncHandler(controller.logout));
+router.post(
+  '/validate-email',
+  validateRequest(platformAdminSchema.validateEmail),
+  asyncHandler(controller.validateEmail)
+);
 
+router.post(
+  '/validate-otp',
+  validateRequest(platformAdminSchema.validateOtp),
+  asyncHandler(controller.validateOtp)
+);
+
+router.post(
+  '/reset-password',
+  validateRequest(platformAdminSchema.resetPassword),
+  asyncHandler(controller.resetPassword)
+);
+
+// Protected routes (require auth)
 router.get('/me', platformAuth(), asyncHandler(controller.me));
 
 router.post(
-  '/',
+  '/create',
   platformAuth('admins.can_edit'),
   validateRequest(platformAdminSchema.create),
   asyncHandler(controller.create)
 );
 
 router.get(
-  '/',
+  '/list',
   platformAuth('admins.can_read'),
   asyncHandler(controller.list)
 );
@@ -53,7 +71,7 @@ router.delete(
 );
 
 router.put(
-  '/:id/password',
+  '/change-password/:id',
   platformAuth('admins.can_edit'),
   validateRequest(platformAdminSchema.changePassword),
   asyncHandler(controller.changePassword)

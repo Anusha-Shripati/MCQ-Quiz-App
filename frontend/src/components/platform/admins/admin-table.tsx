@@ -12,7 +12,7 @@ import AdminForm from './admin-form';
 import { usePlatformAuthStore } from '@/store/platformAuthStore';
 import ReusableTable from '@/components/common/reusable-table';
 import StatusWrapper from '@/components/common/status-wrapper';
-import { userEndpoint } from '@/lib/endpoint';
+import { platformAdminEndpoint } from '@/lib/endpoint';
 import { DeleteDialog } from '@/components/common/delete-dialog';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
@@ -42,7 +42,7 @@ function AdminTable() {
     error,
     mutate,
     isValidating,
-  } = useSWR(`${userEndpoint.LIST}?search=${searchTerm}`, fetcher);
+  } = useSWR(`${platformAdminEndpoint.LIST}?search=${searchTerm}`, fetcher);
 
   const onDelete = (id: string) => {
     setDeleteId(id);
@@ -51,11 +51,11 @@ function AdminTable() {
 
   const handleAdminDelete = async (id: string) => {
     try {
-      const res = await deleteData(`/user/${id}`);
+      const res = await deleteData(`${platformAdminEndpoint.ADMIN_BY_ID}/${id}`);
       if (res.success) {
         toast.success('Platform admin deleted successfully');
       }
-      mutate(`${userEndpoint.LIST}?search=${searchTerm}`);
+      mutate(`${platformAdminEndpoint.LIST}?search=${searchTerm}`);
     } catch (error) {
       if (isAxiosError(error)) {
         toast.error(error.response.data.message || 'An unexpected error occurred');

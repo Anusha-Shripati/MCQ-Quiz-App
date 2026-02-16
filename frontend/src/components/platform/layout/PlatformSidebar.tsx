@@ -3,13 +3,13 @@
 import { useState, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { LayoutDashboard, Building2, CreditCard, Users, ChevronLeft, ChevronRight, Sun, Moon, Shield } from 'lucide-react';
+import { LayoutDashboard, Building2, CreditCard, Users, ChevronLeft, ChevronRight, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/form/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { useTheme } from 'next-themes';
 import Image from 'next/image';
 import ImageLinks from '@/app/assets/images/image-links';
 import PlatformUserAvatar from './PlatformUserAvatar';
+import { PlatformThemeToggle } from '../common/PlatformThemeToggle';
 import '@/styles/platform.css';
 
 const navigation = [
@@ -26,11 +26,6 @@ export default function PlatformSidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
-  const { theme, setTheme } = useTheme();
-
-  const toggleTheme = () => {
-    setTheme(theme === 'dark' ? 'light' : 'dark');
-  };
 
   const toggleSidebar = useCallback(() => {
     setIsCollapsed((prev) => !prev);
@@ -126,26 +121,7 @@ export default function PlatformSidebar() {
             )}
 
             {/* Theme Toggle */}
-            <Tooltip delayDuration={0}>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  onClick={toggleTheme}
-                  className={`w-full text-base relative h-10 flex ${isCollapsed ? 'justify-center' : 'justify-start'} items-center gap-4 p-3 rounded-lg transition-colors text-white/90 hover:bg-white/10 hover:text-white`}
-                >
-                  <span className="h-5 w-5 relative flex items-center justify-center overflow-hidden">
-                    <Sun className="absolute h-[30px] w-[30px] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-                    <Moon className="absolute h-[30px] w-[30px] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-                  </span>
-                  {!isCollapsed && <span>Theme</span>}
-                </Button>
-              </TooltipTrigger>
-              {isCollapsed && (
-                <TooltipContent side="right" align="center">
-                  Switch to {theme === 'dark' ? 'light' : 'dark'} theme
-                </TooltipContent>
-              )}
-            </Tooltip>
+            <PlatformThemeToggle isCollapsed={isCollapsed} />
 
             {/* Profile with Logout */}
             <PlatformUserAvatar isCollapsed={isCollapsed} />

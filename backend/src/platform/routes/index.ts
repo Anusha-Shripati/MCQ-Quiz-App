@@ -3,6 +3,8 @@ import platformAdminRoutes from './platform-admin.routes';
 import planRoutes from './plan.routes';
 import tenantRoutes from './tenant.routes';
 import provisioningRoutes from './provisioning.routes';
+import platformRoleRoutes from './platform-role.routes';
+import platformModuleRoutes from './platform-module.routes';
 
 const router = express.Router();
 
@@ -15,5 +17,7 @@ router.use('/admins', platformAdminRoutes);
 router.use('/plans', planRoutes);
 router.use('/tenants', tenantRoutes);
 router.use('/provision', provisioningRoutes);
+router.use('/roles', platformRoleRoutes);
+router.use('/modules', platformModuleRoutes);
 
 export default router;

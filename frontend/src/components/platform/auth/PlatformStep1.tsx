@@ -1,7 +1,8 @@
 import { Button } from '@/components/ui/form/button';
 import { Input } from '@/components/ui/form/input';
 import { Label } from '@/components/ui/form/label';
-import { validateEmail } from '@/lib/api';
+import { api } from '@/lib/api';
+import { platformAdminEndpoint } from '@/lib/endpoint';
 import { ApiError, EnterEmailProps } from '@/shared/types/app';
 import React, { useState } from 'react';
 import toast from 'react-hot-toast';
@@ -9,9 +10,14 @@ import useSWRMutation from 'swr/mutation';
 import { MailIcon } from 'lucide-react';
 import Link from 'next/link';
 
+async function validateEmail(url: string, { arg }: { arg: { email: string } }) {
+  const response = await api.post(url, arg);
+  return response;
+}
+
 const PlatformStep1: React.FC<EnterEmailProps> = ({ onNext, setEmail }) => {
   const [emailValue, setEmailValue] = useState('');
-  const { trigger, isMutating } = useSWRMutation(`/user/validate-email`, validateEmail);
+  const { trigger, isMutating } = useSWRMutation(platformAdminEndpoint.VALIDATE_EMAIL, validateEmail);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,8 +30,8 @@ const PlatformStep1: React.FC<EnterEmailProps> = ({ onNext, setEmail }) => {
 
     try {
       const response = await trigger({ email: emailValue });
-      if (response.status !== 200) {
-        throw new Error(response.data.message || 'Failed to validate email');
+      if (!response.success) {
+        throw new Error(response.message || 'Failed to validate email');
       }
       setEmail(emailValue);
       toast.success('Email validated successfully');
@@ -65,7 +71,7 @@ const PlatformStep1: React.FC<EnterEmailProps> = ({ onNext, setEmail }) => {
             value={emailValue}
             onChange={(e) => setEmailValue(e.target.value)}
             required
-            className="h-11 px-4 bg-slate-50 dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-slate-200 focus:border-indigo-500 focus:ring-indigo-500"
+            className="h-12 px-4 bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-slate-200 focus:border-indigo-500 dark:focus:border-indigo-500 focus-visible:ring-indigo-500 dark:focus-visible:ring-indigo-500"
           />
           <div className="flex justify-between text-sm">
             <Link href="/platform-auth/login" className="text-indigo-600 dark:text-indigo-400 hover:underline">
@@ -75,7 +81,7 @@ const PlatformStep1: React.FC<EnterEmailProps> = ({ onNext, setEmail }) => {
         </div>
         <Button
           type="submit"
-          className="w-full h-11 text-lg bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white"
+          className="w-full text-lg h-11 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white"
           disabled={isMutating}
         >
           {isMutating ? 'Sending...' : 'Send Verification Code'}

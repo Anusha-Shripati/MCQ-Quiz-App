@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/form/button';
 import PermissionsTable from './permission-table';
 import { Module, Permissions, RoleData } from '@/types/common.types';
 import useSWRMutation from 'swr/mutation';
-import { moduleEndpoint, roleEndpoint } from '@/lib/endpoint';
+import { platformModuleEndpoint, platformRoleEndpoint } from '@/lib/endpoint';
 import { showSingleToast } from '@/lib/utils';
 
 const permissionSchema = z.object({
@@ -71,10 +71,10 @@ function RoleForm({
     });
   };
 
-  const { data: modules } = useSWR(moduleEndpoint.LIST, api.get);
-  const { trigger, isMutating } = useSWRMutation(roleEndpoint.CREATE, create);
+  const { data: modules } = useSWR(platformModuleEndpoint.LIST, api.get);
+  const { trigger, isMutating } = useSWRMutation(platformRoleEndpoint.CREATE, create);
   const { trigger: updateTrigger, isMutating: updating } = useSWRMutation(
-    `/role/${roleData?.id}`,
+    `${platformRoleEndpoint.ROLE_BY_ID}/${roleData?.id}`,
     update
   );
 
@@ -130,7 +130,7 @@ function RoleForm({
 
       if (res.success) {
         toast.success(roleData ? 'Platform role updated successfully' : 'Platform role created successfully');
-        mutate((key) => typeof key === 'string' && key.startsWith('/role/list'));
+        mutate((key) => typeof key === 'string' && key.startsWith(platformRoleEndpoint.LIST));
         onClose();
       } else {
         toast.error(res.message);

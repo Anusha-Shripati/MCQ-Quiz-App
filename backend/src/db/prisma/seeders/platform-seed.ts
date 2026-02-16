@@ -13,6 +13,8 @@ const MODULES = [
   { name: 'Tenant Management', key: 'tenants', description: 'Manage organizations and tenants' },
   { name: 'Plan Management', key: 'plans', description: 'Manage subscription plans' },
   { name: 'Admin Management', key: 'admins', description: 'Manage platform administrators' },
+  { name: 'Role Management', key: 'roles', description: 'Manage platform roles and permissions' },
+  // { name: 'Module Management', key: 'modules', description: 'Manage platform modules' },
   { name: 'Analytics', key: 'analytics', description: 'View platform analytics and reports' },
 ];
 

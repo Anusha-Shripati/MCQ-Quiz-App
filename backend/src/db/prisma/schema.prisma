@@ -30,6 +30,17 @@ model Platform_admins {
   @@map("platform_admins")
 }
 
+// Platform Password Reset OTP
+model Platform_reset_password {
+  id         String   @id @default(uuid())
+  email      String   @unique
+  otp        String
+  expires_at DateTime
+  created_at DateTime @default(now())
+
+  @@map("platform_reset_password")
+}
+
 // Platform Roles
 model Platform_roles {
   id                  String                     @id @default(uuid())

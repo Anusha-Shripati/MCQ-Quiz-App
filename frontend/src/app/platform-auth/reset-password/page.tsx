@@ -8,7 +8,7 @@ import { TypographyH2 } from '@/styles/typography';
 import PlatformStep1 from '@/components/platform/auth/PlatformStep1';
 import PlatformStep2 from '@/components/platform/auth/PlatformStep2';
 import PlatformStep3 from '@/components/platform/auth/PlatformStep3';
-import { ThemeToggle } from '@/components/common/theme-toggle';
+import { PlatformThemeToggle } from '@/components/platform/common/PlatformThemeToggle';
 
 export default function PlatformResetPasswordPage() {
   const { isAuthenticated } = usePlatformAuthStore();
@@ -68,7 +68,7 @@ export default function PlatformResetPasswordPage() {
   return (
     <div className="bg-gradient-to-br from-indigo-50 via-white to-violet-50 dark:from-slate-900 dark:via-slate-800 dark:to-indigo-950 min-h-screen w-full flex flex-col items-center justify-center px-4 py-8">
       <div className="absolute top-5 right-10">
-        <ThemeToggle />
+        <PlatformThemeToggle />
       </div>
 
       <Card className="w-full max-w-[700px] shadow-2xl overflow-hidden bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-xl">

@@ -14,7 +14,7 @@ import { UserData } from '@/types/common.types';
 import useSWRMutation from 'swr/mutation';
 import RoleForm from '../roles/role-form';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { roleEndpoint, userEndpoint } from '@/lib/endpoint';
+import { platformRoleEndpoint, platformAdminEndpoint } from '@/lib/endpoint';
 import { passwordRegex } from '@/shared/constants/data';
 import PasswordRequirements from '@/components/profile/PasswordRequirements';
 
@@ -94,10 +94,10 @@ function AdminForm({ open, onClose, adminData = null }: AdminFormProps) {
     setShowPassword((prv) => ({ ...prv, [name]: !prv[name] }));
 
   const adminForms = watch();
-  const { data: roles } = useSWR(roleEndpoint.LIST, api.get);
-  const { trigger, isMutating } = useSWRMutation(userEndpoint.CREATE, create);
+  const { data: roles } = useSWR(platformRoleEndpoint.LIST, api.get);
+  const { trigger, isMutating } = useSWRMutation(platformAdminEndpoint.CREATE, create);
   const { trigger: updateTrigger, isMutating: updating } = useSWRMutation(
-    `/user/${adminData?.id}`,
+    `${platformAdminEndpoint.ADMIN_BY_ID}/${adminData?.id}`,
     update
   );
 
@@ -125,7 +125,7 @@ function AdminForm({ open, onClose, adminData = null }: AdminFormProps) {
       
       if (res.success) {
         toast.success(adminData ? 'Platform admin updated successfully' : 'Platform admin created successfully');
-        mutate((key) => typeof key === 'string' && key.startsWith('/user/list'));
+        mutate((key) => typeof key === 'string' && key.startsWith(platformAdminEndpoint.LIST));
       } else {
         toast.error(res.message);
       }

@@ -13,7 +13,7 @@ import ReusableTable from '@/components/common/reusable-table';
 import { Badge } from '@/components/ui/badge';
 import { usePlatformAuthStore } from '@/store/platformAuthStore';
 import StatusWrapper from '@/components/common/status-wrapper';
-import { roleEndpoint } from '@/lib/endpoint';
+import { platformRoleEndpoint } from '@/lib/endpoint';
 import { DeleteDialog } from '@/components/common/delete-dialog';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
@@ -43,15 +43,15 @@ function RoleTable() {
     error,
     mutate,
     isValidating,
-  } = useSWR(`${roleEndpoint.LIST}?search=${searchTerm}`, fetcher);
+  } = useSWR(`${platformRoleEndpoint.LIST}?search=${searchTerm}`, fetcher);
 
   const handleDeleteRole = async (id: string) => {
     try {
-      const res = await deleteData(`/role/${id}`);
+      const res = await deleteData(`${platformRoleEndpoint.ROLE_BY_ID}/${id}`);
       if (res.success) {
         toast.success('Platform role deleted successfully');
       }
-      mutate(`${roleEndpoint.LIST}?search=${searchTerm}`);
+      mutate(`${platformRoleEndpoint.LIST}?search=${searchTerm}`);
     } catch (error) {
       if (isAxiosError(error)) {
         toast.error(error.response.data.message || 'An unexpected error occurred');

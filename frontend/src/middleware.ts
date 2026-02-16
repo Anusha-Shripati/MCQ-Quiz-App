@@ -37,10 +37,14 @@ export async function middleware(request: NextRequest) {
       return response;
     }
 
-    // Redirect to platform dashboard if authenticated, otherwise to login
-    return NextResponse.redirect(
-      new URL(platformToken ? '/platform/dashboard' : '/platform-auth/login', request.url)
-    );
+    // Root path - redirect based on auth status
+    if (currentPath === '/') {
+      return NextResponse.redirect(
+        new URL(platformToken ? '/platform/dashboard' : '/platform-auth/login', request.url)
+      );
+    }
+
+    return response;
   }
 
   // Tenant routes - prevent platform users from accessing

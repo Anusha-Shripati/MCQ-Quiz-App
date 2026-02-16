@@ -17,7 +17,7 @@ userRouter.post(
 );
 
 userRouter.post('/login', validateRequest(userSchema.login), asyncHandler(userController.login));
-userRouter.get('/logout',  asyncHandler(userController.logout));
+userRouter.get('/logout', asyncHandler(userController.logout));
 
 userRouter.get(
   '/list',
@@ -62,7 +62,11 @@ userRouter.post(
   validateRequest(userSchema.validateEmail),
   asyncHandler(userController.validateEmail)
 );
-userRouter.post("/validate-otp", validateRequest(userSchema.validateOtp), asyncHandler(userController.validateOtp));
+userRouter.post(
+  "/validate-otp",
+  validateRequest(userSchema.validateOtp),
+  asyncHandler(userController.validateOtp)
+);
 
 userRouter.post(
   '/reset-password',

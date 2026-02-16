@@ -10,20 +10,27 @@ const instance = axios.create({
 
 instance.interceptors.request.use(
   (config) => {
-    const token = Cookies.get('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    
-    // Extract tenant from current URL using tenant-utils
+    // Check if platform or tenant based on subdomain
     if (typeof window !== 'undefined') {
       const tenantSlug = extractSubdomain(window.location.hostname);
       
-      if (tenantSlug && tenantSlug !== 'admin') {
-        config.headers['x-tenant-slug'] = tenantSlug;
-        config.headers['x-tenant-type'] = 'TENANT';
-      } else if (tenantSlug === 'admin') {
+      if (tenantSlug === 'admin') {
+        // Platform request
+        const platformToken = Cookies.get('platformToken');
+        if (platformToken) {
+          config.headers.Authorization = `Bearer ${platformToken}`;
+        }
         config.headers['x-tenant-type'] = 'PLATFORM';
+      } else {
+        // Tenant request
+        const token = Cookies.get('token');
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
+        if (tenantSlug) {
+          config.headers['x-tenant-slug'] = tenantSlug;
+          config.headers['x-tenant-type'] = 'TENANT';
+        }
       }
     }
     
@@ -37,9 +44,19 @@ instance.interceptors.response.use(
   (err) => {
     if (err.response?.status === 401) {
       if (typeof window !== 'undefined') {
-        localStorage.clear();
-        document.cookie = 'token=; path=/;';
-        window.location.href = '/';
+        const tenantSlug = extractSubdomain(window.location.hostname);
+        
+        if (tenantSlug === 'admin') {
+          // Platform 401 - redirect to platform login
+          localStorage.removeItem('platformAdmin');
+          document.cookie = 'platformToken=; path=/;';
+          window.location.href = '/platform-auth/login';
+        } else {
+          // Tenant 401 - redirect to tenant login
+          localStorage.clear();
+          document.cookie = 'token=; path=/;';
+          window.location.href = '/';
+        }
       }
     }
     

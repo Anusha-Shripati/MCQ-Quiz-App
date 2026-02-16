@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import { Module, Permissions } from '@/types/common.types';
 import Cookies from 'js-cookie';
+import { api, isAxiosError } from '@/lib/api';
+import { platformAdminEndpoint } from '@/lib/endpoint';
 
 interface PlatformAdmin {
   id?: string;
@@ -46,39 +48,17 @@ export const usePlatformAuthStore = create<PlatformAuthState>((set, get) => ({
   permissions: null,
   
   login: async ({ email, password }: { email: string; password: string }) => {
+    console.log('1. Login function called');
     set({ loading: true });
     try {
-      // TODO: Replace with actual platform API endpoint when backend is ready
-      // const response = await api.post('/platform/auth/login', { email, password });
+      console.log('2. Making API call to:', platformAdminEndpoint.LOGIN);
+      const response = await api.post(platformAdminEndpoint.LOGIN, { email, password });
+      console.log('3. API response:', response);
       
-      // Mock response for now
-      const mockResponse = {
-        success: true,
-        data: {
-          id: '1',
-          name: 'Platform Admin',
-          email,
-          password: '',
-          role: {
-            id: '1',
-            name: 'Super Admin',
-            role_permissions: [
-              { module: { name: 'tenants' }, can_edit: true, can_read: true },
-              { module: { name: 'plans' }, can_edit: true, can_read: true },
-              { module: { name: 'admins' }, can_edit: true, can_read: true },
-              { module: { name: 'analytics' }, can_edit: false, can_read: true },
-            ],
-          },
-          token: 'mock-platform-token',
-        },
-      };
-      
-      if (mockResponse.success) {
-        const permissions = mockResponse.data?.role?.role_permissions?.reduce(
-          (
-            obj: Record<string, Permissions>,
-            pr: Omit<Permissions, 'module'> & { module: Module }
-          ) => {
+      if (response.success) {
+        console.log('4. Login successful');
+        const permissions = response.data?.role?.role_permissions?.reduce(
+          (obj: Record<string, Permissions>, pr: Omit<Permissions, 'module'> & { module: Module }) => {
             obj[pr.module?.name] = {
               can_edit: pr.can_edit,
               can_read: pr.can_read,
@@ -88,16 +68,23 @@ export const usePlatformAuthStore = create<PlatformAuthState>((set, get) => ({
           {}
         );
         
-        set({ platformAdmin: mockResponse.data, loading: false, error: null, permissions });
-        localStorage.setItem('platformAdmin', JSON.stringify(mockResponse.data));
-        document.cookie = `platformToken=${mockResponse.data.token}; path=/;`;
-        document.cookie = `platformRole=${mockResponse.data?.role?.name}; path=/;`;
+        set({ platformAdmin: response.data, loading: false, error: null, permissions });
+        localStorage.setItem('platformAdmin', JSON.stringify(response.data));
+        document.cookie = `platformToken=${response.data.token}; path=/;`;
+        document.cookie = `platformRole=${response.data?.role?.name}; path=/;`;
         document.cookie = `platformPermissions=${encodeURIComponent(JSON.stringify(permissions))}; path=/;`;
+        
+        return response.data;
       }
     } catch (error) {
-      const errorMessage = 'Login failed';
-      set({ error: errorMessage, loading: false, permissions: null });
-      throw new Error(errorMessage);
+      console.log('5. Error caught:', error);
+      set({ error: 'Login failed', loading: false, permissions: null });
+      if (isAxiosError(error)) {
+        const errorMessage = error.response?.data?.message || 'Invalid credentials';
+        console.log('6. Throwing error:', errorMessage);
+        throw new Error(errorMessage);
+      }
+      throw new Error('An unexpected error occurred');
     }
   },
   

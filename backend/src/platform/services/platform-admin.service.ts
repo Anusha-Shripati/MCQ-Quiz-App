@@ -136,4 +136,75 @@ export class PlatformAdminService {
       data: { password },
     });
   }
+
+  async generateAndSendOtp(name: string, email: string) {
+    const nodemailer = require('nodemailer');
+    const dayjs = require('dayjs');
+    
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = dayjs().add(10, 'minute').toDate();
+
+    // Delete any existing OTPs for this email
+    await this.prisma.platform_reset_password.deleteMany({ where: { email } });
+
+    // Store OTP in platform_reset_password table
+    await this.prisma.platform_reset_password.create({
+      data: {
+        email,
+        otp,
+        expires_at: expiresAt,
+      },
+    });
+
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASSWORD,
+      },
+    });
+
+    const mailOptions = {
+      from: process.env.SMTP_USER,
+      to: email,
+      subject: 'Your OTP for Password Reset - Platform Admin',
+      html: `
+        <div style="font-family: Arial, sans-serif; padding: 20px;">
+          <h2>Password Reset Request</h2>
+          <p>Hello ${name}</p>
+          <p>You requested to reset your platform admin password. Use the OTP below:</p>
+          <h3 style="color: #333;">${otp}</h3>
+          <p>This OTP will expire in 10 minutes.</p>
+          <p>If you didn't request this, you can ignore this email.</p>
+          <br/>
+          <p>Thanks,</p>
+          <p>Platform Admin Team</p>
+        </div>
+      `,
+    };
+
+    await transporter.sendMail(mailOptions);
+    return true;
+  }
+
+  async validateOtp(email: string, otp: string) {
+    const resetPassword = await this.prisma.platform_reset_password.findFirst({
+      where: { email, otp, expires_at: { gte: new Date() } },
+    });
+
+    if (!resetPassword) {
+      throw new Error('Invalid or expired OTP');
+    }
+
+    return resetPassword;
+  }
+
+  async findSoftDeletedAdminByEmail(email: string) {
+    return await this.prisma.platform_admins.findFirst({
+      where: {
+        email,
+        deleted_at: { not: null },
+      },
+    });
+  }
 }

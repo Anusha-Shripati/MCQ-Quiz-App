@@ -6,20 +6,19 @@ import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { EyeIcon, EyeOffIcon, LockIcon } from 'lucide-react';
 import useSWRMutation from 'swr/mutation';
-import { resetPassword } from '@/lib/api';
-import { ApiError } from '@/shared/types/app';
+import { api } from '@/lib/api';
+import { platformAdminEndpoint } from '@/lib/endpoint';
+import { ApiError, NewPasswordProps } from '@/shared/types/app';
 import { passwordRegex } from '@/shared/constants/data';
 import PasswordRequirements from '@/components/profile/PasswordRequirements';
-import { IoMdArrowRoundBack } from 'react-icons/io';
 
-interface PlatformStep3Props {
-  email: string;
-  otp: string;
-  onPrevious: () => void;
+async function resetPassword(url: string, { arg }: { arg: { email: string; newPassword: string; confirmPassword: string } }) {
+  const response = await api.post(url, arg);
+  return response;
 }
 
-const PlatformStep3: React.FC<PlatformStep3Props> = ({ email, otp, onPrevious }) => {
-  const { trigger, isMutating } = useSWRMutation('/user/reset-password', resetPassword);
+const PlatformStep3: React.FC<NewPasswordProps> = ({ email }) => {
+  const { trigger, isMutating } = useSWRMutation(platformAdminEndpoint.RESET_PASSWORD, resetPassword);
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -32,6 +31,7 @@ const PlatformStep3: React.FC<PlatformStep3Props> = ({ email, otp, onPrevious })
     e.preventDefault();
     setIsLoading(true);
 
+    // Validate password against the regex pattern
     if (!passwordRegex.test(password)) {
       toast.error('Password must meet all requirements');
       setIsLoading(false);
@@ -43,16 +43,13 @@ const PlatformStep3: React.FC<PlatformStep3Props> = ({ email, otp, onPrevious })
       setIsLoading(false);
       return;
     }
-
     try {
       const response = await trigger({ email, newPassword: password, confirmPassword });
-      if (response.status !== 200) {
-        throw new Error(response.data.message || 'Failed to reset password');
+      if (!response.success) {
+        throw new Error(response.message || 'Failed to reset password');
       }
-      toast.success('Password reset successfully! Redirecting to login...');
-      setTimeout(() => {
-        router.push('/platform-auth/login');
-      }, 1500);
+      toast.success('Password reset successfully');
+      router.push('/platform-auth/login');
     } catch (error) {
       console.error('Error resetting password:', error);
       const apiError = error as ApiError;
@@ -77,9 +74,12 @@ const PlatformStep3: React.FC<PlatformStep3Props> = ({ email, otp, onPrevious })
         </h3>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-3">
-          <Label htmlFor="new-password" className="text-base font-medium text-slate-900 dark:text-slate-200">
+          <Label
+            htmlFor="new-password"
+            className="text-base font-medium text-slate-900 dark:text-slate-200"
+          >
             New Password
           </Label>
           <div className="relative">
@@ -92,13 +92,13 @@ const PlatformStep3: React.FC<PlatformStep3Props> = ({ email, otp, onPrevious })
               onFocus={() => setShowPasswordRequirements(true)}
               required
               autoFocus
-              autoComplete="off"
-              className="h-11 pr-12 bg-slate-50 dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-slate-200 focus:border-indigo-500 focus:ring-indigo-500"
+              autoComplete={'off'}
+              className="h-12 pr-12 bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-slate-200 focus:border-indigo-500 dark:focus:border-indigo-500 focus-visible:ring-indigo-500 dark:focus-visible:ring-indigo-500"
             />
             <Button
               type="button"
               variant="ghost"
-              className="absolute right-0 top-0 h-full px-3 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
+              className="absolute right-0 top-0 h-full px-3 text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 focus:bg-transparent"
               onClick={() => setShowPassword(!showPassword)}
             >
               {showPassword ? <EyeOffIcon size={18} /> : <EyeIcon size={18} />}
@@ -108,7 +108,10 @@ const PlatformStep3: React.FC<PlatformStep3Props> = ({ email, otp, onPrevious })
         </div>
 
         <div className="space-y-3">
-          <Label htmlFor="confirm-password" className="text-base font-medium text-slate-900 dark:text-slate-200">
+          <Label
+            htmlFor="confirm-password"
+            className="text-base font-medium text-slate-900 dark:text-slate-200"
+          >
             Confirm Password
           </Label>
           <div className="relative">
@@ -119,13 +122,13 @@ const PlatformStep3: React.FC<PlatformStep3Props> = ({ email, otp, onPrevious })
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
-              autoComplete="off"
-              className="h-11 pr-12 bg-slate-50 dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-slate-200 focus:border-indigo-500 focus:ring-indigo-500"
+              autoComplete={'off'}
+              className="h-12 pr-12 bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-slate-200 focus:border-indigo-500 dark:focus:border-indigo-500 focus-visible:ring-indigo-500 dark:focus-visible:ring-indigo-500"
             />
             <Button
               type="button"
               variant="ghost"
-              className="absolute right-0 top-0 h-full px-3 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
+              className="absolute right-0 top-0 h-full px-3 text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 focus:bg-transparent"
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
             >
               {showConfirmPassword ? <EyeOffIcon size={18} /> : <EyeIcon size={18} />}
@@ -133,19 +136,11 @@ const PlatformStep3: React.FC<PlatformStep3Props> = ({ email, otp, onPrevious })
           </div>
         </div>
 
-        <div className="flex gap-3 pt-4">
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={onPrevious}
-            className="h-11 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
-          >
-            <IoMdArrowRoundBack />
-          </Button>
+        <div className="flex justify-between space-x-4 pt-4 w-full">
           <Button
             type="submit"
             disabled={isLoading || isMutating}
-            className="flex-1 h-11 text-lg bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white"
+            className="w-full text-lg h-11 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white"
           >
             {isLoading || isMutating ? 'Resetting...' : 'Reset Password'}
           </Button>

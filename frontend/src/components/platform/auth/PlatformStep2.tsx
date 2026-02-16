@@ -4,17 +4,28 @@ import { Input } from '@/components/ui/form/input';
 import { Label } from '@/components/ui/form/label';
 import toast from 'react-hot-toast';
 import useSWRMutation from 'swr/mutation';
-import { validateEmail, validateOtp } from '@/lib/api';
+import { api } from '@/lib/api';
+import { platformAdminEndpoint } from '@/lib/endpoint';
 import { ApiError, ValidateOTPProps } from '@/shared/types/app';
 import { KeyIcon } from 'lucide-react';
 import { IoMdArrowRoundBack } from 'react-icons/io';
 
+async function validateOtp(url: string, { arg }: { arg: { email: string; otp: string } }) {
+  const response = await api.post(url, arg);
+  return response;
+}
+
+async function validateEmail(url: string, { arg }: { arg: { email: string } }) {
+  const response = await api.post(url, arg);
+  return response;
+}
+
 const PlatformStep2: React.FC<ValidateOTPProps> = ({ onNext, onPrevious, setOtp, email }) => {
   const { trigger: triggerValidateOtp, isMutating } = useSWRMutation(
-    '/user/validate-otp',
+    platformAdminEndpoint.VALIDATE_OTP,
     validateOtp
   );
-  const { trigger: triggerResendOtp } = useSWRMutation('/user/validate-email', validateEmail);
+  const { trigger: triggerResendOtp } = useSWRMutation(platformAdminEndpoint.VALIDATE_EMAIL, validateEmail);
   const [otpValue, setOtpValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [resendDisabled, setResendDisabled] = useState(false);
@@ -32,8 +43,8 @@ const PlatformStep2: React.FC<ValidateOTPProps> = ({ onNext, onPrevious, setOtp,
 
     try {
       const response = await triggerValidateOtp({ email, otp: otpValue });
-      if (response.status !== 200) {
-        throw new Error(response.data.message || 'Failed to validate OTP');
+      if (!response.success) {
+        throw new Error(response.message || 'Failed to validate OTP');
       }
       setOtp(otpValue);
       toast.success('OTP verified successfully');
@@ -58,8 +69,8 @@ const PlatformStep2: React.FC<ValidateOTPProps> = ({ onNext, onPrevious, setOtp,
 
     try {
       const response = await triggerResendOtp({ email });
-      if (response.status !== 200) {
-        throw new Error(response.data.message || 'Failed to resend OTP');
+      if (!response.success) {
+        throw new Error(response.message || 'Failed to resend OTP');
       }
       toast.success('New OTP sent successfully');
 
@@ -107,7 +118,7 @@ const PlatformStep2: React.FC<ValidateOTPProps> = ({ onNext, onPrevious, setOtp,
             onChange={(e) => setOtpValue(e.target.value.replace(/[^0-9]/g, '').slice(0, 6))}
             required
             autoFocus
-            className="h-11 px-4 text-center text-xl tracking-widest bg-slate-50 dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-slate-200 focus:border-indigo-500 focus:ring-indigo-500"
+            className="h-12 px-4 text-center text-xl tracking-widest bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-slate-200 focus:border-indigo-500 dark:focus:border-indigo-500 focus-visible:ring-indigo-500 dark:focus-visible:ring-indigo-500"
           />
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 text-center">
             We have sent a verification code to{' '}
@@ -120,7 +131,7 @@ const PlatformStep2: React.FC<ValidateOTPProps> = ({ onNext, onPrevious, setOtp,
             type="button"
             variant="ghost"
             onClick={onPrevious}
-            className="w-full h-11 text-lg bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white"
+            className="w-full text-lg bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white"
           >
             <IoMdArrowRoundBack />
           </Button>
@@ -136,7 +147,7 @@ const PlatformStep2: React.FC<ValidateOTPProps> = ({ onNext, onPrevious, setOtp,
           <Button
             type="submit"
             disabled={isLoading || isMutating}
-            className="w-full h-11 text-lg bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white"
+            className="w-full text-lg bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white"
           >
             {isLoading || isMutating ? 'Verifying...' : 'Verify'}
           </Button>

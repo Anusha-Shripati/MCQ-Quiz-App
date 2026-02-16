@@ -13,16 +13,16 @@ export class PlatformAdminController {
       const admin = await adminService.findAdminByEmail(email);
       
       if (!admin) {
-        return generateResponse(res, 401, {}, false, 'Invalid credentials');
+        return generateResponse(res, 400, {}, false, 'Invalid credentials');
       }
 
       if (!admin.is_active) {
-        return generateResponse(res, 403, {}, false, 'Account is inactive');
+        return generateResponse(res, 400, {}, false, 'Account is inactive');
       }
 
       const isPasswordValid = await matchPassword(password, admin.password);
       if (!isPasswordValid) {
-        return generateResponse(res, 401, {}, false, 'Invalid credentials');
+        return generateResponse(res, 400, {}, false, 'Invalid credentials');
       }
 
       const token = jwt.sign(
@@ -208,7 +208,7 @@ export class PlatformAdminController {
   changePassword = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
-      const { old_password, new_password } = req.body;
+      const { oldPassword, newPassword } = req.body;
       const adminService = new PlatformAdminService(req.context!.prisma);
 
       const admin = await adminService.findAdminById(id);
@@ -216,17 +216,101 @@ export class PlatformAdminController {
         return generateResponse(res, 404, {}, false, 'Admin not found');
       }
 
-      if (old_password) {
-        const isPasswordValid = await matchPassword(old_password, admin.password);
+      if (oldPassword) {
+        const isPasswordValid = await matchPassword(oldPassword, admin.password);
         if (!isPasswordValid) {
           return generateResponse(res, 400, {}, false, 'Invalid current password');
         }
       }
 
-      const hashedPassword = await encryptStringCrypt(new_password);
+      const isSamePassword = await matchPassword(newPassword, admin.password);
+      if (isSamePassword) {
+        return generateResponse(
+          res,
+          400,
+          {},
+          false,
+          'New password cannot be same as old password, Please choose a different password.'
+        );
+      }
+
+      const hashedPassword = await encryptStringCrypt(newPassword);
       await adminService.changePassword(id, hashedPassword);
 
       return generateResponse(res, 200, {}, true, 'Password changed successfully');
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  validateEmail = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { email } = req.body;
+      const adminService = new PlatformAdminService(req.context!.prisma);
+
+      const admin = await adminService.findAdminByEmail(email);
+      if (!admin) {
+        return generateResponse(res, 404, {}, false, 'Admin not found');
+      }
+
+      await adminService.generateAndSendOtp(admin.name, admin.email);
+      return generateResponse(res, 200, { email: admin.email }, true, 'Email is valid');
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  validateOtp = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { email, otp } = req.body;
+      const adminService = new PlatformAdminService(req.context!.prisma);
+
+      const admin = await adminService.findAdminByEmail(email);
+      if (!admin) {
+        return generateResponse(res, 404, {}, false, 'Admin not found');
+      }
+
+      try {
+        const validOtp = await adminService.validateOtp(email, otp);
+        return generateResponse(
+          res,
+          200,
+          { email: admin.email },
+          true,
+          'OTP is valid. You can reset your password now.'
+        );
+      } catch (error) {
+        return generateResponse(
+          res,
+          400,
+          {},
+          false,
+          error instanceof Error ? error.message : 'Invalid or expired OTP'
+        );
+      }
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  resetPassword = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { email, newPassword, confirmPassword } = req.body;
+      const adminService = new PlatformAdminService(req.context!.prisma);
+
+      const admin = await adminService.findAdminByEmail(email);
+      if (!admin) {
+        return generateResponse(res, 404, {}, false, 'Admin not found');
+      }
+
+      if (newPassword !== confirmPassword) {
+        return generateResponse(res, 400, {}, false, 'Passwords do not match');
+      }
+
+      const hashedPassword = await encryptStringCrypt(newPassword);
+      await adminService.changePassword(admin.id, hashedPassword);
+
+      return generateResponse(res, 200, {}, true, 'Password reset successfully');
     } catch (error) {
       next(error);
     }

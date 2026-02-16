@@ -61,3 +61,26 @@ export const examEndpoint = {
     CANDIDATE_EXAM: "candidate-exam",
     SEND_THANK_YOU_EMAIL: "/candidate-exam/send-thank-you-email"
 }
+
+// Platform Admin Endpoints
+export const platformAdminEndpoint = {
+    LOGIN: '/platform/admins/login',
+    ME: '/platform/admins/me',
+    LIST: '/platform/admins/list',
+    CREATE: '/platform/admins/create',
+    ADMIN_BY_ID: '/platform/admins',
+    CHANGE_PASSWORD: '/platform/admins/change-password',
+    VALIDATE_EMAIL: '/platform/admins/validate-email',
+    VALIDATE_OTP: '/platform/admins/validate-otp',
+    RESET_PASSWORD: '/platform/admins/reset-password',
+}
+
+export const platformRoleEndpoint = {
+    LIST: '/platform/roles/list',
+    CREATE: '/platform/roles/create',
+    ROLE_BY_ID: '/platform/roles',
+}
+
+export const platformModuleEndpoint = {
+    LIST: '/platform/modules/list',
+}

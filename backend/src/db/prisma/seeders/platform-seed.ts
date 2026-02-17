@@ -10,12 +10,11 @@ const platformPrisma = new PrismaClient({
 });
 
 const MODULES = [
-  { name: 'Tenant Management', key: 'tenants', description: 'Manage organizations and tenants' },
-  { name: 'Plan Management', key: 'plans', description: 'Manage subscription plans' },
-  { name: 'Admin Management', key: 'admins', description: 'Manage platform administrators' },
-  { name: 'Role Management', key: 'roles', description: 'Manage platform roles and permissions' },
-  // { name: 'Module Management', key: 'modules', description: 'Manage platform modules' },
-  { name: 'Analytics', key: 'analytics', description: 'View platform analytics and reports' },
+  { name: 'tenants', description: 'Manage organizations and tenants' },
+  { name: 'plans', description: 'Manage subscription plans' },
+  { name: 'admins', description: 'Manage platform administrators' },
+  { name: 'roles', description: 'Manage platform roles and permissions' },
+  { name: 'analytics', description: 'View platform analytics and reports' },
 ];
 
 const PLANS = [
@@ -51,7 +50,7 @@ async function seedPlatform() {
     const modules = [];
     for (const module of MODULES) {
       const created = await platformPrisma.platform_modules.upsert({
-        where: { key: module.key },
+        where: { name: module.name },
         update: module,
         create: module,
       });

@@ -4,6 +4,7 @@ import { validateRequest } from '../../middlewares/validation.middleware';
 import { platformAdminSchema } from '../validations/platform-admin.validations';
 import { asyncHandler } from '../../utils/asyncHandler';
 import { platformAuth } from '../middlewares/platform-auth.middleware';
+import { upload } from '../../utils/fileUpload';
 
 const router = express.Router();
 const controller = new PlatformAdminController();
@@ -75,6 +76,13 @@ router.put(
   platformAuth('admins.can_edit'),
   validateRequest(platformAdminSchema.changePassword),
   asyncHandler(controller.changePassword)
+);
+
+router.put(
+  '/upload-image/:id',
+  platformAuth(),
+  upload.single('file'),
+  asyncHandler(controller.uploadImage)
 );
 
 export default router;

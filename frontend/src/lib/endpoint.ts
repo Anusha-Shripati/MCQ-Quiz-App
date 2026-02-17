@@ -70,6 +70,7 @@ export const platformAdminEndpoint = {
     CREATE: '/platform/admins/create',
     ADMIN_BY_ID: '/platform/admins',
     CHANGE_PASSWORD: '/platform/admins/change-password',
+    UPLOAD_IMAGE: '/platform/admins/upload-image',
     VALIDATE_EMAIL: '/platform/admins/validate-email',
     VALIDATE_OTP: '/platform/admins/validate-otp',
     RESET_PASSWORD: '/platform/admins/reset-password',

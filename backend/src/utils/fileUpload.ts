@@ -35,16 +35,31 @@ if (storageMode === 's3') {
 
   storage = multer.diskStorage({
     destination: (req, file, cb) => {
-      const tenantId = req.context?.tenant?.id || 'unknown';
-      let path = uploadPath + `/${tenantId}`;
-      if (req.params.examId) path += `/${req.params.examId}`;
-      if (req.query.fileType) path += `/${req.query.fileType}`;
-      if (req.query.chunkFolder) path += `/${req.query.chunkFolder}`;
-
-      if (!fs.existsSync(path)) {
-        fs.mkdirSync(path, { recursive: true });
+      const isPlatformAdmin = req.user?.token_type === 'PLATFORM_ADMIN';
+      const userId = req.params.id || req.user?.id || 'unknown';
+      
+      let destPath = uploadPath;
+      
+      if (isPlatformAdmin) {
+        destPath += `/platform-admin/${userId}`;
+      } else {
+        const tenantSlug = req.context?.tenant?.slug || 'unknown';
+        destPath += `/tenants/${tenantSlug}`;
+        
+        // For user profile uploads, add userId
+        if (req.params.id || (req.path && req.path.includes('upload-image'))) {
+          destPath += `/${userId}`;
+        }
       }
-      cb(null, path);
+      
+      if (req.params.examId) destPath += `/${req.params.examId}`;
+      if (req.query.fileType) destPath += `/${req.query.fileType}`;
+      if (req.query.chunkFolder) destPath += `/${req.query.chunkFolder}`;
+
+      if (!fs.existsSync(destPath)) {
+        fs.mkdirSync(destPath, { recursive: true });
+      }
+      cb(null, destPath);
     },
     filename: (req: ExamFileUploadRequest, file: Express.Multer.File, cb) => {
       const ext = path.extname(file.originalname) || `.${file.mimetype.split('/')[1]}`;

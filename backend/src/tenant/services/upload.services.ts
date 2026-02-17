@@ -59,8 +59,7 @@ export class UploadService {
   }
 
   private async mergeChunkLocal(foldername: string, exam_id: string, tenantId?: string) {
-    const tenantFolder = tenantId || 'unknown';
-    const chunkDir = path.join('uploads', tenantFolder, foldername);
+    const chunkDir = path.join('uploads', foldername);
 
     if (!fs.existsSync(chunkDir)) {
       logger.error(`Chunk directory ${chunkDir} does not exist.`);
@@ -70,7 +69,7 @@ export class UploadService {
     const files = fs.readdirSync(chunkDir);
     files.sort((a, b) => Number(a) - Number(b));
 
-    const finalPath = path.join('uploads', tenantFolder, exam_id, `${foldername}.webm`);
+    const finalPath = path.join('uploads', path.dirname(foldername), exam_id, `${path.basename(foldername)}.webm`);
     if (!fs.existsSync(path.dirname(finalPath))) {
       fs.mkdirSync(path.dirname(finalPath), { recursive: true });
     }

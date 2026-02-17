@@ -66,7 +66,7 @@ export const platformAuth =
         }
 
         const modulePermission = admin.role.role_permissions.find(
-          (p: any) => p.module?.key === moduleName
+          (p: any) => p.module?.name === moduleName
         );
 
         if (!modulePermission || !modulePermission[action as Actions]) {

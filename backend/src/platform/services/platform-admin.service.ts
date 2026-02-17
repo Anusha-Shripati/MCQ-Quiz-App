@@ -20,7 +20,6 @@ export class PlatformAdminService {
                 module: {
                   select: {
                     name: true,
-                    key: true,
                   },
                 },
               },
@@ -44,7 +43,6 @@ export class PlatformAdminService {
                 module: {
                   select: {
                     name: true,
-                    key: true,
                   },
                 },
               },
@@ -113,6 +111,7 @@ export class PlatformAdminService {
     name?: string;
     role_id?: string;
     is_active?: boolean;
+    image?: string;
   }) {
     return await this.prisma.platform_admins.update({
       where: { id },

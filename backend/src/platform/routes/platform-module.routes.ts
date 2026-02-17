@@ -8,7 +8,7 @@ const controller = new PlatformModuleController();
 
 router.get(
   '/list',
-  platformAuth('modules.can_read'),
+  platformAuth('roles.can_read'),
   asyncHandler(controller.get)
 );
 

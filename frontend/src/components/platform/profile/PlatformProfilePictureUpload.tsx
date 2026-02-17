@@ -1,23 +1,23 @@
 import { useEffect, useState } from 'react';
 import { Camera, User2Icon } from 'lucide-react';
-import { Input } from '../ui/form/input';
-import { Button } from '../ui/form/button';
+import { Input } from '../../ui/form/input';
+import { Button } from '../../ui/form/button';
 import { useProfileStore } from '@/store/profileStore';
 import { api, isAxiosError } from '@/lib/api';
 import toast from 'react-hot-toast';
-import { useAuthStore } from '@/store/authStore';
-import { userEndpoint } from '@/lib/endpoint';
+import { usePlatformAuthStore } from '@/store/platformAuthStore';
+import { platformAdminEndpoint } from '@/lib/endpoint';
 import Image from 'next/image';
 
-const ProfilePictureUpload = ({ imageUrl }: { imageUrl: string }) => {
+const PlatformProfilePictureUpload = ({ imageUrl }: { imageUrl: string }) => {
   const [profilePicture, setProfilePicture] = useState<string | null>(imageUrl);
 
   useEffect(() => {
     setProfilePicture(imageUrl);
-  }, [imageUrl])
-
+  }, [imageUrl]);
+  
   const { isEditing, setIsEditing } = useProfileStore();
-  const { user, setUser } = useAuthStore()
+  const { platformAdmin, setPlatformAdmin } = usePlatformAuthStore();
 
   const handleProfilePictureChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -25,18 +25,17 @@ const ProfilePictureUpload = ({ imageUrl }: { imageUrl: string }) => {
       try {
         const formData = new FormData();
         formData.append('file', file);
-        const response = await api.put(`${userEndpoint.UPLOAD_IMAGE}/${user?.id}`, formData);
+        const response = await api.put(`${platformAdminEndpoint.UPLOAD_IMAGE}/${platformAdmin?.id}`, formData);
         if (response.success) {
           setProfilePicture(response.data.path);
-          if (user) {
-            setUser({
-              ...user,
+          if (platformAdmin) {
+            setPlatformAdmin({
+              ...platformAdmin,
               image: response.data.path,
             });
           }
           toast.success('Profile picture uploaded successfully!');
         }
-
       } catch (error) {
         if (isAxiosError(error)) {
           toast.error(error.response?.data?.message || 'Error uploading file');
@@ -51,7 +50,6 @@ const ProfilePictureUpload = ({ imageUrl }: { imageUrl: string }) => {
   return (
     <div className="flex items-center justify-between">
       <div className="relative w-24 h-24">
-        {/* Display profile picture or placeholder */}
         {profilePicture ? (
           <Image
             src={`${process.env.NEXT_PUBLIC_IMGAE_PREFIX}${profilePicture}`}
@@ -73,9 +71,8 @@ const ProfilePictureUpload = ({ imageUrl }: { imageUrl: string }) => {
           </div>
         )}
 
-        {/* Camera icon overlay for uploading a new picture */}
         <label
-          className="absolute bottom-0 right-0 w-8 h-8 bg-pink-500 rounded-full flex items-center justify-center cursor-pointer border-2 border-white dark:border-gray-900 shadow-lg"
+          className="absolute bottom-0 right-0 w-8 h-8 bg-indigo-500 rounded-full flex items-center justify-center cursor-pointer border-2 border-white dark:border-gray-900 shadow-lg"
           aria-label="Upload profile picture"
         >
           <Camera className="w-5 h-5 text-white" />
@@ -90,7 +87,7 @@ const ProfilePictureUpload = ({ imageUrl }: { imageUrl: string }) => {
 
       <Button
         onClick={() => setIsEditing(!isEditing)}
-        className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-600"
+        className="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-600"
         variant="ghost"
       >
         {isEditing ? 'Cancel' : 'Edit'}
@@ -99,4 +96,4 @@ const ProfilePictureUpload = ({ imageUrl }: { imageUrl: string }) => {
   );
 };
 
-export default ProfilePictureUpload;
+export default PlatformProfilePictureUpload;

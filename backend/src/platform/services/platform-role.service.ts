@@ -18,7 +18,7 @@ export class PlatformRoleService {
         role_permissions: {
           include: {
             module: {
-              select: { name: true, key: true },
+              select: { name: true },
             },
           },
         },
@@ -46,7 +46,7 @@ export class PlatformRoleService {
         role_permissions: {
           include: {
             module: {
-              select: { name: true, key: true, id: true },
+              select: { name: true, id: true },
             },
           },
         },

@@ -46,7 +46,7 @@ const UserAvatar = ({ isCollapsed }: { isCollapsed: boolean }) => {
             {user?.image ? (
               <Image
                 src={`${((process.env.NEXT_PUBLIC_IMGAE_PREFIX || '') + (user?.image || ''))}`}
-                className="w-[30px] h-[30px] rounded-full"
+                // className="w-[30px] h-[30px] rounded-full"
                 alt="User Avatar"
                 width={30}
                 height={30}

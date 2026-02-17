@@ -7,15 +7,22 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { LogOut, User2Icon } from 'lucide-react';
+import { LogOut, User2Icon, UserCircle } from 'lucide-react';
 import { usePlatformAuthStore } from '@/store/platformAuthStore';
+import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 const PlatformUserAvatar = ({ isCollapsed }: { isCollapsed: boolean }) => {
   const { platformAdmin, logout } = usePlatformAuthStore();
+  const router = useRouter();
 
   const handleLogout = () => {
     logout();
     window.location.href = '/platform-auth/login';
+  };
+
+  const handleProfile = () => {
+    router.push('/platform/profile');
   };
 
   return (
@@ -26,7 +33,21 @@ const PlatformUserAvatar = ({ isCollapsed }: { isCollapsed: boolean }) => {
           className={`w-full text-base relative h-10 flex ${isCollapsed ? 'justify-center' : 'justify-start'} items-center gap-4 p-3 rounded-lg transition-colors text-white/90 hover:bg-white/10 hover:text-white`}
         >
           <span className="h-5 w-5">
-            <User2Icon className="w-[30px] h-[30px]" />
+            {platformAdmin?.image ? (
+              <Image
+                src={`${process.env.NEXT_PUBLIC_IMGAE_PREFIX}${platformAdmin.image}`}
+                // className="w-[30px] h-[30px] rounded-full"
+                alt="User Avatar"
+                width={30}
+                height={30}
+                onError={(e) => {
+                  e.currentTarget.onerror = null;
+                  e.currentTarget.src = '/fallback.png';
+                }}
+              />
+            ) : (
+              <User2Icon className="w-[30px] h-[30px]" />
+            )}
           </span>
           {!isCollapsed && <span>{platformAdmin?.name}</span>}
         </Button>
@@ -40,6 +61,13 @@ const PlatformUserAvatar = ({ isCollapsed }: { isCollapsed: boolean }) => {
             <p className="text-md">{platformAdmin?.name}</p>
             <p className="text-sm text-gray-500">{platformAdmin?.role?.name}</p>
           </div>
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={handleProfile}
+          className="flex items-center space-x-2 p-2 justify-start rounded-md hover:bg-gray-100 dark:hover:bg-secondary cursor-pointer"
+        >
+          <UserCircle className="h-4 w-4 text-gray-600 dark:text-gray-300" />
+          <span className="text-gray-900 dark:text-gray-200">Profile</span>
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={handleLogout}

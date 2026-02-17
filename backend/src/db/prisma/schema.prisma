@@ -15,6 +15,7 @@ model Platform_admins {
   password          String
   name              String
   role_id           String?
+  image             String?
   is_active         Boolean             @default(true)
   last_login        DateTime?
   created_by        String?
@@ -58,7 +59,6 @@ model Platform_roles {
 model Platform_modules {
   id          String                     @id @default(uuid())
   name        String                     @unique
-  key         String                     @unique
   description String?
   created_at  DateTime                   @default(now())
   updated_at  DateTime                   @updatedAt

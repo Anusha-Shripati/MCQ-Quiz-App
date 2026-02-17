@@ -315,4 +315,31 @@ export class PlatformAdminController {
       next(error);
     }
   };
+
+  uploadImage = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const adminId = req.params.id;
+      const adminService = new PlatformAdminService(req.context!.prisma);
+      const { UploadService } = require('../../tenant/services/upload.services');
+      const uploadService = new UploadService();
+
+      const admin = await adminService.findAdminById(adminId);
+      if (!admin) {
+        return generateResponse(res, 404, {}, false, 'Admin not found');
+      }
+
+      if (!req.file) {
+        return generateResponse(res, 400, {}, false, 'No file uploaded');
+      }
+
+      const fileData = await uploadService.processFile(req.file);
+      await adminService.updateAdmin(adminId, {
+        image: fileData.path,
+      });
+
+      return generateResponse(res, 200, fileData, true, 'Image uploaded successfully');
+    } catch (error) {
+      next(error);
+    }
+  };
 }

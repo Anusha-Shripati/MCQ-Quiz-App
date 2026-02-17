@@ -94,6 +94,9 @@ export const usePlatformAuthStore = create<PlatformAuthState>((set, get) => ({
   
   setPlatformAdmin: (admin: PlatformAdmin | null) => {
     set({ platformAdmin: admin });
+    if (admin) {
+      localStorage.setItem('platformAdmin', JSON.stringify(admin));
+    }
   },
   
   initializeAuth: () => {

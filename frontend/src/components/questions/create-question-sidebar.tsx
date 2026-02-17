@@ -124,6 +124,8 @@ const QuestionSidebar: React.FC<QuestionSidebarProps> = ({
         isOpen={isDeleteModalOpen}
         setOpen={setIsDeleteModalOpen}
         onDelete={confirmDelete}
+        title="Delete Question"
+        description="This action cannot be undone. This will permanently delete the question."
       />
     </Card>
   );

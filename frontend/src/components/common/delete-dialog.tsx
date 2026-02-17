@@ -13,15 +13,17 @@ export const DeleteDialog: React.FC<{
   isOpen: boolean;
   setOpen: (open: boolean) => void;
   onDelete: () => void;
-}> = ({ isOpen, setOpen, onDelete }) => (
+  title?: string;
+  description?: string;
+}> = ({ isOpen, setOpen, onDelete, title = 'Are you sure?', description = 'This action cannot be undone. This will permanently delete the item.' }) => (
   <Dialog open={isOpen} onOpenChange={() => setOpen(false)}>
     <DialogContent className="sm:max-w-[425px]">
       <DialogHeader>
         <DialogTitle className="text-lg font-semibold text-gray-900 dark:text-white">
-          Are you sure?
+          {title}
         </DialogTitle>
         <DialogDescription className="text-sm text-gray-600 dark:text-gray-400">
-          This action cannot be undone. This will permanently delete the question.
+          {description}
         </DialogDescription>
       </DialogHeader>
       <DialogFooter>

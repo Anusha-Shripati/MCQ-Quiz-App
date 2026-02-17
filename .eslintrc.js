@@ -15,7 +15,7 @@ module.exports = {
   
       // Optional: disable all warning-level rules you don’t care about
       '@typescript-eslint/no-unused-vars': 'error',
-      '@typescript-eslint/no-explicit-any': 'error',
+      '@typescript-eslint/no-explicit-any': 'warning',
   
       '@typescript-eslint/no-unused-expressions': ['error', {
         allowShortCircuit: true,

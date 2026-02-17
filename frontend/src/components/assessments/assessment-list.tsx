@@ -62,6 +62,8 @@ function AssessmentCard({ assessment, onView, onEdit, onDelete }: AssessmentCard
         onDelete={() => onDelete(deleteId as string)}
         setOpen={setDeleteOpen}
         isOpen={deleteOpen}
+        title="Delete Assessment"
+        description="This action cannot be undone. This will permanently delete the assessment."
       />
       <Card className="group relative overflow-hidden bg-white dark:bg-background border border-gray-200 dark:border-border hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-300 hover:shadow-lg hover:shadow-blue-100 dark:hover:shadow-blue-900/20 hover:-translate-y-1">
         <CardContent className="p-6">

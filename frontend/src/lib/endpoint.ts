@@ -85,3 +85,12 @@ export const platformRoleEndpoint = {
 export const platformModuleEndpoint = {
     LIST: '/platform/modules/list',
 }
+
+export const platformPlanEndpoint = {
+    LIST: '/platform/plans',
+    CREATE: '/platform/plans',
+    BY_ID: '/platform/plans',
+    UPDATE: '/platform/plans',
+    DELETE: '/platform/plans',
+    TOGGLE: '/platform/plans',
+}

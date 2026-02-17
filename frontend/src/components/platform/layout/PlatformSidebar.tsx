@@ -10,22 +10,22 @@ import Image from 'next/image';
 import ImageLinks from '@/app/assets/images/image-links';
 import PlatformUserAvatar from './PlatformUserAvatar';
 import { PlatformThemeToggle } from '../common/PlatformThemeToggle';
+import { usePlatformAuthStore } from '@/store/platformAuthStore';
 import '@/styles/platform.css';
 
 const navigation = [
-  { name: 'Dashboard', href: '/platform/dashboard', icon: LayoutDashboard },
-  { name: 'Tenants', href: '/platform/tenants', icon: Building2 },
-  { name: 'Plans', href: '/platform/plans', icon: CreditCard },
-  { name: 'Admins', href: '/platform/admins', icon: Users },
-  { name: 'Roles', href: '/platform/roles', icon: Shield },
-  // { name: 'Analytics', href: '/platform/analytics', icon: BarChart3 },
-  // { name: 'Settings', href: '/platform/settings', icon: Settings },
+  { name: 'Dashboard', href: '/platform/dashboard', icon: LayoutDashboard, permission: null },
+  { name: 'Tenants', href: '/platform/tenants', icon: Building2, permission: 'tenants' },
+  { name: 'Plans', href: '/platform/plans', icon: CreditCard, permission: 'plans' },
+  { name: 'Admins', href: '/platform/admins', icon: Users, permission: 'admins' },
+  { name: 'Roles', href: '/platform/roles', icon: Shield, permission: 'roles' },
 ];
 
 export default function PlatformSidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
+  const { permissions, platformAdmin } = usePlatformAuthStore();
 
   const toggleSidebar = useCallback(() => {
     setIsCollapsed((prev) => !prev);
@@ -67,6 +67,11 @@ export default function PlatformSidebar() {
             <div className="flex flex-col justify-center">
               <nav className="flex-1 platform-sidebar-nav">
                 {navigation.map((item) => {
+                  // Check permissions - show if no permission required or if user has read access
+                  if (item.permission && permissions && !permissions[item.permission]?.can_read) {
+                    return null;
+                  }
+
                   const Icon = item.icon;
                   const isActive = pathname === item.href;
 

@@ -1,25 +1,21 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { Input } from '@/components/ui/form/input';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/form/button';
-import { usePlatformAuthStore } from '@/store/platformAuthStore';
-import AdminForm from './admin-form';
-import { usePathname } from 'next/navigation';
+import { Input } from '@/components/ui/form/input';
 import { Plus, Search } from 'lucide-react';
+import PlanForm from './plan-form';
+import { usePathname } from 'next/navigation';
+import { usePlatformAuthStore } from '@/store/platformAuthStore';
 
-function Header() {
+export default function PlanHeader() {
   const [searchTerm, setSearchTerm] = useState('');
-  const [open, setOpen] = useState(false);
-  const { permissions } = usePlatformAuthStore();
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const { platformAdmin } = usePlatformAuthStore();
   const pathname = usePathname();
-  
+
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
-  };
-  
-  const handleCreateAdmin = () => {
-    setOpen(true);
   };
 
   useEffect(() => {
@@ -33,7 +29,7 @@ function Header() {
 
     return () => clearTimeout(timer);
   }, [searchTerm, pathname]);
-  
+
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const search = params.get('search');
@@ -48,8 +44,7 @@ function Header() {
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
           <Input
-            type="search"
-            placeholder="Search Platform Admins..."
+            placeholder="Search plans..."
             value={searchTerm}
             onChange={handleSearch}
             autoComplete="off"
@@ -57,22 +52,23 @@ function Header() {
           />
         </div>
 
-        {permissions?.admins?.can_edit && (
+        {platformAdmin?.role?.name === 'Super Admin' && (
           <Button
-            onClick={handleCreateAdmin}
+            onClick={() => setIsFormOpen(true)}
             className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white h-9 px-4 text-sm"
           >
             <Plus className="h-4 w-4 mr-2" />
-            Create Admin
+            Create Plan
           </Button>
         )}
       </div>
 
-      {open && (
-        <AdminForm open={open} onClose={() => setOpen(false)} />
+      {isFormOpen && (
+        <PlanForm
+          isOpen={isFormOpen}
+          onClose={() => setIsFormOpen(false)}
+        />
       )}
     </>
   );
 }
-
-export default Header;

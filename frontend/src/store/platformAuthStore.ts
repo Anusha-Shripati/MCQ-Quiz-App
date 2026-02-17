@@ -101,13 +101,26 @@ export const usePlatformAuthStore = create<PlatformAuthState>((set, get) => ({
   
   initializeAuth: () => {
     const storedAdmin = localStorage.getItem('platformAdmin');
+    const permissionsCookie = Cookies.get('platformPermissions');
+    
     if (storedAdmin) {
       try {
-        set({ platformAdmin: JSON.parse(storedAdmin) });
+        const admin = JSON.parse(storedAdmin);
+        let permissions = null;
+        
+        if (permissionsCookie) {
+          try {
+            permissions = JSON.parse(decodeURIComponent(permissionsCookie));
+          } catch (error) {
+            console.error('Error parsing permissions cookie:', error);
+          }
+        }
+        
+        set({ platformAdmin: admin, permissions });
       } catch (error) {
         console.error('Error parsing stored platform admin:', error);
         localStorage.removeItem('platformAdmin');
-        set({ platformAdmin: null });
+        set({ platformAdmin: null, permissions: null });
       }
     } else {
       document.cookie = 'platformToken=; path=/;';

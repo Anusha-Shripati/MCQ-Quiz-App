@@ -130,6 +130,8 @@ function UserTable() {
         onDelete={() => handleUserDelete(deleteId as string)}
         setOpen={setDeleteOpen}
         isOpen={deleteOpen}
+        title="Delete User"
+        description="This action cannot be undone. This will permanently delete the user."
       />
     </StatusWrapper>
   );

@@ -137,6 +137,8 @@ function RoleTable() {
         onDelete={() => handleDeleteRole(deleteId as string)}
         setOpen={setDeleteOpen}
         isOpen={deleteOpen}
+        title="Delete Role"
+        description="This action cannot be undone. This will permanently delete the role."
       />
     </StatusWrapper>
   );

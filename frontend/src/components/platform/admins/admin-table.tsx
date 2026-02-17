@@ -10,22 +10,16 @@ import useSWR from 'swr';
 import { isAxiosError } from '@/lib/api';
 import AdminForm from './admin-form';
 import { usePlatformAuthStore } from '@/store/platformAuthStore';
-import ReusableTable from '@/components/common/reusable-table';
-import StatusWrapper from '@/components/common/status-wrapper';
 import { platformAdminEndpoint } from '@/lib/endpoint';
 import { DeleteDialog } from '@/components/common/delete-dialog';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import PlatformTable, { PlatformColumn } from '@/components/platform/common/platform-table';
+import StatusWrapper from '@/components/common/status-wrapper';
 
 function AdminTable() {
   const [admin, setAdmin] = useState<UserData | null>(null);
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  
-  const handleEditAdmin = (admin: UserData) => {
-    setAdmin(admin);
-    setOpen(true);
-  };
-  
   const { permissions } = usePlatformAuthStore();
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteOpen, setDeleteOpen] = useState<boolean>(false);
@@ -43,6 +37,11 @@ function AdminTable() {
     mutate,
     isValidating,
   } = useSWR(`${platformAdminEndpoint.LIST}?search=${searchTerm}`, fetcher);
+
+  const handleEditAdmin = (admin: UserData) => {
+    setAdmin(admin);
+    setOpen(true);
+  };
 
   const onDelete = (id: string) => {
     setDeleteId(id);
@@ -65,30 +64,42 @@ function AdminTable() {
     }
   };
 
-  const columns = [
-    { key: 'name', header: 'Admin Name', render: (row: UserData) => row.name },
-    { key: 'email', header: 'Email', render: (row: UserData) => row.email },
-    { key: 'role', header: 'Role', render: (row: UserData) => row.role?.name },
+  const columns: PlatformColumn<UserData>[] = [
+    {
+      key: 'name',
+      header: 'Admin Name',
+      render: (row) => <span className="font-medium text-slate-900 dark:text-white">{row.name}</span>,
+    },
+    {
+      key: 'email',
+      header: 'Email',
+      render: (row) => <span className="text-slate-600 dark:text-slate-400">{row.email}</span>,
+    },
+    {
+      key: 'role',
+      header: 'Role',
+      render: (row) => <span className="text-slate-600 dark:text-slate-400">{row.role?.name}</span>,
+    },
     {
       key: 'created_by',
       header: 'Created By',
-      render: (row: UserData) => row.created_by_user?.name || '-',
+      render: (row) => <span className="text-slate-600 dark:text-slate-400">{row.created_by_user?.name || '-'}</span>,
     },
     {
       key: 'action',
-      header: 'Action',
-      render: (row: UserData) => (
-        <div className="flex space-x-2">
+      header: 'Actions',
+      render: (row) => (
+        <div className="flex items-center gap-2">
           {permissions?.admins.can_edit && (
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
                   variant="ghost"
-                  size="icon"
+                  size="sm"
                   onClick={() => handleEditAdmin(row)}
-                  className="hover:bg-indigo-50 dark:hover:bg-indigo-900/20"
+                  className="text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50"
                 >
-                  <FiEdit className="h-4 w-4 text-indigo-600" />
+                  <FiEdit className="h-4 w-4" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent sideOffset={4}>
@@ -100,8 +111,13 @@ function AdminTable() {
           {row.role?.name !== 'Super Admin' && permissions?.admins.can_edit && (
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" onClick={() => onDelete(row.id)}>
-                  <FiTrash2 className="h-4 w-4 text-destructive" />
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => onDelete(row.id)}
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                >
+                  <FiTrash2 className="h-4 w-4" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent sideOffset={4}>
@@ -113,7 +129,7 @@ function AdminTable() {
       ),
     },
   ];
-  
+
   return (
     <StatusWrapper
       className="min-h-[83vh] flex"
@@ -122,11 +138,11 @@ function AdminTable() {
       reset={mutate}
     >
       <div className="flex-1 overflow-hidden">
-        <ReusableTable
+        <PlatformTable
           columns={columns}
-          rows={admins?.data?.list || []}
+          data={admins?.data?.list || []}
           rowKey="id"
-          className="h-full animate-in fade-in duration-300"
+          emptyMessage="No admins found"
         />
       </div>
 
@@ -135,6 +151,8 @@ function AdminTable() {
         onDelete={() => handleAdminDelete(deleteId as string)}
         setOpen={setDeleteOpen}
         isOpen={deleteOpen}
+        title="Delete Admin"
+        description="This action cannot be undone. This will permanently delete the admin."
       />
     </StatusWrapper>
   );

@@ -9,25 +9,19 @@ import toast from 'react-hot-toast';
 import useSWR from 'swr';
 import { isAxiosError } from '@/lib/api';
 import RoleForm from './role-form';
-import ReusableTable from '@/components/common/reusable-table';
 import { Badge } from '@/components/ui/badge';
 import { usePlatformAuthStore } from '@/store/platformAuthStore';
-import StatusWrapper from '@/components/common/status-wrapper';
 import { platformRoleEndpoint } from '@/lib/endpoint';
 import { DeleteDialog } from '@/components/common/delete-dialog';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import PlatformTable, { PlatformColumn } from '@/components/platform/common/platform-table';
+import StatusWrapper from '@/components/common/status-wrapper';
 
 function RoleTable() {
   const [role, setRole] = useState<RoleData | null>(null);
   const { platformAdmin } = usePlatformAuthStore();
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  
-  const handleEditRole = (role: RoleData) => {
-    setRole(role);
-    setOpen(true);
-  };
-
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteOpen, setDeleteOpen] = useState<boolean>(false);
 
@@ -45,6 +39,16 @@ function RoleTable() {
     isValidating,
   } = useSWR(`${platformRoleEndpoint.LIST}?search=${searchTerm}`, fetcher);
 
+  const handleEditRole = (role: RoleData) => {
+    setRole(role);
+    setOpen(true);
+  };
+
+  const onDelete = (id: string) => {
+    setDeleteId(id);
+    setDeleteOpen(true);
+  };
+
   const handleDeleteRole = async (id: string) => {
     try {
       const res = await deleteData(`${platformRoleEndpoint.ROLE_BY_ID}/${id}`);
@@ -61,25 +65,24 @@ function RoleTable() {
     }
   };
 
-  const onDelete = (id: string) => {
-    setDeleteId(id);
-    setDeleteOpen(true);
-  };
-  
-  const columns = [
-    { key: 'name', header: 'Name', render: (row: RoleData) => row.name },
+  const columns: PlatformColumn<RoleData>[] = [
+    {
+      key: 'name',
+      header: 'Name',
+      render: (row) => <span className="font-medium text-slate-900 dark:text-white">{row.name}</span>,
+    },
     {
       key: 'permissions',
       header: 'Permissions',
-      render: (row: RoleData) => (
+      render: (row) => (
         <div className="flex flex-wrap gap-2">
           {row.role_permissions.map((item) => {
             return (
               <React.Fragment key={item.id}>
                 {(item.can_edit || item.can_read) && (
-                  <Badge 
-                    key={item.id} 
-                    variant="secondary" 
+                  <Badge
+                    key={item.id}
+                    variant="secondary"
                     className="bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-200"
                   >
                     {item.module?.name}
@@ -93,20 +96,20 @@ function RoleTable() {
     },
     {
       key: 'action',
-      header: 'Action',
-      render: (row: RoleData) => (
+      header: 'Actions',
+      render: (row) => (
         <>
           {platformAdmin?.role?.name === 'Super Admin' && (
-            <div className="flex space-x-2">
+            <div className="flex items-center gap-2">
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    onClick={() => handleEditRole(row)} 
-                    className="hover:bg-indigo-50 dark:hover:bg-indigo-900/20"
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleEditRole(row)}
+                    className="text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50"
                   >
-                    <FiEdit className="h-4 w-4 text-indigo-600" />
+                    <FiEdit className="h-4 w-4" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent sideOffset={4}>
@@ -117,8 +120,13 @@ function RoleTable() {
               {row.name !== 'Super Admin' && (
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button variant="ghost" size="icon" onClick={() => onDelete(row.id)}>
-                      <FiTrash2 className="h-4 w-4 text-destructive" />
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => onDelete(row.id)}
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                    >
+                      <FiTrash2 className="h-4 w-4" />
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent sideOffset={4}>
@@ -132,7 +140,7 @@ function RoleTable() {
       ),
     },
   ];
-  
+
   return (
     <StatusWrapper
       loading={isLoading || isValidating}
@@ -141,13 +149,21 @@ function RoleTable() {
       reset={mutate}
     >
       <div className="flex-1 overflow-hidden">
-        <ReusableTable columns={columns} rows={roles?.data?.list || []} rowKey="id" className="h-full" />
+        <PlatformTable
+          columns={columns}
+          data={roles?.data?.list || []}
+          rowKey="id"
+          emptyMessage="No roles found"
+        />
       </div>
+
       <RoleForm open={open} roleData={role} onClose={() => setOpen(false)} />
       <DeleteDialog
         onDelete={() => handleDeleteRole(deleteId as string)}
         setOpen={setDeleteOpen}
         isOpen={deleteOpen}
+        title="Delete Role"
+        description="This action cannot be undone. This will permanently delete the role."
       />
     </StatusWrapper>
   );

@@ -35,20 +35,22 @@ export class TenantController {
 
   list = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { status, plan_id, search } = req.query;
+      const { status, plan_id, search, page = '1', limit = '10' } = req.query;
       const tenantService = new TenantService(req.context!.prisma);
 
       const filter: any = {};
       if (status) filter.status = status as string;
       if (plan_id) filter.plan_id = plan_id as string;
       if (search) filter.search = search as string;
+      filter.page = parseInt(page as string);
+      filter.limit = parseInt(limit as string);
 
-      const tenants = await tenantService.findManyTenants(filter);
+      const { tenants, total } = await tenantService.findManyTenants(filter);
 
       return generateResponse(
         res,
         200,
-        { list: tenants, count: tenants.length },
+        { list: tenants, count: tenants.length, total },
         true,
         'Tenants retrieved successfully'
       );
@@ -119,6 +121,24 @@ export class TenantController {
       await tenantService.deleteTenant(id);
 
       return generateResponse(res, 200, {}, true, 'Tenant deleted successfully');
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  hardDelete = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { id } = req.params;
+      const tenantService = new TenantService(req.context!.prisma);
+
+      const tenant = await tenantService.findTenantById(id);
+      if (!tenant) {
+        return generateResponse(res, 404, {}, false, 'Tenant not found');
+      }
+
+      await tenantService.hardDeleteTenant(id);
+
+      return generateResponse(res, 200, {}, true, 'Tenant and database deleted permanently');
     } catch (error) {
       next(error);
     }

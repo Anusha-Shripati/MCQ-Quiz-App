@@ -59,12 +59,12 @@ export class DatabaseUtils {
     console.log(`[DB Utils] Running migrations for database`);
     console.log(`[DB Utils] Database URL: ${dbUrl}`);
     
-    const command = `TENANT_DB_URL="${dbUrl}" npx prisma migrate deploy --schema=./src/db/tenant/schema.prisma`;
+    const command = `npx prisma migrate deploy --schema=./src/db/tenant/schema.prisma`;
     
     try {
       const { stdout, stderr } = await execAsync(command, { 
-        cwd: '/home/logicrays/code/mcq-quiz-new/backend',
-        env: { ...process.env, TENANT_DB_URL: dbUrl }
+        env: { ...process.env, TENANT_DB_URL: dbUrl },
+        shell: '/bin/bash'
       });
       
       console.log(`[DB Utils] Migrations completed successfully`);
@@ -90,7 +90,8 @@ export class DatabaseUtils {
   }
 
   static generateDbName(slug: string): string {
-    const dbName = `tenant_${slug}`;
+    const sanitizedSlug = slug.replace(/-/g, '_');
+    const dbName = `tenant_${sanitizedSlug}_db`;
     console.log(`[DB Utils] Generated DB name: ${dbName}`);
     return dbName;
   }

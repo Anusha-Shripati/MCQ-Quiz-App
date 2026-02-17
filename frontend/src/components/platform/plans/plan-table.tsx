@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import useSWR from 'swr';
 import { fetcher, isAxiosError } from '@/lib/api';
 import { platformPlanEndpoint } from '@/lib/endpoint';
@@ -15,18 +15,40 @@ import PlatformTable, { PlatformColumn } from '@/components/platform/common/plat
 import StatusWrapper from '@/components/common/status-wrapper';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Switch } from '@/components/ui/switch';
+import Pagination from '@/components/pagination';
+import qs from 'query-string';
 
 export default function PlanTable() {
   const [editingPlan, setEditingPlan] = useState<Plan | null>(null);
   const [deletingPlan, setDeletingPlan] = useState<Plan | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const search = params.get('search') || '';
+    const page = params.get('page') || '1';
+    const perPage = params.get('perPage') || '10';
     setSearchTerm(search);
+    setCurrentPage(Number(page));
+    setItemsPerPage(Number(perPage));
   }, []);
+
+  const queryObj = useMemo(
+    () => ({
+      page: currentPage,
+      limit: itemsPerPage,
+      search: searchTerm,
+    }),
+    [currentPage, itemsPerPage, searchTerm]
+  );
+
+  const cleanedQuery = useMemo(
+    () => qs.stringify(queryObj, { skipNull: true, skipEmptyString: true }),
+    [queryObj]
+  );
 
   const {
     data: plans,
@@ -34,7 +56,7 @@ export default function PlanTable() {
     isLoading,
     mutate,
     isValidating,
-  } = useSWR(`${platformPlanEndpoint.LIST}?search=${searchTerm}`, fetcher);
+  } = useSWR(`${platformPlanEndpoint.LIST}?${cleanedQuery}`, fetcher);
 
   const handleToggleActive = async (plan: Plan) => {
     try {
@@ -65,7 +87,7 @@ export default function PlanTable() {
       if (res.success) {
         toast.success('Plan deleted successfully');
       }
-      mutate(`${platformPlanEndpoint.LIST}?search=${searchTerm}`);
+      mutate();
     } catch (error) {
       if (isAxiosError(error)) {
         toast.error(error.response.data.message || 'An unexpected error occurred');
@@ -164,7 +186,7 @@ export default function PlanTable() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                    className="text-grey-600 hover:text-red-700 hover:bg-red-50"
                     disabled
                   >
                     <Trash2 className="h-4 w-4" />
@@ -197,6 +219,28 @@ export default function PlanTable() {
     },
   ];
 
+  const handlePerPageChange = (value: string) => {
+    setItemsPerPage(Number(value));
+    setCurrentPage(1);
+    updateQueryParams({ page: '1', perPage: value });
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    updateQueryParams({ page: page.toString() });
+  };
+
+  const updateQueryParams = (params: { page?: string; perPage?: string }) => {
+    const newParams = new URLSearchParams(window.location.search);
+    if (params.page) newParams.set('page', params.page);
+    if (params.perPage) newParams.set('perPage', params.perPage);
+    window.history.pushState(null, '', `?${newParams.toString()}`);
+  };
+
+  const totalItems = plans?.data?.total || 0;
+  const currentPageStart = (currentPage - 1) * itemsPerPage + 1;
+  const currentPageEnd = Math.min(currentPage * itemsPerPage, totalItems);
+
   return (
     <StatusWrapper
       loading={isLoading || isValidating}
@@ -204,14 +248,25 @@ export default function PlanTable() {
       className="min-h-[83vh] flex"
       reset={mutate}
     >
-      <div className="flex-1 overflow-hidden">
-        <PlatformTable
-          columns={columns}
-          data={plans?.data?.list || []}
-          rowKey="id"
-          emptyMessage="No plans found"
-        />
-      </div>
+      <Pagination
+        className="flex-grow"
+        currentPageStart={currentPageStart}
+        currentPageEnd={currentPageEnd}
+        totalItems={totalItems}
+        itemsPerPage={itemsPerPage}
+        onPerPageChange={handlePerPageChange}
+        currentPage={currentPage}
+        onPageChange={handlePageChange}
+      >
+        <div className="flex-1 overflow-hidden">
+          <PlatformTable
+            columns={columns}
+            data={plans?.data?.list || []}
+            rowKey="id"
+            emptyMessage="No plans found"
+          />
+        </div>
+      </Pagination>
 
       {editingPlan && (
         <PlanForm

@@ -96,3 +96,15 @@ export const platformPlanEndpoint = {
     DELETE: '/platform/plans',
     TOGGLE: '/platform/plans',
 }
+
+export const platformTenantEndpoint = {
+    LIST: '/platform/tenants',
+    CREATE: '/platform/tenants',
+    BY_ID: '/platform/tenants',
+    UPDATE: '/platform/tenants',
+    DELETE: '/platform/tenants',
+    STATUS: '/platform/tenants',
+    SUBSCRIPTION: '/platform/tenants',
+    USAGE: '/platform/tenants',
+    PROVISION: '/platform/provision',
+}

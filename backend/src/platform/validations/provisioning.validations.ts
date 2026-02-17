@@ -15,5 +15,6 @@ export const provisioningValidations = {
     admin_email: Joi.string().email().required(),
     admin_name: Joi.string().required().min(2).max(100),
     admin_password: Joi.string().required().min(8),
+    trial_days: Joi.number().integer().min(1).max(365).optional(),
   }),
 };

@@ -34,7 +34,7 @@ export class PlanService {
     });
   }
 
-  async findManyPlans(filter?: { is_active?: boolean; search?: string }) {
+  async findManyPlans(filter?: { is_active?: boolean; search?: string; page?: number; limit?: number }) {
     const where: any = {};
 
     if (filter?.is_active !== undefined) {
@@ -48,15 +48,26 @@ export class PlanService {
       ];
     }
 
-    return await this.prisma.plans.findMany({
-      where,
-      include: {
-        _count: {
-          select: { tenants: true },
+    const page = filter?.page || 1;
+    const limit = filter?.limit || 10;
+    const skip = (page - 1) * limit;
+
+    const [plans, total] = await Promise.all([
+      this.prisma.plans.findMany({
+        where,
+        include: {
+          _count: {
+            select: { tenants: true },
+          },
         },
-      },
-      orderBy: { created_at: 'desc' },
-    });
+        orderBy: { created_at: 'desc' },
+        skip,
+        take: limit,
+      }),
+      this.prisma.plans.count({ where }),
+    ]);
+
+    return { plans, total };
   }
 
   async updatePlan(id: string, data: {

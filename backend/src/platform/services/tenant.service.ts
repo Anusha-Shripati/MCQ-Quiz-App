@@ -1,4 +1,5 @@
 import { PrismaClient } from '../../db/prisma/generated/client';
+import { DatabaseUtils } from '../utils/database.utils';
 
 export class TenantService {
   private prisma: PrismaClient;
@@ -57,6 +58,8 @@ export class TenantService {
     status?: string;
     plan_id?: string;
     search?: string;
+    page?: number;
+    limit?: number;
   }) {
     const where: any = { deleted_at: null };
 
@@ -76,19 +79,30 @@ export class TenantService {
       ];
     }
 
-    return await this.prisma.tenants.findMany({
-      where,
-      include: {
-        plan: {
-          select: {
-            id: true,
-            name: true,
-            price: true,
+    const page = filter?.page || 1;
+    const limit = filter?.limit || 10;
+    const skip = (page - 1) * limit;
+
+    const [tenants, total] = await Promise.all([
+      this.prisma.tenants.findMany({
+        where,
+        include: {
+          plan: {
+            select: {
+              id: true,
+              name: true,
+              price: true,
+            },
           },
         },
-      },
-      orderBy: { created_at: 'desc' },
-    });
+        orderBy: { created_at: 'desc' },
+        skip,
+        take: limit,
+      }),
+      this.prisma.tenants.count({ where }),
+    ]);
+
+    return { tenants, total };
   }
 
   async updateTenant(id: string, data: {
@@ -112,6 +126,37 @@ export class TenantService {
       where: { id },
       data: { deleted_at: new Date() },
     });
+  }
+
+  async hardDeleteTenant(id: string) {
+    const tenant = await this.findTenantById(id);
+    if (!tenant) {
+      throw new Error('Tenant not found');
+    }
+
+    console.log(`[Tenant Service] Starting hard delete for tenant: ${tenant.slug}`);
+
+    try {
+      // Delete usage records
+      console.log(`[Tenant Service] Deleting usage records`);
+      await this.prisma.tenant_usage.deleteMany({ where: { tenant_id: id } });
+
+      // Delete tenant record
+      console.log(`[Tenant Service] Deleting tenant record`);
+      await this.prisma.tenants.delete({ where: { id } });
+
+      // Drop database
+      if (tenant.db_name) {
+        console.log(`[Tenant Service] Dropping database: ${tenant.db_name}`);
+        await DatabaseUtils.dropDatabase(tenant.db_name);
+      }
+
+      console.log(`[Tenant Service] ✅ Hard delete completed for tenant: ${tenant.slug}`);
+      return { success: true, message: 'Tenant and database deleted successfully' };
+    } catch (error: any) {
+      console.error(`[Tenant Service] ❌ Error during hard delete:`, error.message);
+      throw new Error(`Failed to delete tenant: ${error.message}`);
+    }
   }
 
   async updateStatus(id: string, status: string) {

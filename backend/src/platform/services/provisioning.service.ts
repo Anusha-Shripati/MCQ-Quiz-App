@@ -20,6 +20,7 @@ export class ProvisioningService {
     admin_email: string;
     admin_name: string;
     admin_password: string;
+    trial_days?: number;
     created_by?: string;
   }) {
     let dbName: string | null = null;
@@ -30,8 +31,18 @@ export class ProvisioningService {
       console.log(`[Provisioning] Starting tenant provisioning for slug: ${data.slug}`);
       
       console.log(`[Provisioning] Step 1: Validating provisioning data`);
-      await this.validateProvisioningData(data);
+      const plan = await this.validateProvisioningData(data);
       console.log(`[Provisioning] Validation passed`);
+
+      // Determine status and dates based on plan
+      const isFree = plan.name.toLowerCase() === 'free';
+      const status = isFree ? 'trial' : 'active';
+      const trialEndsAt = isFree ? new Date(Date.now() + (data.trial_days || 14) * 24 * 60 * 60 * 1000) : undefined;
+      const subscriptionEndsAt = !isFree ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) : undefined;
+
+      console.log(`[Provisioning] Plan: ${plan.name}, Status: ${status}`);
+      if (trialEndsAt) console.log(`[Provisioning] Trial ends at: ${trialEndsAt.toISOString()}`);
+      if (subscriptionEndsAt) console.log(`[Provisioning] Subscription ends at: ${subscriptionEndsAt.toISOString()}`);
 
       console.log(`[Provisioning] Step 2: Generating database name and URL`);
       dbName = DatabaseUtils.generateDbName(data.slug);
@@ -70,8 +81,9 @@ export class ProvisioningService {
         db_url: dbUrl,
         admin_email: data.admin_email,
         admin_name: data.admin_name,
-        status: 'trial',
-        trial_ends_at: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+        status,
+        trial_ends_at: trialEndsAt,
+        subscription_ends_at: subscriptionEndsAt,
         created_by: data.created_by,
       });
       console.log(`[Provisioning] Tenant record created with ID: ${tenant.id}`);
@@ -131,6 +143,8 @@ export class ProvisioningService {
     if (!plan.is_active) {
       throw new Error('Selected plan is not active');
     }
+
+    return plan;
   }
 
   private async seedTenantDefaults(

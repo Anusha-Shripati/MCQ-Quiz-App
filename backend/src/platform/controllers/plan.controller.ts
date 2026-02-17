@@ -8,8 +8,8 @@ export class PlanController {
       const { name, description, price, limits, features } = req.body;
       const planService = new PlanService(req.context!.prisma);
 
-      const existingPlan = await planService.findManyPlans({ search: name });
-      if (existingPlan.some(p => p.name.toLowerCase() === name.toLowerCase())) {
+      const { plans: existingPlans } = await planService.findManyPlans({ search: name });
+      if (existingPlans.some(p => p.name.toLowerCase() === name.toLowerCase())) {
         return generateResponse(res, 400, {}, false, 'Plan with this name already exists');
       }
 
@@ -30,7 +30,7 @@ export class PlanController {
 
   list = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { is_active, search } = req.query;
+      const { is_active, search, page = '1', limit = '10' } = req.query;
       const planService = new PlanService(req.context!.prisma);
 
       const filter: any = {};
@@ -40,13 +40,15 @@ export class PlanController {
       if (search) {
         filter.search = search as string;
       }
+      filter.page = parseInt(page as string);
+      filter.limit = parseInt(limit as string);
 
-      const plans = await planService.findManyPlans(filter);
+      const { plans, total } = await planService.findManyPlans(filter);
 
       return generateResponse(
         res,
         200,
-        { list: plans, count: plans.length },
+        { list: plans, count: plans.length, total },
         true,
         'Plans retrieved successfully'
       );
@@ -84,8 +86,8 @@ export class PlanController {
       }
 
       if (name && name !== existingPlan.name) {
-        const duplicatePlan = await planService.findManyPlans({ search: name });
-        if (duplicatePlan.some(p => p.name.toLowerCase() === name.toLowerCase() && p.id !== id)) {
+        const { plans: duplicatePlans } = await planService.findManyPlans({ search: name });
+        if (duplicatePlans.some(p => p.name.toLowerCase() === name.toLowerCase() && p.id !== id)) {
           return generateResponse(res, 400, {}, false, 'Plan with this name already exists');
         }
       }

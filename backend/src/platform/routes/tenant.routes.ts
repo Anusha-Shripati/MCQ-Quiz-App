@@ -42,6 +42,13 @@ router.delete(
   asyncHandler(controller.delete)
 );
 
+router.delete(
+  '/:id/hard',
+  platformAuth('tenants.can_edit'),
+  validateRequest(tenantSchema.delete),
+  asyncHandler(controller.hardDelete)
+);
+
 router.put(
   '/:id/status',
   platformAuth('tenants.can_edit'),

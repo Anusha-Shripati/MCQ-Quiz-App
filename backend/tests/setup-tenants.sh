@@ -32,7 +32,8 @@ TENANT_2_DB_URL="postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${
 # Function to check if database exists
 check_db_exists() {
     local db_name=$1
-    PGPASSWORD=$DB_PASSWORD psql -h $DB_HOST -p $DB_PORT -U $DB_USER -lqt | cut -d \| -f 1 | grep -qw $db_name
+    local result=$(PGPASSWORD=$DB_PASSWORD psql -h $DB_HOST -p $DB_PORT -U $DB_USER -d postgres -tAc "SELECT 1 FROM pg_database WHERE datname='$db_name';" 2>/dev/null)
+    [ "$result" = "1" ]
 }
 
 # Function to check if tenant exists in platform DB

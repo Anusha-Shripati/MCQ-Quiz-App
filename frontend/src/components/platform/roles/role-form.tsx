@@ -79,31 +79,30 @@ function RoleForm({
   );
 
   useEffect(() => {
-    if (modules?.data?.list && !roleData) {
-      setPermissionData(
-        modules.data.list.map((item: Module) => ({
+    if (open && modules?.data?.list) {
+      if (roleData && roleData.role_permissions?.length > 0) {
+        // Editing existing role
+        setPermissionData(roleData.role_permissions);
+        reset({
+          name: roleData.name,
+          role_permissions: roleData.role_permissions,
+        });
+      } else {
+        // Creating new role
+        const initialPermissions = modules.data.list.map((item: Module) => ({
           module: { id: item.id, name: item.name },
           module_id: item.id,
           can_edit: false,
           can_read: false,
-        }))
-      );
+        }));
+        setPermissionData(initialPermissions);
+        reset({
+          name: '',
+          role_permissions: initialPermissions,
+        });
+      }
     }
-  }, [modules, open]);
-
-  useEffect(() => {
-    if (open) {
-      const formData = {
-        name: roleData?.name || '',
-        role_permissions:
-          (roleData?.role_permissions ?? []).length > 0
-            ? roleData?.role_permissions
-            : permissionData,
-      };
-      setPermissionData(formData.role_permissions || []);
-      reset(formData);
-    }
-  }, [open]);
+  }, [open, modules, roleData, reset]);
 
   const handleCreateOrUpdateRole = async (data: RoleData) => {
     try {

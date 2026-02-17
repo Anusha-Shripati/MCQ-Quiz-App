@@ -20,9 +20,15 @@ export default function QuestionsPage() {
   const { paramsLoading } = useAuthStore();
   const pathname = usePathname();
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
-  
-  const { data, isLoading, error, mutate: questionMutate, isValidating } = useSWR(
-    paramsLoading ? null : `${technologyEndpoint.LIST}?search=${debouncedSearchTerm}`, 
+
+  const {
+    data,
+    isLoading,
+    error,
+    mutate: questionMutate,
+    isValidating,
+  } = useSWR(
+    paramsLoading ? null : `${technologyEndpoint.LIST}?search=${debouncedSearchTerm}`,
     api.get
   );
 
@@ -53,16 +59,20 @@ export default function QuestionsPage() {
   return (
     <div className="px-2 py-6 flex flex-col">
       <Card className="flex flex-col p-4 sm:p-6 gap-2">
-        <TechnologyFilters 
+        <TechnologyFilters
           searchQuery={searchTerm}
           setSearchQuery={setSearchTerm}
           categoriesArray={categoriesArray}
         />
-        <StatusWrapper className="min-h-[83vh] flex" loading={isLoading || isValidating} error={error} reset={questionMutate}>
+        <StatusWrapper
+          className="min-h-[83vh] flex"
+          loading={isLoading || isValidating}
+          error={error}
+          reset={questionMutate}
+        >
           <TechnologyTable technologies={categoriesArray} />
         </StatusWrapper>
       </Card>
     </div>
   );
 }
-

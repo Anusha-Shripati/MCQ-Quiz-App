@@ -15,41 +15,77 @@ import { useQuestionStore } from '@/store/questionStore';
 import { technologyEndpoint } from '@/lib/endpoint';
 import ImportSampleXLSX from './import-sample-xlsx';
 import { QuestionCategory } from '@/shared/types/app';
-
-async function createCategory(url: string, { arg }: { arg: { name: string } }) {
-  const response = await api.post(url, arg);
-  return response.data;
+import CreateTechnologyModal from '../ui/create-technology-modal';
+// async function createCategory(url: string, { arg }: { arg: { name: string } }) {
+//   const response = await api.post(url, arg);
+//   return response.data;
+// }
+//  SWR mutation fetcher for function create a technology.
+async function createTechnology(url: string, { arg }: { arg: { name: string } }) {
+  return await api.post(url, arg);
 }
-
 interface TechnologyFiltersProps {
   searchQuery: string;
   setSearchQuery: (query: string) => void;
   categoriesArray?: QuestionCategory[];
 }
 
-export default function TechnologyFilters({ searchQuery, setSearchQuery, categoriesArray = [] }: TechnologyFiltersProps) {
+export default function TechnologyFilters({
+  searchQuery,
+  setSearchQuery,
+  categoriesArray = [],
+}: TechnologyFiltersProps) {
   const [open, setOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [categoryName, setCategoryName] = useState('');
   const { hasPermissionQuestionEdit } = useAuthStore();
   const isQuestionEditable = hasPermissionQuestionEdit();
   const { technologyFilter } = useQuestionStore();
-  const { trigger } = useSWRMutation(technologyEndpoint.CREATE, createCategory);
+  // Create a technology by calling the CREATE_ONLY API endpoint
+  const { trigger: createTrigger } = useSWRMutation(
+    technologyEndpoint.CREATE_ONLY,
+    createTechnology
+  );
+  //Handler function for create technology name
+  const handleCreateTechnology = async () => {
+    // validate the field is empty or not
+    if (!categoryName.trim()) {
+      toast.error('Please enter technology name');
+      return;
+    }
 
-  const handleCreateCategory = async () => {
     try {
-      const data = await trigger({ name: categoryName });
+      const data = await createTrigger({ name: categoryName });
       if (data) {
         setCategoryName('');
         setOpen(false);
-        toast.success('Technology created successfully');
-        mutate(`/technology/list?search=${technologyFilter}`);
+
+        toast.success(data?.message || 'Technology created successfully');
+        mutate((key) => typeof key === 'string' && key.startsWith('/technology/list'));
+      } else {
+        toast.error(data?.message || 'Failed to create technology');
       }
-    } catch (error: unknown) {
+    } catch (error) {
       const axiosError = error as AxiosError<{ message: string }>;
       toast.error(axiosError.response?.data?.message || 'Something went wrong.');
     }
   };
+  // const { trigger } = useSWRMutation(technologyEndpoint.CREATE, createCategory);
+
+  // const handleCreateCategory = async () => {
+  //   try {
+  //     const data = await trigger({ name: categoryName });
+  //     if (data) {
+  //       setCategoryName('');
+  //       setOpen(false);
+  //       toast.success('Technology created successfully');
+  //       mutate(`/technology/list?search=${technologyFilter}`);
+  //     }
+  //   } catch (error: unknown) {
+  //     const axiosError = error as AxiosError<{ message: string }>;
+  //     toast.error(axiosError.response?.data?.message || 'Something went wrong.');
+  //   }
+  // };
 
   const handleImportSuccess = () => {
     mutate(`/technology/list?search=${technologyFilter}`);
@@ -75,9 +111,15 @@ export default function TechnologyFilters({ searchQuery, setSearchQuery, categor
               )}
             />
           </div>
-          
+
           {isQuestionEditable && (
             <div className="flex gap-2 ml-auto">
+              <Button
+                className="bg-blue-600 text-primary-foreground hover:bg-primary/90"
+                onClick={() => setOpen(true)}
+              >
+                Add Technology
+              </Button>
               <Button
                 className="bg-blue-600 text-primary-foreground hover:bg-primary/90"
                 onClick={() => setImportOpen(true)}
@@ -88,8 +130,31 @@ export default function TechnologyFilters({ searchQuery, setSearchQuery, categor
           )}
         </div>
       </section>
-
-      <Dialog open={open} onOpenChange={setOpen}>
+      {open && (
+        <CreateTechnologyModal
+          actionsAlign="center"
+          title={'Add Technology'}
+          onOpenChange={() => setOpen(false)}
+          actionButtons={
+            <button
+              className="px-3 py-2 bg-blue-500 text-white rounded"
+              onClick={() => handleCreateTechnology()}
+            >
+              Save
+            </button>
+          }
+        >
+          <input
+            type="text"
+            className="w-96 px-4 py-5 h-10 border border-gray-300 rounded hover:outline-gray-400 focus:outline-none focus:border-gray-500"
+            placeholder="Enter Technology Name..."
+            value={categoryName}
+            onChange={(e) => setCategoryName(e.target.value)}
+          />
+          {/* {error ? 'Technology is already exist' : ''} */}
+        </CreateTechnologyModal>
+      )}
+      {/* <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Add Technology</DialogTitle>
@@ -108,7 +173,7 @@ export default function TechnologyFilters({ searchQuery, setSearchQuery, categor
             </Button>
           </div>
         </DialogContent>
-      </Dialog>
+      </Dialog> */}
 
       <ImportSampleXLSX
         importOpen={importOpen}

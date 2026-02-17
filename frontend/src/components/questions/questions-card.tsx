@@ -69,7 +69,7 @@ export const QuestionCard = ({
     wordLimit: 30,
     charLimit: 120,
   });
-
+  
   return (
     <>
       <Card className="relative bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-800 dark:via-gray-900 dark:to-gray-800 rounded-2xl p-6 mb-8 border border-gray-200 dark:border-border transition-all duration-300">

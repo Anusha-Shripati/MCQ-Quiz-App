@@ -1,61 +1,63 @@
 export const dashboardEndpoint = {
-    INTERVIEW_DATA: '/dashboard/get-interview-data',
-    CALENDAR_DATA: '/dashboard/get-calendar-data',
-    INTERVIEW_COUNT: '/dashboard/get-interview-count',
-    INTERVIEW_SCORE: '/dashboard/get-interview-score',
-    QUESTIONS_DATA: '/dashboard/get-questions-data',
-    TOP_ASSESSMENTS: '/dashboard/get-top-assessments',
-    QUESTION_TYPE_PERFORMANCE: '/dashboard/get-question-type-performance',
-    EXAM_DURATION_PERFORMANCE: '/dashboard/get-exam-duration-performance'
-}
+  INTERVIEW_DATA: '/dashboard/get-interview-data',
+  CALENDAR_DATA: '/dashboard/get-calendar-data',
+  INTERVIEW_COUNT: '/dashboard/get-interview-count',
+  INTERVIEW_SCORE: '/dashboard/get-interview-score',
+  QUESTIONS_DATA: '/dashboard/get-questions-data',
+  TOP_ASSESSMENTS: '/dashboard/get-top-assessments',
+  QUESTION_TYPE_PERFORMANCE: '/dashboard/get-question-type-performance',
+  EXAM_DURATION_PERFORMANCE: '/dashboard/get-exam-duration-performance',
+};
 export const assessmentEndpoint = {
-    LIST: "/assessment/list",
-    ASSESSMENT_BY_ID: "/assessment",
-    ALL: "/assessment/all",
-    CHECK_UNIQUE: '/assessment/check-unique',
-    CHECK_QUESTIONS: "/assessment/check-question"
-}
-
+  LIST: '/assessment/list',
+  ASSESSMENT_BY_ID: '/assessment',
+  ALL: '/assessment/all',
+  CHECK_UNIQUE: '/assessment/check-unique',
+  CHECK_QUESTIONS: '/assessment/check-question',
+};
 export const technologyEndpoint = {
-    LIST: '/technology/list',
-    TECHNOLOGY_BY_ID: '/technology',
-    CREATE: '/technology/create',
-    DOWNLOAD_TEMPLATE: '/question/download-template',
+  LIST: '/technology/list',
+  // TECHNOLOGY_BY_ID: '/technology',
+  CREATE: '/technology/create',
+  DOWNLOAD_TEMPLATE: '/question/download-template',
+  CREATE_ONLY: '/technology/create-only',
+  GET_TECHNOLOGY_BY_ID: '/technology',
+  UPDATE: '/technology/:id/name',
+  DELETE: '/technology',
 };
 export const userEndpoint = {
-    LIST: "/user/list",
-    CREATE: "/user/create",
-    UPLOAD_IMAGE: "/user/upload-image",
-    USER_BY_ID: "/user",
-    CHANGE_PASSWORD: "/user/change-password",
-    LOGIN: '/user/login',
-    LOGOUT:"/user/logout"
-}
+  LIST: '/user/list',
+  CREATE: '/user/create',
+  UPLOAD_IMAGE: '/user/upload-image',
+  USER_BY_ID: '/user',
+  CHANGE_PASSWORD: '/user/change-password',
+  LOGIN: '/user/login',
+  LOGOUT: '/user/logout',
+};
 export const candidateEndpoint = {
-    LIST: "/candidate/list",
-    CREATE: "/candidate/create",
-    CANDIDATE_BY_ID: "/candidate"
-}
+  LIST: '/candidate/list',
+  CREATE: '/candidate/create',
+  CANDIDATE_BY_ID: '/candidate',
+};
 export const questionEndpoint = {
-    LIST: "/question/list",
-    CREATE: "/question/create",
-    QUESTION_BY_ID: "/question",
-    DELETE: "/question/delete",
-}
+  LIST: '/question/list',
+  CREATE: '/question/create',
+  QUESTION_BY_ID: '/question',
+  DELETE: '/question/delete',
+};
 export const roleEndpoint = {
-    LIST: "/role/list",
-    CREATE: "/role/create",
-}
+  LIST: '/role/list',
+  CREATE: '/role/create',
+};
 export const resultEndpoint = {
-    LIST: "/result/list",
-    RESULT_BY_ID: "/result",
-    UPDATE_SCORE: "/result/update-score",
-    GET_FEEDBACK: "/result/feedback",
-
-}
+  LIST: '/result/list',
+  RESULT_BY_ID: '/result',
+  UPDATE_SCORE: '/result/update-score',
+  GET_FEEDBACK: '/result/feedback',
+};
 export const moduleEndpoint = {
-    LIST: "/module/list",
-}
+  LIST: '/module/list',
+};
 export const examEndpoint = {
     BY_ID: "/candidate-exam",
     CANDIDATE_EXAM: "candidate-exam",

@@ -6,7 +6,7 @@ export const teachnologySchema = {
       name: Joi.string().required().messages({
         'string.empty': 'Technology name is required',
       }),
-      questions:Joi.array().items(Joi.any()).optional(),
+      questions: Joi.array().items(Joi.any()).optional(),
     }),
   },
   createOnly: {
@@ -25,7 +25,7 @@ export const teachnologySchema = {
     }),
     body: Joi.object({
       name: Joi.string().optional(),
-      questions:Joi.array().items(Joi.any()).optional(),
+      questions: Joi.array().items(Joi.any()).optional(),
     }),
   },
   updateName: {

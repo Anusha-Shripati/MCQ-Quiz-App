@@ -12,9 +12,9 @@ export class TechnologyService {
 
   async getTechnologies(filters: { name: string }): Promise<Technology[]> {
     const { name } = filters;
-    const key = this.cacheService.generateKey('technology-all',{name});
+    const key = this.cacheService.generateKey('technology-all', { name });
     const data = await this.cacheService.getKey(key);
-    if(data) return JSON.parse(data)
+    if (data) return JSON.parse(data);
 
     const technologies = await this.prisma.technology.findMany({
       where: {
@@ -27,15 +27,14 @@ export class TechnologyService {
             deleted_at: null,
           },
         },
-        assessment_technology: {}
+        assessment_technology: {},
       },
       orderBy: {
         created_at: 'desc',
       },
     });
 
-    const response= technologies
-    .map((tech) => {
+    const response = technologies.map((tech) => {
       const difficultyCount = {
         easy: 0,
         medium: 0,
@@ -56,66 +55,79 @@ export class TechnologyService {
       };
     });
 
-    await this.cacheService.setKey(key,response,this.cacheTime)
-    
-    return response
+    await this.cacheService.setKey(key, response, this.cacheTime);
+
+    return response;
   }
   async createTechnology(data: { name: string, questions?: Omit<Questions, 'id'>[] }) {
     const result = await this.prisma.$transaction(async (tx) => {
       const technology = await tx.technology.create({ data: { name: data.name } });
-      
+
       if (data.questions && data.questions.length > 0) {
         const arr = data.questions.map((item) => ({
           ...item,
           technology_id: technology.id,
           options: item.options as Prisma.InputJsonValue,
-          meta: item.meta as Prisma.InputJsonValue
-        }))
-        await tx.questions.createMany({ data: arr })
+          meta: item.meta as Prisma.InputJsonValue,
+        }));
+        await tx.questions.createMany({ data: arr });
       }
-      
-      return technology
-    })
-    return result
+
+      return technology;
+    });
+    return result;
   }
 
   async createTechnologyOnly(data: { name: string }) {
-    return await this.prisma.technology.create({ data: { name: data.name } });
+    try {
+      const response = await this.prisma.technology.create({ data: { name: data.name } });
+      return response;
+    } catch (error) {
+      console.log('Create Technology error', error);
+    }
   }
 
   async updateTechnology(
     id: string,
-    userId:string,
-    data: { name: string; deleted_at?: Date | null, questions: Omit<Questions, 'id'>[] }
-  ){
+    userId: string,
+    data: { name: string; deleted_at?: Date | null; questions: Omit<Questions, 'id'>[] }
+  ) {
     const result = await this.prisma.$transaction(async (tx) => {
       const arr = data.questions?.map((item) => ({
         ...item,
         technology_id: id,
         options: item.options as Prisma.InputJsonValue,
         meta: item.meta as Prisma.InputJsonValue,
-        created_by:userId
-      }))
-      const questions = await tx.questions.createMany({ data: arr })
-      return questions
-    })
-    return result
+        created_by: userId,
+      }));
+      const questions = await tx.questions.createMany({ data: arr });
+      return questions;
+    });
+    return result;
   }
 
   async updateTechnologyName(id: string, data: { name: string }) {
-    return await this.prisma.technology.update({
-      where: { id },
-      data: { name: data.name }
-    });
+    try {
+      const response = await this.prisma.technology.update({
+        where: { id },
+        data: { name: data.name },
+      });
+      return response;
+    } catch (error) {
+      console.log('Update Technology Error', error);
+    }
   }
   async getTechnologyById(id: string) {
     const data = await this.cacheService.getKey(`technology:${id}`);
-    if(data) JSON.parse(data)
+    if (data) JSON.parse(data);
 
-    const response =  this.prisma.technology.findUnique({ where: { id }, include: { questions:{ orderBy:{created_at:'asc'}} } });
-    await this.cacheService.setKey(`technology:${id}`,response,this.cacheTime)
-    
-    return response
+    const response = this.prisma.technology.findUnique({
+      where: { id },
+      include: { questions: { orderBy: { created_at: 'asc' } } },
+    });
+    await this.cacheService.setKey(`technology:${id}`, response, this.cacheTime);
+
+    return response;
   }
   async getTechnologyByName(name: string): Promise<Technology | null> {
     return this.prisma.technology.findUnique({ where: { name } });

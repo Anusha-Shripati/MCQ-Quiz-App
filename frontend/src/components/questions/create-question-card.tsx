@@ -234,7 +234,6 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
     setOptionErrors(errors);
     return !hasError;
   };
-
   return (
     <Card className={validationError ? 'border-2 border-red-500' : ''}>
       <CardHeader>

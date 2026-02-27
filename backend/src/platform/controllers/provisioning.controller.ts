@@ -5,7 +5,7 @@ import { generateResponse } from '../../utils/generateResponse';
 export class ProvisioningController {
   provision = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { name, slug, plan_id, admin_email, admin_name, admin_password } = req.body;
+      const { name, slug, plan_id, admin_email, admin_name, admin_password, trial_days } = req.body;
       
       const provisioningService = new ProvisioningService(req.context!.prisma);
 
@@ -16,6 +16,7 @@ export class ProvisioningController {
         admin_email,
         admin_name,
         admin_password,
+        trial_days,
         created_by: req.user?.id,
       });
 

@@ -25,7 +25,7 @@ const tenantSchema = z.object({
   plan_id: z.string().min(1, 'Plan is required'),
   provision: z.boolean(),
   status: z.enum(['active', 'trial', 'suspended', 'expired', 'cancelled']).optional(),
-  trial_days: z.number().min(1).max(365).optional(),
+  trial_days: z.number().min(1, 'Trial days must be at least 1').max(365, 'Trial days cannot exceed 365').optional(),
   trial_ends_at: z.string().optional(),
   subscription_ends_at: z.string().optional(),
 });
@@ -82,7 +82,7 @@ export default function TenantForm({ isOpen, onClose, tenant }: TenantFormProps)
       plan_id: '',
       provision: true,
       status: 'trial',
-      trial_days: 14,
+      trial_days: 30,
       trial_ends_at: '',
       subscription_ends_at: '',
     },
@@ -321,9 +321,14 @@ export default function TenantForm({ isOpen, onClose, tenant }: TenantFormProps)
                       type="number"
                       {...register('trial_days', { valueAsNumber: true })}
                       className="mt-1 h-11"
-                      placeholder="14"
+                      placeholder="30"
+                      min="1"
+                      max="365"
                     />
-                    <p className="text-xs text-slate-500 mt-1">Status: Trial</p>
+                    {errors.trial_days && (
+                      <p className="text-red-500 text-sm mt-1">{errors.trial_days.message}</p>
+                    )}
+                    <p className="text-xs text-slate-500 mt-1">Status: Trial (1-365 days, default: 30 days)</p>
                   </div>
                 ) : (
                   <div>

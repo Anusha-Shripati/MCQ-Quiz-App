@@ -37,7 +37,7 @@ export class ProvisioningService {
       // Determine status and dates based on plan
       const isFree = plan.name.toLowerCase() === 'free';
       const status = isFree ? 'trial' : 'active';
-      const trialEndsAt = isFree ? new Date(Date.now() + (data.trial_days || 14) * 24 * 60 * 60 * 1000) : undefined;
+      const trialEndsAt = isFree ? new Date(Date.now() + (data.trial_days || 30) * 24 * 60 * 60 * 1000) : undefined;
       const subscriptionEndsAt = !isFree ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) : undefined;
 
       console.log(`[Provisioning] Plan: ${plan.name}, Status: ${status}`);

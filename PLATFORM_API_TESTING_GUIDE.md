@@ -1,4 +1,4 @@
-# Platform Admin API Testing Guide - Phase 4.1, 4.2, 4.3, 4.4 & 4.5
+# Platform Admin API Testing Guide - Phase 4.1 to 4.6
 
 ## Base URL
 ```
@@ -13,7 +13,7 @@ http://localhost:3001/api/v1/platform
 ```
 POST /api/v1/platform/auth/login
 Content-Type: application/json
-
+ 
 Body:
 {
   "email": "admin@logicrays.com",
@@ -795,6 +795,403 @@ If any step fails, the endpoint automatically:
 
 ---
 
+## Phase 4.6: Usage Tracking & Enforcement
+
+**Note:** All routes require `Authorization: Bearer <token>` header
+
+### 1. Get All Tenants Usage Summary
+```
+GET /api/v1/platform/usage/summary
+Authorization: Bearer <token>
+
+Response (200):
+{
+  "success": true,
+  "message": "Usage summary fetched successfully",
+  "data": [
+    {
+      "tenantId": "uuid",
+      "tenantName": "Acme Corporation",
+      "planName": "Starter",
+      "metrics": {
+        "candidates": {
+          "current": 45,
+          "limit": 100,
+          "percentage": 45
+        },
+        "assessments": {
+          "current": 8,
+          "limit": 50,
+          "percentage": 16
+        },
+        "questions": {
+          "current": 234,
+          "limit": 500,
+          "percentage": 47
+        },
+        "storage_mb": {
+          "current": 0,
+          "limit": 500,
+          "percentage": 0
+        },
+        "api_calls": {
+          "current": 0,
+          "limit": 5000,
+          "percentage": 0
+        }
+      }
+    }
+  ]
+}
+```
+
+### 2. Get Tenant Usage Statistics
+```
+GET /api/v1/platform/usage/:tenant_id
+Authorization: Bearer <token>
+
+Replace :tenant_id with actual UUID
+
+Response (200):
+{
+  "success": true,
+  "message": "Usage statistics fetched successfully",
+  "data": {
+    "tenantId": "uuid",
+    "planName": "Starter",
+    "usage": {
+      "candidates": {
+        "current": 45,
+        "limit": 100,
+        "percentage": 45,
+        "unlimited": false
+      },
+      "assessments": {
+        "current": 8,
+        "limit": 50,
+        "percentage": 16,
+        "unlimited": false
+      },
+      "questions": {
+        "current": 234,
+        "limit": 500,
+        "percentage": 47,
+        "unlimited": false
+      },
+      "storage_mb": {
+        "current": 0,
+        "limit": 500,
+        "percentage": 0,
+        "unlimited": false
+      },
+      "api_calls": {
+        "current": 0,
+        "limit": 5000,
+        "percentage": 0,
+        "unlimited": false
+      }
+    },
+    "lastUpdated": "2025-02-17T10:30:00Z"
+  }
+}
+```
+
+### 3. Get Specific Metric Usage
+```
+GET /api/v1/platform/usage/:tenant_id/:metric
+Authorization: Bearer <token>
+
+Replace :tenant_id with actual UUID
+Replace :metric with: candidates, assessments, questions, storage_mb, or api_calls
+
+Example: GET /api/v1/platform/usage/abc-123/candidates
+
+Response (200):
+{
+  "success": true,
+  "message": "Metric usage fetched successfully",
+  "data": {
+    "metric": "candidates",
+    "current": 45,
+    "limit": 100,
+    "unlimited": false,
+    "percentage": 45
+  }
+}
+```
+
+### 4. Reset Metric Usage
+```
+PUT /api/v1/platform/usage/:tenant_id/:metric/reset
+Authorization: Bearer <token>
+Content-Type: application/json
+
+Replace :tenant_id with actual UUID
+Replace :metric with: candidates, assessments, questions, storage_mb, or api_calls
+
+Example: PUT /api/v1/platform/usage/abc-123/candidates/reset
+
+No Body Required
+
+Response (200):
+{
+  "success": true,
+  "message": "candidates usage reset successfully",
+  "data": {}
+}
+```
+
+### 5. Sync Usage from Database
+```
+POST /api/v1/platform/usage/:tenant_id/sync
+Authorization: Bearer <token>
+Content-Type: application/json
+
+Replace :tenant_id with actual UUID
+
+No Body Required
+
+Response (200):
+{
+  "success": true,
+  "message": "Usage synced successfully",
+  "data": {
+    "tenantId": "uuid",
+    "planName": "Starter",
+    "usage": {
+      "candidates": {
+        "current": 45,
+        "limit": 100,
+        "percentage": 45,
+        "unlimited": false
+      },
+      "assessments": {
+        "current": 8,
+        "limit": 50,
+        "percentage": 16,
+        "unlimited": false
+      },
+      "questions": {
+        "current": 234,
+        "limit": 500,
+        "percentage": 47,
+        "unlimited": false
+      }
+    },
+    "lastUpdated": "2025-02-17T10:30:00Z"
+  }
+}
+
+Note: This endpoint counts actual records in the tenant database and updates usage accordingly.
+Use this when:
+- Initial setup (tenant has existing data)
+- After manual database changes
+- Periodic accuracy verification
+```
+
+### Usage Enforcement (Tenant APIs)
+
+The following tenant endpoints now enforce usage limits:
+
+#### Create Candidate (Enforced)
+```
+POST /api/v1/tenant/candidates/create
+Authorization: Bearer <tenant_token>
+Content-Type: application/json
+
+Body:
+{
+  "name": "John Doe",
+  "email": "john@example.com",
+  "assessment_id": "uuid",
+  "technology_id": "uuid"
+}
+
+Success Response (201):
+{
+  "success": true,
+  "message": "Candidate created successfully",
+  "data": {...}
+}
+
+Limit Reached Response (403):
+{
+  "success": false,
+  "message": "candidates limit reached (100/100). Please upgrade your plan.",
+  "error": "USAGE_LIMIT_EXCEEDED",
+  "data": {
+    "current": 100,
+    "limit": 100,
+    "upgradeRequired": true
+  }
+}
+```
+
+#### Create Assessment (Enforced)
+```
+POST /api/v1/tenant/assessments/create
+Authorization: Bearer <tenant_token>
+
+Limit Reached Response (403):
+{
+  "success": false,
+  "message": "assessments limit reached (50/50). Please upgrade your plan.",
+  "error": "USAGE_LIMIT_EXCEEDED",
+  "data": {
+    "current": 50,
+    "limit": 50,
+    "upgradeRequired": true
+  }
+}
+```
+
+#### Create Question (Enforced)
+```
+POST /api/v1/tenant/questions/create
+Authorization: Bearer <tenant_token>
+
+Limit Reached Response (403):
+{
+  "success": false,
+  "message": "questions limit reached (500/500). Please upgrade your plan.",
+  "error": "USAGE_LIMIT_EXCEEDED",
+  "data": {
+    "current": 500,
+    "limit": 500,
+    "upgradeRequired": true
+  }
+}
+```
+
+#### Import Questions (Enforced)
+```
+POST /api/v1/tenant/questions/import
+Authorization: Bearer <tenant_token>
+
+Limit Reached Response (403):
+{
+  "success": false,
+  "message": "questions limit reached (500/500). Please upgrade your plan.",
+  "error": "USAGE_LIMIT_EXCEEDED",
+  "data": {
+    "current": 500,
+    "limit": 500,
+    "upgradeRequired": true
+  }
+}
+```
+
+### How Usage Tracking Works
+
+1. **Automatic Increment**: When a resource is created, usage counter increases by 1
+2. **Automatic Decrement**: When a resource is deleted, usage counter decreases by 1
+3. **Bulk Operations**: Import operations increment by the actual count imported
+4. **Monthly Periods**: Usage resets automatically at the start of each month
+5. **Unlimited Plans**: Plans with -1 limit allow unlimited resources
+
+### Testing Usage Enforcement
+
+#### Test Scenario 1: Create Until Limit
+```bash
+# 1. Create a plan with low limits for testing
+POST /api/v1/platform/plans
+{
+  "name": "Test Plan",
+  "limits": {
+    "candidates": 5,
+    "assessments": 3,
+    "questions": 10
+  }
+}
+
+# 2. Provision a tenant with this plan
+POST /api/v1/platform/provision
+{
+  "name": "Test Tenant",
+  "slug": "test",
+  "plan_id": "<test_plan_id>",
+  "admin_email": "test@example.com",
+  "admin_name": "Test User",
+  "admin_password": "Test123"
+}
+
+# 3. Login as tenant admin and get token
+
+# 4. Create 5 candidates (should succeed)
+POST /api/v1/tenant/candidates/create (x5)
+
+# 5. Try to create 6th candidate (should fail with 403)
+POST /api/v1/tenant/candidates/create
+# Response: "candidates limit reached (5/5)"
+
+# 6. Check usage as platform admin
+GET /api/v1/platform/usage/<tenant_id>
+# Should show: candidates: 5/5 (100%)
+```
+
+#### Test Scenario 2: Sync Usage
+```bash
+# 1. Manually delete some candidates via database
+# (Simulates out-of-sync scenario)
+
+# 2. Check usage (will be incorrect)
+GET /api/v1/platform/usage/<tenant_id>
+# Shows: candidates: 5/5
+
+# 3. Sync usage from database
+POST /api/v1/platform/usage/<tenant_id>/sync
+
+# 4. Check usage again (now correct)
+GET /api/v1/platform/usage/<tenant_id>
+# Shows: candidates: 3/5 (after manual deletion)
+```
+
+#### Test Scenario 3: Reset Usage
+```bash
+# 1. Tenant at limit
+GET /api/v1/platform/usage/<tenant_id>
+# Shows: candidates: 5/5
+
+# 2. Reset usage as platform admin
+PUT /api/v1/platform/usage/<tenant_id>/candidates/reset
+
+# 3. Check usage
+GET /api/v1/platform/usage/<tenant_id>
+# Shows: candidates: 0/5
+
+# 4. Tenant can now create resources again
+```
+
+#### Test Scenario 4: Unlimited Plan
+```bash
+# 1. Create unlimited plan
+POST /api/v1/platform/plans
+{
+  "name": "Unlimited",
+  "limits": {
+    "candidates": -1,
+    "assessments": -1,
+    "questions": -1
+  }
+}
+
+# 2. Upgrade tenant to unlimited plan
+PUT /api/v1/platform/tenants/<tenant_id>
+{
+  "plan_id": "<unlimited_plan_id>"
+}
+
+# 3. Create unlimited resources (should never fail)
+POST /api/v1/tenant/candidates/create (x1000)
+# All succeed
+
+# 4. Check usage
+GET /api/v1/platform/usage/<tenant_id>
+# Shows: candidates: 1000/-1 (unlimited: true)
+```
+
+---
+
 ## Testing Workflow
 
 ### Step 1: Login
@@ -811,7 +1208,7 @@ If any step fails, the endpoint automatically:
 6. Try to delete a plan
 7. Get tenants using a plan
 
-### Step 3: Test Tenant Provisioning (NEW)
+### Step 3: Test Tenant Provisioning
 1. Provision a tenant using automated endpoint
 2. Verify database was created
 3. Verify tenant can login immediately
@@ -836,7 +1233,17 @@ If any step fails, the endpoint automatically:
 6. Try to delete self (should fail)
 7. Delete another admin
 
-### Step 5: Test Authentication
+### Step 6: Test Usage Tracking & Enforcement (NEW)
+1. Get all tenants usage summary
+2. Get specific tenant usage statistics
+3. Get specific metric usage
+4. Create resources until limit reached
+5. Verify 403 error when limit exceeded
+6. Reset usage for a metric
+7. Sync usage from database
+8. Test unlimited plan (no limits)
+
+### Step 7: Test Authentication
 1. Get your profile
 2. Logout
 3. Try to access protected route (should fail)
@@ -894,6 +1301,7 @@ plan_id: (set after creating a plan)
 tenant_id: (set after creating a tenant)
 admin_id: (set after creating an admin)
 role_id: (get from login response or admin list)
+test_metric: (auto-set from usage response, e.g., "candidates")
 ```
 
 ### Login Test Script (Auto-save token):
@@ -934,6 +1342,16 @@ if (pm.response.code === 201) {
 if (pm.response.code === 201) {
     const response = pm.response.json();
     pm.collectionVariables.set("tenant_id", response.data.tenant.id);
+}
+```
+
+### Get Usage Test Script (Auto-save for testing):
+```javascript
+if (pm.response.code === 200) {
+    const response = pm.response.json();
+    // Save first metric for testing
+    const firstMetric = Object.keys(response.data.usage)[0];
+    pm.collectionVariables.set("test_metric", firstMetric);
 }
 ```
 

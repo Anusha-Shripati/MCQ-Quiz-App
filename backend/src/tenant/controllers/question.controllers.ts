@@ -1,13 +1,23 @@
 import { Request, Response, NextFunction } from 'express';
 import QuestionsService from '../services/question.services';
 import { generateResponse } from '../../utils/generateResponse';
+import { UsageService } from '../../platform/services/usage.service';
+import { UsageMetric } from '../../db/prisma/generated/client';
+import { getPrisma } from '../../db/prisma/client';
 
 export class QuestionsController {
+  private usageService: UsageService;
+
+  constructor() {
+    this.usageService = new UsageService(getPrisma());
+  }
   create = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const questionsService = new QuestionsService(req.context!.prisma);
       
       const question = await questionsService.createQuestion({...req.body,created_by:req.user?.id});
+      await this.usageService.incrementUsage(req.context!.tenant!.id, UsageMetric.questions);
+
       return generateResponse(res, 200, question, true, 'Question created successfully');
     } catch (error) {
       next(error);
@@ -45,6 +55,8 @@ export class QuestionsController {
       }
 
       await questionsService.deleteQuestion(id);
+      await this.usageService.decrementUsage(req.context!.tenant!.id, UsageMetric.questions);
+
       return generateResponse(res, 200, {}, true, 'Question deleted successfully');
     } catch (error) {
       console.error('Error deleting question:', error);
@@ -121,6 +133,14 @@ export class QuestionsController {
       const questionsService = new QuestionsService(req.context!.prisma);
       
       const result = await questionsService.importQuestionsFromXlsx(file.buffer, technologyId, req.user?.id || '');
+
+      if (result.totalImported > 0) {
+        await this.usageService.incrementUsage(
+          req.context!.tenant!.id,
+          UsageMetric.questions,
+          result.totalImported
+        );
+      }
 
       return generateResponse(
         res,

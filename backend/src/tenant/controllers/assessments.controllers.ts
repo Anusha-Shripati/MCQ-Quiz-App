@@ -3,8 +3,16 @@ import AssessmentsService from '../services/assessments.services';
 import { generateResponse } from '../../utils/generateResponse';
 import ExamService from '../services/exam.services';
 import { Questions } from '@prisma/client';
+import { UsageService } from '../../platform/services/usage.service';
+import { UsageMetric } from '../../db/prisma/generated/client';
+import { getPrisma } from '../../db/prisma/client';
 
 export class AssessmentController {
+  private usageService: UsageService;
+
+  constructor() {
+    this.usageService = new UsageService(getPrisma());
+  }
   create = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { technologies, ...assessmentPayload } = req.body;
@@ -130,7 +138,7 @@ export class AssessmentController {
         req.body.technologies
       );
 
-      // const assessment = await assessmentService.getAssessmentById(newAssessment.id);
+      await this.usageService.incrementUsage(req.context!.tenant!.id, UsageMetric.assessments);
 
       return generateResponse(res, 200, newAssessment, true, 'Assessment created successfully');
     } catch (error) {
@@ -305,6 +313,8 @@ export class AssessmentController {
       }
       await assessmentService.deleteTechnologyAssessment(id);
       await assessmentService.deleteAssessment(id);
+      await this.usageService.decrementUsage(req.context!.tenant!.id, UsageMetric.assessments);
+
       return generateResponse(res, 200, {}, true, 'Assessment delete successfully');
     } catch (error) {
       next(error);

@@ -15,6 +15,7 @@ const MODULES = [
   { name: 'admins', description: 'Manage platform administrators' },
   { name: 'roles', description: 'Manage platform roles and permissions' },
   { name: 'analytics', description: 'View platform analytics and reports' },
+  { name: 'usage', description: 'Manage tenant usage tracking and limits' },
 ];
 
 const PLANS = [

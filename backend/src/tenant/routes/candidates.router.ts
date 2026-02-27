@@ -4,6 +4,8 @@ import { authenticateAndAuthorize } from '../../middlewares/auth.middleware';
 import { validateRequest } from '../../middlewares/validation.middleware';
 import { asyncHandler } from '../../utils/asyncHandler';
 import { candidateSchema } from '../validations/candidates.validations';
+import { enforceUsageLimit } from '../../platform/middlewares/usage-enforcement.middleware';
+import { UsageMetric } from '../../db/prisma/generated/client';
 
 const candidateRouter = express.Router();
 const candidateController = new CandidateController();
@@ -11,6 +13,7 @@ const candidateController = new CandidateController();
 candidateRouter.post(
   '/create',
   authenticateAndAuthorize('candidates.can_edit'),
+  enforceUsageLimit(UsageMetric.candidates),
   validateRequest(candidateSchema.create),
   asyncHandler(candidateController.create)
 );

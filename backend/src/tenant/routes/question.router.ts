@@ -4,12 +4,15 @@ import { validateRequest, validateUploadFile } from '../../middlewares/validatio
 import { questionsSchema } from '../validations/questions.validations';
 import { asyncHandler } from '../../utils/asyncHandler';
 import { authenticateAndAuthorize } from '../../middlewares/auth.middleware';
+import { enforceUsageLimit } from '../../platform/middlewares/usage-enforcement.middleware';
+import { UsageMetric } from '../../db/prisma/generated/client';
 
 const questionRouter = express.Router();
 const questionsController = new QuestionsController();
 questionRouter.post(
   '/import',
   authenticateAndAuthorize(),
+  enforceUsageLimit(UsageMetric.questions),
   validateUploadFile(),
   asyncHandler(questionsController.importQuestionsFromXlsx)
 );
@@ -20,6 +23,7 @@ questionRouter.get('/technology', asyncHandler(questionsController.getTechnology
 questionRouter.post(
   '/create',
   authenticateAndAuthorize(),
+  enforceUsageLimit(UsageMetric.questions),
   validateRequest(questionsSchema.create),
   asyncHandler(questionsController.create)
 );

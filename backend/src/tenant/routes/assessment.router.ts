@@ -4,6 +4,8 @@ import { validateRequest } from '../../middlewares/validation.middleware';
 import { assessmentSchema } from '../validations/assessments.validations';
 import { asyncHandler } from '../../utils/asyncHandler';
 import { authenticateAndAuthorize } from '../../middlewares/auth.middleware';
+import { enforceUsageLimit } from '../../platform/middlewares/usage-enforcement.middleware';
+import { UsageMetric } from '../../db/prisma/generated/client';
 
 const assessmentRouter = express.Router();
 const assessmentController = new AssessmentController();
@@ -11,6 +13,7 @@ const assessmentController = new AssessmentController();
 assessmentRouter.post(
   '/create',
   authenticateAndAuthorize('assessments.can_edit'),
+  enforceUsageLimit(UsageMetric.assessments),
   validateRequest(assessmentSchema.create),
   asyncHandler(assessmentController.create)
 );

@@ -6,8 +6,16 @@ import { CreateCandidate, UpdateCandidate } from '../../types/candidate.types';
 import { generateResponse } from '../../utils/generateResponse';
 import { Candidate } from '@prisma/client';
 import { ExamMeta } from '../services/candiate-exam.services';
+import { UsageService } from '../../platform/services/usage.service';
+import { UsageMetric } from '../../db/prisma/generated/client';
+import { getPrisma } from '../../db/prisma/client';
 
 export class CandidateController {
+  private usageService: UsageService;
+
+  constructor() {
+    this.usageService = new UsageService(getPrisma());
+  }
   create = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const candidateData: CreateCandidate = req.body;
@@ -38,6 +46,8 @@ export class CandidateController {
         meta: candidateData.meta || {},
         created_by: req.user?.id || ''
       });
+
+      await this.usageService.incrementUsage(req.context!.tenant!.id, UsageMetric.candidates);
 
       return generateResponse(res, 201, newCandidate, true, 'Candidate created successfully');
     } catch (error) {
@@ -105,6 +115,8 @@ delete = async (req: Request, res: Response, next: NextFunction) => {
     }
 
     await candidateService.deleteCandidate(id);
+    await this.usageService.decrementUsage(req.context!.tenant!.id, UsageMetric.candidates);
+
     return generateResponse(res, 200, {}, true, 'Candidate deleted successfully');
   } catch (error) {
     next(error);

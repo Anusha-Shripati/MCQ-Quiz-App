@@ -11,7 +11,13 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 
-export function PlatformThemeToggle({ isCollapsed = true }: { isCollapsed?: boolean }) {
+export function PlatformThemeToggle({ 
+  isCollapsed = true, 
+  variant = 'default' 
+}: { 
+  isCollapsed?: boolean;
+  variant?: 'default' | 'sidebar';
+}) {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = React.useState(false);
 
@@ -27,6 +33,12 @@ export function PlatformThemeToggle({ isCollapsed = true }: { isCollapsed?: bool
     return null;
   }
 
+  // Sidebar variant: white icons on dark sidebar background
+  const sidebarClasses = `w-full text-base relative h-10 flex ${isCollapsed ? 'justify-center' : 'justify-start'} items-center gap-4 p-3 rounded-lg transition-colors text-white hover:bg-white/10 hover:text-white`;
+  
+  // Default variant: theme-adaptive for auth pages
+  const defaultClasses = `w-full text-base relative h-10 flex ${isCollapsed ? 'justify-center' : 'justify-start'} items-center gap-4 p-3 rounded-lg transition-colors text-slate-700 dark:text-white/90 hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white`;
+
   return (
     <TooltipProvider>
       <Tooltip delayDuration={0}>
@@ -34,11 +46,11 @@ export function PlatformThemeToggle({ isCollapsed = true }: { isCollapsed?: bool
           <Button
             variant="ghost"
             onClick={toggleTheme}
-            className={`w-full text-base relative h-10 flex ${isCollapsed ? 'justify-center' : 'justify-start'} items-center gap-4 p-3 rounded-lg transition-colors text-slate-700 dark:text-white/90 hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white`}
+            className={variant === 'sidebar' ? sidebarClasses : defaultClasses}
             aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`}
           >
             <span className="h-5 w-5 relative flex items-center justify-center overflow-hidden">
-              <Sun className="absolute h-[30px] w-[30px] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0 text-slate-700" />
+              <Sun className={`absolute h-[30px] w-[30px] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0 ${variant === 'sidebar' ? 'text-white' : 'text-slate-700'}`} />
               <Moon className="absolute h-[30px] w-[30px] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100 text-white" />
             </span>
             {!isCollapsed && <span>Theme</span>}

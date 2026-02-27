@@ -22,11 +22,16 @@ local-backend:
 	@-pkill -f "npm run dev:backend" 2>/dev/null || true
 	@-pkill -f "nodemon.*backend" 2>/dev/null || true
 	@-lsof -ti:3001 | xargs kill -9 2>/dev/null || true
+	@echo "🛑 Killing processes on PostgreSQL port (5432)..."
+	@-lsof -ti:5432 | xargs kill -9 2>/dev/null || true
+	@echo "🛑 Killing processes on Redis port (6379)..."
+	@-lsof -ti:6379 | xargs kill -9 2>/dev/null || true
 	@sleep 1
 	npm run docker:down
 	npm run docker:db
 	npm run docker:redis
 	npm run prisma:generate
+	npm run tenant:generate
 	npm run prisma:migrate
 	npm run dev:backend
 

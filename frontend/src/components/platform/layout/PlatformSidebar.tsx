@@ -126,7 +126,7 @@ export default function PlatformSidebar() {
             )}
 
             {/* Theme Toggle */}
-            <PlatformThemeToggle isCollapsed={isCollapsed} />
+            <PlatformThemeToggle isCollapsed={isCollapsed} variant="sidebar" />
 
             {/* Profile with Logout */}
             <PlatformUserAvatar isCollapsed={isCollapsed} />
@@ -137,7 +137,7 @@ export default function PlatformSidebar() {
                 onClick={toggleSidebar}
                 variant="ghost"
                 size="icon"
-                className="hover:bg-white/10 hover:text-white rounded-lg w-10 h-10 transition-all duration-200"
+                className="text-slate-700 dark:text-white/90 hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white rounded-lg w-10 h-10 transition-all duration-200"
               >
                 <ChevronRight size={16} />
               </Button>
@@ -153,7 +153,7 @@ export default function PlatformSidebar() {
           >
             <Button
               variant="ghost"
-              className="bg-background text-foreground border border-border rounded-full shadow-md flex items-center justify-center w-8 h-8"
+              className="bg-white dark:bg-slate-800 text-slate-700 dark:text-white border border-slate-300 dark:border-slate-600 rounded-full shadow-md flex items-center justify-center w-8 h-8 hover:bg-slate-100 dark:hover:bg-slate-700"
             >
               <ChevronLeft size={14} />
             </Button>

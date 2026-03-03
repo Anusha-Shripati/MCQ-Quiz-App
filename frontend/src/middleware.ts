@@ -6,9 +6,27 @@ import { getTenantContext } from './lib/tenant-utils';
 
 export async function middleware(request: NextRequest) {
   const hostname = request.headers.get('host') || '';
-  const tenantContext = getTenantContext(hostname);
-  
+  const currentPath = request.nextUrl.pathname;
   const response = NextResponse.next();
+
+  // Handle root domain (lr-mcq.com or localhost) - public routes
+  const baseDomain = process.env.NEXT_PUBLIC_BASE_DOMAIN || 'lr-mcq.com';
+  const isRootDomain = hostname === baseDomain;
+
+  if (isRootDomain) {
+    // Allow public routes on root domain
+    const PUBLIC_ROOT_ROUTES = new Set(['/', '/signup', '/request-status', '/organization-login']);
+    
+    if (PUBLIC_ROOT_ROUTES.has(currentPath)) {
+      return response;
+    }
+    
+    // Redirect other routes to landing page
+    return NextResponse.redirect(new URL('/', request.url));
+  }
+
+  // Continue with existing tenant context logic
+  const tenantContext = getTenantContext(hostname);
 
   // Invalid domain - redirect to error page
   if (!tenantContext.isValid) {
@@ -38,7 +56,7 @@ export async function middleware(request: NextRequest) {
     }
 
     // Root path - redirect based on auth status
-    if (currentPath === '/') {
+    if (currentPath === '/' || currentPath === '/login') {
       return NextResponse.redirect(
         new URL(platformToken ? '/platform/dashboard' : '/platform-auth/login', request.url)
       );
@@ -61,7 +79,7 @@ export async function middleware(request: NextRequest) {
   const userRole = request.cookies.get('role')?.value;
   const permissions = request.cookies.get('permissions')?.value || '{}';
 
-  const currentPath = request.nextUrl.pathname;
+  // const currentPath = request.nextUrl.pathname;
   const currentModule = currentPath.split('/')[1];
 
   // 🔹 Block tenant users from accessing platform routes
@@ -72,7 +90,7 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL('/dashboard', request.url));
     } else {
       // Unauthenticated tenant user - redirect to tenant login
-      return NextResponse.redirect(new URL('/', request.url));
+      return NextResponse.redirect(new URL('/login', request.url));
     }
   }
 
@@ -87,7 +105,7 @@ export async function middleware(request: NextRequest) {
   ]);
 
   // 🔹 Define public routes
-  const PUBLIC_ROUTES = new Set(['test', 'tenant-not-found']);
+  const PUBLIC_ROUTES = new Set(['test', 'tenant-not-found', 'login']);
 
   // Skip middleware for public routes
   if (PUBLIC_ROUTES.has(currentModule)) {
@@ -96,11 +114,11 @@ export async function middleware(request: NextRequest) {
 
   // 🔹 Redirect if accessing protected route without authentication
   if (PROTECTED_ROUTES.has(currentModule) && !token) {
-    return NextResponse.redirect(new URL('/', request.url));
+    return NextResponse.redirect(new URL('/login', request.url));
   }
 
   // 🔹 Redirect authenticated users away from login page
-  if (currentPath === '/' && token) {
+  if (currentPath === '/login' && token) {
     return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 
@@ -135,6 +153,10 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     '/',
+    '/login',
+    '/organization-login',
+    '/signup',
+    '/request-status',
     '/dashboard/:path*',
     '/candidates/:path*',
     '/questions/:path*',

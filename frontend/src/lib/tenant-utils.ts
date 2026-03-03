@@ -29,6 +29,8 @@ function isValidDomain(hostname: string): boolean {
   }
   
   const baseDomain = process.env.NEXT_PUBLIC_BASE_DOMAIN || 'lr-mcq.com';
+  // Remove port from base domain if present
+  const baseDomainWithoutPort = baseDomain.split(':')[0];
   const parts = hostWithoutPort.split('.');
   
   // Must be exactly: subdomain.basedomain (e.g., admin.lr-mcq.local)
@@ -39,8 +41,8 @@ function isValidDomain(hostname: string): boolean {
   // const subdomain = parts[0];
   const domain = parts.slice(1).join('.');
   
-  // Domain must exactly match base domain
-  return domain === baseDomain;
+  // Domain must exactly match base domain (without port)
+  return domain === baseDomainWithoutPort;
 }
 
 /**

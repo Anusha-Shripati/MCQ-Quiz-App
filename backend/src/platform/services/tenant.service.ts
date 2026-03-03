@@ -188,4 +188,11 @@ export class TenantService {
       orderBy: { metric_type: 'asc' },
     });
   }
+
+  async findByAdminEmail(admin_email: string) {
+    return await this.prisma.tenants.findFirst({
+      where: { admin_email, deleted_at: null },
+      include: { plan: true }
+    });
+  }
 }

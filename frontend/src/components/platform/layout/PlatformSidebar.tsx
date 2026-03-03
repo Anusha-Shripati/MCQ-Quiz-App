@@ -3,7 +3,7 @@
 import { useState, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { LayoutDashboard, Building2, CreditCard, Users, ChevronLeft, ChevronRight, Shield } from 'lucide-react';
+import { LayoutDashboard, Building2, CreditCard, Users, ChevronLeft, ChevronRight, Shield, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/form/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import Image from 'next/image';
@@ -16,6 +16,7 @@ import '@/styles/platform.css';
 const navigation = [
   { name: 'Dashboard', href: '/platform/dashboard', icon: LayoutDashboard, permission: null },
   { name: 'Tenants', href: '/platform/tenants', icon: Building2, permission: 'tenants' },
+  { name: 'Tenant Requests', href: '/platform/tenant-requests', icon: FileText, permission: 'tenants' },
   { name: 'Plans', href: '/platform/plans', icon: CreditCard, permission: 'plans' },
   { name: 'Admins', href: '/platform/admins', icon: Users, permission: 'admins' },
   { name: 'Roles', href: '/platform/roles', icon: Shield, permission: 'roles' },

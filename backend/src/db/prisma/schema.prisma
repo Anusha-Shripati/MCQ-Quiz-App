@@ -27,6 +27,7 @@ model Platform_admins {
   created_admins    Platform_admins[]   @relation("AdminCreatedBy")
   created_tenants   Tenants[]           @relation("TenantCreatedBy")
   created_plans     Plans[]             @relation("PlanCreatedBy")
+  reviewed_requests Tenant_requests[]   @relation("RequestReviewedBy")
 
   @@map("platform_admins")
 }
@@ -95,6 +96,7 @@ model Plans {
   created_at  DateTime            @default(now())
   updated_at  DateTime            @updatedAt
   tenants     Tenants[]
+  tenant_requests Tenant_requests[]
   created_by_admin Platform_admins? @relation("PlanCreatedBy", fields: [created_by], references: [id], onDelete: SetNull)
 
   @@map("plans")
@@ -119,6 +121,7 @@ model Tenants {
   deleted_at           DateTime?
   plan                 Plans               @relation(fields: [plan_id], references: [id])
   usage                Tenant_usage[]
+  tenant_requests      Tenant_requests[]
   created_by_admin     Platform_admins?    @relation("TenantCreatedBy", fields: [created_by], references: [id], onDelete: SetNull)
 
   @@index([slug])
@@ -144,6 +147,33 @@ model Tenant_usage {
   @@map("tenant_usage")
 }
 
+// Tenant Requests
+model Tenant_requests {
+  id                 String   @id @default(uuid())
+  organization_name  String
+  slug               String   @unique
+  admin_name         String
+  admin_email        String   @unique
+  admin_password     String
+  requested_plan_id  String?
+  status             TenantRequestStatus @default(pending)
+  reviewed_by        String?
+  reviewed_at        DateTime?
+  rejection_reason   String?
+  tenant_id          String?
+  created_at         DateTime @default(now())
+  updated_at         DateTime @updatedAt
+
+  requested_plan     Plans?           @relation(fields: [requested_plan_id], references: [id], onDelete: SetNull)
+  reviewed_admin     Platform_admins? @relation("RequestReviewedBy", fields: [reviewed_by], references: [id], onDelete: SetNull)
+  tenant             Tenants?         @relation(fields: [tenant_id], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@index([admin_email])
+  @@index([slug])
+  @@map("tenant_requests")
+}
+
 // Enums
 enum TenantStatus {
   active
@@ -159,4 +189,11 @@ enum UsageMetric {
   questions
   storage_mb
   api_calls
+}
+
+enum TenantRequestStatus {
+  pending
+  processing
+  approved
+  rejected
 }

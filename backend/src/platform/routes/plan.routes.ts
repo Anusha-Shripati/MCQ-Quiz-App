@@ -8,6 +8,9 @@ import { platformAuth } from '../middlewares/platform-auth.middleware';
 const router = express.Router();
 const controller = new PlanController();
 
+// Public route (no auth required)
+router.get('/public', asyncHandler(controller.listPublic));
+
 router.post(
   '/',
   platformAuth('plans.can_edit'),

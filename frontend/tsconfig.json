@@ -28,7 +28,7 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     "next.config.js",
-    "src/app/(admin)/questions/category/[...cateGory]"
+    "src/app/(tenant)/questions/category/[...cateGory]"
   ],
   "exclude": ["node_modules"]
 }

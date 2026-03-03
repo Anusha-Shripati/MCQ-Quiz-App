@@ -90,6 +90,7 @@ export const platformModuleEndpoint = {
 
 export const platformPlanEndpoint = {
     LIST: '/platform/plans',
+    PUBLIC_LIST: '/platform/plans/public',
     CREATE: '/platform/plans',
     BY_ID: '/platform/plans',
     UPDATE: '/platform/plans',
@@ -107,4 +108,15 @@ export const platformTenantEndpoint = {
     SUBSCRIPTION: '/platform/tenants',
     USAGE: '/platform/tenants',
     PROVISION: '/platform/provision',
+}
+
+export const tenantRequestEndpoint = {
+    CREATE: '/platform/tenant-requests',
+    CHECK_SLUG: '/platform/tenant-requests/check-slug',
+    CHECK_ORGANIZATION: '/platform/tenant-requests/check-organization',
+    STATUS: '/platform/tenant-requests/status',
+    CANCEL: '/platform/tenant-requests',
+    ADMIN_LIST: '/platform/tenant-requests/admin',
+    ADMIN_APPROVE: '/platform/tenant-requests/admin',
+    ADMIN_REJECT: '/platform/tenant-requests/admin',
 }

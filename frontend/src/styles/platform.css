@@ -1,35 +1,42 @@
-/* Platform Admin Styles - Indigo/Violet Theme */
+/* Platform Admin Styles - Dark Slate Theme */
 
 /* Platform Theme Variables - Scoped to avoid conflicts */
 .platform-theme {
-  --platform-primary: #6366f1;
-  --platform-primary-dark: #4f46e5;
-  --platform-primary-light: #818cf8;
-  --platform-secondary: #8b5cf6;
-  --platform-accent: #06b6d4;
-  --platform-bg: #f8fafc;
-  --platform-surface: #ffffff;
-  --platform-border: #e2e8f0;
-  --platform-text-primary: #0f172a;
-  --platform-text-secondary: #64748b;
-  --platform-sidebar-from: #6366f1;
-  --platform-sidebar-to: #8b5cf6;
-}
-
-.dark .platform-theme {
+  --platform-primary: #64748b;
+  --platform-primary-dark: #475569;
+  --platform-primary-light: #94a3b8;
+  --platform-secondary: #334155;
+  --platform-accent: #0ea5e9;
   --platform-bg: #0f172a;
   --platform-surface: #1e293b;
   --platform-border: #334155;
   --platform-text-primary: #f1f5f9;
   --platform-text-secondary: #94a3b8;
-  --platform-sidebar-from: #4338ca;
-  --platform-sidebar-to: #6d28d9;
+  --platform-sidebar-from: #0f00ff14;
+  --platform-sidebar-to: #352db780;
+}
+
+.dark .platform-theme {
+  --platform-bg: #020617;
+  --platform-surface: #0f172a;
+  --platform-border: #1e293b;
+  --platform-text-primary: #f8fafc;
+  --platform-text-secondary: #cbd5e1;
+  --platform-sidebar-from: #0f00ff14;
+  --platform-sidebar-to: #352db780;
 }
 
 /* Sidebar Styles */
 .platform-sidebar {
   @apply sticky top-0 left-0 h-screen z-50 transition-all duration-300 shadow-sm relative;
-  background: linear-gradient(to bottom, var(--platform-sidebar-from), var(--platform-sidebar-to));
+  background: linear-gradient(to bottom, #1e1b4b, #312e81) !important;
+  /* Override body background for sidebar */
+}
+
+/* Ensure sidebar stays dark in both light and dark themes */
+.platform-theme .platform-sidebar,
+.dark .platform-theme .platform-sidebar {
+  background: linear-gradient(to bottom, #1e1b4b, #312e81) !important;
 }
 
 .platform-sidebar-collapsed {
@@ -128,7 +135,7 @@
 
 /* Buttons */
 .platform-btn-primary {
-  @apply h-11 px-6 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-medium rounded-lg shadow-md hover:shadow-lg transition-all duration-200;
+  @apply h-11 px-6 bg-gradient-to-r from-slate-700 to-slate-600 hover:from-slate-600 hover:to-slate-500 text-white font-medium rounded-lg shadow-md hover:shadow-lg transition-all duration-200;
 }
 
 .platform-btn-secondary {
@@ -148,7 +155,7 @@
 }
 
 .platform-btn-outline:hover {
-  @apply bg-indigo-50 dark:bg-indigo-950;
+  @apply bg-slate-800 dark:bg-slate-900;
 }
 
 /* Inputs */
@@ -186,7 +193,7 @@
 }
 
 .platform-table-row:hover {
-  @apply bg-indigo-50 dark:bg-slate-800;
+  @apply bg-slate-800 dark:bg-slate-900;
 }
 
 .platform-table-cell {

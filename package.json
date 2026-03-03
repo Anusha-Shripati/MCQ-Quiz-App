@@ -24,6 +24,11 @@
     "prisma:migrate": "cd backend && npm run prisma:migrate",
     "prisma:migrate:prod": "cd backend && npm run prisma:migrate:prod",
     "prisma:studio": "cd backend && npm run prisma:studio",
+    "tenant:generate": "cd backend && npm run tenant:generate",
+    "tenant:migrate": "cd backend && npm run tenant:migrate",
+    "tenant:studio": "cd backend && npm run tenant:studio",
+    "seed:platform": "cd backend && npm run seed:platform",
+    "seed:tenant": "cd backend && npm run seed:tenant",
     "docker:up-build": "cd backend && docker-compose up --build -d",
     "docker:up": "cd backend && docker-compose up -d",
     "docker:down": "cd backend && docker-compose down",
@@ -31,7 +36,6 @@
     "docker:redis": "cd backend && docker-compose up -d redis",
     "docker:logs": "cd backend && docker-compose logs -f",
     "docker:ps": "cd backend && docker-compose ps",
-    "seed:db": "cd backend && npm run seed:db",
     "prisma:reset": "cd backend && npm run prisma:reset"
   },
   "config": {

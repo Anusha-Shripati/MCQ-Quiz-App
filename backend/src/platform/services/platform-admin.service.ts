@@ -106,13 +106,16 @@ export class PlatformAdminService {
     });
   }
 
-  async updateAdmin(id: string, data: {
-    email?: string;
-    name?: string;
-    role_id?: string;
-    is_active?: boolean;
-    image?: string;
-  }) {
+  async updateAdmin(
+    id: string,
+    data: {
+      email?: string;
+      name?: string;
+      role_id?: string;
+      is_active?: boolean;
+      image?: string;
+    }
+  ) {
     return await this.prisma.platform_admins.update({
       where: { id },
       data,
@@ -139,7 +142,7 @@ export class PlatformAdminService {
   async generateAndSendOtp(name: string, email: string) {
     const nodemailer = require('nodemailer');
     const dayjs = require('dayjs');
-    
+
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const expiresAt = dayjs().add(10, 'minute').toDate();
 

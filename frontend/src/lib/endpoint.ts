@@ -59,52 +59,52 @@ export const moduleEndpoint = {
   LIST: '/module/list',
 };
 export const examEndpoint = {
-    BY_ID: "/candidate-exam",
-    CANDIDATE_EXAM: "candidate-exam",
-    SEND_THANK_YOU_EMAIL: "/candidate-exam/send-thank-you-email"
-}
+  BY_ID: '/candidate-exam',
+  CANDIDATE_EXAM: 'candidate-exam',
+  SEND_THANK_YOU_EMAIL: '/candidate-exam/send-thank-you-email',
+};
 
 // Platform Admin Endpoints
 export const platformAdminEndpoint = {
-    LOGIN: '/platform/admins/login',
-    ME: '/platform/admins/me',
-    LIST: '/platform/admins/list',
-    CREATE: '/platform/admins/create',
-    ADMIN_BY_ID: '/platform/admins',
-    CHANGE_PASSWORD: '/platform/admins/change-password',
-    UPLOAD_IMAGE: '/platform/admins/upload-image',
-    VALIDATE_EMAIL: '/platform/admins/validate-email',
-    VALIDATE_OTP: '/platform/admins/validate-otp',
-    RESET_PASSWORD: '/platform/admins/reset-password',
-}
+  LOGIN: '/platform/admins/login',
+  ME: '/platform/admins/me',
+  LIST: '/platform/admins/list',
+  CREATE: '/platform/admins/create',
+  ADMIN_BY_ID: '/platform/admins',
+  CHANGE_PASSWORD: '/platform/admins/change-password',
+  UPLOAD_IMAGE: '/platform/admins/upload-image',
+  VALIDATE_EMAIL: '/platform/admins/validate-email',
+  VALIDATE_OTP: '/platform/admins/validate-otp',
+  RESET_PASSWORD: '/platform/admins/reset-password',
+};
 
 export const platformRoleEndpoint = {
-    LIST: '/platform/roles/list',
-    CREATE: '/platform/roles/create',
-    ROLE_BY_ID: '/platform/roles',
-}
+  LIST: '/platform/roles/list',
+  CREATE: '/platform/roles/create',
+  ROLE_BY_ID: '/platform/roles',
+};
 
 export const platformModuleEndpoint = {
-    LIST: '/platform/modules/list',
-}
+  LIST: '/platform/modules/list',
+};
 
 export const platformPlanEndpoint = {
-    LIST: '/platform/plans',
-    CREATE: '/platform/plans',
-    BY_ID: '/platform/plans',
-    UPDATE: '/platform/plans',
-    DELETE: '/platform/plans',
-    TOGGLE: '/platform/plans',
-}
+  LIST: '/platform/plans',
+  CREATE: '/platform/plans',
+  BY_ID: '/platform/plans',
+  UPDATE: '/platform/plans',
+  DELETE: '/platform/plans',
+  TOGGLE: '/platform/plans',
+};
 
 export const platformTenantEndpoint = {
-    LIST: '/platform/tenants',
-    CREATE: '/platform/tenants',
-    BY_ID: '/platform/tenants',
-    UPDATE: '/platform/tenants',
-    DELETE: '/platform/tenants',
-    STATUS: '/platform/tenants',
-    SUBSCRIPTION: '/platform/tenants',
-    USAGE: '/platform/tenants',
-    PROVISION: '/platform/provision',
-}
+  LIST: '/platform/tenants',
+  CREATE: '/platform/tenants',
+  BY_ID: '/platform/tenants',
+  UPDATE: '/platform/tenants',
+  DELETE: '/platform/tenants',
+  STATUS: '/platform/tenants',
+  SUBSCRIPTION: '/platform/tenants',
+  USAGE: '/platform/tenants',
+  PROVISION: '/platform/provision',
+};

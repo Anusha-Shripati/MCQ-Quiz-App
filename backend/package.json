@@ -43,6 +43,7 @@
     "formidable": "^3.5.4",
     "helmet": "^8.0.0",
     "ioredis": "^5.6.1",
+    "javascript-time-ago": "^2.6.3",
     "joi": "^17.13.3",
     "jsonwebtoken": "^9.0.2",
     "multer": "^1.4.5-lts.2",

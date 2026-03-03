@@ -35,7 +35,7 @@ interface PlatformPlanStore {
   totalPlans: number;
   searchQuery: string;
   activeFilter: 'all' | 'active' | 'inactive';
-  
+
   setPlans: (plans: Plan[], total: number) => void;
   setSearchQuery: (query: string) => void;
   setActiveFilter: (filter: 'all' | 'active' | 'inactive') => void;
@@ -46,7 +46,7 @@ export const usePlatformPlanStore = create<PlatformPlanStore>((set) => ({
   totalPlans: 0,
   searchQuery: '',
   activeFilter: 'all',
-  
+
   setPlans: (plans, total) => set({ plans, totalPlans: total }),
   setSearchQuery: (query) => set({ searchQuery: query }),
   setActiveFilter: (filter) => set({ activeFilter: filter }),

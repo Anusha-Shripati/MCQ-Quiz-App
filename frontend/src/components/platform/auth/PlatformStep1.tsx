@@ -17,7 +17,10 @@ async function validateEmail(url: string, { arg }: { arg: { email: string } }) {
 
 const PlatformStep1: React.FC<EnterEmailProps> = ({ onNext, setEmail }) => {
   const [emailValue, setEmailValue] = useState('');
-  const { trigger, isMutating } = useSWRMutation(platformAdminEndpoint.VALIDATE_EMAIL, validateEmail);
+  const { trigger, isMutating } = useSWRMutation(
+    platformAdminEndpoint.VALIDATE_EMAIL,
+    validateEmail
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,7 +63,10 @@ const PlatformStep1: React.FC<EnterEmailProps> = ({ onNext, setEmail }) => {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-3">
-          <Label htmlFor="email" className="text-base font-medium text-slate-900 dark:text-slate-200">
+          <Label
+            htmlFor="email"
+            className="text-base font-medium text-slate-900 dark:text-slate-200"
+          >
             Email Address
           </Label>
           <Input
@@ -74,7 +80,10 @@ const PlatformStep1: React.FC<EnterEmailProps> = ({ onNext, setEmail }) => {
             className="h-12 px-4 bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-slate-200 focus:border-indigo-500 dark:focus:border-indigo-500 focus-visible:ring-indigo-500 dark:focus-visible:ring-indigo-500"
           />
           <div className="flex justify-between text-sm">
-            <Link href="/platform-auth/login" className="text-indigo-600 dark:text-indigo-400 hover:underline">
+            <Link
+              href="/platform-auth/login"
+              className="text-indigo-600 dark:text-indigo-400 hover:underline"
+            >
               Back to Login
             </Link>
           </div>

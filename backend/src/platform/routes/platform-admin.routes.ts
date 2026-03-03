@@ -10,11 +10,7 @@ const router = express.Router();
 const controller = new PlatformAdminController();
 
 // Public routes (no auth required)
-router.post(
-  '/login',
-  validateRequest(platformAdminSchema.login),
-  asyncHandler(controller.login)
-);
+router.post('/login', validateRequest(platformAdminSchema.login), asyncHandler(controller.login));
 
 router.post(
   '/validate-email',
@@ -44,11 +40,7 @@ router.post(
   asyncHandler(controller.create)
 );
 
-router.get(
-  '/list',
-  platformAuth('admins.can_read'),
-  asyncHandler(controller.list)
-);
+router.get('/list', platformAuth('admins.can_read'), asyncHandler(controller.list));
 
 router.get(
   '/:id',

@@ -44,13 +44,12 @@ const activities: Activity[] = [
     profit: 20,
   },
 ];
-console.log(activities);
 
 const ActivityTable = () => {
   const columns: PlatformColumn<Activity>[] = [
     {
       key: 'name',
-      header: 'Event',
+      header: 'Plans',
       render: (activity) => (
         <div>
           <div className="font-medium text-slate-900 dark:text-white"> {activity.plan_name}</div>
@@ -65,15 +64,15 @@ const ActivityTable = () => {
       ),
     },
     {
-      key: 'status',
-      header: 'Status',
+      key: 'revenue',
+      header: 'Revenue',
       render: (activity) => (
         <div className="font-medium text-slate-900 dark:text-white">{activity.revenue}</div>
       ),
     },
     {
-      key: 'time',
-      header: 'Time',
+      key: 'profit',
+      header: 'Profit',
       render: (activity) => (
         <div className="font-medium text-slate-500 dark:text-slate-400">{activity.profit}</div>
       ),

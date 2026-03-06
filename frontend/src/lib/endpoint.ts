@@ -108,3 +108,9 @@ export const platformTenantEndpoint = {
   USAGE: '/platform/tenants',
   PROVISION: '/platform/provision',
 };
+
+export const platformDashboardEndpoint = {
+  PLAN_DISTRIBUTION: '/platform/dashboard/plan-distribution',
+  TENANT_GROWTH: '/platform/dashboard/tenant-growth',
+  PLATFORM_USAGE: '/platform/dashboard/platform-usage',
+};

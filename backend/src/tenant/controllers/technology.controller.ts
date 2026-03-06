@@ -47,7 +47,6 @@ export class TechnologyController {
       const newTechnology = await technologyService.createTechnologyOnly({ name: normalizeName });
       return generateResponse(res, 201, newTechnology, true, 'Technology created successfully');
     } catch (error) {
-      console.log('creae Technology err', error);
       next(error);
     }
   };
@@ -55,7 +54,7 @@ export class TechnologyController {
     try {
       const { id } = req.params;
       const technologyService = new TechnologyService(req.context!.prisma);
-      
+
       const technology = await technologyService.getTechnologyById(id);
 
       if (!technology) {
@@ -207,7 +206,7 @@ export class TechnologyController {
     try {
       const { id } = req.params;
       const technologyService = new TechnologyService(req.context!.prisma);
-      
+
       const existingTechnology = await technologyService.getTechnologyById(id);
 
       if (!existingTechnology) {
@@ -225,7 +224,7 @@ export class TechnologyController {
     try {
       const { search } = req.query;
       const technologyService = new TechnologyService(req.context!.prisma);
-      
+
       const technologies = await technologyService.getTechnologies({
         name: search as string,
       });

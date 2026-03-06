@@ -1,21 +1,30 @@
 'use client';
-
 import dynamic from 'next/dynamic';
 import type { ApexOptions } from 'apexcharts';
+import useSWR from 'swr';
+import { platformDashboardEndpoint } from '@/lib/endpoint';
+import { fetcher } from '@/lib/api';
+
+type PlanData = {
+  name: string;
+  tenantCount: number;
+};
 
 const Chart = dynamic(() => import('react-apexcharts'), {
   ssr: false,
 });
 
 export default function SubscriptionPlanPieChart() {
-  const series = [50, 20, 15, 5];
-
+  const { data } = useSWR(`${platformDashboardEndpoint.PLAN_DISTRIBUTION}`, fetcher);
+  const chartData: PlanData[] = data?.data || [];
+  const series = chartData.map((item) => item.tenantCount);
+  const label = chartData.map((item) => item.name);
   const options: ApexOptions = {
     chart: {
       type: 'pie',
     },
-    labels: ['Free', 'Pro', 'Team / Business', 'Enterprise'],
-    colors: ['#0066FF', '#03045e', '#66A3FF', '#00b4d8'],
+    labels: label,
+    colors: ['#0066FF', '#f18805', '#ff3c38', '#058c42'],
     legend: {
       position: 'bottom',
       labels: {

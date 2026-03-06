@@ -34,7 +34,12 @@ export class PlanService {
     });
   }
 
-  async findManyPlans(filter?: { is_active?: boolean; search?: string; page?: number; limit?: number }) {
+  async findManyPlans(filter?: {
+    is_active?: boolean;
+    search?: string;
+    page?: number;
+    limit?: number;
+  }) {
     const where: any = {};
 
     if (filter?.is_active !== undefined) {
@@ -70,13 +75,16 @@ export class PlanService {
     return { plans, total };
   }
 
-  async updatePlan(id: string, data: {
-    name?: string;
-    description?: string;
-    price?: number;
-    limits?: any;
-    features?: any;
-  }) {
+  async updatePlan(
+    id: string,
+    data: {
+      name?: string;
+      description?: string;
+      price?: number;
+      limits?: any;
+      features?: any;
+    }
+  ) {
     return await this.prisma.plans.update({
       where: { id },
       data,

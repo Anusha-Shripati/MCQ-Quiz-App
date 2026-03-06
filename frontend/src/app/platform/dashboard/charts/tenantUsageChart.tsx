@@ -16,7 +16,7 @@ export default function TenantUsageChart() {
     {
       name: 'Total Assessments',
       data: [2400, 1398, 9800, 3908, 4800, 3800, 4300],
-      color: '#66A3FF',
+      color: '#f18805',
     },
     // {
     //   name: 'Total Questions',

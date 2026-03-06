@@ -2,16 +2,21 @@
 
 import dynamic from 'next/dynamic';
 import type { ApexOptions } from 'apexcharts';
-
+import useSWR from 'swr';
+import { platformDashboardEndpoint } from '@/lib/endpoint';
+import { fetcher } from '@/lib/api';
 const Chart = dynamic(() => import('react-apexcharts'), {
   ssr: false,
 });
 
 export default function TenantChart() {
+  const { data } = useSWR(`${platformDashboardEndpoint.TENANT_GROWTH}`, fetcher);
+  const chartInfo = data?.data || { categories: [], seriesData: [] };
+
   const series = [
     {
-      name: 'Tenants',
-      data: [120, 180, 240, 300, 360, 420],
+      name: 'New Tenants',
+      data: chartInfo.seriesData,
     },
   ];
 
@@ -29,17 +34,8 @@ export default function TenantChart() {
     fill: {
       opacity: 0.8,
     },
-    // fill: {
-    //   type: 'gradient',
-    //   gradient: {
-    //     shadeIntensity: 1,
-    //     opacityFrom: 0.4,
-    //     opacityTo: 0.05,
-    //     stops: [0, 90, 100],
-    //   },
-    // },
     xaxis: {
-      categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+      categories: chartInfo.categories,
       labels: {
         style: { colors: '#64748B' },
       },
@@ -54,6 +50,7 @@ export default function TenantChart() {
       strokeDashArray: 4,
     },
     tooltip: {
+      enabled: true,
       theme: 'light',
     },
     dataLabels: {

@@ -8,8 +8,8 @@
   --platform-secondary: #334155;
   --platform-accent: #0ea5e9;
   --platform-bg: #0f172a;
-  --platform-surface: #1e293b;
-  --platform-border: #334155;
+  --platform-surface: #ffffff;
+  --platform-border: #e2e8f0;
   --platform-text-primary: #f1f5f9;
   --platform-text-secondary: #94a3b8;
   --platform-sidebar-from: #0f00ff14;
@@ -19,13 +19,15 @@
 .dark .platform-theme {
   --platform-bg: #020617;
   --platform-surface: #0f172a;
-  --platform-border: #1e293b;
+  --platform-border: #334155;
   --platform-text-primary: #f8fafc;
   --platform-text-secondary: #cbd5e1;
   --platform-sidebar-from: #0f00ff14;
   --platform-sidebar-to: #352db780;
 }
-
+.apexcharts-tooltip {
+  color: #000;
+}
 /* Sidebar Styles */
 .platform-sidebar {
   @apply sticky top-0 left-0 h-screen z-50 transition-all duration-300 shadow-sm relative;

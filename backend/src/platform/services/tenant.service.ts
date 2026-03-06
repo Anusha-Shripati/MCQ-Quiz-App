@@ -105,13 +105,16 @@ export class TenantService {
     return { tenants, total };
   }
 
-  async updateTenant(id: string, data: {
-    name?: string;
-    slug?: string;
-    plan_id?: string;
-    admin_email?: string;
-    admin_name?: string;
-  }) {
+  async updateTenant(
+    id: string,
+    data: {
+      name?: string;
+      slug?: string;
+      plan_id?: string;
+      admin_email?: string;
+      admin_name?: string;
+    }
+  ) {
     return await this.prisma.tenants.update({
       where: { id },
       data,
@@ -169,10 +172,13 @@ export class TenantService {
     });
   }
 
-  async updateSubscription(id: string, data: {
-    trial_ends_at?: Date;
-    subscription_ends_at?: Date;
-  }) {
+  async updateSubscription(
+    id: string,
+    data: {
+      trial_ends_at?: Date;
+      subscription_ends_at?: Date;
+    }
+  ) {
     return await this.prisma.tenants.update({
       where: { id },
       data,

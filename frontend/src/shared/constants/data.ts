@@ -89,7 +89,18 @@ export const questionsData = [
   { value: 300, name: 'Java' },
 ];
 export const languages = ['React', 'JS', 'Go', 'Python', 'Ruby'];
-export const scores = ['1-10', '11-20', '21-30', '31-40', '41-50', '51-60', '61-70', '71-80', '81-90', '91-100'];
+export const scores = [
+  '1-10',
+  '11-20',
+  '21-30',
+  '31-40',
+  '41-50',
+  '51-60',
+  '61-70',
+  '71-80',
+  '81-90',
+  '91-100',
+];
 export const categories = [
   { name: 'ReactJS', easy: 20, medium: 30, hard: 50 },
   { name: 'NodeJS', easy: 20, medium: 30, hard: 50 },
@@ -984,8 +995,8 @@ export const QUIZ_CONFIG = {
 };
 
 export const SNAPSHOT = {
-  screenshot: "screenshot",
-  camera: "camera"
+  screenshot: 'screenshot',
+  camera: 'camera',
 };
 
 export const PROHIBITED_COMBINATIONS = [
@@ -1046,33 +1057,34 @@ export const BROWSER_KEY = [
   'z',
   '+',
   '-',
-  '0'
+  '0',
 ];
 export const modules: string[] = ['assessments', 'candidates', 'questions', 'users'];
 export const questionType: { [key: string]: string } = {
-  'multiple_select': 'Multiple Choice',
-  'mcq': 'Radio Select',
-  'code_snippet': 'Code Snippet with Multiple Answers',
-  'code_editor': 'Code Editor',
-  'code_snippet_with_mcq': 'Code Snippet with MCQ',
-  'video': 'Video',
-  'text': 'Text',
-};
-export const questionDifficulty: { [key: string]: string } = {
-  'easy': 'Easy',
-  'medium': 'Medium',
-  'hard': 'Hard',
+  multiple_select: 'Multiple Choice',
+  mcq: 'Radio Select',
+  code_snippet: 'Code Snippet with Multiple Answers',
+  code_editor: 'Code Editor',
+  code_snippet_with_mcq: 'Code Snippet with MCQ',
+  video: 'Video',
+  text: 'Text',
 };
 
-export const questionTypeOptions= [
+export const questionDifficulty: { [key: string]: string } = {
+  easy: 'Easy',
+  medium: 'Medium',
+  hard: 'Hard',
+};
+
+export const questionTypeOptions = [
   { value: 'multiple_select', label: 'Multiple Choice' },
   { value: 'mcq', label: 'Radio Select' },
   // { value: 'text', label: 'Fill in the Blanks' },
   { value: 'code_snippet', label: 'Code Snippet with Multiple Answers' },
   // { value: 'code_editor', label: 'Code Editor' },
   // { value: 'video', label: 'Video' },
-  { value: 'code_snippet_with_mcq', label: 'Code Snippet with MCQ' }
-] as { value: Question['type']; label: string }[]
+  { value: 'code_snippet_with_mcq', label: 'Code Snippet with MCQ' },
+] as { value: Question['type']; label: string }[];
 
 export const commonRoutes: string[] = ['dashboard', 'profile', ''];
 
@@ -1083,7 +1095,7 @@ interface Exam {
   candidate: string;
 }
 
-export const RESULTS_TITLE = "Double Click to show detailed result.";
+export const RESULTS_TITLE = 'Double Click to show detailed result.';
 
 export const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 export const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;

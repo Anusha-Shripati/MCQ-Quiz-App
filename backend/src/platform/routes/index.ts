@@ -7,6 +7,7 @@ import provisioningRoutes from './provisioning.routes';
 import platformRoleRoutes from './platform-role.routes';
 import platformModuleRoutes from './platform-module.routes';
 import usageRoutes from './usage.routes';
+import dashboardRoutes from './platform-dashboard.routes';
 
 const router = express.Router();
 
@@ -23,5 +24,6 @@ router.use('/provision', provisioningRoutes);
 router.use('/roles', platformRoleRoutes);
 router.use('/modules', platformModuleRoutes);
 router.use('/usage', usageRoutes);
+router.use('/dashboard', dashboardRoutes);
 
 export default router;

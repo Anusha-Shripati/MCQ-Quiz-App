@@ -146,10 +146,7 @@ export default function PlanTable() {
         <Tooltip>
           <TooltipTrigger asChild>
             <div>
-              <Switch
-                checked={plan.is_active}
-                onCheckedChange={() => handleToggleActive(plan)}
-              />
+              <Switch checked={plan.is_active} onCheckedChange={() => handleToggleActive(plan)} />
             </div>
           </TooltipTrigger>
           <TooltipContent sideOffset={4}>

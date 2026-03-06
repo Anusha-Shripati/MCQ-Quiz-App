@@ -140,22 +140,22 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     // Extract tenant from current URL using tenant-utils
     if (typeof window !== 'undefined') {
       const tenantContext = getTenantContext(window.location.hostname);
-      
+
       if (tenantContext.type === 'TENANT' && tenantContext.slug) {
-        set({ 
-          tenant: { 
-            id: '', 
-            name: '', 
-            slug: tenantContext.slug, 
-            status: '' 
+        set({
+          tenant: {
+            id: '',
+            name: '',
+            slug: tenantContext.slug,
+            status: '',
           },
-          tenantType: 'TENANT'
+          tenantType: 'TENANT',
         });
       } else if (tenantContext.type === 'PLATFORM') {
         set({ tenant: null, tenantType: 'PLATFORM' });
       }
     }
-    
+
     // Initialize user from localStorage
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
@@ -183,7 +183,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     if (!storedUser) return false;
     try {
       const user = JSON.parse(storedUser);
-      const token = Cookies.get('token')
+      const token = Cookies.get('token');
       return !!user && !!token;
     } catch (error) {
       console.error('Error checking authentication status:', error);
@@ -191,35 +191,33 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       return false;
     }
   },
-hasPermissionCandidateEdit: (): boolean => {
-  const { permissions } = get();
-  if (!permissions) return false;
-  return !!permissions.candidates && permissions.candidates.can_edit === true;
-},
+  hasPermissionCandidateEdit: (): boolean => {
+    const { permissions } = get();
+    if (!permissions) return false;
+    return !!permissions.candidates && permissions.candidates.can_edit === true;
+  },
 
-hasPermissionQuestionEdit: (): boolean => {
-  const { permissions } = get();
-  if (!permissions) return false;
-  return !!permissions.questions && permissions.questions.can_edit === true;
-},
+  hasPermissionQuestionEdit: (): boolean => {
+    const { permissions } = get();
+    if (!permissions) return false;
+    return !!permissions.questions && permissions.questions.can_edit === true;
+  },
 
-hasPermissionAssessmentEdit: (): boolean => {
-  const { permissions } = get();
-  if (!permissions) return false;
-  return !!permissions.assessments && permissions.assessments.can_edit === true;
-},
+  hasPermissionAssessmentEdit: (): boolean => {
+    const { permissions } = get();
+    if (!permissions) return false;
+    return !!permissions.assessments && permissions.assessments.can_edit === true;
+  },
 
-hasPermissionUserEdit: (): boolean => {
-  const { permissions } = get();
-  if (!permissions) return false;
-  return !!permissions.users && permissions.users.can_edit === true;
-},
+  hasPermissionUserEdit: (): boolean => {
+    const { permissions } = get();
+    if (!permissions) return false;
+    return !!permissions.users && permissions.users.can_edit === true;
+  },
 
-hasPermissionResultEdit: (): boolean => {
-  const { permissions } = get();
-  if (!permissions) return false;
-  return !!permissions.results && permissions.results.can_edit === true;
-},
-
-  
+  hasPermissionResultEdit: (): boolean => {
+    const { permissions } = get();
+    if (!permissions) return false;
+    return !!permissions.results && permissions.results.can_edit === true;
+  },
 }));

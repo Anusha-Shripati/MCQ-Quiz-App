@@ -37,7 +37,13 @@ class ExpressAppProvider {
       cors({
         origin: '*', // No trailing
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-        allowedHeaders: ['Content-Type', 'Authorization', 'x-access-code', 'x-tenant-slug', 'x-tenant-type'],
+        allowedHeaders: [
+          'Content-Type',
+          'Authorization',
+          'x-access-code',
+          'x-tenant-slug',
+          'x-tenant-type',
+        ],
         // credentials: true,
         exposedHeaders: ['Content-Range', 'X-Content-Range'],
       })
@@ -65,7 +71,10 @@ class ExpressAppProvider {
             process.env.FRONTEND_URL || 'http://localhost:3000'
           );
           res.set('Access-Control-Allow-Credentials', 'true');
-          res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-access-code, x-tenant-slug, x-tenant-type');
+          res.set(
+            'Access-Control-Allow-Headers',
+            'Content-Type, Authorization, x-access-code, x-tenant-slug, x-tenant-type'
+          );
         },
       })
     );
@@ -79,9 +88,7 @@ class ExpressAppProvider {
       res.status(200).json({ message: 'Server is up and running' });
     });
 
-
     this.app.get('/get-bucket', (req, res) => {
-
       async function listAllObjects(bucketName: any) {
         let isTruncated: any = true;
         let continuationToken;
@@ -107,13 +114,12 @@ class ExpressAppProvider {
         return allObjects;
       }
 
-      listAllObjects(process.env.AWS_BUCKET_NAME).then(objects => {
-        console.log("Total objects:", objects.length);
-        res.send(objects.map(obj => obj.Key));
+      listAllObjects(process.env.AWS_BUCKET_NAME).then((objects) => {
+        console.log('Total objects:', objects.length);
+        res.send(objects.map((obj) => obj.Key));
       });
-    })
+    });
     this.app.get('/delete-bucket', (req, res) => {
-
       async function listAllObjects(bucketName: any) {
         let isTruncated: any = true;
         let continuationToken;
@@ -130,7 +136,7 @@ class ExpressAppProvider {
           const contents = listResponse.Contents || [];
 
           if (contents.length === 0) {
-            console.log("Bucket is already empty.");
+            console.log('Bucket is already empty.');
             return;
           }
 
@@ -156,12 +162,10 @@ class ExpressAppProvider {
         }
       }
 
-      listAllObjects(process.env.AWS_BUCKET_NAME).then(objects => {
+      listAllObjects(process.env.AWS_BUCKET_NAME).then((objects) => {
         res.send('Success');
       });
-
-    })
-
+    });
   }
 
   private initializeErrorHandling(): void {

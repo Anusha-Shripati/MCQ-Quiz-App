@@ -29,7 +29,7 @@ export class ProvisioningService {
 
     try {
       console.log(`[Provisioning] Starting tenant provisioning for slug: ${data.slug}`);
-      
+
       console.log(`[Provisioning] Step 1: Validating provisioning data`);
       const plan = await this.validateProvisioningData(data);
       console.log(`[Provisioning] Validation passed`);
@@ -37,12 +37,17 @@ export class ProvisioningService {
       // Determine status and dates based on plan
       const isFree = plan.name.toLowerCase() === 'free';
       const status = isFree ? 'trial' : 'active';
-      const trialEndsAt = isFree ? new Date(Date.now() + (data.trial_days || 30) * 24 * 60 * 60 * 1000) : undefined;
-      const subscriptionEndsAt = !isFree ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) : undefined;
+      const trialEndsAt = isFree
+        ? new Date(Date.now() + (data.trial_days || 30) * 24 * 60 * 60 * 1000)
+        : undefined;
+      const subscriptionEndsAt = !isFree
+        ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+        : undefined;
 
       console.log(`[Provisioning] Plan: ${plan.name}, Status: ${status}`);
       if (trialEndsAt) console.log(`[Provisioning] Trial ends at: ${trialEndsAt.toISOString()}`);
-      if (subscriptionEndsAt) console.log(`[Provisioning] Subscription ends at: ${subscriptionEndsAt.toISOString()}`);
+      if (subscriptionEndsAt)
+        console.log(`[Provisioning] Subscription ends at: ${subscriptionEndsAt.toISOString()}`);
 
       console.log(`[Provisioning] Step 2: Generating database name and URL`);
       dbName = DatabaseUtils.generateDbName(data.slug);
@@ -246,7 +251,9 @@ export class ProvisioningService {
         console.log(`[Rollback] Deleting tenant record: ${tenantId}`);
         await this.prisma.tenants.delete({ where: { id: tenantId } }).catch(() => {});
         console.log(`[Rollback] Deleting usage records for tenant: ${tenantId}`);
-        await this.prisma.tenant_usage.deleteMany({ where: { tenant_id: tenantId } }).catch(() => {});
+        await this.prisma.tenant_usage
+          .deleteMany({ where: { tenant_id: tenantId } })
+          .catch(() => {});
       }
 
       if (dbName) {

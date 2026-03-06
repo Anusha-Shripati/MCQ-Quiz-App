@@ -59,34 +59,34 @@ export const moduleEndpoint = {
   LIST: '/module/list',
 };
 export const examEndpoint = {
-    BY_ID: "/candidate-exam",
-    CANDIDATE_EXAM: "candidate-exam",
-    SEND_THANK_YOU_EMAIL: "/candidate-exam/send-thank-you-email"
-}
+  BY_ID: '/candidate-exam',
+  CANDIDATE_EXAM: 'candidate-exam',
+  SEND_THANK_YOU_EMAIL: '/candidate-exam/send-thank-you-email',
+};
 
 // Platform Admin Endpoints
 export const platformAdminEndpoint = {
-    LOGIN: '/platform/admins/login',
-    ME: '/platform/admins/me',
-    LIST: '/platform/admins/list',
-    CREATE: '/platform/admins/create',
-    ADMIN_BY_ID: '/platform/admins',
-    CHANGE_PASSWORD: '/platform/admins/change-password',
-    UPLOAD_IMAGE: '/platform/admins/upload-image',
-    VALIDATE_EMAIL: '/platform/admins/validate-email',
-    VALIDATE_OTP: '/platform/admins/validate-otp',
-    RESET_PASSWORD: '/platform/admins/reset-password',
-}
+  LOGIN: '/platform/admins/login',
+  ME: '/platform/admins/me',
+  LIST: '/platform/admins/list',
+  CREATE: '/platform/admins/create',
+  ADMIN_BY_ID: '/platform/admins',
+  CHANGE_PASSWORD: '/platform/admins/change-password',
+  UPLOAD_IMAGE: '/platform/admins/upload-image',
+  VALIDATE_EMAIL: '/platform/admins/validate-email',
+  VALIDATE_OTP: '/platform/admins/validate-otp',
+  RESET_PASSWORD: '/platform/admins/reset-password',
+};
 
 export const platformRoleEndpoint = {
-    LIST: '/platform/roles/list',
-    CREATE: '/platform/roles/create',
-    ROLE_BY_ID: '/platform/roles',
-}
+  LIST: '/platform/roles/list',
+  CREATE: '/platform/roles/create',
+  ROLE_BY_ID: '/platform/roles',
+};
 
 export const platformModuleEndpoint = {
-    LIST: '/platform/modules/list',
-}
+  LIST: '/platform/modules/list',
+};
 
 export const platformPlanEndpoint = {
     LIST: '/platform/plans',
@@ -120,3 +120,9 @@ export const tenantRequestEndpoint = {
     ADMIN_APPROVE: '/platform/tenant-requests/admin',
     ADMIN_REJECT: '/platform/tenant-requests/admin',
 }
+
+export const platformDashboardEndpoint = {
+  PLAN_DISTRIBUTION: '/platform/dashboard/plan-distribution',
+  TENANT_GROWTH: '/platform/dashboard/tenant-growth',
+  PLATFORM_USAGE: '/platform/dashboard/platform-usage',
+};

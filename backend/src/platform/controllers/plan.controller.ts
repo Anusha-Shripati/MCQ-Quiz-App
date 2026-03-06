@@ -9,7 +9,7 @@ export class PlanController {
       const planService = new PlanService(req.context!.prisma);
 
       const { plans: existingPlans } = await planService.findManyPlans({ search: name });
-      if (existingPlans.some(p => p.name.toLowerCase() === name.toLowerCase())) {
+      if (existingPlans.some((p) => p.name.toLowerCase() === name.toLowerCase())) {
         return generateResponse(res, 400, {}, false, 'Plan with this name already exists');
       }
 
@@ -87,7 +87,9 @@ export class PlanController {
 
       if (name && name !== existingPlan.name) {
         const { plans: duplicatePlans } = await planService.findManyPlans({ search: name });
-        if (duplicatePlans.some(p => p.name.toLowerCase() === name.toLowerCase() && p.id !== id)) {
+        if (
+          duplicatePlans.some((p) => p.name.toLowerCase() === name.toLowerCase() && p.id !== id)
+        ) {
           return generateResponse(res, 400, {}, false, 'Plan with this name already exists');
         }
       }

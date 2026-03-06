@@ -93,7 +93,7 @@ export const authenticateCandidate: RequestHandler = async (req, res, next) => {
     });
 
     if (!candidate || !candidate.exam) {
-      generateResponse(res, 404, {status:'expired'}, false, 'Invalid or expired access code');
+      generateResponse(res, 404, { status: 'expired' }, false, 'Invalid or expired access code');
       return;
     }
 
@@ -110,13 +110,7 @@ export const authenticateCandidate: RequestHandler = async (req, res, next) => {
     const now = new Date();
 
     if (now > tokenExpiresAt) {
-      generateResponse(
-        res,
-        403,
-        { status: 'expired'},
-        false,
-        'Access code has expired'
-      );
+      generateResponse(res, 403, { status: 'expired' }, false, 'Access code has expired');
       return;
     }
 

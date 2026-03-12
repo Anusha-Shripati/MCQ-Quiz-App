@@ -101,6 +101,12 @@ export class PlatformAdminService {
             name: true,
           },
         },
+        created_by_admin: {
+          select: {
+            name: true,
+            deleted_at: true,
+          },
+        },
       },
       orderBy: { created_at: 'desc' },
     });

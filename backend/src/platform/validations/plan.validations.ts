@@ -15,8 +15,6 @@ export const planSchema = {
         candidates: Joi.number().integer().required(),
         assessments: Joi.number().integer().required(),
         questions: Joi.number().integer().required(),
-        storage_mb: Joi.number().integer().required(),
-        api_calls: Joi.number().integer().required(),
       }).required(),
       features: Joi.object({
         custom_branding: Joi.boolean().required(),
@@ -41,8 +39,6 @@ export const planSchema = {
         candidates: Joi.number().integer().optional(),
         assessments: Joi.number().integer().optional(),
         questions: Joi.number().integer().optional(),
-        storage_mb: Joi.number().integer().optional(),
-        api_calls: Joi.number().integer().optional(),
       }).optional(),
       features: Joi.object({
         custom_branding: Joi.boolean().optional(),

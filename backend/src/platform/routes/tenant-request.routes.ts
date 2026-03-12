@@ -27,6 +27,8 @@ const adminRouter = Router();
 adminRouter.get('/', platformAuth(), asyncHandler(controller.list));
 adminRouter.post('/:id/approve', platformAuth(), asyncHandler(controller.approveRequest));
 adminRouter.post('/:id/reject', platformAuth(), validateRequest({ body: rejectRequestValidation }), asyncHandler(controller.rejectRequest));
+adminRouter.post('/:id/reset-to-pending', platformAuth(), asyncHandler(controller.resetToPending));
+adminRouter.delete('/:id', platformAuth(), asyncHandler(controller.deleteRequest));
 
 router.use('/admin', adminRouter);
 

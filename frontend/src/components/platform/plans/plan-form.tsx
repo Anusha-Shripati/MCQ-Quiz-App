@@ -21,8 +21,6 @@ const planSchema = z.object({
     candidates: z.number().int(),
     assessments: z.number().int(),
     questions: z.number().int(),
-    storage_mb: z.number().int(),
-    api_calls: z.number().int(),
   }),
   features: z.object({
     custom_branding: z.boolean(),
@@ -58,8 +56,6 @@ export default function PlanForm({ isOpen, onClose, plan }: PlanFormProps) {
         candidates: -1,
         assessments: -1,
         questions: -1,
-        storage_mb: -1,
-        api_calls: -1,
       },
       features: {
         custom_branding: false,
@@ -207,32 +203,6 @@ export default function PlanForm({ isOpen, onClose, plan }: PlanFormProps) {
                   id="questions"
                   type="number"
                   {...register('limits.questions', { valueAsNumber: true })}
-                  className="mt-1 h-11"
-                  placeholder="-1"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="storage_mb" className="block text-sm font-medium text-slate-700 dark:text-slate-300">
-                  Storage (MB)
-                </label>
-                <Input
-                  id="storage_mb"
-                  type="number"
-                  {...register('limits.storage_mb', { valueAsNumber: true })}
-                  className="mt-1 h-11"
-                  placeholder="-1"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="api_calls" className="block text-sm font-medium text-slate-700 dark:text-slate-300">
-                  API Calls
-                </label>
-                <Input
-                  id="api_calls"
-                  type="number"
-                  {...register('limits.api_calls', { valueAsNumber: true })}
                   className="mt-1 h-11"
                   placeholder="-1"
                 />

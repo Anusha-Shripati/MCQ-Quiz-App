@@ -4,7 +4,7 @@ import { useEffect, useState, useMemo } from 'react';
 import useSWR from 'swr';
 import { fetcher, isAxiosError } from '@/lib/api';
 import { tenantRequestEndpoint } from '@/lib/endpoint';
-import { CheckCircle, XCircle, Clock, Loader2 } from 'lucide-react';
+import { CheckCircle, XCircle, Clock, Loader2, RotateCcw, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/form/button';
 import toast from 'react-hot-toast';
 import { api } from '@/lib/api';
@@ -62,11 +62,15 @@ const statusIcons = {
 export default function TenantRequestTable() {
   const [approvingRequest, setApprovingRequest] = useState<TenantRequest | null>(null);
   const [rejectingRequest, setRejectingRequest] = useState<TenantRequest | null>(null);
+  const [reapprovingRequest, setReapprovingRequest] = useState<TenantRequest | null>(null);
+  const [deletingRequest, setDeletingRequest] = useState<TenantRequest | null>(null);
   const [rejectionReason, setRejectionReason] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all'); // Default to 'all'
   const [approveOpen, setApproveOpen] = useState(false);
   const [rejectOpen, setRejectOpen] = useState(false);
+  const [resetToPendingOpen, setResetToPendingOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
   const [reasonDialogOpen, setReasonDialogOpen] = useState(false);
   const [selectedReason, setSelectedReason] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -148,6 +152,16 @@ export default function TenantRequestTable() {
     setRejectOpen(true);
   };
 
+  const handleResetToPending = (request: TenantRequest) => {
+    setReapprovingRequest(request);
+    setResetToPendingOpen(true);
+  };
+
+  const handleDelete = (request: TenantRequest) => {
+    setDeletingRequest(request);
+    setDeleteOpen(true);
+  };
+
   const confirmApprove = async () => {
     if (!approvingRequest) return;
 
@@ -190,6 +204,48 @@ export default function TenantRequestTable() {
       setRejectOpen(false);
       setRejectingRequest(null);
       setRejectionReason('');
+    }
+  };
+
+  const confirmResetToPending = async () => {
+    if (!reapprovingRequest) return;
+
+    try {
+      const res = await api.post(`${tenantRequestEndpoint.ADMIN_RESET_TO_PENDING}/${reapprovingRequest.id}/reset-to-pending`, {});
+      if (res.success) {
+        toast.success('Request reset to pending status successfully');
+        mutate();
+      }
+    } catch (error: any) {
+      if (isAxiosError(error)) {
+        toast.error(error.response?.data?.message || 'Failed to reset request to pending');
+      } else {
+        toast.error('Failed to reset request to pending');
+      }
+    } finally {
+      setResetToPendingOpen(false);
+      setReapprovingRequest(null);
+    }
+  };
+
+  const confirmDelete = async () => {
+    if (!deletingRequest) return;
+
+    try {
+      const res = await api.delete(`${tenantRequestEndpoint.ADMIN_DELETE}/${deletingRequest.id}`);
+      if (res.success) {
+        toast.success('Request deleted successfully');
+        mutate();
+      }
+    } catch (error: any) {
+      if (isAxiosError(error)) {
+        toast.error(error.response?.data?.message || 'Failed to delete request');
+      } else {
+        toast.error('Failed to delete request');
+      }
+    } finally {
+      setDeleteOpen(false);
+      setDeletingRequest(null);
     }
   };
 
@@ -287,18 +343,53 @@ export default function TenantRequestTable() {
             </>
           )}
           
-          {request.status === 'rejected' && request.rejection_reason && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                setSelectedReason(request.rejection_reason!);
-                setReasonDialogOpen(true);
-              }}
-              className="px-2 h-6 text-xs text-white-600 hover:text-red-700 hover:bg-red-50 bg-red-500"
-            >
-              View Reason
-            </Button>
+          {(request.status === 'rejected' || request.status === 'approved') && (
+            <>
+
+             <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={() => handleDelete(request)}
+                    className="h-10 w-10 rounded-md flex items-center justify-center text-red-600 hover:text-red-700 hover:bg-red-50 transition-colors"
+                  >
+                    <Trash2 className="h-5 w-5" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent sideOffset={4}>
+                  <p>Delete Request</p>
+                </TooltipContent>
+              </Tooltip>
+
+              {request.status === 'rejected' && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={() => handleResetToPending(request)}
+                      className="h-10 w-10 rounded-md flex items-center justify-center text-blue-600 hover:text-blue-700 hover:bg-blue-50 transition-colors"
+                    >
+                      <RotateCcw className="h-5 w-5" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent sideOffset={4}>
+                    <p>Reset to Pending</p>
+                  </TooltipContent>
+                </Tooltip>
+              )}
+
+              {request.status === 'rejected' && request.rejection_reason && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setSelectedReason(request.rejection_reason!);
+                    setReasonDialogOpen(true);
+                  }}
+                  className="px-2 h-6 text-xs text-white hover:text-red-700 hover:bg-red-50 bg-red-500"
+                >
+                  View Reason
+                </Button>
+              )}
+            </>
           )}
         </div>
       ),
@@ -459,6 +550,81 @@ export default function TenantRequestTable() {
               className="bg-slate-600 hover:bg-slate-700 text-white"
             >
               Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reset to Pending Dialog */}
+      <Dialog open={resetToPendingOpen} onOpenChange={setResetToPendingOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-semibold text-gray-900 dark:text-white">
+              Reset Request to Pending
+            </DialogTitle>
+            <DialogDescription className="text-sm text-gray-600 dark:text-gray-400">
+              Are you sure you want to reset the request for "{reapprovingRequest?.organization_name}" back to pending status? 
+              This will allow the request to be reviewed and approved again.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+              <h4 className="text-sm font-medium text-blue-800 dark:text-blue-200 mb-2">
+                What will happen:
+              </h4>
+              <ul className="text-xs text-blue-700 dark:text-blue-300 space-y-1">
+                <li>• Request status will change to "pending"</li>
+                <li>• Rejection reason will be cleared</li>
+                <li>• Request can be approved normally</li>
+              </ul>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setResetToPendingOpen(false)} className="text-gray-900 dark:text-white">
+              Cancel
+            </Button>
+            <Button onClick={confirmResetToPending} className="bg-blue-600 hover:bg-blue-700">
+              Reset to Pending
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Dialog */}
+      <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-semibold text-gray-900 dark:text-white">
+              Delete Tenant Request
+            </DialogTitle>
+            <DialogDescription className="text-sm text-gray-600 dark:text-gray-400">
+              Are you sure you want to permanently delete the {deletingRequest?.status} request for "{deletingRequest?.organization_name}"? 
+              This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg">
+              <h4 className="text-sm font-medium text-red-800 dark:text-red-200 mb-2">
+                ⚠️ Warning:
+              </h4>
+              <ul className="text-xs text-red-700 dark:text-red-300 space-y-1">
+                <li>• This will permanently delete the request record</li>
+                {deletingRequest?.status === 'rejected' && (
+                  <li>• The organization will need to submit a new request</li>
+                )}
+                {deletingRequest?.status === 'approved' && (
+                  <li>• The tenant organization will continue to exist</li>
+                )}
+                <li>• This action cannot be reversed</li>
+              </ul>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteOpen(false)} className="text-gray-900 dark:text-white">
+              Cancel
+            </Button>
+            <Button onClick={confirmDelete} className="bg-red-600 hover:bg-red-700 text-white">
+              Delete Request
             </Button>
           </DialogFooter>
         </DialogContent>

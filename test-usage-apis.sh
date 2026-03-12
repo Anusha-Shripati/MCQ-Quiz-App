@@ -53,9 +53,7 @@ if [ -z "$PLAN_ID" ]; then
       "limits": {
         "candidates": 5,
         "assessments": 3,
-        "questions": 10,
-        "storage_mb": 100,
-        "api_calls": 1000
+        "questions": 10
       },
       "features": {
         "custom_branding": false,

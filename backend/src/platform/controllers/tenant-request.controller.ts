@@ -270,4 +270,52 @@ export class TenantRequestController {
       next(error);
     }
   };
+
+  resetToPending = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { id } = req.params;
+      const adminId = req.user?.id;
+      const service = new TenantRequestService(req.context!.prisma);
+
+      const request = await service.findById(id);
+      if (!request) {
+        return generateResponse(res, 404, {}, false, 'Request not found');
+      }
+
+      if (request.status !== 'rejected') {
+        const statusMessages = {
+          pending: 'Request is already pending',
+          processing: 'Request is currently being processed',
+          approved: 'Request has already been approved'
+        };
+        return generateResponse(res, 400, {}, false, statusMessages[request.status as keyof typeof statusMessages] || 'Only rejected requests can be reset to pending');
+      }
+
+      const updatedRequest = await service.resetToPending(id, adminId!);
+      return generateResponse(res, 200, updatedRequest, true, 'Request reset to pending status successfully');
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  deleteRequest = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { id } = req.params;
+      const service = new TenantRequestService(req.context!.prisma);
+
+      const request = await service.findById(id);
+      if (!request) {
+        return generateResponse(res, 404, {}, false, 'Request not found');
+      }
+
+      if (request.status !== 'rejected' && request.status !== 'approved') {
+        return generateResponse(res, 400, {}, false, 'Only rejected or approved requests can be deleted');
+      }
+
+      await service.hardDeleteRequest(id);
+      return generateResponse(res, 200, {}, true, 'Request deleted successfully');
+    } catch (error) {
+      next(error);
+    }
+  };
 }

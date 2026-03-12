@@ -5,7 +5,7 @@ export const usageValidations = {
     params: Joi.object({
       tenantId: Joi.string().uuid().required(),
       metric: Joi.string()
-        .valid('candidates', 'assessments', 'questions', 'storage_mb', 'api_calls')
+        .valid('candidates', 'assessments', 'questions')
         .required(),
     }),
   },
@@ -18,7 +18,7 @@ export const usageValidations = {
     params: Joi.object({
       tenantId: Joi.string().uuid().required(),
       metric: Joi.string()
-        .valid('candidates', 'assessments', 'questions', 'storage_mb', 'api_calls')
+        .valid('candidates', 'assessments', 'questions')
         .required(),
     }),
   },

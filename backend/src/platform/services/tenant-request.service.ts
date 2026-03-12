@@ -145,4 +145,21 @@ export class TenantRequestService {
     
     return { requests, total };
   }
+
+  async resetToPending(id: string, adminId: string) {
+    return await this.prisma.tenant_requests.update({
+      where: { id },
+      data: {
+        status: 'pending',
+        rejection_reason: null,
+        reviewed_by: adminId,
+        reviewed_at: new Date()
+      },
+      include: { requested_plan: true }
+    });
+  }
+
+  async hardDeleteRequest(id: string) {
+    return await this.prisma.tenant_requests.delete({ where: { id } });
+  }
 }

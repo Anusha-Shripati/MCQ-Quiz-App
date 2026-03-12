@@ -83,7 +83,7 @@ function AdminTable() {
     {
       key: 'created_by',
       header: 'Created By',
-      render: (row) => <span className="text-slate-600 dark:text-slate-400">{row.created_by_user?.name || '-'}</span>,
+      render: (row) => <span className="text-slate-600 dark:text-slate-400">{row.created_by_admin?.name || '-'}</span>,
     },
     {
       key: 'action',

@@ -39,6 +39,10 @@ export interface UserData {
     name:string
     deleted_at:string
   }
+  created_by_admin?:{
+    name:string
+    deleted_at:string
+  }
   role: {
     id: string;
     name: string;

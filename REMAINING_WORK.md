@@ -88,7 +88,7 @@ Update these routes to enforce limits:
 - `/candidates` - Check candidates limit before creation
 - `/assessments` - Check assessments limit before creation
 - `/questions` - Check questions limit before creation
-- `/upload` - Check storage_mb limit before upload
+- `/upload` - Check file size and type before upload
 
 Add usage tracking:
 ```typescript
@@ -103,8 +103,7 @@ await usageService.decrementUsage(tenantId, 'candidates');
 1. `candidates` - Increment on create, decrement on delete
 2. `assessments` - Increment on create, decrement on delete
 3. `questions` - Increment on create, decrement on delete
-4. `storage_mb` - Increment on upload, decrement on delete
-5. `api_calls` - Increment on every request (optional)
+
 
 ##### Files to Create:
 ```

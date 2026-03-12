@@ -119,6 +119,8 @@ export const tenantRequestEndpoint = {
     ADMIN_LIST: '/platform/tenant-requests/admin',
     ADMIN_APPROVE: '/platform/tenant-requests/admin',
     ADMIN_REJECT: '/platform/tenant-requests/admin',
+    ADMIN_RESET_TO_PENDING: '/platform/tenant-requests/admin',
+    ADMIN_DELETE: '/platform/tenant-requests/admin',
 }
 
 export const platformDashboardEndpoint = {

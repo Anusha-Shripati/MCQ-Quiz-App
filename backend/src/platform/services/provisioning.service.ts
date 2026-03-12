@@ -224,7 +224,6 @@ export class ProvisioningService {
       { metric_type: 'candidates', limit: limits?.candidates || -1 },
       { metric_type: 'assessments', limit: limits?.assessments || -1 },
       { metric_type: 'questions', limit: limits?.questions || -1 },
-      { metric_type: 'storage_mb', limit: limits?.storage_mb || -1 },
     ];
 
     const now = new Date();

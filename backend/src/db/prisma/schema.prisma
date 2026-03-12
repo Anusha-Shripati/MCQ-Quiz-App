@@ -187,8 +187,6 @@ enum UsageMetric {
   candidates
   assessments
   questions
-  storage_mb
-  api_calls
 }
 
 enum TenantRequestStatus {

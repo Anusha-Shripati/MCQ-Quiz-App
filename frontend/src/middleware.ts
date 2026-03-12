@@ -16,11 +16,11 @@ export async function middleware(request: NextRequest) {
   if (isRootDomain) {
     // Allow public routes on root domain
     const PUBLIC_ROOT_ROUTES = new Set(['/', '/signup', '/request-status', '/organization-login']);
-    
+
     if (PUBLIC_ROOT_ROUTES.has(currentPath)) {
       return response;
     }
-    
+
     // Redirect other routes to landing page
     return NextResponse.redirect(new URL('/', request.url));
   }
@@ -82,8 +82,8 @@ export async function middleware(request: NextRequest) {
   // const currentPath = request.nextUrl.pathname;
   const currentModule = currentPath.split('/')[1];
 
-  // 🔹 Block tenant users from accessing platform routes
-  if (currentPath.startsWith('/platform') || currentPath.startsWith('/platform-auth')) {
+  // 🔹 Block tenant users from accessing platform routes and root path
+  if (currentPath.startsWith('/platform') || currentPath.startsWith('/platform-auth') || currentPath === '/') {
     // Tenant user trying to access platform routes
     if (token) {
       // Authenticated tenant user - redirect to tenant dashboard

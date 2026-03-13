@@ -120,7 +120,6 @@ Check tenant subscription status:
 ## Implementation Checklist
 
 ### Database Changes
-- [ ] Add `subscription_starts_at` field to tenants table
 - [ ] Remove `trial_ends_at` field from tenants table
 - [ ] Update tenant creation/update queries
 - [ ] Create migration script
@@ -134,7 +133,6 @@ Check tenant subscription status:
 - [ ] Update error messages and handling
 
 ### Admin Panel Updates
-- [ ] Update tenant forms to use `subscription_starts_at`
 - [ ] Add usage entry creation to manual updates
 - [ ] Implement plan change validation
 - [ ] Update subscription extension workflows

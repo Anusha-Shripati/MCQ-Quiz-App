@@ -130,3 +130,11 @@ export const platformDashboardEndpoint = {
   TENANT_GROWTH: '/platform/dashboard/tenant-growth',
   PLATFORM_USAGE: '/platform/dashboard/platform-usage',
 };
+
+export const platformUsageEndpoint = {
+  SUMMARY: '/platform/usage/summary',
+  TENANT: '/platform/usage',
+  METRIC: '/platform/usage',
+  RESET: '/platform/usage',
+  SYNC: '/platform/usage',
+};

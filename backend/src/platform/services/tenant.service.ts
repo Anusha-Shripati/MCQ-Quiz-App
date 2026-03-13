@@ -140,6 +140,10 @@ export class TenantService {
     console.log(`[Tenant Service] Starting hard delete for tenant: ${tenant.slug}`);
 
     try {
+      // Delete tenant request records linked to this tenant
+      console.log(`[Tenant Service] Deleting tenant request records`);
+      await this.prisma.tenant_requests.deleteMany({ where: { tenant_id: id } });
+
       // Delete usage records
       console.log(`[Tenant Service] Deleting usage records`);
       await this.prisma.tenant_usage.deleteMany({ where: { tenant_id: id } });

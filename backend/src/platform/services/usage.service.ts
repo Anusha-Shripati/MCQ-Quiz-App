@@ -22,7 +22,12 @@ export interface UsageStats {
 export interface TenantUsageSummary {
   tenantId: string;
   tenantName: string;
+  tenantSlug: string;
+  tenantStatus: string;
   planName: string;
+  subscriptionStartsAt: Date | null;
+  subscriptionEndsAt: Date | null;
+  lastUpdated: Date | null;
   metrics: Record<string, { current: number; limit: number; percentage: number }>;
 }
 
@@ -356,6 +361,7 @@ export class UsageService {
     const tenants = await this.prisma.tenants.findMany({
       where: { deleted_at: null },
       include: { plan: true, usage: true },
+      orderBy: { created_at: 'desc' },
     });
 
     return tenants.map((tenant) => {
@@ -366,7 +372,12 @@ export class UsageService {
         return {
           tenantId: tenant.id,
           tenantName: tenant.name,
+          tenantSlug: tenant.slug,
+          tenantStatus: tenant.status,
           planName: tenant.plan.name,
+          subscriptionStartsAt: tenant.subscription_starts_at,
+          subscriptionEndsAt: tenant.subscription_ends_at,
+          lastUpdated: tenant.updated_at,
           metrics: {},
         };
       }
@@ -388,10 +399,22 @@ export class UsageService {
         };
       });
 
+      const lastUpdated =
+        currentUsage.length > 0
+          ? currentUsage.reduce((latest, usage) =>
+              usage.updated_at > latest ? usage.updated_at : latest
+            , currentUsage[0].updated_at)
+          : tenant.updated_at;
+
       return {
         tenantId: tenant.id,
         tenantName: tenant.name,
+        tenantSlug: tenant.slug,
+        tenantStatus: tenant.status,
         planName: tenant.plan.name,
+        subscriptionStartsAt: tenant.subscription_starts_at,
+        subscriptionEndsAt: tenant.subscription_ends_at,
+        lastUpdated,
         metrics,
       };
     });

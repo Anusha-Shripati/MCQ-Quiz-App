@@ -108,6 +108,8 @@ export const platformTenantEndpoint = {
     SUBSCRIPTION: '/platform/tenants',
     USAGE: '/platform/tenants',
     PROVISION: '/platform/provision',
+    VALIDATE_PLAN_CHANGE: '/platform/tenants',
+    APPLY_PLAN_CHANGE: '/platform/tenants',
 }
 
 export const tenantRequestEndpoint = {

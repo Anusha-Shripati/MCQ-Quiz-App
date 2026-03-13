@@ -5,7 +5,7 @@ import { logger } from '../config/logger';
 /**
  * Subscription Expiry Cron Job
  * 
- * Runs daily at 1 AM to check and update expired subscriptions/trials
+ * Runs daily at 1 AM to check and update expired subscriptions
  * 
  * Scenarios covered:
  * 1. Trial expiry - Updates status from 'trial' to 'expired'
@@ -32,10 +32,7 @@ cron.schedule('0 1 * * *', async () => {
                 status: {
                     in: ['active', 'trial']
                 },
-                OR: [
-                    { trial_ends_at: { not: null } },
-                    { subscription_ends_at: { not: null } }
-                ]
+                subscription_ends_at: { not: null }
             },
             include: {
                 plan: true
@@ -52,20 +49,11 @@ cron.schedule('0 1 * * *', async () => {
                 let shouldExpire = false;
                 let expiryReason = '';
                 
-                // Scenario 1: Check trial expiry
-                if (tenant.status === 'trial' && tenant.trial_ends_at) {
-                    if (tenant.trial_ends_at <= now) {
-                        shouldExpire = true;
-                        expiryReason = `Trial expired on ${tenant.trial_ends_at.toISOString()}`;
-                    }
-                }
-                
-                // Scenario 2: Check subscription expiry
-                if (tenant.status === 'active' && tenant.subscription_ends_at) {
-                    if (tenant.subscription_ends_at <= now) {
-                        shouldExpire = true;
-                        expiryReason = `Subscription expired on ${tenant.subscription_ends_at.toISOString()}`;
-                    }
+                // Check subscription expiry (works for both trial and active status)
+                if (tenant.subscription_ends_at && tenant.subscription_ends_at <= now) {
+                    shouldExpire = true;
+                    const statusType = tenant.status === 'trial' ? 'Trial' : 'Subscription';
+                    expiryReason = `${statusType} expired on ${tenant.subscription_ends_at.toISOString()}`;
                 }
                 
                 // Update tenant status if expired

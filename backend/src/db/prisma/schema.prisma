@@ -113,7 +113,7 @@ model Tenants {
   db_url               String              // Connection string for tenant DB
   admin_email          String
   admin_name           String
-  trial_ends_at        DateTime?
+  subscription_starts_at DateTime?
   subscription_ends_at DateTime?
   created_by           String?
   created_at           DateTime            @default(now())

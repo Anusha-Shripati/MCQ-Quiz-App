@@ -37,17 +37,12 @@ export class ProvisioningService {
       // Determine status and dates based on plan
       const isFree = plan.name.toLowerCase() === 'free';
       const status = isFree ? 'trial' : 'active';
-      const trialEndsAt = isFree
-        ? new Date(Date.now() + (data.trial_days || 30) * 24 * 60 * 60 * 1000)
-        : undefined;
-      const subscriptionEndsAt = !isFree
-        ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
-        : undefined;
+      const subscriptionStartsAt = new Date();
+      const subscriptionEndsAt = new Date(Date.now() + (data.trial_days || 30) * 24 * 60 * 60 * 1000);
 
       console.log(`[Provisioning] Plan: ${plan.name}, Status: ${status}`);
-      if (trialEndsAt) console.log(`[Provisioning] Trial ends at: ${trialEndsAt.toISOString()}`);
-      if (subscriptionEndsAt)
-        console.log(`[Provisioning] Subscription ends at: ${subscriptionEndsAt.toISOString()}`);
+      console.log(`[Provisioning] Subscription starts at: ${subscriptionStartsAt.toISOString()}`);
+      console.log(`[Provisioning] Subscription ends at: ${subscriptionEndsAt.toISOString()}`);
 
       console.log(`[Provisioning] Step 2: Generating database name and URL`);
       dbName = DatabaseUtils.generateDbName(data.slug);
@@ -87,7 +82,7 @@ export class ProvisioningService {
         admin_email: data.admin_email,
         admin_name: data.admin_name,
         status,
-        trial_ends_at: trialEndsAt,
+        subscription_starts_at: subscriptionStartsAt,
         subscription_ends_at: subscriptionEndsAt,
         created_by: data.created_by,
       });
@@ -213,33 +208,63 @@ export class ProvisioningService {
   }
 
   private async initializeUsage(tenantId: string, planId: string) {
-    const plan = await this.prisma.plans.findUnique({
-      where: { id: planId },
-    });
-
-    if (!plan) return;
-
-    const limits = plan.limits as any;
-    const usageMetrics = [
-      { metric_type: 'candidates', limit: limits?.candidates || -1 },
-      { metric_type: 'assessments', limit: limits?.assessments || -1 },
-      { metric_type: 'questions', limit: limits?.questions || -1 },
-    ];
-
-    const now = new Date();
-    const periodEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-
-    for (const metric of usageMetrics) {
-      await this.prisma.tenant_usage.create({
-        data: {
-          tenant_id: tenantId,
-          metric_type: metric.metric_type as any,
-          current_value: 0,
-          limit_value: metric.limit,
-          period_start: now,
-          period_end: periodEnd,
-        },
+    console.log(`[Usage Init] Starting usage initialization for tenant: ${tenantId}`);
+    
+    try {
+      const plan = await this.prisma.plans.findUnique({
+        where: { id: planId },
       });
+
+      if (!plan) {
+        throw new Error(`Plan not found: ${planId}`);
+      }
+
+      const tenant = await this.prisma.tenants.findUnique({
+        where: { id: tenantId },
+      });
+
+      if (!tenant) {
+        throw new Error(`Tenant not found: ${tenantId}`);
+      }
+
+      if (!tenant.subscription_starts_at) {
+        throw new Error(`Tenant missing subscription_starts_at: ${tenantId}`);
+      }
+
+      const limits = plan.limits as any;
+      const usageMetrics = [
+        { metric_type: 'candidates', limit: limits?.candidates || -1 },
+        { metric_type: 'assessments', limit: limits?.assessments || -1 },
+        { metric_type: 'questions', limit: limits?.questions || -1 },
+      ];
+
+      const periodStart = tenant.subscription_starts_at;
+      const periodEnd = tenant.subscription_ends_at || new Date(periodStart.getTime() + 30 * 24 * 60 * 60 * 1000);
+
+      console.log(`[Usage Init] Creating usage entries for period: ${periodStart.toISOString()} to ${periodEnd.toISOString()}`);
+
+      // Create usage entries atomically
+      const usageEntries = [];
+      for (const metric of usageMetrics) {
+        const entry = await this.prisma.tenant_usage.create({
+          data: {
+            tenant_id: tenantId,
+            metric_type: metric.metric_type as any,
+            current_value: 0,
+            limit_value: metric.limit,
+            period_start: periodStart,
+            period_end: periodEnd,
+          },
+        });
+        usageEntries.push(entry);
+        console.log(`[Usage Init] Created usage entry for ${metric.metric_type}: limit ${metric.limit}`);
+      }
+
+      console.log(`[Usage Init] ✅ Successfully created ${usageEntries.length} usage entries`);
+      return usageEntries;
+    } catch (error: any) {
+      console.error(`[Usage Init] ❌ Failed to initialize usage:`, error.message);
+      throw new Error(`Usage initialization failed: ${error.message}`);
     }
   }
 

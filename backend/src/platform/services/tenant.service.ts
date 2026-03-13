@@ -17,7 +17,7 @@ export class TenantService {
     admin_email: string;
     admin_name: string;
     status?: string;
-    trial_ends_at?: Date;
+    subscription_starts_at?: Date;
     subscription_ends_at?: Date;
     created_by?: string;
   }) {
@@ -175,7 +175,7 @@ export class TenantService {
   async updateSubscription(
     id: string,
     data: {
-      trial_ends_at?: Date;
+      subscription_starts_at?: Date;
       subscription_ends_at?: Date;
     }
   ) {

@@ -3,11 +3,13 @@
 import { useEffect, useMemo, useState } from 'react';
 import useSWR from 'swr';
 import qs from 'query-string';
-import { RefreshCcw } from 'lucide-react';
+import { RotateCcw } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/form/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Checkbox } from '@/components/ui/form/checkbox';
 import Pagination from '@/components/pagination';
 import StatusWrapper from '@/components/common/status-wrapper';
 import PlatformTable, { PlatformColumn } from '@/components/platform/common/platform-table';
@@ -136,6 +138,25 @@ function MetricUsageCell({ metric }: { metric: UsageMetric }) {
   );
 }
 
+interface ResetDialogState {
+  isOpen: boolean;
+  tenantId: string;
+  tenantName: string;
+  selectedMetrics: MetricKey[];
+}
+
+const metricLabels: Record<MetricKey, string> = {
+  candidates: 'Candidates',
+  assessments: 'Assessments', 
+  questions: 'Questions',
+};
+
+const metricDescriptions: Record<MetricKey, string> = {
+  candidates: 'Reset candidate creation count to 0 for current subscription period',
+  assessments: 'Reset assessment creation count to 0 for current subscription period',
+  questions: 'Reset question creation count to 0 for current subscription period',
+};
+
 export default function UsageTable() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -144,7 +165,13 @@ export default function UsageTable() {
   const [resourceFilter, setResourceFilter] = useState<'all' | MetricKey>('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
-  const [syncingTenantId, setSyncingTenantId] = useState<string | null>(null);
+  const [resetingTenantId, setResetingTenantId] = useState<string | null>(null);
+  const [resetDialog, setResetDialog] = useState<ResetDialogState>({
+    isOpen: false,
+    tenantId: '',
+    tenantName: '',
+    selectedMetrics: [],
+  });
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -199,7 +226,7 @@ export default function UsageTable() {
       const healthStatus = getHealthStatus(row, resourceFilter);
       const healthMatch = healthFilter === 'all' || healthStatus === healthFilter;
 
-      return searchMatch && statusMatch && planMatch && healthMatch;
+      return searchMatch && statusMatch && planMatch && healthMatch;  
     });
   }, [usageRows, searchTerm, statusFilter, planFilter, healthFilter, resourceFilter]);
 
@@ -226,22 +253,59 @@ export default function UsageTable() {
     updateQueryParams({ page: page.toString() });
   };
 
-  const handleSync = async (tenantId: string) => {
-    setSyncingTenantId(tenantId);
+  const openResetDialog = (tenantId: string, tenantName: string) => {
+    setResetDialog({
+      isOpen: true,
+      tenantId,
+      tenantName,
+      selectedMetrics: [],
+    });
+  };
+
+  const closeResetDialog = () => {
+    setResetDialog({
+      isOpen: false,
+      tenantId: '',
+      tenantName: '',
+      selectedMetrics: [],
+    });
+  };
+
+  const toggleMetricSelection = (metric: MetricKey) => {
+    setResetDialog(prev => ({
+      ...prev,
+      selectedMetrics: prev.selectedMetrics.includes(metric)
+        ? prev.selectedMetrics.filter(m => m !== metric)
+        : [...prev.selectedMetrics, metric],
+    }));
+  };
+
+  const handleReset = async () => {
+    if (resetDialog.selectedMetrics.length === 0) {
+      toast.error('Please select at least one metric to reset');
+      return;
+    }
+
+    setResetingTenantId(resetDialog.tenantId);
     try {
-      const response = await api.post(`${platformUsageEndpoint.SYNC}/${tenantId}/sync`, {});
-      if (response.success) {
-        toast.success('Usage synced successfully');
-        mutate();
-      }
-    } catch (syncError) {
-      if (isAxiosError(syncError)) {
-        toast.error(syncError.response?.data?.message || 'Failed to sync usage');
+      const resetPromises = resetDialog.selectedMetrics.map(metric =>
+        api.put(`${platformUsageEndpoint.RESET}/${resetDialog.tenantId}/${metric}/reset`, {})
+      );
+      
+      await Promise.all(resetPromises);
+      
+      const metricNames = resetDialog.selectedMetrics.map(m => metricLabels[m]).join(', ');
+      toast.success(`${metricNames} usage reset successfully for ${resetDialog.tenantName}`);
+      mutate();
+      closeResetDialog();
+    } catch (resetError) {
+      if (isAxiosError(resetError)) {
+        toast.error(resetError.response?.data?.message || 'Failed to reset usage');
       } else {
-        toast.error('Failed to sync usage');
+        toast.error('Failed to reset usage');
       }
     } finally {
-      setSyncingTenantId(null);
+      setResetingTenantId(null);
     }
   };
 
@@ -330,17 +394,17 @@ export default function UsageTable() {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => handleSync(row.tenantId)}
-                disabled={syncingTenantId === row.tenantId}
+                onClick={() => openResetDialog(row.tenantId, row.tenantName)}
+                disabled={resetingTenantId === row.tenantId}
                 className="text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50"
               >
-                <RefreshCcw
-                  className={`h-4 w-4 ${syncingTenantId === row.tenantId ? 'animate-spin' : ''}`}
+                <RotateCcw
+                  className={`h-4 w-4 ${resetingTenantId === row.tenantId ? 'animate-spin' : ''}`}
                 />
               </Button>
             </TooltipTrigger>
             <TooltipContent sideOffset={4}>
-              <p>Sync Usage</p>
+              <p>Reset Usage Metrics</p>
             </TooltipContent>
           </Tooltip>
         </div>
@@ -353,31 +417,111 @@ export default function UsageTable() {
   const currentPageEnd = Math.min(currentPage * itemsPerPage, totalItems);
 
   return (
-    <StatusWrapper
-      loading={isLoading || isValidating}
-      error={error}
-      className="min-h-[83vh] flex"
-      reset={mutate}
-    >
-      <Pagination
-        className="flex-grow"
-        currentPageStart={currentPageStart}
-        currentPageEnd={currentPageEnd}
-        totalItems={totalItems}
-        itemsPerPage={itemsPerPage}
-        onPerPageChange={handlePerPageChange}
-        currentPage={currentPage}
-        onPageChange={handlePageChange}
+    <>
+      <StatusWrapper
+        loading={isLoading || isValidating}
+        error={error}
+        className="min-h-[83vh] flex"
+        reset={mutate}
       >
-        <div className="flex-1 overflow-hidden">
-          <PlatformTable
-            columns={columns}
-            data={paginatedRows}
-            rowKey="tenantId"
-            emptyMessage="No tenants matched the selected usage filters"
-          />
-        </div>
-      </Pagination>
-    </StatusWrapper>
+        <Pagination
+          className="flex-grow"
+          currentPageStart={currentPageStart}
+          currentPageEnd={currentPageEnd}
+          totalItems={totalItems}
+          itemsPerPage={itemsPerPage}
+          onPerPageChange={handlePerPageChange}
+          currentPage={currentPage}
+          onPageChange={handlePageChange}
+        >
+          <div className="flex-1 overflow-hidden">
+            <PlatformTable
+              columns={columns}
+              data={paginatedRows}
+              rowKey="tenantId"
+              emptyMessage="No tenants matched the selected usage filters"
+            />
+          </div>
+        </Pagination>
+      </StatusWrapper>
+
+      {/* Reset Usage Dialog */}
+      <Dialog open={resetDialog.isOpen} onOpenChange={closeResetDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold text-slate-900 dark:text-white">
+              Reset Usage Metrics
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4 mt-4">
+            <div className="p-4 bg-amber-50 dark:bg-amber-900/30 rounded-lg border border-amber-200 dark:border-amber-700">
+              <p className="text-sm text-amber-800 dark:text-amber-100 font-medium mb-2">
+                ⚠️ Important: What does reset do?
+              </p>
+              <p className="text-xs text-amber-700 dark:text-amber-200">
+                Reset sets the usage count to <strong>0 for the current subscription period only</strong>. 
+                This allows the tenant to create more resources within their plan limits. 
+                <strong>No actual data will be deleted</strong> - all existing candidates, assessments, and questions remain intact.
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              <p className="text-sm font-medium text-slate-900 dark:text-slate-100">
+                Reset usage for <strong>{resetDialog.tenantName}</strong>:
+              </p>
+              
+              {(Object.keys(metricLabels) as MetricKey[]).map((metric) => (
+                <div key={metric} className="flex items-start space-x-3 p-3 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800">
+                  <Checkbox
+                    id={metric}
+                    checked={resetDialog.selectedMetrics.includes(metric)}
+                    onCheckedChange={() => toggleMetricSelection(metric)}
+                    className="mt-0.5 border-slate-300 dark:border-slate-500 data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600 dark:data-[state=checked]:bg-indigo-500 dark:data-[state=checked]:border-indigo-500"
+                  />
+                  <div className="flex-1">
+                    <label
+                      htmlFor={metric}
+                      className="text-sm font-medium text-slate-900 dark:text-slate-100 cursor-pointer"
+                    >
+                      {metricLabels[metric]}
+                    </label>
+                    <p className="text-xs text-slate-600 dark:text-slate-300 mt-1">
+                      {metricDescriptions[metric]}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-600">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={closeResetDialog}
+                disabled={resetingTenantId === resetDialog.tenantId}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                onClick={handleReset}
+                disabled={resetingTenantId === resetDialog.tenantId || resetDialog.selectedMetrics.length === 0}
+                className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white"
+              >
+                {resetingTenantId === resetDialog.tenantId ? (
+                  <>
+                    <RotateCcw className="h-4 w-4 mr-2 animate-spin" />
+                    Resetting...
+                  </>
+                ) : (
+                  `Reset Selected (${resetDialog.selectedMetrics.length})`
+                )}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

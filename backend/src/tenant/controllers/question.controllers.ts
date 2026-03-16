@@ -13,6 +13,7 @@ export class QuestionsController {
   }
   create = async (req: Request, res: Response, next: NextFunction) => {
     try {
+      // console.log('Creating question with data............:', req.body);
       const questionsService = new QuestionsService(req.context!.prisma);
       
       const question = await questionsService.createQuestion({...req.body,created_by:req.user?.id});
@@ -55,7 +56,7 @@ export class QuestionsController {
       }
 
       await questionsService.deleteQuestion(id);
-      await this.usageService.decrementUsage(req.context!.tenant!.id, UsageMetric.questions);
+      // Removed decrementUsage call - usage tracks creation limits per period
 
       return generateResponse(res, 200, {}, true, 'Question deleted successfully');
     } catch (error) {

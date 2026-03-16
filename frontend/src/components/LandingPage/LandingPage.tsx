@@ -70,21 +70,21 @@ const pricingPlans = [
     name: 'Free',
     price: '$0',
     description: 'For early teams validating their hiring workflow.',
-    points: ['Up to 10 candidates', '5 assessments', '50 questions', 'Basic analytics'],
+    points: ['Create up to 10 candidates/month', 'Create 5 assessments/month', 'Create 50 questions/month', 'Basic analytics', 'All created data retained forever'],
     highlighted: false,
   },
   {
     name: 'Pro',
     price: '$99',
     description: 'For growing teams running frequent assessments.',
-    points: ['Up to 100 candidates', '50 assessments', '500 questions', 'Advanced analytics'],
+    points: ['Create up to 100 candidates/month', 'Create 50 assessments/month', 'Create 500 questions/month', 'Advanced analytics', 'Unlimited data retention'],
     highlighted: true,
   },
   {
     name: 'Enterprise',
     price: 'Custom',
     description: 'For scale, compliance, and advanced governance needs.',
-    points: ['Unlimited usage', 'Priority support', 'Custom onboarding', 'Extended controls'],
+    points: ['Unlimited monthly creation limits', 'Priority support', 'Custom onboarding', 'Extended controls', 'Full data ownership'],
     highlighted: false,
   },
 ];
@@ -194,8 +194,8 @@ export default function LandingPage() {
                     <p className="mt-1 text-2xl font-bold">100%</p>
                   </div>
                   <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900">
-                    <p className="text-xs text-slate-500">Usage Controls</p>
-                    <p className="mt-1 text-2xl font-bold">Plan-based</p>
+                    <p className="text-xs text-slate-500">Billing Model</p>
+                    <p className="mt-1 text-2xl font-bold">Creation</p>
                   </div>
                   <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900">
                     <p className="text-xs text-slate-500">Exam Integrity</p>
@@ -204,8 +204,7 @@ export default function LandingPage() {
                 </div>
 
                 <p className="text-sm text-slate-600 dark:text-slate-300">
-                  From question creation to final result analytics, the platform is optimized for
-                  high-volume assessment operations.
+                  Pay for creation capacity, not storage. All your data stays with you forever as you grow.
                 </p>
               </CardContent>
             </Card>

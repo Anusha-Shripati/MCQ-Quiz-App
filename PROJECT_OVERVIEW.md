@@ -119,6 +119,86 @@ Backend validates tenant on every API call
 
 ---
 
+## 💡 **Creation-Based Usage Tracking System**
+
+### **Revolutionary Billing Approach**
+
+We've implemented a **creation-based usage tracking system** that fundamentally changes how SaaS billing works:
+
+#### **How It Works:**
+
+```
+Traditional SaaS: "You can have up to 100 questions"
+     Our System: "You can CREATE up to 100 questions per month"
+```
+
+**Key Principles:**
+
+1. **Creation Limits**: Plans limit how many resources can be **created** per subscription period
+2. **Data Retention**: Deleting resources does NOT reduce usage count - all data stays with tenant
+3. **Period-Based Reset**: Usage resets at subscription renewal, not calendar months
+4. **Loyalty Benefits**: Long-term tenants accumulate more resources over time
+
+#### **Business Example:**
+
+```
+Plan: 100 Questions/Month
+
+Month 1: Create 100 questions → Usage: 100/100 (limit reached)
+Month 2: Create 90 more questions → Total DB: 190 questions, Usage: 90/100
+Month 3: Delete 50 old questions → Total DB: 140 questions, Usage: 0/100 (can create 100 more)
+
+Result: Tenant has 140 questions available but can still create 100 new ones in Month 3
+```
+
+#### **Technical Implementation:**
+
+**Database Queries:**
+```sql
+-- Count only resources created within current subscription period
+SELECT COUNT(*) FROM questions 
+WHERE tenant_id = ? 
+  AND deleted_at IS NULL 
+  AND created_at >= subscription_starts_at 
+  AND created_at <= subscription_ends_at;
+```
+
+**Usage Service Methods:**
+- `checkUsageLimit()` - Validates creation against period limits
+- `incrementUsage()` - Tracks new resource creation
+- `resetUsage()` - Admin can reset counts without deleting data
+- `validatePlanChange()` - Prevents downgrades exceeding current usage
+
+#### **Benefits:**
+
+**For Tenants:**
+- 📊 **Fair Billing**: Pay for creation capacity, not storage
+- 💾 **Data Ownership**: Keep all historical data forever
+- 🎁 **Loyalty Rewards**: More data = more value over time
+- 💰 **Predictable Costs**: Clear monthly creation limits
+
+**For Platform:**
+- 🔄 **Sustainable Growth**: Revenue scales with tenant activity
+- 🛡️ **Data Integrity**: No data loss from billing operations
+- 📈 **Customer Retention**: Accumulated data creates switching costs
+- ⚖️ **Fair Usage**: Active tenants pay more, inactive pay less
+
+#### **Admin Controls:**
+
+**Reset Functionality:**
+- Platform admins can reset usage counts to 0 for current period
+- Granular reset per metric (candidates, assessments, questions)
+- Clear warnings: "No actual data will be deleted"
+- Allows tenants to continue creating within their limits
+
+**Plan Change Validation:**
+- Real-time validation when changing tenant plans
+- Prevents downgrades that would exceed new limits
+- Shows current usage vs new plan limits
+- Automatic usage limit updates for approved changes
+
+---
+
 ## 🚀 Key Features
 
 ### Platform Admin Features
@@ -126,8 +206,9 @@ Backend validates tenant on every API call
 - ✅ Plan Management (CRUD, limits, features, pricing)
 - ✅ Admin Management (CRUD, RBAC, password management)
 - ✅ **Automated Provisioning** (creates DB, runs migrations, seeds data)
-- ✅ Usage Tracking (view tenant usage statistics)
-- ⏳ Usage Enforcement (limit creation based on plan - **PENDING**)
+- ✅ **Creation-Based Usage Tracking** (tracks resource creation per subscription period)
+- ✅ **Usage Enforcement** (limits creation based on plan, with reset capabilities)
+- ✅ **Plan Change Validation** (prevents downgrades exceeding current usage)
 
 ### Tenant Features
 - ✅ User Management with RBAC
@@ -319,7 +400,7 @@ NEXT_PUBLIC_DEV_TENANT_SLUG="localhost"
 
 ## 📈 Implementation Progress
 
-### Backend: ~90% Complete
+### Backend: ~95% Complete
 
 | Phase | Status | Progress |
 |-------|--------|----------|
@@ -331,7 +412,9 @@ NEXT_PUBLIC_DEV_TENANT_SLUG="localhost"
 | Admin Management | ✅ Complete | 100% |
 | Provisioning Automation | ✅ Complete | 100% |
 | Subscription Expiry | ✅ Complete | 100% |
-| **Usage Tracking & Enforcement** | ⏳ Pending | 0% |
+| **Creation-Based Usage Tracking** | ✅ Complete | 100% |
+| **Usage Enforcement & Validation** | ✅ Complete | 100% |
+| **Plan Change Validation** | ✅ Complete | 100% |
 
 ### Frontend: ~80% Complete
 
@@ -519,9 +602,9 @@ npm run dev                 # Development mode
 
 ## 🚀 Estimated Completion
 
-**Overall Progress:** ~85% Complete  
-**Remaining Time:** 1-2 weeks  
-**Critical Path:** Usage Tracking → Landing Page → Testing → Deployment
+**Overall Progress:** ~92% Complete  
+**Remaining Time:** 1-2 days  
+**Critical Path:** Landing Page → Final Testing → Deployment
 
 ---
 

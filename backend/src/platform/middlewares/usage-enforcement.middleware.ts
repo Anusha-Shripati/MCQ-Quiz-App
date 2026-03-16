@@ -13,12 +13,31 @@ export const enforceUsageLimit = (metricType: UsageMetric) => {
       const tenantName = req.context?.tenant?.name;
       const planName = req.context?.tenant?.plan?.name;
 
+      console.log('[Usage Middleware] Starting usage enforcement', {
+        metricType,
+        tenantId,
+        tenantName,
+        planName,
+        method: req.method,
+        path: req.originalUrl,
+      });
+
       if (!tenantId) {
+        console.log('[Usage Middleware] Tenant context not found');
         generateResponse(res, 400, {}, false, 'Tenant context not found');
         return;
       }
 
+      console.log('[Usage Middleware] Checking usage limit', { tenantId, metricType });
       const check = await usageService.checkUsageLimit(tenantId, metricType);
+      console.log('[Usage Middleware] Usage limit check result', {
+        tenantId,
+        metricType,
+        current: check.current,
+        limit: check.limit,
+        unlimited: check.unlimited,
+        allowed: check.allowed,
+      });
 
       if (!check.allowed) {
         const errorData = {
@@ -51,8 +70,14 @@ export const enforceUsageLimit = (metricType: UsageMetric) => {
         return;
       }
 
+      console.log('[Usage Middleware] Usage enforcement passed', { tenantId, metricType });
       next();
     } catch (error: any) {
+      console.error('[Usage Middleware] Usage enforcement error', {
+        tenantId: req.context?.tenant?.id,
+        metricType,
+        error: error?.message || error,
+      });
       // Handle specific usage service errors
       if (error.message.includes('Tenant not found')) {
         generateResponse(res, 404, {}, false, 'Tenant not found', 'TENANT_NOT_FOUND');

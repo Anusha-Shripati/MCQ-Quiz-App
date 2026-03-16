@@ -136,5 +136,5 @@ export const platformUsageEndpoint = {
   TENANT: '/platform/usage',
   METRIC: '/platform/usage',
   RESET: '/platform/usage',
-  SYNC: '/platform/usage',
+  // SYNC: '/platform/usage', // Removed - sync is for internal use only
 };

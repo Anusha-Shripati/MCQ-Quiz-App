@@ -10,6 +10,7 @@ import { mutate } from 'swr';
 import { cn } from '@/lib/utils';
 import { QuestionCategory } from '@/shared/types/app';
 import { FormField } from '../common/form-field';
+import { questionEndpoint } from '@/lib/endpoint';
 
 interface ImportSampleXLSXProps {
   importOpen: boolean;
@@ -49,7 +50,7 @@ const ImportSampleXLSX = ({
   );
 
   const { trigger: uploadFileTrigger, isMutating: isUploading } = useSWRMutation(
-    '/question/import',
+    questionEndpoint.IMPORT,
     uploadXlsxFile
   );
 

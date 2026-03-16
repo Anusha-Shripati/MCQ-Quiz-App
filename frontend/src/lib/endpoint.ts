@@ -42,6 +42,8 @@ export const candidateEndpoint = {
 export const questionEndpoint = {
   LIST: '/question/list',
   CREATE: '/question/create',
+  CREATE_MULTIPLE: '/question/create-multiple',
+  IMPORT: '/question/import',
   QUESTION_BY_ID: '/question',
   DELETE: '/question/delete',
 };

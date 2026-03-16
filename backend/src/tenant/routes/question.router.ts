@@ -21,6 +21,14 @@ questionRouter.get('/download-template', asyncHandler(questionsController.downlo
 questionRouter.get('/technology', asyncHandler(questionsController.getTechnology));
 
 questionRouter.post(
+  '/create-multiple',
+  authenticateAndAuthorize(),
+  enforceUsageLimit(UsageMetric.questions),
+  validateRequest(questionsSchema.createMultiple),
+  asyncHandler(questionsController.createMultiple)
+);
+
+questionRouter.post(
   '/create',
   authenticateAndAuthorize(),
   enforceUsageLimit(UsageMetric.questions),

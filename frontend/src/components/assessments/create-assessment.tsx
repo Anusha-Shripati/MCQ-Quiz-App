@@ -168,7 +168,17 @@ export default function CreateAssessment() {
             }
         } catch (error) {
             if (isAxiosError(error)) {
-                toast.error(error.response.data.message || 'An unexpected error occurred');
+                const errorData: any = error.response?.data;
+                
+                // Handle usage limit exceeded error
+                if (errorData?.error === 'USAGE_LIMIT_EXCEEDED') {
+                    toast.error(
+                        `Assessment limit reached (${errorData.data?.current}/${errorData.data?.limit}). Please upgrade your plan.`
+                    );
+                    return;
+                }
+                
+                toast.error(errorData?.message || 'An unexpected error occurred');
             } else {
                 toast.error('An unexpected error occurred');
             }

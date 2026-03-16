@@ -13,31 +13,12 @@ export const enforceUsageLimit = (metricType: UsageMetric) => {
       const tenantName = req.context?.tenant?.name;
       const planName = req.context?.tenant?.plan?.name;
 
-      console.log('[Usage Middleware] Starting usage enforcement', {
-        metricType,
-        tenantId,
-        tenantName,
-        planName,
-        method: req.method,
-        path: req.originalUrl,
-      });
-
       if (!tenantId) {
-        console.log('[Usage Middleware] Tenant context not found');
         generateResponse(res, 400, {}, false, 'Tenant context not found');
         return;
       }
 
-      console.log('[Usage Middleware] Checking usage limit', { tenantId, metricType });
       const check = await usageService.checkUsageLimit(tenantId, metricType);
-      console.log('[Usage Middleware] Usage limit check result', {
-        tenantId,
-        metricType,
-        current: check.current,
-        limit: check.limit,
-        unlimited: check.unlimited,
-        allowed: check.allowed,
-      });
 
       if (!check.allowed) {
         const errorData = {
@@ -50,14 +31,13 @@ export const enforceUsageLimit = (metricType: UsageMetric) => {
           upgradeRequired: true,
           suggestedActions: [
             'Upgrade to a higher plan',
-            'Delete unused items to free up space',
             'Contact support for assistance'
           ]
         };
 
         const errorMessage = check.unlimited 
           ? `System error: Unlimited plan should not have limits`
-          : `${metricType} limit reached (${check.current}/${check.limit}). Please upgrade your plan or delete unused items.`;
+          : `${metricType} limit reached (${check.current}/${check.limit}). Please upgrade your plan.`;
 
         generateResponse(
           res,
@@ -70,7 +50,6 @@ export const enforceUsageLimit = (metricType: UsageMetric) => {
         return;
       }
 
-      console.log('[Usage Middleware] Usage enforcement passed', { tenantId, metricType });
       next();
     } catch (error: any) {
       console.error('[Usage Middleware] Usage enforcement error', {

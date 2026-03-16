@@ -16,18 +16,11 @@ import { FormField } from '@/components/common/form-field';
 import useSWRMutation from 'swr/mutation';
 import { showSingleToast } from '@/lib/utils';
 import { isAxiosError } from 'axios';
-import { technologyEndpoint } from '@/lib/endpoint';
+import { questionEndpoint, technologyEndpoint } from '@/lib/endpoint';
 import { useQuestionPreferencesStore } from '@/store/questionPreferencesStore';
 
-// import { isValidObjectId } from '@/lib/utils';
-
-// async function create(url: string, { arg }: { arg: { name: string; questions: Question[] } }) {
-//   const response = await api.post(url, arg);
-//   return response;
-// }
-
-async function update(url: string, { arg }: { arg: { name: string; questions: Question[] } }) {
-  const response = await api.put(url, arg);
+async function createMultipleQuestions(url: string, { arg }: { arg: { technology_id: string; questions: Question[] } }) {
+  const response = await api.post(url, arg);
   return response;
 }
 
@@ -54,29 +47,11 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
   // const [showSidebar, setShowSidebar] = useState(false);
   const router = useRouter();
   const [selectedQuestion, setSelectedQuestion] = useState<number>(0);
-  const [name, setName] = useState<string>('');
-  // const [isValidTechnology, setIsValidTechnology]: [
-  //   boolean,
-  //   React.Dispatch<React.SetStateAction<boolean>>,
-  // ] = useState<boolean>(isValidUUID(params.technology));
   const [technology, setTechnology] = useState<string>('');
 
-  // const {
-  //   data,
-  //   isLoading,
-  //   error,
-  //   isValidating,
-  //   mutate: questionMutate,
-  // } = useSWR(
-  //   isValidTechnology ? `${questionEndpoint.LIST}?technology_id=${technologyId}` : null,
-  //   api.get
-  // );
-
-  // const { trigger, isMutating } = useSWRMutation(`${technologyEndpoint.CREATE}`, create);
-
-  const { trigger: updateTrigger, isMutating: updating } = useSWRMutation(
-    `${technologyEndpoint.GET_TECHNOLOGY_BY_ID}/${technologyId}`,
-    update
+  const { trigger: createQuestionsTrigger, isMutating: creating } = useSWRMutation(
+    questionEndpoint.CREATE_MULTIPLE,
+    createMultipleQuestions
   );
 
   useEffect(() => {
@@ -99,11 +74,6 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
   useEffect(() => {
     if (technologyData?.data?.list && technologyId) {
       setTechnology(technologyId);
-      setName(
-        technologyData.data.list.find(
-          (tech: { id: string; name: string }) => tech.id === technologyId
-        )?.name || ''
-      );
     }
   }, [technologyId, technologyData]);
 
@@ -276,50 +246,41 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
       return;
     }
 
-    // if (isValidTechnology) {
+    // Create questions using the question API
     try {
-      const response = await updateTrigger({ name, questions });
-      toast.success(response.message || 'Technology saved successfully!');
+      const response = await createQuestionsTrigger({ 
+        technology_id: technologyId, 
+        questions 
+      });
+      toast.success(response.message || 'Questions created successfully!');
       router.replace(`/questions/category/${technologyId}`);
       mutate((key: string) => typeof key === 'string' && key.startsWith('/technology/list'));
     } catch (error) {
       if (isAxiosError(error)) {
-        const duplicateQuestions = error.response?.data?.data?.questions;
-        duplicateQuestions?.map((item: string) => {
-          const questionIndex = questions.findIndex((q) => {
-            // Allow duplicate questions for code_snippet_with_mcq and code_snippet types
-            if (q.type === 'code_snippet_with_mcq' || q.type === 'code_snippet') {
-              return false;
-            }
-            return q.question === item;
+        const errorData = error.response?.data;
+        
+        // Handle usage limit exceeded error
+        if (errorData?.error === 'USAGE_LIMIT_EXCEEDED') {
+          showSingleToast(
+            `Question limit reached (${errorData.data?.current}/${errorData.data?.limit}). Please upgrade your plan.`
+          );
+          return;
+        }
+        
+        // Handle validation errors
+        if (errorData?.data?.validationErrors) {
+          const validationErrors = errorData.data.validationErrors;
+          Object.entries(validationErrors).forEach(([index, error]) => {
+            errors[parseInt(index)] = error as string;
           });
-          if (questionIndex !== -1) {
-            errors[questionIndex] = 'Question is already exists';
-          }
-        });
-        setValidationErrors(errors);
-
-        showSingleToast(error.response?.data?.message || 'Failed to save technology.');
+          setValidationErrors(errors);
+        }
+        
+        showSingleToast(errorData?.message || 'Failed to create questions.');
       } else {
-        showSingleToast('Failed to save technology.');
+        showSingleToast('Failed to create questions.');
       }
     }
-    // } else {
-    //   try {
-    //     const response = await trigger({ name, questions });
-    //     toast.success(response.message || 'Technology created successfully!');
-    //     window.history.replaceState(null, '', `/questions/create-question/${response.data.id}`);
-    //     setTechnologyId(response.data.id);
-    //     router.push('/questions');
-    //     mutate((key: string) => typeof key === 'string' && key.startsWith('/technology/list'));
-    //   } catch (error) {
-    //     showSingleToast(
-    //       isAxiosError(error)
-    //         ? error.response?.data?.message || 'Failed to save technology.'
-    //         : 'Failed to save technology.'
-    //     );
-    //   }
-    // }
   };
   const handleSelectTechnology = (value: string) => {
     setTechnology(value);
@@ -328,11 +289,8 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
     );
 
     if (selectedTech) {
-      setName(selectedTech.name);
       window.history.replaceState(null, '', `/questions/create-question/${selectedTech.id}`);
-      // router.push(`/questions/create-question/${selectedTech.id}`);
       setTechnologyId(selectedTech.id);
-      // setIsValidTechnology(isValidUUID(selectedTech.id));
     }
   };
   type TechnologyData = {
@@ -372,7 +330,7 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
           <Button
             className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
             onClick={handleSave}
-            disabled={updating}
+            disabled={creating}
           >
             Save
           </Button>
@@ -433,7 +391,6 @@ const CreateQuestion: React.FC<{ params: { technology: string } }> = ({ params }
               )}
             </div>
           </div>
-          {/* {!isValidTechnology && <div className="absolute h-full w-full backdrop-blur-sm"></div>} */}
         </div>
       </StatusWrapper>
     </div>

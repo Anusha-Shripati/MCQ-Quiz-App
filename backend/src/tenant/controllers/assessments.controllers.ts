@@ -313,7 +313,7 @@ export class AssessmentController {
       }
       await assessmentService.deleteTechnologyAssessment(id);
       await assessmentService.deleteAssessment(id);
-      await this.usageService.decrementUsage(req.context!.tenant!.id, UsageMetric.assessments);
+      // Removed decrementUsage call - usage tracks creation limits per period
 
       return generateResponse(res, 200, {}, true, 'Assessment delete successfully');
     } catch (error) {

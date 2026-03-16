@@ -42,6 +42,8 @@ export const candidateEndpoint = {
 export const questionEndpoint = {
   LIST: '/question/list',
   CREATE: '/question/create',
+  CREATE_MULTIPLE: '/question/create-multiple',
+  IMPORT: '/question/import',
   QUESTION_BY_ID: '/question',
   DELETE: '/question/delete',
 };
@@ -89,28 +91,52 @@ export const platformModuleEndpoint = {
 };
 
 export const platformPlanEndpoint = {
-  LIST: '/platform/plans',
-  CREATE: '/platform/plans',
-  BY_ID: '/platform/plans',
-  UPDATE: '/platform/plans',
-  DELETE: '/platform/plans',
-  TOGGLE: '/platform/plans',
-};
+    LIST: '/platform/plans',
+    PUBLIC_LIST: '/platform/plans/public',
+    CREATE: '/platform/plans',
+    BY_ID: '/platform/plans',
+    UPDATE: '/platform/plans',
+    DELETE: '/platform/plans',
+    TOGGLE: '/platform/plans',
+}
 
 export const platformTenantEndpoint = {
-  LIST: '/platform/tenants',
-  CREATE: '/platform/tenants',
-  BY_ID: '/platform/tenants',
-  UPDATE: '/platform/tenants',
-  DELETE: '/platform/tenants',
-  STATUS: '/platform/tenants',
-  SUBSCRIPTION: '/platform/tenants',
-  USAGE: '/platform/tenants',
-  PROVISION: '/platform/provision',
-};
+    LIST: '/platform/tenants',
+    CREATE: '/platform/tenants',
+    BY_ID: '/platform/tenants',
+    UPDATE: '/platform/tenants',
+    DELETE: '/platform/tenants',
+    STATUS: '/platform/tenants',
+    SUBSCRIPTION: '/platform/tenants',
+    USAGE: '/platform/tenants',
+    PROVISION: '/platform/provision',
+    VALIDATE_PLAN_CHANGE: '/platform/tenants',
+    APPLY_PLAN_CHANGE: '/platform/tenants',
+}
+
+export const tenantRequestEndpoint = {
+    CREATE: '/platform/tenant-requests',
+    CHECK_SLUG: '/platform/tenant-requests/check-slug',
+    CHECK_ORGANIZATION: '/platform/tenant-requests/check-organization',
+    STATUS: '/platform/tenant-requests/status',
+    CANCEL: '/platform/tenant-requests',
+    ADMIN_LIST: '/platform/tenant-requests/admin',
+    ADMIN_APPROVE: '/platform/tenant-requests/admin',
+    ADMIN_REJECT: '/platform/tenant-requests/admin',
+    ADMIN_RESET_TO_PENDING: '/platform/tenant-requests/admin',
+    ADMIN_DELETE: '/platform/tenant-requests/admin',
+}
 
 export const platformDashboardEndpoint = {
   PLAN_DISTRIBUTION: '/platform/dashboard/plan-distribution',
   TENANT_GROWTH: '/platform/dashboard/tenant-growth',
   PLATFORM_USAGE: '/platform/dashboard/platform-usage',
+};
+
+export const platformUsageEndpoint = {
+  SUMMARY: '/platform/usage/summary',
+  TENANT: '/platform/usage',
+  METRIC: '/platform/usage',
+  RESET: '/platform/usage',
+  // SYNC: '/platform/usage', // Removed - sync is for internal use only
 };

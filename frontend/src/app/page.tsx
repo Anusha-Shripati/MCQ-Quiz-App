@@ -1,13 +1,13 @@
-import Login from '@/components/common/login'
 import React from 'react'
 import { Metadata } from 'next';
+import LandingPage from '@/components/LandingPage/LandingPage';
 
 
 export const metadata: Metadata = {
-  title: 'Admin Login',
+  title: 'LR-MCQ SaaS Platform',
 };
 function Home() {
-  return <Login/>
+  return <LandingPage/>
 }
 
 export default Home

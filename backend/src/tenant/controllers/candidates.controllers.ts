@@ -115,7 +115,7 @@ delete = async (req: Request, res: Response, next: NextFunction) => {
     }
 
     await candidateService.deleteCandidate(id);
-    await this.usageService.decrementUsage(req.context!.tenant!.id, UsageMetric.candidates);
+    // Removed decrementUsage call - usage tracks creation limits per period
 
     return generateResponse(res, 200, {}, true, 'Candidate deleted successfully');
   } catch (error) {

@@ -11,8 +11,91 @@ export class QuestionsController {
   constructor() {
     this.usageService = new UsageService(getPrisma());
   }
+  createMultiple = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      console.log('Creating multiple questions with data:', req.body);
+      const { technology_id, questions } = req.body;
+      const questionsService = new QuestionsService(req.context!.prisma);
+      
+      // Check if we have enough usage limit for all questions
+      const usageCheck = await this.usageService.checkUsageLimit(
+        req.context!.tenant!.id,
+        UsageMetric.questions
+      );
+      
+      if (!usageCheck.unlimited) {
+        const remainingLimit = usageCheck.limit - usageCheck.current;
+        if (questions.length > remainingLimit) {
+          return generateResponse(
+            res,
+            400,
+            {
+              error: 'USAGE_LIMIT_EXCEEDED',
+              data: {
+                current: usageCheck.current,
+                limit: usageCheck.limit,
+                remaining: remainingLimit,
+                requested: questions.length,
+              },
+            },
+            false,
+            `Cannot create ${questions.length} questions. Only ${remainingLimit} questions remaining in your plan (${usageCheck.current}/${usageCheck.limit} used).`
+          );
+        }
+      }
+      
+      const createdQuestions = [];
+      
+      // Create questions one by one to maintain data integrity
+      for (const questionData of questions) {
+        // Clean up the question data - remove extra fields and filter empty options
+        const cleanedQuestionData = {
+          ...questionData,
+          technology_id, // Use the root level technology_id
+          created_by: req.user?.id || '',
+          // Filter out empty options for question types that need options
+          options: ['mcq', 'multiple_select', 'code_snippet', 'code_snippet_with_mcq'].includes(questionData.type)
+            ? questionData.options?.filter((opt: string) => opt && opt.trim()) || []
+            : questionData.options || [],
+        };
+        
+        // Remove fields that shouldn't be passed to the service
+        delete cleanedQuestionData.time; // Remove time field if present
+        if (cleanedQuestionData.technology_id === technology_id) {
+          // Remove duplicate technology_id from question object since we're using root level
+          const { technology_id: _, ...questionWithoutTechId } = cleanedQuestionData;
+          cleanedQuestionData.technology_id = technology_id;
+        }
+        
+        const question = await questionsService.createQuestion(cleanedQuestionData);
+        createdQuestions.push(question);
+      }
+      
+      // Increment usage by the number of questions created
+      await this.usageService.incrementUsage(
+        req.context!.tenant!.id,
+        UsageMetric.questions,
+        createdQuestions.length
+      );
+
+      return generateResponse(
+        res,
+        200,
+        {
+          questions: createdQuestions,
+          totalCreated: createdQuestions.length,
+        },
+        true,
+        `${createdQuestions.length} questions created successfully`
+      );
+    } catch (error) {
+      next(error);
+    }
+  };
+
   create = async (req: Request, res: Response, next: NextFunction) => {
     try {
+      console.log('Creating question with data............:', req.body);
       const questionsService = new QuestionsService(req.context!.prisma);
       
       const question = await questionsService.createQuestion({...req.body,created_by:req.user?.id});
@@ -55,7 +138,7 @@ export class QuestionsController {
       }
 
       await questionsService.deleteQuestion(id);
-      await this.usageService.decrementUsage(req.context!.tenant!.id, UsageMetric.questions);
+      // Removed decrementUsage call - usage tracks creation limits per period
 
       return generateResponse(res, 200, {}, true, 'Question deleted successfully');
     } catch (error) {
@@ -131,6 +214,44 @@ export class QuestionsController {
       const file = req.file;
       const { technologyId } = req.body;
       const questionsService = new QuestionsService(req.context!.prisma);
+      
+      // Parse the Excel file to count questions before importing
+      const XLSX = require('xlsx');
+      const workbook = XLSX.read(file.buffer, { type: 'buffer' });
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      const questions = XLSX.utils.sheet_to_json(worksheet);
+      
+      if (questions.length === 0) {
+        return generateResponse(res, 400, {}, false, 'The uploaded file contains no data or has an incorrect format');
+      }
+      
+      // Check if we have enough usage limit for all questions
+      const usageCheck = await this.usageService.checkUsageLimit(
+        req.context!.tenant!.id,
+        UsageMetric.questions
+      );
+      
+      if (!usageCheck.unlimited) {
+        const remainingLimit = usageCheck.limit - usageCheck.current;
+        if (questions.length > remainingLimit) {
+          return generateResponse(
+            res,
+            400,
+            {
+              error: 'USAGE_LIMIT_EXCEEDED',
+              data: {
+                current: usageCheck.current,
+                limit: usageCheck.limit,
+                remaining: remainingLimit,
+                requested: questions.length,
+              },
+            },
+            false,
+            `Cannot import ${questions.length} questions. Only ${remainingLimit} questions remaining in your plan (${usageCheck.current}/${usageCheck.limit} used).`
+          );
+        }
+      }
       
       const result = await questionsService.importQuestionsFromXlsx(file.buffer, technologyId, req.user?.id || '');
 

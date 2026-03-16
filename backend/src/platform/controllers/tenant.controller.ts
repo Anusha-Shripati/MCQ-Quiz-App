@@ -1,11 +1,21 @@
 import { Request, Response, NextFunction } from 'express';
 import { TenantService } from '../services/tenant.service';
+import { ProvisioningService } from '../services/provisioning.service';
+import { UsageService } from '../services/usage.service';
 import { generateResponse } from '../../utils/generateResponse';
 
 export class TenantController {
+  private provisioningService: ProvisioningService;
+  private usageService: UsageService;
+
+  constructor() {
+    // Services will be initialized with request context in each method
+    this.provisioningService = new ProvisioningService(null as any);
+    this.usageService = new UsageService(null as any);
+  }
   create = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { name, slug, plan_id, db_name, db_url, admin_email, admin_name, status, trial_ends_at, subscription_ends_at } = req.body;
+      const { name, slug, plan_id, db_name, db_url, admin_email, admin_name, status, subscription_starts_at, subscription_ends_at } = req.body;
       const tenantService = new TenantService(req.context!.prisma);
 
       const existingTenant = await tenantService.findTenantBySlug(slug);
@@ -22,7 +32,7 @@ export class TenantController {
         admin_email,
         admin_name,
         status,
-        trial_ends_at: trial_ends_at ? new Date(trial_ends_at) : undefined,
+        subscription_starts_at: subscription_starts_at ? new Date(subscription_starts_at) : undefined,
         subscription_ends_at: subscription_ends_at ? new Date(subscription_ends_at) : undefined,
         created_by: req.user?.id,
       });
@@ -81,6 +91,7 @@ export class TenantController {
       const { id } = req.params;
       const { name, slug, plan_id, admin_email, admin_name } = req.body;
       const tenantService = new TenantService(req.context!.prisma);
+      const usageService = new UsageService(req.context!.prisma);
 
       const existingTenant = await tenantService.findTenantById(id);
       if (!existingTenant) {
@@ -92,6 +103,20 @@ export class TenantController {
         if (duplicateTenant) {
           return generateResponse(res, 400, {}, false, 'Tenant with this slug already exists');
         }
+      }
+
+      // Check if plan is changing
+      const planChanged = plan_id && plan_id !== existingTenant.plan_id;
+      
+      if (planChanged) {
+        // Validate plan change first
+        const validation = await usageService.validatePlanChange(id, plan_id);
+        if (!validation.allowed) {
+          return generateResponse(res, 400, { validation }, false, `Plan change not allowed: ${validation.issues.join(', ')}`);
+        }
+        
+        // Apply plan change
+        await usageService.applyPlanChange(id, plan_id);
       }
 
       const updatedTenant = await tenantService.updateTenant(id, {
@@ -166,7 +191,9 @@ export class TenantController {
   updateSubscription = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
-      const { trial_ends_at, subscription_ends_at } = req.body;
+      const { subscription_ends_at } = req.body;
+      
+      const usageService = new UsageService(req.context!.prisma);
       const tenantService = new TenantService(req.context!.prisma);
 
       const tenant = await tenantService.findTenantById(id);
@@ -174,13 +201,70 @@ export class TenantController {
         return generateResponse(res, 404, {}, false, 'Tenant not found');
       }
 
-      const updatedTenant = await tenantService.updateSubscription(id, {
-        trial_ends_at: trial_ends_at ? new Date(trial_ends_at) : undefined,
-        subscription_ends_at: subscription_ends_at ? new Date(subscription_ends_at) : undefined,
+      if (!subscription_ends_at) {
+        return generateResponse(res, 400, {}, false, 'subscription_ends_at is required');
+      }
+
+      // Use usage service for subscription extension (only end date)
+      const updatedTenant = await usageService.extendSubscriptionEndDate({
+        tenantId: id,
+        subscription_ends_at: new Date(subscription_ends_at),
       });
 
-      return generateResponse(res, 200, updatedTenant, true, 'Subscription updated successfully');
+      return generateResponse(res, 200, updatedTenant, true, 'Subscription end date updated successfully');
+    } catch (error: any) {
+      if (error.message.includes('not found')) {
+        return generateResponse(res, 404, {}, false, error.message);
+      }
+      next(error);
+    }
+  };
+
+  validatePlanChange = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { id } = req.params;
+      const { new_plan_id } = req.body;
+      
+      const usageService = new UsageService(req.context!.prisma);
+      const tenantService = new TenantService(req.context!.prisma);
+
+      const tenant = await tenantService.findTenantById(id);
+      if (!tenant) {
+        return generateResponse(res, 404, {}, false, 'Tenant not found');
+      }
+
+      const validation = await usageService.validatePlanChange(id, new_plan_id);
+
+      return generateResponse(res, 200, validation, true, 'Plan change validation completed');
     } catch (error) {
+      next(error);
+    }
+  };
+
+  applyPlanChange = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { id } = req.params;
+      const { new_plan_id } = req.body;
+      
+      const usageService = new UsageService(req.context!.prisma);
+      const tenantService = new TenantService(req.context!.prisma);
+
+      const tenant = await tenantService.findTenantById(id);
+      if (!tenant) {
+        return generateResponse(res, 404, {}, false, 'Tenant not found');
+      }
+
+      // Apply plan change with usage validation
+      await usageService.applyPlanChange(id, new_plan_id);
+      
+      // Update tenant plan
+      const updatedTenant = await tenantService.updateTenant(id, { plan_id: new_plan_id });
+
+      return generateResponse(res, 200, updatedTenant, true, 'Plan changed successfully');
+    } catch (error: any) {
+      if (error.message.includes('Plan change not allowed')) {
+        return generateResponse(res, 400, {}, false, error.message);
+      }
       next(error);
     }
   };

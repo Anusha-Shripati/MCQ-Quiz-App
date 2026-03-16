@@ -26,7 +26,6 @@ const tenantSchema = z.object({
   provision: z.boolean(),
   status: z.enum(['active', 'trial', 'suspended', 'expired', 'cancelled']).optional(),
   trial_days: z.number().min(1, 'Trial days must be at least 1').max(365, 'Trial days cannot exceed 365').optional(),
-  trial_ends_at: z.string().optional(),
   subscription_ends_at: z.string().optional(),
 });
 
@@ -40,7 +39,7 @@ interface Tenant {
   admin_name: string;
   plan: { id: string; name: string };
   status: 'active' | 'trial' | 'suspended' | 'expired' | 'cancelled';
-  trial_ends_at?: string;
+  subscription_starts_at?: string;
   subscription_ends_at?: string;
 }
 
@@ -50,8 +49,17 @@ interface TenantFormProps {
   tenant?: Tenant;
 }
 
+interface PlanValidation {
+  allowed: boolean;
+  issues: string[];
+  currentUsage: Record<string, number>;
+  newLimits: Record<string, number>;
+}
+
 export default function TenantForm({ isOpen, onClose, tenant }: TenantFormProps) {
   const [isProvisioning, setIsProvisioning] = useState(!tenant);
+  const [planValidation, setPlanValidation] = useState<PlanValidation | null>(null);
+  const [isValidatingPlan, setIsValidatingPlan] = useState(false);
   const { data: plansData } = useSWR(platformPlanEndpoint.LIST, fetcher);
   const [selectedPlan, setSelectedPlan] = useState<any>(null);
 
@@ -71,7 +79,6 @@ export default function TenantForm({ isOpen, onClose, tenant }: TenantFormProps)
       plan_id: tenant.plan.id,
       provision: false,
       status: tenant.status,
-      trial_ends_at: tenant.trial_ends_at ? new Date(tenant.trial_ends_at).toISOString().split('T')[0] : '',
       subscription_ends_at: tenant.subscription_ends_at ? new Date(tenant.subscription_ends_at).toISOString().split('T')[0] : '',
     } : {
       name: '',
@@ -83,7 +90,6 @@ export default function TenantForm({ isOpen, onClose, tenant }: TenantFormProps)
       provision: true,
       status: 'trial',
       trial_days: 30,
-      trial_ends_at: '',
       subscription_ends_at: '',
     },
   });
@@ -106,18 +112,59 @@ export default function TenantForm({ isOpen, onClose, tenant }: TenantFormProps)
     }
   }, [name, tenant, setValue]);
 
+  // Validate plan change when plan changes in edit mode
+  useEffect(() => {
+    if (tenant && planId && planId !== tenant.plan.id) {
+      validatePlanChange(planId);
+    } else {
+      setPlanValidation(null);
+    }
+  }, [planId, tenant]);
+
+  const validatePlanChange = async (newPlanId: string) => {
+    if (!tenant) return;
+    
+    setIsValidatingPlan(true);
+    try {
+      const response = await api.post(`${platformTenantEndpoint.VALIDATE_PLAN_CHANGE}/${tenant.id}/validate-plan-change`, {
+        new_plan_id: newPlanId
+      });
+      
+      if (response.success) {
+        setPlanValidation(response.data);
+      }
+    } catch (error: any) {
+      toast.error('Failed to validate plan change');
+      console.error('Plan validation error:', error);
+    } finally {
+      setIsValidatingPlan(false);
+    }
+  };
+
   const onSubmit = async (data: TenantFormData) => {
     try {
       if (tenant) {
+        const originalPlanId = tenant.plan.id;
+        const originalEndDate = tenant.subscription_ends_at;
+        const newPlanId = data.plan_id;
+        const newEndDate = data.subscription_ends_at;
+        
+        const planChanged = newPlanId !== originalPlanId;
+        const endDateChanged = newEndDate !== (originalEndDate ? new Date(originalEndDate).toISOString().split('T')[0] : '');
+
+        // Update basic info first
         const payload: any = {
           name: data.name,
           slug: data.slug,
           admin_email: data.admin_email,
           admin_name: data.admin_name,
-          plan_id: data.plan_id,
         };
 
-        // Update basic info
+        // Only include plan_id if not changed (to avoid dual updates)
+        if (!planChanged) {
+          payload.plan_id = data.plan_id;
+        }
+
         const res = await api.put(`${platformTenantEndpoint.UPDATE}/${tenant.id}`, payload);
         
         // Update status if changed
@@ -125,13 +172,25 @@ export default function TenantForm({ isOpen, onClose, tenant }: TenantFormProps)
           await api.put(`${platformTenantEndpoint.STATUS}/${tenant.id}/status`, { status: data.status });
         }
 
-        // Update subscription dates if changed
-        const subscriptionPayload: any = {};
-        if (data.trial_ends_at) subscriptionPayload.trial_ends_at = new Date(data.trial_ends_at).toISOString();
-        if (data.subscription_ends_at) subscriptionPayload.subscription_ends_at = new Date(data.subscription_ends_at).toISOString();
-        
-        if (Object.keys(subscriptionPayload).length > 0) {
-          await api.put(`${platformTenantEndpoint.SUBSCRIPTION}/${tenant.id}/subscription`, subscriptionPayload);
+        // Handle plan change with validation
+        if (planChanged) {
+          if (planValidation && !planValidation.allowed) {
+            toast.error(`Cannot change plan: ${planValidation.issues.join(', ')}`);
+            return;
+          }
+          
+          await api.post(`${platformTenantEndpoint.APPLY_PLAN_CHANGE}/${tenant.id}/apply-plan-change`, {
+            new_plan_id: newPlanId
+          });
+          toast.success('Plan changed successfully');
+        }
+
+        // Handle subscription end date change
+        if (endDateChanged && newEndDate) {
+          await api.put(`${platformTenantEndpoint.SUBSCRIPTION}/${tenant.id}/subscription`, {
+            subscription_ends_at: new Date(newEndDate).toISOString()
+          });
+          toast.success('Subscription end date updated successfully');
         }
 
         if (res.success) {
@@ -255,6 +314,37 @@ export default function TenantForm({ isOpen, onClose, tenant }: TenantFormProps)
               {errors.plan_id && (
                 <p className="text-red-500 text-sm mt-1">{errors.plan_id.message}</p>
               )}
+              
+              {/* Plan validation feedback */}
+              {tenant && planId !== tenant.plan.id && (
+                <div className="mt-2">
+                  {isValidatingPlan ? (
+                    <p className="text-blue-600 text-sm">Validating plan change...</p>
+                  ) : planValidation ? (
+                    <div className={`p-3 rounded-lg text-sm ${
+                      planValidation.allowed 
+                        ? 'bg-green-50 text-green-700 border border-green-200' 
+                        : 'bg-red-50 text-red-700 border border-red-200'
+                    }`}>
+                      {planValidation.allowed ? (
+                        <div>
+                          <p className="font-medium">✓ Plan change allowed</p>
+                          <p className="text-xs mt-1">Current usage is within new plan limits</p>
+                        </div>
+                      ) : (
+                        <div>
+                          <p className="font-medium">⚠ Plan change blocked</p>
+                          <ul className="text-xs mt-1 space-y-1">
+                            {planValidation.issues.map((issue, index) => (
+                              <li key={index}>• {issue}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  ) : null}
+                </div>
+              )}
             </div>
 
             <div>
@@ -364,31 +454,18 @@ export default function TenantForm({ isOpen, onClose, tenant }: TenantFormProps)
                   )}
                 </div>
 
-                {selectedPlan?.name?.toLowerCase() === 'free' ? (
-                  <div>
-                    <label htmlFor="trial_ends_at" className="block text-sm font-medium text-slate-700 dark:text-slate-300">
-                      Trial Ends At
-                    </label>
-                    <Input
-                      id="trial_ends_at"
-                      type="date"
-                      {...register('trial_ends_at')}
-                      className="mt-1 h-11"
-                    />
-                  </div>
-                ) : (
-                  <div>
-                    <label htmlFor="subscription_ends_at" className="block text-sm font-medium text-slate-700 dark:text-slate-300">
-                      Subscription Ends At
-                    </label>
-                    <Input
-                      id="subscription_ends_at"
-                      type="date"
-                      {...register('subscription_ends_at')}
-                      className="mt-1 h-11"
-                    />
-                  </div>
-                )}
+                <div>
+                  <label htmlFor="subscription_ends_at" className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                    Subscription Ends At
+                  </label>
+                  <Input
+                    id="subscription_ends_at"
+                    type="date"
+                    {...register('subscription_ends_at')}
+                    className="mt-1 h-11"
+                  />
+                  <p className="text-xs text-slate-500 mt-1">Note: Subscription start date cannot be modified after creation</p>
+                </div>
               </>
             )}
           </div>

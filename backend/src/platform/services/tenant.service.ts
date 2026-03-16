@@ -17,7 +17,7 @@ export class TenantService {
     admin_email: string;
     admin_name: string;
     status?: string;
-    trial_ends_at?: Date;
+    subscription_starts_at?: Date;
     subscription_ends_at?: Date;
     created_by?: string;
   }) {
@@ -140,6 +140,10 @@ export class TenantService {
     console.log(`[Tenant Service] Starting hard delete for tenant: ${tenant.slug}`);
 
     try {
+      // Delete tenant request records linked to this tenant
+      console.log(`[Tenant Service] Deleting tenant request records`);
+      await this.prisma.tenant_requests.deleteMany({ where: { tenant_id: id } });
+
       // Delete usage records
       console.log(`[Tenant Service] Deleting usage records`);
       await this.prisma.tenant_usage.deleteMany({ where: { tenant_id: id } });
@@ -175,7 +179,7 @@ export class TenantService {
   async updateSubscription(
     id: string,
     data: {
-      trial_ends_at?: Date;
+      subscription_starts_at?: Date;
       subscription_ends_at?: Date;
     }
   ) {
@@ -192,6 +196,13 @@ export class TenantService {
     return await this.prisma.tenant_usage.findMany({
       where: { tenant_id: id },
       orderBy: { metric_type: 'asc' },
+    });
+  }
+
+  async findByAdminEmail(admin_email: string) {
+    return await this.prisma.tenants.findFirst({
+      where: { admin_email, deleted_at: null },
+      include: { plan: true }
     });
   }
 }

@@ -31,7 +31,7 @@ export const tenantSchema = {
         'string.empty': 'Admin name is required',
       }),
       status: Joi.string().valid('active', 'suspended', 'trial', 'expired', 'cancelled').optional(),
-      trial_ends_at: Joi.date().optional(),
+      subscription_starts_at: Joi.date().optional(),
       subscription_ends_at: Joi.date().optional(),
     }),
   },
@@ -96,10 +96,10 @@ export const tenantSchema = {
       }),
     }),
     body: Joi.object({
-      trial_ends_at: Joi.date().optional(),
-      subscription_ends_at: Joi.date().optional(),
-    }).or('trial_ends_at', 'subscription_ends_at').messages({
-      'object.missing': 'At least one date field is required',
+      subscription_ends_at: Joi.date().required().messages({
+        'date.base': 'subscription_ends_at must be a valid date',
+        'any.required': 'subscription_ends_at is required',
+      }),
     }),
   },
 
@@ -107,6 +107,34 @@ export const tenantSchema = {
     params: Joi.object({
       id: Joi.string().uuid().required().messages({
         'string.uuid': 'Invalid tenant ID format',
+      }),
+    }),
+  },
+
+  validatePlanChange: {
+    params: Joi.object({
+      id: Joi.string().uuid().required().messages({
+        'string.uuid': 'Invalid tenant ID format',
+      }),
+    }),
+    body: Joi.object({
+      new_plan_id: Joi.string().uuid().required().messages({
+        'string.uuid': 'Invalid plan ID format',
+        'any.required': 'new_plan_id is required',
+      }),
+    }),
+  },
+
+  applyPlanChange: {
+    params: Joi.object({
+      id: Joi.string().uuid().required().messages({
+        'string.uuid': 'Invalid tenant ID format',
+      }),
+    }),
+    body: Joi.object({
+      new_plan_id: Joi.string().uuid().required().messages({
+        'string.uuid': 'Invalid plan ID format',
+        'any.required': 'new_plan_id is required',
       }),
     }),
   },

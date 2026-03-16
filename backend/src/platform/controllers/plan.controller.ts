@@ -174,4 +174,27 @@ export class PlanController {
       next(error);
     }
   };
+
+  // Public endpoint for fetching active plans (no auth required)
+  listPublic = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const planService = new PlanService(req.context!.prisma);
+
+      const { plans } = await planService.findManyPlans({ 
+        is_active: true,
+        page: 1,
+        limit: 100 // Get all active plans
+      });
+
+      return generateResponse(
+        res,
+        200,
+        { list: plans, count: plans.length },
+        true,
+        'Active plans retrieved successfully'
+      );
+    } catch (error) {
+      next(error);
+    }
+  };
 }

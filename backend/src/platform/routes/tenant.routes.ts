@@ -70,4 +70,18 @@ router.get(
   asyncHandler(controller.getUsage)
 );
 
+router.post(
+  '/:id/validate-plan-change',
+  platformAuth('tenants.can_edit'),
+  validateRequest(tenantSchema.validatePlanChange),
+  asyncHandler(controller.validatePlanChange)
+);
+
+router.post(
+  '/:id/apply-plan-change',
+  platformAuth('tenants.can_edit'),
+  validateRequest(tenantSchema.applyPlanChange),
+  asyncHandler(controller.applyPlanChange)
+);
+
 export default router;

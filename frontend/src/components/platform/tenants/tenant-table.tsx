@@ -37,7 +37,7 @@ interface Tenant {
     name: string;
     price: number;
   };
-  trial_ends_at?: string;
+  subscription_starts_at?: string;
   subscription_ends_at?: string;
   created_at: string;
 }
@@ -169,15 +169,6 @@ export default function TenantTable() {
       ),
     },
     {
-      key: 'plan',
-      header: 'Plan',
-      render: (tenant) => (
-        <Badge variant="outline" className="font-medium">
-          {tenant.plan.name}
-        </Badge>
-      ),
-    },
-    {
       key: 'status',
       header: 'Status',
       render: (tenant) => (
@@ -188,12 +179,21 @@ export default function TenantTable() {
         </div>
       ),
     },
+        {
+      key: 'plan',
+      header: 'Plan',
+      render: (tenant) => (
+        <Badge variant="outline" className="font-medium">
+          {tenant.plan.name}
+        </Badge>
+      ),
+    },
     {
-      key: 'trial_ends',
-      header: 'Trial Ends',
+      key: 'subscription_starts',
+      header: 'Subscription Starts',
       render: (tenant) => {
-        if (!tenant.trial_ends_at) return <span className="text-slate-400">-</span>;
-        const date = new Date(tenant.trial_ends_at);
+        if (!tenant.subscription_starts_at) return <span className="text-slate-400">-</span>;
+        const date = new Date(tenant.subscription_starts_at);
         return (
           <span className="text-sm text-slate-600 dark:text-slate-400">
             {date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}

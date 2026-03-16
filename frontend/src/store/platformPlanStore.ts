@@ -4,8 +4,6 @@ export interface PlanLimits {
   candidates: number;
   assessments: number;
   questions: number;
-  storage_mb: number;
-  api_calls: number;
 }
 
 export interface PlanFeatures {

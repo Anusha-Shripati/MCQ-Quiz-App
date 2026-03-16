@@ -141,6 +141,51 @@ npm run build
 npm run start
 ```
 
+## Usage Tracking & Billing Model
+
+### Creation-Based Usage Tracking
+
+The MCQ Quiz application implements a **creation-based usage tracking system** that focuses on resource creation limits per subscription period rather than total existing resources.
+
+#### How It Works:
+
+**📊 Usage Metrics Tracked:**
+- **Candidates**: Number of candidates created in current subscription period
+- **Assessments**: Number of assessments created in current subscription period  
+- **Questions**: Number of questions created in current subscription period
+
+**🔄 Key Principles:**
+
+1. **Creation Limits**: Each plan has limits on how many resources can be **created** per subscription period
+2. **Period-Based Tracking**: Usage resets at the start of each new subscription period
+3. **Data Retention**: Deleting resources does NOT reduce usage count - all created data remains as tenant value
+4. **Cumulative Benefit**: Long-term tenants accumulate more resources over time as a loyalty reward
+
+**💡 Business Logic:**
+
+```
+Example: 100 Questions/Month Plan
+
+Month 1: Create 100 questions → Usage: 100/100 (limit reached)
+Month 2: Create 90 more questions → Total DB: 190 questions, Usage: 90/100
+Month 3: Delete 50 old questions → Total DB: 140 questions, Usage: 0/100 (can create 100 more)
+
+Result: Tenant has 140 questions available but can still create 100 new ones in Month 3
+```
+
+**🎯 Benefits:**
+- **Fair Billing**: Pay for creation capacity, not storage
+- **Data Ownership**: Tenants keep all historical data
+- **Loyalty Rewards**: Longer subscriptions = more accumulated resources
+- **Predictable Costs**: Clear monthly creation limits
+- **No Data Loss**: Deletion doesn't affect billing or usage tracking
+
+**⚙️ Technical Implementation:**
+- Usage tracking syncs only records created within current subscription period
+- Database queries filter by `created_at` date within period boundaries
+- Platform admin can reset usage counts to 0 without affecting actual data
+- Plan changes validate against current period usage, not total data
+
 ## Tech Stack
 
 ### Backend

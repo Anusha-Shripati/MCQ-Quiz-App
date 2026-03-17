@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '../../db/tenant/generated/client';
 
 export class ModuleService {
   private prisma: PrismaClient;

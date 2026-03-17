@@ -1,4 +1,4 @@
-import { Roles, PrismaClient } from '@prisma/client';
+import { Roles, PrismaClient } from '../../db/tenant/generated/client';
 import { Permissions } from '../controllers/role.controllers';
 import { CacheService } from './cacheService';
 

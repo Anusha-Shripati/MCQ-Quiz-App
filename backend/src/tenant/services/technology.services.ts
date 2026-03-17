@@ -1,4 +1,4 @@
-import { Questions, Technology, Prisma, PrismaClient } from '@prisma/client';
+import { Questions, Technology, Prisma, PrismaClient } from '../../db/tenant/generated/client';
 import { CacheService } from './cacheService';
 export class TechnologyService {
   private prisma: PrismaClient;

@@ -4,7 +4,7 @@ import CandidatesService from '../services/candidates.services';
 import ExamService from '../services/exam.services';
 import { CreateCandidate, UpdateCandidate } from '../../types/candidate.types';
 import { generateResponse } from '../../utils/generateResponse';
-import { Candidate } from '@prisma/client';
+import { Candidate } from '../../db/tenant/generated/client';
 import { ExamMeta } from '../services/candiate-exam.services';
 import { UsageService } from '../../platform/services/usage.service';
 import { UsageMetric } from '../../db/prisma/generated/client';

@@ -1,4 +1,4 @@
-import { Candidate, Prisma, PrismaClient } from '@prisma/client';
+import { Candidate, Prisma, PrismaClient } from '../../db/tenant/generated/client';
 import jwt from 'jsonwebtoken';
 import { AppError } from '../../common/errors/AppError';
 import { CreateCandidate, UpdateCandidate } from '../../types/candidate.types';

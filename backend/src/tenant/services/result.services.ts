@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '../../db/tenant/generated/client';
 import { CacheService } from './cacheService';
 import { ExamMeta } from './candiate-exam.services';
 import { UploadService } from './upload.services';

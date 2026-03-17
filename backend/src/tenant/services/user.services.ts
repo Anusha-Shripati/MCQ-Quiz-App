@@ -1,4 +1,4 @@
-import { Roles, User, PrismaClient } from '@prisma/client';
+import { Roles, User, PrismaClient } from '../../db/tenant/generated/client';
 import dayjs from 'dayjs';
 import nodemailer from 'nodemailer';
 import { CacheService } from './cacheService';

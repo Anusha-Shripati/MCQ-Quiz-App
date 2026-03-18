@@ -89,7 +89,7 @@ export default function UsageHeader() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Plans</SelectItem>
-              {planOptions.map((plan) => (
+              {planOptions.map((plan: string) => (
                 <SelectItem key={plan} value={plan}>
                   {plan}
                 </SelectItem>

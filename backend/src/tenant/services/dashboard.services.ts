@@ -1,5 +1,5 @@
 import { Result } from '../../common/types/types';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '../../db/tenant/generated/client';
 import {
   categorizeExamDate,
   formatInterviewResults,
@@ -605,4 +605,3 @@ export class DashboardService {
     return response;
   }
 }
-

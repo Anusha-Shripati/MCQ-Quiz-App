@@ -2,7 +2,6 @@ import { Request, Response, NextFunction } from 'express';
 import AssessmentsService from '../services/assessments.services';
 import { generateResponse } from '../../utils/generateResponse';
 import ExamService from '../services/exam.services';
-import { Questions } from '@prisma/client';
 import { UsageService } from '../../platform/services/usage.service';
 import { UsageMetric } from '../../db/prisma/generated/client';
 import { getPrisma } from '../../db/prisma/client';

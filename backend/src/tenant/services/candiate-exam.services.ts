@@ -1,4 +1,4 @@
-import { Answers, Questions, PrismaClient } from '@prisma/client';
+import { Answers, Questions, PrismaClient } from '../../db/tenant/generated/client';
 import { AppError } from '../../common/errors/AppError';
 import { UploadService } from './upload.services';
 import { Decimal, JsonObject } from '@prisma/client/runtime/library';

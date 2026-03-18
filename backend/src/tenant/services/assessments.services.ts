@@ -1,4 +1,4 @@
-import { Assessments, Prisma, PrismaClient } from '@prisma/client';
+import { Assessments, Prisma, PrismaClient } from '../../db/tenant/generated/client';
 import { CacheService } from './cacheService';
 
 interface Filters {

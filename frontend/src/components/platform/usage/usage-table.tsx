@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import useSWR from 'swr';
-import qs from 'query-string';
 import { RotateCcw } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { Badge } from '@/components/ui/badge';

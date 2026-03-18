@@ -1,4 +1,4 @@
-import { User, PrismaClient } from '@prisma/client';
+import { User, PrismaClient } from '../../db/tenant/generated/client';
 
 export class ProfileService {
   private prisma: PrismaClient;

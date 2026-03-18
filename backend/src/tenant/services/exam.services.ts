@@ -1,4 +1,4 @@
-import { Difficulty, Prisma, PrismaClient, Questions } from '@prisma/client';
+import { Difficulty, Prisma, PrismaClient, Questions } from '../../db/tenant/generated/client';
 import { AppError } from '../../common/errors/AppError';
 
 interface CreateExamData {

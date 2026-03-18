@@ -1,4 +1,4 @@
-import { Prisma, Question_type, Questions, Technology, PrismaClient } from '@prisma/client';
+import { Prisma, Question_type, Questions, Technology, PrismaClient } from '../../db/tenant/generated/client';
 import * as XLSX from 'xlsx';
 import { allTechnologiesWorldwide, docData, sampleData } from '../../utils/dateUtils';
 import { CacheService } from './cacheService';

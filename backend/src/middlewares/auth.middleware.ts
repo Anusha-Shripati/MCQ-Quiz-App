@@ -61,14 +61,32 @@ export const authenticateAndAuthorize =
         }
 
         const modulePermission = permissions.find((p: any) => p.module?.name === moduleName);
-        if (!modulePermission || !modulePermission[action as Actions]) {
-          generateResponse(res, 403, {}, false, 'Request not allowed.');
+        if (!modulePermission) {
+          generateResponse(res, 403, { 
+            error: 'ACCESS_DENIED',
+            module: moduleName,
+            action: action 
+          }, false, `Access denied: You don't have permission to access the ${moduleName} module.`);
+          return;
+        }
+        
+        if (!modulePermission[action as Actions]) {
+          const actionText = action === 'can_read' ? 'view' : action === 'can_edit' ? 'edit' : action;
+          generateResponse(res, 403, { 
+            error: 'ACTION_DENIED',
+            module: moduleName,
+            action: action 
+          }, false, `Access denied: You don't have permission to ${actionText} ${moduleName}.`);
           return;
         }
       }
 
       if (role && decoded.role_name !== role) {
-        generateResponse(res, 403, {}, false, 'Request not allowed.');
+        generateResponse(res, 403, { 
+          error: 'ROLE_ACCESS_DENIED',
+          requiredRole: role,
+          userRole: decoded.role_name 
+        }, false, `Access denied: This action requires ${role} role, but you have ${decoded.role_name} role.`);
         return;
       }
       next();

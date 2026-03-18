@@ -10,54 +10,54 @@ const technologyController = new TechnologyController();
 
 technologyRouter.post(
   '/create',
+  authenticateAndAuthorize('questions.can_edit'),
   validateRequest(teachnologySchema.create),
-  // authenticateAndAuthorize('assessments.can_edit'),
   asyncHandler(technologyController.create)
 );
 
 technologyRouter.post(
   '/create-only',
+  authenticateAndAuthorize('questions.can_edit'),
   validateRequest(teachnologySchema.createOnly),
-  authenticateAndAuthorize(),
   asyncHandler(technologyController.createTechnologyOnly)
 );
 
 technologyRouter.get(
   '/list',
-  // authenticateAndAuthorize('assessments.can_read'),
+  authenticateAndAuthorize('questions.can_read'),
   asyncHandler(technologyController.list)
 );
 
 // technologyRouter.get(
 //   "/questions",
-//   authenticateAndAuthorize("assessments.can_read"),
+//   authenticateAndAuthorize("questions.can_read"),
 //   asyncHandler(technologyController.getTechnologyWithQuestion)
 // );
 
 technologyRouter.get(
   '/:id',
+  authenticateAndAuthorize('questions.can_read'),
   validateRequest(teachnologySchema.get),
-  // authenticateAndAuthorize('assessments.can_read'),
   asyncHandler(technologyController.getTechnologyById)
 );
 
 technologyRouter.put(
   '/:id',
-  authenticateAndAuthorize(),
+  authenticateAndAuthorize('questions.can_edit'),
   validateRequest(teachnologySchema.update),
   asyncHandler(technologyController.update)
 );
 
 technologyRouter.put(
   '/:id/name',
-  authenticateAndAuthorize(),
+  authenticateAndAuthorize('questions.can_edit'),
   validateRequest(teachnologySchema.updateName),
   asyncHandler(technologyController.updateTechnologyName)
 );
 
 technologyRouter.delete(
   '/:id',
-  authenticateAndAuthorize(),
+  authenticateAndAuthorize('questions.can_edit'),
   validateRequest(teachnologySchema.delete),
   asyncHandler(technologyController.delete)
 );

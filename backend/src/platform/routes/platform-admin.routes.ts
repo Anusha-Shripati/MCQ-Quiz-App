@@ -31,7 +31,7 @@ router.post(
 );
 
 // Protected routes (require auth)
-router.get('/me', platformAuth(), asyncHandler(controller.me));
+router.get('/me', platformAuth('admins.can_read'), asyncHandler(controller.me));
 
 router.post(
   '/create',
@@ -72,7 +72,7 @@ router.put(
 
 router.put(
   '/upload-image/:id',
-  platformAuth(),
+  platformAuth('admins.can_edit'),
   upload.single('file'),
   asyncHandler(controller.uploadImage)
 );

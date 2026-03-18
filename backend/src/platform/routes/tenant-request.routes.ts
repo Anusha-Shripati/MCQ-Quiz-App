@@ -24,11 +24,11 @@ router.delete('/', validateRequest({ body: cancelRequestValidation }), asyncHand
 
 // Admin routes (auth required)
 const adminRouter = Router();
-adminRouter.get('/', platformAuth(), asyncHandler(controller.list));
-adminRouter.post('/:id/approve', platformAuth(), asyncHandler(controller.approveRequest));
-adminRouter.post('/:id/reject', platformAuth(), validateRequest({ body: rejectRequestValidation }), asyncHandler(controller.rejectRequest));
-adminRouter.post('/:id/reset-to-pending', platformAuth(), asyncHandler(controller.resetToPending));
-adminRouter.delete('/:id', platformAuth(), asyncHandler(controller.deleteRequest));
+adminRouter.get('/', platformAuth('tenants.can_read'), asyncHandler(controller.list));
+adminRouter.post('/:id/approve', platformAuth('tenants.can_edit'), asyncHandler(controller.approveRequest));
+adminRouter.post('/:id/reject', platformAuth('tenants.can_edit'), validateRequest({ body: rejectRequestValidation }), asyncHandler(controller.rejectRequest));
+adminRouter.post('/:id/reset-to-pending', platformAuth('tenants.can_edit'), asyncHandler(controller.resetToPending));
+adminRouter.delete('/:id', platformAuth('tenants.can_edit'), asyncHandler(controller.deleteRequest));
 
 router.use('/admin', adminRouter);
 

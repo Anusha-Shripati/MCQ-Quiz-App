@@ -69,8 +69,22 @@ export const platformAuth =
           (p: any) => p.module?.name === moduleName
         );
 
-        if (!modulePermission || !modulePermission[action as Actions]) {
-          generateResponse(res, 403, {}, false, 'Insufficient permissions');
+        if (!modulePermission) {
+          generateResponse(res, 403, {
+            error: 'ACCESS_DENIED',
+            module: moduleName,
+            action: action
+          }, false, `Access denied: You don't have permission to access the ${moduleName} module.`);
+          return;
+        }
+
+        if (!modulePermission[action as Actions]) {
+          const actionText = action === 'can_read' ? 'view' : action === 'can_edit' ? 'edit' : action;
+          generateResponse(res, 403, {
+            error: 'ACTION_DENIED',
+            module: moduleName,
+            action: action
+          }, false, `Access denied: You don't have permission to ${actionText} ${moduleName}.`);
           return;
         }
       }

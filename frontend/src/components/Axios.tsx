@@ -2,6 +2,7 @@
 
 import axios from 'axios';
 import Cookies from 'js-cookie';
+import toast from 'react-hot-toast';
 import { extractSubdomain } from '@/lib/tenant-utils';
 
 const instance = axios.create({
@@ -57,6 +58,37 @@ instance.interceptors.response.use(
           document.cookie = 'token=; path=/;';
           window.location.href = '/';
         }
+      }
+    }
+    
+    // Backend permission codes are nested under `data.error` in the response payload.
+    if (err.response?.status === 403) {
+      const responseData = err.response.data;
+      const errorData = responseData?.data ?? responseData;
+      const errorCode = errorData?.error ?? responseData?.error;
+      
+      if (
+        errorCode === 'ACCESS_DENIED' ||
+        errorCode === 'ACTION_DENIED' ||
+        errorCode === 'ROLE_ACCESS_DENIED'
+      ) {
+        const message =
+          responseData?.message ||
+          'Access denied: You don\'t have permission to perform this action.';
+
+        if (typeof window !== 'undefined') {
+          toast.error(message, {
+            duration: 5000,
+            style: {
+              background: '#ef4444',
+              color: '#fff',
+              fontWeight: '500',
+            },
+          });
+        }
+        
+        // Don't redirect, just show the error message
+        return Promise.reject(err);
       }
     }
     

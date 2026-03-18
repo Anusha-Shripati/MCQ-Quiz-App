@@ -1,24 +1,22 @@
-version: "3.8"
-
 services:
   postgres:
-    image: bitnami/postgresql:latest
+    image: postgres:15-alpine
     container_name: postgres-container
     environment:
-      POSTGRESQL_USERNAME: postgres
-      POSTGRESQL_PASSWORD: root
-      POSTGRESQL_DATABASE: platform_db  # Platform database created automatically
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: platform_db  # Platform database created automatically
     ports:
       - "5432:5432"
     volumes:
-      - postgres-data:/bitnami/postgresql
+      - postgres-data:/var/lib/postgresql/data
     networks:
       - app-network
     restart: always
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
-      timeout: 5s
+      test: ["CMD-SHELL", "pg_isready -U postgres -d platform_db"]
+      interval: 5s
+      timeout: 3s
       retries: 5
 
   redis:

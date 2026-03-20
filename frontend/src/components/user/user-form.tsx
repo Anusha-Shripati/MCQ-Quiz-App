@@ -27,10 +27,7 @@ const userSchema = z
       .min(8, 'Match the below password requirements.')
       .regex(passwordRegex, 'Invalid password format')
       .nullable(),
-    confirmPassword: z
-      .string()
-      .min(8, 'Confirm Password must match Password.')
-      .nullable(),
+    confirmPassword: z.string().min(8, 'Confirm Password must match Password.').nullable(),
     role: z.string().min(1, 'Role is required'),
   })
   .refine((data) => data.password === data.confirmPassword, {

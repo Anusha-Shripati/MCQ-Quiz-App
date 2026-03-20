@@ -5,7 +5,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url = env("DATABASE_URL")
 }
 
 // Platform Admin Users
@@ -28,7 +28,7 @@ model Platform_admins {
   created_tenants   Tenants[]           @relation("TenantCreatedBy")
   created_plans     Plans[]             @relation("PlanCreatedBy")
   reviewed_requests Tenant_requests[]   @relation("RequestReviewedBy")
-
+  
   @@map("platform_admins")
 }
 
@@ -121,13 +121,14 @@ model Tenants {
   deleted_at           DateTime?
   plan                 Plans               @relation(fields: [plan_id], references: [id])
   usage                Tenant_usage[]
+  usage_events         Usage_event[]
   tenant_requests      Tenant_requests[]
   created_by_admin     Platform_admins?    @relation("TenantCreatedBy", fields: [created_by], references: [id], onDelete: SetNull)
 
   @@index([slug])
   @@index([status])
   @@map("tenants")
-}
+}  
 
 // Tenant Usage Tracking
 model Tenant_usage {
@@ -146,7 +147,19 @@ model Tenant_usage {
   @@index([tenant_id])
   @@map("tenant_usage")
 }
-
+ model Usage_event {
+  id            String  @id @default(uuid())
+  tenant_id     String
+  metric_type   UsageMetric
+  event_value   Int
+  created_at    DateTime @default(now())
+  tenant        Tenants  @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  
+  @@index([metric_type])
+  @@index([created_at])
+  @@index([tenant_id, metric_type, created_at])
+  @@map("usage_events")
+ }
 // Tenant Requests
 model Tenant_requests {
   id                 String   @id @default(uuid())

@@ -83,7 +83,11 @@ export async function middleware(request: NextRequest) {
   const currentModule = currentPath.split('/')[1];
 
   // 🔹 Block tenant users from accessing platform routes and root path
-  if (currentPath.startsWith('/platform') || currentPath.startsWith('/platform-auth') || currentPath === '/') {
+  if (
+    currentPath.startsWith('/platform') ||
+    currentPath.startsWith('/platform-auth') ||
+    currentPath === '/'
+  ) {
     // Tenant user trying to access platform routes
     if (token) {
       // Authenticated tenant user - redirect to tenant dashboard

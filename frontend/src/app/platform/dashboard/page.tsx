@@ -4,7 +4,7 @@ import SubscriptionPlan from '@/app/platform/dashboard/charts/subscriptionPlan';
 import TenantChart from './charts/tenantsChart';
 import useSWR from 'swr';
 import { fetcher } from '@/lib/api';
-import { platformPlanEndpoint } from '@/lib/endpoint';
+import { platformDashboardEndpoint, platformPlanEndpoint } from '@/lib/endpoint';
 import { platformTenantEndpoint } from '@/lib/endpoint';
 import ActivityTable from './activityTable/activity-table';
 import SystemAlertTable from './system-alerts/system-alerts';
@@ -13,7 +13,10 @@ export default function PlatformDashboard() {
   const { data: plansData } = useSWR(`${platformPlanEndpoint.LIST}`, fetcher);
   const totalPlans = plansData?.data?.count;
   const { data: tenantsData } = useSWR(`${platformTenantEndpoint.LIST}`, fetcher);
-  const totalTenants = tenantsData?.data?.total;
+  const totalTenants = tenantsData?.data?.count;
+  const { data: activeTenantData } = useSWR(`${platformDashboardEndpoint.ACTIVE_TENANTS}`, fetcher);
+  const totalActiveTenants = activeTenantData?.data?.activeTenants;
+  console.log('Active Tenants:', totalActiveTenants);
 
   return (
     <div className="px-2 py-6 flex flex-col h-full mt-8">
@@ -33,14 +36,16 @@ export default function PlatformDashboard() {
               <p className="text-sm text-indigo-700 dark:text-indigo-300 mt-1">Total Tenants</p>
             </div>
             <div className="bg-gradient-to-br from-indigo-50 to-violet-50 dark:from-indigo-950 dark:to-violet-950 rounded-xl p-3 shadow border border-indigo-200 dark:border-indigo-800">
-              <p className="text-3xl font-bold text-indigo-900 dark:text-indigo-100">18</p>
+              <p className="text-3xl font-bold text-indigo-900 dark:text-indigo-100">
+                {totalActiveTenants}
+              </p>
               <p className="text-sm text-indigo-700 dark:text-indigo-300 mt-1">Active Tenants</p>
             </div>
             <div className="bg-gradient-to-br from-indigo-50 to-violet-50 dark:from-indigo-950 dark:to-violet-950 rounded-xl p-3 shadow border border-indigo-200 dark:border-indigo-800">
               <p className="text-3xl font-bold text-indigo-900 dark:text-indigo-100">
                 {totalPlans}
               </p>
-              <p className="text-sm text-indigo-700 dark:text-indigo-300 mt-1">Plans</p>
+              <p className="text-sm text-indigo-700 dark:text-indigo-300 mt-1">Active Plans</p>
             </div>
             <div className="bg-gradient-to-br from-indigo-50 to-violet-50 dark:from-indigo-950 dark:to-violet-950 rounded-xl p-3 shadow border border-indigo-200 dark:border-indigo-800">
               <p className="text-3xl font-bold text-indigo-900 dark:text-indigo-100">$6000</p>

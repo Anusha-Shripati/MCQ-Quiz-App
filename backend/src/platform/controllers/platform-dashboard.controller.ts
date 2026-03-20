@@ -27,6 +27,35 @@ export class PlatformDashboardController {
       next(error);
     }
   };
+  getActiveTenantsData = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const dashboardService = new PlatformDashboardService(req.context!.prisma);
+      const activeTenants = await dashboardService.getActiveTenants();
+      return res.status(200).json({
+        success: true,
+        status: 200,
+        message: 'Active tenants  fetched successfully',
+        data: { activeTenants },
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  getResourceUsageData = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const dashboardService = new PlatformDashboardService(req.context!.prisma);
+      const usageData = await dashboardService.getResourceUsage();
+      return res.status(200).json({
+        success: true,
+        status: 200,
+        message: 'Resource usage data fetched successfully',
+        data: usageData,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
   // getPlatformUsageData = async (req: Request, res: Response, next: NextFunction) => {
   //   try {
   //     const dashboardService = new PlatformDashboardService(req.context!.prisma);

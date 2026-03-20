@@ -9,7 +9,13 @@ type CodeEditorProps = {
   readOnly?: boolean;
 };
 
-const CodeEditor: React.FC<CodeEditorProps> = ({ language, theme, value, onChange, readOnly = false }) => {
+const CodeEditor: React.FC<CodeEditorProps> = ({
+  language,
+  theme,
+  value,
+  onChange,
+  readOnly = false,
+}) => {
   return (
     <div className="relative">
       <Editor
@@ -28,11 +34,9 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ language, theme, value, onChang
       />
 
       {/* Overlay when disabled */}
-      {readOnly && (
-        <div className="absolute inset-0 bg-transparent cursor-not-allowed z-10" />
-      )}
+      {readOnly && <div className="absolute inset-0 bg-transparent cursor-not-allowed z-10" />}
     </div>
   );
-}
+};
 
 export default CodeEditor;

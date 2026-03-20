@@ -33,6 +33,7 @@ export default function TechnologyTable({ technologies }: TechnologyTableProps) 
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [modalType, setModalType] = useState<ModalType>(null);
   const [categoryName, setCategoryName] = useState('');
+  const [open, setOpen] = useState(false);
   const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
 
   const totalItems = technologies.length;

@@ -21,12 +21,17 @@ import ImageLinks from '@/app/assets/images/image-links';
 import PlatformUserAvatar from './PlatformUserAvatar';
 import { PlatformThemeToggle } from '../common/PlatformThemeToggle';
 import { usePlatformAuthStore } from '@/store/platformAuthStore';
-import '@/styles/platform.css';
+// import '@/styles/platform.css';'
 
 const navigation = [
   { name: 'Dashboard', href: '/platform/dashboard', icon: LayoutDashboard, permission: null },
   { name: 'Tenants', href: '/platform/tenants', icon: Building2, permission: 'tenants' },
-  { name: 'Tenant Requests', href: '/platform/tenant-requests', icon: FileText, permission: 'tenants' },
+  {
+    name: 'Tenant Requests',
+    href: '/platform/tenant-requests',
+    icon: FileText,
+    permission: 'tenants',
+  },
   { name: 'Plans', href: '/platform/plans', icon: CreditCard, permission: 'plans' },
   { name: 'Usage', href: '/platform/usage', icon: BarChart3, permission: 'usage' },
   { name: 'Admins', href: '/platform/admins', icon: Users, permission: 'admins' },
@@ -42,9 +47,10 @@ export default function PlatformSidebar() {
   const toggleSidebar = useCallback(() => {
     setIsCollapsed((prev) => !prev);
   }, []);
-
   return (
-    <aside className={`platform-sidebar ${isCollapsed ? 'platform-sidebar-collapsed' : 'platform-sidebar-expanded'}`}>
+    <aside
+      className={`platform-sidebar ${isCollapsed ? 'platform-sidebar-collapsed' : 'platform-sidebar-expanded'}`}
+    >
       <div className="overflow-auto flex flex-row justify-center items-center h-full">
         <div className="w-[calc(100%-20px)] flex flex-col justify-between h-full pb-4 pt-4">
           <div className="space-y-4 flex-shrink-0">
@@ -132,7 +138,7 @@ export default function PlatformSidebar() {
             {/* Platform Name */}
             {!isCollapsed && (
               <div className="mb-4 pb-4 border-b border-white/10 w-full flex gap-4 p-3 rounded-lg">
-                <Building2 size={20} color='white' />
+                <Building2 size={20} color="white" />
                 <p className="text-white text-base">Platform Admin</p>
               </div>
             )}

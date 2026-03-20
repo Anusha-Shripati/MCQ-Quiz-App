@@ -57,6 +57,7 @@
     "@emotion/styled": "^11.14.1",
     "@mui/x-charts": "^8.27.0",
     "apexcharts": "^5.6.0",
+    "echarts-for-react": "^3.0.6",
     "flowbite": "^4.0.1",
     "react-apexcharts": "^2.0.1"
   }

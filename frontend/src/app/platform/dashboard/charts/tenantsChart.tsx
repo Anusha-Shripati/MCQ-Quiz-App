@@ -1,10 +1,10 @@
 'use client';
-
 import dynamic from 'next/dynamic';
 import type { ApexOptions } from 'apexcharts';
 import useSWR from 'swr';
 import { platformDashboardEndpoint } from '@/lib/endpoint';
 import { fetcher } from '@/lib/api';
+
 const Chart = dynamic(() => import('react-apexcharts'), {
   ssr: false,
 });

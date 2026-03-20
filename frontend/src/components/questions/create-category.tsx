@@ -59,6 +59,15 @@ const CreateCategory: React.FC<CreateCategoryProps> = ({ categoriesArray = [] })
   };
   // const { trigger } = useSWRMutation(technologyEndpoint.CREATE, createCategory);
 
+  const handleCreate = async () => {
+    setCategoryName(categoryName);
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setCategoryName('');
+    setOpen(false);
+  };
   // Create a technology by calling the CREATE_ONLY API endpoint
   const { trigger: createTrigger } = useSWRMutation(
     technologyEndpoint.CREATE_ONLY,
@@ -75,13 +84,10 @@ const CreateCategory: React.FC<CreateCategoryProps> = ({ categoriesArray = [] })
     try {
       const data = await createTrigger({ name: categoryName });
       if (data) {
-        setCategoryName('');
-        setOpen(false);
-
-        toast.success(data?.message || 'Technology created successfully');
+        toast.success('Technology created successfully');
         mutate((key) => typeof key === 'string' && key.startsWith('/technology/list'));
       } else {
-        toast.error(data?.message || 'Failed to create technology');
+        toast.error('Failed to create technology');
       }
     } catch (error) {
       const axiosError = error as AxiosError<{ message: string }>;
@@ -143,27 +149,11 @@ const CreateCategory: React.FC<CreateCategoryProps> = ({ categoriesArray = [] })
       </div>
       {open && (
         <CreateTechnologyModal
-          actionsAlign="center"
-          title={'Add Technology'}
-          onOpenChange={() => setOpen(false)}
-          actionButtons={
-            <button
-              className="px-3 py-2 bg-blue-500 text-white rounded"
-              onClick={() => handleCreateTechnology()}
-            >
-              Save
-            </button>
+          open={open}
+          onClose={handleClose}
+          data={categoryName}
           }
-        >
-          <input
-            type="text"
-            className="w-96 px-4 py-5 h-10 border border-gray-300 rounded hover:outline-gray-400 focus:outline-none focus:border-gray-500"
-            placeholder="Enter Technology Name..."
-            value={categoryName}
-            onChange={(e) => setCategoryName(e.target.value)}
-          />
-          {/* {error ? 'Technology is already exist' : ''} */}
-        </CreateTechnologyModal>
+        />
       )}
       {/* Add/Edit Category Modal */}
       {/* {open && (
